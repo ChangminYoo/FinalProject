@@ -510,14 +510,14 @@ void TexColumnsApp::LoadTextures()
 
 	auto tileTex = std::make_unique<Texture>();
 	tileTex->Name = "tileTex";
-	tileTex->Filename = L"Textures/tile.dds";
+	tileTex->Filename = L"Textures/grass.dds";
 	ThrowIfFailed(DirectX::CreateDDSTextureFromFile12(md3dDevice.Get(),
 		mCommandList.Get(), tileTex->Filename.c_str(),
 		tileTex->Resource, tileTex->UploadHeap));
 
 	auto fbxTex = std::make_unique<Texture>();
 	fbxTex->Name = "fbxTex";
-	fbxTex->Filename = L"Textures/dragon_S.dds"; //
+	fbxTex->Filename = L"Textures/stone.dds"; //
 	ThrowIfFailed(DirectX::CreateDDSTextureFromFile12(md3dDevice.Get(),
 		mCommandList.Get(), fbxTex->Filename.c_str(),
 		fbxTex->Resource, fbxTex->UploadHeap));
@@ -795,7 +795,7 @@ void TexColumnsApp::BuildShapeGeometry()
 void TexColumnsApp::BuildFbxGeometry()
 {
 	// FBX¸ðµ¨ ·Îµå
-	if (LoadFBXConvertToVertexData("Models\\dragon.fbx", g_vertexDataArray, g_MatDataArray) == false)
+	if (LoadFBXConvertToVertexData("Models\\humanoid.fbx", g_vertexDataArray, g_MatDataArray) == false)
 	{
 		MessageBox(nullptr, L"Load Error ", 0, MB_OK);
 
@@ -812,10 +812,6 @@ void TexColumnsApp::BuildFbxGeometry()
 	for (auto i = g_vertexDataArray.begin(); i != g_vertexDataArray.end(); i++,k++)
 	{
 		indices.push_back(i->index);
-
-		//vertices[k].Pos = i->pos;			
-		//vertices[k].TexC = i->uv;
-
 	}
 
 	// 
