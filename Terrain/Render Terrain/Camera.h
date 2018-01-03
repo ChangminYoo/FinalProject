@@ -1,0 +1,66 @@
+
+#pragma once
+
+#include <DirectXMath.h>
+#include "BoundingVolume.h"
+
+using namespace DirectX;
+
+struct Frustum {
+	XMFLOAT3 nlb;
+	XMFLOAT3 nlt;
+	XMFLOAT3 nrb;
+	XMFLOAT3 nrt;
+	XMFLOAT3 flb;
+	XMFLOAT3 flt;
+	XMFLOAT3 frb;
+	XMFLOAT3 frt;
+	BoundingSphere bs;
+};
+
+class Camera
+{
+public:
+	Camera(int h, int w);
+	~Camera();
+
+	// combine the view and projection matrices and transpose the result
+	XMFLOAT4X4 GetViewProjectionMatrixTransposed();
+	// returns m_vPos;
+	XMFLOAT4 GetEyePosition() { return m_vPos; }
+	// Return the 6 planes forming the view frustum. Stored in the array planes.
+	void GetViewFrustum(XMFLOAT4 planes[6]);
+	// Move the camera along its 3 axis: m_vStartLook (forward/backward), m_vStartLeft (left/right), m_vStartUp (up/down)
+	void Translate(XMFLOAT3 move);
+	// rotate the camera up and down, around m_vStartLeft
+	void Pitch(float theta);
+	// rotate the camera left and right, around m_vStartUp
+	void Yaw(float theta);
+	// rotate the camera clockwise and counter-clockwise, around m_vStartLook
+	void Roll(float theta);
+	// find a view frustum based on the current view matrix and the provided near and far planes.
+	Frustum CalculateFrustumByNearFar(float near, float far);
+	// Lock the Camera's eye to the supplied position.
+	void LockPosition(XMFLOAT4 p);
+
+private:
+	void Update();
+	
+	XMFLOAT4X4	m_mProjection;	// Projection matrix
+	XMFLOAT4X4	m_mView;		// View matrix
+	XMFLOAT4	m_vPos;			// Camera position
+	XMFLOAT4	m_vStartLook;	// Starting lookat vector
+	XMFLOAT4	m_vStartUp;		// Starting up vector
+	XMFLOAT4	m_vStartLeft;	// Starting left vector
+	XMFLOAT4	m_vCurLook;		// Current lookat vector
+	XMFLOAT4	m_vCurUp;		// Current up vector
+	XMFLOAT4	m_vCurLeft;		// Current left vector
+	int			m_wScreen;
+	int			m_hScreen;
+	float		m_fovHorizontal;
+	float		m_fovVertical;
+	float		m_angleYaw;
+	float		m_anglePitch;
+	float		m_angleRoll;
+};
+

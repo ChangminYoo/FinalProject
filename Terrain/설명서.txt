@@ -1,0 +1,8 @@
+기본(숫자1키) : HeightMap 2D
+숫자 2키 : 3D Map Terrain
+
+W,A,S,D
+
+T : 스킨
+
+로딩 후 조금 기다려야함 
