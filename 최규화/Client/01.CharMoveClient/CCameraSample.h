@@ -43,10 +43,10 @@ protected:
 	D3D12_VIEWPORT		m_d3dViewport;
 	D3D12_RECT			m_d3dScissorRect;
 
-	ComPtr<CPlayer>		 m_pPlayer{nullptr};
+	CPlayer*		    m_pPlayer{nullptr};
 
 	ComPtr<ID3D12Resource>	 m_pd3dcbCamera{ nullptr };
-	ComPtr<VS_CB_CAMERA_INFO> m_pcbMappedCamera{ nullptr };
+	VS_CB_CAMERA_INFO*	     m_pcbMappedCamera{ nullptr };
 
 public:
 	CCameraSample();
@@ -66,8 +66,8 @@ public:
 
 	void GenerateProjectionMatrix(float fNearPlayerDistance, float fFarPlayerDistance, float fAspectRatio, float fFOVAngle);
 
-	//void SetPlayer(CPlayer *pPlayer) { m_pPlayer = pPlayer; }
-	//CPlayer *GetPlayer() { return(m_pPlayer); }
+	void SetPlayer(CPlayer *pPlayer) { m_pPlayer = pPlayer; }
+	CPlayer *GetPlayer() { return(m_pPlayer); }
 
 	void SetMode(DWORD nMode) { m_nMode = nMode; }
 	DWORD GetMode() { return(m_nMode); }

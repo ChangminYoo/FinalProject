@@ -175,17 +175,69 @@ void CPlayer::Update(float fTimeElapsed)
 	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(m_xmf3Velocity, -fDeceleration, true));
 }
 
-ComPtr<CCameraSample> CPlayer::OnChangeCamera(DWORD nNewCameraMode, DWORD nCurrentCameraMode)
+unique_ptr<CCameraSample> CPlayer::OnChangeCamera(DWORD nNewCameraMode, DWORD nCurrentCameraMode)
 {
-	ComPtr<CCameraSample> pNewCamera = nullptr;
+	unique_ptr<CCameraSample> pNewCamera = nullptr;
 	switch (nNewCameraMode)
 	{
 	case FIRST_PERSON_CAMERA:
-		pNewCamera = new CFirstPersonCamera(m_pCamera);
+		pNewCamera = make_unique<CFirstPersonCamera>(m_pCamera);
 		break;
 	case THIRD_PERSON_CAMERA:
-		pNewCamera = new CThirdPersonCamera(m_pCamera);
+		pNewCamera = make_unique<CThirdPersonCamera>(m_pCamera);
+		break;
+	case SPACESHIP_CAMERA:
+		pNewCamera = make_unique<CSpaceShipCamera>(m_pCamera);
 		break;
 	}
-	return ComPtr<CCameraSample>();
+	if (nCurrentCameraMode == SPACESHIP_CAMERA)
+	{
+		m_xmf3Right = Vector3::Normalize(XMFLOAT3(m_xmf3Right.x, 0.0f, m_xmf3Look.z));
+		m_xmf3Up = Vector3::Normalize(XMFLOAT3(0.0f, 1.0f, 0.0f));
+		m_xmf3Look = Vector3::Normalize(XMFLOAT3(m_xmf3Right.x, 0.0f, m_xmf3Look.z));
+
+		m_fPitch = 0.0f;
+		m_fRoll = 0.0f;
+		m_fYaw = Vector3::Angle(XMFLOAT3(0.0f, 0.0f, 1.0f), m_xmf3Look);
+		if (m_xmf3Look.x < 0.0f) m_fYaw = -m_fYaw;
+	}
+	else if ((nNewCameraMode == SPACESHIP_CAMERA) && m_pCamera)
+	{
+		m_xmf3Right = m_pCamera->GetRightVector();
+		m_xmf3Up = m_pCamera->GetUpVector();
+		m_xmf3Look = m_pCamera->GetLookVector();
+	}
+
+	if (pNewCamera)
+	{
+		pNewCamera->SetMode(nNewCameraMode);
+		pNewCamera->SetPlayer(this);
+	}
+
+	//if (m_pCamera) delete m_pCamera;
+
+	return pNewCamera;
+}
+
+void CPlayer::OnPrepareRender()
+{
+	m_xmf4x4World._11 = m_xmf3Right.x; m_xmf4x4World._12 = m_xmf3Right.y; m_xmf4x4World._13 = m_xmf3Right.z;
+	m_xmf4x4World._21 = m_xmf3Up.x; m_xmf4x4World._22 = m_xmf3Up.y; m_xmf4x4World._23 = m_xmf3Up.z;
+	m_xmf4x4World._31 = m_xmf3Look.x; m_xmf4x4World._32 = m_xmf3Look.y; m_xmf4x4World._33 = m_xmf3Look.z;
+	m_xmf4x4World._41 = m_xmf3Position.x; m_xmf4x4World._42 = m_xmf3Position.y; m_xmf4x4World._43 = m_xmf3Position.z;
+}
+
+void CPlayer::Render(ID3D12GraphicsCommandList * pd3dCommandList, CCameraSample * pCamera)
+{
+	DWORD nCameraMode = (pCamera) ? p->Camera->GetMode() : 0x00;
+	if (nCameraMode == THIRD_PERSON_CAMERA) CGameObject::Render(pd3dCommandList, pCamera);
+}
+
+CCubePlayer::CCubePlayer(ID3D12Device * pd3dDevice, ID3D12GraphicsCommandList * pd3dCommandList, ID3D12RootSignature * pd3dGraphicsRootSignature, void * pContext, int nMeshes)
+{
+	m_pCamera = ChangeCamera(THIRD_PERSON_CAMERA, 0.0f);
+
+	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+
+	CCubePlayer *pCubeMesh = n
 }

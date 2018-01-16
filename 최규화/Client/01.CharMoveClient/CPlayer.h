@@ -9,6 +9,8 @@
 
 #include "CCameraSample.h"
 
+using namespace std;
+
 struct CB_PLAYER_INFO
 {
 	XMFLOAT4X4					m_xmf4x4World;
@@ -36,7 +38,7 @@ protected:
 	LPVOID						m_pPlayerUpdatedContext = nullptr;
 	LPVOID						m_pCameraUpdatedContext = nullptr;
 
-	ComPtr<CCameraSample>	    m_pCamera = nullptr;
+	CCameraSample			    *m_pCamera = nullptr;
 
 
 public:
@@ -60,7 +62,7 @@ public:
 	float GetPitch() const { return(m_fPitch); }
 	float GetRoll() const { return(m_fRoll); }
 
-	ComPtr<CCameraSample> GetCamera() { return(m_pCamera); }
+	CCameraSample* GetCamera() { return(m_pCamera); }
 	void SetCamera(CCameraSample *pCamera) { m_pCamera = pCamera; }
 
 	void Move(ULONG nDirection, float fDistance, bool bVelocity = false);
@@ -80,15 +82,15 @@ public:
 	virtual void ReleaseShaderVariables();
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList);
 
-	ComPtr<CCameraSample> OnChangeCamera(DWORD nNewCameraMode, DWORD nCurrentCameraMode);
+	unique_ptr<CCameraSample> OnChangeCamera(DWORD nNewCameraMode, DWORD nCurrentCameraMode);
 
-	virtual ComPtr<CCameraSample> ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed) { return(nullptr); }
+	virtual CCameraSample *ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed) { return(nullptr); }
 	virtual void OnPrepareRender();
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCameraSample *pCamera = nullptr);
 
 protected:
 	ComPtr<ID3D12Resource>			m_pd3dcbPlayer{ nullptr };
-	ComPtr<CB_PLAYER_INFO>			m_pcbMappedPlayer{ nullptr };
+	CB_PLAYER_INFO					*m_pcbMappedPlayer{ nullptr };
 };
 
 class CCubePlayer : public CPlayer
@@ -97,7 +99,7 @@ public:
 	CCubePlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature, void *pContext = NULL, int nMeshes = 1);
 	virtual ~CCubePlayer();
 
-	virtual ComPtr<CCameraSample> ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed);
+	virtual CCameraSample* ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed);
 	virtual void OnPrepareRender();
 };
 
