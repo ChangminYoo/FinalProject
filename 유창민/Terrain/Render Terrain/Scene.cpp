@@ -3,7 +3,8 @@
 #include <stdlib.h>
 
 Scene::Scene(int height, int width, Device* DEV) : 
-	m_ResMgr(DEV, FRAME_BUFFER_COUNT, 6, 23, 0), m_Cam(height, width), m_DNC(6000, 4096) {
+	m_ResMgr(DEV, FRAME_BUFFER_COUNT, 6, 23, 0), m_Cam(height, width), m_DNC(6000, 4096)
+{
 	m_pDev = DEV;
 	m_pT = nullptr;
 

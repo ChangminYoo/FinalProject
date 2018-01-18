@@ -107,7 +107,7 @@ void DayNightCycle::Update(BoundingSphere& bsScene, Camera* cam)
 	// update the time for the next pass.
 	m_tLast = now;
 
-	CalculateShadowMatrices(bsScene, cam);
+	//CalculateShadowMatrices(bsScene, cam);
 }
 
 void DayNightCycle::CalculateShadowMatrices(BoundingSphere& bsScene, Camera* cam) {
