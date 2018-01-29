@@ -41,6 +41,11 @@ struct Vertex
     DirectX::XMFLOAT3 Pos;
     DirectX::XMFLOAT3 Normal;
 	DirectX::XMFLOAT2 TexC;
+
+	int index;
+
+	DirectX::XMFLOAT4 boneids;
+	DirectX::XMFLOAT4 weights;
 };
 
 // Stores the resources needed for the CPU to build the command lists

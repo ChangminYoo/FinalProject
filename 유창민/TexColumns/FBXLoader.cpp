@@ -1,5 +1,4 @@
-#include <cstdio>
-#include <fbxsdk.h>
+
 #include "FBXLoader.h"
 
 // 정점데이터 획득
@@ -10,6 +9,27 @@ static void GetMatrialData(FbxSurfaceMaterial* mat, MatDataArray& outMatData);
 
 // 메쉬처리(재귀함수)
 static void GetMeshData(FbxNode *child, VertexDataArray& outVertexData, MatDataArray& outMatData);
+
+// 머터리얼 특성 획득
+FbxDouble3 GetMaterialProperty(const FbxSurfaceMaterial * pMaterial, const char * pPropertyName, const char * pFactorPropertyName);
+
+
+
+void ProcessSkeletonHeirarchy(FbxNode* root);
+void ProcessSkeletonHeirarchyre(FbxNode* node, int depth, int index, int parentindex);
+
+unsigned int FindJointIndex(const std::string& jointname);
+
+DirectX::XMMATRIX GetAnimatedMatrix(int index);
+
+//===================================
+Skeleton skeleton;
+
+FbxScene *pScene;
+
+std::map<int, int> controlpoints;
+//===================================
+
 
 // FBX데이터에서 정점 데이터 변환
 // 
@@ -23,7 +43,7 @@ bool LoadFBXConvertToVertexData(const char* filename, VertexDataArray& outVertex
 	FbxManager* pFBXManager = FbxManager::Create();
 
 	// Scene생성
-	FbxScene* pScene = FbxScene::Create(pFBXManager, "");
+	pScene = FbxScene::Create(pFBXManager, "");
 
 	// FBX의IO구성 객체 생성
 	FbxIOSettings *pIO = FbxIOSettings::Create(pFBXManager, IOSROOT);
@@ -53,6 +73,9 @@ bool LoadFBXConvertToVertexData(const char* filename, VertexDataArray& outVertex
 	// Scene의 모든것을 삼각형화
 	FbxGeometryConverter geometryConverte(pFBXManager);
 	geometryConverte.Triangulate(pScene, true);
+
+
+	ProcessSkeletonHeirarchy(pScene->GetRootNode());
 
 	// 메쉬 처리
 	GetMeshData(pScene->GetRootNode(), outVertexData, outMatData);
@@ -110,6 +133,9 @@ void GetMeshData(FbxNode *parent, VertexDataArray& outVertexData, MatDataArray& 
 			}
 		}
 
+
+
+
 		if (numMat == 0)
 		{
 			printf("자료없음\n");
@@ -153,8 +179,8 @@ void GetFBXVertexData(FbxMesh* pMesh, VertexDataArray& outVertexData)
 		fbxsdk::FbxVector4& pos = positions[i];
 		fbxsdk::FbxVector4& normal = normals[i];
 
-		outVertexData[i].pos = DirectX::XMFLOAT3(pos.mData[0], pos.mData[1], pos.mData[2]);
-		outVertexData[i].normal = DirectX::XMFLOAT4(normal.mData[0], normal.mData[1], normal.mData[2], normal.mData[3]);
+		outVertexData[i].Pos = DirectX::XMFLOAT3(pos.mData[0], pos.mData[1], pos.mData[2]);
+		outVertexData[i].Normal = DirectX::XMFLOAT3(normal.mData[0], normal.mData[1], normal.mData[2]);
 	}
 
 	//인덱스 정보
@@ -184,19 +210,129 @@ void GetFBXVertexData(FbxMesh* pMesh, VertexDataArray& outVertexData)
 
 				if (outVertexData.size() > UVCount)
 				{
-					outVertexData[UVCount].uv = DirectX::XMFLOAT2(UV.mData[0], UV.mData[1]);
+					outVertexData[UVCount].TexC = DirectX::XMFLOAT2(UV.mData[0], 1 - UV.mData[1]);
 				}
 				UVCount++;
 			}
 		}
 	}
+	///////////////////////////////////////////////////////
+	const FbxVector4 lT = pMesh->GetNode()->GetGeometricTranslation(FbxNode::eSourcePivot);
+	const FbxVector4 lR = pMesh->GetNode()->GetGeometricRotation(FbxNode::eSourcePivot);
+	const FbxVector4 lS = pMesh->GetNode()->GetGeometricScaling(FbxNode::eSourcePivot);
+
+	FbxAMatrix geometryTransform = FbxAMatrix(lT, lR, lS);
+
+	std::vector<Vertex> meshvertices;
+
+	for (unsigned int deformerIndex = 0; deformerIndex < pMesh->GetDeformerCount(); ++deformerIndex)
+	{
+		FbxSkin* skin = reinterpret_cast<FbxSkin*>(pMesh->GetDeformer(deformerIndex, FbxDeformer::eSkin));
+		if (!skin)
+			continue;
+
+		for (unsigned int clusterIndex = 0; clusterIndex < skin->GetClusterCount(); ++clusterIndex)
+		{
+			FbxCluster* cluster = skin->GetCluster(clusterIndex);
+			std::string jointname = cluster->GetLink()->GetName();
+			unsigned int jointIndex = FindJointIndex(jointname);
+			FbxAMatrix transformMatrix;
+			FbxAMatrix transformLinkMatrix;
+			FbxAMatrix globalBindposeInverseMatrix;
+
+			cluster->GetTransformMatrix(transformMatrix);
+			cluster->GetTransformLinkMatrix(transformLinkMatrix);
+			globalBindposeInverseMatrix = transformLinkMatrix.Inverse() * transformMatrix * geometryTransform;
+
+			skeleton.mJoints[jointIndex].mGlobalBindposeInverse = globalBindposeInverseMatrix;
+			skeleton.mJoints[jointIndex].mNode = cluster->GetLink();
+
+			for (unsigned int i = 0; i < cluster->GetControlPointIndicesCount(); ++i)
+			{
+				int vertexid = controlpoints[cluster->GetControlPointIndices()[i]];
+
+				if (outVertexData[vertexid].boneids.x == 0) outVertexData[vertexid].boneids.x = jointIndex;
+				if (outVertexData[vertexid].boneids.y == 0) outVertexData[vertexid].boneids.y = jointIndex;
+				if (outVertexData[vertexid].boneids.z == 0) outVertexData[vertexid].boneids.z = jointIndex;
+				if (outVertexData[vertexid].boneids.w == 0) outVertexData[vertexid].boneids.w = jointIndex;
+				if (outVertexData[vertexid].weights.x == 0) outVertexData[vertexid].weights.x = cluster->GetControlPointWeights()[i];
+				if (outVertexData[vertexid].weights.y == 0) outVertexData[vertexid].weights.y = cluster->GetControlPointWeights()[i];
+				if (outVertexData[vertexid].weights.z == 0) outVertexData[vertexid].weights.z = cluster->GetControlPointWeights()[i];
+				if (outVertexData[vertexid].weights.w == 0) outVertexData[vertexid].weights.w = cluster->GetControlPointWeights()[i];
+			}
+
+			FbxAnimStack* animstack = pScene->GetSrcObject<FbxAnimStack>(0);
+			FbxString animstackname = animstack->GetName();
+			FbxTakeInfo* takeinfo = pScene->GetTakeInfo(animstackname);
+			FbxTime start = takeinfo->mLocalTimeSpan.GetStart();
+			FbxTime end = takeinfo->mLocalTimeSpan.GetStop();
+			FbxLongLong animationlength = end.GetFrameCount(FbxTime::eFrames30) - start.GetFrameCount(FbxTime::eFrames30) + 1;
+			Keyframe** anim = &skeleton.mJoints[jointIndex].mAnimation;
+
+			for (FbxLongLong i = start.GetFrameCount(FbxTime::eFrames30); i <= end.GetFrameCount(FbxTime::eFrames30); ++i)
+			{
+				FbxTime time;
+				time.SetFrame(i, FbxTime::eFrames30);
+				*anim = new Keyframe();
+				(*anim)->mFrameNum = i;
+				FbxAMatrix transformoffset = pMesh->GetNode()->EvaluateGlobalTransform(1.0f) * geometryTransform;
+				(*anim)->mGlobalTransform = transformoffset.Inverse() * cluster->GetLink()->EvaluateGlobalTransform(time);
+				anim = &((*anim)->mNext);
+			}
+		}
+	}
+
+	///////////////////////////////////////////////////////////
+
+}
+
+// 머터리얼 표시
+void GetMatrialData(FbxSurfaceMaterial* mat, MatDataArray& outMatData)
+{
+	if (mat == nullptr)
+	{
+		return;
+	}
+
+	puts("");
+	if (mat->GetClassId().Is(FbxSurfaceLambert::ClassId))
+	{
+		printf("램버트 타입\n");
+	}
+	else if (mat->GetClassId().Is(FbxSurfacePhong::ClassId))
+	{
+		printf("퐁 타입\n");
+	}
+
+	const FbxDouble3 lEmissive = GetMaterialProperty(mat, FbxSurfaceMaterial::sEmissive, FbxSurfaceMaterial::sEmissiveFactor);
+	printf("이미시브컬러:r = %f, g = %f, b = %f\n", lEmissive.mData[0], lEmissive.mData[1], lEmissive.mData[2]);
+
+	const FbxDouble3 lAmbient = GetMaterialProperty(mat, FbxSurfaceMaterial::sAmbient, FbxSurfaceMaterial::sAmbientFactor);
+	printf("엠비언트색상:r = %f, g = %f, b = %f\n", lAmbient.mData[0], lAmbient.mData[1], lAmbient.mData[2]);
+
+	const FbxDouble3 lDiffuse = GetMaterialProperty(mat, FbxSurfaceMaterial::sDiffuse, FbxSurfaceMaterial::sDiffuseFactor);
+	printf("디퓨즈컬러:r = %f, g = %f, b = %f\n", lDiffuse.mData[0], lDiffuse.mData[1], lDiffuse.mData[2]);
+
+	const FbxDouble3 lSpecular = GetMaterialProperty(mat, FbxSurfaceMaterial::sSpecular, FbxSurfaceMaterial::sSpecularFactor);
+	printf("반사컬러:r = %f, g = %f, b = %f\n", lSpecular.mData[0], lSpecular.mData[1], lSpecular.mData[2]);
+
+	FbxProperty lTransparencyFactorProperty = mat->FindProperty(FbxSurfaceMaterial::sTransparencyFactor);
+	if (lTransparencyFactorProperty.IsValid())
+	{
+		double lTransparencyFactor = lTransparencyFactorProperty.Get<FbxDouble>();
+		printf("투명도 = %lf\n", lTransparencyFactor);
+	}
+
+	FbxProperty lShininessProperty = mat->FindProperty(FbxSurfaceMaterial::sShininess);
+	if (lShininessProperty.IsValid())
+	{
+		double lShininess = lShininessProperty.Get<FbxDouble>();
+		printf("반사 = %lf\n", lShininess);
+	}
 }
 
 // 머터리얼 특성 획득
-FbxDouble3 GetMaterialProperty(
-	const FbxSurfaceMaterial * pMaterial,
-	const char * pPropertyName,
-	const char * pFactorPropertyName)
+FbxDouble3 GetMaterialProperty(const FbxSurfaceMaterial * pMaterial, const char * pPropertyName, const char * pFactorPropertyName)
 {
 	FbxDouble3 lResult(0, 0, 0);
 	const FbxProperty lProperty = pMaterial->FindProperty(pPropertyName);
@@ -260,47 +396,52 @@ FbxDouble3 GetMaterialProperty(
 	return lResult;
 }
 
-// 머터리얼 표시
-void GetMatrialData(FbxSurfaceMaterial* mat, MatDataArray& outMatData)
+DirectX::XMMATRIX GetAnimatedMatrix(int index)
 {
-	if (mat == nullptr)
+	DirectX::XMMATRIX bonematxm;
+
+	FbxAMatrix bonemat = skeleton.mJoints[index].mGlobalBindposeInverse; //* skeleton.mJoints[0].mAnimation->mGlobalTransform;
+
+	bonematxm  = DirectX::XMMatrixTranslation(bonemat.GetT().mData[0], bonemat.GetT().mData[1], bonemat.GetT().mData[2]);
+	bonematxm *= DirectX::XMMatrixRotationX(bonemat.GetR().mData[0]);
+	bonematxm *= DirectX::XMMatrixRotationY(bonemat.GetR().mData[1]);
+	bonematxm *= DirectX::XMMatrixRotationZ(bonemat.GetR().mData[2]);
+
+	return bonematxm;
+} 
+
+
+void ProcessSkeletonHeirarchy(FbxNode * rootnode)
+{
+	for (int childindex = 0; childindex < rootnode->GetChildCount(); ++childindex)
 	{
-		return;
+		FbxNode *node = rootnode->GetChild(childindex);
+		ProcessSkeletonHeirarchyre(node, 0, 0, -1);
 	}
+}
 
-	puts("");
-	if (mat->GetClassId().Is(FbxSurfaceLambert::ClassId))
+void ProcessSkeletonHeirarchyre(FbxNode * node, int depth, int index, int parentindex)
+{
+	if (node->GetNodeAttribute() && node->GetNodeAttribute()->GetAttributeType() && node->GetNodeAttribute()->GetAttributeType() == FbxNodeAttribute::eSkeleton)
 	{
-		printf("램버트 타입\n");
+		Joint joint;
+		joint.mParentIndex = parentindex;
+		joint.mName = node->GetName();
+		skeleton.mJoints.push_back(joint);
 	}
-	else if (mat->GetClassId().Is(FbxSurfacePhong::ClassId))
+	for (int i = 0; i < node->GetChildCount(); i++)
 	{
-		printf("퐁 타입\n");
+		ProcessSkeletonHeirarchyre(node->GetChild(i), depth + 1, skeleton.mJoints.size(), index);
 	}
+}
 
-	const FbxDouble3 lEmissive = GetMaterialProperty(mat, FbxSurfaceMaterial::sEmissive, FbxSurfaceMaterial::sEmissiveFactor);
-	printf("이미시브컬러:r = %f, g = %f, b = %f\n", lEmissive.mData[0], lEmissive.mData[1], lEmissive.mData[2]);
-
-	const FbxDouble3 lAmbient = GetMaterialProperty(mat, FbxSurfaceMaterial::sAmbient, FbxSurfaceMaterial::sAmbientFactor);
-	printf("엠비언트색상:r = %f, g = %f, b = %f\n", lAmbient.mData[0], lAmbient.mData[1], lAmbient.mData[2]);
-
-	const FbxDouble3 lDiffuse = GetMaterialProperty(mat, FbxSurfaceMaterial::sDiffuse, FbxSurfaceMaterial::sDiffuseFactor);
-	printf("디퓨즈컬러:r = %f, g = %f, b = %f\n", lDiffuse.mData[0], lDiffuse.mData[1], lDiffuse.mData[2]);
-
-	const FbxDouble3 lSpecular = GetMaterialProperty(mat, FbxSurfaceMaterial::sSpecular, FbxSurfaceMaterial::sSpecularFactor);
-	printf("반사컬러:r = %f, g = %f, b = %f\n", lSpecular.mData[0], lSpecular.mData[1], lSpecular.mData[2]);
-
-	FbxProperty lTransparencyFactorProperty = mat->FindProperty(FbxSurfaceMaterial::sTransparencyFactor);
-	if (lTransparencyFactorProperty.IsValid())
+unsigned int FindJointIndex(const std::string & jointname)
+{
+	for (unsigned int i = 0; i < skeleton.mJoints.size(); ++i)
 	{
-		double lTransparencyFactor = lTransparencyFactorProperty.Get<FbxDouble>();
-		printf("투명도 = %lf\n", lTransparencyFactor);
-	}
-
-	FbxProperty lShininessProperty = mat->FindProperty(FbxSurfaceMaterial::sShininess);
-	if (lShininessProperty.IsValid())
-	{
-		double lShininess = lShininessProperty.Get<FbxDouble>();
-		printf("반사 = %lf\n", lShininess);
+		if (skeleton.mJoints[i].mName == jointname)
+		{
+			return i;
+		}
 	}
 }

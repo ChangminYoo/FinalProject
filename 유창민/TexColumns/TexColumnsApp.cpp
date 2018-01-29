@@ -90,12 +90,7 @@ private:
     void BuildShapeGeometry();
     void BuildPSOs();
     void BuildFrameResources();
-	
-	void BuildTerrain();
 
-
-	void PlayerRender(ID3D12GraphicsCommandList* cmdList, const std::vector<RenderItem*>& ritems);
-	void BuildPlayerItems();
 	//
 
 	void BuildFbxGeometry();
@@ -140,7 +135,7 @@ private:
 
 	Camera mCamera;
 
-	std::vector<VertexData>	g_vertexDataArray;
+	std::vector<Vertex>	g_vertexDataArray;
 	MatDataArray g_MatDataArray;
 
 	
@@ -210,7 +205,6 @@ bool TexColumnsApp::Initialize()
 	BuildFbxGeometry();
 	BuildMaterials();
     BuildRenderItems();
-	BuildPlayerItems();
     BuildFrameResources();
     BuildPSOs();
 
@@ -299,10 +293,6 @@ void TexColumnsApp::Draw(const GameTimer& gt)
 
     DrawRenderItems(mCommandList.Get(), mOpaqueRitems);
 
-	
-
-
-	
     // Indicate a state transition on the resource usage.
 	mCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(CurrentBackBuffer(),
 		D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
@@ -321,10 +311,10 @@ void TexColumnsApp::Draw(const GameTimer& gt)
     // Advance the fence value to mark commands up to this fence point.
     mCurrFrameResource->Fence = ++mCurrentFence;
 
-    // Add an instruction to the command queue to set a new fence point. 
-    // Because we are on the GPU timeline, the new fence point won't be 
-    // set until the GPU finishes processing all the commands prior to this Signal().
-    mCommandQueue->Signal(mFence.Get(), mCurrentFence);
+	// 명령큐에 명령을 추가하여 새로운 팬스 지점 설정
+	// GPU타임 라인상에 있기 때문에 새로운 펜스 포인트는 
+	// GPU가 Signal()전에 모든 명령을 처리할 때까지 설정 
+	mCommandQueue->Signal(mFence.Get(), mCurrentFence);
 }
 
 void TexColumnsApp::OnMouseDown(WPARAM btnState, int x, int y)
@@ -521,7 +511,7 @@ void TexColumnsApp::LoadTextures()
 
 	auto fbxTex = std::make_unique<Texture>();
 	fbxTex->Name = "fbxTex";
-	fbxTex->Filename = L"Textures/dragon_S.dds"; //
+	fbxTex->Filename = L"Textures/world_war_zombie_diffuse.dds"; //
 	ThrowIfFailed(DirectX::CreateDDSTextureFromFile12(md3dDevice.Get(),
 		mCommandList.Get(), fbxTex->Filename.c_str(),
 		fbxTex->Resource, fbxTex->UploadHeap));
@@ -652,11 +642,6 @@ void TexColumnsApp::BuildShadersAndInputLayout()
     };
 }
 
-void TexColumnsApp::BuildTerrain()
-{
-
-}
-
 
 void TexColumnsApp::BuildShapeGeometry()
 {
@@ -666,8 +651,7 @@ void TexColumnsApp::BuildShapeGeometry()
 	GeometryGenerator::MeshData sphere = geoGen.CreateSphere(0.5f, 20, 20);
 	GeometryGenerator::MeshData cylinder = geoGen.CreateCylinder(0.5f, 0.3f, 3.0f, 20, 20);
 
-	GeometryGenerator::MeshData player = geoGen.CreateBox(1.0f, 1.0f, 1.0f, 3);
-	//
+//
 	// We are concatenating all the geometry into one big vertex/index buffer.  So
 	// define the regions in the buffer each submesh covers.
 	//
@@ -677,14 +661,12 @@ void TexColumnsApp::BuildShapeGeometry()
 	UINT gridVertexOffset = (UINT)box.Vertices.size();
 	UINT sphereVertexOffset = gridVertexOffset + (UINT)grid.Vertices.size();
 	UINT cylinderVertexOffset = sphereVertexOffset + (UINT)sphere.Vertices.size();
-	UINT playerVertexOffset = cylinderVertexOffset + (UINT)cylinder.Vertices.size();
-	
+
 	// Cache the starting index for each object in the concatenated index buffer.
 	UINT boxIndexOffset = 0;
 	UINT gridIndexOffset = (UINT)box.Indices32.size();
 	UINT sphereIndexOffset = gridIndexOffset + (UINT)grid.Indices32.size();
 	UINT cylinderIndexOffset = sphereIndexOffset + (UINT)sphere.Indices32.size();
-	UINT playerIndexOffset = cylinderIndexOffset + (UINT)cylinder.Indices32.size();
 
 	SubmeshGeometry boxSubmesh;
 	boxSubmesh.IndexCount = (UINT)box.Indices32.size();
@@ -706,11 +688,6 @@ void TexColumnsApp::BuildShapeGeometry()
 	cylinderSubmesh.StartIndexLocation = cylinderIndexOffset;
 	cylinderSubmesh.BaseVertexLocation = cylinderVertexOffset;
 
-	SubmeshGeometry playerSubmesh;
-	playerSubmesh.IndexCount = (UINT)player.Indices32.size();
-	playerSubmesh.StartIndexLocation =playerIndexOffset;
-	playerSubmesh.BaseVertexLocation =playerVertexOffset;
-
 	//
 	// Extract the vertex elements we are interested in and pack the
 	// vertices of all the meshes into one vertex buffer.
@@ -720,9 +697,7 @@ void TexColumnsApp::BuildShapeGeometry()
 		box.Vertices.size() +
 		grid.Vertices.size() +
 		sphere.Vertices.size() +
-		cylinder.Vertices.size() +
-		player.Vertices.size()
-		;
+		cylinder.Vertices.size();
 
 	std::vector<Vertex> vertices(totalVertexCount);
 
@@ -754,19 +729,13 @@ void TexColumnsApp::BuildShapeGeometry()
 		vertices[k].Normal = cylinder.Vertices[i].Normal;
 		vertices[k].TexC = cylinder.Vertices[i].TexC;
 	}
-	for (size_t i = 0; i < player.Vertices.size(); ++i, ++k)
-	{
-		vertices[k].Pos = player.Vertices[i].Position;
-		vertices[k].Normal = player.Vertices[i].Normal;
-		vertices[k].TexC = player.Vertices[i].TexC;
-	}
+
 
 	std::vector<std::uint16_t> indices;
 	indices.insert(indices.end(), std::begin(box.GetIndices16()), std::end(box.GetIndices16()));
 	indices.insert(indices.end(), std::begin(grid.GetIndices16()), std::end(grid.GetIndices16()));
 	indices.insert(indices.end(), std::begin(sphere.GetIndices16()), std::end(sphere.GetIndices16()));
 	indices.insert(indices.end(), std::begin(cylinder.GetIndices16()), std::end(cylinder.GetIndices16()));
-	indices.insert(indices.end(), std::begin(player.GetIndices16()), std::end(player.GetIndices16()));
 
     const UINT vbByteSize = (UINT)vertices.size() * sizeof(Vertex);
     const UINT ibByteSize = (UINT)indices.size()  * sizeof(std::uint16_t);
@@ -796,7 +765,6 @@ void TexColumnsApp::BuildShapeGeometry()
 	geo->DrawArgs["grid"] = gridSubmesh;
 	geo->DrawArgs["sphere"] = sphereSubmesh;
 	geo->DrawArgs["cylinder"] = cylinderSubmesh;
-	geo->DrawArgs["player"] = playerSubmesh;
 
 	mGeometries[geo->Name] = std::move(geo);
 }
@@ -805,7 +773,7 @@ void TexColumnsApp::BuildShapeGeometry()
 void TexColumnsApp::BuildFbxGeometry()
 {
 	// FBX모델 로드
-	if (LoadFBXConvertToVertexData("Models\\player_dodge.fbx", g_vertexDataArray, g_MatDataArray) == false)
+	if (LoadFBXConvertToVertexData("Models\\Zombie Running.fbx", g_vertexDataArray, g_MatDataArray) == false)
 	{
 		MessageBox(nullptr, L"Load Error ", 0, MB_OK);
 
@@ -819,35 +787,40 @@ void TexColumnsApp::BuildFbxGeometry()
 	std::vector<Vertex> vertices(g_vertexDataArray.size());
 
 	UINT k = 0;
-	for (auto i = g_vertexDataArray.begin(); i != g_vertexDataArray.end(); i++,k++)
+	for (auto i = g_vertexDataArray.begin(); i != g_vertexDataArray.end(); i++)
 	{
 		indices.push_back(i->index);
-
-		//vertices[k].Pos = i->pos;			
-		//vertices[k].TexC = i->uv;
-
 	}
 
+
+	for (size_t i = 0; i < g_vertexDataArray.size(); ++i, ++k)
+	{
+		vertices[k].Pos = g_vertexDataArray[i].Pos;
+		vertices[k].Normal = g_vertexDataArray[i].Normal;
+		vertices[k].TexC = g_vertexDataArray[i].TexC;
+	}
+
+
 	// 
-	const UINT vbByteSize = (UINT)g_vertexDataArray.size() * sizeof(VertexData);
+	const UINT vbByteSize = (UINT)vertices.size() * sizeof(Vertex);
 	const UINT ibByteSize = (UINT)indices.size() * sizeof(std::uint32_t);
 
 	//버텍스를 버퍼에 복사
 	ThrowIfFailed(D3DCreateBlob(vbByteSize, &mFbxGeo->VertexBufferCPU));
-	CopyMemory(mFbxGeo->VertexBufferCPU->GetBufferPointer(), g_vertexDataArray.data(), vbByteSize);
+	CopyMemory(mFbxGeo->VertexBufferCPU->GetBufferPointer(), vertices.data(), vbByteSize);
 
 	//인덱스를 버퍼에 복사
 	ThrowIfFailed(D3DCreateBlob(ibByteSize, &mFbxGeo->IndexBufferCPU));
 	CopyMemory(mFbxGeo->IndexBufferCPU->GetBufferPointer(), indices.data(), ibByteSize);
 
 	mFbxGeo->VertexBufferGPU = d3dUtil::CreateDefaultBuffer(md3dDevice.Get(),
-		mCommandList.Get(), g_vertexDataArray.data(), vbByteSize, mFbxGeo->VertexBufferUploader);
+		mCommandList.Get(), vertices.data(), vbByteSize, mFbxGeo->VertexBufferUploader);
 
 	mFbxGeo->IndexBufferGPU = d3dUtil::CreateDefaultBuffer(md3dDevice.Get(),
 		mCommandList.Get(), indices.data(), ibByteSize, mFbxGeo->IndexBufferUploader);
 
 
-	mFbxGeo->VertexByteStride = sizeof(VertexData);
+	mFbxGeo->VertexByteStride = sizeof(Vertex);
 	mFbxGeo->VertexBufferByteSize = vbByteSize;
 	mFbxGeo->IndexFormat = DXGI_FORMAT_R32_UINT;
 	mFbxGeo->IndexBufferByteSize = ibByteSize;
@@ -856,7 +829,6 @@ void TexColumnsApp::BuildFbxGeometry()
 	submesh.IndexCount = (UINT)indices.size();
 	submesh.StartIndexLocation = 0;
 	submesh.BaseVertexLocation = 0;
-
 
 	mFbxGeo->DrawArgs["Fbx"] = submesh;
 
@@ -938,7 +910,7 @@ void TexColumnsApp::BuildMaterials()
 	fbx0->DiffuseSrvHeapIndex = 3;
 	fbx0->DiffuseAlbedo = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	fbx0->FresnelR0 = XMFLOAT3(0.02f, 0.02f, 0.02f);
-	fbx0->Roughness = 0.3f;
+	fbx0->Roughness = 0.1f;
 
 
 	mMaterials["bricks0"] = std::move(bricks0);
@@ -948,23 +920,6 @@ void TexColumnsApp::BuildMaterials()
 
 }
 
-void TexColumnsApp::BuildPlayerItems()
-{
-	auto Player = std::make_unique<RenderItem>();
-
-	XMStoreFloat4x4(&Player->World, XMMatrixScaling(2.0f, 2.0f, 2.0f)*XMMatrixTranslation(pX, 1.0f, pZ));
-	XMStoreFloat4x4(&Player->TexTransform, XMMatrixScaling(1.0f, 1.0f, 1.0f));
-	Player->ObjCBIndex = 0;
-	Player->Mat = mMaterials["stone0"].get();
-	Player->Geo = mGeometries["shapeGeo"].get();
-	Player->PrimitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-	Player->IndexCount = Player->Geo->DrawArgs["player"].IndexCount;
-	Player->StartIndexLocation = Player->Geo->DrawArgs["player"].StartIndexLocation;
-	Player->BaseVertexLocation = Player->Geo->DrawArgs["player"].BaseVertexLocation;
-
-
-	playerItems.push_back(Player.get());
-}
 
 void TexColumnsApp::BuildRenderItems()
 {
@@ -1057,7 +1012,7 @@ void TexColumnsApp::BuildRenderItems()
 	////
 	auto fbxRitem = std::make_unique<RenderItem>();
 
-	XMStoreFloat4x4(&fbxRitem->World, XMMatrixScaling(0.2f, 0.2f, 0.2f)*XMMatrixTranslation(0.0f, 10.0f, -10.0f));
+	XMStoreFloat4x4(&fbxRitem->World, XMMatrixScaling(0.05f, 0.05f, 0.05f)*XMMatrixTranslation(0.0f, 0.0f, -10.0f));
 	fbxRitem->TexTransform = MathHelper::Identity4x4();
 
 	fbxRitem->ObjCBIndex = objCBIndex++;
@@ -1109,37 +1064,6 @@ void TexColumnsApp::DrawRenderItems(ID3D12GraphicsCommandList* cmdList, const st
 
 }
 
-void TexColumnsApp::PlayerRender(ID3D12GraphicsCommandList* cmdList, const std::vector<RenderItem*>& ritems)
-{
-
-	UINT objCBByteSize = d3dUtil::CalcConstantBufferByteSize(sizeof(ObjectConstants));
-	UINT matCBByteSize = d3dUtil::CalcConstantBufferByteSize(sizeof(MaterialConstants));
-
-	auto objectCB = mCurrFrameResource->ObjectCB->Resource();
-	auto matCB = mCurrFrameResource->MaterialCB->Resource();
-
-	for (size_t i = 0; i < ritems.size(); ++i)
-	{
-		auto ri = ritems[i];
-
-		cmdList->IASetVertexBuffers(0, 1, &ri->Geo->VertexBufferView());//
-		cmdList->IASetIndexBuffer(&ri->Geo->IndexBufferView());
-		cmdList->IASetPrimitiveTopology(ri->PrimitiveType);
-
-		CD3DX12_GPU_DESCRIPTOR_HANDLE tex(mSrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
-		tex.Offset(ri->Mat->DiffuseSrvHeapIndex, mCbvSrvDescriptorSize);
-
-		D3D12_GPU_VIRTUAL_ADDRESS objCBAddress = objectCB->GetGPUVirtualAddress() + ri->ObjCBIndex*objCBByteSize;
-		D3D12_GPU_VIRTUAL_ADDRESS matCBAddress = matCB->GetGPUVirtualAddress() + ri->Mat->MatCBIndex*matCBByteSize;
-
-		cmdList->SetGraphicsRootDescriptorTable(0, tex);
-		cmdList->SetGraphicsRootConstantBufferView(1, objCBAddress);
-		cmdList->SetGraphicsRootConstantBufferView(3, matCBAddress);
-
-		cmdList->DrawIndexedInstanced(ri->IndexCount, 1, ri->StartIndexLocation, ri->BaseVertexLocation, 0);
-
-	}
-}
 
 std::array<const CD3DX12_STATIC_SAMPLER_DESC, 6> TexColumnsApp::GetStaticSamplers()
 {

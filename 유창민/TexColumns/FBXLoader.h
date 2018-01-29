@@ -3,21 +3,19 @@
 //==============================================================================
 //
 //==============================================================================
-#include <DirectXMath.h>
+#include <d3d12.h>
+#include <cstdio>
+#include <fbxsdk.h>
 #include <vector>
+#include <map>
+#include "FrameResource.h"
+#include "MathHelper.h"
+
 
 //==============================================================================
 // 정의
 //==============================================================================
 // 정점데이터
-typedef struct VertexData
-{
-	DirectX::XMFLOAT3 pos;		// 좌표
-	DirectX::XMFLOAT4 normal;	// 노멀
-	DirectX::XMFLOAT2 uv;		// UV좌표
-	int index;
-
-}VertexData;
 
 
 //머터리얼 데이터
@@ -30,12 +28,59 @@ struct MaterialData
 	float Shininess;
 };
 
+struct Keyframe 
+{
+	FbxLongLong mFrameNum;
+	FbxAMatrix mGlobalTransform;
+	Keyframe* mNext;
 
+	Keyframe() : mNext(nullptr)
+	{}
+};
+
+struct Joint
+{
+	int mParentIndex;
+	const char* mName;
+	FbxAMatrix mGlobalBindposeInverse;
+	Keyframe* mAnimation;
+	FbxNode *mNode;
+
+	Joint() :
+		mNode(nullptr),
+		mAnimation(nullptr)
+	{
+		mGlobalBindposeInverse.SetIdentity();
+		mParentIndex = -1;
+	}
+
+	~Joint()
+	{
+		while (mAnimation)
+		{
+			Keyframe* temp = mAnimation->mNext;
+			delete mAnimation;
+			mAnimation = temp;
+		}
+	}
+
+};
+
+struct Skeleton
+{
+	std::vector<Joint> mJoints;
+};
+
+//=================================================
+
+
+//=================================================
 // 정점 데이터 배열
-typedef std::vector<VertexData>	VertexDataArray;
+typedef std::vector<Vertex>	VertexDataArray;
 
 //머터리얼 데이터 배열
 typedef std::vector<MaterialData> MatDataArray;
+//==================================================
 
 //==============================================================================
 //함수정의
@@ -44,6 +89,8 @@ typedef std::vector<MaterialData> MatDataArray;
 // FBX데이터에서 정점데이터 변환
 // 
 //const char* filename = "../datas/humanoid.fbx";
+
+
 bool LoadFBXConvertToVertexData(const char* filename, VertexDataArray& outVertexData, MatDataArray& outMatData);
 
 //==============================================================================
