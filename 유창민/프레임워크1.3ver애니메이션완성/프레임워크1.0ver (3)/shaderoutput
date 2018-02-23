@@ -94,7 +94,7 @@ dcl_temps 12
 //   o2.x <- <VS return value>.Tex.x; o2.y <- <VS return value>.Tex.y; 
 //   o0.x <- <VS return value>.PosH.x; o0.y <- <VS return value>.PosH.y; o0.z <- <VS return value>.PosH.z; o0.w <- <VS return value>.PosH.w
 //
-#line 67 "C:\Users\min94\Desktop\?레?워??.3ver?니메이?완???레?워??.0ver (3)\ShaderFile.hlsl"
+#line 67 "C:\Users\min94\Desktop\FinalProject\?레?워??.3ver?니메이?완???레?워??.0ver (3)\ShaderFile.hlsl"
 mov r0.xyzw, v6.xyzw  // r0.x <- tempVert.WeightPos1.x; r0.y <- tempVert.WeightPos1.y; r0.z <- tempVert.WeightPos1.z; r0.w <- tempVert.WeightPos1.w
 mov r1.xyzw, v7.xyzw  // r1.x <- tempVert.WeightPos2.x; r1.y <- tempVert.WeightPos2.y; r1.z <- tempVert.WeightPos2.z; r1.w <- tempVert.WeightPos2.w
 mov r2.xyzw, v8.xyzw  // r2.x <- tempVert.WeightPos3.x; r2.y <- tempVert.WeightPos3.y; r2.z <- tempVert.WeightPos3.z; r2.w <- tempVert.WeightPos3.w
