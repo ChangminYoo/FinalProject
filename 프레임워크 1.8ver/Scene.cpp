@@ -119,12 +119,12 @@ void Scene::CreateShaderObject()
 void Scene::CreateGameObject()
 {
 	DynamicObject.push_back(new CZombieObject(device, commandlist));
-	DynamicObject.push_back(new CZombieObject(device, commandlist, XMFLOAT4(7, 8, 0, 0)));
-	DynamicObject.push_back(new CZombieObject(device, commandlist, XMFLOAT4(-7,0, 10, 0)));
+	DynamicObject.push_back(new CZombieObject(device, commandlist, XMFLOAT4(20, 0, -20, 0)));
+	DynamicObject.push_back(new CZombieObject(device, commandlist, XMFLOAT4(-20, 0, 20, 0)));
 	//플레이어의 오브젝트 설정. 이건 나중에 바꿔야함.
 	Player->SetPlayer(DynamicObject.front());
 	//블랜딩용 테스트코드
-	Player->PlayerObject->Blending = true;
+	Player->PlayerObject->Blending = false;
 
 	for (int i = 0; i < nShader; i++)
 	{

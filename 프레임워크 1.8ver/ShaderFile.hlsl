@@ -1,6 +1,6 @@
-#include"lightShader.hlsl"
 
 #define MAXJOINT 65
+#define LIGHT_MAX 10
 
 Texture2D gDiffuseMap : register(t0);
 
@@ -25,6 +25,10 @@ float4 QuaternionMultiply(float4 Q1, float4 Q2)
 	return q;
 }
 
+//-----------------------------------------------
+// 구조체 정의
+//-----------------------------------------------
+
 //애니메이션 처리용 조인트. 이걸로 웨이트포지션 들을 계산해서 실제 정점 위치가 계산됨
 struct Joint
 {
@@ -33,9 +37,19 @@ struct Joint
 	float3 pos:Posj;//조인트의 위치
 };
 
+//라이트 구조체 - 빛색상, 방향, 위치
+struct Light
+{
+	float3 DiffuseColor;
+	float3 Direction;
+	float3 Position;
+	float SpecularPower;
+};
 
-/////////////////////////////////////
 
+//------------------------------------
+// 상수버퍼
+//-------------------------------------
 cbuffer ObjectData : register(b0)
 {
 	float4x4 gWorld; 
@@ -69,10 +83,8 @@ cbuffer LightData : register(b3)
 
 cbuffer MaterialData : register(b4)
 {
-	float4   gDiffuseAlbedo;//MaterialData(상수버퍼임)
-	float3   gFresnelR0;//MaterialData(상수버퍼임)
+	//float4   gDiffuseAlbedo;//MaterialData(상수버퍼임)
 	float    gRoughness;//MaterialData(상수버퍼임)
-	//float4x4 gMatTransform;
 }
 
 struct VertexIn
@@ -96,6 +108,7 @@ struct VertexOut
 	float4 PosH  : SV_POSITION;
 	float3 Normal : NORMAL;
 	float2 Tex : TEXTURE;
+
 };
 
 VertexOut VS(VertexIn vin)
@@ -151,15 +164,22 @@ VertexOut VS(VertexIn vin)
 		//여기까지가 애니메이션 처리 완료
 	}
 	//---------------------여기서 부터 시작 --------------------------
-
+	float4 world;
 
 	vout.PosH = mul(float4(vin.PosL, 1), gWorld);
 
 	vout.Normal = mul(vin.Normal, (float3x3)gWorld);
+	vout.Normal = normalize(vout.Normal);
 
 	vout.PosH = mul(vout.PosH, gViewProj);
 
 	vout.Tex = vin.Tex;
+
+	world = mul(float4(vin.PosL, 1), gWorld);
+
+	
+	//정점의 월드상의 위치를 계산하고 카메라/광원 위치에서 이 위치를 뺌으로 실제로 어떤 방향으로 보는지를 알아냅니다
+	
 
 	return vout;
 }
@@ -167,31 +187,48 @@ VertexOut VS(VertexIn vin)
 
 float4 PS(VertexOut pin) : SV_Target
 {
-	//비등방성 : 방향에 따라 물체의 물리적 성질이 다른것(들어오는 빛의 방향에 따라 반사율이 다르다.)
-	float4 diffuseAlbedo = gDiffuseMap.Sample(gsamAnisotropicWrap, pin.Tex) * gDiffuseAlbedo;
-	
-	pin.Normal = normalize(pin.Normal);
+	float4 textureColor; //텍스쳐 색상
+	float3 lightDir;     //빛벡터
+	float lightIntensity; 
+	float3 reflection;   //반사광
+	float4 specular;
+	float4 litColor;
+	float3 viewDirection;
 
-	//조명되는점에서 눈(카메라)까지의 벡터
-	float3 toEyeW = normalize(gEyePos - pin.PosH);
 
-	float4 ambient = gAmbientLight * diffuseAlbedo;
+	//텍스쳐의 기본 색상 - 샘플러를 사용하여 값 추출
+	textureColor = gDiffuseMap.Sample(gsamLinearWrap, pin.Tex);
 
-	//블랜딩 테스트용 코드
-	//ambient.w = 0.5;
+	viewDirection = gLights[0].Position - pin.PosH.xyz;
+	viewDirection = normalize(viewDirection);
 
-	const float shininess = 1.0f - gRoughness;
 
-	Material mat = { diffuseAlbedo, gFresnelR0, shininess };
+	lightDir = -(gLights[0].Direction);
 
-	float3 shadowFactor = 1.0f;
-	float4 directLight = ComputeLighting(gLights, mat, pin.PosH, pin.Normal, toEyeW, shadowFactor);
-	
-	float4 litColor = ambient + directLight;
+	litColor = gAmbientLight;
 
-	litColor.a = diffuseAlbedo.a;
+	specular = float4( 0.0f, 0.0f, 0.0f, 0.0f );
+
+	//픽셀당 비치는 빛의양 (0 ~ 1)
+	lightIntensity = saturate(dot(pin.Normal, lightDir));
+
+	if (lightIntensity > 0.0f)
+	{
+		litColor += (float4(gLights[0].DiffuseColor, 1.0f) * lightIntensity);
+
+		litColor = saturate(litColor);
+
+		reflection = normalize(2 * lightIntensity * pin.Normal - lightDir);
+
+		specular = pow(saturate(dot(reflection, viewDirection)), 256.0f);
+	}
+
+	litColor = litColor * textureColor;
+
+	litColor = saturate(litColor + specular);
 
 	return litColor;
+
 }
 	
 

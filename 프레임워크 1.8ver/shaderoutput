@@ -31,9 +31,7 @@ cbuffer LightData : register(b3)
 
 cbuffer MaterialData : register(b4)
 {
-    float4  gDiffuseAlbedo;             // Offset:    0, size:   16
-    float3  gFresnelR0;                 // Offset:   16, size:   12
-    float   gRoughness;                 // Offset:   28, size:    4
+    float   gRoughness;                 // Offset:    0, size:    4
 }
 
 //

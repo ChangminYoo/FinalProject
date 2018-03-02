@@ -13,7 +13,7 @@ struct Light
 	XMFLOAT3 Direction = { 0.0f, -1.0f, 0.0f };                 
 	//À§Ä¡
 	XMFLOAT3 Position = { 0.0f, 0.0f, 0.0f };  
-	float SpotPower = 64.0f;
+	float SpecularPower = 64.0f;
 };
 
 struct LightData

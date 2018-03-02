@@ -131,7 +131,7 @@ CZombieObject::CZombieObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList 
 	OffLookvector = XMFLOAT3(0, 0, -1);
 	OffRightvector = XMFLOAT3(-1, 0, 0);
 	ThetaY = 180;
-	ObjData.Scale = 0.1;
+	ObjData.Scale = 0.2;
 	Speed = 60;
 
 	XMFLOAT3 rx(4, 0, 0);
@@ -164,9 +164,8 @@ void CZombieObject::SetMaterial(ID3D12Device * m_Device, ID3D12GraphicsCommandLi
 	if(Mat.MatData.ConstBuffer == NULL)
 		Mat.MatData.ConstBuffer = new UploadBuffer<MaterialData>(m_Device, 1, true);
 
-	Mat.MatData.DiffuseAlbedo = { 1.0f, 1.0f, 1.0f, 1.0f };
-	Mat.MatData.FresnelR0 = { 0.02f, 0.02f, 0.02f };
-	Mat.MatData.Roughness = 0.2f;
+
+	Mat.MatData.Roughness = 0.3f;
 }
 
 void CZombieObject::Tick(const GameTimer & gt)
