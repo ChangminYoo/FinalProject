@@ -438,7 +438,28 @@ void FrameWork::OnMouseDown(WPARAM btnState, int x, int y)
 
 void FrameWork::OnMouseMove(WPARAM btnState, int x, int y)
 {
+	RECT rc;
+	POINT p1, p2;
+
+	GetClientRect(hwnd, &rc);
+
 	scene->Player->TPSCameraSystem(x, y,0.01);
+
+	p1.x = rc.left;
+	p1.y = rc.top;
+	p2.x = rc.right;
+	p2.y = rc.bottom;
+
+	ClientToScreen(hwnd, &p1);
+	ClientToScreen(hwnd, &p2);
+
+	rc.left = p1.x;
+	rc.top = p1.y;
+	rc.right = p2.x;
+	rc.bottom = p2.y;
+
+	ClipCursor(&rc);
+
 }
 
 bool FrameWork::InitMainWindow()
