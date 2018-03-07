@@ -337,7 +337,7 @@ CZombieObject::CZombieObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList 
 		Mesh.Index = NULL;
 		Mesh.SubResource = NULL;
 
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "ZombieTex", L"textures/human/Male White Wizard 05 Red.dds");
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "ZombieTex", L"textures/zombie_diffuse.dds");
 		SetMesh(m_Device, commandlist);
 		SetMaterial(m_Device, commandlist);
 		CreateMesh = true;

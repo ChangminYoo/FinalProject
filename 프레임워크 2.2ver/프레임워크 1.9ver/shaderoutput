@@ -113,7 +113,7 @@ dcl_temps 12
 //   o1.x <- <VS return value>.Normal.x; o1.y <- <VS return value>.Normal.y; o1.z <- <VS return value>.Normal.z; 
 //   o0.x <- <VS return value>.PosH.x; o0.y <- <VS return value>.PosH.y; o0.z <- <VS return value>.PosH.z; o0.w <- <VS return value>.PosH.w
 //
-#line 121 "D:\Dx12?제\D3D12Studying?는?Chapter 4 Direct3D Initialization\?레?워??2.0ver\?레?워??1.9ver\ShaderFile.hlsl"
+#line 121 "C:\Users\min94\Desktop\?레?워??2.2ver\?레?워??1.9ver\ShaderFile.hlsl"
 ine r0.x, l(0, 0, 0, 0), cb0[4].z
 if_nz r0.x
 
