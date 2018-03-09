@@ -11,9 +11,14 @@ public:
 	void PlayerCameraReLocate();
 	void SetPlayer(CGameObject* obj);
 	void PlayerInput(float DeltaTime);
+
+
+public:
 	CCamera Camera;
 	CGameObject* PlayerObject;
 
+
+private:
 	//카메라 회전관련 데이터들
 	float ox = -1;//이전마우스 x좌표
 	float oy = -1;//이전마우스 y좌표

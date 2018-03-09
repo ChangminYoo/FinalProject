@@ -404,6 +404,7 @@ LRESULT FrameWork::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		return 0;
 	}
 
+
 	return DefWindowProc(hwnd, msg, wParam, lParam);
 }
 
@@ -438,13 +439,10 @@ void FrameWork::OnMouseDown(WPARAM btnState, int x, int y)
 
 void FrameWork::OnMouseMove(WPARAM btnState, int x, int y)
 {
-	RECT rc;
-	POINT p1, p2;
-
-	GetClientRect(hwnd, &rc);
-
 	scene->Player->TPSCameraSystem(x, y,0.01);
 
+
+	GetClientRect(hwnd, &rc);
 	p1.x = rc.left;
 	p1.y = rc.top;
 	p2.x = rc.right;
@@ -459,7 +457,6 @@ void FrameWork::OnMouseMove(WPARAM btnState, int x, int y)
 	rc.bottom = p2.y;
 
 	ClipCursor(&rc);
-
 }
 
 bool FrameWork::InitMainWindow()

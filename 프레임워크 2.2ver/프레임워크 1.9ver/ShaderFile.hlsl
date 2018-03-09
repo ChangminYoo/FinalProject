@@ -171,7 +171,7 @@ VertexOut VS(VertexIn vin)
 	vout.PosH = mul(float4(vin.PosL, 1), gWorld);
 
 	vout.Normal = mul(vin.Normal, gWorld);
-	vout.Normal = normalize(vin.Normal);
+	vout.Normal = normalize(vout.Normal);
 
 	vout.PosH = mul(vout.PosH, gViewProj);
 

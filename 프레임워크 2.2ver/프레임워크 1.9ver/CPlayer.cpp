@@ -34,7 +34,7 @@ void CPlayer::TPSCameraSystem(int mx, int my,float DeltaTime)
 				}
 				else if (mx<ox)//왼쪽으로 이동
 				{
-					ytheta += (-240 *MMPE_PI / 180)*DeltaTime;
+					ytheta += (-240 * MMPE_PI / 180)*DeltaTime;
 					playerYtheta= (-240 * MMPE_PI / 180)*DeltaTime;
 					ox = mx;
 					rotate = true;
@@ -49,9 +49,9 @@ void CPlayer::TPSCameraSystem(int mx, int my,float DeltaTime)
 
 				if (my > oy)//아래로이동
 				{
-					xtheta += (120 * 3.14 / 180)*DeltaTime;
-					if (xtheta >= (85 * 3.14 / 180))
-						xtheta = (85 * 3.14 / 180);
+					xtheta += (120 * MMPE_PI / 180)*DeltaTime;
+					if (xtheta >= (85 * MMPE_PI / 180))
+						xtheta = (85 * MMPE_PI / 180);
 
 
 
@@ -59,10 +59,10 @@ void CPlayer::TPSCameraSystem(int mx, int my,float DeltaTime)
 				}
 				else if (my<oy)//위로이동
 				{
-					xtheta += (-120 * 3.14 / 180)*DeltaTime;
+					xtheta += (-120 * MMPE_PI / 180)*DeltaTime;
 
-					if (xtheta <= (-65 * 3.14 / 180))
-						xtheta = (-65 * 3.14 / 180);
+					if (xtheta <= (-65 * MMPE_PI / 180))
+						xtheta = (-65 * MMPE_PI / 180);
 
 					oy = my;
 				}
@@ -317,13 +317,13 @@ void CPlayer::PlayerInput(float DeltaTime)
 
 		if (move == true)//움직이고 있으면 움직이는 모션으로
 		{
-			if (PlayerObject->n_Animation != 2)//공격모션이 아니면 다시 대기상태로
-				PlayerObject->SetAnimation(1);
+			if (PlayerObject->n_Animation != (int)Ani_State::Attack)//공격모션이 아니면 다시 대기상태로
+				PlayerObject->SetAnimation((int)Ani_State::Run);
 		}
 		else
 		{
-			if(PlayerObject->n_Animation!=2)//공격모션이 아니면 다시 대기상태로
-				PlayerObject->SetAnimation(0);
+			if(PlayerObject->n_Animation != (int)Ani_State::Attack)//공격모션이 아니면 다시 대기상태로
+				PlayerObject->SetAnimation((int)Ani_State::Idle);
 		}
 	}
 }

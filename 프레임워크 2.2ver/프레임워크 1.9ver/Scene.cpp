@@ -25,7 +25,6 @@ Scene::Scene(ID3D12Device * m_Device, ID3D12GraphicsCommandList * m_DC, float cw
 	CreateGameObject();
 
 
-
 }
 
 
@@ -49,6 +48,13 @@ Scene::~Scene()
 		delete DynamicObject.front();
 		DynamicObject.pop_front();
 	}
+
+	while (StaticObject.size())
+	{
+		delete StaticObject.front();
+		StaticObject.pop_front();
+	}
+
 
 	if (Player != NULL)
 		delete Player;
@@ -117,7 +123,8 @@ void Scene::CreateShaderObject()
 		Shaders[i] = new Shader;
 		Shaders[i]->CreateShader(device, rootsg.Get(), L"ShaderFile.hlsl", "VS", "vs_5_0", L"ShaderFile.hlsl", "PS", "ps_5_0");
 		Shaders[i]->DynamicObject = &DynamicObject;
-	
+		
+		Shaders[i]->StaticObject = &StaticObject;
 	}
 	
 }
@@ -129,6 +136,11 @@ void Scene::CreateGameObject()
 	DynamicObject.push_back(new CZombieObject(device, commandlist, XMFLOAT4(-50, 30, 0, 0)));
 //	DynamicObject.push_back(new CCubeManObject(device, commandlist, XMFLOAT4(40,60, 0, 0)));
 	//플레이어의 오브젝트 설정. 이건 나중에 바꿔야함.
+
+	DynamicObject.push_back(new CSphereObject(device, commandlist, XMFLOAT4(20, 20, 0, 0)));
+
+
+
 	Player->SetPlayer(DynamicObject.front());
 	Player->PlayerObject->Blending = false;
 
@@ -136,6 +148,7 @@ void Scene::CreateGameObject()
 	for (int i = 0; i < nShader; i++)
 	{
 		Shaders[i]->DynamicObject = &DynamicObject;
+		Shaders[i]->StaticObject = &StaticObject;
 	}
 
 }
@@ -147,7 +160,6 @@ void Scene::Render(const GameTimer& gt)
 
 	//루트시그니처연결. 이때 루트시그니처는 쉐이더 종류에 관계없이 동일해야함.
 	commandlist->SetGraphicsRootSignature(rootsg.Get());
-
 
 	//이제 쉐이더를 연결하고 PSO 연결후 쉐이더의 렌더함수호출. 그다음 게임오브젝트의 상수버퍼(시그니처에서 했던거)를 연결해야함
 	//테이블의 경우 힙과 테이블을 연결해야함.
@@ -178,21 +190,31 @@ void Scene::Tick(const GameTimer & gt)
 	//지워야 할 오브젝트를 지운다.
 	for (auto i = DynamicObject.begin(); i != DynamicObject.end();)
 	{
-
 		if ((*i)->DelObj==true)
 		{
 			delete *i;//실제 게임오브젝트의 메모리 해제
 			i = DynamicObject.erase(i);//리스트상에서 해당 요소를 지움
-
-
 		}
 		else
 			i++;
 	}
 
+	for (auto i = StaticObject.begin(); i != StaticObject.end();)
+	{
+		if ((*i)->DelObj == true)
+		{
+			delete *i;//실제 게임오브젝트의 메모리 해제
+			i = StaticObject.erase(i);//리스트상에서 해당 요소를 지움
+		}
+		else
+			i++;
+	}
 
 	//오브젝트들의 틱함수 처리
 	for (auto b = DynamicObject.begin(); b != DynamicObject.end(); b++)
+		(*b)->Tick(gt);
+
+	for (auto b = StaticObject.begin(); b != StaticObject.end(); b++)
 		(*b)->Tick(gt);
 
 	//카메라 리 로케이트 
