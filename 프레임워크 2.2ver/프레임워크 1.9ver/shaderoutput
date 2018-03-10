@@ -113,7 +113,7 @@ dcl_temps 12
 //   o1.x <- <VS return value>.Normal.x; o1.y <- <VS return value>.Normal.y; o1.z <- <VS return value>.Normal.z; 
 //   o0.x <- <VS return value>.PosH.x; o0.y <- <VS return value>.PosH.y; o0.z <- <VS return value>.PosH.z; o0.w <- <VS return value>.PosH.w
 //
-#line 121 "D:\Dx12?제\D3D12Studying?는?Chapter 4 Direct3D Initialization\?레?워??2.2ver\?레?워??1.9ver\ShaderFile.hlsl"
+#line 121 "D:\Dx12?제\D3D12Studying?는?Chapter 4 Direct3D Initialization\?레?워??2.3ver 공격기능추?\??워??1.9ver\ShaderFile.hlsl"
 ieq r0.x, cb0[4].z, l(1)
 if_nz r0.x
 

@@ -190,15 +190,15 @@ CCubeManObject::CCubeManObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 	gamedata.Speed = 60;
 	
 	//광선충돌 검사용 육면체
-	XMFLOAT3 rx(4, 0, 0);
+	XMFLOAT3 rx(3, 0, 0);
 	XMFLOAT3 ry(0, 9, 0);
-	XMFLOAT3 rz(0, 0, 4);
+	XMFLOAT3 rz(0, 0, 3);
 	rco.SetPlane(rx, ry, rz);
 
 	//질점오브젝트 사용시 필요한 데이터들 설정
 	pp = new PhysicsPoint();
 	pp->SetPosition(CenterPos);//이 값은 항상 갱신되야한다.
-	pp->SetHalfBox(4, 9, 4);//충돌 박스의 x,y,z 크기
+	pp->SetHalfBox(3, 9, 3);//충돌 박스의 x,y,z 크기
 	pp->SetDamping(0.5);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
 	pp->SetBounce(false);//튕기지 않는다.
 
@@ -626,14 +626,14 @@ BulletCube::BulletCube(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 
 	//광선충돌 검사용 육면체
 	XMFLOAT3 rx(1, 0, 0);
-	XMFLOAT3 ry(0, 2, 0);
+	XMFLOAT3 ry(0, 1, 0);
 	XMFLOAT3 rz(0, 0, 1);
 	rco.SetPlane(rx, ry, rz);
 
 	//질점오브젝트 사용시 필요한 데이터들 설정
 	pp = new PhysicsPoint();
 	pp->SetPosition(CenterPos);//이 값은 항상 갱신되야한다.
-	pp->SetHalfBox(1, 2, 1);//충돌 박스의 x,y,z 크기
+	pp->SetHalfBox(1, 1, 1);//충돌 박스의 x,y,z 크기
 	pp->SetDamping(1);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
 	pp->SetBounce(false);//튕기지 않는다.
 	pp->SetVelocity(Lookvector.x*gamedata.Speed, Lookvector.y*gamedata.Speed, Lookvector.z*gamedata.Speed);//룩벡터로 날아감
@@ -647,7 +647,7 @@ void BulletCube::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList* com
 
 	//모델 로드
 		//여기에 FBX로드를 해주세요!
-	LoadMD5Model(L".\\플레이어메쉬들\\dietzombie2.MD5MESH", &Mesh, 0, 0.1);
+	LoadMD5Model(L".\\플레이어메쉬들\\Cube.MD5MESH", &Mesh, 0, 1);
 	//
 	Mesh.SetNormal(false);
 	Mesh.CreateVertexBuffer(m_Device, commandlist);
