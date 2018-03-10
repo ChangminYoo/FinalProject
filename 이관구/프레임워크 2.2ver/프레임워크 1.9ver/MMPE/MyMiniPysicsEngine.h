@@ -87,6 +87,7 @@ namespace MiniPhysicsEngineG9
 		bool RayCasting(XMFLOAT3& RayOrgin, XMFLOAT3& RayDir,XMFLOAT3& ObjCenterPos,XMFLOAT3& PlayerPos,XMFLOAT3& Look, XMFLOAT3* SavePos = NULL);
 		void SetPlane(XMFLOAT3& x, XMFLOAT3& y, XMFLOAT3& z);
 	};
+	XMFLOAT3 RayShot(XMFLOAT3& RayOrgin, XMFLOAT3& RayDir, float MaxLen);
 
 
 	//********************* 시스템 클래스에 사용되는 힘 생성기 ********************************//
@@ -144,6 +145,10 @@ namespace MiniPhysicsEngineG9
 
 		XMFLOAT3 XMFloat4to3(XMFLOAT4& v);
 		XMFLOAT4 XMFloat3to4(XMFLOAT3& v);
+		
+
+		XMFLOAT4 QuaternionRotation(XMFLOAT3& Axis, float radian);
+		XMFLOAT4 QuaternionMultiply(XMFLOAT4& q1, XMFLOAT4& q2);
 }
 
 using namespace MiniPhysicsEngineG9;

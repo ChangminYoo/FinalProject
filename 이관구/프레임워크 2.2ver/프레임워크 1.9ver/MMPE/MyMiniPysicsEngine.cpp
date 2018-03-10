@@ -1,5 +1,15 @@
 #include "MyMiniPysicsEngine.h"
 #include<math.h>
+//해당 위치에서 해당방향으로 MaxLen에 도달할때의 점을 반환함.
+XMFLOAT3 MiniPhysicsEngineG9::RayShot(XMFLOAT3 & RayOrgin, XMFLOAT3 & RayDir, float MaxLen)
+{
+	XMVECTOR ro = XMLoadFloat3(&RayOrgin);
+	XMVECTOR rd = XMLoadFloat3(&RayDir);
+	ro += rd * MaxLen;
+	XMFLOAT3 result;
+	XMStoreFloat3(&result, ro);
+	return result;
+}
 
 float MiniPhysicsEngineG9::FloatLength(XMFLOAT3 & v)
 {
@@ -104,6 +114,26 @@ XMFLOAT4 MiniPhysicsEngineG9::XMFloat3to4(XMFLOAT3 & v)
 	return XMFLOAT4(v.x, v.y, v.z, 0);
 }
 
+//회전축과 각도를 주면 그 축으로 회전하는 쿼터니언을 반환
+XMFLOAT4 MiniPhysicsEngineG9::QuaternionRotation(XMFLOAT3 & Axis, float radian)
+{
+
+	
+
+	auto q = XMQuaternionRotationAxis(XMLoadFloat3(&Axis), radian);
+	XMFLOAT4 Result;
+	XMStoreFloat4(&Result, q);
+	return Result;
+}
+
+XMFLOAT4 MiniPhysicsEngineG9::QuaternionMultiply(XMFLOAT4 & q1, XMFLOAT4 & q2)
+{
+	auto q = XMQuaternionMultiply(XMLoadFloat4(&q1), XMLoadFloat4(&q2));
+	XMFLOAT4 Result;
+	XMStoreFloat4(&Result, q);
+	return Result;
+}
+
 
 
 PhysicsPoint::PhysicsPoint()
@@ -134,15 +164,15 @@ void PhysicsPoint::integrate(float DeltaTime, XMFLOAT4* ObjPos, XMFLOAT3* ObjVel
 	//중력에 의해 속도가 너무 빨라질경우를 대비한 if문이다.
 	//-40보다 더 늦게 떨어지면 그대로 가되, -40이상의 속도면 -40으로 고정한다.
 	//tempV를 이용한 이유는 실제 속도를 -40으로 변경해버리면 댐핑이후에 속도가 이전보다 느려지기 때문이다.
-	XMVECTOR velocity;
-	if(Velocity.y>-40)
+	XMVECTOR velocity=XMLoadFloat3(&Velocity);
+	/*if(Velocity.y>-40)
 		velocity = XMLoadFloat3(&Velocity);
 	else
 	{
 		XMFLOAT3 tempV = Velocity;
 		tempV.y = -40;
 		velocity = XMLoadFloat3(&tempV);
-	}
+	}*/
 	XMVECTOR accel = XMLoadFloat3(&Accel);
 	XMVECTOR totalforce = XMLoadFloat3(&TotalForce);
 	//먼저 힘과 질량으로 가속도를 계산한다.

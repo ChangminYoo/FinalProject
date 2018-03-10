@@ -33,6 +33,7 @@ protected:
 
 public:
 	list<CGameObject*>* DynamicObject=NULL;//애니메이션이 되는 오브젝트들이 여기에 모임.Scene클래스가 가진거를 공유만.
+	list<CGameObject*>* BulletObject = NULL;//투사체들이 여기에 모임.Scene클래스가 가진거를 공유만.
 
 
 };

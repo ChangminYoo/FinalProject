@@ -6,7 +6,7 @@ using namespace std;
 using namespace DirectX;
 
 UINT CbvSrvDescriptorSize = 0;
-
+#define MAXRAYLEN 200
 
 LRESULT CALLBACK
 GetWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
@@ -422,12 +422,29 @@ void FrameWork::OnMouseDown(WPARAM btnState, int x, int y)
 	{
 		if ((*b) != scene->Player->PlayerObject)//플레이어가 아닐경우
 		{
-
-			if ((*b)->rco.RayCasting(RAY.RayOrgin, RAY.RayDir, XMFloat4to3((*b)->CenterPos), XMFloat4to3(scene->Player->PlayerObject->CenterPos),
-				scene->Player->PlayerObject->Lookvector,&savepoint)	== true)//광선이 다른 오브젝트를 맞출경우
+			//광선의 길이보다 가까울때
+			if (FloatLength(Float4Add(scene->Player->PlayerObject->CenterPos, (*b)->CenterPos)) <= MAXRAYLEN)
 			{
-				//여기서 뭔가를 처리한다.
-				(*b)->DelObj = true;//나는 일단 광선맞추면 지우는걸로함.
+
+
+				if ((*b)->rco.RayCasting(RAY.RayOrgin, RAY.RayDir, XMFloat4to3((*b)->CenterPos), XMFloat4to3(scene->Player->PlayerObject->CenterPos),
+					scene->Player->PlayerObject->Lookvector, &savepoint) == true)//광선이 다른 오브젝트를 맞출경우
+				{
+					//여기서 뭔가를 처리한다.
+					//플레이어가 현재 사용할 투사체 넘버를 통해 자체적으로 투사체를 생성해서 불렛오브젝트 리스트에 저장함.
+					scene->Player->CreateBullet(Device.Get(), mCommandList.Get(), savepoint, (*b), &scene->BulletObject);
+				}
+
+				else//광선의 길이보다 가깝지만 맞추지 못함. # 같은처리
+				{
+					savepoint=RayShot(RAY.RayOrgin, RAY.RayDir, MAXRAYLEN);
+					scene->Player->CreateBullet(Device.Get(), mCommandList.Get(), savepoint, (*b), &scene->BulletObject);
+				}
+			}
+			else//광선의 길이보다 멀때 # 같은처리
+			{
+				savepoint = RayShot(RAY.RayOrgin, RAY.RayDir, MAXRAYLEN);
+				scene->Player->CreateBullet(Device.Get(), mCommandList.Get(), savepoint, (*b), &scene->BulletObject);
 			}
 		}
 	}

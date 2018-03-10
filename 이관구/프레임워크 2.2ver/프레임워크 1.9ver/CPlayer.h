@@ -20,5 +20,7 @@ public:
 	float xtheta = 0;
 	float ytheta = 0;
 
+	int SellectBulletNumber = 0;
+	void CreateBullet(ID3D12Device* Device,ID3D12GraphicsCommandList* cl, XMFLOAT3& Goal, CGameObject* lock, list<CGameObject*>* bulletlist);
 };
 

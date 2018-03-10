@@ -226,14 +226,30 @@ void Shader::Render(ID3D12GraphicsCommandList * CommandList, const GameTimer& gt
 			//블랜딩용 PSO 연결
 			SetShader(CommandList, true);
 			//블랜딩용 PSO로 그림
-			(*b)->Render(CommandList,gt);
+			(*b)->Render(CommandList, gt);
 			//다시 원상태 PSO로 연결
 			SetShader(CommandList, false);
 		}
 		else//블랜딩 안씀
-			(*b)->Render(CommandList,gt);
+				(*b)->Render(CommandList, gt);
 	}
-		
+	
+	//투사체또한 그린다.
+	for (auto b = BulletObject->cbegin(); b != BulletObject->cend(); b++)
+	{
+		if ((*b)->Blending)
+		{
+			//블랜딩용 PSO 연결
+			SetShader(CommandList, true);
+			//블랜딩용 PSO로 그림
+			(*b)->Render(CommandList, gt);
+			//다시 원상태 PSO로 연결
+			SetShader(CommandList, false);
+		}
+		else//블랜딩 안씀
+			(*b)->Render(CommandList, gt);
+	}
+
 }
 
 D3D12_INPUT_LAYOUT_DESC Shader::CreateInputLayout()

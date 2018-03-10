@@ -26,16 +26,16 @@ void CPlayer::TPSCameraSystem(int mx, int my,float DeltaTime)
 				if (mx >ox)//오른쪽으로 이동
 				{
 
-					ytheta += (240 * MMPE_PI / 180)*DeltaTime;
+					ytheta += (190 * MMPE_PI / 180)*DeltaTime;
 
-					playerYtheta= (240 * MMPE_PI / 180)*DeltaTime;
+					playerYtheta= (190 * MMPE_PI / 180)*DeltaTime;
 					ox = mx;
 					rotate = true;
 				}
 				else if (mx<ox)//왼쪽으로 이동
 				{
-					ytheta += (-240 *MMPE_PI / 180)*DeltaTime;
-					playerYtheta= (-240 * MMPE_PI / 180)*DeltaTime;
+					ytheta += (-190 *MMPE_PI / 180)*DeltaTime;
+					playerYtheta= (-190 * MMPE_PI / 180)*DeltaTime;
 					ox = mx;
 					rotate = true;
 				}
@@ -90,10 +90,15 @@ void CPlayer::TPSCameraSystem(int mx, int my,float DeltaTime)
 
 				//플레이어를 회전시켜둠. 먼저 -180도 회전시켜서 뒷모습을 보이게한다
 				//이후에 카메라가 회전한만큼 추가적으로 움직이게함
-				PlayerObject->ThetaY += playerYtheta * 180 / MMPE_PI;
+				//PlayerObject->ThetaY += playerYtheta * 180 / MMPE_PI;
 				
 				
-				 XMVECTOR result = XMLoadFloat3(&oe);
+				
+				XMFLOAT3 axis{ 0,1,0 };
+				auto q2 = QuaternionRotation(axis, playerYtheta);
+				PlayerObject->Orient = QuaternionMultiply(PlayerObject->Orient, q2);
+			
+				XMVECTOR result = XMLoadFloat3(&oe);
 				 
 
 				 //Xr*= Yr;
@@ -185,7 +190,7 @@ void CPlayer::PlayerInput(float DeltaTime)
 			move = true;
 			//룩벡터의 +방향으로 움직인다.
 			auto l = XMLoadFloat3(&PlayerObject->Lookvector);
-			l *= PlayerObject->Speed*DeltaTime;
+			l *= PlayerObject->gamedata.Speed*DeltaTime;
 			auto p = XMLoadFloat4(&PlayerObject->CenterPos);
 			p += l;
 
@@ -217,7 +222,7 @@ void CPlayer::PlayerInput(float DeltaTime)
 			move = true;
 			//룩벡터의 -방향으로 움직인다.
 			auto l = XMLoadFloat3(&PlayerObject->Lookvector);
-			l *= PlayerObject->Speed*DeltaTime;
+			l *= PlayerObject->gamedata.Speed*DeltaTime;
 			auto p = XMLoadFloat4(&PlayerObject->CenterPos);
 			p -= l;
 
@@ -249,7 +254,7 @@ void CPlayer::PlayerInput(float DeltaTime)
 			move = true;
 			//라이트벡터의 -방향으로 움직인다.
 			auto r = XMLoadFloat3(&PlayerObject->Rightvector);
-			r *= PlayerObject->Speed*DeltaTime;
+			r *= PlayerObject->gamedata.Speed*DeltaTime;
 			auto p = XMLoadFloat4(&PlayerObject->CenterPos);
 			p -= r;
 
@@ -280,7 +285,7 @@ void CPlayer::PlayerInput(float DeltaTime)
 			move = true;
 			//라이트벡터의 +방향으로 움직인다.
 			auto r = XMLoadFloat3(&PlayerObject->Rightvector);
-			r *= PlayerObject->Speed*DeltaTime;
+			r *= PlayerObject->gamedata.Speed*DeltaTime;
 			auto p = XMLoadFloat4(&PlayerObject->CenterPos);
 			p += r;
 
@@ -317,13 +322,48 @@ void CPlayer::PlayerInput(float DeltaTime)
 
 		if (move == true)//움직이고 있으면 움직이는 모션으로
 		{
-			if (PlayerObject->n_Animation != 2)//공격모션이 아니면 다시 대기상태로
-				PlayerObject->SetAnimation(1);
+			if (PlayerObject->n_Animation != Ani_State::Attack)//
+				PlayerObject->SetAnimation(Ani_State::Run);
 		}
 		else
 		{
-			if(PlayerObject->n_Animation!=2)//공격모션이 아니면 다시 대기상태로
-				PlayerObject->SetAnimation(0);
+			if(PlayerObject->n_Animation!= Ani_State::Attack)//공격모션이 아니면 다시 대기상태로
+				PlayerObject->SetAnimation(Ani_State::Idle);
 		}
+	}
+}
+
+void CPlayer::CreateBullet(ID3D12Device* Device, ID3D12GraphicsCommandList* cl,XMFLOAT3 & Goal,CGameObject* lock, list<CGameObject*>* bulletlist)
+{
+	switch (SellectBulletNumber)
+	{
+	case 0://불렛큐브
+		auto v = Float3Add(Goal, XMFloat4to3(PlayerObject->CenterPos), false);
+		v = Float3Normalize(v);//새로운 룩벡터(발사방향)
+		//기존 룩벡터와 새로운 룩벡터를 외적해서 방향축을 구한다.
+		XMFLOAT3 l{ 0,0,1 };
+		XMVECTOR ol = XMLoadFloat3(&l);
+		XMVECTOR nl = XMLoadFloat3(&v);
+		auto axis=XMVector3Cross(ol, nl);
+		//방향축을 완성.
+		axis = XMVector3Normalize(axis);
+		XMFLOAT3 Axis;
+		XMStoreFloat3(&Axis, axis);
+		//이제 회전각도를 구해야한다. 내적을 통해 회전각도를 구한다.
+
+		auto temp=XMVector3Dot(ol, nl);
+
+		float d;//기존 룩벡터와 새로운 룩벡터를 내적한 결과.
+		XMStoreFloat(&d, temp);
+		if(fabsf(d)<=1)//반드시 이 결과는 -1~1 사이여야한다. 그래야 각도가 구해진다.
+			d=acos(d);//각도 완성. 라디안임
+
+		auto ori = QuaternionRotation(Axis, d);
+
+		CGameObject* bul = new BulletCube(Device, cl, PlayerObject, ori, lock, PlayerObject->CenterPos);
+		
+		bulletlist->push_back(bul);
+		break;
+
 	}
 }

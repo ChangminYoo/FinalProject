@@ -62,6 +62,7 @@ public:
 	CPlayer* Player = NULL;
 	CLight* light = NULL;
 	list<CGameObject*> DynamicObject;//애니메이션이 되는 오브젝트들이 여기에 모임.
+	list<CGameObject*> BulletObject;//투사체들이 모인다.
 
 
 };
