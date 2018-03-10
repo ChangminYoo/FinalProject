@@ -3,6 +3,9 @@
 extern UINT CbvSrvDescriptorSize;
 
 
+
+
+
 CGameObject::CGameObject()
 {
 	
@@ -39,7 +42,7 @@ CGameObject::CGameObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList* com
 	//여기서는 기본적인것들만 처리한다. 위치나 회전각 등 초기화
 	this->commandlist = commandlist;
 	this->CenterPos = cp;//중점위치
-	ThetaY = 0;
+	XMStoreFloat4(&Orient, XMQuaternionIdentity());//방향을 초기화 한다.
 	SetWorldMatrix();	//월드변환생성
 	CreateConstBuffer(m_Device);//상수버퍼생성
 }
@@ -48,7 +51,8 @@ void CGameObject::SetWorldMatrix()
 {
 	auto wmatrix = XMMatrixIdentity();
 	auto pos = XMLoadFloat4(&CenterPos);
-	wmatrix *= XMMatrixRotationY(ThetaY*MMPE_PI/180);
+	auto quater = XMLoadFloat4(&Orient);
+	wmatrix *= XMMatrixRotationQuaternion(quater);
 	wmatrix *= XMMatrixTranslationFromVector(pos);
 	XMStoreFloat4x4(&ObjData.WorldMatrix, wmatrix);
 }
@@ -56,6 +60,16 @@ void CGameObject::SetWorldMatrix()
 void CGameObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer& gt)
 {
 	
+}
+
+void CGameObject::ToDamage(float Damage)
+{
+	if (gamedata.GodMode == false)
+	{
+		gamedata.HP -= fabsf(Damage);
+		if (gamedata.HP <= 0)
+			DelObj = true;
+	}
 }
 
 void CGameObject::UpdatePPosCenterPos()
@@ -66,7 +80,8 @@ void CGameObject::UpdatePPosCenterPos()
 void CGameObject::UpdateLookVector()
 {
 	auto wmatrix = XMMatrixIdentity();
-	wmatrix *= XMMatrixRotationY(ThetaY*MMPE_PI/180);
+	auto quater = XMLoadFloat4(&Orient);
+	wmatrix *= XMMatrixRotationQuaternion(quater);
 	auto ol=XMLoadFloat3(&OffLookvector);
 	auto or = XMLoadFloat3(&OffRightvector);
 
@@ -134,13 +149,6 @@ void CGameObject::UpdateConstBuffer(ID3D12GraphicsCommandList * commandlist)
 	commandlist->SetGraphicsRootConstantBufferView(1, ConstBuffer->Resource()->GetGPUVirtualAddress());//월드행렬연결
 }
 
-
-
-
-//---------------------------------------------------------
-// DinamicObject
-//---------------------------------------------------------
-
 CCubeManObject::CCubeManObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, XMFLOAT4 cp) : CGameObject(m_Device,commandlist,cp)
 {
 
@@ -156,7 +164,7 @@ CCubeManObject::CCubeManObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 		Mesh.Index = NULL;
 		Mesh.SubResource = NULL;
 	
-		LoadTexture(m_Device, commandlist,this, Textures,SrvDescriptorHeap,"ZombieTex", L"textures/human/Male White Wizard 05 Red.dds", false);
+		LoadTexture(m_Device, commandlist,this, Textures,SrvDescriptorHeap,"ZombieTex", L"textures/human/Male White Wizard 05 Red.dds");
 		SetMesh(m_Device, commandlist);
 		SetMaterial(m_Device, commandlist);
 		CreateMesh = true;
@@ -167,14 +175,20 @@ CCubeManObject::CCubeManObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 	//실제 룩벡터 등은 모두 UpdateLookVector에서 처리된다(라이트벡터도) 따라서 Tick함수에서 반드시 호출해야한다.
 	OffLookvector = XMFLOAT3(0, 0, -1);
 	OffRightvector = XMFLOAT3(-1, 0, 0);
+	auto q = XMLoadFloat4(&Orient);//방향을 180도 돌리려 한다.
+	XMFLOAT3 axis{ 0,1,0 };
+	auto q2 = QuaternionRotation(axis, MMPE_PI);
+	Orient = QuaternionMultiply(Orient, q2);
 	UpdateLookVector();
-	ThetaY = 180;
 	ObjData.isAnimation = true;
 	ObjData.Scale =3;
 	ObjData.SpecularParamater = 0.0f;//스페큘러를 낮게준다.
-	Speed = 60;
 	
-
+	//게임 데이터 (스텟)을 찍는다. 캐릭터는 데미지를 갖지 않고, 탄환이 데미지를 갖도록하자.
+	gamedata.MAXHP = 100;
+	gamedata.HP = 100;
+	gamedata.Speed = 60;
+	
 	//광선충돌 검사용 육면체
 	XMFLOAT3 rx(4, 0, 0);
 	XMFLOAT3 ry(0, 9, 0);
@@ -245,7 +259,9 @@ void CCubeManObject::Render(ID3D12GraphicsCommandList * commandlist, const GameT
 	//게임오브젝트의 렌더링은 간단하다. 
 	//텍스처를 연결하고, 월드행렬을 연결한다.
 
-	if(Texturing)
+	
+
+	if(Textures.size()>0)
 		SetTexture(commandlist,SrvDescriptorHeap);
 	UpdateConstBuffer(commandlist);
 	
@@ -314,9 +330,9 @@ void CCubeManObject::Collision(list<CGameObject*>* collist, float DeltaTime)
 void CCubeManObject::EndAnimation(int nAni)
 {
 	
-	if (nAni == (int)Ani_State::Attack )//공격하기였으면
+	if (nAni == 2 )//공격하기였으면
 	{
-		SetAnimation((int)Ani_State::Idle);//대기상태로둔다.
+		SetAnimation(0);//대기상태로둔다.
 
 	}
 	
@@ -339,7 +355,7 @@ CZombieObject::CZombieObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList 
 		Mesh.Index = NULL;
 		Mesh.SubResource = NULL;
 
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "ZombieTex", L"textures/zombie_diffuse.dds", false);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "ZombieTex", L"textures/human/Male White Wizard 05 Red.dds");
 		SetMesh(m_Device, commandlist);
 		SetMaterial(m_Device, commandlist);
 		CreateMesh = true;
@@ -350,13 +366,21 @@ CZombieObject::CZombieObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList 
 	//실제 룩벡터 등은 모두 UpdateLookVector에서 처리된다(라이트벡터도) 따라서 Tick함수에서 반드시 호출해야한다.
 	OffLookvector = XMFLOAT3(0, 0, -1);
 	OffRightvector = XMFLOAT3(-1, 0, 0);
-	UpdateLookVector();
-	ThetaY = 180;
-	ObjData.isAnimation = true;
-	ObjData.Scale = 0.1;
-	ObjData.SpecularParamater = 0.0f;//스페큘러를 낮게준다.
-	Speed = 60;
+	auto q = XMLoadFloat4(&Orient);//방향을 180도 돌리려 한다.
+	XMFLOAT3 axis{ 0,1,0 };
+	auto q2 = QuaternionRotation(axis, MMPE_PI);
+	Orient = QuaternionMultiply(Orient, q2);
 
+
+	UpdateLookVector();
+	
+	ObjData.isAnimation = true;
+	ObjData.Scale =0.1;
+	ObjData.SpecularParamater = 0.0f;//스페큘러를 낮게준다.
+	
+	gamedata.MAXHP = 100;
+	gamedata.HP = 100;
+	gamedata.Speed = 60;
 
 	//광선충돌 검사용 육면체
 	XMFLOAT3 rx(4, 0, 0);
@@ -418,6 +442,7 @@ void CZombieObject::Tick(const GameTimer & gt)
 	TickValue += 1;
 
 
+
 }
 
 void CZombieObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer& gt)
@@ -425,7 +450,9 @@ void CZombieObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTi
 	//게임오브젝트의 렌더링은 간단하다. 
 	//텍스처를 연결하고, 월드행렬을 연결한다.
 
-	if (Texturing)
+
+
+	if (Textures.size()>0)
 		SetTexture(commandlist, SrvDescriptorHeap);
 	UpdateConstBuffer(commandlist);
 
@@ -494,9 +521,9 @@ void CZombieObject::Collision(list<CGameObject*>* collist, float DeltaTime)
 void CZombieObject::EndAnimation(int nAni)
 {
 
-	if (nAni == (int)Ani_State::Attack)//공격하기였으면
+	if (nAni == 2)//공격하기였으면
 	{
-		SetAnimation((int)Ani_State::Idle);//대기상태로둔다.
+		SetAnimation(0);//대기상태로둔다.
 
 	}
 
@@ -514,9 +541,9 @@ void SetTexture(ID3D12GraphicsCommandList * commandlist, ComPtr<ID3D12Descriptor
 	commandlist->SetGraphicsRootDescriptorTable(0, tex);
 }
 
-void LoadTexture(ID3D12Device* device, ID3D12GraphicsCommandList* commandlist,CGameObject* obj, unordered_map<string, unique_ptr<CTexture>>& Textures, ComPtr<ID3D12DescriptorHeap>& SrvDescriptorHeap, string texturename, wstring FileName, bool isTexCube)
+void LoadTexture(ID3D12Device* device, ID3D12GraphicsCommandList* commandlist,CGameObject* obj, unordered_map<string, unique_ptr<CTexture>>& Textures, ComPtr<ID3D12DescriptorHeap>& SrvDescriptorHeap, string texturename, wstring FileName)
 {
-	obj->Texturing = true;
+	
 	auto Tex = make_unique<CTexture>();
 	Tex->Name = texturename;
 	Tex->Filename = FileName;
@@ -539,42 +566,35 @@ void LoadTexture(ID3D12Device* device, ID3D12GraphicsCommandList* commandlist,CG
 
 	auto Texs = Textures[texturename]->Resource;
 
-	
-		D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
-		srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-		srvDesc.Format = Texs->GetDesc().Format;
+	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	srvDesc.Format = Texs->GetDesc().Format;
+	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+	srvDesc.Texture2D.MostDetailedMip = 0;
+	srvDesc.Texture2D.MipLevels = Texs->GetDesc().MipLevels;
+	srvDesc.Texture2D.ResourceMinLODClamp = 0.0f;
 
-		if (isTexCube) 
-		{srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURECUBE;}
-		else 
-		{srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;}
-
-		srvDesc.Texture2D.MostDetailedMip = 0;
-		srvDesc.Texture2D.MipLevels = Texs->GetDesc().MipLevels;
-		srvDesc.Texture2D.ResourceMinLODClamp = 0.0f;
-
-		device->CreateShaderResourceView(Texs.Get(), &srvDesc, hDescriptor);
-
+	device->CreateShaderResourceView(Texs.Get(), &srvDesc, hDescriptor);
 }
 
 
 
 
-//---------------------------------------------------------
-// StaticObject
-//---------------------------------------------------------
+//------------------- 투 사 체 -----------------------//
 
-
-CSphereObject::CSphereObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, cp)
+BulletCube::BulletCube(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist,CGameObject* master,XMFLOAT4& ori,CGameObject* lockon, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, cp)
 {
+
+	
+	//조인트가 저장될 배열.
 
 	if (CreateMesh == false)
 	{
-		SetValue(0.5, 20, 20);
 
 		Mesh.Index = NULL;
 		Mesh.SubResource = NULL;
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "BrickTex", L"textures/bricks.dds", false);
+
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "ZombieTex", L"textures/human/Male White Wizard 05 Red.dds");
 		SetMesh(m_Device, commandlist);
 		SetMaterial(m_Device, commandlist);
 		CreateMesh = true;
@@ -583,163 +603,141 @@ CSphereObject::CSphereObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList 
 
 	//게임오브젝트마다 룩벡터와 라이트벡터가 다르므로 초기 오프셋 설정을 해준다.
 	//실제 룩벡터 등은 모두 UpdateLookVector에서 처리된다(라이트벡터도) 따라서 Tick함수에서 반드시 호출해야한다.
+	OffLookvector = XMFLOAT3(0, 0, 1);
+	OffRightvector = XMFLOAT3(1, 0, 0);
+	//인자로 발사방향으로 룩벡터가 될정도로 회전한 ori값을 받고, 현재 방향(아직은 0,0,0,1)과 곱해준다.
+	Orient = QuaternionMultiply(Orient, ori);
 
-	OffLookvector = XMFLOAT3(0, 0, -1);
-	OffRightvector = XMFLOAT3(-1, 0, 0);
 	UpdateLookVector();
-	ThetaY = 180;
-	ObjData.isAnimation = false;
-	ObjData.Scale = 1.0;
+
+	ObjData.isAnimation = 0;
+	ObjData.Scale = 0.025;
 	ObjData.SpecularParamater = 0.0f;//스페큘러를 낮게준다.
-	Speed = 0;
+	
+	//게임관련 데이터들
+	gamedata.MAXHP = 1;
+	gamedata.HP = 1;
+	gamedata.Damage = 50;
+	gamedata.GodMode = true;
+	gamedata.Speed = 50;
+	LifeTime = 10;
+	Master = master;
+	LockOn = lockon;
+
+	//광선충돌 검사용 육면체
+	XMFLOAT3 rx(1, 0, 0);
+	XMFLOAT3 ry(0, 2, 0);
+	XMFLOAT3 rz(0, 0, 1);
+	rco.SetPlane(rx, ry, rz);
 
 	//질점오브젝트 사용시 필요한 데이터들 설정
 	pp = new PhysicsPoint();
 	pp->SetPosition(CenterPos);//이 값은 항상 갱신되야한다.
-	pp->SetHalfBox(0,0,0);//충돌 박스의 x,y,z 크기
-	pp->SetDamping(0.5);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
+	pp->SetHalfBox(1, 2, 1);//충돌 박스의 x,y,z 크기
+	pp->SetDamping(1);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
 	pp->SetBounce(false);//튕기지 않는다.
+	pp->SetVelocity(Lookvector.x*gamedata.Speed, Lookvector.y*gamedata.Speed, Lookvector.z*gamedata.Speed);//룩벡터로 날아감
 
 
 }
 
-void CSphereObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
+
+void BulletCube::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList* commandlist)
 {
-	Mesh.nStride = sizeof(CVertex);
-	Mesh.nOffset = 0;	
-	Mesh.nVertex = ((stack - 2)* slice) + 2;
 
-	int NumSphereVertices = Mesh.nVertex;
-	int NumSphereFaces = ((stack - 3)*(slice) * 2) + (slice * 2);
-
-	float sphereYaw = 0.0f;
-	float spherePitch = 0.0f;
-
-	if (Mesh.SubResource == NULL)
-		Mesh.SubResource = new CVertex[NumSphereVertices];
-
-
-	XMVECTOR currVertPos = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
-	XMMATRIX Rotationx;
-	XMMATRIX Rotationy;
-
-	Mesh.SubResource[0].V.x = 0.0f;
-	Mesh.SubResource[0].V.y = 0.0f;
-	Mesh.SubResource[0].V.z = 1.0f;
-
-	for (DWORD i = 0; i < stack - 2; ++i)
-	{
-		spherePitch = (i + 1) * (3.14 / (stack - 1));
-		Rotationx = XMMatrixRotationX(spherePitch);
-		for (DWORD j = 0; j < slice; ++j)
-		{
-			sphereYaw = j * (6.28 / (slice));
-			Rotationy = XMMatrixRotationZ(sphereYaw);
-			currVertPos = XMVector3TransformNormal(XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f), (Rotationx * Rotationy));
-			currVertPos = XMVector3Normalize(currVertPos);
-			Mesh.SubResource[i*slice + j + 1].V.x = XMVectorGetX(currVertPos);
-			Mesh.SubResource[i*slice + j + 1].V.y = XMVectorGetY(currVertPos);
-			Mesh.SubResource[i*slice + j + 1].V.z = XMVectorGetZ(currVertPos);
-		}
-	}
-
-	Mesh.SubResource[NumSphereVertices - 1].V.x = 0.0f;
-	Mesh.SubResource[NumSphereVertices - 1].V.y = 0.0f;
-	Mesh.SubResource[NumSphereVertices - 1].V.z = -1.0f;
-
-	Mesh.nindex = NumSphereFaces * 3;
-	Mesh.nioffset = 0;
-	Mesh.nisize = sizeof(UINT);
-
-	if (Mesh.Index == NULL)
-		Mesh.Index = new UINT[Mesh.nindex];
-
-	int k = 0;
-	for (DWORD l = 0; l < slice - 1; ++l)
-	{
-		Mesh.Index[k] = 0;
-		Mesh.Index[k + 1] = l + 1;
-		Mesh.Index[k + 2] = l + 2;
-		k += 3;
-	}
-
-	Mesh.Index[k] = 0;
-	Mesh.Index[k + 1] = slice;
-	Mesh.Index[k + 2] = 1;
-	k += 3;
-
-	for (DWORD i = 0; i < stack - 3; ++i)
-	{
-		for (DWORD j = 0; j < slice - 1; ++j)
-		{
-			Mesh.Index[k] = i*slice + j + 1;
-			Mesh.Index[k + 1] = i*slice + j + 2;
-			Mesh.Index[k + 2] = (i + 1)*slice + j + 1;
-			Mesh.Index[k + 3] = (i + 1)*slice + j + 1;
-			Mesh.Index[k + 4] = i*slice + j + 2;
-			Mesh.Index[k + 5] = (i + 1)*slice + j + 2;
-
-			k += 6; // next quad
-		}
-
-		Mesh.Index[k] = (i*slice) + slice;
-		Mesh.Index[k + 1] = (i*slice) + 1;
-		Mesh.Index[k + 2] = ((i + 1)*slice) + slice;
-		Mesh.Index[k + 3] = ((i + 1)*slice) + slice;
-		Mesh.Index[k + 4] = (i*slice) + 1;
-		Mesh.Index[k + 5] = ((i + 1)*slice) + 1;
-
-		k += 6;
-	}
-
-	for (DWORD l = 0; l < slice - 1; ++l)
-	{
-		Mesh.Index[k] = NumSphereVertices - 1;
-		Mesh.Index[k + 1] = (NumSphereVertices - 1) - (l + 1);
-		Mesh.Index[k + 2] = (NumSphereVertices - 1) - (l + 2);
-		k += 3;
-	}
-
-	Mesh.Index[k] = NumSphereVertices - 1;
-	Mesh.Index[k + 1] = (NumSphereVertices - 1) - slice;
-	Mesh.Index[k + 2] = NumSphereVertices - 2;
-
-
-
+	//모델 로드
+		//여기에 FBX로드를 해주세요!
+	LoadMD5Model(L".\\플레이어메쉬들\\dietzombie2.MD5MESH", &Mesh, 0, 0.1);
+	//
 	Mesh.SetNormal(false);
 	Mesh.CreateVertexBuffer(m_Device, commandlist);
 	Mesh.CreateIndexBuffer(m_Device, commandlist);
 
-
+	
 }
 
-void CSphereObject::SetMaterial(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
+void BulletCube::SetMaterial(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
 {
 	if (Mat.ConstBuffer == NULL)
 		Mat.ConstBuffer = new UploadBuffer<MaterialData>(m_Device, 1, true);
 
-	Mat.MatData.Roughness = 0.1f;
+
+	Mat.MatData.Roughness = 0.3f;
 }
 
-void CSphereObject::Tick(const GameTimer & gt)
+void BulletCube::Tick(const GameTimer & gt)
 {
+	//적분기. 적분기란? 매 틱마다 힘! 에의해서 변화 되는 가속도/속도/위치를 갱신한다.
+	//이때 pp의 position과 CenterPos를 일치시켜야하므로 CenterPos의 포인터를 인자로 넘겨야 한다.
+	pp->integrate(gt.DeltaTime(), &CenterPos);
+
+	//No애니메이션!
+
+	//투사체는 생명 주기가 있어야 한다.
+	LifeTime -= gt.DeltaTime();
+	if (LifeTime <= 0)
+		DelObj = true;
+
 }
 
-void CSphereObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer & gt)
+void BulletCube::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer& gt)
 {
 	//게임오브젝트의 렌더링은 간단하다. 
 	//텍스처를 연결하고, 월드행렬을 연결한다.
 
-	if (Texturing)
+
+
+	if (Textures.size()>0)
 		SetTexture(commandlist, SrvDescriptorHeap);
 	UpdateConstBuffer(commandlist);
 
 	Mat.UpdateConstantBuffer(commandlist);
 
+	//이후 그린다.
+
 	Mesh.Render(commandlist);
 
 }
 
-void CSphereObject::Collision(list<CGameObject*>* collist, float DeltaTime)
+//충돌기. 충돌검출과 충돌해소를 맡는다.
+void BulletCube::Collision(list<CGameObject*>* collist, float DeltaTime)
 {
+	CollisionList = collist;
+	//충돌리스트의 모든 요소와 충돌검사를 실시한다.
+	for (auto i = CollisionList->begin(); i != CollisionList->end(); i++)
+	{
+		
+		if (*i != this && *i!=Master && (*i)->pp!=NULL) // pp가 NULL이 아니면 질점 오브젝트이다.
+		{
+
+			bool test = pp->CollisionTest(*(*i)->pp, Lookvector, Rightvector, GetUpvector(), (*i)->Lookvector, (*i)->Rightvector, (*i)->GetUpvector());
+
+			if (test)//충돌했으면 pp의 경우는 그냥 데미지를 주고 자신을 없애면 됨. 
+			{
+				(*i)->ToDamage(gamedata.Damage);
+							
+				XMFLOAT3 cn;
+				//고정된 물체가 아니면
+				if ((*i)->staticobject == false)
+				{
+					//상대속도 방향을 구한다. A-B
+					cn = Float3Add(pp->GetPosition(), (*(*i)->pp).GetPosition(), false);
+					cn = Float3Normalize(cn);
+
+
+
+				}
+				else//고정된 물체면 충돌한 평면의 노멀방향으로 cn을 설정할것.
+				{
+
+				}
+
+				//충돌후 속도를 계산함.
+				pp->ResolveVelocity(*(*i)->pp, cn, DeltaTime, false);
+				//겹치는 부분을 제거할필요가 없는게 투사체는 어처피 사라지니까.
+				DelObj = true;
+				
+			}
+		}
+	}
 }

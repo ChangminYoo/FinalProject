@@ -55,7 +55,7 @@ cbuffer ObjectData : register(b0)
 	float4x4 gWorld; 
 	float Scale;
 	float SpecularParamater;
-	bool isAnimation;
+	int isAnimation;
 };
 
 cbuffer JointArr : register(b1)//조인트들의 배열. 현재는 65개가 최대 조인트
@@ -118,7 +118,7 @@ VertexOut VS(VertexIn vin)
 
 	VertexOut vout;
 
-	if (isAnimation)//애니메이션 오브젝트일때만 계산함.
+	if (isAnimation==1)//애니메이션 오브젝트일때만 계산함.
 	{
 		VertexIn tempVert = vin;
 		tempVert.PosL = float3(0, 0, 0);
@@ -165,6 +165,7 @@ VertexOut VS(VertexIn vin)
 		vin.PosL = tempVert.PosL*Scale;
 		//여기까지가 애니메이션 처리 완료
 	}
+	
 	//---------------------여기서 부터 시작 --------------------------
 	float4 world;
 

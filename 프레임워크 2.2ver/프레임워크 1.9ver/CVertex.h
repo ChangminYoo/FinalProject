@@ -25,12 +25,12 @@ public:
 
 
 	CVertex(void);
-	CVertex(XMFLOAT3 v, XMFLOAT2 tex)
+	CVertex(XMFLOAT3 v)
 	{
 		
 		V = v;
 		N = XMFLOAT4(0, 0, 0, 1);
-		Tex = tex;
+		
 	}
 	~CVertex(void);
 

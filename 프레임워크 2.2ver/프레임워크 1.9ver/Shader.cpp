@@ -201,6 +201,8 @@ void Shader::CreateShader(ID3D12Device * Device, ID3D12RootSignature * GraphicsR
 	if (d3dPipelineStateDesc.InputLayout.pInputElementDescs) delete[]
 		d3dPipelineStateDesc.InputLayout.pInputElementDescs;
 
+
+
 }
 
 void Shader::SetShader(ID3D12GraphicsCommandList* commandlist,bool isBlend)
@@ -224,15 +226,16 @@ void Shader::Render(ID3D12GraphicsCommandList * CommandList, const GameTimer& gt
 			//블랜딩용 PSO 연결
 			SetShader(CommandList, true);
 			//블랜딩용 PSO로 그림
-			(*b)->Render(CommandList,gt);
+			(*b)->Render(CommandList, gt);
 			//다시 원상태 PSO로 연결
 			SetShader(CommandList, false);
 		}
 		else//블랜딩 안씀
-			(*b)->Render(CommandList,gt);
+				(*b)->Render(CommandList, gt);
 	}
-
-	for (auto b = StaticObject->cbegin(); b != StaticObject->cend(); b++)
+	
+	//투사체또한 그린다.
+	for (auto b = BulletObject->cbegin(); b != BulletObject->cend(); b++)
 	{
 		if ((*b)->Blending)
 		{
@@ -246,7 +249,6 @@ void Shader::Render(ID3D12GraphicsCommandList * CommandList, const GameTimer& gt
 		else//블랜딩 안씀
 			(*b)->Render(CommandList, gt);
 	}
-
 
 }
 

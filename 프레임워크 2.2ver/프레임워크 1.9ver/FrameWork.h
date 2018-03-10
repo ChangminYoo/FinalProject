@@ -67,9 +67,7 @@ protected:
 	int mClientWidth = 800;
 	int mClientHeight = 600;
 
-	RECT rc;
-	POINT p1, p2;
-
+	
 	
 	Scene* scene=NULL;//æ¿≈¨∑°Ω∫
 

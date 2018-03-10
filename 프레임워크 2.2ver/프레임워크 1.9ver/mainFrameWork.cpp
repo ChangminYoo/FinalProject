@@ -53,7 +53,17 @@ bool MainFrameWork::Initialize()
 //중요한점은 충돌해소후에 반드시! UpdatePPosCenterPos함수를 호출해서 PP의 중점으로 게임오브젝트의 중점을 갱신해야한다.
 void MainFrameWork::CollisionSystem(const GameTimer& gt)
 {
+	//반드시 투사체가 가장먼저 상대를 검사한다.
+	for (auto i = scene->BulletObject.begin(); i != scene->BulletObject.end(); i++)
+	{
+		//FindCollisionObject 함수를 나중에 만들어야함. 현재는 그냥 DynamicObject를 준다.
+		//해당 객체가 충돌처리 검사를 할 목록을 저장함.
+		//이 목록을 가지고 충돌검사를 하도록함.
 
+		//투사체끼리는 검사 X 투사체는 반드시 다이나믹오브젝트 들을 검사해야함.
+		(*i)->Collision(&scene->DynamicObject, gt.DeltaTime());
+
+	}
 
 	//고정된 객체를 제외한 모든 오브젝트를 충돌검사를 하도록 함.
 	for (auto i = scene->DynamicObject.begin(); i != scene->DynamicObject.end(); i++)
@@ -76,7 +86,7 @@ void MainFrameWork::GravitySystem(const GameTimer & gt)
 {
 	GeneratorGravity gg;
 	gg.SetGravityAccel(XMFLOAT3(0, -100, 0));
-	//고정된 물체를 제외한 모든오브젝트에 중력을 가한다.
+	//고정된 물체를 제외한 모든오브젝트에 중력을 가한다. 단 투사체는 제외한다.
 	for (auto i = scene->DynamicObject.begin(); i != scene->DynamicObject.end(); i++)
 	{
 		
@@ -107,6 +117,13 @@ void MainFrameWork::AfterGravitySystem(const GameTimer & gt)
 			(*i)->pp->SetVelocity(v);
 			(*i)->AirBone = false;
 		}
+	}
+
+	//투사체는 y가 0보다 작으면 제거된다.
+	for (auto i = scene->BulletObject.begin(); i != scene->BulletObject.end(); i++)
+	{
+		if ((*i)->CenterPos.y <= 0)
+			(*i)->DelObj = true;
 	}
 }
 
