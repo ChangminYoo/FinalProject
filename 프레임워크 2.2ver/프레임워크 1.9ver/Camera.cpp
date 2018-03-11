@@ -69,7 +69,7 @@ void CCamera::UpdateConstantBuffer(ID3D12GraphicsCommandList* commandlist)
 
 	ConstBuffer->CopyData(0, tempCamData);
 
-	commandlist->SetGraphicsRootConstantBufferView(3, ConstBuffer->Resource()->GetGPUVirtualAddress());//월드행렬연결
+	commandlist->SetGraphicsRootConstantBufferView(4, ConstBuffer->Resource()->GetGPUVirtualAddress());//월드행렬연결
 
 }
 

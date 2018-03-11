@@ -19,8 +19,8 @@ public:
 	D3D12_SHADER_BYTECODE CompileShaderFromFile(WCHAR *shaderfile, LPCSTR SName, LPCSTR Profile,ID3DBlob** blob);//실제 쉐이더생성함수
 
 	virtual void CreateShader(ID3D12Device * Device, ID3D12RootSignature * GraphicsRootSignature, WCHAR * vsfile, LPCSTR vsname, LPCSTR vsprofile, WCHAR * psfile, LPCSTR psname, LPCSTR psprofile);//PSO생성
-
 	virtual void SetShader(ID3D12GraphicsCommandList* commandlist,bool isBlend=false);
+	virtual void SetSkyShader(ID3D12GraphicsCommandList* commandlist);
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList,const GameTimer& gt);
 protected:
 	ComPtr<ID3DBlob> VertexShader = nullptr;
@@ -30,11 +30,11 @@ protected:
 
 	ComPtr<ID3D12PipelineState> PSO = nullptr;
 	ComPtr<ID3D12PipelineState> BlendPSO = nullptr;
-
+	ComPtr<ID3D12PipelineState> SkyPSO = nullptr;
 public:
 	list<CGameObject*>* DynamicObject=NULL;//애니메이션이 되는 오브젝트들이 여기에 모임.Scene클래스가 가진거를 공유만.
 	list<CGameObject*>* BulletObject = NULL;//투사체들이 여기에 모임.Scene클래스가 가진거를 공유만.
 
-
+	list<CGameObject*>* LandObject = NULL;
 };
 

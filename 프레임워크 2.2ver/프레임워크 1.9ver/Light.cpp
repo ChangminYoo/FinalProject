@@ -29,6 +29,6 @@ void CLight::UpdateConstantBuffer(ID3D12GraphicsCommandList* commandlist)
 	LData.AmbientLight = { 0.238f, 0.238f, 0.238f, 1.0f };
 
 	ConstBuffer->CopyData(0, LData);
-	commandlist->SetGraphicsRootConstantBufferView(4, ConstBuffer->Resource()->GetGPUVirtualAddress());
+	commandlist->SetGraphicsRootConstantBufferView(5, ConstBuffer->Resource()->GetGPUVirtualAddress());
 
 }

@@ -98,10 +98,8 @@ void CGameObject::UpdateLookVector()
 void CGameObject::SetAnimation(int n_Ani)
 {
 	if (n_Ani != n_Animation)
-	{
-		
+	{		
 		currAnimTime = 0;
-
 	}
 	n_Animation = n_Ani;
 	
@@ -146,7 +144,7 @@ void CGameObject::UpdateConstBuffer(ID3D12GraphicsCommandList * commandlist)
 	//상수버퍼 업데이트
 	ConstBuffer->CopyData(0, ObjData);
 
-	commandlist->SetGraphicsRootConstantBufferView(1, ConstBuffer->Resource()->GetGPUVirtualAddress());//월드행렬연결
+	commandlist->SetGraphicsRootConstantBufferView(2, ConstBuffer->Resource()->GetGPUVirtualAddress());//월드행렬연결
 }
 
 CCubeManObject::CCubeManObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, XMFLOAT4 cp) : CGameObject(m_Device,commandlist,cp)
@@ -164,7 +162,7 @@ CCubeManObject::CCubeManObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 		Mesh.Index = NULL;
 		Mesh.SubResource = NULL;
 	
-		LoadTexture(m_Device, commandlist,this, Textures,SrvDescriptorHeap,"ZombieTex", L"textures/human/Male White Wizard 05 Red.dds");
+		LoadTexture(m_Device, commandlist,this, Textures,SrvDescriptorHeap,"ZombieTex", L"textures/human/Male White Wizard 05 Red.dds",false);
 		SetMesh(m_Device, commandlist);
 		SetMaterial(m_Device, commandlist);
 		CreateMesh = true;
@@ -268,7 +266,7 @@ void CCubeManObject::Render(ID3D12GraphicsCommandList * commandlist, const GameT
 	Mat.UpdateConstantBuffer(commandlist);
 
 	//틱함수에서 업데이트한 애니메이션된 조인트를 연결함.
-	commandlist->SetGraphicsRootConstantBufferView(2, jarr->Resource()->GetGPUVirtualAddress());
+	commandlist->SetGraphicsRootConstantBufferView(3, jarr->Resource()->GetGPUVirtualAddress());
 	//이후 그린다.
 
 	Mesh.Render(commandlist);
@@ -330,9 +328,9 @@ void CCubeManObject::Collision(list<CGameObject*>* collist, float DeltaTime)
 void CCubeManObject::EndAnimation(int nAni)
 {
 	
-	if (nAni == 2 )//공격하기였으면
+	if (nAni == (int)Ani_State::Attack )//공격하기였으면
 	{
-		SetAnimation(0);//대기상태로둔다.
+		SetAnimation((int)Ani_State::Idle);//대기상태로둔다.
 
 	}
 	
@@ -355,7 +353,7 @@ CZombieObject::CZombieObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList 
 		Mesh.Index = NULL;
 		Mesh.SubResource = NULL;
 
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "ZombieTex", L"textures/human/Male White Wizard 05 Red.dds");
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "ZombieTex", L"textures/human/Male White Wizard 05 Red.dds", false);
 		SetMesh(m_Device, commandlist);
 		SetMaterial(m_Device, commandlist);
 		CreateMesh = true;
@@ -459,7 +457,7 @@ void CZombieObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTi
 	Mat.UpdateConstantBuffer(commandlist);
 
 	//틱함수에서 업데이트한 애니메이션된 조인트를 연결함.
-	commandlist->SetGraphicsRootConstantBufferView(2, jarr->Resource()->GetGPUVirtualAddress());
+	commandlist->SetGraphicsRootConstantBufferView(3, jarr->Resource()->GetGPUVirtualAddress());
 	//이후 그린다.
 
 	Mesh.Render(commandlist);
@@ -521,9 +519,9 @@ void CZombieObject::Collision(list<CGameObject*>* collist, float DeltaTime)
 void CZombieObject::EndAnimation(int nAni)
 {
 
-	if (nAni == 2)//공격하기였으면
+	if (nAni == (int)Ani_State::Attack)//공격하기였으면
 	{
-		SetAnimation(0);//대기상태로둔다.
+		SetAnimation((int)Ani_State::Idle);//대기상태로둔다.
 
 	}
 
@@ -535,13 +533,17 @@ void SetTexture(ID3D12GraphicsCommandList * commandlist, ComPtr<ID3D12Descriptor
 	ID3D12DescriptorHeap* descriptorHeaps[] = { SrvDescriptorHeap.Get() };
 	commandlist->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
 
-	CD3DX12_GPU_DESCRIPTOR_HANDLE tex(SrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
-	tex.Offset(0, CbvSrvDescriptorSize);
+	CD3DX12_GPU_DESCRIPTOR_HANDLE Skytex(SrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
+	Skytex.Offset(0, CbvSrvDescriptorSize);
 
-	commandlist->SetGraphicsRootDescriptorTable(0, tex);
+	commandlist->SetGraphicsRootDescriptorTable(0, Skytex);
+
+
+	commandlist->SetGraphicsRootDescriptorTable(1, SrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
+
 }
 
-void LoadTexture(ID3D12Device* device, ID3D12GraphicsCommandList* commandlist,CGameObject* obj, unordered_map<string, unique_ptr<CTexture>>& Textures, ComPtr<ID3D12DescriptorHeap>& SrvDescriptorHeap, string texturename, wstring FileName)
+void LoadTexture(ID3D12Device* device, ID3D12GraphicsCommandList* commandlist,CGameObject* obj, unordered_map<string, unique_ptr<CTexture>>& Textures, ComPtr<ID3D12DescriptorHeap>& SrvDescriptorHeap, string texturename, wstring FileName, bool isCubeMap)
 {
 	
 	auto Tex = make_unique<CTexture>();
@@ -555,6 +557,7 @@ void LoadTexture(ID3D12Device* device, ID3D12GraphicsCommandList* commandlist,CG
 	Textures[Tex->Name] = move(Tex);
 
 
+	//디스크립터 힙 생성
 	D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc = {};
 	srvHeapDesc.NumDescriptors = 1;
 	srvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
@@ -568,11 +571,23 @@ void LoadTexture(ID3D12Device* device, ID3D12GraphicsCommandList* commandlist,CG
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
 	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	srvDesc.Format = Texs->GetDesc().Format;
-	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-	srvDesc.Texture2D.MostDetailedMip = 0;
-	srvDesc.Texture2D.MipLevels = Texs->GetDesc().MipLevels;
-	srvDesc.Texture2D.ResourceMinLODClamp = 0.0f;
+	if (isCubeMap)
+	{
+		srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURECUBE;
+		srvDesc.TextureCube.MostDetailedMip = 0;
+		srvDesc.TextureCube.MipLevels = Texs->GetDesc().MipLevels;
+		srvDesc.TextureCube.ResourceMinLODClamp = 0.0f;
+		srvDesc.Format = Texs->GetDesc().Format;
+		}
+	else
+	{
+		srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+		srvDesc.Texture2D.MostDetailedMip = 0;
+		srvDesc.Texture2D.MipLevels = Texs->GetDesc().MipLevels;
+		srvDesc.Texture2D.ResourceMinLODClamp = 0.0f;
+		srvDesc.Format = Texs->GetDesc().Format;
+	}
+
 
 	device->CreateShaderResourceView(Texs.Get(), &srvDesc, hDescriptor);
 }
@@ -585,16 +600,13 @@ void LoadTexture(ID3D12Device* device, ID3D12GraphicsCommandList* commandlist,CG
 BulletCube::BulletCube(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist,CGameObject* master,XMFLOAT4& ori,CGameObject* lockon, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, cp)
 {
 
-	
-	//조인트가 저장될 배열.
-
 	if (CreateMesh == false)
 	{
 
 		Mesh.Index = NULL;
 		Mesh.SubResource = NULL;
 
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "ZombieTex", L"textures/human/Male White Wizard 05 Red.dds");
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "ZombieTex", L"textures/human/Male White Wizard 05 Red.dds", false);
 		SetMesh(m_Device, commandlist);
 		SetMaterial(m_Device, commandlist);
 		CreateMesh = true;
@@ -611,7 +623,7 @@ BulletCube::BulletCube(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 	UpdateLookVector();
 
 	ObjData.isAnimation = 0;
-	ObjData.Scale = 0.025;
+	ObjData.Scale = 1.0;
 	ObjData.SpecularParamater = 0.0f;//스페큘러를 낮게준다.
 	
 	//게임관련 데이터들
@@ -646,7 +658,6 @@ void BulletCube::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList* com
 {
 
 	//모델 로드
-		//여기에 FBX로드를 해주세요!
 	LoadMD5Model(L".\\플레이어메쉬들\\Cube.MD5MESH", &Mesh, 0, 1);
 	//
 	Mesh.SetNormal(false);
@@ -684,8 +695,6 @@ void BulletCube::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer
 {
 	//게임오브젝트의 렌더링은 간단하다. 
 	//텍스처를 연결하고, 월드행렬을 연결한다.
-
-
 
 	if (Textures.size()>0)
 		SetTexture(commandlist, SrvDescriptorHeap);
@@ -740,4 +749,92 @@ void BulletCube::Collision(list<CGameObject*>* collist, float DeltaTime)
 			}
 		}
 	}
+}
+
+
+//---------------------- 스태틱 오브젝트 -----------------------------//
+
+SphereObject::SphereObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, cp)
+{
+
+	if (CreateMesh == false)
+	{
+
+		Mesh.Index = NULL;
+		Mesh.SubResource = NULL;
+
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "MapTex", L"textures/snowcube1024.dds",true);
+		SetMesh(m_Device, commandlist);
+		SetMaterial(m_Device, commandlist);
+		CreateMesh = true;
+
+	}
+
+	//게임오브젝트마다 룩벡터와 라이트벡터가 다르므로 초기 오프셋 설정을 해준다.
+	//실제 룩벡터 등은 모두 UpdateLookVector에서 처리된다(라이트벡터도) 따라서 Tick함수에서 반드시 호출해야한다.
+	OffLookvector = XMFLOAT3(0, 0, 1);
+	OffRightvector = XMFLOAT3(1, 0, 0);
+
+	UpdateLookVector();
+
+	ObjData.isAnimation = 0;
+	ObjData.Scale = 1.0f;
+	ObjData.SpecularParamater = 0.0f;//스페큘러를 낮게준다.
+
+	//게임관련 데이터들
+	gamedata.MAXHP = 100000;
+	gamedata.HP = 100000;
+	gamedata.Damage = 0;
+	gamedata.GodMode = true;
+	gamedata.Speed = 0;
+
+
+	//광선충돌 검사용 육면체
+	XMFLOAT3 rx(1, 0, 0);
+	XMFLOAT3 ry(0, 1, 0);
+	XMFLOAT3 rz(0, 0, 1);
+	rco.SetPlane(rx, ry, rz);
+
+	//질점오브젝트 사용시 필요한 데이터들 설정
+	pp = new PhysicsPoint();
+	pp->SetPosition(CenterPos);//이 값은 항상 갱신되야한다.
+	pp->SetHalfBox(0, 0, 0);//충돌 박스의 x,y,z 크기
+	pp->SetDamping(1);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
+	pp->SetBounce(false);//튕기지 않는다.
+	pp->SetVelocity(Lookvector.x*gamedata.Speed, Lookvector.y*gamedata.Speed, Lookvector.z*gamedata.Speed);//룩벡터로 날아감
+
+}
+
+
+void SphereObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
+{
+	//모델 로드
+	LoadMD5Model(L".\\플레이어메쉬들\\sphere.MD5MESH", &Mesh, 0, 1024);
+	//
+	Mesh.SetNormal(false);
+	Mesh.CreateVertexBuffer(m_Device, commandlist);
+	Mesh.CreateIndexBuffer(m_Device, commandlist);
+
+}
+
+void SphereObject::Tick(const GameTimer & gt)
+{
+}
+
+void SphereObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer & gt)
+{
+	//게임오브젝트의 렌더링은 간단하다. 
+	//텍스처를 연결하고, 월드행렬을 연결한다.
+
+	if (Textures.size()>0)
+		SetTexture(commandlist, SrvDescriptorHeap);
+	UpdateConstBuffer(commandlist);
+
+	//이후 그린다.
+
+	Mesh.Render(commandlist);
+}
+
+void SphereObject::Collision(list<CGameObject*>* collist, float DeltaTime)
+{
 }

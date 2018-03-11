@@ -5,6 +5,16 @@
 #include"CTexture.h"
 #include"CMaterial.h"
 #include"MMPE\MyMiniPysicsEngine.h"
+
+enum class Ani_State : int
+{
+	Idle = 0,
+	Run,
+	Attack,
+	Victory,
+	Crying
+};
+
 struct ObjectData
 {
 	XMFLOAT4X4 WorldMatrix;
@@ -14,7 +24,9 @@ struct ObjectData
 	//XMFLOAT4 CustomData1;
 	//XMFLOAT4 CustomData2;
 };
-struct GameData
+
+
+struct GameData //게임캐릭터의 정보 흔히 알고있는 체력, 데미지, 스피드가 있다.
 {
 	float MAXHP=0;
 	float HP=0;
@@ -32,10 +44,10 @@ public:
 	ObjectData ObjData;//월드행렬과 기타 데이터
 	PhysicsPoint* pp = NULL;//질점 오브젝트. 오브젝트는 질점오브젝트와 강체오브젝트로 나뉘며 하나만 사용한다.
 	bool staticobject = false;//고정된 건물같은 객체인가?
+	
 	list<CGameObject*>* CollisionList=NULL;
 
 protected:
-
 	
 	UploadBuffer<ObjectData>* ConstBuffer=NULL;	//월드행렬과 커스텀데이터를 저장하기위한 버퍼
 
@@ -95,7 +107,7 @@ public:
 	
 };
 void SetTexture(ID3D12GraphicsCommandList * commandlist, ComPtr<ID3D12DescriptorHeap>& SrvDescriptorHeap);
-void LoadTexture(ID3D12Device* device, ID3D12GraphicsCommandList* commandlist, CGameObject* obj, unordered_map<string, unique_ptr<CTexture>>& Textures, ComPtr<ID3D12DescriptorHeap>& SrvDescriptorHeap, string texturename, wstring FileName);
+void LoadTexture(ID3D12Device* device, ID3D12GraphicsCommandList* commandlist, CGameObject* obj, unordered_map<string, unique_ptr<CTexture>>& Textures, ComPtr<ID3D12DescriptorHeap>& SrvDescriptorHeap, string texturename, wstring FileName, bool isCubeMap);
 
 //상속받은 게임오브젝트는 다음과 같은것을 처리할것.
 //1. 생성자
@@ -150,6 +162,7 @@ public:
 	virtual void EndAnimation(int nAni);
 };
 
+
 //---------------------- 투 사 체 -----------------------------//
 
 class BulletCube : public CGameObject
@@ -170,6 +183,30 @@ public:
 public:
 	virtual void SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist);//셋메시는 메시를 최종적으로 생성한다. 즉 메시를구성하는 정점과 삼각형을구성하는인덱스버퍼생성
 	virtual void SetMaterial(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist); //머테리얼 생성
+	virtual void Tick(const GameTimer& gt);
+	virtual void Render(ID3D12GraphicsCommandList* commandlist, const GameTimer& gt);
+	virtual void Collision(list<CGameObject*>* collist, float DeltaTime);
+
+};
+
+
+
+//---------------------- 스태틱 오브젝트 -----------------------------//
+
+class SphereObject : public CGameObject
+{
+public:
+	SphereObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
+
+public:
+	static bool CreateMesh;//최초로 false며 메쉬를 만든후 true가된다.
+	static unordered_map<string, unique_ptr<CTexture>> Textures;//텍스처들을 저장함
+	static CMesh Mesh;//오로지 한번만 만들어짐
+	static ComPtr<ID3D12DescriptorHeap> SrvDescriptorHeap;//텍스처 용 힙
+
+	
+public:
+	virtual void SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist);//셋메시는 메시를 최종적으로 생성한다. 즉 메시를구성하는 정점과 삼각형을구성하는인덱스버퍼생성
 	virtual void Tick(const GameTimer& gt);
 	virtual void Render(ID3D12GraphicsCommandList* commandlist, const GameTimer& gt);
 	virtual void Collision(list<CGameObject*>* collist, float DeltaTime);

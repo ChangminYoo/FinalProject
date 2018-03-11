@@ -54,6 +54,12 @@ Scene::~Scene()
 		delete BulletObject.front();
 		BulletObject.pop_front();
 	}
+	while (LandObject.size())
+	{
+		delete LandObject.front();
+		LandObject.pop_front();
+	}
+
 
 	if (Player != NULL)
 		delete Player;
@@ -64,31 +70,36 @@ Scene::~Scene()
 
 void Scene::CreateRootSignature()
 {
+	CD3DX12_DESCRIPTOR_RANGE SkytexTable;
+	SkytexTable.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 0);
+
+
 	CD3DX12_DESCRIPTOR_RANGE texTable;
-	texTable.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0);
+	texTable.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 1, 0);
 
 
 	//연결될 리소스들 목록. 현재는 큐브의 월드변환행렬 하나만 넣을것.
-	CD3DX12_ROOT_PARAMETER RootParameter[6];
+	CD3DX12_ROOT_PARAMETER RootParameter[7];
 
 	//파라메터의 종류는 3가진데  디스크립터쓸거임
 
 
 	//파라메터목록에 해당 목록을 인자로 넣으면서 초기화함
-	RootParameter[0].InitAsDescriptorTable(1, &texTable, D3D12_SHADER_VISIBILITY_PIXEL);
+	RootParameter[0].InitAsDescriptorTable(1, &SkytexTable, D3D12_SHADER_VISIBILITY_PIXEL);
+	RootParameter[1].InitAsDescriptorTable(1, &texTable, D3D12_SHADER_VISIBILITY_PIXEL);
 
-	RootParameter[1].InitAsConstantBufferView(0); //obj     //register b0
-	RootParameter[2].InitAsConstantBufferView(1); //joint   //b1
-	RootParameter[3].InitAsConstantBufferView(2); //camera  //b2
-	RootParameter[4].InitAsConstantBufferView(3); //light	//b3
-	RootParameter[5].InitAsConstantBufferView(4); //material	//b4
+	RootParameter[2].InitAsConstantBufferView(0); //obj     //register b0
+	RootParameter[3].InitAsConstantBufferView(1); //joint   //b1
+	RootParameter[4].InitAsConstantBufferView(2); //camera  //b2
+	RootParameter[5].InitAsConstantBufferView(3); //light	//b3
+	RootParameter[6].InitAsConstantBufferView(4); //material	//b4
 
 
 	auto staticSamplers = GetStaticSamplers();
 
 	// 루트시그니처는 루트파라메터의 배열이다.
 	//루트시그니처의 정보구조체 생성
-	CD3DX12_ROOT_SIGNATURE_DESC rootSigDesc(6, RootParameter, (UINT)staticSamplers.size(), staticSamplers.data(),
+	CD3DX12_ROOT_SIGNATURE_DESC rootSigDesc(7, RootParameter, (UINT)staticSamplers.size(), staticSamplers.data(),
 		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
 
 
@@ -120,10 +131,11 @@ void Scene::CreateShaderObject()
 	for (int i = 0; i < nShader; i++)
 	{
 		Shaders[i] = new Shader;
-		Shaders[i]->CreateShader(device, rootsg.Get(), L"ShaderFile.hlsl", "VS", "vs_5_0", L"ShaderFile.hlsl", "PS", "ps_5_0");
+		Shaders[i]->CreateShader(device, rootsg.Get(), L"ShaderFile.hlsl", "VS", "vs_5_1", L"ShaderFile.hlsl", "PS", "ps_5_1");
 		Shaders[i]->DynamicObject = &DynamicObject;
 		Shaders[i]->BulletObject = &BulletObject;
 
+		Shaders[i]->LandObject = &LandObject;
 	}
 	
 }
@@ -140,11 +152,16 @@ void Scene::CreateGameObject()
 	delete resource;
 	resource = new BulletCube(device, commandlist,NULL,XMFLOAT4(0,0,0,1),NULL, XMFLOAT4(0, -0, 0, 0));
 	delete resource;
+	resource = new SphereObject(device, commandlist, XMFLOAT4(0, 0, 0, 0));
+	delete resource;
 
 	//--------------------------------------------------//
 
 	DynamicObject.push_back(new CCubeManObject(device, commandlist,XMFLOAT4(0,-0,0,0)));
 	DynamicObject.push_back(new CCubeManObject(device, commandlist, XMFLOAT4(0, 20, 0, 0)));
+	
+	LandObject.push_back(new SphereObject(device, commandlist, XMFLOAT4(30, 0, 0, 0)));
+
 
 //	DynamicObject.push_back(new CCubeManObject(device, commandlist, XMFLOAT4(40,60, 0, 0)));
 	//플레이어의 오브젝트 설정. 이건 나중에 바꿔야함.
@@ -227,6 +244,9 @@ void Scene::Tick(const GameTimer & gt)
 	//불렛
 	for (auto b = BulletObject.begin(); b != BulletObject.end(); b++)
 		(*b)->Tick(gt);
+
+
+
 
 	//카메라 리 로케이트 
 	Player->PlayerCameraReLocate();

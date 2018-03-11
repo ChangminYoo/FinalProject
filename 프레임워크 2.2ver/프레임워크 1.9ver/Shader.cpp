@@ -197,10 +197,19 @@ void Shader::CreateShader(ID3D12Device * Device, ID3D12RootSignature * GraphicsR
 	Device->CreateGraphicsPipelineState(&d3dPipelineStateDesc,
 		IID_PPV_ARGS(&BlendPSO));//블랜드용 PSO생성
 
+				
+								 
+	//SKY PSO
+	D3D12_GRAPHICS_PIPELINE_STATE_DESC skyPsoDesc = d3dPipelineStateDesc;
+	skyPsoDesc.VS = CreateVertexShader(L"Sky.hlsl", "VS", "vs_5_1");
+	skyPsoDesc.PS = CreatePixelShader(L"Sky.hlsl", "PS", "ps_5_1");
+	skyPsoDesc.RasterizerState.CullMode = D3D12_CULL_MODE_NONE;
+	skyPsoDesc.DepthStencilState.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+	Device->CreateGraphicsPipelineState(&skyPsoDesc,IID_PPV_ARGS(&SkyPSO));
+
 
 	if (d3dPipelineStateDesc.InputLayout.pInputElementDescs) delete[]
 		d3dPipelineStateDesc.InputLayout.pInputElementDescs;
-
 
 
 }
@@ -211,6 +220,12 @@ void Shader::SetShader(ID3D12GraphicsCommandList* commandlist,bool isBlend)
 		commandlist->SetPipelineState(PSO.Get());
 	else
 		commandlist->SetPipelineState(BlendPSO.Get());
+
+}
+
+void Shader::SetSkyShader(ID3D12GraphicsCommandList * commandlist)
+{
+	commandlist->SetPipelineState(SkyPSO.Get());
 }
 
 void Shader::Render(ID3D12GraphicsCommandList * CommandList, const GameTimer& gt)
@@ -248,6 +263,13 @@ void Shader::Render(ID3D12GraphicsCommandList * CommandList, const GameTimer& gt
 		}
 		else//블랜딩 안씀
 			(*b)->Render(CommandList, gt);
+	}
+
+	for (auto b = LandObject->cbegin(); b != LandObject->cend(); b++)
+	{
+		SetSkyShader(CommandList);
+
+		(*b)->Render(CommandList, gt);
 	}
 
 }

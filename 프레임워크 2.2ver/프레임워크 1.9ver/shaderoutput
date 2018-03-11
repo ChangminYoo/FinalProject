@@ -113,21 +113,21 @@ dcl_temps 12
 //   o1.x <- <VS return value>.Normal.x; o1.y <- <VS return value>.Normal.y; o1.z <- <VS return value>.Normal.z; 
 //   o0.x <- <VS return value>.PosH.x; o0.y <- <VS return value>.PosH.y; o0.z <- <VS return value>.PosH.z; o0.w <- <VS return value>.PosH.w
 //
-#line 121 "D:\Dx12?제\D3D12Studying?는?Chapter 4 Direct3D Initialization\?레?워??2.3ver 공격기능추?\??워??1.9ver\ShaderFile.hlsl"
+#line 33 "C:\Users\min94\Desktop\?레?워??2.2ver\?레?워??1.9ver\ShaderFile.hlsl"
 ieq r0.x, cb0[4].z, l(1)
 if_nz r0.x
 
-#line 123
+#line 35
   mov r0.xyzw, v6.xyzw  // r0.x <- tempVert.WeightPos1.x; r0.y <- tempVert.WeightPos1.y; r0.z <- tempVert.WeightPos1.z; r0.w <- tempVert.WeightPos1.w
   mov r1.xyzw, v7.xyzw  // r1.x <- tempVert.WeightPos2.x; r1.y <- tempVert.WeightPos2.y; r1.z <- tempVert.WeightPos2.z; r1.w <- tempVert.WeightPos2.w
   mov r2.xyzw, v8.xyzw  // r2.x <- tempVert.WeightPos3.x; r2.y <- tempVert.WeightPos3.y; r2.z <- tempVert.WeightPos3.z; r2.w <- tempVert.WeightPos3.w
   mov r3.xyzw, v9.xyzw  // r3.x <- tempVert.WeightPos4.x; r3.y <- tempVert.WeightPos4.y; r3.z <- tempVert.WeightPos4.z; r3.w <- tempVert.WeightPos4.w
   mov r4.x, v4.x  // r4.x <- tempVert.WeightCount
 
-#line 124
+#line 36
   itof r4.yzw, l(0, 0, 0, 0)  // r4.y <- tempVert.PosL.x; r4.z <- tempVert.PosL.y; r4.w <- tempVert.PosL.z
 
-#line 126
+#line 38
   mov r5.x, l(0)  // r5.x <- j
   mov r5.yzw, r4.yyzw  // r5.y <- tempVert.PosL.x; r5.z <- tempVert.PosL.y; r5.w <- tempVert.PosL.z
   mov r6.x, r5.x  // r6.x <- j
@@ -135,74 +135,74 @@ if_nz r0.x
     ilt r6.y, r6.x, r4.x
     breakc_z r6.y
 
-#line 130
+#line 42
     dp4 r6.y, v5.xyzw, icb[r6.x + 0].xyzw
     ftou r6.y, r6.y
     imul null, r6.y, r6.y, l(2)
     mov r7.xyzw, cb1[r6.y + 0].xyzw  // r7.x <- tempJoint.orientation.x; r7.y <- tempJoint.orientation.y; r7.z <- tempJoint.orientation.z; r7.w <- tempJoint.orientation.w
     mov r6.yzw, cb1[r6.y + 1].yyzw  // r6.y <- tempJoint.pos.x; r6.z <- tempJoint.pos.y; r6.w <- tempJoint.pos.z
 
-#line 131
+#line 43
     mov r7.xyzw, r7.xyzw  // r7.x <- tempJointOrientation.x; r7.y <- tempJointOrientation.y; r7.z <- tempJointOrientation.z; r7.w <- tempJointOrientation.w
 
-#line 133
+#line 45
     switch r6.x
 
-#line 135
+#line 47
       case l(0)
 
-#line 136
+#line 48
       mov r8.xyzw, r0.xyzw  // r8.x <- tempWeightPos.x; r8.y <- tempWeightPos.y; r8.z <- tempWeightPos.z; r8.w <- tempWeightPos.w
 
-#line 137
+#line 49
       break 
 
-#line 138
+#line 50
       case l(1)
 
-#line 139
+#line 51
       mov r8.xyzw, r1.xyzw  // r8.x <- tempWeightPos.x; r8.y <- tempWeightPos.y; r8.z <- tempWeightPos.z; r8.w <- tempWeightPos.w
 
-#line 140
+#line 52
       break 
 
-#line 141
+#line 53
       case l(2)
 
-#line 142
+#line 54
       mov r8.xyzw, r2.xyzw  // r8.x <- tempWeightPos.x; r8.y <- tempWeightPos.y; r8.z <- tempWeightPos.z; r8.w <- tempWeightPos.w
 
-#line 143
+#line 55
       break 
 
-#line 144
+#line 56
       case l(3)
 
-#line 145
+#line 57
       mov r8.xyzw, r3.xyzw  // r8.x <- tempWeightPos.x; r8.y <- tempWeightPos.y; r8.z <- tempWeightPos.z; r8.w <- tempWeightPos.w
 
-#line 146
+#line 58
       break 
 
-#line 148
+#line 60
       default 
       break 
     endswitch   // r8.x <- tempWeightPos.x; r8.y <- tempWeightPos.y; r8.z <- tempWeightPos.z; r8.w <- tempWeightPos.w
 
-#line 149
+#line 61
     mov r9.x, -r7.x  // r9.x <- tempJointOrientationConjugate.x
     mov r9.y, -r7.y  // r9.y <- tempJointOrientationConjugate.y
     mov r9.z, -r7.z  // r9.z <- tempJointOrientationConjugate.z
     mov r9.w, r7.w  // r9.w <- tempJointOrientationConjugate.w
 
-#line 153
+#line 65
     nop 
     nop 
     mov r7.xyzw, r7.xyzw
     itof r10.x, l(0)
     mov r8.xyz, r8.xyzx
 
-#line 19
+#line 21 "C:\Users\min94\Desktop\프레임워크 2.2ver\프레임워크 1.9ver\common.hlsl"
     mul r10.y, r7.x, r10.x
     mul r10.z, r7.w, r8.x
     add r10.y, r10.z, r10.y
@@ -212,7 +212,7 @@ if_nz r0.x
     mov r10.z, -r10.z
     add r11.x, r10.z, r10.y  // r11.x <- q.x
 
-#line 20
+#line 22
     mul r10.y, r7.y, r10.x
     mul r10.z, r7.z, r8.x
     mov r10.z, -r10.z
@@ -222,7 +222,7 @@ if_nz r0.x
     mul r10.z, r7.x, r8.z
     add r11.y, r10.z, r10.y  // r11.y <- q.y
 
-#line 21
+#line 23
     mul r10.y, r7.z, r10.x
     mul r10.z, r7.y, r8.x
     add r10.y, r10.z, r10.y
@@ -232,7 +232,7 @@ if_nz r0.x
     mul r10.z, r7.w, r8.z
     add r11.z, r10.z, r10.y  // r11.z <- q.z
 
-#line 22
+#line 24
     mul r7.w, r7.w, r10.x
     mul r7.x, r7.x, r8.x
     mov r7.x, -r7.x
@@ -244,17 +244,17 @@ if_nz r0.x
     mov r7.y, -r7.y
     add r11.w, r7.y, r7.x  // r11.w <- q.w
 
-#line 25
+#line 27
     mov r11.x, r11.x  // r11.x <- <QuaternionMultiply return value>.x
     mov r11.y, r11.y  // r11.y <- <QuaternionMultiply return value>.y
     mov r11.z, r11.z  // r11.z <- <QuaternionMultiply return value>.z
     mov r11.w, r11.w  // r11.w <- <QuaternionMultiply return value>.w
 
-#line 153
+#line 65 "C:\Users\min94\Desktop\?레?워??2.2ver\?레?워??1.9ver\ShaderFile.hlsl"
     mov r11.xyzw, r11.xyzw
     mov r9.xyzw, r9.xyzw
 
-#line 19
+#line 21 "C:\Users\min94\Desktop\프레임워크 2.2ver\프레임워크 1.9ver\common.hlsl"
     mul r7.x, r11.x, r9.w
     mul r7.y, r11.w, r9.x
     add r7.x, r7.y, r7.x
@@ -264,7 +264,7 @@ if_nz r0.x
     mov r7.y, -r7.y
     add r7.x, r7.y, r7.x  // r7.x <- q.x
 
-#line 20
+#line 22
     mul r7.w, r11.y, r9.w
     mul r8.x, r11.z, r9.x
     mov r8.x, -r8.x
@@ -274,7 +274,7 @@ if_nz r0.x
     mul r8.x, r11.x, r9.z
     add r7.y, r7.w, r8.x  // r7.y <- q.y
 
-#line 21
+#line 23
     mul r7.w, r11.z, r9.w
     mul r8.x, r11.y, r9.x
     add r7.w, r7.w, r8.x
@@ -284,69 +284,72 @@ if_nz r0.x
     mul r8.x, r11.w, r9.z
     add r7.z, r7.w, r8.x  // r7.z <- q.z
 
-#line 25
+#line 27
     mov r7.x, r7.x  // r7.x <- <QuaternionMultiply return value>.x
     mov r7.y, r7.y  // r7.y <- <QuaternionMultiply return value>.y
     mov r7.z, r7.z  // r7.z <- <QuaternionMultiply return value>.z
 
-#line 153
+#line 65 "C:\Users\min94\Desktop\?레?워??2.2ver\?레?워??1.9ver\ShaderFile.hlsl"
     mov r7.xyz, r7.xyzx  // r7.x <- rotatedPoint.x; r7.y <- rotatedPoint.y; r7.z <- rotatedPoint.z
 
-#line 155
+#line 67
     mov r6.yzw, r6.yyzw  // r6.y <- tp.x; r6.z <- tp.y; r6.w <- tp.z
 
-#line 156
+#line 68
     mov r7.xyz, r7.xyzx  // r7.x <- rp.x; r7.y <- rp.y; r7.z <- rp.z
 
-#line 157
+#line 69
     mov r5.yzw, r5.yyzw  // r5.y <- tpv.x; r5.z <- tpv.y; r5.w <- tpv.z
 
-#line 160
+#line 72
     add r6.yzw, r6.yyzw, r7.xxyz
     mul r6.yzw, r8.wwww, r6.yyzw
     add r5.yzw, r5.yyzw, r6.yyzw
 
-#line 162
+#line 74
     iadd r6.x, r6.x, l(1)
   endloop 
 
-#line 165
-  mul r0.xyz, r5.yzwy, cb0[4].xxxx  // r0.x <- vin.PosL.x; r0.y <- vin.PosL.y; r0.z <- vin.PosL.z
+#line 77
+  mov r5.yzw, r5.yyzw  // r5.y <- vin.PosL.x; r5.z <- vin.PosL.y; r5.w <- vin.PosL.z
 
-#line 167
+#line 79
 else 
-  mov r0.xyz, v0.xyzx  // r0.x <- vin.PosL.x; r0.y <- vin.PosL.y; r0.z <- vin.PosL.z
+  mov r5.yzw, v0.xxyz  // r5.y <- vin.PosL.x; r5.z <- vin.PosL.y; r5.w <- vin.PosL.z
 endif 
 
-#line 172
+#line 84
+mul r0.xyz, r5.yzwy, cb0[4].xxxx  // r0.x <- vin.PosL.x; r0.y <- vin.PosL.y; r0.z <- vin.PosL.z
+
+#line 85
 itof r0.w, l(1)
 dp4 r1.x, r0.xyzw, cb0[0].xyzw  // r1.x <- vout.PosH.x
 dp4 r1.y, r0.xyzw, cb0[1].xyzw  // r1.y <- vout.PosH.y
 dp4 r1.z, r0.xyzw, cb0[2].xyzw  // r1.z <- vout.PosH.z
 dp4 r1.w, r0.xyzw, cb0[3].xyzw  // r1.w <- vout.PosH.w
 
-#line 174
+#line 87
 dp3 r0.x, v1.xyzx, cb0[0].xyzx  // r0.x <- vout.Normal.x
 dp3 r0.y, v1.xyzx, cb0[1].xyzx  // r0.y <- vout.Normal.y
 dp3 r0.z, v1.xyzx, cb0[2].xyzx  // r0.z <- vout.Normal.z
 
-#line 175
+#line 88
 dp3 r0.w, r0.xyzx, r0.xyzx
 rsq r0.w, r0.w
 mul r0.xyz, r0.wwww, r0.xyzx
 
-#line 177
+#line 90
 dp4 r2.x, r1.xyzw, cb2[8].xyzw  // r2.x <- vout.PosH.x
 dp4 r2.y, r1.xyzw, cb2[9].xyzw  // r2.y <- vout.PosH.y
 dp4 r2.z, r1.xyzw, cb2[10].xyzw  // r2.z <- vout.PosH.z
 dp4 r2.w, r1.xyzw, cb2[11].xyzw  // r2.w <- vout.PosH.w
 
-#line 179
+#line 92
 mov r1.xy, v2.xyxx  // r1.x <- vout.Tex.x; r1.y <- vout.Tex.y
 
-#line 181
+#line 94
 mov o0.xyzw, r2.xyzw
 mov o1.xyz, r0.xyzx
 mov o2.xy, r1.xyxx
 ret 
-// Approximately 145 instruction slots used
+// Approximately 146 instruction slots used
