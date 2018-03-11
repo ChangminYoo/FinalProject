@@ -84,8 +84,9 @@ void CGameObject::UpdateLookVector()
 	wmatrix *= XMMatrixRotationQuaternion(quater);
 	auto ol=XMLoadFloat3(&OffLookvector);
 	auto or = XMLoadFloat3(&OffRightvector);
-
+	
 	ol=XMVector4Transform(ol, wmatrix);
+	
 	or= XMVector4Transform(or, wmatrix);
 	
 	XMStoreFloat3(&Lookvector, ol);
@@ -93,6 +94,7 @@ void CGameObject::UpdateLookVector()
 
 	Lookvector = Float3Normalize(Lookvector);
 	Rightvector = Float3Normalize(Rightvector);
+	
 }
 
 void CGameObject::SetAnimation(int n_Ani)
@@ -621,11 +623,13 @@ BulletCube::BulletCube(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 	//실제 룩벡터 등은 모두 UpdateLookVector에서 처리된다(라이트벡터도) 따라서 Tick함수에서 반드시 호출해야한다.
 	OffLookvector = XMFLOAT3(0, 0, 1);
 	OffRightvector = XMFLOAT3(1, 0, 0);
+	Lookvector = OffLookvector;
+	Rightvector = OffRightvector;
 	//인자로 발사방향으로 룩벡터가 될정도로 회전한 ori값을 받고, 현재 방향(아직은 0,0,0,1)과 곱해준다.
 	Orient = QuaternionMultiply(Orient, ori);
 
 	UpdateLookVector();
-
+	
 	ObjData.isAnimation = 0;
 	ObjData.Scale = 0.025;
 	ObjData.SpecularParamater = 0.0f;//스페큘러를 낮게준다.
@@ -635,7 +639,7 @@ BulletCube::BulletCube(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 	gamedata.HP = 1;
 	gamedata.Damage = 50;
 	gamedata.GodMode = true;
-	gamedata.Speed = 50;
+	gamedata.Speed = 20;
 	LifeTime = 10;
 	Master = master;
 	LockOn = lockon;
@@ -653,7 +657,7 @@ BulletCube::BulletCube(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 	pp->SetDamping(1);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
 	pp->SetBounce(false);//튕기지 않는다.
 	pp->SetVelocity(Lookvector.x*gamedata.Speed, Lookvector.y*gamedata.Speed, Lookvector.z*gamedata.Speed);//룩벡터로 날아감
-
+	
 
 }
 

@@ -6,7 +6,7 @@ using namespace std;
 using namespace DirectX;
 
 UINT CbvSrvDescriptorSize = 0;
-#define MAXRAYLEN 200
+#define MAXRAYLEN 500
 
 LRESULT CALLBACK
 GetWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
