@@ -223,10 +223,6 @@ void Shader::SetShader(ID3D12GraphicsCommandList* commandlist,bool isBlend)
 
 }
 
-void Shader::SetSkyShader(ID3D12GraphicsCommandList * commandlist)
-{
-	commandlist->SetPipelineState(SkyPSO.Get());
-}
 
 void Shader::Render(ID3D12GraphicsCommandList * CommandList, const GameTimer& gt)
 {
@@ -267,7 +263,7 @@ void Shader::Render(ID3D12GraphicsCommandList * CommandList, const GameTimer& gt
 
 	for (auto b = SkyObject->cbegin(); b != SkyObject->cend(); b++)
 	{
-		SetSkyShader(CommandList);
+		CommandList->SetPipelineState(SkyPSO.Get());
 
 		(*b)->Render(CommandList, gt);
 	}

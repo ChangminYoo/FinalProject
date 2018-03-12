@@ -414,7 +414,7 @@ void FrameWork::OnMouseDown(WPARAM btnState, int x, int y)
 	//레이를 쏜다.
 	
 	//공격 애니메이션으로 전환
-	scene->Player->PlayerObject->SetAnimation(2);
+	scene->Player->PlayerObject->SetAnimation((int)Ani_State::Attack);
 	auto RAY=MousePicking(x, y,scene->Player->Camera.CamData.EyePos, scene->Player->Camera.CamData.View,scene->Player->Camera.CamData.Proj);
 	XMFLOAT3 savepoint;
 	//여기에 모든 오브젝트리스트들을 돌아가면서 검사를 한다.
