@@ -6,7 +6,7 @@ using namespace DirectX;
 struct MaterialData
 {
 	float Roughness = 0.25f;	//°ÅÄ¥±â
-
+	XMFLOAT3 CustomMaterial = { 0,0,0 };
 	
 };
 

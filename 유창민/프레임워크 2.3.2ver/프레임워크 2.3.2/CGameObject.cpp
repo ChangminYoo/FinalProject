@@ -260,7 +260,7 @@ void CCubeManObject::Render(ID3D12GraphicsCommandList * commandlist, const GameT
 	
 
 	if(Textures.size()>0)
-		SetTexture(commandlist,SrvDescriptorHeap);
+		SetTexture(commandlist,SrvDescriptorHeap,false);
 	UpdateConstBuffer(commandlist);
 	
 	Mat.UpdateConstantBuffer(commandlist);
@@ -451,7 +451,7 @@ void CZombieObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTi
 
 
 	if (Textures.size()>0)
-		SetTexture(commandlist, SrvDescriptorHeap);
+		SetTexture(commandlist, SrvDescriptorHeap, false);
 	UpdateConstBuffer(commandlist);
 
 	Mat.UpdateConstantBuffer(commandlist);
@@ -527,7 +527,10 @@ void CZombieObject::EndAnimation(int nAni)
 
 }
 
-void SetTexture(ID3D12GraphicsCommandList * commandlist, ComPtr<ID3D12DescriptorHeap>& SrvDescriptorHeap)
+
+//---------------------------------------------------------------------------------------------------------------------------------
+
+void SetTexture(ID3D12GraphicsCommandList * commandlist, ComPtr<ID3D12DescriptorHeap>& SrvDescriptorHeap, bool isCubeMap)
 {
 	//텍스처는 테이블을 쓸것이므로 힙과 테이블 두개를 연결해야함.
 	ID3D12DescriptorHeap* descriptorHeaps[] = { SrvDescriptorHeap.Get() };
@@ -536,10 +539,10 @@ void SetTexture(ID3D12GraphicsCommandList * commandlist, ComPtr<ID3D12Descriptor
 	CD3DX12_GPU_DESCRIPTOR_HANDLE Skytex(SrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
 	Skytex.Offset(0, CbvSrvDescriptorSize);
 
-	commandlist->SetGraphicsRootDescriptorTable(0, Skytex);
-
-
-	commandlist->SetGraphicsRootDescriptorTable(1, SrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
+	if(isCubeMap)
+		commandlist->SetGraphicsRootDescriptorTable(0, Skytex);
+	else
+		commandlist->SetGraphicsRootDescriptorTable(1, SrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
 
 }
 
@@ -592,7 +595,7 @@ void LoadTexture(ID3D12Device* device, ID3D12GraphicsCommandList* commandlist,CG
 	device->CreateShaderResourceView(Texs.Get(), &srvDesc, hDescriptor);
 }
 
-
+//---------------------------------------------------------------------------------------------------------------------------------
 
 
 //------------------- 투 사 체 -----------------------//
@@ -697,7 +700,7 @@ void BulletCube::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer
 	//텍스처를 연결하고, 월드행렬을 연결한다.
 
 	if (Textures.size()>0)
-		SetTexture(commandlist, SrvDescriptorHeap);
+		SetTexture(commandlist, SrvDescriptorHeap,false);
 	UpdateConstBuffer(commandlist);
 
 	Mat.UpdateConstantBuffer(commandlist);
@@ -827,7 +830,7 @@ void SphereObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTim
 	//텍스처를 연결하고, 월드행렬을 연결한다.
 
 	if (Textures.size()>0)
-		SetTexture(commandlist, SrvDescriptorHeap);
+		SetTexture(commandlist, SrvDescriptorHeap, true);
 	UpdateConstBuffer(commandlist);
 
 	//이후 그린다.
@@ -927,7 +930,7 @@ void CubeObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer
 	//텍스처를 연결하고, 월드행렬을 연결한다.
 
 	if (Textures.size()>0)
-		SetTexture(commandlist, SrvDescriptorHeap);
+		SetTexture(commandlist, SrvDescriptorHeap,false);
 	UpdateConstBuffer(commandlist);
 
 	//이후 그린다.

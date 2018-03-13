@@ -152,7 +152,7 @@ float4 PS(VertexOut pin) : SV_Target
 		litColor = litColor * textureColor;  //엠비언트 * 텍스쳐 컬러
 
 		litColor = saturate(litColor + specular); //마지막으로 스패큘러 더한다.
-
+		litColor.w = BlendValue;
 		if (nLights > 0)
 			return litColor;
 		else

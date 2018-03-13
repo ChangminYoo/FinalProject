@@ -21,7 +21,8 @@ struct ObjectData
 	float Scale;
 	float SpecularParamater=1;
 	int isAnimation = 0;
-	//XMFLOAT4 CustomData1;
+	float BlendValue = 1.0f;//최종 블렌딩값
+	XMFLOAT4 CustomData1 = XMFLOAT4{ 1,2,3,4 };//오브젝트별 특화 데이터.
 	//XMFLOAT4 CustomData2;
 };
 
@@ -106,7 +107,7 @@ public:
 	
 	
 };
-void SetTexture(ID3D12GraphicsCommandList * commandlist, ComPtr<ID3D12DescriptorHeap>& SrvDescriptorHeap);
+void SetTexture(ID3D12GraphicsCommandList * commandlist, ComPtr<ID3D12DescriptorHeap>& SrvDescriptorHeap, bool isCubeMap);
 void LoadTexture(ID3D12Device* device, ID3D12GraphicsCommandList* commandlist, CGameObject* obj, unordered_map<string, unique_ptr<CTexture>>& Textures, ComPtr<ID3D12DescriptorHeap>& SrvDescriptorHeap, string texturename, wstring FileName, bool isCubeMap);
 
 //상속받은 게임오브젝트는 다음과 같은것을 처리할것.

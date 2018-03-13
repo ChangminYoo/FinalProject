@@ -62,7 +62,7 @@ void MainFrameWork::CollisionSystem(const GameTimer& gt)
 
 		//투사체끼리는 검사 X 투사체는 반드시 다이나믹오브젝트 들을 검사해야함.
 		(*i)->Collision(&scene->DynamicObject, gt.DeltaTime());
-
+		(*i)->Collision(&scene->StaticObject, gt.DeltaTime());
 	}
 
 	//고정된 객체를 제외한 모든 오브젝트를 충돌검사를 하도록 함.
@@ -73,17 +73,10 @@ void MainFrameWork::CollisionSystem(const GameTimer& gt)
 		//이 목록을 가지고 충돌검사를 하도록함.
 		
 		(*i)->Collision(&scene->DynamicObject, gt.DeltaTime());
+		(*i)->Collision(&scene->StaticObject, gt.DeltaTime());
 
 	}
 
-
-	//고정된 객체를 제외한 모든 오브젝트를 충돌검사를 하도록 함.
-	for (auto i = scene->StaticObject.begin(); i != scene->StaticObject.end(); i++)
-	{
-
-		(*i)->Collision(&scene->DynamicObject, gt.DeltaTime());
-
-	}
 }
 
 void MainFrameWork::System(const GameTimer & gt)

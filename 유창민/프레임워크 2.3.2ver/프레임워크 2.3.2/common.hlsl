@@ -45,7 +45,6 @@ struct Light
 	float4 Direction;
 	float3 Position;
 	float SpecularPower;
-	
 };
 
 
@@ -90,5 +89,5 @@ cbuffer MaterialData : register(b4)
 {
 	//float4   gDiffuseAlbedo;//MaterialData(상수버퍼임)
 	float    gRoughness;//MaterialData(상수버퍼임)
-	float3 CustomMaterial;//커스텀마테리얼데이터. 왜 있냐면 최소 16바이트여야 함(상수버퍼)
+	float3 CustomMaterialData;//커스텀용데이터 무조건 상수버퍼는 16바이트여야함.
 }

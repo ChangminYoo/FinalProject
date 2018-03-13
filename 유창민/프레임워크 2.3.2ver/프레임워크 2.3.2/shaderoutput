@@ -11,6 +11,8 @@
 //   float Scale;                       // Offset:   64 Size:     4
 //   float SpecularParamater;           // Offset:   68 Size:     4 [unused]
 //   int isAnimation;                   // Offset:   72 Size:     4
+//   float BlendValue;                  // Offset:   76 Size:     4 [unused]
+//   float4 CustomData1;                // Offset:   80 Size:    16 [unused]
 //
 // }
 //
