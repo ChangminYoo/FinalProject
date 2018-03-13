@@ -45,6 +45,7 @@ struct Light
 	float4 Direction;
 	float3 Position;
 	float SpecularPower;
+	
 };
 
 
@@ -57,6 +58,8 @@ cbuffer ObjectData : register(b0)
 	float Scale;
 	float SpecularParamater;
 	int isAnimation;
+	float BlendValue;
+	float4 CustomData1;
 };
 
 cbuffer JointArr : register(b1)//조인트들의 배열. 현재는 65개가 최대 조인트
@@ -87,4 +90,5 @@ cbuffer MaterialData : register(b4)
 {
 	//float4   gDiffuseAlbedo;//MaterialData(상수버퍼임)
 	float    gRoughness;//MaterialData(상수버퍼임)
+	float3 CustomMaterial;//커스텀마테리얼데이터. 왜 있냐면 최소 16바이트여야 함(상수버퍼)
 }
