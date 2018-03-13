@@ -417,6 +417,8 @@ void FrameWork::OnMouseDown(WPARAM btnState, int x, int y)
 	scene->Player->PlayerObject->SetAnimation(2);
 	auto RAY=MousePicking(x, y,scene->Player->Camera.CamData.EyePos, scene->Player->Camera.CamData.View,scene->Player->Camera.CamData.Proj);
 	XMFLOAT3 savepoint;
+
+	bool Shot = false;
 	//여기에 모든 오브젝트리스트들을 돌아가면서 검사를 한다.
 	for (auto b = scene->DynamicObject.begin(); b != scene->DynamicObject.end(); b++)
 	{
@@ -428,29 +430,47 @@ void FrameWork::OnMouseDown(WPARAM btnState, int x, int y)
 
 
 				if ((*b)->rco.RayCasting(RAY.RayOrgin, RAY.RayDir, XMFloat4to3((*b)->CenterPos), XMFloat4to3(scene->Player->PlayerObject->CenterPos),
-					scene->Player->PlayerObject->Lookvector, &savepoint) == true)//광선이 다른 오브젝트를 맞출경우
+					scene->Player->PlayerObject->Lookvector, &savepoint) == true&& Shot == false)//광선이 다른 오브젝트를 맞출경우
 				{
 					//여기서 뭔가를 처리한다.
 					//플레이어가 현재 사용할 투사체 넘버를 통해 자체적으로 투사체를 생성해서 불렛오브젝트 리스트에 저장함.
 					scene->Player->CreateBullet(Device.Get(), mCommandList.Get(), savepoint, (*b), &scene->BulletObject);
+					Shot = true;
 				}
-
-				else//광선의 길이보다 가깝지만 맞추지 못함. # 같은처리
-				{
-					savepoint=RayShot(RAY.RayOrgin, RAY.RayDir, MAXRAYLEN);
-					scene->Player->CreateBullet(Device.Get(), mCommandList.Get(), savepoint, (*b), &scene->BulletObject);
-				}
-			}
-			else//광선의 길이보다 멀때 # 같은처리
-			{
-				savepoint = RayShot(RAY.RayOrgin, RAY.RayDir, MAXRAYLEN);
-				scene->Player->CreateBullet(Device.Get(), mCommandList.Get(), savepoint, (*b), &scene->BulletObject);
 			}
 		}
 	}
 	
 
+	for (auto b = scene->StaticObject.begin(); b != scene->StaticObject.end(); b++)
+	{
+		if ((*b) != scene->Player->PlayerObject)//플레이어가 아닐경우
+		{
+			//광선의 길이보다 가까울때
+			if (FloatLength(Float4Add(scene->Player->PlayerObject->CenterPos, (*b)->CenterPos)) <= MAXRAYLEN)
+			{
 
+
+				if ((*b)->rco.RayCasting(RAY.RayOrgin, RAY.RayDir, XMFloat4to3((*b)->CenterPos), XMFloat4to3(scene->Player->PlayerObject->CenterPos),
+					scene->Player->PlayerObject->Lookvector, &savepoint) == true && Shot == false)//광선이 다른 오브젝트를 맞출경우
+				{
+					//여기서 뭔가를 처리한다.
+					//플레이어가 현재 사용할 투사체 넘버를 통해 자체적으로 투사체를 생성해서 불렛오브젝트 리스트에 저장함.
+					scene->Player->CreateBullet(Device.Get(), mCommandList.Get(), savepoint, (*b), &scene->BulletObject);
+					Shot = true;
+				}
+
+
+			}
+		}
+
+	}
+		if (Shot == false)//명중시킨 적이 없으면.
+		{
+			savepoint = RayShot(RAY.RayOrgin, RAY.RayDir, MAXRAYLEN);
+			scene->Player->CreateBullet(Device.Get(), mCommandList.Get(), savepoint, NULL, &scene->BulletObject);
+		}
+	
 }
 
 void FrameWork::OnMouseMove(WPARAM btnState, int x, int y)

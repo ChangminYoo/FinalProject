@@ -63,7 +63,6 @@ void MainFrameWork::CollisionSystem(const GameTimer& gt)
 		//투사체끼리는 검사 X 투사체는 반드시 다이나믹오브젝트 들을 검사해야함.
 		(*i)->Collision(&scene->DynamicObject, gt.DeltaTime());
 		(*i)->Collision(&scene->StaticObject, gt.DeltaTime());
-
 	}
 
 	//고정된 객체를 제외한 모든 오브젝트를 충돌검사를 하도록 함.
@@ -78,7 +77,6 @@ void MainFrameWork::CollisionSystem(const GameTimer& gt)
 
 	}
 
-	//고정된 물체는 충돌검사 안한다. 검사만 당함
 }
 
 void MainFrameWork::System(const GameTimer & gt)
@@ -102,7 +100,7 @@ void MainFrameWork::GravitySystem(const GameTimer & gt)
 
 void MainFrameWork::AfterGravitySystem(const GameTimer & gt)
 {
-	//고정이아닌 물체만 처리한다
+	
 	for (auto i = scene->DynamicObject.begin(); i != scene->DynamicObject.end(); i++)
 	{
 		//왜 실제 중점이 아닌 pp의 중점으로 처리하냐면 실제중점을 움직인후 pp의 중점을 움직이나
@@ -131,7 +129,25 @@ void MainFrameWork::AfterGravitySystem(const GameTimer & gt)
 	}
 
 
-
+	for (auto i = scene->StaticObject.begin(); i != scene->StaticObject.end(); i++)
+	{
+		//왜 실제 중점이 아닌 pp의 중점으로 처리하냐면 실제중점을 움직인후 pp의 중점을 움직이나
+		//pp의중점을 움직이고 실제중점을 움직이나 같지만, UpdatePPosCenterPos를 쓰기위해
+		//pp를 움직이고 cp를 pp로 맞춘다.
+		float ppy = (*i)->pp->GetPosition().y;
+		float hby = (*i)->pp->GetHalfBox().y;
+		if (ppy - hby < 0)//pp의 중점y-하프박스의 y값을 한결과가 0보다 작으면 땅아래에 묻힌셈
+		{
+			XMFLOAT3 gp = (*i)->pp->GetPosition();
+			gp.y += hby - ppy;//그러면 반대로 하프박스y값-중점y만큼 올리면 된다.
+			(*i)->pp->SetPosition(gp);
+			(*i)->UpdatePPosCenterPos();
+			auto v = (*i)->pp->GetVelocity();
+			v.y = 0;//중력에 의한 속도를 0으로 만듬
+			(*i)->pp->SetVelocity(v);
+			(*i)->AirBone = false;
+		}
+	}
 }
 
 void MainFrameWork::OnResize()

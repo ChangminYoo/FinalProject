@@ -514,7 +514,7 @@ void MiniPhysicsEngineG9::PhysicsPoint::ResolveVelocity(PhysicsPoint & p2, XMFLO
 //나는 그냥 공중에서는 밀어내도 상관 없도록 하는게 나을것 같음.
 void MiniPhysicsEngineG9::PhysicsPoint::ResolvePenetration(PhysicsPoint & p2, float DeltaTime,bool Keyboard)
 {
-	if (penetration <= 0)//밀어낼 필요가 없는경우
+	if (penetration < MMPE_EPSILON)//밀어낼 필요가 없는경우
 		return;
 	float totalInverseMass = GetMass();
 	totalInverseMass += p2.GetMass();

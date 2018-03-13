@@ -260,7 +260,7 @@ void CCubeManObject::Render(ID3D12GraphicsCommandList * commandlist, const GameT
 	
 
 	if(Textures.size()>0)
-		SetTexture(commandlist,SrvDescriptorHeap);
+		SetTexture(commandlist,SrvDescriptorHeap,false);
 	UpdateConstBuffer(commandlist);
 	
 	Mat.UpdateConstantBuffer(commandlist);
@@ -290,11 +290,11 @@ void CCubeManObject::Collision(list<CGameObject*>* collist, float DeltaTime)
 			{
 
 				//충돌 했을때 축이 (0,1,0) 이면 Airbone을 false로 둔다. 이는 내가 위에있음을 나타낸다.
-				if (pp->pAxis.y == 1)
+				if (pp->pAxis.y >0)
 					AirBone = false;
 				//충돌했을때  축이 (0,-1,0)이면 상대방 Airbone을 false로 둔다.  이는 상대가 내 위에있음을 나타낸다.
 				//설사 상대 위에 다른 상대가 있어도 걱정말자. 자연스러운것임.
-				if (pp->pAxis.y == -1)
+				if (pp->pAxis.y <0)
 					(*i)->AirBone = false;
 
 
@@ -451,7 +451,7 @@ void CZombieObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTi
 
 
 	if (Textures.size()>0)
-		SetTexture(commandlist, SrvDescriptorHeap);
+		SetTexture(commandlist, SrvDescriptorHeap, false);
 	UpdateConstBuffer(commandlist);
 
 	Mat.UpdateConstantBuffer(commandlist);
@@ -481,11 +481,11 @@ void CZombieObject::Collision(list<CGameObject*>* collist, float DeltaTime)
 			{
 
 				//충돌 했을때 축이 (0,1,0) 이면 Airbone을 false로 둔다. 이는 내가 위에있음을 나타낸다.
-				if (pp->pAxis.y == 1)
+				if (pp->pAxis.y >0)
 					AirBone = false;
 				//충돌했을때  축이 (0,-1,0)이면 상대방 Airbone을 false로 둔다.  이는 상대가 내 위에있음을 나타낸다.
 				//설사 상대 위에 다른 상대가 있어도 걱정말자. 자연스러운것임.
-				if (pp->pAxis.y == -1)
+				if (pp->pAxis.y <0)
 					(*i)->AirBone = false;
 
 
@@ -527,7 +527,10 @@ void CZombieObject::EndAnimation(int nAni)
 
 }
 
-void SetTexture(ID3D12GraphicsCommandList * commandlist, ComPtr<ID3D12DescriptorHeap>& SrvDescriptorHeap)
+
+//---------------------------------------------------------------------------------------------------------------------------------
+
+void SetTexture(ID3D12GraphicsCommandList * commandlist, ComPtr<ID3D12DescriptorHeap>& SrvDescriptorHeap, bool isCubeMap)
 {
 	//텍스처는 테이블을 쓸것이므로 힙과 테이블 두개를 연결해야함.
 	ID3D12DescriptorHeap* descriptorHeaps[] = { SrvDescriptorHeap.Get() };
@@ -536,10 +539,10 @@ void SetTexture(ID3D12GraphicsCommandList * commandlist, ComPtr<ID3D12Descriptor
 	CD3DX12_GPU_DESCRIPTOR_HANDLE Skytex(SrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
 	Skytex.Offset(0, CbvSrvDescriptorSize);
 
-	commandlist->SetGraphicsRootDescriptorTable(0, Skytex);
-
-
-	commandlist->SetGraphicsRootDescriptorTable(1, SrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
+	if(isCubeMap)
+		commandlist->SetGraphicsRootDescriptorTable(0, Skytex);
+	else
+		commandlist->SetGraphicsRootDescriptorTable(1, SrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
 
 }
 
@@ -592,7 +595,7 @@ void LoadTexture(ID3D12Device* device, ID3D12GraphicsCommandList* commandlist,CG
 	device->CreateShaderResourceView(Texs.Get(), &srvDesc, hDescriptor);
 }
 
-
+//---------------------------------------------------------------------------------------------------------------------------------
 
 
 //------------------- 투 사 체 -----------------------//
@@ -697,7 +700,7 @@ void BulletCube::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer
 	//텍스처를 연결하고, 월드행렬을 연결한다.
 
 	if (Textures.size()>0)
-		SetTexture(commandlist, SrvDescriptorHeap);
+		SetTexture(commandlist, SrvDescriptorHeap,false);
 	UpdateConstBuffer(commandlist);
 
 	Mat.UpdateConstantBuffer(commandlist);
@@ -827,7 +830,7 @@ void SphereObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTim
 	//텍스처를 연결하고, 월드행렬을 연결한다.
 
 	if (Textures.size()>0)
-		SetTexture(commandlist, SrvDescriptorHeap);
+		SetTexture(commandlist, SrvDescriptorHeap, true);
 	UpdateConstBuffer(commandlist);
 
 	//이후 그린다.
@@ -867,15 +870,14 @@ CubeObject::CubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 	ObjData.isAnimation = 0;
 	ObjData.Scale = 5.0f;
 	ObjData.SpecularParamater = 0.0f;//스페큘러를 낮게준다.
-	
-	staticobject = true;
+
 	//게임관련 데이터들
 	gamedata.MAXHP = 100;
 	gamedata.HP = 100;
 	gamedata.Damage = 0;
 	gamedata.GodMode = true;
 	gamedata.Speed = 0;
-	
+
 
 	//광선충돌 검사용 육면체
 	XMFLOAT3 rx(5, 0, 0);
@@ -889,7 +891,7 @@ CubeObject::CubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 	pp->SetHalfBox(5, 5, 5);//충돌 박스의 x,y,z 크기
 	pp->SetDamping(1);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
 	pp->SetBounce(false);//튕기지 않는다.
-	pp->SetMass(INFINITY);
+	pp->SetMass(INFINITY);//고정된 물체는 무게가 무한이다.
 }
 
 void CubeObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
@@ -915,7 +917,8 @@ void CubeObject::SetMaterial(ID3D12Device * m_Device, ID3D12GraphicsCommandList 
 
 void CubeObject::Tick(const GameTimer & gt)
 {
-	//고정된 오브젝트는 아무런처리 X
+	//적분기. 적분기란? 매 틱마다 힘! 에의해서 변화 되는 가속도/속도/위치를 갱신한다.
+	//이때 pp의 position과 CenterPos를 일치시켜야하므로 CenterPos의 포인터를 인자로 넘겨야 한다.
 	//pp->integrate(gt.DeltaTime(), &CenterPos);
 
 	//No애니메이션!
@@ -928,7 +931,7 @@ void CubeObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer
 	//텍스처를 연결하고, 월드행렬을 연결한다.
 
 	if (Textures.size()>0)
-		SetTexture(commandlist, SrvDescriptorHeap);
+		SetTexture(commandlist, SrvDescriptorHeap,false);
 	UpdateConstBuffer(commandlist);
 
 	//이후 그린다.
