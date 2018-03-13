@@ -205,7 +205,7 @@ void Scene::Render(const GameTimer& gt)
 void Scene::Tick(const GameTimer & gt)
 {
 	//플레이어 입력처리 
-	Player->PlayerInput(gt.DeltaTime());
+	Player->PlayerInput(gt.DeltaTime(),this);
 
 	//--------------------------------------------------------------
 	//오브젝트 삭제

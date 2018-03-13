@@ -63,14 +63,14 @@ namespace MiniPhysicsEngineG9
 
 		//충돌체 해소 관련. 이때 키보드 처리는 따로 해줘야함. 왜냐하면 대각선으로 눌렀을때 충돌안되는 부분은 스무스하게
 		//움직이게 하기위해서다. CollisionN은 충돌시 내가 밀려나야하는 방향을 나타낸다.
-		void CollisionResolve(PhysicsPoint& p2,XMFLOAT3& CollisionN, float DeltaTime, bool KeyBoard=false);
+		void CollisionResolve(PhysicsPoint& p2,XMFLOAT3& CollisionN, float DeltaTime);
 		//상대속도를 구한다.
-		float GetSeparateVelocity(PhysicsPoint& p2, XMFLOAT3& CollisionN, bool KeyBoard = false);
+		float GetSeparateVelocity(PhysicsPoint& p2, XMFLOAT3& CollisionN);
 		//충돌후 속도를 구한다.
 		bool GetBounce();
-		void ResolveVelocity(PhysicsPoint& p2, XMFLOAT3& CollisionN, float DeltaTime, bool KeyBoard = false);
+		void ResolveVelocity(PhysicsPoint& p2, XMFLOAT3& CollisionN, float DeltaTime);
 		//겹쳐진 부분을 밀어낸다.
-		void ResolvePenetration(PhysicsPoint& p2,float DeltaTime,bool Keyboard=false);
+		void ResolvePenetration(PhysicsPoint& p2,float DeltaTime);
 	};
 
 	struct RayCastPlane

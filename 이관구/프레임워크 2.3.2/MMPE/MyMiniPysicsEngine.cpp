@@ -402,28 +402,23 @@ bool MiniPhysicsEngineG9::PhysicsPoint::CollisionTest(PhysicsPoint & p2, XMFLOAT
 		return false;
 }
 
-void MiniPhysicsEngineG9::PhysicsPoint::CollisionResolve(PhysicsPoint & p2, XMFLOAT3 & CollisionN, float DeltaTime, bool KeyBoard)
+void MiniPhysicsEngineG9::PhysicsPoint::CollisionResolve(PhysicsPoint & p2, XMFLOAT3 & CollisionN, float DeltaTime)
 {
 	//충돌후 속도를 계산함.
-	ResolveVelocity(p2, CollisionN, DeltaTime,KeyBoard);
+	ResolveVelocity(p2, CollisionN, DeltaTime);
 
 	//속도계산후 겹치는 부분을 밀어냄
-	ResolvePenetration(p2, DeltaTime,KeyBoard);
+	ResolvePenetration(p2, DeltaTime);
 }
 
-float MiniPhysicsEngineG9::PhysicsPoint::GetSeparateVelocity(PhysicsPoint & p2, XMFLOAT3 & CollisionN, bool KeyBoard)
+float MiniPhysicsEngineG9::PhysicsPoint::GetSeparateVelocity(PhysicsPoint & p2, XMFLOAT3 & CollisionN)
 {
-	if (KeyBoard)//키보드 처리시
-	{
-		return 0;
-	}
-	else//키보드 처리가 아닌경우
-	{
+	
 		XMFLOAT3 v1 = GetVelocity();
 		XMFLOAT3 v2 = p2.GetVelocity();
 		v1 = Float3Add(v1, v2, false);
 		return v1.x*CollisionN.x + v1.y*CollisionN.y + v1.z*CollisionN.z;
-	}
+	
 }
 
 bool MiniPhysicsEngineG9::PhysicsPoint::GetBounce()
@@ -431,7 +426,7 @@ bool MiniPhysicsEngineG9::PhysicsPoint::GetBounce()
 	return Bounce;
 }
 
-void MiniPhysicsEngineG9::PhysicsPoint::ResolveVelocity(PhysicsPoint & p2, XMFLOAT3 & CollisionN, float DeltaTime, bool KeyBoard)
+void MiniPhysicsEngineG9::PhysicsPoint::ResolveVelocity(PhysicsPoint & p2, XMFLOAT3 & CollisionN, float DeltaTime)
 {
 	//충돌후 속도 변화는 다음과 같다.
 	//1. 충돌전 분리속도를 구하고
@@ -440,16 +435,7 @@ void MiniPhysicsEngineG9::PhysicsPoint::ResolveVelocity(PhysicsPoint & p2, XMFLO
 	//4. 충격량을 계산한다. 충격량 크기 * CollisionN이다. 기본적으로 CollisionN은 나의위치-상대방위치를 노멀화한것.
 	//다만 키보드 입력시 밀려나야하는방향은 내가 키보드 누른 키의 반대방향의 속도다.
 
-	if (KeyBoard)//키보드 입력처리시 나만 되돌아와야하며, 속도를 변경하는게 아니라 위치를 변경한다!!
-	{
-		//갱신될 위치 = 현재위치 - 키보드 누른 방향
-		auto op = GetPosition();
-		op = Float3Add(op, CollisionN, false);
-		SetPosition(op);//위치를 지정한다. 중요한점은 이건 질점의 위치이므로 반드시 충돌해소후 오브젝트 중점도 갱신하라
-
-	}
-	else//일반적인 경우에는 속도만 변경시킨다. 
-	{
+	
 		float sv = GetSeparateVelocity(p2, CollisionN);
 		if (sv > 0)//이미 멀어지고있음
 			return;
@@ -503,7 +489,7 @@ void MiniPhysicsEngineG9::PhysicsPoint::ResolveVelocity(PhysicsPoint & p2, XMFLO
 
 
 
-	}
+	
 }
 //겹쳐질경우 서로를 밀어냄. 키보드 입력일땐 자신만 밀려남
 //공중일때가 좀 문제임 공중이면 상대방이 밀릴수있음 왜냐하면 이게 정상인게
@@ -512,7 +498,7 @@ void MiniPhysicsEngineG9::PhysicsPoint::ResolveVelocity(PhysicsPoint & p2, XMFLO
 //만약 이게 마음에 안들면 x와 z의 속도가 0이면 밀려나지 않도록 하는 방법이 있음.
 //물론 이게 또 문제가 뭐냐면 아예 완전히 겹쳐있는 순간에 안움직이고 있으면 안떼어내진다.
 //나는 그냥 공중에서는 밀어내도 상관 없도록 하는게 나을것 같음.
-void MiniPhysicsEngineG9::PhysicsPoint::ResolvePenetration(PhysicsPoint & p2, float DeltaTime,bool Keyboard)
+void MiniPhysicsEngineG9::PhysicsPoint::ResolvePenetration(PhysicsPoint & p2, float DeltaTime)
 {
 	if (penetration < MMPE_EPSILON)//밀어낼 필요가 없는경우
 		return;
@@ -535,13 +521,12 @@ void MiniPhysicsEngineG9::PhysicsPoint::ResolvePenetration(PhysicsPoint & p2, fl
 	
 	SetPosition(result1);//자신을 옮긴다.
 
-	if (Keyboard == false)
-	{
+	
 		XMFLOAT3 m2(-movevector.x*p2.GetMass(), -movevector.y*p2.GetMass(), -movevector.z*p2.GetMass());
 		auto pp2 = p2.GetPosition();
 		auto result2 = Float3Add(pp2, m2);
 		p2.SetPosition(result2);//겹쳐진 대상을 옮긴다.
-	}
+	
 
 	
 }

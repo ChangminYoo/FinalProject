@@ -1,6 +1,9 @@
 #pragma once
 #include"CGameObject.h"
 #include"Camera.h"
+
+class Scene;
+
 class CPlayer
 {
 public:
@@ -10,7 +13,7 @@ public:
 	void TPSCameraSystem(int mx,int my,float DeltaTime);
 	void PlayerCameraReLocate();
 	void SetPlayer(CGameObject* obj);
-	void PlayerInput(float DeltaTime);
+	void PlayerInput(float DeltaTime,Scene* scene);
 	CCamera Camera;
 	CGameObject* PlayerObject;
 

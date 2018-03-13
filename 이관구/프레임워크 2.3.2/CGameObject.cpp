@@ -317,7 +317,7 @@ void CCubeManObject::Collision(list<CGameObject*>* collist, float DeltaTime)
 				
 
 				//충돌해소 호출. 충돌해소 이후에 반드시 변경된 질점의 위치로 오브젝트위치를 일치시켜야한다.
-				pp->CollisionResolve(*(*i)->pp, cn, DeltaTime,false);//좀비는 튕기지 않는다.
+				pp->CollisionResolve(*(*i)->pp, cn, DeltaTime);//좀비는 튕기지 않는다.
 				UpdatePPosCenterPos();
 				(*i)->UpdatePPosCenterPos();
 			}
@@ -508,7 +508,7 @@ void CZombieObject::Collision(list<CGameObject*>* collist, float DeltaTime)
 
 
 				//충돌해소 호출. 충돌해소 이후에 반드시 변경된 질점의 위치로 오브젝트위치를 일치시켜야한다.
-				pp->CollisionResolve(*(*i)->pp, cn, DeltaTime, false);//좀비는 튕기지 않는다.
+				pp->CollisionResolve(*(*i)->pp, cn, DeltaTime);//좀비는 튕기지 않는다.
 				UpdatePPosCenterPos();
 				(*i)->UpdatePPosCenterPos();
 			}
@@ -745,7 +745,7 @@ void BulletCube::Collision(list<CGameObject*>* collist, float DeltaTime)
 				}
 
 				//충돌후 속도를 계산함.
-				pp->ResolveVelocity(*(*i)->pp, cn, DeltaTime, false);
+				pp->ResolveVelocity(*(*i)->pp, cn, DeltaTime);
 				//겹치는 부분을 제거할필요가 없는게 투사체는 어처피 사라지니까.
 				DelObj = true;
 				

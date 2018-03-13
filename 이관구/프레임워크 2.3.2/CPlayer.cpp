@@ -1,6 +1,5 @@
 #include "CPlayer.h"
-
-
+#include"Scene.h"
 
 CPlayer::CPlayer(ID3D12Device* Device, ID3D12GraphicsCommandList* commandlist, float asp, XMFLOAT3& e, XMFLOAT3& a, XMFLOAT3& u) : Camera(Device,commandlist,asp,e,a,u)
 {
@@ -178,7 +177,7 @@ void CPlayer::SetPlayer(CGameObject * obj)
 //이때 위화살표와 오른쪽화살표를 누르면 앞으로는 못가도 옆으로스무스하게 움직여야한다.
 //이를 위해 키마다 충돌처리를 한다음 충돌하면 원상태로 되돌리고 하는것이다.
 //또한 항상 pp의 위치를 갱신해줘야한다.
-void CPlayer::PlayerInput(float DeltaTime)
+void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 {
 	if (PlayerObject != NULL)
 	{
@@ -192,29 +191,46 @@ void CPlayer::PlayerInput(float DeltaTime)
 			auto l = XMLoadFloat3(&PlayerObject->Lookvector);
 			l *= PlayerObject->gamedata.Speed*DeltaTime;
 			auto p = XMLoadFloat4(&PlayerObject->CenterPos);
+			auto tempP = p;
 			p += l;
 
-			XMFLOAT3 sp;
-			XMStoreFloat3(&sp, l);
+			
 			XMStoreFloat4(&PlayerObject->CenterPos, p);
 			PlayerObject->pp->SetPosition(PlayerObject->CenterPos);
-
-			if (PlayerObject->CollisionList != NULL)
-			{
+			
+			
 				//충돌리스트의 목록을 전부 검사한다.
-				for (auto i = PlayerObject->CollisionList->begin(); i != PlayerObject->CollisionList->end(); i++)
-				{
+			//다이나믹오브젝트,고정오브젝트 등을 검사해야함.
+			for (auto i = scene->DynamicObject.begin(); i != scene->DynamicObject.end(); i++)
+			{
 					
-					if ((*i) != PlayerObject)//리스트에 자기자신이있을경우를 제외함.
-						if (PlayerObject->pp->CollisionTest(*(*i)->pp, PlayerObject->Lookvector, PlayerObject->Rightvector,
-							PlayerObject->GetUpvector(), (*i)->Lookvector, (*i)->Rightvector, (*i)->GetUpvector())==true&&abs((*i)->pp->pAxis.y)!=1)//충돌했으면
-						{
-							//기존에 W키를 눌러서 움직인만큼 되돌려보내야함.
-							PlayerObject->pp->CollisionResolve(*(*i)->pp, sp, DeltaTime, true);
-							PlayerObject->UpdatePPosCenterPos();//충돌해소한 다음 그 결과를 CenterPos에 저장한다.
-						}
-				}
+				if ((*i) != PlayerObject)//리스트에 자기자신이있을경우를 제외함.
+					if (PlayerObject->pp->CollisionTest(*(*i)->pp, PlayerObject->Lookvector, PlayerObject->Rightvector,
+						PlayerObject->GetUpvector(), (*i)->Lookvector, (*i)->Rightvector, (*i)->GetUpvector())==true&&abs((*i)->pp->pAxis.y)!=1)//충돌했으면
+					{
+						//기존에 W키를 눌러서 움직인만큼 되돌려보내야함.
+	
+						XMStoreFloat4(&PlayerObject->CenterPos, tempP);
+						PlayerObject->pp->SetPosition(PlayerObject->CenterPos);
+
+					}
 			}
+			//고정된 물체와 비교
+			for (auto i = scene->StaticObject.begin(); i != scene->StaticObject.end(); i++)
+			{
+
+				if ((*i) != PlayerObject)//리스트에 자기자신이있을경우를 제외함.
+					if (PlayerObject->pp->CollisionTest(*(*i)->pp, PlayerObject->Lookvector, PlayerObject->Rightvector,
+						PlayerObject->GetUpvector(), (*i)->Lookvector, (*i)->Rightvector, (*i)->GetUpvector()) == true && abs((*i)->pp->pAxis.y) != 1)//충돌했으면
+					{
+						//기존에 W키를 눌러서 움직인만큼 되돌려보내야함.
+
+						XMStoreFloat4(&PlayerObject->CenterPos, tempP);
+						PlayerObject->pp->SetPosition(PlayerObject->CenterPos);
+
+					}
+			}
+
 			
 		}
 		else if (GetKeyState(0x53) & 0x8000)//S키
@@ -224,29 +240,45 @@ void CPlayer::PlayerInput(float DeltaTime)
 			auto l = XMLoadFloat3(&PlayerObject->Lookvector);
 			l *= PlayerObject->gamedata.Speed*DeltaTime;
 			auto p = XMLoadFloat4(&PlayerObject->CenterPos);
+			auto tempP = p;
 			p -= l;
 
-			XMFLOAT3 sp;
-			XMStoreFloat3(&sp, -l);
 			XMStoreFloat4(&PlayerObject->CenterPos, p);
 			PlayerObject->pp->SetPosition(PlayerObject->CenterPos);
 
-			if (PlayerObject->CollisionList != NULL)
+			
+			//충돌리스트의 목록을 전부 검사한다.
+			//다이나믹오브젝트,고정오브젝트 등을 검사해야함.
+			for (auto i = scene->DynamicObject.begin(); i != scene->DynamicObject.end(); i++)
 			{
-				//충돌리스트의 목록을 전부 검사한다.
-				for (auto i = PlayerObject->CollisionList->begin(); i != PlayerObject->CollisionList->end(); i++)
-				{
-					
-					if ((*i) != PlayerObject)//리스트에 자기자신이있을경우를 제외함.
-						if (PlayerObject->pp->CollisionTest(*(*i)->pp, PlayerObject->Lookvector, PlayerObject->Rightvector,
-							PlayerObject->GetUpvector(), (*i)->Lookvector, (*i)->Rightvector, (*i)->GetUpvector()) == true && abs((*i)->pp->pAxis.y) != 1)//충돌했으면
-						{
-							//기존에 S키를 눌러서 움직인만큼 되돌려보내야함.
-							PlayerObject->pp->CollisionResolve(*(*i)->pp, sp, DeltaTime, true);
-							PlayerObject->UpdatePPosCenterPos();//충돌해소한 다음 그 결과를 CenterPos에 저장한다.
-						}
-				}
+
+				if ((*i) != PlayerObject)//리스트에 자기자신이있을경우를 제외함.
+					if (PlayerObject->pp->CollisionTest(*(*i)->pp, PlayerObject->Lookvector, PlayerObject->Rightvector,
+						PlayerObject->GetUpvector(), (*i)->Lookvector, (*i)->Rightvector, (*i)->GetUpvector()) == true && abs((*i)->pp->pAxis.y) != 1)//충돌했으면
+					{
+						//기존에 W키를 눌러서 움직인만큼 되돌려보내야함.
+
+						XMStoreFloat4(&PlayerObject->CenterPos, tempP);
+						PlayerObject->pp->SetPosition(PlayerObject->CenterPos);
+
+					}
 			}
+			//고정된 물체와 비교
+			for (auto i = scene->StaticObject.begin(); i != scene->StaticObject.end(); i++)
+			{
+
+				if ((*i) != PlayerObject)//리스트에 자기자신이있을경우를 제외함.
+					if (PlayerObject->pp->CollisionTest(*(*i)->pp, PlayerObject->Lookvector, PlayerObject->Rightvector,
+						PlayerObject->GetUpvector(), (*i)->Lookvector, (*i)->Rightvector, (*i)->GetUpvector()) == true && abs((*i)->pp->pAxis.y) != 1)//충돌했으면
+					{
+						//기존에 W키를 눌러서 움직인만큼 되돌려보내야함.
+
+						XMStoreFloat4(&PlayerObject->CenterPos, tempP);
+						PlayerObject->pp->SetPosition(PlayerObject->CenterPos);
+
+					}
+			}
+			
 		}
 
 		if (GetKeyState(0x41) & 0x8000)//A키
@@ -256,29 +288,45 @@ void CPlayer::PlayerInput(float DeltaTime)
 			auto r = XMLoadFloat3(&PlayerObject->Rightvector);
 			r *= PlayerObject->gamedata.Speed*DeltaTime;
 			auto p = XMLoadFloat4(&PlayerObject->CenterPos);
+			auto tempP = p;
 			p -= r;
 
-			XMFLOAT3 sp;
-			XMStoreFloat3(&sp, -r);
 			XMStoreFloat4(&PlayerObject->CenterPos, p);
 			PlayerObject->pp->SetPosition(PlayerObject->CenterPos);
 
-			if (PlayerObject->CollisionList != NULL)
+
+			//충돌리스트의 목록을 전부 검사한다.
+			//다이나믹오브젝트,고정오브젝트 등을 검사해야함.
+			for (auto i = scene->DynamicObject.begin(); i != scene->DynamicObject.end(); i++)
 			{
-				//충돌리스트의 목록을 전부 검사한다.
-				for (auto i = PlayerObject->CollisionList->begin(); i != PlayerObject->CollisionList->end(); i++)
-				{
-					
-					if ((*i) != PlayerObject)//리스트에 자기자신이있을경우를 제외함.
-						if (PlayerObject->pp->CollisionTest(*(*i)->pp, PlayerObject->Lookvector, PlayerObject->Rightvector,
-							PlayerObject->GetUpvector(), (*i)->Lookvector, (*i)->Rightvector, (*i)->GetUpvector()) == true && abs((*i)->pp->pAxis.y) != 1)//충돌했으면
-						{
-							//기존에 A키를 눌러서 움직인만큼 되돌려보내야함.
-							PlayerObject->pp->CollisionResolve(*(*i)->pp, sp, DeltaTime, true);
-							PlayerObject->UpdatePPosCenterPos();//충돌해소한 다음 그 결과를 CenterPos에 저장한다.
-						}
-				}
+
+				if ((*i) != PlayerObject)//리스트에 자기자신이있을경우를 제외함.
+					if (PlayerObject->pp->CollisionTest(*(*i)->pp, PlayerObject->Lookvector, PlayerObject->Rightvector,
+						PlayerObject->GetUpvector(), (*i)->Lookvector, (*i)->Rightvector, (*i)->GetUpvector()) == true && abs((*i)->pp->pAxis.y) != 1)//충돌했으면
+					{
+						//기존에 W키를 눌러서 움직인만큼 되돌려보내야함.
+
+						XMStoreFloat4(&PlayerObject->CenterPos, tempP);
+						PlayerObject->pp->SetPosition(PlayerObject->CenterPos);
+
+					}
 			}
+			//고정된 물체와 비교
+			for (auto i = scene->StaticObject.begin(); i != scene->StaticObject.end(); i++)
+			{
+
+				if ((*i) != PlayerObject)//리스트에 자기자신이있을경우를 제외함.
+					if (PlayerObject->pp->CollisionTest(*(*i)->pp, PlayerObject->Lookvector, PlayerObject->Rightvector,
+						PlayerObject->GetUpvector(), (*i)->Lookvector, (*i)->Rightvector, (*i)->GetUpvector()) == true && abs((*i)->pp->pAxis.y) != 1)//충돌했으면
+					{
+						//기존에 W키를 눌러서 움직인만큼 되돌려보내야함.
+
+						XMStoreFloat4(&PlayerObject->CenterPos, tempP);
+						PlayerObject->pp->SetPosition(PlayerObject->CenterPos);
+
+					}
+			}
+		
 		}
 		else if (GetKeyState(0x44) & 0x8000)//D키
 		{
@@ -287,29 +335,45 @@ void CPlayer::PlayerInput(float DeltaTime)
 			auto r = XMLoadFloat3(&PlayerObject->Rightvector);
 			r *= PlayerObject->gamedata.Speed*DeltaTime;
 			auto p = XMLoadFloat4(&PlayerObject->CenterPos);
+			auto tempP = p;//기존 위치
 			p += r;
 
-			XMFLOAT3 sp;
-			XMStoreFloat3(&sp, r);
+			
 			XMStoreFloat4(&PlayerObject->CenterPos, p);
 			PlayerObject->pp->SetPosition(PlayerObject->CenterPos);
 
-			if (PlayerObject->CollisionList != NULL)
+			//충돌리스트의 목록을 전부 검사한다.
+			//다이나믹오브젝트,고정오브젝트 등을 검사해야함.
+			for (auto i = scene->DynamicObject.begin(); i != scene->DynamicObject.end(); i++)
 			{
-				//충돌리스트의 목록을 전부 검사한다.
-				for (auto i = PlayerObject->CollisionList->begin(); i != PlayerObject->CollisionList->end(); i++)
-				{
-					
-					if ((*i) != PlayerObject)//리스트에 자기자신이있을경우를 제외함.
-						if (PlayerObject->pp->CollisionTest(*(*i)->pp, PlayerObject->Lookvector, PlayerObject->Rightvector,
-							PlayerObject->GetUpvector(), (*i)->Lookvector, (*i)->Rightvector, (*i)->GetUpvector()) == true && abs((*i)->pp->pAxis.y) != 1)//충돌했으면
-						{
-							//기존에 D키를 눌러서 움직인만큼 되돌려보내야함. 다만 pAxis가 z축인경우는 제외
-							PlayerObject->pp->CollisionResolve(*(*i)->pp, sp, DeltaTime, true);
-							PlayerObject->UpdatePPosCenterPos();//충돌해소한 다음 그 결과를 CenterPos에 저장한다.
-						}
-				}
+
+				if ((*i) != PlayerObject)//리스트에 자기자신이있을경우를 제외함.
+					if (PlayerObject->pp->CollisionTest(*(*i)->pp, PlayerObject->Lookvector, PlayerObject->Rightvector,
+						PlayerObject->GetUpvector(), (*i)->Lookvector, (*i)->Rightvector, (*i)->GetUpvector()) == true && abs((*i)->pp->pAxis.y) != 1)//충돌했으면
+					{
+						//기존에 W키를 눌러서 움직인만큼 되돌려보내야함.
+
+						XMStoreFloat4(&PlayerObject->CenterPos, tempP);
+						PlayerObject->pp->SetPosition(PlayerObject->CenterPos);
+
+					}
 			}
+			//고정된 물체와 비교
+			for (auto i = scene->StaticObject.begin(); i != scene->StaticObject.end(); i++)
+			{
+
+				if ((*i) != PlayerObject)//리스트에 자기자신이있을경우를 제외함.
+					if (PlayerObject->pp->CollisionTest(*(*i)->pp, PlayerObject->Lookvector, PlayerObject->Rightvector,
+						PlayerObject->GetUpvector(), (*i)->Lookvector, (*i)->Rightvector, (*i)->GetUpvector()) == true && abs((*i)->pp->pAxis.y) != 1)//충돌했으면
+					{
+						//기존에 W키를 눌러서 움직인만큼 되돌려보내야함.
+
+						XMStoreFloat4(&PlayerObject->CenterPos, tempP);
+						PlayerObject->pp->SetPosition(PlayerObject->CenterPos);
+
+					}
+			}
+
 		}
 		
 		if (GetKeyState(VK_SPACE) & 0x8000 && PlayerObject->AirBone == false)
