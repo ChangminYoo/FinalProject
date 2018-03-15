@@ -6,7 +6,7 @@
 #include"CGameObject.h"
 using namespace std;
 
-bool LoadMD5Model(std::wstring filename, CMesh* MD5Model, int numberofMesh, float scale, float spec)
+bool LoadMD5Model(std::wstring filename, CMesh* MD5Model, int numberofMesh, float scale)
 {
 	std::wifstream fileIn(filename.c_str());
 	int qi = 0;
@@ -459,7 +459,7 @@ bool LoadMD5Anim(ID3D12Device* m_Device, std::wstring filename, CMesh* MD5Model,
 
 
 //오브젝트는 다수의 애니메이션을 가질수있음.animation 인자는 몇번째 애니메이션을 쓸건지를 나타낸다.
-void UpdateMD5Model(ID3D12GraphicsCommandList* m_DC, CMesh* MD5Model, CGameObject* obj, float deltaTime, int animation, vector<ModelAnimation>& av)
+void UpdateMD5Model(ID3D12GraphicsCommandList* m_DC, CMesh* MD5Model, CGameObject* obj, float deltaTime, int animation, vector<ModelAnimation>& av, UploadBuffer<JointArr>* jarr)
 {
 	//토탈 타임과 커렌트타임으로 애니메이션을 분할하자.
 
@@ -471,7 +471,7 @@ void UpdateMD5Model(ID3D12GraphicsCommandList* m_DC, CMesh* MD5Model, CGameObjec
 
 								  //애니메이션이 끝나면 애니메이션 후처리 함수를 호출한다. 예를들면 공격이 끝나면 아이들애니메이션
 								  //으로 전환하던가 한다.
-		//((Agent*)obj)->EndAnimation(animation);
+		obj->EndAnimation(animation);
 
 	}
 
@@ -513,7 +513,7 @@ void UpdateMD5Model(ID3D12GraphicsCommandList* m_DC, CMesh* MD5Model, CGameObjec
 		
 	}
 	//업데이트 모델에서는 조인트들을 업데이트한다음, 조인트를 상수버퍼로 갱신한다.
-	if (MD5Model->jarr != NULL)
+	if (jarr != NULL)
 	{
 		JointArr tempjwa;
 		for (int i = 0; i < av[animation].numJoints; i++)
@@ -523,7 +523,7 @@ void UpdateMD5Model(ID3D12GraphicsCommandList* m_DC, CMesh* MD5Model, CGameObjec
 			tempjwa.j[i].pos = interpolatedSkeleton[i].pos;
 		}
 		auto ts = sizeof(tempjwa);
-		MD5Model->jarr->CopyData(0, tempjwa);
+		jarr->CopyData(0, tempjwa);
 
 	}
 

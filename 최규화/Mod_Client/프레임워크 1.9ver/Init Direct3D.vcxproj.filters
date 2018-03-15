@@ -34,15 +34,6 @@
     <Filter Include="MyMiniPhysicsEngine">
       <UniqueIdentifier>{18887dc4-50ac-40d8-b6ba-a770ec745724}</UniqueIdentifier>
     </Filter>
-    <Filter Include="소스파일\서버">
-      <UniqueIdentifier>{b660068a-b61c-440d-902b-c9d8e368793d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="헤더파일\서버">
-      <UniqueIdentifier>{07a11f36-9bd3-4e00-9888-95a7520820db}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="소스파일\서버\데이터베이스">
-      <UniqueIdentifier>{67796f34-2ec2-446a-8e82-041fdfdeb15a}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="d3dUtil.cpp">
@@ -99,15 +90,6 @@
     <ClCompile Include="Light.cpp">
       <Filter>소스파일\장면구성</Filter>
     </ClCompile>
-    <ClCompile Include="server\main_client\AsyncClient.cpp">
-      <Filter>소스파일\서버</Filter>
-    </ClCompile>
-    <ClCompile Include="server\main_client\Database\CTextTest.cpp">
-      <Filter>소스파일\서버\데이터베이스</Filter>
-    </ClCompile>
-    <ClCompile Include="MsgProcessing.cpp">
-      <Filter>소스파일\서버</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="d3dUtil.h">
@@ -163,18 +145,6 @@
     </ClInclude>
     <ClInclude Include="Light.h">
       <Filter>헤더파일\장면구성</Filter>
-    </ClInclude>
-    <ClInclude Include="server\main_client\AsyncClient.h">
-      <Filter>소스파일\서버</Filter>
-    </ClInclude>
-    <ClInclude Include="server\main_client\Database\CTextTest.h">
-      <Filter>소스파일\서버\데이터베이스</Filter>
-    </ClInclude>
-    <ClInclude Include="server\main_client\protocol.h">
-      <Filter>헤더파일\서버</Filter>
-    </ClInclude>
-    <ClInclude Include="server\main_client\stdafx.h">
-      <Filter>헤더파일\서버</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

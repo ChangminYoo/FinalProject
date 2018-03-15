@@ -56,20 +56,13 @@ public:
 
 //	void DeleteStaticMesh();
 
-	void Render();	//이후 카메라를 인자로 받아야됨
+	void Render(const GameTimer& gt);	//이후 카메라를 인자로 받아야됨
 	void Tick(const GameTimer& gt);
 
 	CPlayer* Player = NULL;
 	CLight* light = NULL;
 	list<CGameObject*> DynamicObject;//애니메이션이 되는 오브젝트들이 여기에 모임.
 
-//서버추가
-public :
-	Player_Data* Get_PlayerServerData(unsigned int id);
-	Player_Data* Get_MonsterServerData(unsigned int id);
 
-	//서버에서 받은 PlayerData를 이용하면 이 함수는 없어도됨
-	//PlayerData를 기반으로 Player의 값이 달라질것이므로
-	CGameObject* Get_GameObject{ nullptr };
 };
 
