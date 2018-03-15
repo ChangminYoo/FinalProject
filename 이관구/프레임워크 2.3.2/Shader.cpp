@@ -1,3 +1,4 @@
+
 #include "Shader.h"
 
 
@@ -239,51 +240,81 @@ void Shader::Render(ID3D12GraphicsCommandList * CommandList, const GameTimer& gt
 	SetShader(CommandList, false);
 	for (auto b = DynamicObject->cbegin(); b != DynamicObject->cend(); b++)
 	{
-		if ((*b)->Blending)
+		if (isRender(*b) == true)
 		{
-			//블랜딩용 PSO 연결
-			SetShader(CommandList, true);
-			//블랜딩용 PSO로 그림
-			(*b)->Render(CommandList, gt);
-			//다시 원상태 PSO로 연결
-			SetShader(CommandList, false);
-		}
-		else//블랜딩 안씀
+			if ((*b)->Blending)
+			{
+				//블랜딩용 PSO 연결
+				SetShader(CommandList, true);
+				//블랜딩용 PSO로 그림
 				(*b)->Render(CommandList, gt);
+				//다시 원상태 PSO로 연결
+				SetShader(CommandList, false);
+			}
+			else//블랜딩 안씀
+				(*b)->Render(CommandList, gt);
+		}
 	}
 	
 	//이제 이렇게 그릴때 마다 그리기전에 옳바른 PSO를 연결하고, 오브젝트들을 그린다.
 	//투사체또한 그린다.
 	for (auto b = BulletObject->cbegin(); b != BulletObject->cend(); b++)
 	{
-		if ((*b)->Blending)
+		if (isRender(*b) == true)
 		{
-			//블랜딩용 PSO 연결
-			SetShader(CommandList, true);
-			//블랜딩용 PSO로 그림
-			(*b)->Render(CommandList, gt);
-			//다시 원상태 PSO로 연결
-			SetShader(CommandList, false);
+			if ((*b)->Blending)
+			{
+				//블랜딩용 PSO 연결
+				SetShader(CommandList, true);
+				//블랜딩용 PSO로 그림
+				(*b)->Render(CommandList, gt);
+				//다시 원상태 PSO로 연결
+				SetShader(CommandList, false);
+			}
+			else//블랜딩 안씀
+				(*b)->Render(CommandList, gt);
 		}
-		else//블랜딩 안씀
-			(*b)->Render(CommandList, gt);
 	}
 
 	for (auto b = StaticObject->cbegin(); b != StaticObject->cend(); b++)
 	{
-		if ((*b)->Blending)
+		if (isRender(*b) == true)
 		{
-			//블랜딩용 PSO 연결
-			SetShader(CommandList, true);
-			//블랜딩용 PSO로 그림
-			(*b)->Render(CommandList, gt);
-			//다시 원상태 PSO로 연결
-			SetShader(CommandList, false);
+			if ((*b)->Blending)
+			{
+				//블랜딩용 PSO 연결
+				SetShader(CommandList, true);
+				//블랜딩용 PSO로 그림
+				(*b)->Render(CommandList, gt);
+				//다시 원상태 PSO로 연결
+				SetShader(CommandList, false);
+			}
+			else//블랜딩 안씀
+				(*b)->Render(CommandList, gt);
 		}
-		else//블랜딩 안씀
-			(*b)->Render(CommandList, gt);
 	}
 
+
+}
+
+bool Shader::isRender(CGameObject * obj)
+{
+	if (player != NULL)
+	{
+		auto v = Float3Add(XMFloat4to3(obj->CenterPos),player->Camera.CamData.EyePos,false);
+
+
+		float l=FloatLength(v );
+		if (l > player->Camera.mFarZ)//최대로 볼수있는것보다 멀리있으면
+			return false;
+
+		v = Float3Normalize(v);
+		auto d=player->PlayerObject->Lookvector.x*v.x + player->PlayerObject->Lookvector.y*v.y+ player->PlayerObject->Lookvector.z*v.z;
+		if (d < 0)//내적 결과가 뒤에있을경우
+			return false;
+	}
+
+	return true;
 
 }
 

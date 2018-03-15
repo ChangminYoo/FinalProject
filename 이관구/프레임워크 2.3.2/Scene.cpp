@@ -21,6 +21,7 @@ Scene::Scene(ID3D12Device * m_Device, ID3D12GraphicsCommandList * m_DC, float cw
 	Shaders = new Shader;
 	CreateShaderObject();
 	Player = new CPlayer(m_Device, m_DC, cw / ch, e, a, u);
+	Shaders->player = Player;//이제 플레이어도 설정되야 한다.
 	light = new CLight(m_Device, m_DC);
 	CreateGameObject();
 

@@ -47,12 +47,13 @@ public:
 	XMFLOAT3 offAt;//원점에서의 At위치
 	
 	UploadBuffer<CameraData>* ConstBuffer = nullptr;	//월드행렬과 커스텀데이터를 저장하기위한 버퍼	
+	float mNearZ = 0.0f;
+	float mFarZ = 0.0f;
 private:
 
 	
 	// Cache frustum properties.
-	float mNearZ = 0.0f;
-	float mFarZ = 0.0f;
+
 	float mAspect = 0.0f;
 	float mFovY = 0.0f;
 	float aspect = 0;

@@ -210,7 +210,7 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 					{
 						//기존에 W키를 눌러서 움직인만큼 되돌려보내야함.
 	
-						XMStoreFloat4(&PlayerObject->CenterPos, tempP);
+w						XMStoreFloat4(&PlayerObject->CenterPos, tempP);
 						PlayerObject->pp->SetPosition(PlayerObject->CenterPos);
 
 					}

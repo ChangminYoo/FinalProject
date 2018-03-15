@@ -1,12 +1,14 @@
 #pragma once
 #include "d3dUtil.h"
 #include"CGameObject.h"
+#include"CPlayer.h"
 using Microsoft::WRL::ComPtr;
 
 
 class Shader
 {
 public:
+	CPlayer * player=NULL;
 	Shader();
 	~Shader();
 	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout();//입력레이아웃생성
@@ -22,6 +24,7 @@ public:
 	virtual void SetShader(ID3D12GraphicsCommandList* commandlist,bool isBlend=false);
 	virtual void SetSkyShader(ID3D12GraphicsCommandList* commandlist);
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList,const GameTimer& gt);
+	virtual bool isRender(CGameObject* obj);
 protected:
 	ComPtr<ID3DBlob> VertexShader = nullptr;
 	ComPtr<ID3DBlob> PixelShader = nullptr;
