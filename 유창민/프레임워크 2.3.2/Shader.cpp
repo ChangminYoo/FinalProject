@@ -229,6 +229,8 @@ void Shader::SetSkyShader(ID3D12GraphicsCommandList * commandlist)
 	commandlist->SetPipelineState(SkyPSO.Get());
 }
 
+
+
 void Shader::Render(ID3D12GraphicsCommandList * CommandList, const GameTimer& gt)
 {
 	//이제 이렇게 그릴때 마다 그리기전에 옳바른 PSO를 연결하고, 오브젝트들을 그린다.

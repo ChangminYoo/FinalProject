@@ -54,6 +54,7 @@ struct Light
 cbuffer ObjectData : register(b0)
 {
 	float4x4 gWorld;
+	float4x4 gTexTransform;
 	float Scale;
 	float SpecularParamater;
 	int isAnimation;

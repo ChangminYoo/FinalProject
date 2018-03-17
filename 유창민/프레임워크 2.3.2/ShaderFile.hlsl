@@ -25,6 +25,16 @@ struct VertexOut
 
 };
 
+struct GeoOut
+{
+	float4 PosH  : SV_POSITION;
+	float3 Normal : NORMAL;
+	float2 Tex : TEXTURE;
+	uint   PrimID : SV_PrimitiveID;
+
+};
+
+
 VertexOut VS(VertexIn vin)
 {
 
@@ -109,12 +119,10 @@ float4 PS(VertexOut pin) : SV_Target
 	//텍스쳐의 기본 색상 - 샘플러를 사용하여 값 추출
 	textureColor = gDiffuseMap.Sample(gsamAnisotropicWrap, pin.Tex);
 	
-	
-		viewDirection = gLights[0].Position - pin.PosH.xyz;
+		viewDirection = gEyePos - pin.PosH.xyz;
 		viewDirection = normalize(viewDirection);
 
-
-
+		
 		lightDir = -(gLights[0].Direction);
 		lightDir = normalize(lightDir);
 		litColor = gAmbientLight;
@@ -160,4 +168,15 @@ float4 PS(VertexOut pin) : SV_Target
 
 }
 	
-
+//[maxvertexcount(6)]
+//void GS(point VertexOut gin[1], uint primID : SV_PrimitiveID, inout TriangleStream<GeoOut> triStream)
+//{
+//	float3 up = float3(0.0f, 1.0f, 0.0f);
+//	float3 look = gEyePos - gin[0].PosH;
+//	look.y = 0.0f;				// xz평면에 투영
+//	look = normalize(look);
+//	float3 right = cross(up, look);
+//
+//
+//
+//}

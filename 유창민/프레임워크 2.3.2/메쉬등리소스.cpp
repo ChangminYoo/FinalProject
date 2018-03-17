@@ -36,3 +36,10 @@ unordered_map<string, unique_ptr<CTexture>> CubeObject::Textures;//텍스처들을 저
 CMesh  CubeObject::Mesh;//나중에 메쉬는 static으로 둬야함
 ComPtr<ID3D12DescriptorHeap> CubeObject::SrvDescriptorHeap;//텍스처 용 힙
 CMaterial CubeObject::Mat;
+
+//--------------------------------------------------------------------------------------
+bool GridObject::CreateMesh = false;
+unordered_map<string, unique_ptr<CTexture>> GridObject::Textures;//텍스처들을 저장함
+CMesh  GridObject::Mesh;//나중에 메쉬는 static으로 둬야함
+ComPtr<ID3D12DescriptorHeap> GridObject::SrvDescriptorHeap;//텍스처 용 힙
+CMaterial GridObject::Mat;

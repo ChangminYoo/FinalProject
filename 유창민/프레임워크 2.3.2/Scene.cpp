@@ -156,15 +156,18 @@ void Scene::CreateGameObject()
 	resource = new SphereObject(device, commandlist, XMFLOAT4(0, 0, 0, 0));
 	delete resource;
 	resource = new CubeObject(device, commandlist, XMFLOAT4(0, 0, 0, 0));
-
+	delete resource;
+	resource = new GridObject(device, commandlist, XMFLOAT4(0, 0, 0, 0));
+	delete resource;
 	//--------------------------------------------------//
 	
-	SkyObject = new SphereObject(device, commandlist, XMFLOAT4(30, 0, 0, 0));
+	SkyObject = new SphereObject(device, commandlist, XMFLOAT4(0, 0, 0, 0));
 
-	DynamicObject.push_back(new CCubeManObject(device, commandlist,XMFLOAT4(0,0,0,0)));
-	DynamicObject.push_back(new CCubeManObject(device, commandlist, XMFLOAT4(0, 20, 0, 0)));
+	DynamicObject.push_back(new CCubeManObject(device, commandlist,XMFLOAT4(20, 0, 0, 0)));
+	DynamicObject.push_back(new CCubeManObject(device, commandlist, XMFLOAT4(0, 0, 0, 0)));
 
 	StaticObject.push_back(new CubeObject(device, commandlist, XMFLOAT4(-20, 0, 0, 0)));
+	StaticObject.push_back(new GridObject(device, commandlist, XMFLOAT4(0, 0, 0, 0)));
 
 //	DynamicObject.push_back(new CCubeManObject(device, commandlist, XMFLOAT4(40,60, 0, 0)));
 	//플레이어의 오브젝트 설정. 이건 나중에 바꿔야함.
@@ -215,7 +218,7 @@ void Scene::Tick(const GameTimer & gt)
 	for (auto i = DynamicObject.begin(); i != DynamicObject.end();)
 	{
 
-		if ((*i)->DelObj==true)
+		if ((*i)->DelObj == true)
 		{
 			delete *i;//실제 게임오브젝트의 메모리 해제
 			i = DynamicObject.erase(i);//리스트상에서 해당 요소를 지움
@@ -245,7 +248,7 @@ void Scene::Tick(const GameTimer & gt)
 		if ((*i)->DelObj == true)
 		{
 			delete *i;//실제 게임오브젝트의 메모리 해제
-			i = BulletObject.erase(i);//리스트상에서 해당 요소를 지움
+			i = StaticObject.erase(i);//리스트상에서 해당 요소를 지움
 
 
 		}
