@@ -433,8 +433,11 @@ void MiniPhysicsEngineG9::PhysicsPoint::ResolveVelocity(PhysicsPoint & p2, XMFLO
 	//충돌후 속도 변화는 다음과 같다.
 	//1. 충돌전 분리속도를 구하고
 	//2. 충돌 후 분리속도를 구한다 Vf=-eVi 다.
-	//3. 충격량 크기를 계산한다.
+	//3. 충격량 크기를 계산한다. W= M(Vf-Vi)
 	//4. 충격량을 계산한다. 충격량 크기 * CollisionN이다. 기본적으로 CollisionN은 나의위치-상대방위치를 노멀화한것.
+	//5. 최종 실속도 = 기존 실속도 + 충격량(MV)/M1 또는 M2 왜 이렇게 되냐면 최종적으로 움직이는 크기는 나의 질량에 반비례
+	//해야하기 때문이다. 예를들어 M=Inverse(Inverse(M1)+Inverse(M2)) 이고, M1=1 M2=9였으면 M=9/10 가 나온다.
+	//이걸 계산하면 M1인 녀석은 0.9만큼 밀리고 M2는 0.1 만큼 밀린다.
 	//다만 키보드 입력시 밀려나야하는방향은 내가 키보드 누른 키의 반대방향의 속도다.
 
 	
@@ -907,20 +910,23 @@ void MiniPhysicsEngineG9::RigidBody::integrate(float DeltaTime)
 
 	//가속도 구하고 속도 구하고 마찰로 감속시킨후 위치를 구한다.
 
-	accel = totalforce * InverseMass;
+	//델타타임으로 나누는 이유는 프레임이 어떻게되든 같은 가속도를 계산하기 위해.
+	//사실 힘은 항상 가해지는게 같으면 관계없는데 1회성으로 가해지면 문제가 생김.
+	accel = totalforce * InverseMass/DeltaTime;
 
 	//가속도를 통해 속도를 추가한다.
-	velocity = velocity + accel * DeltaTime;
+	velocity = velocity + accel*DeltaTime ;
+	
+	
 
 	// 댐핑지수를 통해 감속한다.
-	velocity *= powf(damping, DeltaTime);
+	velocity *= powf(damping, DeltaTime*5);
 
 	//감속시킨게 엡실론 정도면 속도를 0으로 만듬.
 	float e = 0;
 	XMStoreFloat(&e, XMVector3Length(velocity));
 	if (e <= MMPE_EPSILON)
 		velocity = XMVectorZero();
-
 
 	//속도와 가속도를 적분해 중점을 구한다.
 
@@ -941,13 +947,15 @@ void MiniPhysicsEngineG9::RigidBody::integrate(float DeltaTime)
 	//각가속도 구하고 각속도 구하고 마찰로 감속시킨후 방햐을 구한다.
 
 	// A = T/I == T * Inverse I
-	XMVECTOR Aaccel = XMVector4Transform(totaltorque,IT);
+	//델타타임으로 나누는 이유는 프레임이 어떻게되든 같은 가속도를 계산하기 위해.
+	//사실 힘은 항상 가해지는게 같으면 관계없는데 1회성으로 가해지면 문제가 생김.
+	XMVECTOR Aaccel = XMVector4Transform(totaltorque,IT)/DeltaTime;
 
 	//각속도를 구함.
 	Avelocity += Aaccel * DeltaTime;
 	
 	// 댐핑지수를 통해 감속한다.
-	Avelocity *= powf(Angulardamping, DeltaTime);
+	Avelocity *= powf(Angulardamping, DeltaTime * 5);
 
 	//감속시킨게 엡실론 정도면 속도를 0으로 만듬.
 	float av = 0;

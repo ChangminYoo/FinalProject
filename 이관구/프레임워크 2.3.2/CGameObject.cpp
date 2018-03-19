@@ -70,8 +70,13 @@ void CGameObject::ToDamage(float Damage)
 	{
 		gamedata.HP -= fabsf(Damage);
 		if (gamedata.HP <= 0)
-			DelObj = true;
+			ToDead();
 	}
+}
+
+void CGameObject::ToDead()
+{
+	DelObj = true;
 }
 
 void CGameObject::UpdatePPosCenterPos()
@@ -218,10 +223,11 @@ void CCubeManObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList*
 	Mesh.CreateIndexBuffer(m_Device, commandlist);
 
 	//애니메이션 로드
+
 	LoadMD5Anim(m_Device, L".\\플레이어메쉬들\\cIdle.MD5ANIM",&Mesh, this, animations);//0
 	LoadMD5Anim(m_Device, L".\\플레이어메쉬들\\cRunning.MD5ANIM", &Mesh, this, animations);//1
 	LoadMD5Anim(m_Device, L".\\플레이어메쉬들\\cAttack.MD5ANIM", &Mesh, this, animations);//2
-	
+	LoadMD5Anim(m_Device, L".\\플레이어메쉬들\\cDeath.MD5ANIM", &Mesh, this, animations);//3	
 }
 
 void CCubeManObject::SetMaterial(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
@@ -589,7 +595,7 @@ void LoadTexture(ID3D12Device* device, ID3D12GraphicsCommandList* commandlist,CG
 	{
 		srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 		srvDesc.Texture2D.MostDetailedMip = 0;
-		srvDesc.Texture2D.MipLevels = Texs->GetDesc().MipLevels;
+		srvDesc.Texture2D.MipLevels = 1;// Texs->GetDesc().MipLevels;
 		srvDesc.Texture2D.ResourceMinLODClamp = 0.0f;
 		srvDesc.Format = Texs->GetDesc().Format;
 	}
@@ -904,10 +910,10 @@ CubeObject::CubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 	rb->SetHalfBox(5, 5, 5);//충돌 박스의 x,y,z 크기
 	rb->SetDamping(0.8f,0.8f);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
 	rb->SetBounce(false);//튕기지 않는다.
-	rb->SetMass(5);//고정된 물체는 무게가 무한이다.
+	rb->SetMass(1);//고정된 물체는 무게가 무한이다.
 	rb->SetIMoment(5, 5, 5);
 	rb->SetOrient(&Orient);
-	XMFLOAT3 testForce{ 0,0,1000 };
+	XMFLOAT3 testForce{ 0,0,50 };
 	XMFLOAT3 testPoint{ -15,0,-5 };
 	rb->AddForcePoint(testForce,testPoint);
 }
@@ -938,7 +944,7 @@ void CubeObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer
 {
 	//테스트용 리지드 바디 코드.
 	rb->integrate(gt.DeltaTime());
-
+	 
 	//게임오브젝트의 렌더링은 간단하다. 
 	//텍스처를 연결하고, 월드행렬을 연결한다.
 

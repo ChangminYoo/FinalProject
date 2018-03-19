@@ -309,8 +309,9 @@ bool Shader::isRender(CGameObject * obj)
 			return false;
 
 		v = Float3Normalize(v);
-		auto d=player->PlayerObject->Lookvector.x*v.x + player->PlayerObject->Lookvector.y*v.y+ player->PlayerObject->Lookvector.z*v.z;
-		if (d < -0.4)//내적 결과가 뒤에있을경우
+		auto ae = Float3Add(player->Camera.CamData.At, player->Camera.CamData.EyePos, false);
+		auto d=ae.x*v.x + ae.y*v.y+ ae.z*v.z;
+		if (d < -0.15)//내적 결과가 뒤에있을경우
 			return false;
 	}
 
