@@ -910,9 +910,7 @@ void MiniPhysicsEngineG9::RigidBody::integrate(float DeltaTime)
 
 	//가속도 구하고 속도 구하고 마찰로 감속시킨후 위치를 구한다.
 
-	//델타타임으로 나누는 이유는 프레임이 어떻게되든 같은 가속도를 계산하기 위해.
-	//사실 힘은 항상 가해지는게 같으면 관계없는데 1회성으로 가해지면 문제가 생김.
-	accel = totalforce * InverseMass/DeltaTime;
+	accel = totalforce * InverseMass;
 
 	//가속도를 통해 속도를 추가한다.
 	velocity = velocity + accel*DeltaTime ;
@@ -920,7 +918,7 @@ void MiniPhysicsEngineG9::RigidBody::integrate(float DeltaTime)
 	
 
 	// 댐핑지수를 통해 감속한다.
-	velocity *= powf(damping, DeltaTime*5);
+	velocity *= powf(damping, DeltaTime);
 
 	//감속시킨게 엡실론 정도면 속도를 0으로 만듬.
 	float e = 0;
@@ -947,15 +945,14 @@ void MiniPhysicsEngineG9::RigidBody::integrate(float DeltaTime)
 	//각가속도 구하고 각속도 구하고 마찰로 감속시킨후 방햐을 구한다.
 
 	// A = T/I == T * Inverse I
-	//델타타임으로 나누는 이유는 프레임이 어떻게되든 같은 가속도를 계산하기 위해.
-	//사실 힘은 항상 가해지는게 같으면 관계없는데 1회성으로 가해지면 문제가 생김.
-	XMVECTOR Aaccel = XMVector4Transform(totaltorque,IT)/DeltaTime;
+
+	XMVECTOR Aaccel = XMVector4Transform(totaltorque, IT);
 
 	//각속도를 구함.
 	Avelocity += Aaccel * DeltaTime;
 	
 	// 댐핑지수를 통해 감속한다.
-	Avelocity *= powf(Angulardamping, DeltaTime * 5);
+	Avelocity *= powf(Angulardamping, DeltaTime );
 
 	//감속시킨게 엡실론 정도면 속도를 0으로 만듬.
 	float av = 0;

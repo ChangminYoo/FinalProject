@@ -908,14 +908,17 @@ CubeObject::CubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 	rb = new RigidBody();
 	rb->SetPosition(&CenterPos);//이 값은 항상 갱신되야한다.
 	rb->SetHalfBox(5, 5, 5);//충돌 박스의 x,y,z 크기
-	rb->SetDamping(0.8f,0.8f);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
+	rb->SetDamping(0.6f,0.6f);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
 	rb->SetBounce(false);//튕기지 않는다.
 	rb->SetMass(1);//고정된 물체는 무게가 무한이다.
 	rb->SetIMoment(5, 5, 5);
 	rb->SetOrient(&Orient);
-	XMFLOAT3 testForce{ 0,0,50 };
+	XMFLOAT3 testForce{ 0,0,300 };
 	XMFLOAT3 testPoint{ -15,0,-5 };
+	//힘을 한번만 가한다. 여기서 힘을 한번만 가한다의 단위는 F를 0.1초만큼 가하는것을 말한다.
+	//애초에 힘을 한번만 가한다라고 정의할수는 없으며 힘은 F만큼 n초동안 가하는게 맞는말이다.
 	rb->AddForcePoint(testForce,testPoint);
+	rb->integrate(0.1f);
 }
 
 void CubeObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
