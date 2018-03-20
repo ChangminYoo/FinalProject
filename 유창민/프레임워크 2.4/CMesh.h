@@ -10,8 +10,6 @@ class CMesh
 public:
 	CVertex * SubResource;	//정점의 배열. 서브리소스다. 정점버퍼에 채워질값
 	
-	BillVertex * BsubResource;
-	
 	UINT* Index;	//인덱스 배열
 
 	ComPtr<ID3D12Resource> VertexBuffer;//정점버퍼

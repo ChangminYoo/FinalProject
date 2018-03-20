@@ -174,9 +174,12 @@ void Scene::CreateGameObject()
 	DynamicObject.push_back(new CCubeManObject(device, commandlist, XMFLOAT4(0, 0, 0, 0)));
 
 	StaticObject.push_back(new CubeObject(device, commandlist, XMFLOAT4(-20, 0, 0, 0)));
+	StaticObject.push_back(new CubeObject(device, commandlist, XMFLOAT4(0, 0, 40, 0)));
+	StaticObject.push_back(new CubeObject(device, commandlist, XMFLOAT4(-10, 0, -20, 0)));
+
 	StaticObject.push_back(new GridObject(device, commandlist, XMFLOAT4(0, 0, 0, 0)));
 
-	BbObject.push_back(new TreeObject(device, commandlist, XMFLOAT4(10, 0, 0, 0)));
+	BbObject.push_back(new TreeObject(device, commandlist, XMFLOAT4(0, 0, 0, 0)));
 	//BbObject.push_back(new BillboardObject(device, commandlist, XMFLOAT4(80, 0, 10, 0)));
 
 

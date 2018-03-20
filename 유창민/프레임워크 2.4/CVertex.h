@@ -44,22 +44,3 @@ public:
 	}
 };
 
-
-class BillVertex
-{
-public:
-	XMFLOAT3 V;
-	XMFLOAT2 Size;
-
-	BillVertex(void);
-	BillVertex(XMFLOAT3 v)
-	{
-
-		V = v;
-		Size = XMFLOAT2(0, 0);
-
-	}
-
-	~BillVertex(void);
-
-};

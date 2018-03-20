@@ -68,8 +68,13 @@ void CGameObject::ToDamage(float Damage)
 	{
 		gamedata.HP -= fabsf(Damage);
 		if (gamedata.HP <= 0)
-			DelObj = true;
+			ToDead();
 	}
+}
+
+void CGameObject::ToDead()
+{
+	DelObj = true;
 }
 
 void CGameObject::UpdatePPosCenterPos()
@@ -260,7 +265,7 @@ void CCubeManObject::Render(ID3D12GraphicsCommandList * commandlist, const GameT
 	
 
 	if(Textures.size()>0)
-		SetTexture(commandlist,SrvDescriptorHeap,false);
+		SetTexture(commandlist,SrvDescriptorHeap, Textures["CubeManTex"].get()->Resource.Get(), false);
 	UpdateConstBuffer(commandlist);
 	
 	Mat.UpdateConstantBuffer(commandlist);
@@ -305,13 +310,11 @@ void CCubeManObject::Collision(list<CGameObject*>* collist, float DeltaTime)
 					//상대속도 방향을 구한다. A-B
 					cn = Float3Add(pp->GetPosition(), (*(*i)->pp).GetPosition(), false);
 					cn = Float3Normalize(cn);
-				
-					
-					
+								
 				}
 				else//고정된 물체면 충돌한 평면의 노멀방향으로 cn을 설정할것.
 				{
-
+					cn = pp->pAxis;
 				}
 				
 				
@@ -451,7 +454,7 @@ void CZombieObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTi
 
 
 	if (Textures.size()>0)
-		SetTexture(commandlist, SrvDescriptorHeap, false);
+		SetTexture(commandlist, SrvDescriptorHeap, Textures["ZombieTex"].get()->Resource.Get(), false);
 	UpdateConstBuffer(commandlist);
 
 	Mat.UpdateConstantBuffer(commandlist);
@@ -497,12 +500,10 @@ void CZombieObject::Collision(list<CGameObject*>* collist, float DeltaTime)
 					cn = Float3Add(pp->GetPosition(), (*(*i)->pp).GetPosition(), false);
 					cn = Float3Normalize(cn);
 
-
-
 				}
 				else//고정된 물체면 충돌한 평면의 노멀방향으로 cn을 설정할것.
 				{
-
+					cn = pp->pAxis;
 				}
 
 
@@ -530,8 +531,18 @@ void CZombieObject::EndAnimation(int nAni)
 
 //---------------------------------------------------------------------------------------------------------------------------------
 
-void SetTexture(ID3D12GraphicsCommandList * commandlist, ComPtr<ID3D12DescriptorHeap>& SrvDescriptorHeap, bool isCubeMap)
+void SetTexture(ID3D12GraphicsCommandList * commandlist, ComPtr<ID3D12DescriptorHeap>& SrvDescriptorHeap, ID3D12Resource* texture, bool isCubeMap)
 {
+	static ID3D12Resource* OldResource = NULL;
+
+	if (OldResource == NULL)
+		OldResource = texture;
+	else
+	{
+		commandlist->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(OldResource,
+			D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE));
+	}
+
 	//텍스처는 테이블을 쓸것이므로 힙과 테이블 두개를 연결해야함.
 	ID3D12DescriptorHeap* descriptorHeaps[] = { SrvDescriptorHeap.Get() };
 	commandlist->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
@@ -544,6 +555,8 @@ void SetTexture(ID3D12GraphicsCommandList * commandlist, ComPtr<ID3D12Descriptor
 	else
 		commandlist->SetGraphicsRootDescriptorTable(1, tex);
 
+	commandlist->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(texture,
+		D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE));
 }
 
 void LoadTexture(ID3D12Device* device, ID3D12GraphicsCommandList* commandlist,CGameObject* obj, unordered_map<string, unique_ptr<CTexture>>& Textures, ComPtr<ID3D12DescriptorHeap>& SrvDescriptorHeap, string texturename, wstring FileName, bool isCubeMap)
@@ -610,7 +623,7 @@ BulletCube::BulletCube(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 		Mesh.Index = NULL;
 		Mesh.SubResource = NULL;
 
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "ZombieTex", L"textures/human/Male White Wizard 05 Red.dds", false);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "BulletTex", L"textures/human/Male White Wizard 05 Red.dds", false);
 		SetMesh(m_Device, commandlist);
 		SetMaterial(m_Device, commandlist);
 		CreateMesh = true;
@@ -701,7 +714,7 @@ void BulletCube::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer
 	//텍스처를 연결하고, 월드행렬을 연결한다.
 
 	if (Textures.size()>0)
-		SetTexture(commandlist, SrvDescriptorHeap,false);
+		SetTexture(commandlist, SrvDescriptorHeap, Textures["BulletTex"].get()->Resource.Get(), false);
 	UpdateConstBuffer(commandlist);
 
 	Mat.UpdateConstantBuffer(commandlist);
@@ -737,12 +750,10 @@ void BulletCube::Collision(list<CGameObject*>* collist, float DeltaTime)
 					cn = Float3Add(pp->GetPosition(), (*(*i)->pp).GetPosition(), false);
 					cn = Float3Normalize(cn);
 
-
-
 				}
 				else//고정된 물체면 충돌한 평면의 노멀방향으로 cn을 설정할것.
 				{
-
+					cn = pp->pAxis;
 				}
 
 				//충돌후 속도를 계산함.
@@ -828,7 +839,7 @@ void SphereObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTim
 	//텍스처를 연결하고, 월드행렬을 연결한다.
 
 	if (Textures.size()>0)
-		SetTexture(commandlist, SrvDescriptorHeap, true);
+		SetTexture(commandlist, SrvDescriptorHeap, Textures["MapTex"].get()->Resource.Get(), true);
 	UpdateConstBuffer(commandlist);
 
 	//이후 그린다.
@@ -852,7 +863,7 @@ CubeObject::CubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 		Mesh.Index = NULL;
 		Mesh.SubResource = NULL;
 
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "BoxTex", L"textures/tile.dds", false);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "CubeTex", L"textures/bricks2.dds", false);
 		SetMesh(m_Device, commandlist);
 		SetMaterial(m_Device, commandlist);
 		CreateMesh = true;
@@ -935,7 +946,7 @@ void CubeObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer
 	//텍스처를 연결하고, 월드행렬을 연결한다.
 
 	if (Textures.size()>0)
-		SetTexture(commandlist, SrvDescriptorHeap,false);
+		SetTexture(commandlist, SrvDescriptorHeap, Textures["CubeTex"].get()->Resource.Get(), false);
 	UpdateConstBuffer(commandlist);
 
 	//이후 그린다.
@@ -958,7 +969,7 @@ GridObject::GridObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 		Mesh.Index = NULL;
 		Mesh.SubResource = NULL;
 
-		//LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "GridTex", L"textures/tile.dds", false);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "GridTex", L"textures/tile.dds", false);
 		SetMesh(m_Device, commandlist);
 		SetMaterial(m_Device, commandlist);
 		CreateMesh = true;
@@ -1018,7 +1029,7 @@ void GridObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer
 	//텍스처를 연결하고, 월드행렬을 연결한다.
 
 	if (Textures.size()>0)
-		SetTexture(commandlist, SrvDescriptorHeap, false);
+		SetTexture(commandlist, SrvDescriptorHeap, Textures["GridTex"].get()->Resource.Get(), false);
 	UpdateConstBuffer(commandlist);
 
 	//이후 그린다.
@@ -1034,15 +1045,10 @@ void GridObject::Collision(list<CGameObject*>* collist, float DeltaTime)
 
 TreeObject::TreeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, cp)
 {
-	if (CreateMesh == false)
-	{
-		Mesh.Index = NULL;
-		Mesh.BsubResource = NULL;
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "TreeTex", L"textures/treearray.dds", false);
-		SetMesh(m_Device, commandlist);
-		CreateMesh = true;
 
-	}
+	ObjData.isAnimation = 0;
+	ObjData.Scale = 20.0f;
+	ObjData.SpecularParamater = 0.3f;//스페큘러를 낮게준다.
 
 
 	//게임관련 데이터들
@@ -1052,24 +1058,27 @@ TreeObject::TreeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 	gamedata.GodMode = true;
 	gamedata.Speed = 0;
 
+	if (CreateMesh == false)
+	{
+		Mesh.Index = NULL;
+		Mesh.SubResource = NULL;
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "TreeTex", L"textures/treearray.dds", false);
+		SetMesh(m_Device, commandlist);
+		CreateMesh = true;
 
-	//질점오브젝트 사용시 필요한 데이터들 설정
-	//pp = new PhysicsPoint();
-	//pp->SetPosition(CenterPos);//이 값은 항상 갱신되야한다.
-	//pp->SetHalfBox(0, 10, 0);//충돌 박스의 x,y,z 크기
-	//pp->SetDamping(1);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
-	//pp->SetBounce(false);//튕기지 않는다.
-	//pp->SetMass(INFINITY);//고정된 물체는 무게가 무한이다.
+	}
+
+	UpdateLookVector();
 }
 
 void TreeObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
 {
-	UINT numOfTree = 1;
+	int numOfTree = 10;
 
 
-	Mesh.BsubResource = new BillVertex[numOfTree];
+	Mesh.SubResource = new CVertex[numOfTree];
 	Mesh.nVertex = numOfTree;
-	Mesh.nStride = sizeof(BillVertex);
+	Mesh.nStride = sizeof(CVertex);
 	Mesh.nOffset = 0;
 
 	
@@ -1079,23 +1088,22 @@ void TreeObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * co
 	Mesh.nisize = sizeof(UINT);
 
 
-
-	for (UINT i = 0; i < numOfTree; ++i)
+	//여기서 좌표를 일괄적으로 설정 할 수 있다
+	for (int i = 0; i < numOfTree; ++i)
 	{
-		
-		float x = 10.0f;
-		float y = 0.0f;
-		float z = 20.0f;
+				
+		float x = MathHelper::RandF(-50.0f, 50.0f);
+		float z = MathHelper::RandF(-50.0f, 50.0f);
 
+		float y = ObjData.Scale * 0.5;
 
-		Mesh.BsubResource[i].V = XMFLOAT3(x, y, z);
-		Mesh.BsubResource[i].Size = XMFLOAT2(20.0f, 20.0f);
+		Mesh.SubResource[i].V = XMFLOAT3(x, y, z);
 
 		Mesh.Index[i] = i;
 	}
 
-	Mesh.VertexBuffer = d3dUtil::CreateDefaultBuffer(m_Device, commandlist, (void*)Mesh.BsubResource, Mesh.nStride*Mesh.nVertex, Mesh.VertexInitBuffer);
-	Mesh.IndexBuffer = d3dUtil::CreateDefaultBuffer(m_Device, commandlist, (void*)Mesh.Index, Mesh.nisize*Mesh.nindex, Mesh.IndexInitBuffer);
+	Mesh.CreateVertexBuffer(m_Device, commandlist);
+	Mesh.CreateIndexBuffer(m_Device, commandlist);
 
 }
 
@@ -1106,7 +1114,7 @@ void TreeObject::SetMaterial(ID3D12Device * m_Device, ID3D12GraphicsCommandList 
 void TreeObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer & gt)
 {
 	if (Textures.size()>0)
-		SetTexture(commandlist, SrvDescriptorHeap, false);	
+		SetTexture(commandlist, SrvDescriptorHeap, Textures["TreeTex"].get()->Resource.Get(), false);
 	UpdateConstBuffer(commandlist);
 
 

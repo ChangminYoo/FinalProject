@@ -321,8 +321,9 @@ bool Shader::isRender(CGameObject * obj)
 			return false;
 
 		v = Float3Normalize(v);
-		auto d = player->PlayerObject->Lookvector.x*v.x + player->PlayerObject->Lookvector.y*v.y + player->PlayerObject->Lookvector.z*v.z;
-		if (d < -0.4)//내적 결과가 뒤에있을경우
+		auto ae = Float3Add(player->Camera.CamData.At, player->Camera.CamData.EyePos, false);
+		auto d = ae.x*v.x + ae.y*v.y + ae.z*v.z;
+		if (d < -0.15)//내적 결과가 뒤에있을경우
 			return false;
 	}
 
@@ -364,10 +365,9 @@ D3D12_INPUT_LAYOUT_DESC Shader::CreateInputLayout()
 
 D3D12_INPUT_LAYOUT_DESC Shader::CreateInputLayout_GS()
 {
-	UINT nInputElementDescs = 2;
+	UINT nInputElementDescs = 1;
 	D3D12_INPUT_ELEMENT_DESC *pd3dInputElementDescs = new D3D12_INPUT_ELEMENT_DESC[nInputElementDescs];
 	pd3dInputElementDescs[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
-	pd3dInputElementDescs[1] = { "SIZE", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
 
 	D3D12_INPUT_LAYOUT_DESC d3dInputLayoutDesc;
 	d3dInputLayoutDesc.pInputElementDescs = pd3dInputElementDescs;

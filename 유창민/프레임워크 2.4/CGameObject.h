@@ -39,8 +39,10 @@ struct GameData //게임캐릭터의 정보 흔히 알고있는 체력, 데미지, 스피드가 있다.
 class CGameObject//이 클래스를 기본으로 상속받아 다른 오브젝트를 만듬. ex) 검사오브젝트, 좀비오브젝트 등
 {
 public:
+	CGameObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
 	CGameObject();
 	~CGameObject();
+	
 	ID3D12GraphicsCommandList* commandlist;//그래픽커맨드리스트
 	ObjectData ObjData;//월드행렬과 기타 데이터
 	RigidBody* rb = NULL;//리지드 바디 오브젝트. 강체오브젝트는 아직 미완성. 테스트및 구현중이다.
@@ -83,19 +85,23 @@ public:
 	bool Blending = false;
 	CGameObject* LockOn=NULL;
 
-	CGameObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist,XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
 	virtual void SetWorldMatrix();//월드매트릭스 설정.
 	
 	virtual void CreateConstBuffer(ID3D12Device* m_Device);
 	virtual void UpdateConstBuffer(ID3D12GraphicsCommandList* commandlist);
+	
 	virtual void SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist)=0;//셋메시는 메시를 최종적으로 생성한다. 즉 메시를구성하는 정점과 삼각형을구성하는인덱스버퍼생성
 	virtual void SetMaterial(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist) {}
 	virtual void Tick(const GameTimer& gt);
 	virtual void Render(ID3D12GraphicsCommandList* commandlist, const GameTimer& gt);
 	virtual void Collision(list<CGameObject*>* collist, float DeltaTime)=0;
+	
 	virtual void ToDamage(float Damage);
+	virtual void ToDead();
+	
 	void UpdatePPosCenterPos();//질점의 중점으로 센터포즈를 변경함. 반드시 충돌하거나 하면 처리해야함.
 	void UpdateLookVector();//항상호출해줄것.
+	
 	void SetAnimation(int n_Ani);//몇번째 애니메이션을 쓸건가?
 	virtual void EndAnimation(int nAni) {}//애니메이션 종료되었음을 알린다.
 	//게임오브젝트를 상속받고 이것들을 모두 static으로 생성할것.
@@ -108,7 +114,7 @@ public:
 	
 	
 };
-void SetTexture(ID3D12GraphicsCommandList * commandlist, ComPtr<ID3D12DescriptorHeap>& SrvDescriptorHeap, bool isCubeMap);
+void SetTexture(ID3D12GraphicsCommandList * commandlist, ComPtr<ID3D12DescriptorHeap>& SrvDescriptorHeap, ID3D12Resource* texture, bool isCubeMap);
 void LoadTexture(ID3D12Device* device, ID3D12GraphicsCommandList* commandlist, CGameObject* obj, unordered_map<string, unique_ptr<CTexture>>& Textures, ComPtr<ID3D12DescriptorHeap>& SrvDescriptorHeap, string texturename, wstring FileName, bool isCubeMap);
 
 //상속받은 게임오브젝트는 다음과 같은것을 처리할것.

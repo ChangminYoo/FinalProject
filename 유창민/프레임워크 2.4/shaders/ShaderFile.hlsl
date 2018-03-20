@@ -80,7 +80,6 @@ VertexOut VS(VertexIn vin)
 	}
 	
 	//---------------------여기서 부터 시작 --------------------------
-	float4 world;
 
 	vin.PosL = vin.PosL * Scale;
 	vout.PosH = mul(float4(vin.PosL, 1), gWorld);
