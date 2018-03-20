@@ -161,10 +161,14 @@ void Scene::CreateGameObject()
 	
 	SkyObject = new SphereObject(device, commandlist, XMFLOAT4(30, 0, 0, 0));
 
-	DynamicObject.push_back(new CCubeManObject(device, commandlist,XMFLOAT4(0,0,0,0)));
-	DynamicObject.push_back(new CCubeManObject(device, commandlist, XMFLOAT4(0, 20, 0, 0)));
-
+	DynamicObject.push_back(new CCubeManObject(device, commandlist,XMFLOAT4(0,0,-50,0)));
+	DynamicObject.push_back(new CCubeManObject(device, commandlist, XMFLOAT4(30, 0, -40, 0)));
+	DynamicObject.back()->pp->SetBounce(true);
+	DynamicObject.back()->pp->AddForce(-600, 0, 600);
+	DynamicObject.back()->pp->integrate(0.1f);//힘은 지속적으로 가해지는것이며 즉발적이려면 힘을 가한 시간을 통해 계산한다.
 	StaticObject.push_back(new CubeObject(device, commandlist, XMFLOAT4(-20, 0, 0, 0)));
+	StaticObject.push_back(new CubeObject(device, commandlist, XMFLOAT4(-40, 10, 0, 0)));
+	StaticObject.push_back(new CubeObject(device, commandlist, XMFLOAT4(50, 0, -40, 0)));
 
 //	DynamicObject.push_back(new CCubeManObject(device, commandlist, XMFLOAT4(40,60, 0, 0)));
 	//플레이어의 오브젝트 설정. 이건 나중에 바꿔야함.
