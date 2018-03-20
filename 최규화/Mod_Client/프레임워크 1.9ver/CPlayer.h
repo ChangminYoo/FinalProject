@@ -1,6 +1,10 @@
 #pragma once
 #include"CGameObject.h"
 #include"Camera.h"
+#include"server\main_client\AsyncClient.h"
+
+class AsyncClient;
+
 class CPlayer
 {
 public:
@@ -20,5 +24,8 @@ public:
 	float xtheta = 0;
 	float ytheta = 0;
 
+	//Player_Data* m_player_data;
+
+	AsyncClient* m_async_client;
 };
 

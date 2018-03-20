@@ -1,7 +1,9 @@
+#pragma once
 #include "stdafx.h"
 #include "Database\CTextTest.h"
 #include "../../CGameObject.h"
-#include "../../Scene.h"
+
+class Scene;
 
 class AsyncClient
 {
@@ -37,9 +39,6 @@ public:
 	//해당 변경된 gameobject의 데이터를 dynamicobject에 넣어줄것인지? -> 서버에서 데이터를 받을 때마다
 	//변경된 데이터들을 수시로 찾아가며 바꿔야함
 	//processpacket 내부에서 변경된 데이터를 바로 인자로 받은 dynamicobject에 넣어줄것인지
-
-	void ReUpdateData();
-
 
 };
 

@@ -101,6 +101,7 @@ void AsyncClient::RecvPacket()
 			//clients[m_id]->SendPacket(reinterpret_cast<Packet*>(&dis_msg));	
 		}
 
+		cout << endl;
 		//ProcessPacket(Get_RecvBuf);
 		//RecvPacket();
 		/*
@@ -144,5 +145,25 @@ void AsyncClient::RecvPacket()
 
 void AsyncClient::SendPacket(Packet * packet)
 {
+	int packet_size = packet[0];
+	Packet *new_sendBuf = new Packet[packet_size];
+	memcpy(new_sendBuf, packet, packet_size);
+
+	boost::asio::async_write(m_socket, boost::asio::buffer(new_sendBuf, packet_size),
+		[&](const boost::system::error_code& error, size_t bytes_transferred)
+	{
+		if (error != 0)
+		{
+			//if (bytes_transferred != packet_size)
+			//{
+			//	cout << "Client No. [ " << m_id << " ] error code : " << error.value() << endl;
+			//}
+
+			delete[] new_sendBuf;
+			return;
+		}
+
+		RecvPacket();
+	});
 }
 

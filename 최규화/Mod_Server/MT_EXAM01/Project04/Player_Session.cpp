@@ -1,4 +1,5 @@
 #include <random>
+#include <memory>
 #include "Player_Session.h"
 
 #define RAND_CREATE_X_POS 300
@@ -150,9 +151,7 @@ void Player_Session::InitData_To_Client()
 	init_player.player_data = m_playerData;
 	init_player.player_data.Pos = { 0.0f, -1000.0f, 0.0f };
 
-	m_clients[m_id - 1]->SendPacket(reinterpret_cast<Packet*>(&init_player));
-
-	RecvPacket();
+	m_clients[m_id]->SendPacket(reinterpret_cast<Packet*>(&init_player));
 }
 
 
@@ -162,20 +161,28 @@ void Player_Session::SendPacket(Packet* packet)
 	Packet *new_sendBuf = new Packet[packet_size];
 	memcpy(new_sendBuf, packet, packet_size);
 
+	//shared_ptr<Packet*> new_sendBuf(new Packet[packet_size]);
+	//m_new_sendBuf = new Packet[packet_size];
+
 	auto a = *(reinterpret_cast<Player_Data*>(&new_sendBuf[2]));
 
 	//1. async_write_some - 비동기 IO / 받은데이터를 즉시 보냄(따로 버퍼에 저장X)
 	//2. async_write - 비동기 IO / 보내고자 하는 데이터가 모두 버퍼에 담기면 데이터를 보냄
 	boost::asio::async_write(m_socket, boost::asio::buffer(new_sendBuf, packet_size),
-		[=](const boost::system::error_code& error, size_t bytes_transferred)
+		[&](const boost::system::error_code& error, size_t bytes_transferred)
 	{
 		if (error != 0)
 		{
-			cout << "Client No. [ " << m_id << " ] error code : " << error.value() << endl;
+			if (bytes_transferred != packet_size)
+			{
+				cout << "Client No. [ " << m_id << " ] error code : " << error.value() << endl;
+			}
+
+			delete[] new_sendBuf;
+			return;
 		}
-
-		delete[] new_sendBuf;
-
+		
+		RecvPacket();
 	});
 
 	/*
@@ -205,9 +212,16 @@ void Player_Session::RecvPacket()
 {
 	//m_socket.async_read_some(boost::asio::buffer(m_recvBuf, MAX_BUFFER_SIZE),
 	//[=](const boost::system::error_code& error, size_t bytes_transferred)
-	boost::asio::async_read(m_socket, boost::asio::buffer(m_recvBuf, MAX_BUFFER_SIZE),
+
+	//패킷받을 때 버퍼사이즈는 전달된 버퍼의 크기만큼만 할당해야한다
+	boost::asio::async_read(m_socket, boost::asio::buffer(m_recvBuf, 1),
 		[&](const boost::system::error_code& error, size_t bytes_transferred)
-	{
+	{	
+		Packet *temp_buf = Get_RecvBuf();
+		int packet_size = temp_buf[0];
+
+		cout << "Packet_size : " << packet_size << endl;
+
 		if (error != 0)
 		{
 			//에러: 작업이 취소된 경우 
@@ -242,9 +256,18 @@ void Player_Session::RecvPacket()
 			return;
  		}
 
-		ProcessPacket(Get_RecvBuf());
+		if (temp_buf[0] == 0) { return; }
+		else
+		{
+			boost::asio::async_read(m_socket, boost::asio::buffer(temp_buf , packet_size),
+				[&](const boost::system::error_code& error, size_t bytes_transferred)
+			{
+				ProcessPacket(temp_buf);
 
-		RecvPacket();
+				RecvPacket();
+			});
+		}
+
 		/*
 		int cur_data_proc = static_cast<int>(bytes_transferred);
 		Packet* temp_buf = m_recvBuf;

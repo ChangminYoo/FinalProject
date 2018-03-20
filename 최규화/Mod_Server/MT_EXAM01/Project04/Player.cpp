@@ -12,7 +12,7 @@ Player::Player() : m_acceptor(g_io_service,
 	//몬스터 초기화는 게임판마다 실행되어야함
 
 	//1. 초기화
-	Monster_Init();
+	//Monster_Init();
 
 	//2. 클라이언트 연결 및 유저데이터 초기화
 	Accept_Event();
@@ -86,7 +86,6 @@ void Player::Accept_Event()
 			cout << "PORT = " << m_socket.remote_endpoint().port() << endl;
 
 			Player_Session* pNewSession = new Player_Session(m_playerIndex, move(m_socket));
-			++m_playerIndex;
 
 			if (pNewSession->CheckPlayerInfo())
 			{
@@ -98,13 +97,17 @@ void Player::Accept_Event()
 
 				cout << "클라이언트 [ " << m_playerIndex << " ] 데이터할당 완료. " << endl;
 
-				delete pNewSession;
+				++m_playerIndex;
+
+				//delete를 해주면 메모리에러가 남. pNewSession에서 작업을 아직 안 끝냈는데 죽이려고 하기때문에
+				//delete pNewSession;
 			}
 			else
 			{
 				cout << "클라이언트 [ " << m_playerIndex << " ] 데이터할당 오류. " << endl;
 			}
 			
+
 			//요거 이제 처리
 			//session->PostReceive();
 		}
@@ -120,19 +123,23 @@ void Player::Accept_Event()
 void Player::MainLogic()
 { 
 	//g_io_service.run();
-	thread f_thread([]() { g_io_service.run(); });
+	thread f_thread([]() 
+	{ 
+		auto work = make_shared<boost::asio::io_service::work>(g_io_service);
+		g_io_service.run(); 
+	});
 
 	f_thread.join();
-	/*for (auto i = 0; i < m_myCPUCoreCnt; ++i)
-	{
-		m_pworkerThread.emplace_back(new thread{ [&]() {g_io_service.run(); } });
-	}
-
-	for (auto thread : m_pworkerThread)
-	{
-		thread->join();
-		delete thread;
-	}*/
+	//for (auto i = 0; i < m_myCPUCoreCnt; ++i)
+	//{
+	//	m_pworkerThread.emplace_back(new thread{ [&]() {g_io_service.run(); } });
+	//}
+	//
+	//for (auto thread : m_pworkerThread)
+	//{
+	//	thread->join();
+	//	delete thread;
+	//}
 }
 
 /*#include "ChattingServer.h"

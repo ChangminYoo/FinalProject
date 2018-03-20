@@ -1,4 +1,5 @@
 #include "server\main_client\AsyncClient.h"
+#include "../../Scene.h"
 
 void AsyncClient::ProcessPacket(Packet* packet, CGameObject* obj, Scene& scene)
 {
@@ -22,11 +23,13 @@ void AsyncClient::ProcessPacket(Packet* packet, CGameObject* obj, Scene& scene)
 		//Scene -> DynamicObject -> CGameObject 의 m_PlayerData를 갱신해준다.
 
 		//서버에서 플레이어의 초기화정보를 넘겨주므로 모든 PlayerData 값을 변경해야한다
+		//서버쪽은 ID 0 ~ 4까지가 몬스터 -- 클라쪽은 ID 0 ~ 2까지가 플레이어 
+		//즉 서버ID - 몬스터아이디를 클라쪽 ID에 집어넣어야함
 		auto data = scene.Get_PlayerServerData(delivered_data.ID);
 		auto GameObject = scene.Get_GameObject;
 
 		data->Dir = delivered_data.Dir;
-		data->ID = delivered_data.ID;
+		data->ID = delivered_data.ID; //- MAX_MONSTER_NUM;
 		data->Is_AI = delivered_data.Is_AI;
 
 		wcscpy(data->LoginData.name, delivered_data.LoginData.name);
@@ -45,7 +48,7 @@ void AsyncClient::ProcessPacket(Packet* packet, CGameObject* obj, Scene& scene)
 		data->UserInfo.player_status.speed = delivered_data.UserInfo.player_status.speed;
 
 		GameObject->CenterPos = { data->Pos.x , data->Pos.y , data->Pos.z , data->Pos.w };
-		GameObject->Speed = data->UserInfo.player_status.speed;
+		GameObject->Speed = delivered_data.UserInfo.player_status.speed;
 
 		//캐릭터 스테이터스 초기화값 서버->클라. 클라에서 추가해줘야됌
 			
@@ -75,6 +78,3 @@ void AsyncClient::ProcessPacket(Packet* packet, CGameObject* obj, Scene& scene)
 
 }
 
-void AsyncClient::ReUpdateData()
-{
-}

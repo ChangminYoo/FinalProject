@@ -42,6 +42,7 @@ private:
 
 	// 로그인 데이터베이스
 	//CTextTest* m_ploginData;
+	//Packet *m_new_sendBuf;
 
 	// 몬스터 
 	MONSTERS m_monsterType;

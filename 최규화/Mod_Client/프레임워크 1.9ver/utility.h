@@ -1,8 +1,5 @@
 #pragma once
 #include"d3dUtil.h"
-#include"UploadBuffer.h"
-#define MAXJOINT 65
-
 using Microsoft::WRL::ComPtr;
 using namespace DirectX;
 using namespace DirectX::PackedVector;
@@ -22,18 +19,12 @@ struct Joint {
 //쉐이더에 연결하기 위한용. Joint의 name파트를 뺐다.
 struct ShaderJoint
 {
-	
 	XMFLOAT4 orientation;//방향
 	int parentID;//조인트 부모인덱스
 	XMFLOAT3 pos;//조인트의 위치
 
 };
 
-struct JointArr
-{
-	ShaderJoint j[MAXJOINT];
-
-};
 
 struct Weight {
 	int jointID;//조인트 인덱스 , 아이디
@@ -75,7 +66,7 @@ struct ModelAnimation
 };
 
 
-bool LoadMD5Model(wstring filename, CMesh* MD5Model,  int numberofMesh=0, float scale=1);//메시는 1개만 생성되는게 일반적이지만 다수일경우 이녀석을 통해 해결하자 0번메쉬 1번메쉬 등 numberofMesh 정보를 얻을수잇음
+bool LoadMD5Model(wstring filename, CMesh* MD5Model,  int numberofMesh=0, float scale=1,float Spec=1);//메시는 1개만 생성되는게 일반적이지만 다수일경우 이녀석을 통해 해결하자 0번메쉬 1번메쉬 등 numberofMesh 정보를 얻을수잇음
 
 bool LoadMD5Anim(ID3D12Device* m_Device,std::wstring filename, CMesh* MD5Model, CGameObject* obj,vector<ModelAnimation>& av,int numberofMesh=0);
-void UpdateMD5Model(ID3D12GraphicsCommandList* m_DC,CMesh* MD5Model, CGameObject* obj, float deltaTime, int animation,vector<ModelAnimation>& av, UploadBuffer<JointArr>* jarr);
+void UpdateMD5Model(ID3D12GraphicsCommandList* m_DC,CMesh* MD5Model, CGameObject* obj, float deltaTime, int animation,vector<ModelAnimation>& av);

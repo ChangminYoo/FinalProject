@@ -63,7 +63,7 @@ struct Player_Status
 {
 	unsigned int			attack{ 50 };
 	unsigned int			defend{ 50 };
-	unsigned int			speed{ 10 };
+	unsigned int			speed{ 100 };
 };
 //12
 
