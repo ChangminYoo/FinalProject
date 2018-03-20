@@ -202,7 +202,7 @@ CCubeManObject::CCubeManObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 	pp = new PhysicsPoint();
 	pp->SetPosition(CenterPos);//이 값은 항상 갱신되야한다.
 	pp->SetHalfBox(3, 10, 3);//충돌 박스의 x,y,z 크기
-	pp->SetDamping(0.5);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
+	pp->SetDamping(0.7);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
 	pp->SetBounce(false);//튕기지 않는다.
 
 	
@@ -288,8 +288,8 @@ void CCubeManObject::Collision(list<CGameObject*>* collist, float DeltaTime)
 
 		if (*i != this)
 		{
-			
-			bool test=pp->CollisionTest(*(*i)->pp, Lookvector, Rightvector, GetUpvector(), (*i)->Lookvector, (*i)->Rightvector,(*i)->GetUpvector());
+
+			bool test = pp->CollisionTest(*(*i)->pp, Lookvector, Rightvector, GetUpvector(), (*i)->Lookvector, (*i)->Rightvector, (*i)->GetUpvector());
 
 			if (test)//충돌했으면 충돌해소를 해야한다.
 			{
@@ -310,14 +310,16 @@ void CCubeManObject::Collision(list<CGameObject*>* collist, float DeltaTime)
 					//상대속도 방향을 구한다. A-B
 					cn = Float3Add(pp->GetPosition(), (*(*i)->pp).GetPosition(), false);
 					cn = Float3Normalize(cn);
-								
+
+
+
 				}
 				else//고정된 물체면 충돌한 평면의 노멀방향으로 cn을 설정할것.
 				{
 					cn = pp->pAxis;
 				}
-				
-				
+
+
 
 				//충돌해소 호출. 충돌해소 이후에 반드시 변경된 질점의 위치로 오브젝트위치를 일치시켜야한다.
 				pp->CollisionResolve(*(*i)->pp, cn, DeltaTime);//좀비는 튕기지 않는다.
@@ -327,7 +329,6 @@ void CCubeManObject::Collision(list<CGameObject*>* collist, float DeltaTime)
 		}
 	}
 }
-
 void CCubeManObject::EndAnimation(int nAni)
 {
 	
@@ -888,7 +889,7 @@ CubeObject::CubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 	gamedata.Damage = 0;
 	gamedata.GodMode = true;
 	gamedata.Speed = 0;
-
+	staticobject = true;
 
 	//광선충돌 검사용 육면체
 	XMFLOAT3 rx(5, 0, 0);
@@ -902,7 +903,7 @@ CubeObject::CubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 	pp->SetHalfBox(5, 5, 5);//충돌 박스의 x,y,z 크기
 	pp->SetDamping(0.5f);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
 	pp->SetBounce(false);//튕기지 않는다.
-	pp->SetMass(3);//고정된 물체는 무게가 무한이다.
+	pp->SetMass(INFINITY);//고정된 물체는 무게가 무한이다.
 
 	//테스트용 리지드 바디
 	//rb = new RigidBody();
