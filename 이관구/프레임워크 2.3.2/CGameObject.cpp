@@ -170,7 +170,7 @@ CCubeManObject::CCubeManObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 		Mesh.Index = NULL;
 		Mesh.SubResource = NULL;
 	
-		LoadTexture(m_Device, commandlist,this, Textures,SrvDescriptorHeap,"ZombieTex", L"textures/human/Male White Wizard 05 Red.dds",false);
+		LoadTexture(m_Device, commandlist,this, Textures,SrvDescriptorHeap,"Tex1", L"textures/human/Male White Wizard 05 Red.dds",false);
 		SetMesh(m_Device, commandlist);
 		SetMaterial(m_Device, commandlist);
 		CreateMesh = true;
@@ -269,7 +269,7 @@ void CCubeManObject::Render(ID3D12GraphicsCommandList * commandlist, const GameT
 	
 
 	if(Textures.size()>0)
-		SetTexture(commandlist,SrvDescriptorHeap,false);
+		SetTexture(commandlist,SrvDescriptorHeap, Textures["Tex1"].get()->Resource.Get(),false);
 	UpdateConstBuffer(commandlist);
 	
 	Mat.UpdateConstantBuffer(commandlist);
@@ -460,7 +460,7 @@ void CZombieObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTi
 
 
 	if (Textures.size()>0)
-		SetTexture(commandlist, SrvDescriptorHeap, false);
+		SetTexture(commandlist, SrvDescriptorHeap, Textures["ZombieTex"].get()->Resource.Get(), false);
 	UpdateConstBuffer(commandlist);
 
 	Mat.UpdateConstantBuffer(commandlist);
@@ -539,20 +539,34 @@ void CZombieObject::EndAnimation(int nAni)
 
 //---------------------------------------------------------------------------------------------------------------------------------
 
-void SetTexture(ID3D12GraphicsCommandList * commandlist, ComPtr<ID3D12DescriptorHeap>& SrvDescriptorHeap, bool isCubeMap)
+
+void SetTexture(ID3D12GraphicsCommandList * commandlist, ComPtr<ID3D12DescriptorHeap>& SrvDescriptorHeap, ID3D12Resource* texture, bool isCubeMap)
 {
+	static ID3D12Resource* OldResource = NULL;
+
+	if (OldResource == NULL)
+		OldResource = texture;
+	else
+	{
+		commandlist->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(OldResource,
+			D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE));
+	}
+
 	//텍스처는 테이블을 쓸것이므로 힙과 테이블 두개를 연결해야함.
 	ID3D12DescriptorHeap* descriptorHeaps[] = { SrvDescriptorHeap.Get() };
 	commandlist->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
 
-	CD3DX12_GPU_DESCRIPTOR_HANDLE Skytex(SrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
-	Skytex.Offset(0, CbvSrvDescriptorSize);
+	CD3DX12_GPU_DESCRIPTOR_HANDLE tex(SrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
+	tex.Offset(0, CbvSrvDescriptorSize);
 
-	if(isCubeMap)
-		commandlist->SetGraphicsRootDescriptorTable(0, Skytex);
+
+	if (isCubeMap)
+		commandlist->SetGraphicsRootDescriptorTable(0, tex);
 	else
-		commandlist->SetGraphicsRootDescriptorTable(1, SrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
+		commandlist->SetGraphicsRootDescriptorTable(1, tex);
 
+	commandlist->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(texture,
+		D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE));
 }
 
 void LoadTexture(ID3D12Device* device, ID3D12GraphicsCommandList* commandlist,CGameObject* obj, unordered_map<string, unique_ptr<CTexture>>& Textures, ComPtr<ID3D12DescriptorHeap>& SrvDescriptorHeap, string texturename, wstring FileName, bool isCubeMap)
@@ -595,7 +609,7 @@ void LoadTexture(ID3D12Device* device, ID3D12GraphicsCommandList* commandlist,CG
 	{
 		srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 		srvDesc.Texture2D.MostDetailedMip = 0;
-		srvDesc.Texture2D.MipLevels = 1;// Texs->GetDesc().MipLevels;
+		srvDesc.Texture2D.MipLevels =  Texs->GetDesc().MipLevels;
 		srvDesc.Texture2D.ResourceMinLODClamp = 0.0f;
 		srvDesc.Format = Texs->GetDesc().Format;
 	}
@@ -619,7 +633,7 @@ BulletCube::BulletCube(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 		Mesh.Index = NULL;
 		Mesh.SubResource = NULL;
 
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "ZombieTex", L"textures/human/Male White Wizard 05 Red.dds", false);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Tex1", L"textures/human/Male White Wizard 05 Red.dds", false);
 		SetMesh(m_Device, commandlist);
 		SetMaterial(m_Device, commandlist);
 		CreateMesh = true;
@@ -708,9 +722,9 @@ void BulletCube::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer
 {
 	//게임오브젝트의 렌더링은 간단하다. 
 	//텍스처를 연결하고, 월드행렬을 연결한다.
-
+	
 	if (Textures.size()>0)
-		SetTexture(commandlist, SrvDescriptorHeap,false);
+		SetTexture(commandlist, SrvDescriptorHeap, Textures["Tex1"].get()->Resource.Get() ,false);
 	UpdateConstBuffer(commandlist);
 
 	Mat.UpdateConstantBuffer(commandlist);
@@ -840,7 +854,7 @@ void SphereObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTim
 	//텍스처를 연결하고, 월드행렬을 연결한다.
 
 	if (Textures.size()>0)
-		SetTexture(commandlist, SrvDescriptorHeap, true);
+		SetTexture(commandlist, SrvDescriptorHeap, Textures["MapTex"].get()->Resource.Get(), true);
 	UpdateConstBuffer(commandlist);
 
 	//이후 그린다.
@@ -952,7 +966,7 @@ void CubeObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer
 	//텍스처를 연결하고, 월드행렬을 연결한다.
 
 	if (Textures.size()>0)
-		SetTexture(commandlist, SrvDescriptorHeap,false);
+		SetTexture(commandlist, SrvDescriptorHeap, Textures["BoxTex"].get()->Resource.Get(),false);
 	UpdateConstBuffer(commandlist);
 
 	//이후 그린다.
