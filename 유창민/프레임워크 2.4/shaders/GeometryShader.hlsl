@@ -27,6 +27,8 @@ VertexOut VS(VertexIn vin)
 	VertexOut vout;
 
 	vout.Pos = mul(float4(vin.Pos,1), gWorld);
+	//vout.Pos = mul(vout.Pos, gView);
+
 
 	return vout;
 
@@ -37,9 +39,12 @@ void GS(point VertexOut gin[1], inout TriangleStream<GeoOut> triStream)
 {
 	float3 up = float3(0.0f, 1.0f, 0.0f);
 	float3 look = gin[0].Pos - gEyePos;
-	look.y = 0.0f;				// xz평면에 투영
+	
 	look = normalize(look);
-	float3 right = cross(look, up);
+	float3 right = normalize(cross(look, up));
+
+	up = normalize(cross(right, look));
+
 
 	float halfWidth = 0.5f*Scale;			 
 	float halfHeight = 0.5f*Scale;										//				 v[1]--------v[3]
@@ -50,6 +55,7 @@ void GS(point VertexOut gin[1], inout TriangleStream<GeoOut> triStream)
 	v[2] = float4((gin[0].Pos - halfWidth*right - halfHeight*up), 1.0f);//	                /
 	v[3] = float4((gin[0].Pos - halfWidth*right + halfHeight*up), 1.0f);//				  cam
 
+	
 	float2 tex[4];
 	tex[0] = float2(0.0f, 1.0f);
 	tex[1] = float2(0.0f, 0.0f);
