@@ -27,7 +27,7 @@ VertexOut VS(VertexIn vin)
 	VertexOut vout;
 
 	vout.Pos = mul(float4(vin.Pos,1), gWorld);
-	//vout.Pos = mul(vout.Pos, gView);
+	vout.Pos = mul(vout.Pos, gView);
 
 
 	return vout;
@@ -37,25 +37,26 @@ VertexOut VS(VertexIn vin)
 [maxvertexcount(4)]
 void GS(point VertexOut gin[1], inout TriangleStream<GeoOut> triStream)
 {
-	float3 up = float3(0.0f, 1.0f, 0.0f);
-	float3 look = gin[0].Pos - gEyePos;
-	
-	look = normalize(look);
-	float3 right = normalize(cross(look, up));
-
-	up = normalize(cross(right, look));
-
 
 	float halfWidth = 0.5f*Scale;			 
-	float halfHeight = 0.5f*Scale;										//				 v[1]--------v[3]
-																		//					\		   \ 
-	float4 v[4];														//					 \	/center	\																
-	v[0] = float4((gin[0].Pos + halfWidth*right - halfHeight*up), 1.0f);//					  v[0]--------v[2]
-	v[1] = float4((gin[0].Pos + halfWidth*right + halfHeight*up), 1.0f);//				     /
-	v[2] = float4((gin[0].Pos - halfWidth*right - halfHeight*up), 1.0f);//	                /
-	v[3] = float4((gin[0].Pos - halfWidth*right + halfHeight*up), 1.0f);//				  cam
+	float halfHeight = 0.5f*Scale;										
 
+	float4 v[4];
+	for (int i = 0; i < 4; i++)
+		v[i] = gin[0].Pos;
 	
+	v[0].x += -halfWidth;
+	v[0].y  += -halfHeight;
+
+	v[1].x += -halfWidth;
+	v[1].y += halfHeight;
+
+	v[2].x += halfWidth;
+	v[2].y += -halfHeight;
+
+	v[3].x += halfWidth;
+	v[3].y += halfHeight;
+
 	float2 tex[4];
 	tex[0] = float2(0.0f, 1.0f);
 	tex[1] = float2(0.0f, 0.0f);
@@ -67,9 +68,9 @@ void GS(point VertexOut gin[1], inout TriangleStream<GeoOut> triStream)
 	[unroll]
 	for (int i = 0; i < 4; ++i)
 	{
-		gout.PosH = mul(v[i], gViewProj);
+		gout.PosH = mul(v[i], gProj);
 		gout.PosW = v[i].xyz;
-		gout.Normal = look;
+		gout.Normal = float3(0,1,0);
 		gout.Tex = tex[i];
 
 		triStream.Append(gout);
