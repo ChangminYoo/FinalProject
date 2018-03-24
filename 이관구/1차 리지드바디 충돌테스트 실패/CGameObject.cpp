@@ -889,6 +889,24 @@ CubeObject::CubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 	//실제 룩벡터 등은 모두 UpdateLookVector에서 처리된다(라이트벡터도) 따라서 Tick함수에서 반드시 호출해야한다.
 	OffLookvector = XMFLOAT3(0, 0, 1);
 	OffRightvector = XMFLOAT3(1, 0, 0);
+	
+	//테스트용 코드다.
+	//먼저 Z축으로 30도정도 회전했을때 처리는 아주잘됨.
+	//문제는 X축으로 살짝 1도정도만 틀었는데, 결과는 구데기다.
+	//이처럼 점이 2개일때 충돌은 평면과 수평이여야 정확하게 회전된다.
+	//따라서 x축으로 -1도로 틀어주면 수평인 선이 나온다.
+	auto q = XMLoadFloat4(&Orient);
+	XMFLOAT3 axis{ 0,0,1 };
+	auto q2 = QuaternionRotation(axis, MMPE_PI/6);
+	axis.x = 1;
+	axis.z = 0;
+	auto q3 = QuaternionRotation(axis, MMPE_PI / 180);
+	auto q4 = QuaternionRotation(axis, -MMPE_PI / 180);
+
+	Orient = QuaternionMultiply(Orient, q2);
+	Orient = QuaternionMultiply(Orient, q3);
+	Orient = QuaternionMultiply(Orient, q4);
+
 
 	UpdateLookVector();
 	ObjData.isAnimation = 0;
@@ -931,7 +949,7 @@ CubeObject::CubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 	XMFLOAT3 testPoint{ -15,0,-5 };
 	//힘을 한번만 가한다. 여기서 힘을 한번만 가한다의 단위는 F를 0.1초만큼 가하는것을 말한다.
 	//애초에 힘을 한번만 가한다라고 정의할수는 없으며 힘은 F만큼 n초동안 가하는게 맞는말이다.
-	rb->AddForcePoint(testForce,testPoint);
+	//rb->AddForcePoint(testForce,testPoint);
 	rb->integrate(0.1f);
 }
 

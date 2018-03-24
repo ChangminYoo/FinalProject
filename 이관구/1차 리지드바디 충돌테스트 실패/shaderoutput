@@ -204,7 +204,7 @@ if_nz r0.x
     itof r10.x, l(0)
     mov r8.xyz, r8.xyzx
 
-#line 20 "D:\GitHub\MagicWorld\이관구\프레임워크 2.3.2\common.hlsl"
+#line 20 "D:\GitHub\MagicWorld\이관구\1차 리지드바디 충돌테스트 실패\common.hlsl"
     mul r10.y, r7.x, r10.x
     mul r10.z, r7.w, r8.x
     add r10.y, r10.z, r10.y
@@ -256,7 +256,7 @@ if_nz r0.x
     mov r11.xyzw, r11.xyzw
     mov r9.xyzw, r9.xyzw
 
-#line 20 "D:\GitHub\MagicWorld\이관구\프레임워크 2.3.2\common.hlsl"
+#line 20 "D:\GitHub\MagicWorld\이관구\1차 리지드바디 충돌테스트 실패\common.hlsl"
     mul r7.x, r11.x, r9.w
     mul r7.y, r11.w, r9.x
     add r7.x, r7.y, r7.x

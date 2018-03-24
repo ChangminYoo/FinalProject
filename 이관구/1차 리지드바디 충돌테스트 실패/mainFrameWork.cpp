@@ -135,8 +135,7 @@ void MainFrameWork::AfterGravitySystem(const GameTimer & gt)
 
 	for (auto j = scene->StaticObject.begin();j != scene->StaticObject.end();j++)
 	{
-		for (int k = 0; k < 15; k++)
-		{
+		
 		XMFLOAT4 arr[8];
 		(*j)->rb->GetEightPoint(arr, (*j)->GetUpvector(), (*j)->Lookvector, (*j)->Rightvector);//먼저 8 개의 점을 가져온다.
 		//점이 충돌했는지 검사를 해야한다.
@@ -202,8 +201,13 @@ void MainFrameWork::AfterGravitySystem(const GameTimer & gt)
 				auto impurse = (*j)->rb->CalculateImpulse(fp);
 			
 
-					impurse = XMFLOAT3(0, 0.085, 0);
-			
+					impurse = XMFLOAT3(0, 0.11, 0);
+				
+					if ((*j)->rb->CollisionPointVector.size() > 2)
+					{
+						impurse = XMFLOAT3(0, 0, 0);
+						(*j)->rb->SetAngularVelocity(0, 0, 0);
+					}
 				XMFLOAT3 p = XMFloat4to3(fp.Pos);
 				auto p2 = XMFloat4to3((*j)->rb->GetPosition());
 				p = Float3Add(p, p2, false);//p-=p2
@@ -237,7 +241,7 @@ void MainFrameWork::AfterGravitySystem(const GameTimer & gt)
 		
 
 		
-	}
+	
 }
 
 void MainFrameWork::OnResize()
