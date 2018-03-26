@@ -1,0 +1,7 @@
+mmpe에 collisionpoint 구조체 추가
+
+rb에 collisionpoint 벡터 추가
+
+mainFramework의 멤버함수로 collisionplane추가
+
+mainFramework.h에 일반함수로 amendobject추가

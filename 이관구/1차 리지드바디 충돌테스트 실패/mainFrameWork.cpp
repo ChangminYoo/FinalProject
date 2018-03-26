@@ -141,99 +141,182 @@ void MainFrameWork::AfterGravitySystem(const GameTimer & gt)
 		//점이 충돌했는지 검사를 해야한다.
 		XMFLOAT3 PlaneNormal{ 0,1,0 };
 		vector<CollisionPoint> tempcp;
+		int c = 0;
 		for (int i = 0; i < 8; i++)
 		{
 			float temppenetration = arr[i].x*PlaneNormal.x + arr[i].y*PlaneNormal.y + arr[i].z*PlaneNormal.z;
+			//충돌 점을 생성한다음 저장한다.
+			CollisionPoint cp;
+			cp.Pos = arr[i];
+			cp.penetration = temppenetration;
+			cp.pAxis = PlaneNormal;
+			tempcp.push_back(cp);
+
 			if (temppenetration < 0)//평면의 뒤에있으면 충돌한것.
 			{
-				//충돌 점을 생성한다음 저장한다.
-				CollisionPoint cp;
-				cp.Pos = arr[i];
-				cp.penetration = fabsf(temppenetration);
-				cp.pAxis = PlaneNormal;
-				tempcp.push_back(cp);
-			}
+				c += 1;
+
+						}
 
 		}
 
 		//사이즈가 0보다 크면 충돌한 지점이 있는것.
-		if (tempcp.size() > 0)
+		if (c > 0)
 		{
 			//이제 가장 깊은 충돌 깊이를 기준으로 정렬한다.왜? 가장깊이 충돌한만큼 밀어내야하니까.
 			sort(tempcp.begin(), tempcp.end(), [](CollisionPoint& a, CollisionPoint& b) {
-				return a.penetration > b.penetration;
+				return a.penetration < b.penetration;
 			});
 
-			float firstpenetration = tempcp.front().penetration;//가장 깊은값을 꺼냄.
-
-			//이제 가장 깊은 녀석을 기준으로 충돌리스트를 돌면서 penetration을 뺐을때 결과가 충분히 작으면
-			//이녀석도 밀어내거나 힘을가할때 사용될 수 있는 충돌점이다. 이 것들이 최종적인 충돌점이다.
-			for (auto i : tempcp)
-			{
-				if (firstpenetration - i.penetration <= MMPE_EPSILON)
-				{
-					(*j)->rb->CollisionPointVector.push_back(i);
-				}
-			}
+			
 		
 
-			CollisionPoint fp;
-			fp.Pos = XMFLOAT4(0, 0, 0, 0);
-			fp.pAxis = PlaneNormal;
-			for (auto i : (*j)->rb->CollisionPointVector)
-			{
-				fp.Pos = Float4Add(fp.Pos, i.Pos);
-				fp.penetration += i.penetration;
-				
-			}
-
-			fp.Pos.x /= (*j)->rb->CollisionPointVector.size();
-			fp.Pos.y /= (*j)->rb->CollisionPointVector.size();
-			fp.Pos.z /= (*j)->rb->CollisionPointVector.size();
-			fp.penetration/=  (*j)->rb->CollisionPointVector.size();
-
+			
 			// 이제 여기까지오면 충돌지점을 처리해야할것들을 다 저장하고있다는것이다.
 			//이제 뭘 해야하나? 1. 속도를 변경한다. 2. 겹쳐진 부분을 해소한다.
 			
 			//테스트 결과 임펄스가 작으면 작을수록, 정확도가 높아짐..
 
 			
-				auto impurse = (*j)->rb->CalculateImpulse(fp);
 			
+				auto v2 = Float4Add(tempcp[1].Pos, tempcp[0].Pos, false);
+				v2 = Float4Normalize(v2);
+				auto v3=Float4Add(tempcp[2].Pos, tempcp[0].Pos,false);
+				tempcp[2].Pos.y = tempcp[0].Pos.y;
+				v3 = Float4Normalize(v3);
+				auto v4 = Float4Add(tempcp[2].Pos, tempcp[0].Pos, false);
+				v4 = Float4Normalize(v4);
+				if (v2.x*v4.x + v2.y*v4.y + v2.z*v4.z < MMPE_EPSILON)
+				{
+					auto axis=Float3Cross(XMFloat4to3(v3), XMFloat4to3(v4));
+					axis = Float3Normalize(axis);
+					auto theta=acos(v3.x*v4.x + v3.y*v4.y + v3.z*v4.z);
+					if (theta != NAN)
+					{
+						XMFLOAT4 r;
+						if (fabsf(theta) < MMPE_PI/18 && FloatLength(axis)!=0)
+						{
+							(*j)->UpdateLookVector();
+							r = QuaternionRotation(axis, theta);
+							r=Float4Normalize(r);
+							(*j)->rb->SetAngularVelocity(0, 0, 0);
+							(*j)->Orient = QuaternionMultiply((*j)->Orient, r);
+							(*j)->UpdateLookVector();
+							tempcp.clear();
+							(*j)->rb->CollisionPointVector.clear();
+						}
+						(*j)->rb->GetEightPoint(arr, (*j)->GetUpvector(), (*j)->Lookvector, (*j)->Rightvector);//먼저 8 개의 점을 가져온다.
+						int c = 0;
+						for (int i = 0; i < 8; i++)
+						{
+							float temppenetration = arr[i].x*PlaneNormal.x + arr[i].y*PlaneNormal.y + arr[i].z*PlaneNormal.z;
+							//충돌 점을 생성한다음 저장한다.
+							CollisionPoint cp;
+							cp.Pos = arr[i];
+							cp.penetration = temppenetration;
+							cp.pAxis = PlaneNormal;
+							tempcp.push_back(cp);
 
-					impurse = XMFLOAT3(0, 0.11, 0);
-				
+							if (temppenetration < 0)//평면의 뒤에있으면 충돌한것.
+							{
+								c += 1;
+
+							}
+
+						}
+						//사이즈가 0보다 크면 충돌한 지점이 있는것.
+						if (c > 0)
+						{
+							//이제 가장 깊은 충돌 깊이를 기준으로 정렬한다.왜? 가장깊이 충돌한만큼 밀어내야하니까.
+							sort(tempcp.begin(), tempcp.end(), [](CollisionPoint& a, CollisionPoint& b) {
+								return a.penetration < b.penetration;
+							});
+						}
+
+					}
+				}
+
+				float firstpenetration = tempcp.front().penetration;//가장 깊은값을 꺼냄.
+				if (firstpenetration > 0)
+					firstpenetration = 0;
+																	//이제 가장 깊은 녀석을 기준으로 충돌리스트를 돌면서 penetration을 뺐을때 결과가 충분히 작으면
+																	//이녀석도 밀어내거나 힘을가할때 사용될 수 있는 충돌점이다. 이 것들이 최종적인 충돌점이다.
+				for (auto i : tempcp)
+				{
+					if (fabsf(firstpenetration - i.penetration) <= MMPE_EPSILON)
+					{
+						(*j)->rb->CollisionPointVector.push_back(i);
+					}
+				}
+				CollisionPoint fp;
+				fp.Pos = XMFLOAT4(0, 0, 0, 0);
+				fp.pAxis = PlaneNormal;
+				for (auto i : (*j)->rb->CollisionPointVector)
+				{
+					fp.Pos = Float4Add(fp.Pos, i.Pos);
+					fp.penetration += i.penetration;
+
+
+
+				}
+
+				if (firstpenetration < 0)
+				{
+					if ((*j)->rb->CollisionPointVector.size() > 0)
+					{
+						fp.Pos.x /= (*j)->rb->CollisionPointVector.size();
+						fp.Pos.y /= (*j)->rb->CollisionPointVector.size();
+						fp.Pos.z /= (*j)->rb->CollisionPointVector.size();
+						fp.penetration /= (*j)->rb->CollisionPointVector.size();
+					}
+					auto impurse = (*j)->rb->CalculateImpulse(fp);
+
+					impurse = XMFLOAT3(0, 30*fabsf(firstpenetration), 0);
+					(*j)->rb->SetAngularVelocity(0, 0, 0);
 					if ((*j)->rb->CollisionPointVector.size() > 2)
 					{
-						impurse = XMFLOAT3(0, 0, 0);
-						(*j)->rb->SetAngularVelocity(0, 0, 0);
+						//impurse = XMFLOAT3(0, 0, 0);
+						//(*j)->rb->SetAngularVelocity(0, 0, 0);
+					//impurse = XMFLOAT3(0, 0, 0);
 					}
-				XMFLOAT3 p = XMFloat4to3(fp.Pos);
-				auto p2 = XMFloat4to3((*j)->rb->GetPosition());
-				p = Float3Add(p, p2, false);//p-=p2
-				XMFLOAT3 t = Float3Cross(p, impurse);
-				XMVECTOR torq = XMLoadFloat3(&t);
-				XMMATRIX iim = XMLoadFloat4x4(&(*j)->rb->GetIMoment());
-				XMFLOAT3 av;
-				XMStoreFloat3(&av, XMVector3Transform(torq, iim));//각속도
+					XMFLOAT3 p = XMFloat4to3(fp.Pos);
+					auto p2 = XMFloat4to3((*j)->rb->GetPosition());
+					p = Float3Add(p, p2, false);//p-=p2
+					if (fabsf(p.x) <= MMPE_EPSILON)//떨리면서 각도 애매하게 바뀌는거 막기위함
+						p.x = 0;
+					if (fabsf(p.y) <= MMPE_EPSILON)//떨리면서 각도 애매하게 바뀌는거 막기위함
+						p.y = 0;
+					if (fabsf(p.z) <= MMPE_EPSILON)//떨리면서 각도 애매하게 바뀌는거 막기위함
+						p.z = 0;
 
-				(*j)->rb->SetAngularVelocity(av);
+
+					XMFLOAT3 t = Float3Cross(p, impurse);
+					XMVECTOR torq = XMLoadFloat3(&t);
+					XMMATRIX iim = XMLoadFloat4x4(&(*j)->rb->GetIMoment());
+					XMFLOAT3 av;
+					XMStoreFloat3(&av, XMVector3Transform(torq, iim));//각속도
+
+					(*j)->rb->SetAngularVelocity(av);
 
 
-				//겹쳐진 부분 해소
-				auto px = (*j)->rb->CollisionPointVector.front().penetration*(*j)->rb->CollisionPointVector.front().pAxis.x;
-				auto py = (*j)->rb->CollisionPointVector.front().penetration*(*j)->rb->CollisionPointVector.front().pAxis.y;
-				auto pz = (*j)->rb->CollisionPointVector.front().penetration*(*j)->rb->CollisionPointVector.front().pAxis.z;
-				(*j)->CenterPos.x += px;
-				(*j)->CenterPos.y += py;
-				(*j)->CenterPos.z += pz;
-				auto d = (*j)->rb->GetVelocity();
-				d.y = 0;
-				(*j)->rb->SetVelocity(d);
-				(*j)->rb->SetVelocity(impurse.x*(*j)->rb->GetMass(), impurse.y*(*j)->rb->GetMass(), impurse.z*(*j)->rb->GetMass());
+					//겹쳐진 부분 해소
 
-	
-				(*j)->rb->integrate(gt.DeltaTime());
+					auto px = fabsf((*j)->rb->CollisionPointVector.front().penetration)*(*j)->rb->CollisionPointVector.front().pAxis.x;
+					auto py = fabsf((*j)->rb->CollisionPointVector.front().penetration)*(*j)->rb->CollisionPointVector.front().pAxis.y;
+					auto pz = fabsf((*j)->rb->CollisionPointVector.front().penetration)*(*j)->rb->CollisionPointVector.front().pAxis.z;
+					(*j)->CenterPos.x += px;
+					(*j)->CenterPos.y += py;
+					(*j)->CenterPos.z += pz;
+
+					auto d = (*j)->rb->GetVelocity();
+					d.y = 0;
+					(*j)->rb->SetVelocity(d);
+					(*j)->rb->SetVelocity(impurse.x*(*j)->rb->GetMass(), impurse.y*(*j)->rb->GetMass(), impurse.z*(*j)->rb->GetMass());
+					if ((*j)->rb->GetPosition().y < -50)
+						(*j)->rb->SetVelocity(0, 5, 0);
+
+					(*j)->rb->integrate(gt.DeltaTime());
+				}
 				(*j)->rb->CollisionPointVector.clear();
 			}
 		}
