@@ -1,5 +1,7 @@
 #include "CPlayer.h"
 
+
+
 CPlayer::CPlayer(ID3D12Device* Device, ID3D12GraphicsCommandList* commandlist, float asp, XMFLOAT3& e, XMFLOAT3& a, XMFLOAT3& u) : Camera(Device,commandlist,asp,e,a,u)
 {
 	PlayerObject = NULL;
@@ -173,15 +175,14 @@ void CPlayer::SetPlayer(CGameObject * obj)
 //또한 항상 pp의 위치를 갱신해줘야한다.
 void CPlayer::PlayerInput(float DeltaTime)
 {
-	//임시추가
-	bool key_flag = false;
-
 	if (PlayerObject != NULL)
 	{
+
+		
+		bool move = false;
 		if (GetKeyState(0x57) & 0x8000)//W키
 		{
-			key_flag = true;
-
+			move = true;
 			//룩벡터의 +방향으로 움직인다.
 			auto l = XMLoadFloat3(&PlayerObject->Lookvector);
 			l *= PlayerObject->Speed*DeltaTime;
@@ -198,10 +199,10 @@ void CPlayer::PlayerInput(float DeltaTime)
 				//충돌리스트의 목록을 전부 검사한다.
 				for (auto i = PlayerObject->CollisionList->begin(); i != PlayerObject->CollisionList->end(); i++)
 				{
-
+					
 					if ((*i) != PlayerObject)//리스트에 자기자신이있을경우를 제외함.
 						if (PlayerObject->pp->CollisionTest(*(*i)->pp, PlayerObject->Lookvector, PlayerObject->Rightvector,
-							PlayerObject->GetUpvector(), (*i)->Lookvector, (*i)->Rightvector, (*i)->GetUpvector()) == true && abs((*i)->pp->pAxis.y) != 1)//충돌했으면
+							PlayerObject->GetUpvector(), (*i)->Lookvector, (*i)->Rightvector, (*i)->GetUpvector())==true&&abs((*i)->pp->pAxis.y)!=1)//충돌했으면
 						{
 							//기존에 W키를 눌러서 움직인만큼 되돌려보내야함.
 							PlayerObject->pp->CollisionResolve(*(*i)->pp, sp, DeltaTime, true);
@@ -209,12 +210,11 @@ void CPlayer::PlayerInput(float DeltaTime)
 						}
 				}
 			}
-
+			
 		}
 		else if (GetKeyState(0x53) & 0x8000)//S키
 		{
-			key_flag = true;
-
+			move = true;
 			//룩벡터의 -방향으로 움직인다.
 			auto l = XMLoadFloat3(&PlayerObject->Lookvector);
 			l *= PlayerObject->Speed*DeltaTime;
@@ -231,7 +231,7 @@ void CPlayer::PlayerInput(float DeltaTime)
 				//충돌리스트의 목록을 전부 검사한다.
 				for (auto i = PlayerObject->CollisionList->begin(); i != PlayerObject->CollisionList->end(); i++)
 				{
-
+					
 					if ((*i) != PlayerObject)//리스트에 자기자신이있을경우를 제외함.
 						if (PlayerObject->pp->CollisionTest(*(*i)->pp, PlayerObject->Lookvector, PlayerObject->Rightvector,
 							PlayerObject->GetUpvector(), (*i)->Lookvector, (*i)->Rightvector, (*i)->GetUpvector()) == true && abs((*i)->pp->pAxis.y) != 1)//충돌했으면
@@ -246,8 +246,7 @@ void CPlayer::PlayerInput(float DeltaTime)
 
 		if (GetKeyState(0x41) & 0x8000)//A키
 		{
-			key_flag = true;
-
+			move = true;
 			//라이트벡터의 -방향으로 움직인다.
 			auto r = XMLoadFloat3(&PlayerObject->Rightvector);
 			r *= PlayerObject->Speed*DeltaTime;
@@ -264,7 +263,7 @@ void CPlayer::PlayerInput(float DeltaTime)
 				//충돌리스트의 목록을 전부 검사한다.
 				for (auto i = PlayerObject->CollisionList->begin(); i != PlayerObject->CollisionList->end(); i++)
 				{
-
+					
 					if ((*i) != PlayerObject)//리스트에 자기자신이있을경우를 제외함.
 						if (PlayerObject->pp->CollisionTest(*(*i)->pp, PlayerObject->Lookvector, PlayerObject->Rightvector,
 							PlayerObject->GetUpvector(), (*i)->Lookvector, (*i)->Rightvector, (*i)->GetUpvector()) == true && abs((*i)->pp->pAxis.y) != 1)//충돌했으면
@@ -278,8 +277,7 @@ void CPlayer::PlayerInput(float DeltaTime)
 		}
 		else if (GetKeyState(0x44) & 0x8000)//D키
 		{
-			key_flag = true;
-
+			move = true;
 			//라이트벡터의 +방향으로 움직인다.
 			auto r = XMLoadFloat3(&PlayerObject->Rightvector);
 			r *= PlayerObject->Speed*DeltaTime;
@@ -296,7 +294,7 @@ void CPlayer::PlayerInput(float DeltaTime)
 				//충돌리스트의 목록을 전부 검사한다.
 				for (auto i = PlayerObject->CollisionList->begin(); i != PlayerObject->CollisionList->end(); i++)
 				{
-
+					
 					if ((*i) != PlayerObject)//리스트에 자기자신이있을경우를 제외함.
 						if (PlayerObject->pp->CollisionTest(*(*i)->pp, PlayerObject->Lookvector, PlayerObject->Rightvector,
 							PlayerObject->GetUpvector(), (*i)->Lookvector, (*i)->Rightvector, (*i)->GetUpvector()) == true && abs((*i)->pp->pAxis.y) != 1)//충돌했으면
@@ -308,17 +306,21 @@ void CPlayer::PlayerInput(float DeltaTime)
 				}
 			}
 		}
-
-		if (key_flag)
+		
+		if (GetKeyState(VK_SPACE) & 0x8000 && PlayerObject->AirBone == false)
 		{
-			STC_ChangedPos changed_pos;
-			changed_pos.packet_size = sizeof(STC_ChangedPos);
-			changed_pos.pack_type = PACKET_PROTOCOL_TYPE::CHANGED_PLAYER_POSITION;
-			changed_pos.id = PlayerObject->m_player_data.ID;
-			changed_pos.pos = { PlayerObject->CenterPos.x, PlayerObject->CenterPos.y, PlayerObject->CenterPos.z, PlayerObject->CenterPos.w };
-
-			m_async_client->SendPacket(reinterpret_cast<Packet*>(&changed_pos));
+			GeneratorJump j;
+			j.SetJumpVel(XMFLOAT3(0, 80, 0));//나중에 플레이어의 점프력만큼 추가할것
+			j.Update(DeltaTime, *PlayerObject->pp);
+			PlayerObject->AirBone = true;//공중상태를 true로
 		}
 
+		if (move == true)//움직이고 있으면 움직이는 모션으로
+			PlayerObject->SetAnimation(1);
+		else
+		{
+			if(PlayerObject->n_Animation!=2)//공격모션이 아니면 다시 대기상태로
+				PlayerObject->SetAnimation(0);
+		}
 	}
 }

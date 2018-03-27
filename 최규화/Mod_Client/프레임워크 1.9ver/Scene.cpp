@@ -3,7 +3,6 @@
 
 Scene::Scene(ID3D12Device * m_Device, ID3D12GraphicsCommandList * m_DC, float cw, float ch)
 {
-	
 
 	device = m_Device;
 	commandlist = m_DC;
@@ -21,11 +20,7 @@ Scene::Scene(ID3D12Device * m_Device, ID3D12GraphicsCommandList * m_DC, float cw
 	nShader = 1;
 	Shaders = new Shader*[nShader];
 	CreateShaderObject();
-
 	Player = new CPlayer(m_Device, m_DC, cw / ch, e, a, u);
-
-	//서버와 커넥트 시도
-
 	light = new CLight(m_Device, m_DC);
 	CreateGameObject();
 
@@ -129,9 +124,10 @@ void Scene::CreateShaderObject()
 
 void Scene::CreateGameObject()
 {
-	DynamicObject.push_back(new CZombieObject(device, commandlist,XMFLOAT4(0,-1000,0,0)));
-	DynamicObject.push_back(new CZombieObject(device, commandlist, XMFLOAT4(2, 30, 0, 0)));
-	DynamicObject.push_back(new CZombieObject(device, commandlist, XMFLOAT4(-20,0, -10, 0)));
+	DynamicObject.push_back(new CCubeManObject(device, commandlist,XMFLOAT4(0,-1000,0,0)));
+	DynamicObject.push_back(new CCubeManObject(device, commandlist, XMFLOAT4(0, 90, 0, 0)));
+	DynamicObject.push_back(new CCubeManObject(device, commandlist, XMFLOAT4(-50, 30, 0, 0)));
+	DynamicObject.push_back(new CCubeManObject(device, commandlist, XMFLOAT4(40,60, 0, 0)));
 	//플레이어의 오브젝트 설정. 이건 나중에 바꿔야함.
 	Player->SetPlayer(DynamicObject.front());
 	Player->PlayerObject->Blending = false;
@@ -144,7 +140,7 @@ void Scene::CreateGameObject()
 
 }
 
-void Scene::Render()
+void Scene::Render(const GameTimer& gt)
 {
 
 	//나중에 카메라에 뷰포트와 씨저렉트를 갖도록하고 여기에서 연결하도록하자
@@ -168,7 +164,7 @@ void Scene::Render()
 
 			
 			//쉐이더가 보유한 그려야할 오브젝트 목록을 그린다.
-			Shaders[i]->Render(commandlist);
+			Shaders[i]->Render(commandlist,gt);
 			
 		}
 	}
@@ -201,29 +197,6 @@ void Scene::Tick(const GameTimer & gt)
 
 	//카메라 리 로케이트 
 	Player->PlayerCameraReLocate();
-}
-
-Player_Data* Scene::Get_PlayerServerData(const unsigned int& id)
-{
-	// map을 이용해서 first 아이디를 통해 보다 빠르게 찾을건지?
-	// 그냥 list를 사용할건지?
-	
-	for (auto GameObject : DynamicObject)
-	{
-		if (GameObject->m_player_data.ID == id) //- MAX_MONSTER_NUM)
-		{
-			Get_GameObject = GameObject;
-			return &(GameObject->m_player_data);
-		}
-			
-	}
-
-	return nullptr;
-}
-
-Player_Data* Scene::Get_MonsterServerData(const unsigned int& id)
-{
-	return nullptr;
 }
 
 

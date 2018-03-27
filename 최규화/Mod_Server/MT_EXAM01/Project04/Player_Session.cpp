@@ -214,29 +214,19 @@ void Player_Session::RecvPacket()
 	//[=](const boost::system::error_code& error, size_t bytes_transferred)
 
 	//패킷받을 때 버퍼사이즈는 전달된 버퍼의 크기만큼만 할당해야한다
-	boost::asio::async_read(m_socket, boost::asio::buffer(m_recvBuf, 1),
+	//1바이트를 받아 패킷사이즈를 알고 해당 패킷 사이즈를 이용해 다시 패킷을 받는다
+	boost::asio::async_read(m_socket, boost::asio::buffer(m_recvBuf , 1),
 		[&](const boost::system::error_code& error, size_t bytes_transferred)
 	{	
-		Packet *temp_buf = Get_RecvBuf();
-		int packet_size = temp_buf[0];
-
-		cout << "Packet_size : " << packet_size << endl;
 
 		if (error != 0)
 		{
 			//에러: 작업이 취소된 경우 
-			
-			//995 error 
-			//if (error.value() == boost::asio::error::operation_aborted)
-			//	cout << "Client No. [ " << m_id << " ] Disconnected [Operation_Aborted] -----  ";
-			//
-			//if (error.value() == boost::asio::error::message_size)
-			//	cout << "Client No. [ " << m_id << " ] Disconnected [Message_Too_Long] -----  ";
+			cout << "Client No. [ " << m_id << " ] error code : " << error.value() << endl;
 
-			cout << "Client No. [ " << m_id  << " ] error code : " << error.value() << endl;
 			cout << "IP: " << m_socket.remote_endpoint().address().to_string() << " // ";
 			cout << "PORT: " << m_socket.remote_endpoint().port() << endl;
-		
+
 			// shutdown_both - 주고 받는 쪽 모두를 중단
 			m_socket.shutdown(m_socket.shutdown_both);
 			m_socket.close();
@@ -254,20 +244,36 @@ void Player_Session::RecvPacket()
 			//clients[m_id]->SendPacket(reinterpret_cast<Packet*>(&dis_msg));
 
 			return;
- 		}
-
-		if (temp_buf[0] == 0) { return; }
-		else
-		{
-			boost::asio::async_read(m_socket, boost::asio::buffer(temp_buf , packet_size),
-				[&](const boost::system::error_code& error, size_t bytes_transferred)
-			{
-				ProcessPacket(temp_buf);
-
-				RecvPacket();
-			});
 		}
 
+		//Packet *buf = Get_RecvBuf();
+		//ProcessPacket(buf);
+
+		
+		Packet *buf = Get_RecvBuf();
+		int cur_data_processing = static_cast<int>(bytes_transferred);
+
+		while (cur_data_processing > 0)
+		{
+			if (m_cur_packet_size == 0)
+			{
+				m_cur_packet_size = buf[0];
+			}
+
+			//1바이트 데이터를 받은 만큼 다음 read에서 사이즈를 빼줘야한다
+			boost::asio::async_read(m_socket, boost::asio::buffer(Get_DataBuf(), m_cur_packet_size - 1),
+				[&](const boost::system::error_code& error, size_t bytes_transferred)
+			{
+				//여기에서 처리할 때도 버퍼[0]부분에 있는 사이즈를 제외하고 데이터를 읽어줘야한다
+				ProcessPacket(buf);
+
+				m_cur_packet_size = 0;
+			});
+		}
+		
+	
+		//RecvPacket();
+		
 		/*
 		int cur_data_proc = static_cast<int>(bytes_transferred);
 		Packet* temp_buf = m_recvBuf;
@@ -298,9 +304,14 @@ void Player_Session::RecvPacket()
 		}
 		RecvPacket();
 		*/
+
 	});
 
 	
+}
+
+void Player_Session::RecvOriginPacket(Packet *packet , const unsigned int& size)
+{
 }
 
 void Player_Session::ProcessPacket(Packet * packet)

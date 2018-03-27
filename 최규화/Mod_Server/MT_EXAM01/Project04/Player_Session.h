@@ -33,9 +33,6 @@ private:
 	Packet m_recvBuf[MAX_BUFFER_SIZE]{ 0 };
 	Packet m_dataBuf[MAX_BUFFER_SIZE]{ 0 };
 
-	unsigned int m_cur_packet_size{ 0 };
-	unsigned int m_prev_packet_size{ 0 };
-
 	void handle_write(const boost::system::error_code& /*error*/, size_t /*bytes_transferred*/);
 
 	void handle_receive(const boost::system::error_code& error, size_t bytes_transferred);
@@ -48,6 +45,10 @@ private:
 	MONSTERS m_monsterType;
 
 	//Player* m_player;
+
+public:
+	unsigned int m_cur_packet_size{ 0 };
+	unsigned int m_prev_packet_size{ 0 };
 
 public:
 	Player_Session(const int& count, boost::asio::ip::tcp::socket socket) : m_id(count), m_socket(move(socket))
@@ -69,6 +70,7 @@ public:
 
 	void SendPacket(Packet* packet);
 	void RecvPacket();
+	void RecvOriginPacket(Packet *packet, const unsigned int& size);
 
 	void ProcessPacket(Packet* packet);
 
@@ -79,6 +81,9 @@ public:
 	bool Get_Connect_State() const { return m_connect_state; }
 	void PostReceive();
 
+	void Set_DataBuf(Packet* buf) { memcpy(m_dataBuf, buf, sizeof(buf)); }
+
+	Packet* Get_DataBuf() { return m_dataBuf; }
 	Packet* Get_RecvBuf() { return m_recvBuf; }
 };
 

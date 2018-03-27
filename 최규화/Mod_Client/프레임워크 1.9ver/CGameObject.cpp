@@ -2,6 +2,10 @@
 
 extern UINT CbvSrvDescriptorSize;
 
+
+
+
+
 CGameObject::CGameObject()
 {
 	
@@ -15,6 +19,8 @@ CGameObject::~CGameObject()
 
 	if (pp != NULL)
 		delete pp;
+	if (jarr != NULL)
+		delete jarr;
 	
 }
 
@@ -32,14 +38,6 @@ XMFLOAT3 CGameObject::GetUpvector()
 
 CGameObject::CGameObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList* commandlist,XMFLOAT4 cp)
 {
-	//서버추가 - 임시 
-	//원래대로라면 서버에서 초기화 데이터를 토대로 아이디등 정보를 바꿔줘야하는데
-	//일단 클라에서 미리 생성한 캐릭터를 이용
-	if (m_player_data.ID == 0)
-		m_player_data.ID = 0;
-	else
-		m_player_data.ID += 1;
-
 	
 	//여기서는 기본적인것들만 처리한다. 위치나 회전각 등 초기화
 	this->commandlist = commandlist;
@@ -58,7 +56,7 @@ void CGameObject::SetWorldMatrix()
 	XMStoreFloat4x4(&ObjData.WorldMatrix, wmatrix);
 }
 
-void CGameObject::Render(ID3D12GraphicsCommandList * commandlist)
+void CGameObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer& gt)
 {
 	
 }
@@ -83,6 +81,18 @@ void CGameObject::UpdateLookVector()
 
 	Lookvector = Float3Normalize(Lookvector);
 	Rightvector = Float3Normalize(Rightvector);
+}
+
+void CGameObject::SetAnimation(int n_Ani)
+{
+	if (n_Ani != n_Animation)
+	{
+		
+		currAnimTime = 0;
+
+	}
+	n_Animation = n_Ani;
+	
 }
 
 void CGameObject::Tick(const GameTimer& gt)
@@ -127,18 +137,22 @@ void CGameObject::UpdateConstBuffer(ID3D12GraphicsCommandList * commandlist)
 	commandlist->SetGraphicsRootConstantBufferView(1, ConstBuffer->Resource()->GetGPUVirtualAddress());//월드행렬연결
 }
 
-CZombieObject::CZombieObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, XMFLOAT4 cp) : CGameObject(m_Device,commandlist,cp)
+CCubeManObject::CCubeManObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, XMFLOAT4 cp) : CGameObject(m_Device,commandlist,cp)
 {
 
 	//게임오브젝트 생성자에서 기본적인것을 처리했으므로 여기서는
 	//메쉬와 텍스처 사용시 불러오기와 애니메이션 로드등을 처리해야한다.
 	
+	//조인트가 저장될 배열.
+	jarr = new UploadBuffer<JointArr>(m_Device, 1, true);
+
 	if (CreateMesh == false)
 	{
 		
 		Mesh.Index = NULL;
 		Mesh.SubResource = NULL;
-		LoadTexture(m_Device, commandlist,this, Textures,SrvDescriptorHeap,"ZombieTex", L"textures/zombie_diffuse.dds");
+	
+		LoadTexture(m_Device, commandlist,this, Textures,SrvDescriptorHeap,"ZombieTex", L"textures/human/Male White Wizard 05 Red.dds");
 		SetMesh(m_Device, commandlist);
 		SetMaterial(m_Device, commandlist);
 		CreateMesh = true;
@@ -151,7 +165,9 @@ CZombieObject::CZombieObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList 
 	OffRightvector = XMFLOAT3(-1, 0, 0);
 	UpdateLookVector();
 	ThetaY = 180;
-	ObjData.Scale = 0.1;
+	ObjData.isAnimation = true;
+	ObjData.Scale = 3;
+	ObjData.SpecularParamater = 0.0f;//스페큘러를 낮게준다.
 	Speed = 60;
 	
 
@@ -173,21 +189,23 @@ CZombieObject::CZombieObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList 
 }
 
 
-void CZombieObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList* commandlist)
+void CCubeManObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList* commandlist)
 {
-	//조인트 배열 생성
-	Mesh.jarr = new UploadBuffer<JointArr>(m_Device, 1, true);
+
 	//모델 로드
-	LoadMD5Model(L".\\플레이어메쉬들\\dietzombie2.MD5MESH", &Mesh, 0, 1, 0.4);
+	LoadMD5Model(L".\\플레이어메쉬들\\player.MD5MESH", &Mesh, 0, 1);
 	Mesh.SetNormal();
 	Mesh.CreateVertexBuffer(m_Device, commandlist);
 	Mesh.CreateIndexBuffer(m_Device, commandlist);
 
 	//애니메이션 로드
-	LoadMD5Anim(m_Device, L".\\플레이어메쉬들\\attack1.MD5ANIM",&Mesh, this, animations);
+	LoadMD5Anim(m_Device, L".\\플레이어메쉬들\\idle.MD5ANIM",&Mesh, this, animations);//0
+	LoadMD5Anim(m_Device, L".\\플레이어메쉬들\\walk.MD5ANIM", &Mesh, this, animations);//1
+	LoadMD5Anim(m_Device, L".\\플레이어메쉬들\\attack.MD5ANIM", &Mesh, this, animations);//2
+	
 }
 
-void CZombieObject::SetMaterial(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
+void CCubeManObject::SetMaterial(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
 {
 	if (Mat.ConstBuffer == NULL)
 		Mat.ConstBuffer = new UploadBuffer<MaterialData>(m_Device, 1, true);
@@ -196,7 +214,7 @@ void CZombieObject::SetMaterial(ID3D12Device * m_Device, ID3D12GraphicsCommandLi
 	Mat.MatData.Roughness = 0.3f;
 }
 
-void CZombieObject::Tick(const GameTimer & gt)
+void CCubeManObject::Tick(const GameTimer & gt)
 {
 	//적분기. 적분기란? 매 틱마다 힘! 에의해서 변화 되는 가속도/속도/위치를 갱신한다.
 	//이때 pp의 position과 CenterPos를 일치시켜야하므로 CenterPos의 포인터를 인자로 넘겨야 한다.
@@ -204,23 +222,26 @@ void CZombieObject::Tick(const GameTimer & gt)
 	
 	if (ObjData.isAnimation == true)
 	{
-		//애니메이션 업데이트
-		if (TickValue > 3)
+		if (TickValue > 1)
 		{
-			UpdateMD5Model(commandlist, &Mesh, this, gt.DeltaTime() * 8, n_Animation, animations);
+			//애니메이션 업데이트
+			UpdateMD5Model(commandlist, &Mesh, this, gt.DeltaTime() * 8, n_Animation, animations, jarr);
+
 			TickValue = 0;
 		}
 	}
 	TickValue += 1;
 
 	
+	
 }
 
-void CZombieObject::Render(ID3D12GraphicsCommandList * commandlist)
+void CCubeManObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer& gt)
 {
 	//게임오브젝트의 렌더링은 간단하다. 
 	//텍스처를 연결하고, 월드행렬을 연결한다.
 
+	
 
 	if(Texturing)
 		SetTexture(commandlist,SrvDescriptorHeap);
@@ -229,7 +250,7 @@ void CZombieObject::Render(ID3D12GraphicsCommandList * commandlist)
 	Mat.UpdateConstantBuffer(commandlist);
 
 	//틱함수에서 업데이트한 애니메이션된 조인트를 연결함.
-	commandlist->SetGraphicsRootConstantBufferView(2, Mesh.jarr->Resource()->GetGPUVirtualAddress());
+	commandlist->SetGraphicsRootConstantBufferView(2, jarr->Resource()->GetGPUVirtualAddress());
 	//이후 그린다.
 
 	Mesh.Render(commandlist);
@@ -237,7 +258,7 @@ void CZombieObject::Render(ID3D12GraphicsCommandList * commandlist)
 }
 
 //충돌기. 충돌검출과 충돌해소를 맡는다.
-void CZombieObject::Collision(list<CGameObject*>* collist, float DeltaTime)
+void CCubeManObject::Collision(list<CGameObject*>* collist, float DeltaTime)
 {
 	CollisionList = collist;
 	//충돌리스트의 모든 요소와 충돌검사를 실시한다.
@@ -252,16 +273,33 @@ void CZombieObject::Collision(list<CGameObject*>* collist, float DeltaTime)
 			if (test)//충돌했으면 충돌해소를 해야한다.
 			{
 
+				//충돌 했을때 축이 (0,1,0) 이면 Airbone을 false로 둔다. 이는 내가 위에있음을 나타낸다.
+				if (pp->pAxis.y == 1)
+					AirBone = false;
+				//충돌했을때  축이 (0,-1,0)이면 상대방 Airbone을 false로 둔다.  이는 상대가 내 위에있음을 나타낸다.
+				//설사 상대 위에 다른 상대가 있어도 걱정말자. 자연스러운것임.
+				if (pp->pAxis.y == -1)
+					(*i)->AirBone = false;
+
+
 				XMFLOAT3 cn;
+				//고정된 물체가 아니면
 				if ((*i)->staticobject == false)
 				{
+					//상대속도 방향을 구한다. A-B
 					cn = Float3Add(pp->GetPosition(), (*(*i)->pp).GetPosition(), false);
 					cn = Float3Normalize(cn);
+				
+					
+					
 				}
 				else//고정된 물체면 충돌한 평면의 노멀방향으로 cn을 설정할것.
 				{
 
 				}
+				
+				
+
 				//충돌해소 호출. 충돌해소 이후에 반드시 변경된 질점의 위치로 오브젝트위치를 일치시켜야한다.
 				pp->CollisionResolve(*(*i)->pp, cn, DeltaTime,false);//좀비는 튕기지 않는다.
 				UpdatePPosCenterPos();
@@ -269,6 +307,17 @@ void CZombieObject::Collision(list<CGameObject*>* collist, float DeltaTime)
 			}
 		}
 	}
+}
+
+void CCubeManObject::EndAnimation(int nAni)
+{
+	
+	if (nAni == 2 )//공격하기였으면
+	{
+		SetAnimation(0);//대기상태로둔다.
+
+	}
+	
 }
 
 void SetTexture(ID3D12GraphicsCommandList * commandlist, ComPtr<ID3D12DescriptorHeap>& SrvDescriptorHeap)

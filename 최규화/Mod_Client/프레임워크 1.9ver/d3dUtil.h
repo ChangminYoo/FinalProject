@@ -5,12 +5,7 @@
 //***************************************************************************************
 
 #pragma once
-#ifndef _WIN32_WINNT
-#define _WIN32_WINNT 0x0601
-#endif
-#define WIN32_LEAN_AND_MEAN
 
-#include <boost/asio.hpp>
 #include <windows.h>
 #include <wrl.h>
 #include <dxgi1_4.h>
@@ -30,12 +25,10 @@
 #include <fstream>
 #include <sstream>
 #include <cassert>
-#include <time.h>
-
 #include "d3dx12.h"
 #include "DDSTextureLoader.h"
 #include "MathHelper.h"
-
+#include<time.h>
 
 extern const int gNumFrameResources;
 
