@@ -121,7 +121,7 @@ XMFLOAT4 MiniPhysicsEngineG9::QuaternionRotation(XMFLOAT3 & Axis, float radian)
 {
 
 	
-
+	Axis = Float3Normalize(Axis);
 	auto q = XMQuaternionRotationAxis(XMLoadFloat3(&Axis), radian);
 	XMFLOAT4 Result;
 	XMStoreFloat4(&Result, q);
@@ -132,6 +132,7 @@ XMFLOAT4 MiniPhysicsEngineG9::QuaternionMultiply(XMFLOAT4 & q1, XMFLOAT4 & q2)
 {
 	auto q = XMQuaternionMultiply(XMLoadFloat4(&q1), XMLoadFloat4(&q2));
 	XMFLOAT4 Result;
+	q=XMQuaternionNormalize(q);
 	XMStoreFloat4(&Result, q);
 	return Result;
 }
@@ -947,9 +948,10 @@ void MiniPhysicsEngineG9::RigidBody::integrate(float DeltaTime)
 
 	//이제 방향을 변경한다.
 	XMVECTOR Avelocity = XMLoadFloat3(&AngularVelocity);
-	XMMATRIX IT = XMLoadFloat4x4(&Inverse_I_Moment);
 	XMVECTOR totaltorque = XMLoadFloat3(&TotalTorque);
 	XMVECTOR orient = XMLoadFloat4(Orient);
+	XMMATRIX IT = XMLoadFloat4x4(&Inverse_I_Moment);
+	IT*=XMMatrixRotationQuaternion(orient);//IT는 디폴트 인버스 관성모멘트 * 방향쿼터니언행렬
 	//각가속도 구하고 각속도 구하고 마찰로 감속시킨후 방햐을 구한다.
 
 	// A = T/I == T * Inverse I
@@ -974,14 +976,11 @@ void MiniPhysicsEngineG9::RigidBody::integrate(float DeltaTime)
 	orient = orient + 0.5f*XMQuaternionMultiply(Avelocity, orient)*DeltaTime;
 
 	orient=XMQuaternionNormalize(orient);
-	//물체의 방향이 변경되었으니 관성모멘트도 회전시킨다.
-	IT *= XMMatrixRotationQuaternion(orient);
 
 	//결과 물을 저장한다.
 	XMStoreFloat4(Orient, orient);
 	XMStoreFloat3(&AngularVelocity,Avelocity);
-	XMStoreFloat4x4(&Inverse_I_Moment, IT);
-
+	
 	//모든 계산이 끝났으면 힘과토크를 초기화 한다.
 	ForceClear();
 	TorqueClear();
@@ -1163,7 +1162,23 @@ void MiniPhysicsEngineG9::RigidBody::AddForcePoint(XMFLOAT3 & F, XMFLOAT3 & poin
 	XMFLOAT3 p = pointposition;
 	auto p2 = XMFloat4to3(*CenterPos);
 	p = Float3Add(p, p2, false);//p-=p2
+
+	if (fabsf(p.x) <= MMPE_EPSILON/10)
+		p.x = 0;
+	if (fabsf(p.y) <= MMPE_EPSILON/10)
+		p.y = 0;
+	if (fabsf(p.z) <= MMPE_EPSILON/10)
+		p.z = 0;
+
 	XMFLOAT3 t = Float3Cross(p, F);//토크 = 중점으로부터 힘을 가해진 벡터 X 힘의 방향
+
+	if (fabsf(t.x) <= MMPE_EPSILON/10)
+		t.x = 0;
+	if (fabsf(t.y) <= MMPE_EPSILON/10)
+		t.y = 0;
+	if (fabsf(t.z) <= MMPE_EPSILON/10)
+		t.z = 0;
+
 	AddForce(F);
 	AddTorque(t);
 }
@@ -1173,8 +1188,27 @@ void MiniPhysicsEngineG9::RigidBody::AddForcePoint(XMFLOAT3 & F, XMFLOAT4 & poin
 	XMFLOAT4 p = pointposition;
 	auto p2 = *CenterPos;
 	p = Float4Add(p, p2, false);//p-=p2
+	
+	if (fabsf(p.x) <= MMPE_EPSILON )
+		p.x = 0;
+	if (fabsf(p.y) <= MMPE_EPSILON )
+		p.y = 0;
+	if (fabsf(p.z) <= MMPE_EPSILON )
+		p.z = 0;
+
+	
 	XMFLOAT3 p1 = XMFloat4to3(p);
 	XMFLOAT3 t = Float3Cross(p1, F);//토크 = 중점으로부터 힘을 가해진 벡터 X 힘의 방향
+
+	if (fabsf(t.x) <= MMPE_EPSILON / 10)
+		t.x = 0;
+	if (fabsf(t.y) <= MMPE_EPSILON / 10)
+		t.y = 0;
+	if (fabsf(t.z) <= MMPE_EPSILON / 10)
+		t.z = 0;
+
+	
+
 	AddForce(F);
 	AddTorque(t);
 }

@@ -98,7 +98,7 @@ void CGameObject::UpdateLookVector()
 	XMStoreFloat3(&Lookvector, ol);
 	XMStoreFloat3(&Rightvector, or);
 
-	if (fabsf(Lookvector.x) < MMPE_EPSILON / 10)
+	if (fabsf(Lookvector.x) < MMPE_EPSILON/10 )
 		Lookvector.x = 0;
 	if (fabsf(Lookvector.y) < MMPE_EPSILON / 10)
 		Lookvector.y = 0;
@@ -913,18 +913,18 @@ CubeObject::CubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 	//따라서 x축으로 -1도로 틀어주면 수평인 선이 나온다.
 	auto q = XMLoadFloat4(&Orient);
 	XMFLOAT3 axis{ 0,0,1 };
-	auto q2 = QuaternionRotation(axis, MMPE_PI/6);
+	auto q2 = QuaternionRotation(axis, -MMPE_PI/6);
 	axis.x = 1;
 	axis.z = 0;
-	auto q3 = QuaternionRotation(axis, MMPE_PI / 180);
+	auto q3 = QuaternionRotation(axis, MMPE_PI / 6);
 	q3=Float4Normalize(q3);
 	auto q4 = QuaternionRotation(axis, -MMPE_PI / 180);
 	q4= Float4Normalize(q4);
 	Orient = QuaternionMultiply(Orient, q2);
 	Orient = QuaternionMultiply(Orient, q3);
 	Orient = Float4Normalize(Orient);
-	Orient = QuaternionMultiply(Orient, q4);
-	Orient=Float4Normalize(Orient);
+	//Orient = QuaternionMultiply(Orient, q4);
+	//Orient=Float4Normalize(Orient);
 
 	UpdateLookVector();
 	ObjData.isAnimation = 0;
@@ -962,6 +962,7 @@ CubeObject::CubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 	rb->SetBounce(false);//튕기지 않는다.
 	rb->SetMass(1);//고정된 물체는 무게가 무한이다.
 	rb->SetIMoment(5, 5, 5);
+	rb->SetAngularVelocity(20,10,-10);
 	rb->SetOrient(&Orient);
 	XMFLOAT3 testForce{ 0,0,20 };
 	XMFLOAT3 testPoint{ -15,0,-5 };

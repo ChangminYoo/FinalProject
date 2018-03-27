@@ -193,7 +193,7 @@ void MainFrameWork::AfterGravitySystem(const GameTimer & gt)
 	//			{
 	//				auto axis=Float3Cross(XMFloat4to3(v3), XMFloat4to3(v4));
 	//				axis = Float3Normalize(axis);
-	//				auto theta=acos(v3.x*v4.x + v3.y*v4.y + v3.z*v4.z);
+	//				double theta=acos(v3.x*v4.x + v3.y*v4.y + v3.z*v4.z);
 	//				if (theta != NAN)
 	//				{
 	//					XMFLOAT4 r;
@@ -376,7 +376,7 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 		for (auto i : tempcollisionpoint)
 		{
 			//실제충돌의 첫번째 깊이 - penetration들을 비교해서 Epsilon이면 이제 실제 접촉점이 저장되는 곳에 넣는다.
-			if (fabsf(tempcollisionpoint.front().penetration - i.penetration) <= MMPE_EPSILON)
+			if (fabsf(tempcollisionpoint.front().penetration - i.penetration) <= 0.1)//차가 0.1정도면 실제로 충돌 가능성이 있다고 판단한다.
 			{
 				contactpoint.push_back(i);
 			}
@@ -389,6 +389,106 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 		int size = contactpoint.size();
 		if (size == 1)
 		{
+			//size가 1이면 뭘해야할까? 바로 정점 2개가 맞부딪힐수있도록 회전시켜야한다.
+			//그러기 위해서는 적당한 위치에 충격량을 가한다.
+			//문제는 이게 과회전이 일어날 수 있다.
+			//따라서 적당한 회전각도가 되면 그 각도로 보정한다.
+
+			//2인자점 - 1인자점을 해서 2인자점을 향하는 벡터를 만든다.
+			//이때 2인자 점을 향하는 각도가 특정각도 이하면 그 각도로 보정한다.
+			auto V1 = Float4Add(allpoint[1].Pos, contactpoint[0].Pos, false);
+			V1 = Float4Normalize(V1);
+
+			float NdotV1 = Normal.x*V1.x + Normal.y*V1.y + Normal.z*V1.z;
+			
+			XMFLOAT3 ProjAB = Normal;
+			ProjAB.x *= NdotV1;
+			ProjAB.y *= NdotV1;
+			ProjAB.z *= NdotV1;
+
+			auto V2 = Float4Add(V1, XMFloat3to4(ProjAB), false);
+			V2 = Float4Normalize(V2);
+			
+
+			//먼저 사잇각도를 구한다.
+			//기존에는 float으로 했는데, 0이아니어야 하는데 0이나오는경우가 생김..
+			double theta = acos(V1.x*V2.x + V1.y*V2.y + V1.z*V2.z);
+
+			//그후 사잇각이 특정각도 이하면 보정시킨다. 
+			//단 이게 double로 해도 0이아닌데 0이나오는경우가 생긴다.
+			//따라서 0일경우 그냥 충격량을 가해서 각도를 변경시킨다.
+			if (abs(theta) <= MMPE_PI / 40 && abs(theta)!=0)//대략 4.5도 이하면 보정시킴.
+			{
+				//회전축을 구하고..
+				XMFLOAT3 mAxis = XMFloat4to3(Float4Cross(V1, V2));
+				mAxis = Float3Normalize(mAxis);
+				//보정을 시킨다.
+				AmendObject(mAxis, theta, obj);
+
+				//그리고 재귀 시킨다. 왜냐하면 보정이되었으면 allpoint,tempcollisionpoint,contactpoint , penetration 모두 다 바뀌어야 하기 때문이다.
+				//재귀 후 아마 2가지 경우의수가 있다. 충돌이 일어나거나, 아니면 살짝 떠있거나.. 어쨌든 잘 해결 된다.
+				obj->rb->SetAngularVelocity(0, 0, 0);
+				RigidBodyCollisionPlane(Normal, distance, obj);
+
+			}
+			else//아니라면 이제 충격량을 적당한 지점에 가한다!
+			{
+				//여기에 왔다는것은 더이상 보정을 하지 않거나 보정을 아직 할필요가 없는 경우다.
+
+
+				XMFLOAT3 impurse{ 0,70,0 };// 충격량 . 여기서는 선속도를 증가시키는것은 적다 다만 각속도를 변화시킬때 유효하다.
+
+				CollisionPoint fp;//충격량을 가할 지점
+				fp.Pos = XMFLOAT4(0, 0, 0, 0);
+				fp.pAxis = Normal;
+
+				fp.Pos =  contactpoint[0].Pos;
+				fp.penetration = contactpoint[0].penetration;
+
+				
+			
+				////충격량을 가하려면 (Q-P)XImpurse 이므로 (Q-P)를한다. 여기서는 충돌지점의평균 - 오브젝트의 중점 이다.
+				//XMFLOAT3 p = XMFloat4to3(fp.Pos);
+				//auto p2 = XMFloat4to3(obj->rb->GetPosition());
+				//p = Float3Add(p, p2, false);//p-=p2
+				//if (fabsf(p.x) <= MMPE_EPSILON)//떨리면서 각도 애매하게 바뀌는거 막기위함
+				//	p.x = 0;
+				//if (fabsf(p.y) <= MMPE_EPSILON)//떨리면서 각도 애매하게 바뀌는거 막기위함
+				//	p.y = 0;
+				//if (fabsf(p.z) <= MMPE_EPSILON)//떨리면서 각도 애매하게 바뀌는거 막기위함
+				//	p.z = 0;
+
+
+				//땅에 닿았으니 현재 속도의 y는 반감되어야 한다. 원래는 탄성계수가 있지만.. 그냥 2배 증가시킨후 부호를 -로 하자.
+
+
+				//현재 여기서 선속도의 가장 많은 부분을 차지함
+				auto d = obj->rb->GetVelocity();
+				d.y = -0.5 * d.y;
+				obj->rb->SetVelocity(d);
+
+
+				//충격량을 가함. impurse = impurse만큼 0.01초동안 가한것. 시간을 작게둔 이유는 힘을 줄이기 위해서.
+
+				obj->rb->AddForcePoint(impurse, fp.Pos);
+				obj->rb->integrate(0.01);
+
+
+				//이제 속도와 각속도는 변경 했으니, 겹쳐진 부분 해소
+				//가장 작은값의 penetration(가장 깊은)만큼 올리면 된다.
+				auto px = fabsf(contactpoint[0].penetration)*Normal.x;
+				auto py = fabsf(contactpoint[0].penetration)*Normal.y;
+				auto pz = fabsf(contactpoint[0].penetration)*Normal.z;
+				obj->CenterPos.x += px;
+				obj->CenterPos.y += py;
+				obj->CenterPos.z += pz;
+
+
+
+
+
+			}
+
 
 		}
 		else if (size == 2)
@@ -400,6 +500,8 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 
 			float Dot = V1.x*Normal.x + V1.y*Normal.y + V1.z*Normal.z;
 
+			if (fabsf(Dot) <= MMPE_EPSILON)
+				Dot = 0;
 			//결과가 0이면 보정이 필요가 없음.
 			if (Dot == 0)
 			{
@@ -410,9 +512,17 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 				auto V2 = Float4Add(allpoint[2].Pos, contactpoint[0].Pos, false);
 				V2 = Float4Normalize(V2);
 				float Dot2 = V1.x*V2.x + V1.y*V2.y + V1.z*V2.z;
-				//첫번째 점과 세번째점을 연결하는게 맞는경우
-				if (Dot2 == 0)
+				
+				if (fabsf(Dot2) <= MMPE_EPSILON)
+					Dot2 = 0;
+
+				//첫번째 점과 세번째점이 맞지 않는경우 두번째 점과 세번째점으로 맞춘다.
+				if (Dot2 != 0)
 				{
+
+					V2 = Float4Add(allpoint[2].Pos, contactpoint[1].Pos, false);
+					V2 = Float4Normalize(V2);
+				}
 					//이제 여기 왔다는것은, 4개의 점을 만들 수 있는 녀석들을 찾은 셈이다.
 					//다만 바로 보정하면 안되고, 이게 어느정도 각도 차가 덜 나야 된다.
 					//그럼 그 각도는 무엇인가??
@@ -439,14 +549,14 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 					//이제 V2와 V3를 아니까 V2와 V3의 사잇각을 구한다음 V2에서 V3로 외적해서 Axis를 구한다.
 
 					//먼저 사잇각도를 구한다.
-					auto theta = acos(V2.x*V3.x + V2.y*V3.y + V2.z*V3.z);
+					double theta = acos(V2.x*V3.x + V2.y*V3.y + V2.z*V3.z);
 
 					//그후 사잇각이 특정각도 이하면 보정시킨다. 
-					if (fabsf(theta) <= MMPE_PI / 18)//대략 10도 이하면 보정시킴.
+					if (abs(theta) <= MMPE_PI / 36 && abs(theta) != 0)//대략 5도 이하면 보정시킴.
 					{
 						//회전축을 구하고
 						XMFLOAT3 mAxis = XMFloat4to3(Float4Cross(V2, V3));
-
+						mAxis = Float3Normalize(mAxis);
 						//보정을 시킨다.
 						AmendObject(mAxis, theta, obj);
 
@@ -461,9 +571,9 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 						//여기에 왔다는것은 더이상 보정을 하지 않거나 보정을 아직 할필요가 없는 경우다.
 
 						//먼저 현재 충돌점은 2개이니 2개의 충돌점을 더한 후 2로 나눠주면 충돌지점 완성이다.
-						//충격량은 차후에 다시 구해야겠지만, 현재는 0,100,0 정도로 가하겠다.
+						//충격량은 차후에 다시 구해야겠지만, 현재는 0,50,0 정도로 가하겠다.
 
-						XMFLOAT3 impurse{ 0,10,0 };// 충격량
+						XMFLOAT3 impurse{ 0,70,0 };// 충격량 . 여기서는 선속도를 증가시키는것은 적다 다만 각속도를 변화시킬때 유효하다.
 
 						CollisionPoint fp;//충격량을 가할 지점
 						fp.Pos = XMFLOAT4(0, 0, 0, 0);
@@ -482,20 +592,22 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 						fp.Pos.z /= contactpoint.size();
 						fp.penetration /= contactpoint.size();
 
-						//충격량을 가하려면 (Q-P)XImpurse 이므로 (Q-P)를한다. 여기서는 충돌지점의평균 - 오브젝트의 중점 이다.
-						XMFLOAT3 p = XMFloat4to3(fp.Pos);
-						auto p2 = XMFloat4to3(obj->rb->GetPosition());
-						p = Float3Add(p, p2, false);//p-=p2
-						if (fabsf(p.x) <= MMPE_EPSILON)//떨리면서 각도 애매하게 바뀌는거 막기위함
-							p.x = 0;
-						if (fabsf(p.y) <= MMPE_EPSILON)//떨리면서 각도 애매하게 바뀌는거 막기위함
-							p.y = 0;
-						if (fabsf(p.z) <= MMPE_EPSILON)//떨리면서 각도 애매하게 바뀌는거 막기위함
-							p.z = 0;
+						////충격량을 가하려면 (Q-P)XImpurse 이므로 (Q-P)를한다. 여기서는 충돌지점의평균 - 오브젝트의 중점 이다.
+						//XMFLOAT3 p = XMFloat4to3(fp.Pos);
+						//auto p2 = XMFloat4to3(obj->rb->GetPosition());
+						//p = Float3Add(p, p2, false);//p-=p2
+						//if (fabsf(p.x) <= MMPE_EPSILON)//떨리면서 각도 애매하게 바뀌는거 막기위함
+						//	p.x = 0;
+						//if (fabsf(p.y) <= MMPE_EPSILON)//떨리면서 각도 애매하게 바뀌는거 막기위함
+						//	p.y = 0;
+						//if (fabsf(p.z) <= MMPE_EPSILON)//떨리면서 각도 애매하게 바뀌는거 막기위함
+						//	p.z = 0;
 
 
 						//땅에 닿았으니 현재 속도의 y는 반감되어야 한다. 원래는 탄성계수가 있지만.. 그냥 2배 증가시킨후 부호를 -로 하자.
 					
+
+						//현재 여기서 선속도의 가장 많은 부분을 차지함
 						auto d = obj->rb->GetVelocity();
 						d.y = -0.5 * d.y;
 						obj->rb->SetVelocity(d);
@@ -503,7 +615,7 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 						
 						//충격량을 가함. impurse = impurse만큼 0.01초동안 가한것. 시간을 작게둔 이유는 힘을 줄이기 위해서.
 						
-						obj->rb->AddForcePoint(impurse, p);
+						obj->rb->AddForcePoint(impurse, fp.Pos);
 						obj->rb->integrate(0.01);
 
 
@@ -523,109 +635,40 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 					}
 				
 
-				}
-				else//두번째점과 세번째점을 연결하는게 맞는경우
-				{
-					V2 = Float4Add(allpoint[2].Pos, contactpoint[1].Pos, false);
-					V2 = Float4Normalize(V2);
-					
-					float NdotV2 = Normal.x*V2.x + Normal.y*V2.y + Normal.z*V2.z;
-					XMFLOAT3 ProjAB = Normal;
-					ProjAB.x *= NdotV2;
-					ProjAB.y *= NdotV2;
-					ProjAB.z *= NdotV2;
-
-					auto V3 = Float4Add(V2, XMFloat3to4(ProjAB), false);
-					V3 = Float4Normalize(V3);
-					//이제 V2와 V3를 아니까 V2와 V3의 사잇각을 구한다음 V2에서 V3로 외적해서 Axis를 구한다.
-
-					//먼저 사잇각도를 구한다.
-					auto theta = acos(V2.x*V3.x + V2.y*V3.y + V2.z*V3.z);
-
-					//그후 사잇각이 특정각도 이하면 보정시킨다. 
-					if (fabsf(theta) <= MMPE_PI / 18)//대략 10도 이하면 보정시킴.
-					{
-						//회전축을 구하고
-						XMFLOAT3 mAxis = XMFloat4to3(Float4Cross(V2, V3));
-
-						//보정을 시킨다.
-						AmendObject(mAxis, theta, obj);
-
-						//그리고 재귀 시킨다. 왜냐하면 보정이되었으면 allpoint,tempcollisionpoint,contactpoint , penetration 모두 다 바뀌어야 하기 때문이다.
-						//재귀 후 아마 2가지 경우의수가 있다. 충돌이 일어나거나, 아니면 살짝 떠있거나.. 어쨌든 잘 해결 된다.
-						obj->rb->SetAngularVelocity(0, 0, 0);
-						RigidBodyCollisionPlane(Normal, distance, obj);
-
-					}
-					else//아니라면 이제 충격량을 적당한 지점에 가한다!
-					{
-						//여기에 왔다는것은 더이상 보정을 하지 않거나 보정을 아직 할필요가 없는 경우다.
-
-						//먼저 현재 충돌점은 2개이니 2개의 충돌점을 더한 후 2로 나눠주면 충돌지점 완성이다.
-						//충격량은 차후에 다시 구해야겠지만, 현재는 0,10,0 정도로 가하겠다.
-
-						XMFLOAT3 impurse{ 0,10,0 };// 충격량
-
-						CollisionPoint fp;//충격량을 가할 지점
-						fp.Pos = XMFLOAT4(0, 0, 0, 0);
-						fp.pAxis = Normal;
-
-						//실제 충돌지점들을 다 더함.
-						for (auto i : contactpoint)
-						{
-							fp.Pos = Float4Add(fp.Pos, i.Pos);
-							fp.penetration += i.penetration;
-
-						}
-						//사이즈로 나눠서 평균을 낸다.
-						fp.Pos.x /= contactpoint.size();
-						fp.Pos.y /= contactpoint.size();
-						fp.Pos.z /= contactpoint.size();
-						fp.penetration /= contactpoint.size();
-
-						//충격량을 가하려면 (Q-P)XImpurse 이므로 (Q-P)를한다. 여기서는 충돌지점의평균 - 오브젝트의 중점 이다.
-						XMFLOAT3 p = XMFloat4to3(fp.Pos);
-						auto p2 = XMFloat4to3(obj->rb->GetPosition());
-						p = Float3Add(p, p2, false);//p-=p2
-						if (fabsf(p.x) <= MMPE_EPSILON)//떨리면서 각도 애매하게 바뀌는거 막기위함
-							p.x = 0;
-						if (fabsf(p.y) <= MMPE_EPSILON)//떨리면서 각도 애매하게 바뀌는거 막기위함
-							p.y = 0;
-						if (fabsf(p.z) <= MMPE_EPSILON)//떨리면서 각도 애매하게 바뀌는거 막기위함
-							p.z = 0;
-
-
-						//땅에 닿았으니 현재 속도의 y는 반감되어야 한다. 원래는 탄성계수가 있지만.. 그냥 절반 감소시킨후 부호를 -로 하자.
-						auto d = obj->rb->GetVelocity();
-						d.y = -0.5 * d.y;
-						obj->rb->SetVelocity(d);
-						obj->rb->SetAccel(0, 0, 0);
-
-						//충격량을 가함. impurse = impurse만큼 0.01초동안 가한것. 시간을 작게둔 이유는 힘을 줄이기 위해서.
-
-						obj->rb->AddForcePoint(impurse, p);
-						obj->rb->integrate(0.01);
-
-
-						//이제 속도와 각속도는 변경 했으니, 겹쳐진 부분 해소
-						//가장 작은값의 penetration(가장 깊은)만큼 올리면 된다.
-						auto px = fabsf(contactpoint[0].penetration)*Normal.x;
-						auto py = fabsf(contactpoint[0].penetration)*Normal.y;
-						auto pz = fabsf(contactpoint[0].penetration)*Normal.z;
-						obj->CenterPos.x += px;
-						obj->CenterPos.y += py;
-						obj->CenterPos.z += pz;
-
-						
-
-
-					}
 				
-				}
 
 			}
 			else//Dot의 결과 삐뚫어진 점 일경우 즉 노멀과 (두번째점-첫번째점) 벡터가 나온경우 
 			{
+				
+				XMFLOAT3 ProjAB = Normal;
+				ProjAB.x *= Dot;
+				ProjAB.y *= Dot;
+				ProjAB.z *= Dot;
+
+				//교정되었을때 V1
+				auto V4 = Float4Add(V1, XMFloat3to4(ProjAB), false);
+				V4 = Float4Normalize(V4);
+
+				//교정할 각도.
+				double theta = acos(V1.x*V4.x + V1.y*V4.y + V1.z*V4.z);
+
+				double theta2 = -MMPE_PI / 180;
+
+				//회전축을 구하고
+				XMFLOAT3 mAxis = XMFloat4to3(Float4Cross(V1, V4));
+				mAxis = Float3Normalize(mAxis);
+
+
+				//보정을 시킨다.
+				AmendObject(mAxis, theta, obj);
+
+				//보정이되면 바로 재귀시켜서 검사한다. 다만 자기자신을 보정하면 굳이 각속도를 변경 시키진 않아도 된다.
+				RigidBodyCollisionPlane(Normal, distance, obj);
+
+				
+
+
 
 			}
 
@@ -653,6 +696,19 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 		}
 		else if (size != 0)//그 외
 		{
+			//임시적이지만 그냥 일단 penetration과 속도만 변경하자.
+			auto px = fabsf(contactpoint[0].penetration)*Normal.x;
+			auto py = fabsf(contactpoint[0].penetration)*Normal.y;
+			auto pz = fabsf(contactpoint[0].penetration)*Normal.z;
+			obj->CenterPos.x += px;
+			obj->CenterPos.y += py;
+			obj->CenterPos.z += pz;
+
+			//땅에 닿았으니 현재 속도의 y는 반감되어야 한다. 원래는 탄성계수가 있지만.. 그냥 절반 감소시킨후 부호를 -로 하자.
+			auto d = obj->rb->GetVelocity();
+			d.y = -0.2 * d.y;
+			obj->rb->SetVelocity(d);
+			obj->rb->SetAccel(0, 0, 0);
 
 		}
 
