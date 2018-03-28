@@ -5,9 +5,12 @@ AsyncClient::~AsyncClient()
 {
 }
 
-void AsyncClient::Init()
+void AsyncClient::Init(CGameObject* obj, Scene* scene)
 {
 	boost::asio::ip::tcp::endpoint endpoint(boost::asio::ip::address::from_string(SERVERIP), SERVERPORT);
+
+	m_myObj = obj;
+	m_myScene = scene;
 
 	Connect(endpoint);
 }
@@ -31,7 +34,7 @@ void AsyncClient::Connect(boost::asio::ip::tcp::endpoint& endpoint)
 			{
 				cout << "Client ID and PW send Success" << endl;
 
-				//RecvPacket();
+				RecvPacket(*m_myObj, *m_myScene);
 				//return;
 			}
 			//Packet send_client_num_buf = static_cast<unsigned char>(temp_DB.Get_LoginPacketInfo()->size());
@@ -60,15 +63,17 @@ void AsyncClient::Connect(boost::asio::ip::tcp::endpoint& endpoint)
 
 }
 
-void AsyncClient::RecvPacket()
+void AsyncClient::RecvPacket(CGameObject& obj, Scene& scene)
 {
 	//m_socket.async_read_some(boost::asio::buffer(m_recvBuf, MAX_BUFFER_SIZE),
 	//	[&](const boost::system::error_code& error, size_t bytes_transferred) 
 	//	-> void 
-	boost::asio::async_read(m_socket, boost::asio::buffer(m_recvBuf, MAX_BUFFER_SIZE),
-		[&](const boost::system::error_code& error, size_t bytes_transferred)
+	//boost::asio::async_read(m_socket, boost::asio::buffer(m_recvBuf , MAX_BUFFER_SIZE),
+	//	[&](const boost::system::error_code& error, size_t bytes_transferred)
+	m_socket.async_read_some(boost::asio::buffer(m_recvBuf, MAX_BUFFER_SIZE),
+		[&](const boost::system::error_code& error,const size_t& bytes_transferred)
 	{
-		if (error)
+		if (error != 0)
 		{
 			//에러: 작업이 취소된 경우 
 			if (error.value() == boost::asio::error::operation_aborted)
@@ -101,12 +106,13 @@ void AsyncClient::RecvPacket()
 			//clients[m_id]->SendPacket(reinterpret_cast<Packet*>(&dis_msg));	
 		}
 
-		cout << endl;
+		
 		//ProcessPacket(Get_RecvBuf);
 		//RecvPacket();
-		/*
+		
 		int cur_data_proc = static_cast<int>(bytes_transferred);
 		Packet* temp_buf = m_recvBuf;
+
 		while (cur_data_proc > 0)
 		{
 			if (m_cur_packet_size == 0)
@@ -123,7 +129,7 @@ void AsyncClient::RecvPacket()
 			{
 				memcpy(m_dataBuf + m_prev_packet_size, temp_buf, need_to_read);
 
-				//ProcessPacket(m_dataBuf);
+				ProcessPacket(m_dataBuf, obj, scene);
 
 				m_prev_packet_size = 0;
 				m_cur_packet_size = 0;
@@ -138,8 +144,7 @@ void AsyncClient::RecvPacket()
 				temp_buf += cur_data_proc;
 			}
 		}
-		*/
-
+		RecvPacket(obj,scene);
 	});
 }
 
@@ -148,6 +153,8 @@ void AsyncClient::SendPacket(Packet * packet)
 	int packet_size = packet[0];
 	Packet *new_sendBuf = new Packet[packet_size];
 	memcpy(new_sendBuf, packet, packet_size);
+
+	auto a = reinterpret_cast<STC_ChangedPos*>(packet);
 
 	boost::asio::async_write(m_socket, boost::asio::buffer(new_sendBuf, packet_size),
 		[&](const boost::system::error_code& error, size_t bytes_transferred)
@@ -163,7 +170,7 @@ void AsyncClient::SendPacket(Packet * packet)
 			return;
 		}
 
-		RecvPacket();
+		//RecvPacket();
 	});
 }
 

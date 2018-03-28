@@ -21,7 +21,7 @@ public:
 	virtual void CreateShader(ID3D12Device * Device, ID3D12RootSignature * GraphicsRootSignature, WCHAR * vsfile, LPCSTR vsname, LPCSTR vsprofile, WCHAR * psfile, LPCSTR psname, LPCSTR psprofile);//PSO»ý¼º
 
 	virtual void SetShader(ID3D12GraphicsCommandList* commandlist,bool isBlend=false);
-	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList,const GameTimer& gt);
+	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList);
 protected:
 	ComPtr<ID3DBlob> VertexShader = nullptr;
 	ComPtr<ID3DBlob> PixelShader = nullptr;

@@ -3,8 +3,13 @@
 #include"utility.h"
 #include"UploadBuffer.h"
 using namespace std;
+#define MAXJOINT 65
 
+struct JointArr
+{
+	ShaderJoint j[MAXJOINT];
 
+};
 class CMesh
 {
 public:
@@ -38,7 +43,8 @@ public:
 	int numWeights;
 	int numTriangles;
 
-	
+	UploadBuffer<JointArr>* jarr = NULL;
+
 
 public:
 	CMesh();

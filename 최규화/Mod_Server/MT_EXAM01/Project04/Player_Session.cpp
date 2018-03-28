@@ -149,7 +149,7 @@ void Player_Session::InitData_To_Client()
 	init_player.pack_size = sizeof(STC_ClientInit);
 	init_player.pack_type = PACKET_PROTOCOL_TYPE::INIT_CLIENT;
 	init_player.player_data = m_playerData;
-	init_player.player_data.Pos = { 0.0f, -1000.0f, 0.0f };
+	init_player.player_data.Pos = { 0.0f, -500.0f, 0.0f };
 
 	m_clients[m_id]->SendPacket(reinterpret_cast<Packet*>(&init_player));
 }
@@ -215,8 +215,10 @@ void Player_Session::RecvPacket()
 
 	//패킷받을 때 버퍼사이즈는 전달된 버퍼의 크기만큼만 할당해야한다
 	//1바이트를 받아 패킷사이즈를 알고 해당 패킷 사이즈를 이용해 다시 패킷을 받는다
-	boost::asio::async_read(m_socket, boost::asio::buffer(m_recvBuf , 1),
-		[&](const boost::system::error_code& error, size_t bytes_transferred)
+	//boost::asio::async_read(m_socket, boost::asio::buffer(m_recvBuf , 1),
+	//	[&](const boost::system::error_code& error, size_t bytes_transferred)
+	m_socket.async_read_some(boost::asio::buffer(m_recvBuf, MAX_BUFFER_SIZE),
+		[&](const boost::system::error_code& error,const size_t& bytes_transferred)
 	{	
 
 		if (error != 0)
@@ -249,7 +251,7 @@ void Player_Session::RecvPacket()
 		//Packet *buf = Get_RecvBuf();
 		//ProcessPacket(buf);
 
-		
+		/*
 		Packet *buf = Get_RecvBuf();
 		int cur_data_processing = static_cast<int>(bytes_transferred);
 
@@ -272,16 +274,25 @@ void Player_Session::RecvPacket()
 		}
 		
 	
-		//RecvPacket();
-		
-		/*
+		RecvPacket();
+		*/
+
 		int cur_data_proc = static_cast<int>(bytes_transferred);
 		Packet* temp_buf = m_recvBuf;
+
 		while (cur_data_proc > 0)
 		{
 			if (m_cur_packet_size == 0)
+			{
 				m_cur_packet_size = temp_buf[0];
-			
+				if (temp_buf[0] > MAX_BUFFER_SIZE)
+				{
+					cout << "RecvPacket() Error, Client No. [ " << m_id << " ] recvBuf[0] is out of MAX_BUF_SIZE\n";
+					exit(-1);
+				}
+
+			}
+				
 			int need_to_read = m_cur_packet_size - m_prev_packet_size;
 			if (need_to_read <= cur_data_proc)
 			{
@@ -303,8 +314,6 @@ void Player_Session::RecvPacket()
 			}
 		}
 		RecvPacket();
-		*/
-
 	});
 
 	
@@ -328,12 +337,12 @@ void Player_Session::ProcessPacket(Packet * packet)
 		m_state = PLAYER_STATE::MOVE;
 
 		//받아들인 데이터(키를 눌러 플레이어를 움직였음)에서 포지션을 추출
-		m_playerData.Pos = *(reinterpret_cast<Position*>(&packet[2]));
+		auto data_ChangedPos = (reinterpret_cast<STC_ChangedPos*>(packet));
 
 		//변화된 포지션을 다른 클라에 전달
 		STC_ChangedPos change_pos;
-		change_pos.id = m_id;
-		change_pos.pos = m_playerData.Pos;
+		change_pos.id = data_ChangedPos->id;
+		change_pos.pos = data_ChangedPos->pos;
 
 		cout << "변화된 위치값: " << "[ x: " << change_pos.pos.x << " --  y: " << change_pos.pos.y
 			<< " -- z: " << change_pos.pos.z << "] " << endl;

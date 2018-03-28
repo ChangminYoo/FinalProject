@@ -17,18 +17,22 @@ private:
 	unsigned int m_prev_packet_size{ 0 };
 
 	CTextTest* m_cur_logindata;
+
+	CGameObject* m_myObj;
+	Scene* m_myScene;
+
 public:
 	AsyncClient() : m_socket(g_io_service) {};
 	~AsyncClient();
 
-	void Init();
+	void Init(CGameObject* obj, Scene* scene);
 
 	void Connect(boost::asio::ip::tcp::endpoint& endpoint);
 
-	void RecvPacket();
+	void RecvPacket(CGameObject& obj, Scene& scene);
 	void SendPacket(Packet* packet);
 
-	void ProcessPacket(Packet* packet, CGameObject* obj, Scene& scene);
+	void ProcessPacket(Packet* packet, CGameObject& obj, Scene& scene);
 
 	//얘를 databuf -> recvbuf로 바꾸니 제대로 값이 서버에서 전달됨
 	//recv 함수에서 임시버퍼에 서버에서 받은 데이터를 차례로 담는과정없이 
