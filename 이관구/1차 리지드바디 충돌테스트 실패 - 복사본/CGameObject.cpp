@@ -913,18 +913,23 @@ CubeObject::CubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 	//따라서 x축으로 -1도로 틀어주면 수평인 선이 나온다.
 	auto q = XMLoadFloat4(&Orient);
 	XMFLOAT3 axis{ 0,0,1 };
-	auto q2 = QuaternionRotation(axis, -MMPE_PI/6);
+	auto q2 = QuaternionRotation(axis, MMPE_PI/6);
 	axis.x = 1;
 	axis.z = 0;
-	auto q3 = QuaternionRotation(axis, MMPE_PI / 6);
+	auto q3 = QuaternionRotation(axis, MMPE_PI /26);
 	q3=Float4Normalize(q3);
+	axis.y = 0;
+	axis.x = 1;
+	axis.z = 0;
 	auto q4 = QuaternionRotation(axis, -MMPE_PI / 180);
 	q4= Float4Normalize(q4);
 	Orient = QuaternionMultiply(Orient, q2);
-	Orient = QuaternionMultiply(Orient, q3);
+	/*Orient = QuaternionMultiply(Orient, q3);
 	Orient = Float4Normalize(Orient);
-	//Orient = QuaternionMultiply(Orient, q4);
-	//Orient=Float4Normalize(Orient);
+	Orient = QuaternionMultiply(Orient, q4);
+	Orient=Float4Normalize(Orient);*/
+
+
 
 	UpdateLookVector();
 	ObjData.isAnimation = 0;
@@ -962,13 +967,13 @@ CubeObject::CubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 	rb->SetBounce(false);//튕기지 않는다.
 	rb->SetMass(1);//고정된 물체는 무게가 무한이다.
 	rb->SetIMoment(5, 5, 5);
-	rb->SetAngularVelocity(20,10,-10);
+
 	rb->SetOrient(&Orient);
-	XMFLOAT3 testForce{ 0,0,20 };
-	XMFLOAT3 testPoint{ -15,0,-5 };
+	XMFLOAT3 testForce{ -5,-3,2 };
+	XMFLOAT3 testPoint{ -15,5,-5 };
 	//힘을 한번만 가한다. 여기서 힘을 한번만 가한다의 단위는 F를 0.1초만큼 가하는것을 말한다.
 	//애초에 힘을 한번만 가한다라고 정의할수는 없으며 힘은 F만큼 n초동안 가하는게 맞는말이다.
-	//rb->AddForcePoint(testForce,testPoint);
+	rb->AddForcePoint(testForce,testPoint);
 	rb->integrate(0.1f);
 }
 

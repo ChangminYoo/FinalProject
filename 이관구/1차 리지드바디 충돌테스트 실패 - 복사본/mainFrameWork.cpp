@@ -396,6 +396,9 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 
 			//2인자점 - 1인자점을 해서 2인자점을 향하는 벡터를 만든다.
 			//이때 2인자 점을 향하는 각도가 특정각도 이하면 그 각도로 보정한다.
+
+			//문제는 2인자점을 어느것으로 할것인가 이다. 경우의수는 2가지다. 왼쪽이나 오른쪽점 / 또는 대각선 점.
+
 			auto V1 = Float4Add(allpoint[1].Pos, contactpoint[0].Pos, false);
 			V1 = Float4Normalize(V1);
 
@@ -417,7 +420,7 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 			//그후 사잇각이 특정각도 이하면 보정시킨다. 
 			//단 이게 double로 해도 0이아닌데 0이나오는경우가 생긴다.
 			//따라서 0일경우 그냥 충격량을 가해서 각도를 변경시킨다.
-			if (abs(theta) <= MMPE_PI / 40 && abs(theta)!=0)//대략 4.5도 이하면 보정시킴.
+			if (abs(theta) <= MMPE_PI / 36 && abs(theta)!=0)//대략 5도 이하면 보정시킴.
 			{
 				//회전축을 구하고..
 				XMFLOAT3 mAxis = XMFloat4to3(Float4Cross(V1, V2));
@@ -573,9 +576,48 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 						//먼저 현재 충돌점은 2개이니 2개의 충돌점을 더한 후 2로 나눠주면 충돌지점 완성이다.
 						//충격량은 차후에 다시 구해야겠지만, 현재는 0,50,0 정도로 가하겠다.
 
+						//근데 여기서 경우의 수가 생긴다. 알다시피 대각선형태로 정확하게 45도 기준으로 서있는 경우의수가 생긴다.
+						//이것을 없애려면 먼저 해당경우의 수에 속하는지를 검사해야한다.
+
+						//그후 그 경우의수를 해결해야겠다. 검사를 하려면 좌우 대칭인지를 보면될것같다.
+						//그리고 대칭이면 랜덤이든 아니면 오른쪽으로 충격량을 약간 가하던 하면 될것같다.
+
+						//먼저 2/3/4/5 인덱스의 점을 비교하면서 이 길이가 0.0001정도 차이면 통과. 4개모두 통과면 특정방향으로 충격량가함.
+						float ComparePenetration = allpoint[2].penetration;
+						bool pass = true;
+						for (int i = 2; i < 6; i++)
+						{
+							if (fabsf(ComparePenetration - allpoint[i].penetration) > 0.25)
+							{
+								pass = false;
+								break;
+							}
+						}
+
+
 						XMFLOAT3 impurse{ 0,70,0 };// 충격량 . 여기서는 선속도를 증가시키는것은 적다 다만 각속도를 변화시킬때 유효하다.
 
-						CollisionPoint fp;//충격량을 가할 지점
+
+						//4개가 모두 같은 깊이면 균형을 이루는것이므로 균형을 부셔버린다.
+						if (pass)
+						{
+							theta = -MMPE_PI /18;
+							XMFLOAT3 mAxis = XMFloat4to3(Float4Cross(V2, V3));
+							mAxis = Float3Normalize(mAxis);
+							//보정을 시킨다.
+							AmendObject(mAxis, theta, obj);
+
+							//그리고 재귀 시킨다. 왜냐하면 보정이되었으면 allpoint,tempcollisionpoint,contactpoint , penetration 모두 다 바뀌어야 하기 때문이다.
+							//재귀 후 아마 2가지 경우의수가 있다. 충돌이 일어나거나, 아니면 살짝 떠있거나.. 어쨌든 잘 해결 된다.
+							obj->rb->SetAngularVelocity(0, 0, 0);
+							RigidBodyCollisionPlane(Normal, distance, obj);
+							
+							return;
+						}
+
+
+						
+						CollisionPoint fp;//충격 량을 가할 지점
 						fp.Pos = XMFLOAT4(0, 0, 0, 0);
 						fp.pAxis = Normal;
 

@@ -950,8 +950,8 @@ void MiniPhysicsEngineG9::RigidBody::integrate(float DeltaTime)
 	XMVECTOR Avelocity = XMLoadFloat3(&AngularVelocity);
 	XMVECTOR totaltorque = XMLoadFloat3(&TotalTorque);
 	XMVECTOR orient = XMLoadFloat4(Orient);
-	XMMATRIX IT = XMLoadFloat4x4(&Inverse_I_Moment);
-	IT*=XMMatrixRotationQuaternion(orient);//IT는 디폴트 인버스 관성모멘트 * 방향쿼터니언행렬
+	XMMATRIX IT = XMLoadFloat4x4(&GetIMoment());
+		
 	//각가속도 구하고 각속도 구하고 마찰로 감속시킨후 방햐을 구한다.
 
 	// A = T/I == T * Inverse I
@@ -969,6 +969,7 @@ void MiniPhysicsEngineG9::RigidBody::integrate(float DeltaTime)
 	XMStoreFloat(&av, XMVector3Length(Avelocity));
 	if (av <= MMPE_EPSILON)
 		Avelocity = XMVectorZero();
+
 
 
 	//방향을 최종적 설정. orient = orient + 0.5*W*orient. 이때 W*orient는 쿼터니언 곱.
@@ -1029,7 +1030,22 @@ void MiniPhysicsEngineG9::RigidBody::SetIMoment(float x, float y, float z)
 XMFLOAT4X4 MiniPhysicsEngineG9::RigidBody::GetIMoment(bool Inverse)
 {
 	if (Inverse)
-		return Inverse_I_Moment;
+	{
+		XMMATRIX ii = XMLoadFloat4x4(&Inverse_I_Moment);
+		XMVECTOR dt = XMMatrixDeterminant(ii);//행렬식
+
+		ii = XMMatrixInverse(&dt, ii);//역이아닌 정상적인 관성모멘트
+
+		XMVECTOR orient = XMLoadFloat4(Orient); // 물체가 회전한만큼 회전시킨다.
+		ii *= XMMatrixRotationQuaternion(orient);//ii는 디폴트 관성모멘트 * 방향쿼터니언행렬
+
+		//다시 역행렬로 변환
+		dt = XMMatrixDeterminant(ii);//행렬식
+		ii = XMMatrixInverse(&dt, ii);
+		XMFLOAT4X4 temp;
+		XMStoreFloat4x4(&temp, ii);
+		return temp;
+	}
 	else
 	{
 		XMMATRIX ii = XMLoadFloat4x4(&Inverse_I_Moment);
