@@ -49,11 +49,9 @@ bool TreeObject::CreateMesh = false;
 unordered_map<string, unique_ptr<CTexture>> TreeObject::Textures;//텍스처들을 저장함
 CMesh  TreeObject::Mesh;//나중에 메쉬는 static으로 둬야함
 ComPtr<ID3D12DescriptorHeap> TreeObject::SrvDescriptorHeap;//텍스처 용 힙
-CMaterial TreeObject::Mat;
 
 //--------------------------------------------------------------------------------------
 bool DamageObject::CreateMesh = false;
 unordered_map<string, unique_ptr<CTexture>> DamageObject::Textures;//텍스처들을 저장함
 CMesh  DamageObject::Mesh;//나중에 메쉬는 static으로 둬야함
 ComPtr<ID3D12DescriptorHeap> DamageObject::SrvDescriptorHeap;//텍스처 용 힙
-CMaterial DamageObject::Mat;

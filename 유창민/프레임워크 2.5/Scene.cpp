@@ -180,16 +180,17 @@ void Scene::CreateGameObject()
 	StaticObject.push_back(new CubeObject(device, commandlist, XMFLOAT4(50, 0, -40, 0)));
 	StaticObject.push_back(new CubeObject(device, commandlist, XMFLOAT4(30, 0, 40, 0)));
 
+
 	StaticObject.push_back(new GridObject(device, commandlist, XMFLOAT4(0, 0, 0, 0)));
 
 	BbObject.push_back(new TreeObject(device, commandlist, XMFLOAT4(0,0,0,0)));
 
-//	DynamicObject.push_back(new CCubeManObject(device, commandlist, XMFLOAT4(40,60, 0, 0)));
+
+
+
 	//플레이어의 오브젝트 설정. 이건 나중에 바꿔야함.
 	Player->SetPlayer(DynamicObject.front());
 	Player->PlayerObject->Blending = false;
-
-
 
 }
 
@@ -235,8 +236,9 @@ void Scene::Tick(const GameTimer & gt)
 		//오브젝트가 맞았다면
 		if ((*i)->IsHit == true)
 		{
-			BbObject.push_back(new DamageObject(device, commandlist, XMFLOAT4((*i)->CenterPos.x, (*i)->CenterPos.y + 20, (*i)->CenterPos.z, 0)));
+			BbObject.push_back(new DamageObject(device, commandlist, (*i)->gamedata.Damage, XMFLOAT4((*i)->CenterPos.x, (*i)->CenterPos.y + 20, (*i)->CenterPos.z, 0)));
 			(*i)->IsHit = false;
+			
 		}
 
 		if ((*i)->DelObj == true)
@@ -256,7 +258,6 @@ void Scene::Tick(const GameTimer & gt)
 			delete *i;//실제 게임오브젝트의 메모리 해제
 			i = BulletObject.erase(i);//리스트상에서 해당 요소를 지움
 
-
 		}
 		else
 			i++;
@@ -268,8 +269,6 @@ void Scene::Tick(const GameTimer & gt)
 		{
 			delete *i;//실제 게임오브젝트의 메모리 해제
 			i = StaticObject.erase(i);//리스트상에서 해당 요소를 지움
-
-
 		}
 		else
 			i++;
@@ -300,6 +299,7 @@ void Scene::Tick(const GameTimer & gt)
 
 	for (auto b = BbObject.begin(); b != BbObject.end(); b++)
 		(*b)->Tick(gt);
+
 	
 	//카메라 리 로케이트 
 	Player->PlayerCameraReLocate();

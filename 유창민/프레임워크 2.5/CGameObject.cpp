@@ -110,10 +110,12 @@ void CGameObject::SetAnimation(int n_Ani)
 	
 }
 
-void CGameObject::Tick(const GameTimer& gt)
+void CGameObject::SetMaterial(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
 {
+}
 
-	
+void CGameObject::Tick(const GameTimer& gt)
+{	
 }
 
 void CGameObject::CreateConstBuffer(ID3D12Device * m_Device)
@@ -647,7 +649,7 @@ BulletCube::BulletCube(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 	//게임관련 데이터들
 	gamedata.MAXHP = 1;
 	gamedata.HP = 1;
-	gamedata.Damage = 10;
+	gamedata.Damage = 20;
 	gamedata.GodMode = true;
 	gamedata.Speed = 50;
 	LifeTime = 10;
@@ -754,7 +756,8 @@ void BulletCube::Collision(list<CGameObject*>* collist, float DeltaTime)
 
 					//맞은 물체 상태 변경후 데미지 띄우기
 					(*i)->IsHit = true;
-
+					//캐릭터의 데미지란에 총알의 데미지를 넣고 씬에서 생성시에 이값을 데미지 오브젝트에 넘겨준다 
+					(*i)->gamedata.Damage = gamedata.Damage;
 				}
 				else//고정된 물체면 충돌한 평면의 노멀방향으로 cn을 설정할것.
 				{
@@ -1117,20 +1120,10 @@ void TreeObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * co
 
 }
 
-void TreeObject::SetMaterial(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
-{
-}
 
 void TreeObject::Tick(const GameTimer & gt)
 {
-	//투사체는 생명 주기가 있어야 한다.
-	//LifeTime -= gt.DeltaTime();
-	//
-	//if (LifeTime > 0.0f)
-	//	CenterPos.y += 0.04f;
-	//
-	//if (LifeTime <= 0)
-	//	DelObj = true;
+
 }
 
 void TreeObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer & gt)
@@ -1166,7 +1159,7 @@ void TreeObject::Collision(list<CGameObject*>* collist, float DeltaTime)
 
 ///////////////////////////////////
 
-DamageObject::DamageObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, cp)
+DamageObject::DamageObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, float Damaged, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, cp)
 {
 	ObjData.isAnimation = 0;
 	ObjData.Scale = 10.0f;
@@ -1185,7 +1178,19 @@ DamageObject::DamageObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * 
 	{
 		Mesh.Index = NULL;
 		Mesh.SubResource = NULL;
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "DamageTex", L"textures/damage/damage10.dds", false);
+
+		if (Damaged == 10.0f)
+			LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "DamageTex", L"textures/damage/damage10.dds", false);
+		else if (Damaged == 20.0f)
+			LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "DamageTex", L"textures/damage/damage20.dds", false);
+		else if (Damaged == 30.0f)
+			LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "DamageTex", L"textures/damage/damage30.dds", false);
+		else if (Damaged == 40.0f)
+			LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "DamageTex", L"textures/damage/damage40.dds", false);
+		else if (Damaged == 50.0f)
+			LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "DamageTex", L"textures/damage/damage50.dds", false);
+
+
 		SetMesh(m_Device, commandlist);
 		CreateMesh = true;
 
@@ -1222,10 +1227,6 @@ void DamageObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * 
 	Mesh.CreateVertexBuffer(m_Device, commandlist);
 	Mesh.CreateIndexBuffer(m_Device, commandlist);
 
-}
-
-void DamageObject::SetMaterial(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
-{
 }
 
 void DamageObject::Tick(const GameTimer & gt)
