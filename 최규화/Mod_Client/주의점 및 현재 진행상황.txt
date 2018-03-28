@@ -21,3 +21,11 @@
   이를 서버가 다시 클라이언트로 보내주는 과정에서 생기는 버그 수정중
 - async_write_some / async_read_some 을 async_write 와 async_read로 바꾸었음
 - 프로토콜 헤더파일에서 패킷 구조체 변경 
+
+
+2018. 03. 27 ~ 2018. 03. 28
+- async_read에 문제가 있어서 async_read_some으로 다시 입출력함수를 바꿈
+- 클라이언트에서 키조작을 통해 변화된 값을 서버가 받아 클라이언트에게 다시 해당값을 보내주는 것을 확인
+- 서버에서 기존에 Accept 내부에 있던 worker_thread를 외부로빼서 Accept 함수와 worker_thread함수가
+  독립적으로 멀티스레드로 작동되게끔 서버 구조를 바꾸어야할것같음. 
+ 
