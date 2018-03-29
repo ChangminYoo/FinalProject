@@ -39,10 +39,13 @@ struct GameData //게임캐릭터의 정보 흔히 알고있는 체력, 데미지, 스피드가 있다.
 class CGameObject//이 클래스를 기본으로 상속받아 다른 오브젝트를 만듬. ex) 검사오브젝트, 좀비오브젝트 등
 {
 public:
-	CGameObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
+	//오브젝트는 반드시 디바이스,커맨드리스트,파티클리스트,포지션을 받는다.
+	//왜파티클 리스트가 필요하냐면 충돌이나 마법효과에서 파티클을 넣기 위해서다.
+	CGameObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist,list<CGameObject*>*Plist, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
 	CGameObject();
 	~CGameObject();
 	
+	ID3D12Device* device;//디바이스
 	ID3D12GraphicsCommandList* commandlist;//그래픽커맨드리스트
 	ObjectData ObjData;//월드행렬과 기타 데이터
 	RigidBody* rb = NULL;//리지드 바디 오브젝트. 강체오브젝트는 아직 미완성. 테스트및 구현중이다.
@@ -50,7 +53,7 @@ public:
 	bool staticobject = false;//고정된 건물같은 객체인가?
 	
 	list<CGameObject*>* CollisionList=NULL;
-
+	list<CGameObject*>* ParticleList = NULL;
 protected:
 	
 	UploadBuffer<ObjectData>* ConstBuffer=NULL;	//월드행렬과 커스텀데이터를 저장하기위한 버퍼
@@ -81,7 +84,7 @@ public:
 	//기타 공용 데이터들
 	bool DelObj = false;//이게 참이면 실제로 제거된다.
 	bool Blending = false;
-	bool IsHit = false;
+	
 	GameData gamedata;
 	RayCastObject rco;//레이캐스트 오브젝트
 	CGameObject* LockOn=NULL;
@@ -130,7 +133,7 @@ void LoadTexture(ID3D12Device* device, ID3D12GraphicsCommandList* commandlist, C
 class CCubeManObject : public CGameObject
 {
 public:
-	CCubeManObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
+	CCubeManObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
 	
 public:
 	static CMaterial Mat;
@@ -153,7 +156,7 @@ public:
 class CZombieObject : public CGameObject
 {
 public:
-	CZombieObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
+	CZombieObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist,list<CGameObject*>*Plist, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
 
 public:
 	static CMaterial Mat;
@@ -179,7 +182,7 @@ public:
 class BulletCube : public CGameObject
 {
 public:
-	BulletCube(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist,CGameObject* master,XMFLOAT4& ori,CGameObject* lockon=NULL, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
+	BulletCube(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist,CGameObject* master,XMFLOAT4& ori,CGameObject* lockon=NULL, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
 	CGameObject* Master = NULL;//소유자
 	CGameObject* LockOn = NULL;//유도시사용됨
 	float LifeTime = 10;//생존시간. 10초 후 제거됨
@@ -208,7 +211,7 @@ public:
 class SphereObject : public CGameObject
 {
 public:
-	SphereObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
+	SphereObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
 
 public:
 	static bool CreateMesh;//최초로 false며 메쉬를 만든후 true가된다.
@@ -227,7 +230,7 @@ public:
 class CubeObject : public CGameObject
 {
 public:
-	CubeObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
+	CubeObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
 
 public:
 	static CMaterial Mat;
@@ -248,7 +251,7 @@ public:
 class RigidCubeObject : public CGameObject
 {
 public:
-	RigidCubeObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
+	RigidCubeObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
 
 public:
 	static CMaterial Mat;
@@ -270,7 +273,7 @@ public:
 class GridObject : public CGameObject
 {
 public:
-	GridObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
+	GridObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
 
 public:
 	static CMaterial Mat;
@@ -292,7 +295,7 @@ public:
 class TreeObject : public CGameObject
 {
 public:
-	TreeObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
+	TreeObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
 	float LifeTime = 0.0f;
 
 public:
@@ -314,7 +317,7 @@ public:
 class DamageObject : public CGameObject
 {
 public:
-	DamageObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, float damaged, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
+	DamageObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, float damaged, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
 	float LifeTime = 1.5f;
 	float Damaged = 0.0f;
 
