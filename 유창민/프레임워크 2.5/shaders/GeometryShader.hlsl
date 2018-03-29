@@ -11,6 +11,11 @@ struct VertexOut
 	float4 Pos : POSITION;
 };
 
+struct PSOUT
+{
+	float4 Color : SV_TARGET;
+	float Depth : SV_DEPTH;
+};
 
 struct GeoOut
 {
@@ -79,7 +84,7 @@ void GS(point VertexOut gin[1], inout TriangleStream<GeoOut> triStream)
 }
 
 
-float4 PS(GeoOut pin) : SV_TARGET
+PSOUT PS(GeoOut pin) 
 {
 	float4 textureColor; //텍스쳐 색상
 	float4 litColor;
@@ -91,7 +96,9 @@ float4 PS(GeoOut pin) : SV_TARGET
 	//알파테스트 실행
 	clip(textureColor.a - 0.1f);
 
-
-	return textureColor;
+	PSOUT pout;
+	pout.Color = textureColor;
+	pout.Depth = -1;
+	return pout;
 
 }

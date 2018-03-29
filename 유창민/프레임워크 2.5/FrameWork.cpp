@@ -465,6 +465,31 @@ void FrameWork::OnMouseDown(WPARAM btnState, int x, int y)
 		}
 
 	}
+	//리지드 바디도 검사해야함.
+	for (auto b = scene->RigidObject.begin(); b != scene->RigidObject.end(); b++)
+	{
+		if ((*b) != scene->Player->PlayerObject)//플레이어가 아닐경우
+		{
+			//광선의 길이보다 가까울때
+			if (FloatLength(Float4Add(scene->Player->PlayerObject->CenterPos, (*b)->CenterPos)) <= MAXRAYLEN)
+			{
+
+
+				if ((*b)->rco.RayCasting(RAY.RayOrgin, RAY.RayDir, XMFloat4to3((*b)->CenterPos), XMFloat4to3(scene->Player->PlayerObject->CenterPos),
+					scene->Player->PlayerObject->Lookvector, &savepoint) == true && Shot == false)//광선이 다른 오브젝트를 맞출경우
+				{
+					//여기서 뭔가를 처리한다.
+					//플레이어가 현재 사용할 투사체 넘버를 통해 자체적으로 투사체를 생성해서 불렛오브젝트 리스트에 저장함.
+					scene->Player->CreateBullet(Device.Get(), mCommandList.Get(), savepoint, (*b), &scene->BulletObject);
+					Shot = true;
+				}
+
+
+			}
+		}
+
+	}
+
 		if (Shot == false)//명중시킨 적이 없으면.
 		{
 			savepoint = RayShot(RAY.RayOrgin, RAY.RayDir, MAXRAYLEN);

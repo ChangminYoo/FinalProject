@@ -277,6 +277,41 @@ void Shader::Render(ID3D12GraphicsCommandList * CommandList, const GameTimer& gt
 		}
 	}
 	
+	//리지드 바디
+	SetShader(CommandList, false);
+	for (auto b = RigidObject->cbegin(); b != RigidObject->cend(); b++)
+	{
+		if (isRender(*b) == true)
+		{
+			if ((*b)->Blending)
+			{
+				//블랜딩용 PSO 연결
+				SetShader(CommandList, true);
+				//블랜딩용 PSO로 그림
+				(*b)->Render(CommandList, gt);
+				//다시 원상태 PSO로 연결
+				SetShader(CommandList, false);
+			}
+			else//블랜딩 안씀
+			{
+				if (ishalfalphaRender(*b) == false)
+					(*b)->Render(CommandList, gt);
+				else
+				{
+					auto tempv = (*b)->ObjData.BlendValue;
+					(*b)->ObjData.BlendValue = 0.75f;
+					SetShader(CommandList, true);
+					//블랜딩용 PSO로 그림
+					(*b)->Render(CommandList, gt);
+					//다시 원상태 PSO로 연결
+					SetShader(CommandList, false);
+					(*b)->ObjData.BlendValue = tempv;
+				}
+
+			}
+		}
+	}
+
 	//이제 이렇게 그릴때 마다 그리기전에 옳바른 PSO를 연결하고, 오브젝트들을 그린다.
 	//투사체또한 그린다.
 	for (auto b = BulletObject->cbegin(); b != BulletObject->cend(); b++)

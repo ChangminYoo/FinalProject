@@ -1,10 +1,18 @@
 #pragma once
 #include<DirectXMath.h>
+#include<vector>
 using namespace DirectX;
 #define MMPE_EPSILON 0.001
 #define MMPE_PI 3.14159287
 namespace MiniPhysicsEngineG9
 {
+	struct CollisionPoint
+	{
+		XMFLOAT4 Pos;//충돌지점
+		float penetration=0;//충돌시 겹쳐진 길이
+		XMFLOAT3 pAxis;//충돌시 방향
+	};
+
 	class PhysicsPoint
 	{
 
@@ -73,6 +81,8 @@ namespace MiniPhysicsEngineG9
 		void ResolvePenetration(PhysicsPoint& p2,float DeltaTime);
 	};
 
+
+
 	class RigidBody
 	{
 
@@ -87,7 +97,7 @@ namespace MiniPhysicsEngineG9
 		XMFLOAT3 Velocity;//속도
 		XMFLOAT3 AngularVelocity;//각속도. 
 
-								 //중점과 방향은 포인터로 공유한다. 즉 실제 오브젝트의 위치와 방향으로!
+		//중점과 방향은 포인터로 공유한다. 즉 실제 오브젝트의 위치와 방향으로!
 		XMFLOAT4* CenterPos;//중점
 		XMFLOAT4* Orient;//방향.
 
@@ -97,10 +107,10 @@ namespace MiniPhysicsEngineG9
 
 		XMFLOAT3 TotalForce;//최종적으로 가해진 모든 힘
 
-							//최종 토크력. 이거 중요한게 토탈포스로 토탈 토크를 구하면안된다. 그이유는 예를들어 중력같이
-							//특정 지점이 아니라 전체에 가해지거나 하는 힘도 있기 때문이다. 따라서 특정 지점에 가해진 힘만으로 구해야함.
+		//최종 토크력. 이거 중요한게 토탈포스로 토탈 토크를 구하면안된다. 그이유는 예를들어 중력같이
+		//특정 지점이 아니라 전체에 가해지거나 하는 힘도 있기 때문이다. 따라서 특정 지점에 가해진 힘만으로 구해야함.
 		XMFLOAT3 TotalTorque;
-
+		
 		XMFLOAT3 Accel;//가속도  
 
 		XMFLOAT3 halfbox;//x길이y길이z길이
@@ -111,12 +121,12 @@ namespace MiniPhysicsEngineG9
 		void integrate(float DeltaTime);//적분기. 속도와 가속도로 위치를 구하고 가속도를 이용해 속도를 갱신함.
 		void SetMass(float M);//무게의 역을 쉽게 저장하기 위한 함수. M을 넣으면 역수로 저장해줌
 		float GetMass(bool Inverse = true);//기본적으로 무게의 역을 구함. 다만 false로 두면 그대로 나온다.
-
+		
 		void SetIMoment(XMFLOAT4X4& i);//관성모멘트 설정. 인자로 넣을땐 그냥 넣고 저장은 인버스형식으로 해둔다.
-		void SetIMoment(float x, float y, float z);//육면체용 관성모멘트
-		XMFLOAT4X4 GetIMoment(bool Inverse = true);//기본적으로 역텐션을 구한다.
-
-		void SetDamping(float D, float Ad);//댐핑지수를 설정함.
+		void SetIMoment(float x,float y,float z);//육면체용 관성모멘트
+		XMFLOAT4X4 GetIMoment(bool Inverse=true);//기본적으로 역텐션을 구한다.
+		
+		void SetDamping(float D,float Ad);//댐핑지수를 설정함.
 		float GetDamping();//댐핑지수 반환
 		float GetAngularDamping();//회전댐핑지수 반환
 
@@ -124,7 +134,7 @@ namespace MiniPhysicsEngineG9
 
 		void SetPosition(XMFLOAT4* pos);//중점 위치 설정
 		void SetOrient(XMFLOAT4* ori);//방향 설정
-
+		
 		XMFLOAT4 GetPosition();//중점 얻기
 		XMFLOAT4 GetOrient();
 
@@ -145,7 +155,7 @@ namespace MiniPhysicsEngineG9
 		void AddForce(float x, float y, float z);
 		XMFLOAT3 GetTotalForce();//현재까지 총 힘을 반환.
 
-								 //특정지점에 힘을가함. 강체는 점이아니기에 특정지점에 힘을 가할수 잇다.보통 이때 토크가 같이 계산된다.
+		 //특정지점에 힘을가함. 강체는 점이아니기에 특정지점에 힘을 가할수 잇다.보통 이때 토크가 같이 계산된다.
 		void AddForcePoint(XMFLOAT3& F, XMFLOAT3& pointposition);
 		void AddForcePoint(XMFLOAT3& F, XMFLOAT4& pointposition);
 
@@ -156,15 +166,19 @@ namespace MiniPhysicsEngineG9
 		XMFLOAT3 GetTotalTorque();//현재까지 총 토크 반환.
 
 
-								  //충돌관련
-		float penetration = 0;//밀어내야하는 길이
-		XMFLOAT3 pAxis;//밀어낼 방향
+								 //충돌관련
+		std::vector<CollisionPoint> CollisionPointVector;//충돌한 지점을 저장하는 벡터. 왜냐하면 리지드'바디'는 점이아니므로 다수의 충돌지점을 가질 수있음
+	
+		XMFLOAT3 CalculateImpulse(CollisionPoint& cp);
 
 		void SetHalfBox(float x, float y, float z);
 		XMFLOAT3 GetHalfBox();
 
+		void GetEightPoint(XMFLOAT4* Parr,XMFLOAT3& Up,XMFLOAT3& Look,XMFLOAT3& Right);
+
 		bool GetBounce();
 	};
+
 
 	struct RayCastPlane
 	{
@@ -195,6 +209,7 @@ namespace MiniPhysicsEngineG9
 		void SetGravityAccel(XMFLOAT3& ga);
 		XMFLOAT3 GetGravityAccel();
 		void Update(float DeltaTime, PhysicsPoint& pp);
+		void Update(float DeltaTime, RigidBody& rb);
 
 	};
 

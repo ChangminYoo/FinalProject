@@ -55,3 +55,11 @@ bool DamageObject::CreateMesh = false;
 unordered_map<string, unique_ptr<CTexture>> DamageObject::Textures;//텍스처들을 저장함
 CMesh  DamageObject::Mesh;//나중에 메쉬는 static으로 둬야함
 ComPtr<ID3D12DescriptorHeap> DamageObject::SrvDescriptorHeap;//텍스처 용 힙
+
+//--------------------------------------------------------------------------------------
+bool RigidCubeObject::CreateMesh = false;
+unordered_map<string, unique_ptr<CTexture>> RigidCubeObject::Textures;//텍스처들을 저장함
+CMesh  RigidCubeObject::Mesh;//나중에 메쉬는 static으로 둬야함
+ComPtr<ID3D12DescriptorHeap> RigidCubeObject::SrvDescriptorHeap;//텍스처 용 힙
+CMaterial RigidCubeObject::Mat;
+

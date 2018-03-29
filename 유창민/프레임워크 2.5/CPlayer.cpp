@@ -230,6 +230,11 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 
 					}
 			}
+			//리지드 바디 와 비교
+			for (auto i = scene->RigidObject.begin(); i != scene->RigidObject.end(); i++)
+			{
+
+			}
 
 			
 		}
@@ -461,7 +466,7 @@ void CPlayer::CreateBullet(ID3D12Device* Device, ID3D12GraphicsCommandList* cl,X
 		XMStoreFloat4(&ori, tempori);//최종 회전 방향
 
 
-		CGameObject* bul = new BulletCube(Device, cl, PlayerObject, ori, lock, PlayerObject->CenterPos);
+		CGameObject* bul = new BulletCube(Device, cl, PlayerObject->ParticleList, PlayerObject, ori, lock, PlayerObject->CenterPos);
 
 		bulletlist->push_back(bul);
 		break;

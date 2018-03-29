@@ -57,8 +57,9 @@ public:
 	list<CGameObject*> BulletObject;//투사체들이 모인다.
 	list<CGameObject*> StaticObject;//애니메이션이 없는 모든 오브젝트들이 모인다.
 	list<CGameObject*> BbObject;
-
+	list<CGameObject*> RigidObject;//리지드바디를 사용하는 오브젝트들.
 	CGameObject* SkyObject=NULL;//스카이박스용 객체를 다룬다. 스카이박스는 하나면 됨.
 	
+	list<CGameObject*> LandObject;
 };
 
