@@ -57,7 +57,7 @@ void AsyncClient::ProcessPacket(Packet* packet, CGameObject& obj, Scene& scene)
 	}
 	case PACKET_PROTOCOL_TYPE::CHANGED_PLAYER_POSITION:
 	{
-		auto delivered_data = reinterpret_cast<STC_ChangedPos*>(&packet[2]);
+		auto delivered_data = reinterpret_cast<STC_ChangedPos*>(packet);
 		//obj->CenterPos.x = updated_data->pos.x;
 		//obj->CenterPos.y = updated_data->pos.y;
 		//obj->CenterPos.z = updated_data->pos.z;

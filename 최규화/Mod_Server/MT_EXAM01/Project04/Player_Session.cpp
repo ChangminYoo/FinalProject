@@ -149,7 +149,7 @@ void Player_Session::InitData_To_Client()
 	init_player.pack_size = sizeof(STC_ClientInit);
 	init_player.pack_type = PACKET_PROTOCOL_TYPE::INIT_CLIENT;
 	init_player.player_data = m_playerData;
-	init_player.player_data.Pos = { 0.0f, -500.0f, 0.0f };
+	init_player.player_data.Pos = { 0.0f, -1000.0f, 0.0f };
 
 	m_clients[m_id]->SendPacket(reinterpret_cast<Packet*>(&init_player));
 }

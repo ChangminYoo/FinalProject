@@ -130,7 +130,10 @@ void PhysicsPoint::integrate(float DeltaTime, XMFLOAT4* ObjPos, XMFLOAT3* ObjVel
 
 	assert(DeltaTime > 0.0);
 
-	XMVECTOR centerpos = XMLoadFloat3(&ObjPos);
+	XMFLOAT3 temp_objPos;
+	temp_objPos.x = ObjPos->x; temp_objPos.y = ObjPos->y; temp_objPos.z = ObjPos->z;
+
+	XMVECTOR centerpos = XMLoadFloat3(&temp_objPos);
 	//중력에 의해 속도가 너무 빨라질경우를 대비한 if문이다.
 	//-40보다 더 늦게 떨어지면 그대로 가되, -40이상의 속도면 -40으로 고정한다.
 	//tempV를 이용한 이유는 실제 속도를 -40으로 변경해버리면 댐핑이후에 속도가 이전보다 느려지기 때문이다.
