@@ -916,13 +916,6 @@ CubeObject::CubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 	auto q2 = QuaternionRotation(axis, MMPE_PI/6);
 	axis.x = 1;
 	axis.z = 0;
-	auto q3 = QuaternionRotation(axis, MMPE_PI /26);
-	q3=Float4Normalize(q3);
-	axis.y = 0;
-	axis.x = 1;
-	axis.z = 0;
-	auto q4 = QuaternionRotation(axis, -MMPE_PI / 180);
-	q4= Float4Normalize(q4);
 	Orient = QuaternionMultiply(Orient, q2);
 	/*Orient = QuaternionMultiply(Orient, q3);
 	Orient = Float4Normalize(Orient);
