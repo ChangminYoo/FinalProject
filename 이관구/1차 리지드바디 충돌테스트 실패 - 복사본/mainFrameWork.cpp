@@ -417,10 +417,40 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 			//기존에는 float으로 했는데, 0이아니어야 하는데 0이나오는경우가 생김..
 			double theta = acos(V1.x*V2.x + V1.y*V2.y + V1.z*V2.z);
 
-			//그후 사잇각이 특정각도 이하면 보정시킨다. 
+
+			CollisionPoint fp;//충격 량을 가할 지점
+			fp.Pos = XMFLOAT4(0, 0, 0, 0);
+			fp.pAxis = Normal;
+
+			//실제 충돌지점들을 다 더함.
+			for (auto i : contactpoint)
+			{
+				fp.Pos = Float4Add(fp.Pos, i.Pos);
+				fp.penetration += i.penetration;
+
+			}
+			//사이즈로 나눠서 평균을 낸다.
+			fp.Pos.x /= contactpoint.size();
+			fp.Pos.y /= contactpoint.size();
+			fp.Pos.z /= contactpoint.size();
+			fp.penetration /= contactpoint.size();
+
+
+			float impurse = obj->rb->CalculateImpulse(fp, NULL,0.05);// 충격량 . 여기서는 선속도를 증가시키는것은 적다 다만 각속도를 변화시킬때 유효하다.
+			
+			//면과의 충격량은 반드시 면의 법선벡터의 방향과 일치해야한다. 따라서 절댓값으로 계산해두자.
+			impurse = fabsf(impurse);
+
+			//이때 충격량에 최대 한도를 준다. 왜 한도를 줘야하나? 우리의 환경은 현실과 달리, 충돌하게 되면 , 다른 기타 에너지들로 바뀌면서 충격량이 엄청크진 않다.
+			//문제는 우리는 이런게 없어서 오히려 충격량이 점점점 증가할 수 있다.
+			
+			if (impurse > 40 )
+				impurse = 40;
+
+			//그후 사잇각이 특정각도 이하면서 충격량이 작으면 보정한다.
 			//단 이게 double로 해도 0이아닌데 0이나오는경우가 생긴다.
 			//따라서 0일경우 그냥 충격량을 가해서 각도를 변경시킨다.
-			if (abs(theta) <= MMPE_PI / 36 && abs(theta)!=0)//대략 5도 이하면 보정시킴.
+			if (abs(theta) <= MMPE_PI / 36 && abs(theta)!=0 && impurse<10)//대략 5도 이하면 보정시킴.
 			{
 				//회전축을 구하고..
 				XMFLOAT3 mAxis = XMFloat4to3(Float4Cross(V1, V2));
@@ -438,44 +468,38 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 			{
 				//여기에 왔다는것은 더이상 보정을 하지 않거나 보정을 아직 할필요가 없는 경우다.
 
+				//선속도 계산.
+				//Jm = J/M
+				auto Jm = Normal;
+				
+				Jm.x *= obj->rb->GetMass()*impurse;
+				Jm.y *= obj->rb->GetMass()*impurse;
+				Jm.z *= obj->rb->GetMass()*impurse;
 
-				XMFLOAT3 impurse{ 0,70,0 };// 충격량 . 여기서는 선속도를 증가시키는것은 적다 다만 각속도를 변화시킬때 유효하다.
 
-				CollisionPoint fp;//충격량을 가할 지점
-				fp.Pos = XMFLOAT4(0, 0, 0, 0);
-				fp.pAxis = Normal;
 
-				fp.Pos =  contactpoint[0].Pos;
-				fp.penetration = contactpoint[0].penetration;
+				//각속도 계산
+				//W = 기존 각속도 + ((Q-P)Ximpurse)*InverseI
+				auto W = obj->rb->GetAngularVelocity();
+				XMVECTOR rxi = XMLoadFloat3(&XMFloat4to3(Float4Add(fp.Pos, obj->CenterPos, false)));
+				rxi = XMVector3Cross(rxi, XMLoadFloat3(&Normal));
+				rxi *= impurse;
+				rxi = XMVector3Transform(rxi, XMLoadFloat4x4(&obj->rb->GetIMoment()));
+				
+				XMFLOAT3 ia;
+				XMStoreFloat3(&ia, rxi);
+
+				W = Float3Add(W, ia);
+				XMFLOAT3 lastvel = obj->rb->GetVelocity();
+				lastvel.x *= -obj->rb->GetE();
+				lastvel.y *= -obj->rb->GetE();
+				lastvel.z *= -obj->rb->GetE();
+				
+				obj->rb->SetVelocity(Float3Add(lastvel, Jm));
+				obj->rb->SetAngularVelocity(W);
+
 
 				
-			
-				////충격량을 가하려면 (Q-P)XImpurse 이므로 (Q-P)를한다. 여기서는 충돌지점의평균 - 오브젝트의 중점 이다.
-				//XMFLOAT3 p = XMFloat4to3(fp.Pos);
-				//auto p2 = XMFloat4to3(obj->rb->GetPosition());
-				//p = Float3Add(p, p2, false);//p-=p2
-				//if (fabsf(p.x) <= MMPE_EPSILON)//떨리면서 각도 애매하게 바뀌는거 막기위함
-				//	p.x = 0;
-				//if (fabsf(p.y) <= MMPE_EPSILON)//떨리면서 각도 애매하게 바뀌는거 막기위함
-				//	p.y = 0;
-				//if (fabsf(p.z) <= MMPE_EPSILON)//떨리면서 각도 애매하게 바뀌는거 막기위함
-				//	p.z = 0;
-
-
-				//땅에 닿았으니 현재 속도의 y는 반감되어야 한다. 원래는 탄성계수가 있지만.. 그냥 2배 증가시킨후 부호를 -로 하자.
-
-
-				//현재 여기서 선속도의 가장 많은 부분을 차지함
-				auto d = obj->rb->GetVelocity();
-				d.y = -0.5 * d.y;
-				obj->rb->SetVelocity(d);
-
-
-				//충격량을 가함. impurse = impurse만큼 0.01초동안 가한것. 시간을 작게둔 이유는 힘을 줄이기 위해서.
-
-				obj->rb->AddForcePoint(impurse, fp.Pos);
-				obj->rb->integrate(0.01);
-
 
 				//이제 속도와 각속도는 변경 했으니, 겹쳐진 부분 해소
 				//가장 작은값의 penetration(가장 깊은)만큼 올리면 된다.
@@ -527,7 +551,7 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 					V2 = Float4Normalize(V2);
 				}
 					//이제 여기 왔다는것은, 4개의 점을 만들 수 있는 녀석들을 찾은 셈이다.
-					//다만 바로 보정하면 안되고, 이게 어느정도 각도 차가 덜 나야 된다.
+					//다만 바로 보정하면 안되고, 이게 어느정도 각도 차가 덜 나야 된다. 그리고 충격량이 매우 작아야 한다.
 					//그럼 그 각도는 무엇인가??
 					/*
 					ㅅ  1)(V2)
@@ -554,8 +578,38 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 					//먼저 사잇각도를 구한다.
 					double theta = acos(V2.x*V3.x + V2.y*V3.y + V2.z*V3.z);
 
-					//그후 사잇각이 특정각도 이하면 보정시킨다. 
-					if (abs(theta) <= MMPE_PI / 36 && abs(theta) != 0)//대략 5도 이하면 보정시킴.
+					//충격량을 구해서 충격량이 작으면 보정한다.
+					CollisionPoint fp;//충격 량을 가할 지점
+					fp.Pos = XMFLOAT4(0, 0, 0, 0);
+					fp.pAxis = Normal;
+
+					//실제 충돌지점들을 다 더함.
+					for (auto i : contactpoint)
+					{
+						fp.Pos = Float4Add(fp.Pos, i.Pos);
+						fp.penetration += i.penetration;
+
+					}
+					//사이즈로 나눠서 평균을 낸다.
+					fp.Pos.x /= contactpoint.size();
+					fp.Pos.y /= contactpoint.size();
+					fp.Pos.z /= contactpoint.size();
+					fp.penetration /= contactpoint.size();
+
+
+					float impurse = obj->rb->CalculateImpulse(fp, NULL,0.05);// 충격량 . 여기서는 선속도를 증가시키는것은 적다 다만 각속도를 변화시킬때 유효하다.
+
+					//면과의 충격량은 반드시 면의 법선벡터의 방향과 일치해야한다. 따라서 절댓값으로 계산해두자.
+					impurse = fabsf(impurse);
+					//이때 충격량에 최대 한도를 준다. 왜 한도를 줘야하나? 우리의 환경은 현실과 달리, 충돌하게 되면 , 다른 기타 에너지들로 바뀌면서 충격량이 엄청크진 않다.
+					//문제는 우리는 이런게 없어서 오히려 충격량이 점점점 증가할 수 있다.
+
+					if (impurse > 40)
+						impurse = 40;
+
+
+					//그후 사잇각이 특정각도 이하면서 충격량의 크기도 작으면 회전시킴.
+					if (abs(theta) <= MMPE_PI / 36 && abs(theta) != 0 && impurse<10)//대략 5도 이하면 보정시킴.
 					{
 						//회전축을 구하고
 						XMFLOAT3 mAxis = XMFloat4to3(Float4Cross(V2, V3));
@@ -595,8 +649,7 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 						}
 
 
-						XMFLOAT3 impurse{ 0,70,0 };// 충격량 . 여기서는 선속도를 증가시키는것은 적다 다만 각속도를 변화시킬때 유효하다.
-
+						
 
 						//4개가 모두 같은 깊이면 균형을 이루는것이므로 균형을 부셔버린다.
 						if (pass)
@@ -614,51 +667,36 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 							
 							return;
 						}
-
-
 						
-						CollisionPoint fp;//충격 량을 가할 지점
-						fp.Pos = XMFLOAT4(0, 0, 0, 0);
-						fp.pAxis = Normal;
 
-						//실제 충돌지점들을 다 더함.
-						for (auto i : contactpoint)
-						{
-							fp.Pos = Float4Add(fp.Pos, i.Pos);
-							fp.penetration += i.penetration;
+						//선속도 계산.
+						//Jm = J/M
+						auto Jm = Normal;
 
-						}
-						//사이즈로 나눠서 평균을 낸다.
-						fp.Pos.x /= contactpoint.size();
-						fp.Pos.y /= contactpoint.size();
-						fp.Pos.z /= contactpoint.size();
-						fp.penetration /= contactpoint.size();
-
-						////충격량을 가하려면 (Q-P)XImpurse 이므로 (Q-P)를한다. 여기서는 충돌지점의평균 - 오브젝트의 중점 이다.
-						//XMFLOAT3 p = XMFloat4to3(fp.Pos);
-						//auto p2 = XMFloat4to3(obj->rb->GetPosition());
-						//p = Float3Add(p, p2, false);//p-=p2
-						//if (fabsf(p.x) <= MMPE_EPSILON)//떨리면서 각도 애매하게 바뀌는거 막기위함
-						//	p.x = 0;
-						//if (fabsf(p.y) <= MMPE_EPSILON)//떨리면서 각도 애매하게 바뀌는거 막기위함
-						//	p.y = 0;
-						//if (fabsf(p.z) <= MMPE_EPSILON)//떨리면서 각도 애매하게 바뀌는거 막기위함
-						//	p.z = 0;
+						Jm.x *= obj->rb->GetMass()*impurse;
+						Jm.y *= obj->rb->GetMass()*impurse;
+						Jm.z *= obj->rb->GetMass()*impurse;
 
 
-						//땅에 닿았으니 현재 속도의 y는 반감되어야 한다. 원래는 탄성계수가 있지만.. 그냥 2배 증가시킨후 부호를 -로 하자.
-					
 
-						//현재 여기서 선속도의 가장 많은 부분을 차지함
-						auto d = obj->rb->GetVelocity();
-						d.y = -0.5 * d.y;
-						obj->rb->SetVelocity(d);
-						
-						
-						//충격량을 가함. impurse = impurse만큼 0.01초동안 가한것. 시간을 작게둔 이유는 힘을 줄이기 위해서.
-						
-						obj->rb->AddForcePoint(impurse, fp.Pos);
-						obj->rb->integrate(0.01);
+						//각속도 계산
+						//W = 기존 각속도 + ((Q-P)Ximpurse/2)*InverseI
+						auto W = obj->rb->GetAngularVelocity();
+						XMVECTOR rxi = XMLoadFloat3(&XMFloat4to3(Float4Add(fp.Pos, obj->CenterPos, false)));
+						rxi = XMVector3Cross(rxi, XMLoadFloat3(&Normal));
+						rxi *= impurse / 2;
+						rxi = XMVector3Transform(rxi, XMLoadFloat4x4(&obj->rb->GetIMoment()));
+
+						XMFLOAT3 ia;
+						XMStoreFloat3(&ia, rxi);
+
+						W = Float3Add(W, ia);
+						XMFLOAT3 lastvel = obj->rb->GetVelocity();
+						lastvel.x *= -obj->rb->GetE();
+						lastvel.y *= -obj->rb->GetE();
+						lastvel.z *= -obj->rb->GetE();
+						obj->rb->SetVelocity(Float3Add(lastvel, Jm));
+						obj->rb->SetAngularVelocity(W);
 
 
 						//이제 속도와 각속도는 변경 했으니, 겹쳐진 부분 해소
@@ -670,7 +708,6 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 						obj->CenterPos.y += py;
 						obj->CenterPos.z += pz;
 
-						
 
 
 

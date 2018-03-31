@@ -1256,52 +1256,6 @@ XMFLOAT3 MiniPhysicsEngineG9::RigidBody::GetTotalTorque()
 	return TotalTorque;
 }
 
-XMFLOAT3 MiniPhysicsEngineG9::RigidBody::CalculateImpulse(CollisionPoint& cp)
-{
-	XMFLOAT3 impulseContact;
-	
-	XMVECTOR centerpos = XMLoadFloat4(CenterPos);
-	XMVECTOR contactpos = XMLoadFloat4(&cp.Pos);
-	XMVECTOR contactnormal = XMLoadFloat3(&cp.pAxis);
-	XMMATRIX iim = XMLoadFloat4x4(&Inverse_I_Moment);
-
-	auto deltaVelWorld = XMVector3Cross(contactpos - centerpos,contactnormal);
-	deltaVelWorld =  XMVector3Transform(deltaVelWorld,iim);
-	deltaVelWorld = XMVector3Cross(deltaVelWorld,contactpos - centerpos);
-
-	
-	float deltaVelocity;
-	XMStoreFloat(&deltaVelocity,XMVector3Dot(deltaVelWorld, contactnormal));
-
-	deltaVelocity += GetMass();
-
-	deltaVelocity = fabsf(deltaVelocity);
-
-	if (deltaVelocity < 1)
-		deltaVelocity=1;
-
-	float desireDeltaVel;//필요한 속도의 변화량. 실속도를 먼저구한다음 노멀속도를 구한다.
-
-	//실속도 = 각속도X(Q-P) + 선속도
-	XMFLOAT3 Vel = Float3Cross(AngularVelocity, Float3Add(XMFloat4to3(cp.Pos), XMFloat4to3(*CenterPos), false));
-	Vel = Float3Add(Vel, GetVelocity());
-
-	//노멀속도 = 충돌법선방향 * 실속도
-	float nVel = cp.pAxis.x*Vel.x + cp.pAxis.y*Vel.y + cp.pAxis.z*Vel.z;
-	
-	//속도의 변화량 = -(1+e)*충돌전 노멀속도
-	desireDeltaVel = -(1 + 0.25)*nVel;
-
-	// 최종충격량
-	impulseContact.x = desireDeltaVel / deltaVelocity*cp.pAxis.x;
-	impulseContact.y = desireDeltaVel / deltaVelocity * cp.pAxis.y;
-	impulseContact.z = desireDeltaVel / deltaVelocity * cp.pAxis.z;
-	return impulseContact;
-
-
-	
-}
-
 void MiniPhysicsEngineG9::RigidBody::SetHalfBox(float x, float y, float z)
 {
 	halfbox.x = x;
@@ -1344,4 +1298,92 @@ void MiniPhysicsEngineG9::RigidBody::GetEightPoint(XMFLOAT4 * arr, XMFLOAT3& Up,
 bool MiniPhysicsEngineG9::RigidBody::GetBounce()
 {
 	return Bounce;
+}
+
+void MiniPhysicsEngineG9::RigidBody::SetE(float tempE)
+{
+	e = tempE;
+}
+
+float MiniPhysicsEngineG9::RigidBody::GetE()
+{
+	return e;
+}
+
+
+float MiniPhysicsEngineG9::RigidBody::CalculateImpulse(CollisionPoint& cp, RigidBody* rb2, float deltatime)
+{
+
+	float finalE = -(1 + e);
+	XMFLOAT3 SeparateVel = GetVelocity();
+	XMFLOAT3 v2;
+	if (rb2 != NULL)
+		v2 = rb2->GetVelocity();
+	else
+		v2 = XMFLOAT3(0, 0, 0);
+	SeparateVel = Float3Add(SeparateVel, v2, false);
+
+	//Wr1 = 충돌전 각속도 X (Q-P)
+	XMFLOAT3 Wr1 = Float3Cross(GetAngularVelocity(), XMFloat4to3(Float4Add(cp.Pos, *CenterPos, false)));
+	//Wr2도 마찬가지.
+	XMFLOAT3 Wr2;
+	if (rb2 != NULL)
+		Wr2 = Float3Cross(rb2->GetAngularVelocity(), XMFloat4to3(Float4Add(cp.Pos, *rb2->CenterPos, false)));
+	else
+		Wr2 = XMFLOAT3(0, 0, 0);
+
+	//1차식. -(1+e)(충돌전 상대속도 + (충돌전 각속도 X (Q-P) - 충돌전 각속도2 X (Q-P2) ) * 접촉방향 
+	auto t1 = (Float3Add(SeparateVel, Float3Add(Wr1, Wr2, false), true));
+	t1.x *= cp.pAxis.x;
+	t1.y *= cp.pAxis.y;
+	t1.z *= cp.pAxis.z;
+	float First = finalE * (t1.x + t1.y + t1.z);
+
+
+	//temp1 = ( (Q-P1)X 접촉방향 );
+	//u1 = ( ( temp1 * 역관성 1 ) X (Q-P1) ) * 접촉방향
+
+	auto temp1 = Float3Cross(XMFloat4to3(Float4Add(cp.Pos, *CenterPos, false)), cp.pAxis);
+	XMVECTOR temp1v = XMLoadFloat3(&temp1);
+	XMMATRIX ii1 = XMLoadFloat4x4(&GetIMoment());
+	temp1v = XMVector3Transform(temp1v, ii1);
+	XMStoreFloat3(&temp1, temp1v);
+	temp1 = Float3Cross(temp1, XMFloat4to3(Float4Add(cp.Pos, *CenterPos, false)));
+
+	float u1 = temp1.x* cp.pAxis.x + temp1.y * cp.pAxis.y + temp1.z* cp.pAxis.z;
+
+	//temp2 = ( (Q-P2)X 접촉방향 );
+	//u2 = ( ( temp2 * 역관성 2 ) X (Q-P2) ) * 접촉방향
+
+	float u2 = 0;
+	if (rb2 != NULL)
+	{
+		auto temp2 = Float3Cross(XMFloat4to3(Float4Add(cp.Pos, *rb2->CenterPos, false)), cp.pAxis);
+		XMVECTOR temp2v = XMLoadFloat3(&temp2);
+		XMMATRIX ii2 = XMLoadFloat4x4(&rb2->GetIMoment());
+		temp2v = XMVector3Transform(temp2v, ii2);
+		XMStoreFloat3(&temp2, temp2v);
+		temp2 = Float3Cross(temp2, XMFloat4to3(Float4Add(cp.Pos, *rb2->CenterPos, false)));
+
+		u2 = temp2.x* cp.pAxis.x + temp2.y * cp.pAxis.y + temp2.z* cp.pAxis.z;
+	}
+
+
+
+
+	float inverseMs = GetMass();
+	if (rb2 != NULL)
+		inverseMs += rb2->GetMass();
+
+	//식2. u1+u2 + inverseMs
+
+	float Second = u1 + u2 + inverseMs;
+
+	//식3 = (식1 / 식2)*충격량을 가한 시간  = 최종 임펄스
+
+	if (Second != 0)
+		return (First / Second)*deltatime;
+	else
+		return 0;
+
 }

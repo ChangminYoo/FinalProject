@@ -115,7 +115,7 @@ namespace MiniPhysicsEngineG9
 
 		XMFLOAT3 halfbox;//x길이y길이z길이
 		bool Bounce = false;
-
+		float e = 0.72f;//탄성계수.
 
 	public:
 		void integrate(float DeltaTime);//적분기. 속도와 가속도로 위치를 구하고 가속도를 이용해 속도를 갱신함.
@@ -126,6 +126,8 @@ namespace MiniPhysicsEngineG9
 		void SetIMoment(float x,float y,float z);//육면체용 관성모멘트
 		XMFLOAT4X4 GetIMoment(bool Inverse=true);//기본적으로 역텐션을 구한다.
 		
+		
+
 		void SetDamping(float D,float Ad);//댐핑지수를 설정함.
 		float GetDamping();//댐핑지수 반환
 		float GetAngularDamping();//회전댐핑지수 반환
@@ -169,7 +171,9 @@ namespace MiniPhysicsEngineG9
 								 //충돌관련
 		std::vector<CollisionPoint> CollisionPointVector;//충돌한 지점을 저장하는 벡터. 왜냐하면 리지드'바디'는 점이아니므로 다수의 충돌지점을 가질 수있음
 	
-		XMFLOAT3 CalculateImpulse(CollisionPoint& cp);
+		void SetE(float tempE);
+		float GetE();
+		float CalculateImpulse(CollisionPoint& cp,RigidBody* rb2,float deltatime);
 
 		void SetHalfBox(float x, float y, float z);
 		XMFLOAT3 GetHalfBox();

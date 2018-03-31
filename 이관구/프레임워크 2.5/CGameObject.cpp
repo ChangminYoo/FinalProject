@@ -1485,7 +1485,7 @@ RigidCubeObject::RigidCubeObject(ID3D12Device* m_Device, ID3D12GraphicsCommandLi
 	OffRightvector = XMFLOAT3(1, 0, 0);
 	UpdateLookVector();
 	ObjData.isAnimation = 0;
-	ObjData.Scale = 10.0f;
+	ObjData.Scale = 20.0f;
 	ObjData.SpecularParamater = 0.0f;//스페큘러를 낮게준다.
 	
 
@@ -1496,25 +1496,25 @@ RigidCubeObject::RigidCubeObject(ID3D12Device* m_Device, ID3D12GraphicsCommandLi
 	gamedata.Damage = 0;
 	gamedata.GodMode = true;
 	gamedata.Speed = 0;
+	
 	staticobject = false;
 
 
 	//광선충돌 검사용 육면체
-	XMFLOAT3 rx(9, 0, 0);
-	XMFLOAT3 ry(0, 9, 0);
-	XMFLOAT3 rz(0, 0, 9);
+	XMFLOAT3 rx(10, 0, 0);
+	XMFLOAT3 ry(0, 10, 0);
+	XMFLOAT3 rz(0, 0, 10);
 	rco.SetPlane(rx, ry, rz);
 
 	//리지드 바디
 
 	rb = new RigidBody();
 	rb->SetPosition(&CenterPos);//이 값은 항상 갱신되야한다.
-	rb->SetHalfBox(9, 9, 9);//충돌 박스의 x,y,z 크기
+	rb->SetHalfBox(10, 10, 10);//충돌 박스의 x,y,z 크기
 	rb->SetDamping(0.6f, 0.6f);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
 	rb->SetBounce(false);//튕기지 않는다.
-	rb->SetMass(2);//고정된 물체는 무게가 무한이다.
-	rb->SetIMoment(9, 9, 9);
-	rb->SetOrient(&Orient);
+	rb->SetMass(1.5);//고정된 물체는 무게가 무한이다.
+	rb->SetIMoment(10, 10, 10);
 	rb->SetOrient(&Orient);
 	
 	//테스트 코드
