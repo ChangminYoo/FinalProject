@@ -122,9 +122,15 @@ XMFLOAT4 MiniPhysicsEngineG9::QuaternionRotation(XMFLOAT3 & Axis, float radian)
 
 	
 	Axis = Float3Normalize(Axis);
-	auto q = XMQuaternionRotationAxis(XMLoadFloat3(&Axis), radian);
 	XMFLOAT4 Result;
-	XMStoreFloat4(&Result, q);
+	//회전축이없으면 단위쿼터니언을 반환하도록함.
+	if (FloatLength(Axis) == 0)
+		Result = XMFLOAT4(0, 0, 0, 1);
+	else
+	{
+		auto q = XMQuaternionRotationAxis(XMLoadFloat3(&Axis), radian);
+		XMStoreFloat4(&Result, q);
+	}
 	return Result;
 }
 

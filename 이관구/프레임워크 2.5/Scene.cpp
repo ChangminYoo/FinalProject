@@ -190,12 +190,12 @@ void Scene::CreateGameObject()
 	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(50, 0, -40, 0)));
 	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(30, 0, 40, 0)));
 
-	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, XMFLOAT4(25, 200, 10, 0)));
-	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, XMFLOAT4(-11, 130, 10, 0)));
-	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, XMFLOAT4(0.5, 50, 3, 0)));
-	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject,XMFLOAT4(13, 90, 7, 0)));
-	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject,XMFLOAT4(15, 40, 39, 0)));
-	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject,XMFLOAT4(20, 100, 0, 0)));
+	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, XMFLOAT4(25, 1200, 10, 0)));
+	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, XMFLOAT4(-11, 1130, 10, 0)));
+	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, XMFLOAT4(0.5, 250, 3, 0)));
+	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject,XMFLOAT4(13, 590, 7, 0)));
+	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject,XMFLOAT4(15, 640, 39, 0)));
+	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject,XMFLOAT4(20, 1100, 0, 0)));
 
 
 //	StaticObject.push_back(new GridObject(device, commandlist, XMFLOAT4(0, 0, 0, 0)));
