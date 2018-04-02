@@ -385,6 +385,16 @@ void Shader::Render(ID3D12GraphicsCommandList * CommandList, const GameTimer& gt
 		(*b)->Render(CommandList, gt);
 	}
 
+
+	for (auto b = LandObject->cbegin(); b != LandObject->cend(); b++)
+	{
+		if (isRender(*b) == true)
+		{		
+			SetShader(CommandList, false);
+			(*b)->Render(CommandList, gt);
+		}
+	}
+
 }
 
 bool Shader::isRender(CGameObject * obj)

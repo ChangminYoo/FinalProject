@@ -48,7 +48,7 @@ XMFLOAT3 MiniPhysicsEngineG9::Float3Add(XMFLOAT3 & v1, XMFLOAT3& v2, bool add)
 	XMVECTOR a = XMLoadFloat3(&v1);
 	XMVECTOR b = XMLoadFloat3(&v2);
 	XMFLOAT3 r;
-	if(add)
+	if (add)
 		XMStoreFloat3(&r, a + b);
 	else
 		XMStoreFloat3(&r, a - b);
@@ -60,7 +60,7 @@ XMFLOAT4 MiniPhysicsEngineG9::Float4Add(XMFLOAT4 & v1, XMFLOAT4& v2, bool add)
 	XMVECTOR a = XMLoadFloat4(&v1);
 	XMVECTOR b = XMLoadFloat4(&v2);
 	XMFLOAT4 r;
-	if(add)
+	if (add)
 		XMStoreFloat4(&r, a + b);
 	else
 		XMStoreFloat4(&r, a - b);
@@ -120,7 +120,7 @@ XMFLOAT4 MiniPhysicsEngineG9::XMFloat3to4(XMFLOAT3 & v)
 XMFLOAT4 MiniPhysicsEngineG9::QuaternionRotation(XMFLOAT3 & Axis, float radian)
 {
 
-	
+
 	Axis = Float3Normalize(Axis);
 	auto q = XMQuaternionRotationAxis(XMLoadFloat3(&Axis), radian);
 	XMFLOAT4 Result;
@@ -132,7 +132,7 @@ XMFLOAT4 MiniPhysicsEngineG9::QuaternionMultiply(XMFLOAT4 & q1, XMFLOAT4 & q2)
 {
 	auto q = XMQuaternionMultiply(XMLoadFloat4(&q1), XMLoadFloat4(&q2));
 	XMFLOAT4 Result;
-	q=XMQuaternionNormalize(q);
+	q = XMQuaternionNormalize(q);
 	XMStoreFloat4(&Result, q);
 	return Result;
 }
@@ -141,7 +141,7 @@ XMFLOAT4 MiniPhysicsEngineG9::QuaternionMultiply(XMFLOAT4 & q1, XMFLOAT4 & q2)
 
 PhysicsPoint::PhysicsPoint()
 {
-	 InverseMass = 1;
+	InverseMass = 1;
 	Velocity = XMFLOAT3(0, 0, 0);
 	CenterPos = XMFLOAT3(0, 0, 0);
 	damping = 0.99;
@@ -167,14 +167,14 @@ void PhysicsPoint::integrate(float DeltaTime, XMFLOAT4* ObjPos, XMFLOAT3* ObjVel
 	//중력에 의해 속도가 너무 빨라질경우를 대비한 if문이다.
 	//-40보다 더 늦게 떨어지면 그대로 가되, -40이상의 속도면 -40으로 고정한다.
 	//tempV를 이용한 이유는 실제 속도를 -40으로 변경해버리면 댐핑이후에 속도가 이전보다 느려지기 때문이다.
-	XMVECTOR velocity=XMLoadFloat3(&Velocity);
+	XMVECTOR velocity = XMLoadFloat3(&Velocity);
 	/*if(Velocity.y>-40)
-		velocity = XMLoadFloat3(&Velocity);
+	velocity = XMLoadFloat3(&Velocity);
 	else
 	{
-		XMFLOAT3 tempV = Velocity;
-		tempV.y = -40;
-		velocity = XMLoadFloat3(&tempV);
+	XMFLOAT3 tempV = Velocity;
+	tempV.y = -40;
+	velocity = XMLoadFloat3(&tempV);
 	}*/
 	XMVECTOR accel = XMLoadFloat3(&Accel);
 	XMVECTOR totalforce = XMLoadFloat3(&TotalForce);
@@ -183,15 +183,15 @@ void PhysicsPoint::integrate(float DeltaTime, XMFLOAT4* ObjPos, XMFLOAT3* ObjVel
 	//가속도 = 최종힘 * 질량의 역수. 가속도는 힘을가했을때만 생기는 것. F가 0이면 a는 0
 	//따라서 힘을 한번만 가했으면 가속도는 한번만 0이아니고 이후는 계속 0이다.
 	//다만 속도는 가속도로 인해 계산된 결과를 계속 유지하며 댐핑지수로 인해 0 에 가까워짐.
-	accel =  totalforce * InverseMass;
+	accel = totalforce * InverseMass;
 
 
 	//속도와 위치는 갱신되야한다.
 
 	//속도와 가속도를 적분해 중점을 구한다.
-	
+
 	centerpos = centerpos + velocity * DeltaTime + 0.5*accel*DeltaTime*DeltaTime;
-	
+
 	//속도를 다시 기존속도로 맞춰준다. 즉 tempV.y가 변경되었던거를 기존에 -80보다 빨랐던거로 바꿈
 	velocity = XMLoadFloat3(&Velocity);
 	//가속도를 통해 속도를 추가한다.
@@ -207,7 +207,7 @@ void PhysicsPoint::integrate(float DeltaTime, XMFLOAT4* ObjPos, XMFLOAT3* ObjVel
 	XMStoreFloat3(&CenterPos, centerpos);
 	XMStoreFloat3(&Velocity, velocity);
 	XMStoreFloat3(&Accel, accel);
-	
+
 	//모든 계산이 끝났으면 힘을 초기화 한다.
 	ForceClear();
 
@@ -215,7 +215,7 @@ void PhysicsPoint::integrate(float DeltaTime, XMFLOAT4* ObjPos, XMFLOAT3* ObjVel
 	//계산된 결과의 중점과 속도 정보를 PhysicsPoint를 가지고있는 오브젝트가 직접가지고 있어야 한다면
 
 	if (ObjPos != NULL)//만약 게임오브젝트가 따로 가지고 있는 중점 변수가 있으면
-		*ObjPos = XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z,ObjPos->w);
+		*ObjPos = XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, ObjPos->w);
 	if (ObjVel != NULL)//만약 게임오브젝트가 따로 가지고 있는 속도 변수가 있으면
 		*ObjVel = Velocity;
 }
@@ -255,7 +255,7 @@ void PhysicsPoint::SetPosition(XMFLOAT3 & pos)
 }
 void PhysicsPoint::SetPosition(XMFLOAT4 & pos)
 {
-	CenterPos = XMFLOAT3(pos.x,pos.y,pos.z);
+	CenterPos = XMFLOAT3(pos.x, pos.y, pos.z);
 }
 void PhysicsPoint::SetPosition(float x, float y, float z)
 {
@@ -304,7 +304,7 @@ void PhysicsPoint::ForceClear()
 
 void PhysicsPoint::AddForce(XMFLOAT3 & F)
 {
-	XMVECTOR f=XMLoadFloat3(&TotalForce);
+	XMVECTOR f = XMLoadFloat3(&TotalForce);
 	XMVECTOR f2 = XMLoadFloat3(&F);
 	f = f + f2;
 	XMStoreFloat3(&TotalForce, f);
@@ -314,7 +314,7 @@ void PhysicsPoint::AddForce(float x, float y, float z)
 {
 
 	XMVECTOR f = XMLoadFloat3(&TotalForce);
-	XMVECTOR f2 = XMLoadFloat3(&XMFLOAT3(x,y,z));
+	XMVECTOR f2 = XMLoadFloat3(&XMFLOAT3(x, y, z));
 	f = f + f2;
 	XMStoreFloat3(&TotalForce, f);
 }
@@ -364,8 +364,8 @@ bool MiniPhysicsEngineG9::PhysicsPoint::CollisionTest(PhysicsPoint & p2, XMFLOAT
 	axis[13] = Float3Cross(l1, u2);
 	axis[14] = Float3Cross(l1, l2);
 	XMFLOAT3 CenterL;//중점끼리 연결한 벡터
-	//최소로 겹치는 부분을 찾아야함. 그곳이 겹치는 최소영역의 길이
-	
+					 //최소로 겹치는 부분을 찾아야함. 그곳이 겹치는 최소영역의 길이
+
 	float minoverlap = INFINITY;
 	//최소겹치는 영역에서 밀어내야할 방향의 인덱스
 	int minindex;
@@ -377,7 +377,7 @@ bool MiniPhysicsEngineG9::PhysicsPoint::CollisionTest(PhysicsPoint & p2, XMFLOAT
 			continue;
 
 		a = Float3Normalize(a);
-		CenterL = XMFLOAT3(p2.GetPosition().x-GetPosition().x , p2.GetPosition().y-GetPosition().y , p2.GetPosition().z-GetPosition().z );
+		CenterL = XMFLOAT3(p2.GetPosition().x - GetPosition().x, p2.GetPosition().y - GetPosition().y, p2.GetPosition().z - GetPosition().z);
 
 		float overlap = penetrationAxis(p2, l1, r1, u1, l2, r2, u2, CenterL, a);
 		if (overlap < 0)//하나라도 겹치는 부분이 없으면 분리되어있음
@@ -393,11 +393,11 @@ bool MiniPhysicsEngineG9::PhysicsPoint::CollisionTest(PhysicsPoint & p2, XMFLOAT
 	penetration = minoverlap;
 	pAxis = axis[minindex];
 	//중점을 이은벡터와 선택된 벡터가 내적시 0보다 크면 반대방향으로 바꿔줘야함. 왜냐하면 밀리는 방향은 나를향해야하므로
-	
+
 	float l = Float3Normalize(CenterL).x*axis[minindex].x + Float3Normalize(CenterL).y*axis[minindex].y + Float3Normalize(CenterL).z*axis[minindex].z;
 	if (l > 0)
-		pAxis = XMFLOAT3(-pAxis.x,-pAxis.y,-pAxis.z);
-	
+		pAxis = XMFLOAT3(-pAxis.x, -pAxis.y, -pAxis.z);
+
 	//return true;
 	if (penetration > MMPE_EPSILON)//엡실론보다 크면 충돌 아니면 정말 미세한 충돌이므로 처리를 할 필요가 없음
 		return true;
@@ -416,12 +416,12 @@ void MiniPhysicsEngineG9::PhysicsPoint::CollisionResolve(PhysicsPoint & p2, XMFL
 
 float MiniPhysicsEngineG9::PhysicsPoint::GetSeparateVelocity(PhysicsPoint & p2, XMFLOAT3 & CollisionN)
 {
-	
-		XMFLOAT3 v1 = GetVelocity();
-		XMFLOAT3 v2 = p2.GetVelocity();
-		v1 = Float3Add(v1, v2, false);
-		return v1.x*CollisionN.x + v1.y*CollisionN.y + v1.z*CollisionN.z;
-	
+
+	XMFLOAT3 v1 = GetVelocity();
+	XMFLOAT3 v2 = p2.GetVelocity();
+	v1 = Float3Add(v1, v2, false);
+	return v1.x*CollisionN.x + v1.y*CollisionN.y + v1.z*CollisionN.z;
+
 }
 
 bool MiniPhysicsEngineG9::PhysicsPoint::GetBounce()
@@ -441,61 +441,61 @@ void MiniPhysicsEngineG9::PhysicsPoint::ResolveVelocity(PhysicsPoint & p2, XMFLO
 	//이걸 계산하면 M1인 녀석은 0.9만큼 밀리고 M2는 0.1 만큼 밀린다.
 	//다만 키보드 입력시 밀려나야하는방향은 내가 키보드 누른 키의 반대방향의 속도다.
 
-	
-		float sv = GetSeparateVelocity(p2, CollisionN);
-		if (sv > 0)//이미 멀어지고있음
-			return;
-		float nsv = -sv*1;//원래 여기에 1대신 탄성계수 e가 들어가는데, 우리가 만드는 게임의 질점오브젝트의 e는 1이다.
-		float deltav = nsv - sv;
 
-		float totalImass = GetMass();
-		totalImass += p2.GetMass();
-		if (totalImass <= 0)
-			return;
-		float impurse = deltav / totalImass;
+	float sv = GetSeparateVelocity(p2, CollisionN);
+	if (sv > 0)//이미 멀어지고있음
+		return;
+	float nsv = -sv * 1;//원래 여기에 1대신 탄성계수 e가 들어가는데, 우리가 만드는 게임의 질점오브젝트의 e는 1이다.
+	float deltav = nsv - sv;
 
-		XMFLOAT3 impursevector(CollisionN.x*impurse, CollisionN.y*impurse, CollisionN.z*impurse);
+	float totalImass = GetMass();
+	totalImass += p2.GetMass();
+	if (totalImass <= 0)
+		return;
+	float impurse = deltav / totalImass;
 
-		//현재 물체의 변화 된 최종 속도
-		auto resultv = GetVelocity();
-		XMFLOAT3 iv1 (impursevector.x*GetMass(), impursevector.y*GetMass(), impursevector.z*GetMass());
-		resultv = Float3Add(resultv, iv1);
-		SetVelocity(resultv);
+	XMFLOAT3 impursevector(CollisionN.x*impurse, CollisionN.y*impurse, CollisionN.z*impurse);
 
-		
-		//나와 부딪힌 물체의 최종속도
-		
-		auto resultv2= p2.GetVelocity();
-		XMFLOAT3 iv2(-impursevector.x*p2.GetMass(), -impursevector.y*p2.GetMass(), -impursevector.z*p2.GetMass());
-		resultv2 = Float3Add(resultv2, iv2);
-		p2.SetVelocity(resultv2);
-		
-		if (Bounce == false)
-		{
-			//튕겨나가기를 하지 않는다면 다음과 같은 절차가 필요하다.
-			//1. 내가 bounce false면 나의 속도는 0이다.
-			//2. 상대방 속도는 그냥 계산한 대로 둔다.
-
-			auto gv = GetVelocity();
-			
-
-			//바운스가 false면 튕겨나가지 않도록 0으로 만든다.
-			gv = XMFLOAT3(0,0,0);
-			SetVelocity(gv);
-
-		}
-		//상대방도 Bounce가 false면 튕겨나가지 않도록함.
-		if (p2.GetBounce() == false)
-		{
-			auto gv2 = p2.GetVelocity();
-
-			gv2 = XMFLOAT3(0, 0, 0);
-			p2.SetVelocity(gv2);
-		}
+	//현재 물체의 변화 된 최종 속도
+	auto resultv = GetVelocity();
+	XMFLOAT3 iv1(impursevector.x*GetMass(), impursevector.y*GetMass(), impursevector.z*GetMass());
+	resultv = Float3Add(resultv, iv1);
+	SetVelocity(resultv);
 
 
+	//나와 부딪힌 물체의 최종속도
 
-	
+	auto resultv2 = p2.GetVelocity();
+	XMFLOAT3 iv2(-impursevector.x*p2.GetMass(), -impursevector.y*p2.GetMass(), -impursevector.z*p2.GetMass());
+	resultv2 = Float3Add(resultv2, iv2);
+	p2.SetVelocity(resultv2);
+
+	if (Bounce == false)
+	{
+		//튕겨나가기를 하지 않는다면 다음과 같은 절차가 필요하다.
+		//1. 내가 bounce false면 나의 속도는 0이다.
+		//2. 상대방 속도는 그냥 계산한 대로 둔다.
+
+		auto gv = GetVelocity();
+
+
+		//바운스가 false면 튕겨나가지 않도록 0으로 만든다.
+		gv = XMFLOAT3(0, 0, 0);
+		SetVelocity(gv);
+
+	}
+	//상대방도 Bounce가 false면 튕겨나가지 않도록함.
+	if (p2.GetBounce() == false)
+	{
+		auto gv2 = p2.GetVelocity();
+
+		gv2 = XMFLOAT3(0, 0, 0);
+		p2.SetVelocity(gv2);
+	}
+
+
+
+
 }
 //겹쳐질경우 서로를 밀어냄. 키보드 입력일땐 자신만 밀려남
 //공중일때가 좀 문제임 공중이면 상대방이 밀릴수있음 왜냐하면 이게 정상인게
@@ -515,41 +515,41 @@ void MiniPhysicsEngineG9::PhysicsPoint::ResolvePenetration(PhysicsPoint & p2, fl
 		return;
 	//물체를 pAxis방향으로 옮긴다. 다만 질량에 반비례하게 움직임. 질량이클수록 덜움직인다.
 	XMFLOAT3 movevector(pAxis.x*(penetration / totalInverseMass), pAxis.y*(penetration / totalInverseMass), pAxis.z*(penetration / totalInverseMass));
-	
+
 	//충분히 작으면 움직이지 않는다.왜 엡실론을 안썻냐면 엡실론을쓸경우 penetration이 엡실론정도일때
 	//밀려나야할경우 안밀려나는 상황이 일어나서, 엡실론보다 10배작은 값으로 검사한다.
-	if (FloatLength(movevector) <=0.0001)
+	if (FloatLength(movevector) <= 0.0001)
 		movevector = XMFLOAT3(0, 0, 0);
 
 	XMFLOAT3 m1(movevector.x*GetMass(), movevector.y*GetMass(), movevector.z*GetMass());
 	auto p1 = GetPosition();
 	auto result1 = Float3Add(p1, m1);
-	
+
 	SetPosition(result1);//자신을 옮긴다.
 
-	
-		XMFLOAT3 m2(-movevector.x*p2.GetMass(), -movevector.y*p2.GetMass(), -movevector.z*p2.GetMass());
-		auto pp2 = p2.GetPosition();
-		auto result2 = Float3Add(pp2, m2);
-		p2.SetPosition(result2);//겹쳐진 대상을 옮긴다.
-	
 
-	
+	XMFLOAT3 m2(-movevector.x*p2.GetMass(), -movevector.y*p2.GetMass(), -movevector.z*p2.GetMass());
+	auto pp2 = p2.GetPosition();
+	auto result2 = Float3Add(pp2, m2);
+	p2.SetPosition(result2);//겹쳐진 대상을 옮긴다.
+
+
+
 }
 
 //하나의 축을 기준으로 두 박스를 내적한 결과를 합산한후 중점의 거리벡터를 기준 축으로 투영한 결과를 뺐을때 0보다 크면 겹치고있으며 0보다 작으면 분리되어있다.
-float MiniPhysicsEngineG9::PhysicsPoint::penetrationAxis(PhysicsPoint & p2, XMFLOAT3 & l1, XMFLOAT3 & r1, XMFLOAT3 & u1, XMFLOAT3 & l2, XMFLOAT3 & r2, XMFLOAT3 & u2, XMFLOAT3 & CenterLength,XMFLOAT3& Axis)
+float MiniPhysicsEngineG9::PhysicsPoint::penetrationAxis(PhysicsPoint & p2, XMFLOAT3 & l1, XMFLOAT3 & r1, XMFLOAT3 & u1, XMFLOAT3 & l2, XMFLOAT3 & r2, XMFLOAT3 & u2, XMFLOAT3 & CenterLength, XMFLOAT3& Axis)
 {
 	float prj1;
 	float prj2;
 	float dst;
 
 	//기준축과 x축y축z축을 내적한 결과를 다 더한다.
-	
+
 	prj1 = GetHalfBox().x*fabsf(Axis.x*r1.x + Axis.y*r1.y + Axis.z*r1.z) + GetHalfBox().y*fabsf(Axis.x*u1.x + Axis.y*u1.y + Axis.z*u1.z) + GetHalfBox().z*fabsf(Axis.x*l1.x + Axis.y*l1.y + Axis.z*l1.z);
 	prj2 = p2.GetHalfBox().x*fabsf(Axis.x*r2.x + Axis.y*r2.y + Axis.z*r2.z) + p2.GetHalfBox().y*fabsf(Axis.x*u2.x + Axis.y*u2.y + Axis.z*u2.z) + p2.GetHalfBox().z*fabsf(Axis.x*l2.x + Axis.y*l2.y + Axis.z*l2.z);
 	dst = fabsf(CenterLength.x*Axis.x + CenterLength.y*Axis.y + CenterLength.z*Axis.z);
-	
+
 	//이결과가 양수면 겹치고 음수면 분리되어있다.
 	return prj1 + prj2 - dst;
 
@@ -781,7 +781,7 @@ void MiniPhysicsEngineG9::RayCastObject::SetPlane(XMFLOAT3 & x, XMFLOAT3 & y, XM
 {
 	//0 왼쪽 1 오른쪽 2 앞쪽 3 뒷쪽 4 아래쪽 5 위쪽
 	Plane[0].Normal = XMFLOAT3(-1, 0, 0);
-	Plane[0].DefaultCenterPos = XMFLOAT3(-x.x,-x.y,-x.z);
+	Plane[0].DefaultCenterPos = XMFLOAT3(-x.x, -x.y, -x.z);
 
 	Plane[1].Normal = XMFLOAT3(1, 0, 0);
 	Plane[1].DefaultCenterPos = XMFLOAT3(x.x, x.y, x.z);
@@ -843,8 +843,8 @@ void MiniPhysicsEngineG9::GeneratorAnchor::Update(float DeltaTime, PhysicsPoint 
 	XMVECTOR objpos = XMLoadFloat3(&pp.GetPosition());
 	XMVECTOR ancpos = XMLoadFloat3(&AnchorPos);
 
-	XMVECTOR obj_anc = objpos-ancpos;
-	
+	XMVECTOR obj_anc = objpos - ancpos;
+
 	float curlen = FloatLength(obj_anc);
 
 	//F=K(defaultlength-curlen); 왜 -를안붙였냐면 원래 델타X구할때 현재길이 - 기본길이임. 근데 반대로 해서 -1곱한거랑같음
@@ -852,7 +852,7 @@ void MiniPhysicsEngineG9::GeneratorAnchor::Update(float DeltaTime, PhysicsPoint 
 
 	//이제 힘을 벡터화 시킨다. 즉 obj_anc를 노멀라이즈해서 방향으로하고 F를 크기로 한다.
 
-	obj_anc=XMVector3Normalize(obj_anc);
+	obj_anc = XMVector3Normalize(obj_anc);
 	obj_anc *= F;
 	XMFLOAT3 FinalForce;
 	XMStoreFloat3(&FinalForce, obj_anc);
@@ -902,13 +902,13 @@ void MiniPhysicsEngineG9::RigidBody::integrate(float DeltaTime)
 	assert(DeltaTime > 0.0);
 
 	XMVECTOR centerpos = XMLoadFloat4(CenterPos);
-	
+
 	XMVECTOR velocity = XMLoadFloat3(&Velocity);
-	
+
 	XMVECTOR accel = XMLoadFloat3(&Accel);
 
 	XMVECTOR totalforce = XMLoadFloat3(&TotalForce);
-	
+
 	//먼저 힘과 질량으로 가속도를 계산한다.
 
 	//가속도 = 최종힘 * 질량의 역수. 가속도는 힘을가했을때만 생기는 것. F가 0이면 a는 0
@@ -922,9 +922,9 @@ void MiniPhysicsEngineG9::RigidBody::integrate(float DeltaTime)
 	accel = totalforce * InverseMass;
 
 	//가속도를 통해 속도를 추가한다.
-	velocity = velocity + accel*DeltaTime ;
-	
-	
+	velocity = velocity + accel*DeltaTime;
+
+
 
 	// 댐핑지수를 통해 감속한다.
 	velocity *= powf(damping, DeltaTime);
@@ -939,8 +939,8 @@ void MiniPhysicsEngineG9::RigidBody::integrate(float DeltaTime)
 
 	centerpos = centerpos + velocity * DeltaTime + 0.5*accel*DeltaTime*DeltaTime;
 
-	
-	
+
+
 	//결과 물을 저장한다.
 	XMStoreFloat4(CenterPos, centerpos);
 	XMStoreFloat3(&Velocity, velocity);
@@ -951,7 +951,7 @@ void MiniPhysicsEngineG9::RigidBody::integrate(float DeltaTime)
 	XMVECTOR totaltorque = XMLoadFloat3(&TotalTorque);
 	XMVECTOR orient = XMLoadFloat4(Orient);
 	XMMATRIX IT = XMLoadFloat4x4(&GetIMoment());
-		
+
 	//각가속도 구하고 각속도 구하고 마찰로 감속시킨후 방햐을 구한다.
 
 	// A = T/I == T * Inverse I
@@ -960,9 +960,9 @@ void MiniPhysicsEngineG9::RigidBody::integrate(float DeltaTime)
 
 	//각속도를 구함.
 	Avelocity += Aaccel * DeltaTime;
-	
+
 	// 댐핑지수를 통해 감속한다.
-	Avelocity *= powf(Angulardamping, DeltaTime );
+	Avelocity *= powf(Angulardamping, DeltaTime);
 
 	//감속시킨게 엡실론 정도면 속도를 0으로 만듬.
 	float av = 0;
@@ -973,15 +973,15 @@ void MiniPhysicsEngineG9::RigidBody::integrate(float DeltaTime)
 
 
 	//방향을 최종적 설정. orient = orient + 0.5*W*orient. 이때 W*orient는 쿼터니언 곱.
-	
+
 	orient = orient + 0.5f*XMQuaternionMultiply(Avelocity, orient)*DeltaTime;
 
-	orient=XMQuaternionNormalize(orient);
+	orient = XMQuaternionNormalize(orient);
 
 	//결과 물을 저장한다.
 	XMStoreFloat4(Orient, orient);
-	XMStoreFloat3(&AngularVelocity,Avelocity);
-	
+	XMStoreFloat3(&AngularVelocity, Avelocity);
+
 	//모든 계산이 끝났으면 힘과토크를 초기화 한다.
 	ForceClear();
 	TorqueClear();
@@ -1016,8 +1016,8 @@ void MiniPhysicsEngineG9::RigidBody::SetIMoment(float x, float y, float z)
 {
 	XMFLOAT4X4 i{ 1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1 };
 	i._11 = (GetMass(false)*(z*z + y * y)) / 12;
-	i._22= (GetMass(false)*(z*z + x * x)) / 12;
-	i._33= (GetMass(false)*(x*x + y * y)) / 12;
+	i._22 = (GetMass(false)*(z*z + x * x)) / 12;
+	i._33 = (GetMass(false)*(x*x + y * y)) / 12;
 
 	XMMATRIX ii = XMLoadFloat4x4(&i);
 	XMVECTOR dt = XMMatrixDeterminant(ii);//행렬식
@@ -1039,7 +1039,7 @@ XMFLOAT4X4 MiniPhysicsEngineG9::RigidBody::GetIMoment(bool Inverse)
 		XMVECTOR orient = XMLoadFloat4(Orient); // 물체가 회전한만큼 회전시킨다.
 		ii *= XMMatrixRotationQuaternion(orient);//ii는 디폴트 관성모멘트 * 방향쿼터니언행렬
 
-		//다시 역행렬로 변환
+												 //다시 역행렬로 변환
 		dt = XMMatrixDeterminant(ii);//행렬식
 		ii = XMMatrixInverse(&dt, ii);
 		XMFLOAT4X4 temp;
@@ -1179,20 +1179,20 @@ void MiniPhysicsEngineG9::RigidBody::AddForcePoint(XMFLOAT3 & F, XMFLOAT3 & poin
 	auto p2 = XMFloat4to3(*CenterPos);
 	p = Float3Add(p, p2, false);//p-=p2
 
-	if (fabsf(p.x) <= MMPE_EPSILON/10)
+	if (fabsf(p.x) <= MMPE_EPSILON / 10)
 		p.x = 0;
-	if (fabsf(p.y) <= MMPE_EPSILON/10)
+	if (fabsf(p.y) <= MMPE_EPSILON / 10)
 		p.y = 0;
-	if (fabsf(p.z) <= MMPE_EPSILON/10)
+	if (fabsf(p.z) <= MMPE_EPSILON / 10)
 		p.z = 0;
 
 	XMFLOAT3 t = Float3Cross(p, F);//토크 = 중점으로부터 힘을 가해진 벡터 X 힘의 방향
 
-	if (fabsf(t.x) <= MMPE_EPSILON/10)
+	if (fabsf(t.x) <= MMPE_EPSILON / 10)
 		t.x = 0;
-	if (fabsf(t.y) <= MMPE_EPSILON/10)
+	if (fabsf(t.y) <= MMPE_EPSILON / 10)
 		t.y = 0;
-	if (fabsf(t.z) <= MMPE_EPSILON/10)
+	if (fabsf(t.z) <= MMPE_EPSILON / 10)
 		t.z = 0;
 
 	AddForce(F);
@@ -1204,15 +1204,15 @@ void MiniPhysicsEngineG9::RigidBody::AddForcePoint(XMFLOAT3 & F, XMFLOAT4 & poin
 	XMFLOAT4 p = pointposition;
 	auto p2 = *CenterPos;
 	p = Float4Add(p, p2, false);//p-=p2
-	
-	if (fabsf(p.x) <= MMPE_EPSILON )
+
+	if (fabsf(p.x) <= MMPE_EPSILON)
 		p.x = 0;
-	if (fabsf(p.y) <= MMPE_EPSILON )
+	if (fabsf(p.y) <= MMPE_EPSILON)
 		p.y = 0;
-	if (fabsf(p.z) <= MMPE_EPSILON )
+	if (fabsf(p.z) <= MMPE_EPSILON)
 		p.z = 0;
 
-	
+
 	XMFLOAT3 p1 = XMFloat4to3(p);
 	XMFLOAT3 t = Float3Cross(p1, F);//토크 = 중점으로부터 힘을 가해진 벡터 X 힘의 방향
 
@@ -1223,7 +1223,7 @@ void MiniPhysicsEngineG9::RigidBody::AddForcePoint(XMFLOAT3 & F, XMFLOAT4 & poin
 	if (fabsf(t.z) <= MMPE_EPSILON / 10)
 		t.z = 0;
 
-	
+
 
 	AddForce(F);
 	AddTorque(t);
@@ -1254,52 +1254,6 @@ void MiniPhysicsEngineG9::RigidBody::AddTorque(float x, float y, float z)
 XMFLOAT3 MiniPhysicsEngineG9::RigidBody::GetTotalTorque()
 {
 	return TotalTorque;
-}
-
-XMFLOAT3 MiniPhysicsEngineG9::RigidBody::CalculateImpulse(CollisionPoint& cp)
-{
-	XMFLOAT3 impulseContact;
-	
-	XMVECTOR centerpos = XMLoadFloat4(CenterPos);
-	XMVECTOR contactpos = XMLoadFloat4(&cp.Pos);
-	XMVECTOR contactnormal = XMLoadFloat3(&cp.pAxis);
-	XMMATRIX iim = XMLoadFloat4x4(&Inverse_I_Moment);
-
-	auto deltaVelWorld = XMVector3Cross(contactpos - centerpos,contactnormal);
-	deltaVelWorld =  XMVector3Transform(deltaVelWorld,iim);
-	deltaVelWorld = XMVector3Cross(deltaVelWorld,contactpos - centerpos);
-
-	
-	float deltaVelocity;
-	XMStoreFloat(&deltaVelocity,XMVector3Dot(deltaVelWorld, contactnormal));
-
-	deltaVelocity += GetMass();
-
-	deltaVelocity = fabsf(deltaVelocity);
-
-	if (deltaVelocity < 1)
-		deltaVelocity=1;
-
-	float desireDeltaVel;//필요한 속도의 변화량. 실속도를 먼저구한다음 노멀속도를 구한다.
-
-	//실속도 = 각속도X(Q-P) + 선속도
-	XMFLOAT3 Vel = Float3Cross(AngularVelocity, Float3Add(XMFloat4to3(cp.Pos), XMFloat4to3(*CenterPos), false));
-	Vel = Float3Add(Vel, GetVelocity());
-
-	//노멀속도 = 충돌법선방향 * 실속도
-	float nVel = cp.pAxis.x*Vel.x + cp.pAxis.y*Vel.y + cp.pAxis.z*Vel.z;
-	
-	//속도의 변화량 = -(1+e)*충돌전 노멀속도
-	desireDeltaVel = -(1 + 0.25)*nVel;
-
-	// 최종충격량
-	impulseContact.x = desireDeltaVel / deltaVelocity*cp.pAxis.x;
-	impulseContact.y = desireDeltaVel / deltaVelocity * cp.pAxis.y;
-	impulseContact.z = desireDeltaVel / deltaVelocity * cp.pAxis.z;
-	return impulseContact;
-
-
-	
 }
 
 void MiniPhysicsEngineG9::RigidBody::SetHalfBox(float x, float y, float z)
@@ -1344,4 +1298,92 @@ void MiniPhysicsEngineG9::RigidBody::GetEightPoint(XMFLOAT4 * arr, XMFLOAT3& Up,
 bool MiniPhysicsEngineG9::RigidBody::GetBounce()
 {
 	return Bounce;
+}
+
+void MiniPhysicsEngineG9::RigidBody::SetE(float tempE)
+{
+	e = tempE;
+}
+
+float MiniPhysicsEngineG9::RigidBody::GetE()
+{
+	return e;
+}
+
+
+float MiniPhysicsEngineG9::RigidBody::CalculateImpulse(CollisionPoint& cp, RigidBody* rb2, float deltatime)
+{
+
+	float finalE = -(1 + e);
+	XMFLOAT3 SeparateVel = GetVelocity();
+	XMFLOAT3 v2;
+	if (rb2 != NULL)
+		v2 = rb2->GetVelocity();
+	else
+		v2 = XMFLOAT3(0, 0, 0);
+	SeparateVel = Float3Add(SeparateVel, v2, false);
+
+	//Wr1 = 충돌전 각속도 X (Q-P)
+	XMFLOAT3 Wr1 = Float3Cross(GetAngularVelocity(), XMFloat4to3(Float4Add(cp.Pos, *CenterPos, false)));
+	//Wr2도 마찬가지.
+	XMFLOAT3 Wr2;
+	if (rb2 != NULL)
+		Wr2 = Float3Cross(rb2->GetAngularVelocity(), XMFloat4to3(Float4Add(cp.Pos, *rb2->CenterPos, false)));
+	else
+		Wr2 = XMFLOAT3(0, 0, 0);
+
+	//1차식. -(1+e)(충돌전 상대속도 + (충돌전 각속도 X (Q-P) - 충돌전 각속도2 X (Q-P2) ) * 접촉방향 
+	auto t1 = (Float3Add(SeparateVel, Float3Add(Wr1, Wr2, false), true));
+	t1.x *= cp.pAxis.x;
+	t1.y *= cp.pAxis.y;
+	t1.z *= cp.pAxis.z;
+	float First = finalE * (t1.x + t1.y + t1.z);
+
+
+	//temp1 = ( (Q-P1)X 접촉방향 );
+	//u1 = ( ( temp1 * 역관성 1 ) X (Q-P1) ) * 접촉방향
+
+	auto temp1 = Float3Cross(XMFloat4to3(Float4Add(cp.Pos, *CenterPos, false)), cp.pAxis);
+	XMVECTOR temp1v = XMLoadFloat3(&temp1);
+	XMMATRIX ii1 = XMLoadFloat4x4(&GetIMoment());
+	temp1v = XMVector3Transform(temp1v, ii1);
+	XMStoreFloat3(&temp1, temp1v);
+	temp1 = Float3Cross(temp1, XMFloat4to3(Float4Add(cp.Pos, *CenterPos, false)));
+
+	float u1 = temp1.x* cp.pAxis.x + temp1.y * cp.pAxis.y + temp1.z* cp.pAxis.z;
+
+	//temp2 = ( (Q-P2)X 접촉방향 );
+	//u2 = ( ( temp2 * 역관성 2 ) X (Q-P2) ) * 접촉방향
+
+	float u2 = 0;
+	if (rb2 != NULL)
+	{
+		auto temp2 = Float3Cross(XMFloat4to3(Float4Add(cp.Pos, *rb2->CenterPos, false)), cp.pAxis);
+		XMVECTOR temp2v = XMLoadFloat3(&temp2);
+		XMMATRIX ii2 = XMLoadFloat4x4(&rb2->GetIMoment());
+		temp2v = XMVector3Transform(temp2v, ii2);
+		XMStoreFloat3(&temp2, temp2v);
+		temp2 = Float3Cross(temp2, XMFloat4to3(Float4Add(cp.Pos, *rb2->CenterPos, false)));
+
+		u2 = temp2.x* cp.pAxis.x + temp2.y * cp.pAxis.y + temp2.z* cp.pAxis.z;
+	}
+
+
+
+
+	float inverseMs = GetMass();
+	if (rb2 != NULL)
+		inverseMs += rb2->GetMass();
+
+	//식2. u1+u2 + inverseMs
+
+	float Second = u1 + u2 + inverseMs;
+
+	//식3 = (식1 / 식2)*충격량을 가한 시간  = 최종 임펄스
+
+	if (Second != 0)
+		return (First / Second)*deltatime;
+	else
+		return 0;
+
 }

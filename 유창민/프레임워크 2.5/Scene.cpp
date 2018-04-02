@@ -186,7 +186,7 @@ void Scene::CreateGameObject()
 	
 	SkyObject = new SphereObject(device, commandlist, false, &BbObject, XMFLOAT4(0, 0, 0, 0));
 
-	DynamicObject.push_back(new CCubeManObject(device, commandlist,false,&BbObject, XMFLOAT4(300, 0, -50, 0)));
+	DynamicObject.push_back(new CCubeManObject(device, commandlist,false,&BbObject, XMFLOAT4(0, 0, -50, 0)));
 	DynamicObject.push_back(new CCubeManObject(device, commandlist,false,&BbObject, XMFLOAT4(30, 0, -40, 0)));
 	//DynamicObject.back()->pp->SetBounce(true);
 	//DynamicObject.back()->pp->AddForce(-600, 0, 600);
@@ -208,15 +208,13 @@ void Scene::CreateGameObject()
 	{
 		for (int j = -6; j <= 6; ++j)
 		{
-			StaticObject.push_back(new GridObject(device, commandlist, isTexLoad, &BbObject, XMFLOAT4(j * 50, 0, i * 50, 0)));
+			LandObject.push_back(new GridObject(device, commandlist, isTexLoad, &BbObject, XMFLOAT4(j * 50, -1, i * 50, 0)));
 			isTexLoad = true;
 		}
 	}
 
 
 	BbObject.push_back(new TreeObject(device, commandlist, false, &BbObject, XMFLOAT4(0,0,0,0)));
-
-
 
 
 	//플레이어의 오브젝트 설정. 이건 나중에 바꿔야함.

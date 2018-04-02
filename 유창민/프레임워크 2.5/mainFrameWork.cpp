@@ -2,29 +2,29 @@
 
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE prevInstance,
-				   PSTR cmdLine, int showCmd)
+	PSTR cmdLine, int showCmd)
 {
 	// Enable run-time memory check for debug builds.
 #if defined(DEBUG) | defined(_DEBUG)
-	_CrtSetDbgFlag( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
+	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
 
-    try
-    {
-        MainFrameWork theApp(hInstance);
-        if(!theApp.Initialize())
-            return 0;
+	try
+	{
+		MainFrameWork theApp(hInstance);
+		if (!theApp.Initialize())
+			return 0;
 
-        return theApp.Run();
-    }
-    catch(DxException& e)
-    {
-        MessageBox(nullptr, e.ToString().c_str(), L"HR Failed", MB_OK);
-        return 0;
-    }
+		return theApp.Run();
+	}
+	catch (DxException& e)
+	{
+		MessageBox(nullptr, e.ToString().c_str(), L"HR Failed", MB_OK);
+		return 0;
+	}
 }
 
-MainFrameWork::MainFrameWork(HINSTANCE hInstance): FrameWork(hInstance) 
+MainFrameWork::MainFrameWork(HINSTANCE hInstance) : FrameWork(hInstance)
 {
 
 }
@@ -35,10 +35,10 @@ MainFrameWork::~MainFrameWork()
 
 bool MainFrameWork::Initialize()
 {
-    if(!FrameWork::Initialize())
+	if (!FrameWork::Initialize())
 		return false;
-	
-	
+
+
 
 	return true;
 }
@@ -80,7 +80,7 @@ void MainFrameWork::CollisionSystem(const GameTimer& gt)
 		//FindCollisionObject 함수를 나중에 만들어야함. 현재는 그냥 DynamicObject를 준다.
 		//해당 객체가 충돌처리 검사를 할 목록을 저장함.
 		//이 목록을 가지고 충돌검사를 하도록함.
-		
+
 		(*i)->Collision(&scene->DynamicObject, gt.DeltaTime());
 		(*i)->Collision(&scene->StaticObject, gt.DeltaTime());
 
@@ -100,7 +100,7 @@ void MainFrameWork::GravitySystem(const GameTimer & gt)
 	//고정된 물체를 제외한 모든오브젝트에 중력을 가한다. 단 투사체는 제외한다.
 	for (auto i = scene->DynamicObject.begin(); i != scene->DynamicObject.end(); i++)
 	{
-		
+
 		gg.Update(gt.DeltaTime(), *(*i)->pp);
 	}
 	for (auto i = scene->RigidObject.begin(); i != scene->RigidObject.end(); i++)
@@ -114,7 +114,7 @@ void MainFrameWork::GravitySystem(const GameTimer & gt)
 
 void MainFrameWork::AfterGravitySystem(const GameTimer & gt)
 {
-	
+
 	for (auto i = scene->DynamicObject.begin(); i != scene->DynamicObject.end(); i++)
 	{
 		//왜 실제 중점이 아닌 pp의 중점으로 처리하냐면 실제중점을 움직인후 pp의 중점을 움직이나
@@ -122,13 +122,13 @@ void MainFrameWork::AfterGravitySystem(const GameTimer & gt)
 		//pp를 움직이고 cp를 pp로 맞춘다.
 		float ppy = (*i)->pp->GetPosition().y;
 		float hby = (*i)->pp->GetHalfBox().y;
-		if (ppy-hby < 0)//pp의 중점y-하프박스의 y값을 한결과가 0보다 작으면 땅아래에 묻힌셈
+		if (ppy - hby < 0)//pp의 중점y-하프박스의 y값을 한결과가 0보다 작으면 땅아래에 묻힌셈
 		{
 			XMFLOAT3 gp = (*i)->pp->GetPosition();
 			gp.y += hby - ppy;//그러면 반대로 하프박스y값-중점y만큼 올리면 된다.
 			(*i)->pp->SetPosition(gp);
 			(*i)->UpdatePPosCenterPos();
-			auto v=(*i)->pp->GetVelocity();
+			auto v = (*i)->pp->GetVelocity();
 			v.y = 0;//중력에 의한 속도를 0으로 만듬
 			(*i)->pp->SetVelocity(v);
 			(*i)->AirBone = false;
@@ -177,8 +177,8 @@ void MainFrameWork::FrameAdvance(const GameTimer& gt)
 {
 	//프레임어드벤스의 시작은 메모리리셋부터다.
 	mDirectCmdListAlloc->Reset();
-	mCommandList->Reset(mDirectCmdListAlloc.Get(),NULL);
-	
+	mCommandList->Reset(mDirectCmdListAlloc.Get(), NULL);
+
 	//뷰포트 연결
 	mCommandList->RSSetViewports(1, &mScreenViewport);
 	mCommandList->RSSetScissorRects(1, &mScissorRect);
@@ -305,7 +305,7 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 			//size가 1이면 뭘해야할까? 바로 정점 2개가 맞부딪힐수있도록 회전시켜야한다.
 			//그러기 위해서는 적당한 위치에 충격량을 가한다.
 			//문제는 이게 과회전이 일어날 수 있다.
-			//따라서 적당한 회전각도가 되면 그 각도로 보정한다.
+			//따라서 적당한 회전각도가 되면 그 각도로 보정한다. 다만 해당 충격량이 너무 크지 않을때만 보정한다.
 
 			//2인자점 - 1인자점을 해서 2인자점을 향하는 벡터를 만든다.
 			//이때 2인자 점을 향하는 각도가 특정각도 이하면 그 각도로 보정한다.
@@ -330,10 +330,32 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 			//기존에는 float으로 했는데, 0이아니어야 하는데 0이나오는경우가 생김..
 			double theta = acos(V1.x*V2.x + V1.y*V2.y + V1.z*V2.z);
 
+			//충격량을 구함. 충격량이 특정 값 이하일때만 보정가능.
+
+			CollisionPoint fp;//충격량을 가할 지점
+			fp.Pos = XMFLOAT4(0, 0, 0, 0);
+			fp.pAxis = Normal;
+
+			fp.Pos = contactpoint[0].Pos;
+			fp.penetration = contactpoint[0].penetration;
+			float impurse = obj->rb->CalculateImpulse(fp, NULL, 1);
+
+			//최대임펄스를 구한다.
+			if (fabsf(impurse) > 500)
+				impurse = 500;
+
+
+			//최소 임펄스를 구한다.
+			if (fabsf(impurse) < 70)
+				impurse = 70;
+
+
+
+
 			//그후 사잇각이 특정각도 이하면 보정시킨다. 
 			//단 이게 double로 해도 0이아닌데 0이나오는경우가 생긴다.
 			//따라서 0일경우 그냥 충격량을 가해서 각도를 변경시킨다.
-			if (abs(theta) <= MMPE_PI / 36 && abs(theta) != 0)//대략 5도 이하면 보정시킴.
+			if (abs(theta) <= MMPE_PI / 36 && abs(theta) != 0 && fabsf(impurse) <= 75)//대략 5도 이하면 보정시킴.
 			{
 				//회전축을 구하고..
 				XMFLOAT3 mAxis = XMFloat4to3(Float4Cross(V1, V2));
@@ -352,41 +374,21 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 				//여기에 왔다는것은 더이상 보정을 하지 않거나 보정을 아직 할필요가 없는 경우다.
 
 
-				XMFLOAT3 impurse{ 0,70,0 };// 충격량 . 여기서는 선속도를 증가시키는것은 적다 다만 각속도를 변화시킬때 유효하다.
-
-				CollisionPoint fp;//충격량을 가할 지점
-				fp.Pos = XMFLOAT4(0, 0, 0, 0);
-				fp.pAxis = Normal;
-
-				fp.Pos = contactpoint[0].Pos;
-				fp.penetration = contactpoint[0].penetration;
-
-
-
-				////충격량을 가하려면 (Q-P)XImpurse 이므로 (Q-P)를한다. 여기서는 충돌지점의평균 - 오브젝트의 중점 이다.
-				//XMFLOAT3 p = XMFloat4to3(fp.Pos);
-				//auto p2 = XMFloat4to3(obj->rb->GetPosition());
-				//p = Float3Add(p, p2, false);//p-=p2
-				//if (fabsf(p.x) <= MMPE_EPSILON)//떨리면서 각도 애매하게 바뀌는거 막기위함
-				//	p.x = 0;
-				//if (fabsf(p.y) <= MMPE_EPSILON)//떨리면서 각도 애매하게 바뀌는거 막기위함
-				//	p.y = 0;
-				//if (fabsf(p.z) <= MMPE_EPSILON)//떨리면서 각도 애매하게 바뀌는거 막기위함
-				//	p.z = 0;
-
-
-				//땅에 닿았으니 현재 속도의 y는 반감되어야 한다. 원래는 탄성계수가 있지만.. 그냥 2배 증가시킨후 부호를 -로 하자.
-
 
 				//현재 여기서 선속도의 가장 많은 부분을 차지함
 				auto d = obj->rb->GetVelocity();
-				d.y = -0.5 * d.y;
+				d.x = -obj->rb->GetE() *d.x;
+				d.y = -obj->rb->GetE() * d.y;
+				d.z = -obj->rb->GetE() *d.z;
 				obj->rb->SetVelocity(d);
 
 
 				//충격량을 가함. impurse = impurse만큼 0.01초동안 가한것. 시간을 작게둔 이유는 힘을 줄이기 위해서.
-
-				obj->rb->AddForcePoint(impurse, fp.Pos);
+				XMFLOAT3 impurseV = Normal;
+				impurseV.x *= impurse;
+				impurseV.y *= impurse;
+				impurseV.z *= impurse;
+				obj->rb->AddForcePoint(impurseV, fp.Pos);
 				obj->rb->integrate(0.01);
 
 
@@ -467,8 +469,36 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 				//먼저 사잇각도를 구한다.
 				double theta = acos(V2.x*V3.x + V2.y*V3.y + V2.z*V3.z);
 
+
+				CollisionPoint fp;//충격량을 가할 지점
+				fp.Pos = XMFLOAT4(0, 0, 0, 0);
+				fp.pAxis = Normal;
+
+				for (auto i : contactpoint)
+				{
+					fp.Pos = Float4Add(fp.Pos, i.Pos);
+					fp.penetration += i.penetration;
+				}
+
+				fp.Pos.x /= contactpoint.size();
+				fp.Pos.y /= contactpoint.size();
+				fp.Pos.z /= contactpoint.size();
+
+				fp.penetration /= contactpoint.size();
+
+				float impurse = obj->rb->CalculateImpulse(fp, NULL, 1);
+
+				//최대임펄스를 구한다.
+				if (fabsf(impurse) > 500)
+					impurse = 500;
+
+				//최소 임펄스를 구한다.
+				if (fabsf(impurse) < 70)
+					impurse = 70;
+
+
 				//그후 사잇각이 특정각도 이하면 보정시킨다. 
-				if (abs(theta) <= MMPE_PI / 36 && abs(theta) != 0)//대략 5도 이하면 보정시킴.
+				if (abs(theta) <= MMPE_PI / 36 && abs(theta) != 0 && fabsf(impurse) <= 75)//대략 5도 이하면 보정시킴.
 				{
 					//회전축을 구하고
 					XMFLOAT3 mAxis = XMFloat4to3(Float4Cross(V2, V3));
@@ -495,7 +525,7 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 					//그후 그 경우의수를 해결해야겠다. 검사를 하려면 좌우 대칭인지를 보면될것같다.
 					//그리고 대칭이면 랜덤이든 아니면 오른쪽으로 충격량을 약간 가하던 하면 될것같다.
 
-					//먼저 2/3/4/5 인덱스의 점을 비교하면서 이 길이가 0.0001정도 차이면 통과. 4개모두 통과면 특정방향으로 충격량가함.
+					//먼저 2/3/4/5 인덱스의 점을 비교하면서 이 길이가 0.0001정도 차이면 통과.
 					float ComparePenetration = allpoint[2].penetration;
 					bool pass = true;
 					for (int i = 2; i < 6; i++)
@@ -508,10 +538,8 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 					}
 
 
-					XMFLOAT3 impurse{ 0,70,0 };// 충격량 . 여기서는 선속도를 증가시키는것은 적다 다만 각속도를 변화시킬때 유효하다.
 
-
-											   //4개가 모두 같은 깊이면 균형을 이루는것이므로 균형을 부셔버린다.
+					//4개가 모두 같은 깊이면 균형을 이루는것이므로 균형을 부셔버린다.
 					if (pass)
 					{
 						theta = -MMPE_PI / 18;
@@ -530,49 +558,21 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 
 
 
-					CollisionPoint fp;//충격 량을 가할 지점
-					fp.Pos = XMFLOAT4(0, 0, 0, 0);
-					fp.pAxis = Normal;
-
-					//실제 충돌지점들을 다 더함.
-					for (auto i : contactpoint)
-					{
-						fp.Pos = Float4Add(fp.Pos, i.Pos);
-						fp.penetration += i.penetration;
-
-					}
-					//사이즈로 나눠서 평균을 낸다.
-					fp.Pos.x /= contactpoint.size();
-					fp.Pos.y /= contactpoint.size();
-					fp.Pos.z /= contactpoint.size();
-					fp.penetration /= contactpoint.size();
-
-					////충격량을 가하려면 (Q-P)XImpurse 이므로 (Q-P)를한다. 여기서는 충돌지점의평균 - 오브젝트의 중점 이다.
-					//XMFLOAT3 p = XMFloat4to3(fp.Pos);
-					//auto p2 = XMFloat4to3(obj->rb->GetPosition());
-					//p = Float3Add(p, p2, false);//p-=p2
-					//if (fabsf(p.x) <= MMPE_EPSILON)//떨리면서 각도 애매하게 바뀌는거 막기위함
-					//	p.x = 0;
-					//if (fabsf(p.y) <= MMPE_EPSILON)//떨리면서 각도 애매하게 바뀌는거 막기위함
-					//	p.y = 0;
-					//if (fabsf(p.z) <= MMPE_EPSILON)//떨리면서 각도 애매하게 바뀌는거 막기위함
-					//	p.z = 0;
-
-
-					//땅에 닿았으니 현재 속도의 y는 반감되어야 한다. 원래는 탄성계수가 있지만.. 그냥 2배 증가시킨후 부호를 -로 하자.
-
-
 					//현재 여기서 선속도의 가장 많은 부분을 차지함
 					auto d = obj->rb->GetVelocity();
-					d.y = -0.5 * d.y;
+					d.x = -obj->rb->GetE() *d.x;
+					d.y = -obj->rb->GetE() * d.y;
+					d.z = -obj->rb->GetE() *d.z;
 					obj->rb->SetVelocity(d);
 
 
 					//충격량을 가함. impurse = impurse만큼 0.01초동안 가한것. 시간을 작게둔 이유는 힘을 줄이기 위해서.
-
-					obj->rb->AddForcePoint(impurse, fp.Pos);
+					XMFLOAT3 impurseV = Normal;
+					impurseV.x *= impurse;
+					impurseV.y *= impurse;
+					impurseV.z *= impurse;
+					obj->rb->AddForcePoint(impurseV, fp.Pos);
 					obj->rb->integrate(0.01);
-
 
 					//이제 속도와 각속도는 변경 했으니, 겹쳐진 부분 해소
 					//가장 작은값의 penetration(가장 깊은)만큼 올리면 된다.
@@ -643,7 +643,7 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 
 			//땅에 닿았으니 현재 속도의 y는 반감되어야 한다. 원래는 탄성계수가 있지만.. 그냥 절반 감소시킨후 부호를 -로 하자.
 			auto d = obj->rb->GetVelocity();
-			d.y = -0.5 * d.y;
+			d.y = -0.2 * d.y;
 			obj->rb->SetVelocity(d);
 			obj->rb->SetAccel(0, 0, 0);
 
@@ -667,7 +667,9 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 
 		}
 
-
+		//너무 낮은위치에 있을때 속도를 0으로
+		if (obj->CenterPos.y < -200)
+			obj->rb->SetVelocity(0, 0, 0);
 
 		allpoint.clear();
 		tempcollisionpoint.clear();

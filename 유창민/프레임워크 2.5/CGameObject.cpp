@@ -998,33 +998,19 @@ GridObject::GridObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 
 	}
 
-	//게임오브젝트마다 룩벡터와 라이트벡터가 다르므로 초기 오프셋 설정을 해준다.
-	//실제 룩벡터 등은 모두 UpdateLookVector에서 처리된다(라이트벡터도) 따라서 Tick함수에서 반드시 호출해야한다.
-	OffLookvector = XMFLOAT3(0, 0, 1);
-	OffRightvector = XMFLOAT3(1, 0, 0);
-
-	UpdateLookVector();
 	ObjData.isAnimation = 0;
 	ObjData.Scale = 1.0f;
 	ObjData.SpecularParamater = 0.3f;//스페큘러를 낮게준다.
 
 
 	//게임관련 데이터들
-	gamedata.MAXHP = 1000000;
-	gamedata.HP = 100000;
+	gamedata.MAXHP = 1;
+	gamedata.HP = 1;
 	gamedata.Damage = 0;
 	gamedata.GodMode = true;
 	gamedata.Speed = 0;
 	staticobject = true;
 
-
-	//질점오브젝트 사용시 필요한 데이터들 설정
-	pp = new PhysicsPoint();
-	pp->SetPosition(CenterPos);//이 값은 항상 갱신되야한다.
-	pp->SetHalfBox(0, 0, 0);//충돌 박스의 x,y,z 크기
-	pp->SetDamping(1);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
-	pp->SetBounce(false);//튕기지 않는다.
-	pp->SetMass(INFINITY);//고정된 물체는 무게가 무한이다.
 }
 
 void GridObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
@@ -1516,7 +1502,7 @@ RigidCubeObject::RigidCubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandL
 	OffRightvector = XMFLOAT3(1, 0, 0);
 	UpdateLookVector();
 	ObjData.isAnimation = 0;
-	ObjData.Scale = 10.0f;
+	ObjData.Scale = 20.0f;
 	ObjData.SpecularParamater = 0.0f;//스페큘러를 낮게준다.
 	
 
@@ -1531,20 +1517,20 @@ RigidCubeObject::RigidCubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandL
 
 
 	//광선충돌 검사용 육면체
-	XMFLOAT3 rx(9, 0, 0);
-	XMFLOAT3 ry(0, 9, 0);
-	XMFLOAT3 rz(0, 0, 9);
+	XMFLOAT3 rx(10, 0, 0);
+	XMFLOAT3 ry(0, 10, 0);
+	XMFLOAT3 rz(0, 0, 10);
 	rco.SetPlane(rx, ry, rz);
 
 	//리지드 바디
 
 	rb = new RigidBody();
 	rb->SetPosition(&CenterPos);//이 값은 항상 갱신되야한다.
-	rb->SetHalfBox(9, 9, 9);//충돌 박스의 x,y,z 크기
+	rb->SetHalfBox(10,10,10);//충돌 박스의 x,y,z 크기
 	rb->SetDamping(0.6f, 0.6f);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
 	rb->SetBounce(false);//튕기지 않는다.
-	rb->SetMass(2);//고정된 물체는 무게가 무한이다.
-	rb->SetIMoment(9, 9, 9);
+	rb->SetMass(1.5);//고정된 물체는 무게가 무한이다.
+	rb->SetIMoment(10,10,10);
 	rb->SetOrient(&Orient);
 	rb->SetOrient(&Orient);
 	
