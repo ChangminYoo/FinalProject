@@ -67,6 +67,8 @@ public :
 	Player_Data* Get_PlayerServerData(const unsigned int& id);
 	Player_Data* Get_MonsterServerData(const unsigned int& id);
 
+	void Set_PlayerServerData(const unsigned int& id, Player_Data& playerdata);
+
 	//서버에서 받은 PlayerData를 이용하면 이 함수는 없어도됨
 	//PlayerData를 기반으로 Player의 값이 달라질것이므로
 	CGameObject* Get_GameObject{ nullptr };

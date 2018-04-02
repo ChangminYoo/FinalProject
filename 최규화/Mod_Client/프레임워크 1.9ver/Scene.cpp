@@ -226,6 +226,22 @@ Player_Data* Scene::Get_MonsterServerData(const unsigned int& id)
 	return nullptr;
 }
 
+void Scene::Set_PlayerServerData(const unsigned int& id, Player_Data& playerdata)
+{
+	for (auto GameObject : DynamicObject)
+	{
+		if (GameObject->m_player_data.ID == id)
+		{
+			GameObject->m_player_data = move(playerdata);
+			GameObject->CenterPos = { playerdata.Pos.x , playerdata.Pos.y , playerdata.Pos.z , playerdata.Pos.w };
+			GameObject->Speed = move(playerdata.UserInfo.player_status.speed);
+
+			//여기에서 이제 애니메이션 스테이트 넣어주고 패킷주고받을때마다 변화되야할 클라정보를 넣어주자
+
+		}
+	}
+}
+
 
 array<const CD3DX12_STATIC_SAMPLER_DESC, 6> Scene::GetStaticSamplers()
 {

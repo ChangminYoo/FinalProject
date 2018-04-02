@@ -7,6 +7,7 @@ Player::Player() : m_acceptor(g_io_service,
 	boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), SERVERPORT)) , m_socket(g_io_service)
 {
 	//GetMyServerIP();
+
 	CheckMyCPUCore();
 
 	//몬스터 초기화는 게임판마다 실행되어야함
@@ -93,7 +94,7 @@ void Player::Accept_Event()
 
 				pNewSession->m_clients.emplace_back(pNewSession);
 
-				pNewSession->InitData_To_Client();
+				//pNewSession->InitData_To_Client();
 
 				cout << "클라이언트 [ " << m_playerIndex << " ] 데이터할당 완료. " << endl;
 

@@ -42,8 +42,6 @@ bool Player_Session::CheckPlayerInfo()
 	Packet cur_logindata_packet[MAX_BUFFER_SIZE]{ 0 };
 	Player_LoginDB logindata;
 
-	m_connect_state = true;
-	
 	m_socket.receive(boost::asio::buffer(cur_logindata_packet, MAX_BUFFER_SIZE));
 
 	wcscpy(m_loginID, reinterpret_cast<wchar_t*>(&cur_logindata_packet[1]));
@@ -56,6 +54,9 @@ bool Player_Session::CheckPlayerInfo()
 	{
 		cur_logindata_packet[0] = 1;
 		m_socket.send(boost::asio::buffer(cur_logindata_packet, MAX_BUFFER_SIZE));
+
+		m_connect_state = true;
+
 		return true;
 	}
 
@@ -88,6 +89,8 @@ void Player_Session::Init_MonsterInfo()
 		break;
 	}
 
+	m_isAI = true;
+
 	m_playerData.Is_AI = true;
 	m_playerData.ID = m_id;
 	m_playerData.Dir = 0;
@@ -115,13 +118,17 @@ void Player_Session::Init_MonsterInfo()
 
 void Player_Session::Init_PlayerInfo()
 {
-	//플레이어 정보 초기화
+	//플레이어 정보 초기화 -> send 다음에 recv를 해줘야한다
 
 	default_random_engine generator(time(0));
 	uniform_int_distribution<int> export_x(-RAND_CREATE_X_POS, RAND_CREATE_X_POS);
 	uniform_int_distribution<int> export_z(-RAND_CREATE_Z_POS, RAND_CREATE_Z_POS);
 	auto rand_x = export_x(generator);
 	auto rand_z = export_z(generator);
+
+	m_state = PLAYER_STATE::IDLE;
+	m_playerType = PLAYERS::LUNA;
+	m_isAI = false;
 
 	m_playerData.Is_AI = false;
 	m_playerData.ID = m_id;
@@ -131,27 +138,43 @@ void Player_Session::Init_PlayerInfo()
 	wcscpy(m_playerData.LoginData.name, m_loginID);
 	wcscpy(m_playerData.LoginData.password, m_loginPW);
 
-	m_state = PLAYER_STATE::IDLE;
-	m_playerType = PLAYERS::LUNA;
-	
-	
-	// m_clients -> 현재 id에 맞는 해당 벡터요소가 sendpacket을 통해 데이터를 클라로 보내야함
-	// 예외 발생
-
-	
-	//clients[m_id]->SendPacket(reinterpret_cast<Packet*>(&init_player));
+	//2. 초기화된 정보를 연결된 클라이언트로 보낸다.
+	InitData_To_Client(); 
 
 }
 
 void Player_Session::InitData_To_Client()
 {
-	STC_ClientInit init_player;
-	init_player.pack_size = sizeof(STC_ClientInit);
+	//1. 내 초기화정보
+	STC_SetMyClient init_player;
+	init_player.pack_size = sizeof(STC_SetMyClient);
 	init_player.pack_type = PACKET_PROTOCOL_TYPE::INIT_CLIENT;
 	init_player.player_data = m_playerData;
 	init_player.player_data.Pos = { 0.0f, -1000.0f, 0.0f };
 
+	// 내 초기화 정보를 일단 나와 연결된 클라이언트에 보낸다.
 	m_clients[m_id]->SendPacket(reinterpret_cast<Packet*>(&init_player));
+
+	//2. 다른 클라이언트 초기화정보
+	STC_SetOtherClient init_otherplayer;
+	init_otherplayer.pack_size = sizeof(STC_SetOtherClient);
+	init_otherplayer.pack_type = PACKET_PROTOCOL_TYPE::INIT_OTHER_CLIENT;
+
+	//2. 내 정보를 다른 클라이언트에게 넘겨준다
+	for (auto i = 0; i < m_clients.size(); ++i)
+	{
+		if (m_clients[i]->Get_ID() != m_id || m_clients[i]->Get_Connect_State() != false || m_clients[i]->Get_IsAI() != true)
+		{
+			// 1. 다른 클라이언트 정보를 내 클라이언트에게 보낸다
+			init_otherplayer.player_data = move(m_clients[i]->GetPlayerData());
+			m_clients[m_id]->SendPacket(reinterpret_cast<Packet*>(&init_otherplayer));
+
+			// 2. 내 정보를 다른 클라이언트에게 보낸다
+			m_clients[i]->SendPacket(reinterpret_cast<Packet*>(&init_player));
+
+		}
+	}
+
 }
 
 
@@ -220,7 +243,7 @@ void Player_Session::RecvPacket()
 	m_socket.async_read_some(boost::asio::buffer(m_recvBuf, MAX_BUFFER_SIZE),
 		[&](const boost::system::error_code& error,const size_t& bytes_transferred)
 	{	
-
+		// error = 0 성공 , error != 0 실패
 		if (error != 0)
 		{
 			//에러: 작업이 취소된 경우 
@@ -228,22 +251,26 @@ void Player_Session::RecvPacket()
 
 			cout << "IP: " << m_socket.remote_endpoint().address().to_string() << " // ";
 			cout << "PORT: " << m_socket.remote_endpoint().port() << endl;
-
 			// shutdown_both - 주고 받는 쪽 모두를 중단
 			m_socket.shutdown(m_socket.shutdown_both);
 			m_socket.close();
 
 			// 자신의 연결상태 - 끊음
 			Set_State(-1);
-			m_connect_state = CONNECT_STATE::DISCONNECT;
+			m_connect_state = false;
 
-			STC_Disconnected dis_msg;
-			dis_msg.id = m_id;
+			STC_Disconnected disconnect_data;
+			disconnect_data.connect = false;
+			disconnect_data.id = m_id;
 
-			// 자신주변에 있는 대상들에게 자신의 연결상태에 대한 정보를 보내야함
-			//auto clients = move(m_player->Get_Clients());
-			//clients[m_id]->Set_Connect_State(CONNECT_STATE::DISCONNECT);
-			//clients[m_id]->SendPacket(reinterpret_cast<Packet*>(&dis_msg));
+			// AI와 연결이 이미 끊긴 클라이언트에게는 연결을 끊으라는 패킷을 보내지 않는다
+			for (auto client : m_clients)
+			{			
+				if (client->Get_IsAI() != true && client->Get_Connect_State() != false)
+				{
+					client->SendPacket(reinterpret_cast<Packet*>(&disconnect_data));
+				}
+			}
 
 			return;
 		}
@@ -282,7 +309,7 @@ void Player_Session::RecvPacket()
 
 		while (cur_data_proc > 0)
 		{
-			if (m_cur_packet_size == 0)
+			if (m_cur_packet_size == 0)			//이렇게 해야 패킷의 첫 정보는 무조건 패킷사이즈가 됨
 			{
 				m_cur_packet_size = temp_buf[0];
 				if (temp_buf[0] > MAX_BUFFER_SIZE)
@@ -290,7 +317,6 @@ void Player_Session::RecvPacket()
 					cout << "RecvPacket() Error, Client No. [ " << m_id << " ] recvBuf[0] is out of MAX_BUF_SIZE\n";
 					exit(-1);
 				}
-
 			}
 				
 			int need_to_read = m_cur_packet_size - m_prev_packet_size;
@@ -300,27 +326,25 @@ void Player_Session::RecvPacket()
 
 				ProcessPacket(m_dataBuf);
 
-				m_prev_packet_size = 0;
-				m_cur_packet_size = 0;
 				cur_data_proc -= need_to_read;
 				temp_buf += need_to_read;
+				m_prev_packet_size = 0;
+				m_cur_packet_size = 0;
 			}
 			else
 			{
 				memcpy(m_dataBuf + m_prev_packet_size, temp_buf, cur_data_proc);
 				m_prev_packet_size += cur_data_proc;
 				cur_data_proc = 0;
-				temp_buf += cur_data_proc;
+
+				//temp_buf += cur_data_proc;
 			}
 		}
+
 		RecvPacket();
 	});
 
 	
-}
-
-void Player_Session::RecvOriginPacket(Packet *packet , const unsigned int& size)
-{
 }
 
 void Player_Session::ProcessPacket(Packet * packet)
@@ -332,40 +356,40 @@ void Player_Session::ProcessPacket(Packet * packet)
 	switch (packet[1])
 	{
 	case PACKET_PROTOCOL_TYPE::CHANGED_PLAYER_POSITION:
-
-		if (m_state == PLAYER_STATE::DEAD) break;
-		m_state = PLAYER_STATE::MOVE;
-
-		//받아들인 데이터(키를 눌러 플레이어를 움직였음)에서 포지션을 추출
-		auto data_ChangedPos = (reinterpret_cast<STC_ChangedPos*>(packet));
-
-		//변화된 포지션을 다른 클라에 전달
-		STC_ChangedPos change_pos;
-		change_pos.id = data_ChangedPos->id;
-		change_pos.pos = data_ChangedPos->pos;
-
-		cout << "변화된 위치값: " << "[ x: " << change_pos.pos.x << " --  y: " << change_pos.pos.y
-			<< " -- z: " << change_pos.pos.z << "] " << endl;
-
-		for (auto player : m_clients)
 		{
-			//상대가 ai / 연결끊김 / 나일 경우 보낼 필요 없음
-			if (player->GetPlayerData()->Is_AI) continue;
-			if (player->m_connect_state == CONNECT_STATE::DISCONNECT) continue;
-			if (m_id == player->Get_ID()) continue;
+			if (m_state == PLAYER_STATE::DEAD) break;
+			m_state = PLAYER_STATE::MOVE;
 
-			//갱신된 상대방 데이터를 나에게 전달
-			STC_OtherClientInit send_other_data_to_me;
-			send_other_data_to_me.player_data = player->m_playerData;
-			SendPacket(reinterpret_cast<Packet*>(&send_other_data_to_me));
+			//1. 받아들인 데이터(키를 눌러 플레이어를 움직였음)에서 변화된 정보를 추출
+			auto PosMove_Data = (reinterpret_cast<STC_ChangedPos*>(packet));
 
-			//갱신된 나의 데이터를 상대방에게 전달
-			STC_OtherClientInit send_my_data_to_other;
-			send_my_data_to_other.player_data = m_playerData;
-			player->SendPacket(reinterpret_cast<Packet*>(&send_my_data_to_other));
+			//2. 변화된 정보를 서버에서 관리하고 있는 해당 클라이언트 객체에 저장 및 내 클라로 다시보냄
+			m_clients[PosMove_Data->id]->m_playerData.Pos = move(PosMove_Data->pos);
+			m_clients[PosMove_Data->id]->SendPacket(reinterpret_cast<Packet*>(&PosMove_Data));
+
+			cout << "변화된 위치값: " << "[x:" << PosMove_Data->pos.x << "\t" << "y:" << PosMove_Data->pos.y
+				<< "\t" << "z:" << PosMove_Data->pos.z << "]" << "\t" << "w:" << PosMove_Data->pos.w << endl;
+
+			//변화된 포지션을 다른 클라에 전달
+			STC_SetOtherClient changedpos_to_otherplayer;
+			changedpos_to_otherplayer.player_data.ID = PosMove_Data->id;
+			changedpos_to_otherplayer.player_data.Pos = move(PosMove_Data->pos);
+
+			for (auto client : m_clients)
+			{
+				//상대가 ai / 연결끊김 / 나일 경우 보낼 필요 없음
+				if (client->m_playerData.Is_AI == true) continue;
+				if (client->m_playerData.Connect_Status == false) continue;
+				if (client->m_playerData.ID == m_id) continue;
+
+				//갱신된 나의 데이터를 상대방에게 전달
+				client->SendPacket(reinterpret_cast<Packet*>(&changedpos_to_otherplayer));
+			}
+
 		}
+		break;
 
-		m_clients[m_id]->SendPacket(reinterpret_cast<Packet*>(&change_pos));
+
 		break;
 	}
 }

@@ -131,17 +131,17 @@ void AsyncClient::RecvPacket(CGameObject& obj, Scene& scene)
 
 				ProcessPacket(m_dataBuf, obj, scene);
 
-				m_prev_packet_size = 0;
-				m_cur_packet_size = 0;
 				cur_data_proc -= need_to_read;
 				temp_buf += need_to_read;
+				m_prev_packet_size = 0;
+				m_cur_packet_size = 0;
 			}
 			else
 			{
 				memcpy(m_dataBuf + m_prev_packet_size, temp_buf, cur_data_proc);
 				m_prev_packet_size += cur_data_proc;
 				cur_data_proc = 0;
-				temp_buf += cur_data_proc;
+				//temp_buf += cur_data_proc;
 			}
 		}
 		RecvPacket(obj,scene);
