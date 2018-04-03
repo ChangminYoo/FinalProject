@@ -1210,16 +1210,16 @@ DamageObject::DamageObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * 
 
 void DamageObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
 {
-	UINT numOfitem = 2;
+	UINT numOfitem = 1;
 
 
-	Mesh.SubResource = new CVertex[numOfitem];
+	Mesh.SubResource = new CVertex;
 	Mesh.nVertex = numOfitem;
 	Mesh.nStride = sizeof(CVertex);
 	Mesh.nOffset = 0;
 
 
-	Mesh.Index = new UINT[numOfitem];
+	Mesh.Index = new UINT;
 	Mesh.nindex = numOfitem;
 	Mesh.nioffset = 0;
 	Mesh.nisize = sizeof(UINT);
