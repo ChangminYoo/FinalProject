@@ -242,6 +242,16 @@ void Shader::Render(ID3D12GraphicsCommandList * CommandList, const GameTimer& gt
 	SetSkyShader(CommandList);
 	(*SkyObject)->Render(CommandList, gt);
 
+	SetShader(CommandList, false);
+	for (auto b = LandObject->cbegin(); b != LandObject->cend(); b++)
+	{
+		if (isRender(*b) == true)
+		{		
+	
+			(*b)->Render(CommandList, gt);
+		}
+	}
+
 	//이제 이렇게 그릴때 마다 그리기전에 옳바른 PSO를 연결하고, 오브젝트들을 그린다.
 	SetShader(CommandList, false);
 	for (auto b = DynamicObject->cbegin(); b != DynamicObject->cend(); b++)
@@ -299,7 +309,7 @@ void Shader::Render(ID3D12GraphicsCommandList * CommandList, const GameTimer& gt
 				else
 				{
 					auto tempv = (*b)->ObjData.BlendValue;
-					(*b)->ObjData.BlendValue = 0.75f;
+					(*b)->ObjData.BlendValue = 0.5f;
 					SetShader(CommandList, true);
 					//블랜딩용 PSO로 그림
 					(*b)->Render(CommandList, gt);
@@ -314,6 +324,7 @@ void Shader::Render(ID3D12GraphicsCommandList * CommandList, const GameTimer& gt
 
 	//이제 이렇게 그릴때 마다 그리기전에 옳바른 PSO를 연결하고, 오브젝트들을 그린다.
 	//투사체또한 그린다.
+	SetShader(CommandList, false);
 	for (auto b = BulletObject->cbegin(); b != BulletObject->cend(); b++)
 	{
 		if (isRender(*b) == true)
@@ -346,6 +357,7 @@ void Shader::Render(ID3D12GraphicsCommandList * CommandList, const GameTimer& gt
 		}
 	}
 
+	SetShader(CommandList, false);
 	for (auto b = StaticObject->cbegin(); b != StaticObject->cend(); b++)
 	{
 		if (isRender(*b) == true)
@@ -378,12 +390,14 @@ void Shader::Render(ID3D12GraphicsCommandList * CommandList, const GameTimer& gt
 		}
 	}
 
+	SetBillboardShader(CommandList);
 	for (auto b = BbObject->cbegin(); b != BbObject->cend(); b++)
 	{
-		SetBillboardShader(CommandList);
 	
 		(*b)->Render(CommandList, gt);
 	}
+
+	
 
 }
 
@@ -421,7 +435,7 @@ bool Shader::ishalfalphaRender(CGameObject * obj)
 		v2 = Float3Normalize(v2);
 
 		auto d = v2.x*v.x + v2.y*v.y + v2.z*v.z;
-		if (d < -0.85)//내적 결과가 뒤에있을경우
+		if (d < -0.5)//내적 결과가 뒤에있을경우
 			return true;
 	}
 	return false;

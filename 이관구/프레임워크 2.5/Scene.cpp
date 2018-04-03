@@ -69,6 +69,12 @@ Scene::~Scene()
 		delete BbObject.front();
 		BbObject.pop_front();
 	}
+	while (LandObject.size())
+	{
+		delete LandObject.front();
+		LandObject.pop_front();
+	}
+
 
 
 	if (Player != NULL)
@@ -148,7 +154,7 @@ void Scene::CreateShaderObject()
 		Shaders->BulletObject = &BulletObject;
 		Shaders->StaticObject = &StaticObject;
 		Shaders->BbObject = &BbObject;
-		
+		Shaders->LandObject = &LandObject;
 	}
 	
 }
@@ -159,54 +165,56 @@ void Scene::CreateGameObject()
 	//--------------- 메쉬와 텍스처 초기화 -------------//
 
 	CGameObject* resource = NULL;
-	resource = new CCubeManObject(device, commandlist,&BbObject, XMFLOAT4(0, -0, 0, 0));
+	resource = new CCubeManObject(device, commandlist, false, &BbObject, XMFLOAT4(0, -0, 0, 0));
 	delete resource;
-	resource = new CZombieObject(device, commandlist, &BbObject, XMFLOAT4(0, -0, 0, 0));
+	resource = new CZombieObject(device, commandlist, false, &BbObject, XMFLOAT4(0, -0, 0, 0));
 	delete resource;
-	resource = new BulletCube(device, commandlist, &BbObject,NULL,XMFLOAT4(0,0,0,1),NULL, XMFLOAT4(0, -0, 0, 0));
+	resource = new BulletCube(device, commandlist, false, &BbObject,NULL,XMFLOAT4(0,0,0,1),NULL, XMFLOAT4(0, -0, 0, 0));
 	delete resource;
-	resource = new SphereObject(device, commandlist, &BbObject, XMFLOAT4(0, 0, 0, 0));
+	resource = new SphereObject(device, commandlist, false, &BbObject, XMFLOAT4(0, 0, 0, 0));
 	delete resource;
-	resource = new CubeObject(device, commandlist, &BbObject, XMFLOAT4(0, 0, 0, 0));
+	resource = new CubeObject(device, commandlist, false, &BbObject, XMFLOAT4(0, 0, 0, 0));
 	delete resource;
-	resource = new GridObject(device, commandlist, &BbObject, XMFLOAT4(0, 0, 0, 0));
+	resource = new GridObject(device, commandlist, false, &BbObject, XMFLOAT4(0, 0, 0, 0));
 	delete resource;
-	resource = new TreeObject(device, commandlist, &BbObject, XMFLOAT4(0, 0, 0, 0));
+	resource = new TreeObject(device, commandlist, false, &BbObject, XMFLOAT4(0, 0, 0, 0));
 	delete resource;
-	resource = new RigidCubeObject(device, commandlist, &BbObject, XMFLOAT4(0, 0, 0, 0));
+	resource = new RigidCubeObject(device, commandlist, false, &BbObject, XMFLOAT4(0, 0, 0, 0));
 	delete resource;
 
 	//--------------------------------------------------//
 	
-	SkyObject = new SphereObject(device, commandlist, &BbObject, XMFLOAT4(0, 0, 0, 0));
+	SkyObject = new SphereObject(device, commandlist, false, &BbObject, XMFLOAT4(0, 0, 0, 0));
 
-	DynamicObject.push_back(new CCubeManObject(device, commandlist, &BbObject, XMFLOAT4(0, 0, -50, 0)));
-	DynamicObject.push_back(new CCubeManObject(device, commandlist, &BbObject, XMFLOAT4(30, 0, -40, 0)));
+	DynamicObject.push_back(new CCubeManObject(device, commandlist,false,&BbObject, XMFLOAT4(0, 0, -50, 0)));
+	DynamicObject.push_back(new CCubeManObject(device, commandlist,false,&BbObject, XMFLOAT4(30, 0, -40, 0)));
 	//DynamicObject.back()->pp->SetBounce(true);
 	//DynamicObject.back()->pp->AddForce(-600, 0, 600);
 	//DynamicObject.back()->pp->integrate(0.1f);//힘은 지속적으로 가해지는것이며 즉발적이려면 힘을 가한 시간을 통해 계산한다.
-	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(-20, 0, 0, 0)));
-	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(-40, 10, 0, 0)));
-	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(50, 0, -40, 0)));
-	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(30, 0, 40, 0)));
+	StaticObject.push_back(new CubeObject(device, commandlist, false, &BbObject, XMFLOAT4(-20, 0, 0, 0)));
+	StaticObject.push_back(new CubeObject(device, commandlist, true, &BbObject, XMFLOAT4(-40, 10, 0, 0)));
+	StaticObject.push_back(new CubeObject(device, commandlist, true, &BbObject, XMFLOAT4(50, 0, -40, 0)));
+	StaticObject.push_back(new CubeObject(device, commandlist, true, &BbObject, XMFLOAT4(30, 0, 40, 0)));
 
-	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, XMFLOAT4(25, 1200, 10, 0)));
-	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, XMFLOAT4(-11, 1130, 10, 0)));
-	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, XMFLOAT4(0.5, 250, 3, 0)));
-	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject,XMFLOAT4(13, 590, 7, 0)));
-	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject,XMFLOAT4(15, 640, 39, 0)));
-	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject,XMFLOAT4(20, 1100, 0, 0)));
-
-
-//	StaticObject.push_back(new GridObject(device, commandlist, XMFLOAT4(0, 0, 0, 0)));
+	RigidObject.push_back(new RigidCubeObject(device, commandlist, false, &BbObject, XMFLOAT4(25, 200, 10, 0)));
+	RigidObject.push_back(new RigidCubeObject(device, commandlist, true, &BbObject, XMFLOAT4(-11, 130, 10, 0)));
+	RigidObject.push_back(new RigidCubeObject(device, commandlist, true, &BbObject, XMFLOAT4(0.5, 50, 3, 0)));
+	RigidObject.push_back(new RigidCubeObject(device, commandlist, true, &BbObject, XMFLOAT4(13, 90, 7, 0)));
+	RigidObject.push_back(new RigidCubeObject(device, commandlist, true, &BbObject, XMFLOAT4(15, 40, 39, 0)));
+	RigidObject.push_back(new RigidCubeObject(device, commandlist, true, &BbObject, XMFLOAT4(20, 100, 0, 0)));
 
 
+	for (int i = -8; i <= 8; ++i)
+	{
+		for (int j = -8; j <= 8; ++j)
+		{
+			LandObject.push_back(new GridObject(device, commandlist, true,&BbObject, XMFLOAT4(j * 50, -1, i * 50, 0)));
+			
+		}
+	}
 
 
-
-	BbObject.push_back(new TreeObject(device, commandlist, &BbObject, XMFLOAT4(0,0,0,0)));
-
-
+	BbObject.push_back(new TreeObject(device, commandlist, false, &BbObject, XMFLOAT4(0,0,0,0)));
 
 
 	//플레이어의 오브젝트 설정. 이건 나중에 바꿔야함.

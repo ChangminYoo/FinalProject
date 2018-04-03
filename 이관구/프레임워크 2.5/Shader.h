@@ -49,6 +49,7 @@ public:
 	list<CGameObject*>* StaticObject = NULL;//애니메이션이 *되지 않는* 오브젝트들이 여기에 모임.Scene클래스가 가진거를 공유만.
 	list<CGameObject*>* RigidObject = NULL;//리지드바디 오브젝트
 	list<CGameObject*>* BbObject = NULL;
+	list<CGameObject*>* LandObject = NULL;
 
 	CGameObject** SkyObject = NULL;//다른오브젝트와 달리 하나만 있으면 됨
 	

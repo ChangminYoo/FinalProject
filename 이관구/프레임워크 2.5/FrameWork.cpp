@@ -6,7 +6,7 @@ using namespace std;
 using namespace DirectX;
 
 UINT CbvSrvDescriptorSize = 0;
-#define MAXRAYLEN 200
+#define MAXRAYLEN 300
 
 LRESULT CALLBACK
 GetWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
@@ -509,15 +509,18 @@ void FrameWork::OnMouseMove(WPARAM btnState, int x, int y)
 
 	p1.x = rc.left; p1.y = rc.top; p2.x = rc.right; p2.y = rc.bottom;
 
+	ClientToScreen(hwnd, &p1);
+	ClientToScreen(hwnd, &p2);
 
-//	ClientToScreen(hwnd, &p2);
+	rc.left = p1.x; rc.top = p1.y; rc.right = p2.x; rc.bottom = p2.y;
 
-//	rc.left = p1.x; rc.top = p1.y; rc.right = p2.x; rc.bottom = p2.y;
-
-//	ClipCursor(&rc);
+	ClipCursor(&rc);
 
 
-	//SetCursorPos((p1.x + p2.x) / 2, (p1.y + p2.y) / 2);
+	//SetCursorPos((rc.left + rc.right) / 2, (rc.top + rc.bottom) / 2);
+	//움직이고나서 다시 제자리로돌아오니까 까딱까딱만 되잖ㅏㅇ아아아
+
+	//ShowCursor(false);
 }
 
 

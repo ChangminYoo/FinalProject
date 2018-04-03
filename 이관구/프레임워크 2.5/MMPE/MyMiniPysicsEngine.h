@@ -9,7 +9,7 @@ namespace MiniPhysicsEngineG9
 	struct CollisionPoint
 	{
 		XMFLOAT4 Pos;//충돌지점
-		float penetration=0;//충돌시 겹쳐진 길이
+		float penetration = 0;//충돌시 겹쳐진 길이
 		XMFLOAT3 pAxis;//충돌시 방향
 	};
 
@@ -27,7 +27,7 @@ namespace MiniPhysicsEngineG9
 		float damping;//제동용 값. 마찰력 대용으로도 사용
 		XMFLOAT3 TotalForce;//최종적으로 가해진 모든 힘
 		XMFLOAT3 Accel;//가속도
-		// 힘을 통해 가속도를 구하고 가속도로 위치와 속도를 계산한다. 오일러방식을 이용함
+					   // 힘을 통해 가속도를 구하고 가속도로 위치와 속도를 계산한다. 오일러방식을 이용함
 
 		XMFLOAT3 halfbox;//x길이y길이z길이
 		bool Bounce = false;
@@ -59,7 +59,7 @@ namespace MiniPhysicsEngineG9
 		void AddForce(float x, float y, float z);
 		XMFLOAT3 GetTotalForce();//현재까지 총 힘을 반환.
 
-		//충돌관련
+								 //충돌관련
 		float penetration = 0;//밀어내야하는 길이
 		XMFLOAT3 pAxis;//밀어낼 방향
 		void SetHalfBox(float x, float y, float z);
@@ -71,14 +71,14 @@ namespace MiniPhysicsEngineG9
 
 		//충돌체 해소 관련. 이때 키보드 처리는 따로 해줘야함. 왜냐하면 대각선으로 눌렀을때 충돌안되는 부분은 스무스하게
 		//움직이게 하기위해서다. CollisionN은 충돌시 내가 밀려나야하는 방향을 나타낸다.
-		void CollisionResolve(PhysicsPoint& p2,XMFLOAT3& CollisionN, float DeltaTime);
+		void CollisionResolve(PhysicsPoint& p2, XMFLOAT3& CollisionN, float DeltaTime);
 		//상대속도를 구한다.
 		float GetSeparateVelocity(PhysicsPoint& p2, XMFLOAT3& CollisionN);
 		//충돌후 속도를 구한다.
 		bool GetBounce();
 		void ResolveVelocity(PhysicsPoint& p2, XMFLOAT3& CollisionN, float DeltaTime);
 		//겹쳐진 부분을 밀어낸다.
-		void ResolvePenetration(PhysicsPoint& p2,float DeltaTime);
+		void ResolvePenetration(PhysicsPoint& p2, float DeltaTime);
 	};
 
 
@@ -97,7 +97,7 @@ namespace MiniPhysicsEngineG9
 		XMFLOAT3 Velocity;//속도
 		XMFLOAT3 AngularVelocity;//각속도. 
 
-		//중점과 방향은 포인터로 공유한다. 즉 실제 오브젝트의 위치와 방향으로!
+								 //중점과 방향은 포인터로 공유한다. 즉 실제 오브젝트의 위치와 방향으로!
 		XMFLOAT4* CenterPos;//중점
 		XMFLOAT4* Orient;//방향.
 
@@ -107,10 +107,10 @@ namespace MiniPhysicsEngineG9
 
 		XMFLOAT3 TotalForce;//최종적으로 가해진 모든 힘
 
-		//최종 토크력. 이거 중요한게 토탈포스로 토탈 토크를 구하면안된다. 그이유는 예를들어 중력같이
-		//특정 지점이 아니라 전체에 가해지거나 하는 힘도 있기 때문이다. 따라서 특정 지점에 가해진 힘만으로 구해야함.
+							//최종 토크력. 이거 중요한게 토탈포스로 토탈 토크를 구하면안된다. 그이유는 예를들어 중력같이
+							//특정 지점이 아니라 전체에 가해지거나 하는 힘도 있기 때문이다. 따라서 특정 지점에 가해진 힘만으로 구해야함.
 		XMFLOAT3 TotalTorque;
-		
+
 		XMFLOAT3 Accel;//가속도  
 
 		XMFLOAT3 halfbox;//x길이y길이z길이
@@ -121,12 +121,12 @@ namespace MiniPhysicsEngineG9
 		void integrate(float DeltaTime);//적분기. 속도와 가속도로 위치를 구하고 가속도를 이용해 속도를 갱신함.
 		void SetMass(float M);//무게의 역을 쉽게 저장하기 위한 함수. M을 넣으면 역수로 저장해줌
 		float GetMass(bool Inverse = true);//기본적으로 무게의 역을 구함. 다만 false로 두면 그대로 나온다.
-		
+
 		void SetIMoment(XMFLOAT4X4& i);//관성모멘트 설정. 인자로 넣을땐 그냥 넣고 저장은 인버스형식으로 해둔다.
-		void SetIMoment(float x,float y,float z);//육면체용 관성모멘트
-		XMFLOAT4X4 GetIMoment(bool Inverse=true);//기본적으로 역텐션을 구한다.
-		
-		void SetDamping(float D,float Ad);//댐핑지수를 설정함.
+		void SetIMoment(float x, float y, float z);//육면체용 관성모멘트
+		XMFLOAT4X4 GetIMoment(bool Inverse = true);//기본적으로 역텐션을 구한다.
+
+		void SetDamping(float D, float Ad);//댐핑지수를 설정함.
 		float GetDamping();//댐핑지수 반환
 		float GetAngularDamping();//회전댐핑지수 반환
 
@@ -134,7 +134,7 @@ namespace MiniPhysicsEngineG9
 
 		void SetPosition(XMFLOAT4* pos);//중점 위치 설정
 		void SetOrient(XMFLOAT4* ori);//방향 설정
-		
+
 		XMFLOAT4 GetPosition();//중점 얻기
 		XMFLOAT4 GetOrient();
 
@@ -155,7 +155,7 @@ namespace MiniPhysicsEngineG9
 		void AddForce(float x, float y, float z);
 		XMFLOAT3 GetTotalForce();//현재까지 총 힘을 반환.
 
-		 //특정지점에 힘을가함. 강체는 점이아니기에 특정지점에 힘을 가할수 잇다.보통 이때 토크가 같이 계산된다.
+								 //특정지점에 힘을가함. 강체는 점이아니기에 특정지점에 힘을 가할수 잇다.보통 이때 토크가 같이 계산된다.
 		void AddForcePoint(XMFLOAT3& F, XMFLOAT3& pointposition);
 		void AddForcePoint(XMFLOAT3& F, XMFLOAT4& pointposition);
 
@@ -166,9 +166,9 @@ namespace MiniPhysicsEngineG9
 		XMFLOAT3 GetTotalTorque();//현재까지 총 토크 반환.
 
 
-								 //충돌관련
+								  //충돌관련
 		std::vector<CollisionPoint> CollisionPointVector;//충돌한 지점을 저장하는 벡터. 왜냐하면 리지드'바디'는 점이아니므로 다수의 충돌지점을 가질 수있음
-	
+
 		void SetE(float tempE);
 		float GetE();
 		float CalculateImpulse(CollisionPoint& cp, RigidBody* rb2, float deltatime);
@@ -177,7 +177,7 @@ namespace MiniPhysicsEngineG9
 		void SetHalfBox(float x, float y, float z);
 		XMFLOAT3 GetHalfBox();
 
-		void GetEightPoint(XMFLOAT4* Parr,XMFLOAT3& Up,XMFLOAT3& Look,XMFLOAT3& Right);
+		void GetEightPoint(XMFLOAT4* Parr, XMFLOAT3& Up, XMFLOAT3& Look, XMFLOAT3& Right);
 
 		bool GetBounce();
 	};
@@ -194,7 +194,7 @@ namespace MiniPhysicsEngineG9
 		RayCastPlane Plane[6];
 
 	public:
-		bool RayCasting(XMFLOAT3& RayOrgin, XMFLOAT3& RayDir,XMFLOAT3& ObjCenterPos,XMFLOAT3& PlayerPos,XMFLOAT3& Look, XMFLOAT3* SavePos = NULL);
+		bool RayCasting(XMFLOAT3& RayOrgin, XMFLOAT3& RayDir, XMFLOAT3& ObjCenterPos, XMFLOAT3& PlayerPos, XMFLOAT3& Look, XMFLOAT3* SavePos = NULL);
 		void SetPlane(XMFLOAT3& x, XMFLOAT3& y, XMFLOAT3& z);
 	};
 	XMFLOAT3 RayShot(XMFLOAT3& RayOrgin, XMFLOAT3& RayDir, float MaxLen);
@@ -242,24 +242,24 @@ namespace MiniPhysicsEngineG9
 
 
 	//*********************** 편의 함수 들 *******************************************//
-		float FloatLength(XMFLOAT3& v);
-		float FloatLength(XMFLOAT4& v);
-		float FloatLength(XMVECTOR& v);
+	float FloatLength(XMFLOAT3& v);
+	float FloatLength(XMFLOAT4& v);
+	float FloatLength(XMVECTOR& v);
 
-		XMFLOAT3 Float3Add(XMFLOAT3& v1, XMFLOAT3& v2,bool add=true);
-		XMFLOAT4 Float4Add(XMFLOAT4& v1,XMFLOAT4& v2, bool add = true);
+	XMFLOAT3 Float3Add(XMFLOAT3& v1, XMFLOAT3& v2, bool add = true);
+	XMFLOAT4 Float4Add(XMFLOAT4& v1, XMFLOAT4& v2, bool add = true);
 
-		XMFLOAT3 Float3Normalize(XMFLOAT3& v);
-		XMFLOAT4 Float4Normalize(XMFLOAT4& v);
-		XMFLOAT3 Float3Cross(XMFLOAT3& v1, XMFLOAT3& v2);
-		XMFLOAT4 Float4Cross(XMFLOAT4& v1, XMFLOAT4& v2);
+	XMFLOAT3 Float3Normalize(XMFLOAT3& v);
+	XMFLOAT4 Float4Normalize(XMFLOAT4& v);
+	XMFLOAT3 Float3Cross(XMFLOAT3& v1, XMFLOAT3& v2);
+	XMFLOAT4 Float4Cross(XMFLOAT4& v1, XMFLOAT4& v2);
 
-		XMFLOAT3 XMFloat4to3(XMFLOAT4& v);
-		XMFLOAT4 XMFloat3to4(XMFLOAT3& v);
-		
+	XMFLOAT3 XMFloat4to3(XMFLOAT4& v);
+	XMFLOAT4 XMFloat3to4(XMFLOAT3& v);
 
-		XMFLOAT4 QuaternionRotation(XMFLOAT3& Axis, float radian);
-		XMFLOAT4 QuaternionMultiply(XMFLOAT4& q1, XMFLOAT4& q2);
+
+	XMFLOAT4 QuaternionRotation(XMFLOAT3& Axis, float radian);
+	XMFLOAT4 QuaternionMultiply(XMFLOAT4& q1, XMFLOAT4& q2);
 }
 
 using namespace MiniPhysicsEngineG9;

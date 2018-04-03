@@ -2,29 +2,29 @@
 
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE prevInstance,
-				   PSTR cmdLine, int showCmd)
+	PSTR cmdLine, int showCmd)
 {
 	// Enable run-time memory check for debug builds.
 #if defined(DEBUG) | defined(_DEBUG)
-	_CrtSetDbgFlag( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
+	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
 
-    try
-    {
-        MainFrameWork theApp(hInstance);
-        if(!theApp.Initialize())
-            return 0;
+	try
+	{
+		MainFrameWork theApp(hInstance);
+		if (!theApp.Initialize())
+			return 0;
 
-        return theApp.Run();
-    }
-    catch(DxException& e)
-    {
-        MessageBox(nullptr, e.ToString().c_str(), L"HR Failed", MB_OK);
-        return 0;
-    }
+		return theApp.Run();
+	}
+	catch (DxException& e)
+	{
+		MessageBox(nullptr, e.ToString().c_str(), L"HR Failed", MB_OK);
+		return 0;
+	}
 }
 
-MainFrameWork::MainFrameWork(HINSTANCE hInstance): FrameWork(hInstance) 
+MainFrameWork::MainFrameWork(HINSTANCE hInstance) : FrameWork(hInstance)
 {
 
 }
@@ -35,10 +35,10 @@ MainFrameWork::~MainFrameWork()
 
 bool MainFrameWork::Initialize()
 {
-    if(!FrameWork::Initialize())
+	if (!FrameWork::Initialize())
 		return false;
-	
-	
+
+
 
 	return true;
 }
@@ -80,7 +80,7 @@ void MainFrameWork::CollisionSystem(const GameTimer& gt)
 		//FindCollisionObject 함수를 나중에 만들어야함. 현재는 그냥 DynamicObject를 준다.
 		//해당 객체가 충돌처리 검사를 할 목록을 저장함.
 		//이 목록을 가지고 충돌검사를 하도록함.
-		
+
 		(*i)->Collision(&scene->DynamicObject, gt.DeltaTime());
 		(*i)->Collision(&scene->StaticObject, gt.DeltaTime());
 
@@ -100,7 +100,7 @@ void MainFrameWork::GravitySystem(const GameTimer & gt)
 	//고정된 물체를 제외한 모든오브젝트에 중력을 가한다. 단 투사체는 제외한다.
 	for (auto i = scene->DynamicObject.begin(); i != scene->DynamicObject.end(); i++)
 	{
-		
+
 		gg.Update(gt.DeltaTime(), *(*i)->pp);
 	}
 	for (auto i = scene->RigidObject.begin(); i != scene->RigidObject.end(); i++)
@@ -114,7 +114,7 @@ void MainFrameWork::GravitySystem(const GameTimer & gt)
 
 void MainFrameWork::AfterGravitySystem(const GameTimer & gt)
 {
-	
+
 	for (auto i = scene->DynamicObject.begin(); i != scene->DynamicObject.end(); i++)
 	{
 		//왜 실제 중점이 아닌 pp의 중점으로 처리하냐면 실제중점을 움직인후 pp의 중점을 움직이나
@@ -122,13 +122,13 @@ void MainFrameWork::AfterGravitySystem(const GameTimer & gt)
 		//pp를 움직이고 cp를 pp로 맞춘다.
 		float ppy = (*i)->pp->GetPosition().y;
 		float hby = (*i)->pp->GetHalfBox().y;
-		if (ppy-hby < 0)//pp의 중점y-하프박스의 y값을 한결과가 0보다 작으면 땅아래에 묻힌셈
+		if (ppy - hby < 0)//pp의 중점y-하프박스의 y값을 한결과가 0보다 작으면 땅아래에 묻힌셈
 		{
 			XMFLOAT3 gp = (*i)->pp->GetPosition();
 			gp.y += hby - ppy;//그러면 반대로 하프박스y값-중점y만큼 올리면 된다.
 			(*i)->pp->SetPosition(gp);
 			(*i)->UpdatePPosCenterPos();
-			auto v=(*i)->pp->GetVelocity();
+			auto v = (*i)->pp->GetVelocity();
 			v.y = 0;//중력에 의한 속도를 0으로 만듬
 			(*i)->pp->SetVelocity(v);
 			(*i)->AirBone = false;
@@ -177,8 +177,8 @@ void MainFrameWork::FrameAdvance(const GameTimer& gt)
 {
 	//프레임어드벤스의 시작은 메모리리셋부터다.
 	mDirectCmdListAlloc->Reset();
-	mCommandList->Reset(mDirectCmdListAlloc.Get(),NULL);
-	
+	mCommandList->Reset(mDirectCmdListAlloc.Get(), NULL);
+
 	//뷰포트 연결
 	mCommandList->RSSetViewports(1, &mScreenViewport);
 	mCommandList->RSSetScissorRects(1, &mScissorRect);
@@ -330,14 +330,6 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 			//기존에는 float으로 했는데, 0이아니어야 하는데 0이나오는경우가 생김..
 			double theta = acos(V1.x*V2.x + V1.y*V2.y + V1.z*V2.z);
 
-			if (abs(theta) > 1)
-			{
-				if (theta > 0)
-					theta = 1;
-				else
-					theta = -1;
-			}
-
 			//충격량을 구함. 충격량이 특정 값 이하일때만 보정가능.
 
 			CollisionPoint fp;//충격량을 가할 지점
@@ -363,7 +355,7 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 			//그후 사잇각이 특정각도 이하면 보정시킨다. 
 			//단 이게 double로 해도 0이아닌데 0이나오는경우가 생긴다.
 			//따라서 0일경우 그냥 충격량을 가해서 각도를 변경시킨다.
-			if (abs(theta) <= MMPE_PI / 36 && abs(theta) != 0 && fabsf(impurse)<=75)//대략 5도 이하면 보정시킴.
+			if (abs(theta) <= MMPE_PI / 36 && abs(theta) != 0 && fabsf(impurse) <= 75)//대략 5도 이하면 보정시킴.
 			{
 				//회전축을 구하고..
 				XMFLOAT3 mAxis = XMFloat4to3(Float4Cross(V1, V2));
@@ -381,7 +373,7 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 			{
 				//여기에 왔다는것은 더이상 보정을 하지 않거나 보정을 아직 할필요가 없는 경우다.
 
-				
+
 
 				//현재 여기서 선속도의 가장 많은 부분을 차지함
 				auto d = obj->rb->GetVelocity();
@@ -471,19 +463,12 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 				ProjAB.z *= NdotV2;
 
 				auto V3 = Float4Add(V2, XMFloat3to4(ProjAB), false);
-				
 				V3 = Float4Normalize(V3);
 				//이제 V2와 V3를 아니까 V2와 V3의 사잇각을 구한다음 V2에서 V3로 외적해서 Axis를 구한다.
 
 				//먼저 사잇각도를 구한다.
 				double theta = acos(V2.x*V3.x + V2.y*V3.y + V2.z*V3.z);
-				if (abs(theta) > 1)
-				{
-					if (theta > 0)
-						theta = 1;
-					else
-						theta = -1;
-				}
+
 
 				CollisionPoint fp;//충격량을 가할 지점
 				fp.Pos = XMFLOAT4(0, 0, 0, 0);
@@ -491,7 +476,7 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 
 				for (auto i : contactpoint)
 				{
-					fp.Pos = Float4Add(fp.Pos,i.Pos);
+					fp.Pos = Float4Add(fp.Pos, i.Pos);
 					fp.penetration += i.penetration;
 				}
 
@@ -499,7 +484,7 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 				fp.Pos.y /= contactpoint.size();
 				fp.Pos.z /= contactpoint.size();
 
-				fp.penetration/=  contactpoint.size();
+				fp.penetration /= contactpoint.size();
 
 				float impurse = obj->rb->CalculateImpulse(fp, NULL, 1);
 
@@ -513,7 +498,7 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 
 
 				//그후 사잇각이 특정각도 이하면 보정시킨다. 
-				if (abs(theta) <= MMPE_PI / 36 && abs(theta) != 0 && fabsf(impurse)<=75)//대략 5도 이하면 보정시킴.
+				if (abs(theta) <= MMPE_PI / 36 && abs(theta) != 0 && fabsf(impurse) <= 75)//대략 5도 이하면 보정시킴.
 				{
 					//회전축을 구하고
 					XMFLOAT3 mAxis = XMFloat4to3(Float4Cross(V2, V3));
@@ -622,13 +607,7 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 
 				//교정할 각도.
 				double theta = acos(V1.x*V4.x + V1.y*V4.y + V1.z*V4.z);
-				if (abs(theta) > 1)
-				{
-					if (theta > 0)
-						theta = 1;
-					else
-						theta = -1;
-				}
+
 				double theta2 = -MMPE_PI / 180;
 
 				//회전축을 구하고

@@ -51,7 +51,7 @@ void CCamera::UpdateConstantBuffer(ID3D12GraphicsCommandList* commandlist)
 	//매번 새로운 카메라 행렬 계산. 이는 카메라가 움직였을때 바뀌어야할 행렬을 갱신해줌
 	XMStoreFloat4x4(&CamData.View, tempView);
 	//마찬가지로 투영행렬도 갱신해줌. Resizing할때 해도되는데 카메라 행렬은 어처피 하나이므로 이거해줘도 성능무리XX
-	SetLens(0.25f*3.141592, aspect, 1.0f, 1000.0f);
+	SetLens(0.25f*3.141592, aspect,mNearZ,mFarZ);
 
 	//전치행렬화 해서 연결하기 위해 tempCamData를 이용한다.
 	tempCamData = CamData;
