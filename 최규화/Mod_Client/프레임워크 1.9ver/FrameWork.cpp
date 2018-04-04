@@ -1,6 +1,7 @@
 #include "FrameWork.h"
 #include <WindowsX.h>
-#include"MMPE\MyMiniPysicsEngine.h"
+#include "MMPE\MyMiniPysicsEngine.h"
+
 using Microsoft::WRL::ComPtr;
 using namespace std;
 using namespace DirectX;
@@ -123,13 +124,13 @@ int FrameWork::Run()
 		// Otherwise, do animation/game stuff.
 		else
 		{
+
 			mTimer.Tick();
 
 			if (!bAppPaused)
 			{
 				CalculateFrameStats();
 				FrameAdvance(mTimer);
-
 			}
 			else
 			{
@@ -412,9 +413,7 @@ void FrameWork::OnMouseDown(WPARAM btnState, int x, int y)
 {
 	
 	//레이를 쏜다.
-	
-	//공격 애니메이션으로 전환
-	scene->Player->PlayerObject->SetAnimation(2);
+
 	auto RAY=MousePicking(x, y,scene->Player->Camera.CamData.EyePos, scene->Player->Camera.CamData.View,scene->Player->Camera.CamData.Proj);
 	XMFLOAT3 savepoint;
 	//여기에 모든 오브젝트리스트들을 돌아가면서 검사를 한다.

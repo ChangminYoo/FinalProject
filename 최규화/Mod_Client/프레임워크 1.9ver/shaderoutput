@@ -9,8 +9,7 @@
 //
 //   float4x4 gWorld;                   // Offset:    0 Size:    64
 //   float Scale;                       // Offset:   64 Size:     4
-//   float SpecularParamater;           // Offset:   68 Size:     4 [unused]
-//   bool isAnimation;                  // Offset:   72 Size:     4
+//   bool isAnimation;                  // Offset:   68 Size:     4
 //
 // }
 //
@@ -113,21 +112,21 @@ dcl_temps 12
 //   o1.x <- <VS return value>.Normal.x; o1.y <- <VS return value>.Normal.y; o1.z <- <VS return value>.Normal.z; 
 //   o0.x <- <VS return value>.PosH.x; o0.y <- <VS return value>.PosH.y; o0.z <- <VS return value>.PosH.z; o0.w <- <VS return value>.PosH.w
 //
-#line 121 "C:\Users\choikyuhwa\Desktop\?레?워??2.0ver\?레?워??1.9ver\ShaderFile.hlsl"
-ine r0.x, l(0, 0, 0, 0), cb0[4].z
+#line 120 "D:\졸업?품_?MagicWorld\"
+ine r0.x, l(0, 0, 0, 0), cb0[4].y
 if_nz r0.x
 
-#line 123
+#line 122
   mov r0.xyzw, v6.xyzw  // r0.x <- tempVert.WeightPos1.x; r0.y <- tempVert.WeightPos1.y; r0.z <- tempVert.WeightPos1.z; r0.w <- tempVert.WeightPos1.w
   mov r1.xyzw, v7.xyzw  // r1.x <- tempVert.WeightPos2.x; r1.y <- tempVert.WeightPos2.y; r1.z <- tempVert.WeightPos2.z; r1.w <- tempVert.WeightPos2.w
   mov r2.xyzw, v8.xyzw  // r2.x <- tempVert.WeightPos3.x; r2.y <- tempVert.WeightPos3.y; r2.z <- tempVert.WeightPos3.z; r2.w <- tempVert.WeightPos3.w
   mov r3.xyzw, v9.xyzw  // r3.x <- tempVert.WeightPos4.x; r3.y <- tempVert.WeightPos4.y; r3.z <- tempVert.WeightPos4.z; r3.w <- tempVert.WeightPos4.w
   mov r4.x, v4.x  // r4.x <- tempVert.WeightCount
 
-#line 124
+#line 123
   itof r4.yzw, l(0, 0, 0, 0)  // r4.y <- tempVert.PosL.x; r4.z <- tempVert.PosL.y; r4.w <- tempVert.PosL.z
 
-#line 126
+#line 125
   mov r5.x, l(0)  // r5.x <- j
   mov r5.yzw, r4.yyzw  // r5.y <- tempVert.PosL.x; r5.z <- tempVert.PosL.y; r5.w <- tempVert.PosL.z
   mov r6.x, r5.x  // r6.x <- j
@@ -135,67 +134,67 @@ if_nz r0.x
     ilt r6.y, r6.x, r4.x
     breakc_z r6.y
 
-#line 130
+#line 129
     dp4 r6.y, v5.xyzw, icb[r6.x + 0].xyzw
     ftou r6.y, r6.y
     imul null, r6.y, r6.y, l(2)
     mov r7.xyzw, cb1[r6.y + 0].xyzw  // r7.x <- tempJoint.orientation.x; r7.y <- tempJoint.orientation.y; r7.z <- tempJoint.orientation.z; r7.w <- tempJoint.orientation.w
     mov r6.yzw, cb1[r6.y + 1].yyzw  // r6.y <- tempJoint.pos.x; r6.z <- tempJoint.pos.y; r6.w <- tempJoint.pos.z
 
-#line 131
+#line 130
     mov r7.xyzw, r7.xyzw  // r7.x <- tempJointOrientation.x; r7.y <- tempJointOrientation.y; r7.z <- tempJointOrientation.z; r7.w <- tempJointOrientation.w
 
-#line 133
+#line 132
     switch r6.x
 
-#line 135
+#line 134
       case l(0)
 
-#line 136
+#line 135
       mov r8.xyzw, r0.xyzw  // r8.x <- tempWeightPos.x; r8.y <- tempWeightPos.y; r8.z <- tempWeightPos.z; r8.w <- tempWeightPos.w
 
-#line 137
+#line 136
       break 
 
-#line 138
+#line 137
       case l(1)
 
-#line 139
+#line 138
       mov r8.xyzw, r1.xyzw  // r8.x <- tempWeightPos.x; r8.y <- tempWeightPos.y; r8.z <- tempWeightPos.z; r8.w <- tempWeightPos.w
 
-#line 140
+#line 139
       break 
 
-#line 141
+#line 140
       case l(2)
 
-#line 142
+#line 141
       mov r8.xyzw, r2.xyzw  // r8.x <- tempWeightPos.x; r8.y <- tempWeightPos.y; r8.z <- tempWeightPos.z; r8.w <- tempWeightPos.w
 
-#line 143
+#line 142
       break 
 
-#line 144
+#line 143
       case l(3)
 
-#line 145
+#line 144
       mov r8.xyzw, r3.xyzw  // r8.x <- tempWeightPos.x; r8.y <- tempWeightPos.y; r8.z <- tempWeightPos.z; r8.w <- tempWeightPos.w
 
-#line 146
+#line 145
       break 
 
-#line 148
+#line 147
       default 
       break 
     endswitch   // r8.x <- tempWeightPos.x; r8.y <- tempWeightPos.y; r8.z <- tempWeightPos.z; r8.w <- tempWeightPos.w
 
-#line 149
+#line 148
     mov r9.x, -r7.x  // r9.x <- tempJointOrientationConjugate.x
     mov r9.y, -r7.y  // r9.y <- tempJointOrientationConjugate.y
     mov r9.z, -r7.z  // r9.z <- tempJointOrientationConjugate.z
     mov r9.w, r7.w  // r9.w <- tempJointOrientationConjugate.w
 
-#line 153
+#line 152
     nop 
     nop 
     mov r7.xyzw, r7.xyzw
@@ -250,7 +249,7 @@ if_nz r0.x
     mov r11.z, r11.z  // r11.z <- <QuaternionMultiply return value>.z
     mov r11.w, r11.w  // r11.w <- <QuaternionMultiply return value>.w
 
-#line 153
+#line 152
     mov r11.xyzw, r11.xyzw
     mov r9.xyzw, r9.xyzw
 
@@ -289,62 +288,62 @@ if_nz r0.x
     mov r7.y, r7.y  // r7.y <- <QuaternionMultiply return value>.y
     mov r7.z, r7.z  // r7.z <- <QuaternionMultiply return value>.z
 
-#line 153
+#line 152
     mov r7.xyz, r7.xyzx  // r7.x <- rotatedPoint.x; r7.y <- rotatedPoint.y; r7.z <- rotatedPoint.z
 
-#line 155
+#line 154
     mov r6.yzw, r6.yyzw  // r6.y <- tp.x; r6.z <- tp.y; r6.w <- tp.z
 
-#line 156
+#line 155
     mov r7.xyz, r7.xyzx  // r7.x <- rp.x; r7.y <- rp.y; r7.z <- rp.z
 
-#line 157
+#line 156
     mov r5.yzw, r5.yyzw  // r5.y <- tpv.x; r5.z <- tpv.y; r5.w <- tpv.z
 
-#line 160
+#line 159
     add r6.yzw, r6.yyzw, r7.xxyz
     mul r6.yzw, r8.wwww, r6.yyzw
     add r5.yzw, r5.yyzw, r6.yyzw
 
-#line 162
+#line 161
     iadd r6.x, r6.x, l(1)
   endloop 
 
-#line 165
+#line 164
   mul r0.xyz, r5.yzwy, cb0[4].xxxx  // r0.x <- vin.PosL.x; r0.y <- vin.PosL.y; r0.z <- vin.PosL.z
 
-#line 167
+#line 166
 else 
   mov r0.xyz, v0.xyzx  // r0.x <- vin.PosL.x; r0.y <- vin.PosL.y; r0.z <- vin.PosL.z
 endif 
 
-#line 171
+#line 170
 itof r0.w, l(1)
 dp4 r1.x, r0.xyzw, cb0[0].xyzw  // r1.x <- vout.PosH.x
 dp4 r1.y, r0.xyzw, cb0[1].xyzw  // r1.y <- vout.PosH.y
 dp4 r1.z, r0.xyzw, cb0[2].xyzw  // r1.z <- vout.PosH.z
 dp4 r1.w, r0.xyzw, cb0[3].xyzw  // r1.w <- vout.PosH.w
 
-#line 173
+#line 172
 dp3 r0.x, v1.xyzx, cb0[0].xyzx  // r0.x <- vout.Normal.x
 dp3 r0.y, v1.xyzx, cb0[1].xyzx  // r0.y <- vout.Normal.y
 dp3 r0.z, v1.xyzx, cb0[2].xyzx  // r0.z <- vout.Normal.z
 
-#line 174
+#line 173
 dp3 r0.w, r0.xyzx, r0.xyzx
 rsq r0.w, r0.w
 mul r0.xyz, r0.wwww, r0.xyzx
 
-#line 176
+#line 175
 dp4 r2.x, r1.xyzw, cb2[8].xyzw  // r2.x <- vout.PosH.x
 dp4 r2.y, r1.xyzw, cb2[9].xyzw  // r2.y <- vout.PosH.y
 dp4 r2.z, r1.xyzw, cb2[10].xyzw  // r2.z <- vout.PosH.z
 dp4 r2.w, r1.xyzw, cb2[11].xyzw  // r2.w <- vout.PosH.w
 
-#line 178
+#line 177
 mov r1.xy, v2.xyxx  // r1.x <- vout.Tex.x; r1.y <- vout.Tex.y
 
-#line 180
+#line 179
 mov o0.xyzw, r2.xyzw
 mov o1.xyz, r0.xyzx
 mov o2.xy, r1.xyxx

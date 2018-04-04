@@ -72,12 +72,16 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>C:\Users\choikyuhwa\Desktop\졸작_서버\boost_1_66_0;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\choikyuhwa\Desktop\졸작_서버\boost_1_66_0\stage\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
+    <IncludePath>C:\Users\choikyuhwa\Desktop\졸작_서버\boost_1_66_0;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\choikyuhwa\Desktop\졸작_서버\boost_1_66_0\stage\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -152,7 +156,10 @@
     <ClCompile Include="Light.cpp" />
     <ClCompile Include="mainFrameWork.cpp" />
     <ClCompile Include="MMPE\MyMiniPysicsEngine.cpp" />
+    <ClCompile Include="MsgProcessing.cpp" />
     <ClCompile Include="Scene.cpp" />
+    <ClCompile Include="server\main_client\AsyncClient.cpp" />
+    <ClCompile Include="server\main_client\Database\CTextTest.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="CTexture.cpp" />
     <ClCompile Include="Timer.cpp" />
@@ -173,6 +180,10 @@
     <ClInclude Include="mainFrameWork.h" />
     <ClInclude Include="MMPE\MyMiniPysicsEngine.h" />
     <ClInclude Include="Scene.h" />
+    <ClInclude Include="server\main_client\AsyncClient.h" />
+    <ClInclude Include="server\main_client\Database\CTextTest.h" />
+    <ClInclude Include="server\main_client\protocol.h" />
+    <ClInclude Include="server\main_client\stdafx.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="CTexture.h" />
     <ClInclude Include="Timer.h" />

@@ -213,7 +213,7 @@ void Shader::SetShader(ID3D12GraphicsCommandList* commandlist,bool isBlend)
 		commandlist->SetPipelineState(BlendPSO.Get());
 }
 
-void Shader::Render(ID3D12GraphicsCommandList * CommandList, const GameTimer& gt)
+void Shader::Render(ID3D12GraphicsCommandList * CommandList)
 {
 	//여기서 뭘하냐면 굳이 안그려도 되는 오브젝트를 제외한 오브젝트만 그린다.
 	//즉 예를들어 카메라가 100만큼 볼수있는데 5000만큼 떨어진 녀석은 그릴필요가 없음
@@ -226,12 +226,12 @@ void Shader::Render(ID3D12GraphicsCommandList * CommandList, const GameTimer& gt
 			//블랜딩용 PSO 연결
 			SetShader(CommandList, true);
 			//블랜딩용 PSO로 그림
-			(*b)->Render(CommandList,gt);
+			(*b)->Render(CommandList);
 			//다시 원상태 PSO로 연결
 			SetShader(CommandList, false);
 		}
 		else//블랜딩 안씀
-			(*b)->Render(CommandList,gt);
+			(*b)->Render(CommandList);
 	}
 		
 }
