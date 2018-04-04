@@ -36,8 +36,6 @@ CMesh::~CMesh(void)
 			delete Index;
 	}
 
-	if (jarr != NULL)
-		delete jarr;
 }
 
 void CMesh::CreateVertexBuffer(ID3D12Device* m_Device,ID3D12GraphicsCommandList* commandlist)

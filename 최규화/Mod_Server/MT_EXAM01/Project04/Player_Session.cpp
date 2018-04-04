@@ -130,16 +130,23 @@ void Player_Session::Init_PlayerInfo()
 	m_playerType = PLAYERS::LUNA;
 	m_isAI = false;
 
+	m_playerData.Connect_Status = true;
 	m_playerData.Is_AI = false;
 	m_playerData.ID = m_id;
 	m_playerData.Dir = 0;
-	m_playerData.Pos = { static_cast<float>(rand_x), 0.0f, static_cast<float>(rand_z) , 0.0f };
+
+	if (m_playerData.ID == 0)
+		m_playerData.Pos = { 0.0f , -1000.0f, 0.0f };
+	else if (m_playerData.ID == 1)
+		m_playerData.Pos = { 200.0f, -1000.0f, -100.0f };
+
+	//m_playerData.Pos = { static_cast<float>(rand_x), 0.0f, static_cast<float>(rand_z) , 0.0f };
 	
-	wcscpy(m_playerData.LoginData.name, m_loginID);
-	wcscpy(m_playerData.LoginData.password, m_loginPW);
+	//wcscpy(m_playerData.LoginData.name, m_loginID);
+	//wcscpy(m_playerData.LoginData.password, m_loginPW);
 
 	//2. 초기화된 정보를 연결된 클라이언트로 보낸다.
-	InitData_To_Client(); 
+	//InitData_To_Client(); 
 
 }
 
@@ -150,11 +157,19 @@ void Player_Session::InitData_To_Client()
 	init_player.pack_size = sizeof(STC_SetMyClient);
 	init_player.pack_type = PACKET_PROTOCOL_TYPE::INIT_CLIENT;
 	init_player.player_data = m_playerData;
-	init_player.player_data.Pos = { 0.0f, -1000.0f, 0.0f };
+	//init_player.player_data.Pos = { 0.0f, -1000.0f, 0.0f };
+
+	//임시
+	//if (m_id == 1)
+		//init_player.player_data.Pos = { 200.0f, -500.0f, -100.0f };
+
+	cout << "Current ID: " << m_clients[m_id]->Get_ID() << endl;
 
 	// 내 초기화 정보를 일단 나와 연결된 클라이언트에 보낸다.
 	m_clients[m_id]->SendPacket(reinterpret_cast<Packet*>(&init_player));
 
+
+	//------------------------------------------------------------------------------------
 	//2. 다른 클라이언트 초기화정보
 	STC_SetOtherClient init_otherplayer;
 	init_otherplayer.pack_size = sizeof(STC_SetOtherClient);
@@ -163,17 +178,20 @@ void Player_Session::InitData_To_Client()
 	//2. 내 정보를 다른 클라이언트에게 넘겨준다
 	for (auto i = 0; i < m_clients.size(); ++i)
 	{
-		if (m_clients[i]->Get_ID() != m_id || m_clients[i]->Get_Connect_State() != false || m_clients[i]->Get_IsAI() != true)
+		if (m_clients[i]->Get_ID() == m_id) continue;
+		if (m_clients[i]->Get_Connect_State() != false || m_clients[i]->Get_IsAI() != true)
 		{
 			// 1. 다른 클라이언트 정보를 내 클라이언트에게 보낸다
 			init_otherplayer.player_data = move(m_clients[i]->GetPlayerData());
 			m_clients[m_id]->SendPacket(reinterpret_cast<Packet*>(&init_otherplayer));
 
 			// 2. 내 정보를 다른 클라이언트에게 보낸다
-			m_clients[i]->SendPacket(reinterpret_cast<Packet*>(&init_player));
+			init_otherplayer.player_data = move(m_playerData);
+			m_clients[i]->SendPacket(reinterpret_cast<Packet*>(&init_otherplayer));
 
 		}
 	}
+	//------------------------------------------------------------------------------------
 
 }
 
@@ -367,20 +385,23 @@ void Player_Session::ProcessPacket(Packet * packet)
 			m_clients[PosMove_Data->id]->m_playerData.Pos = move(PosMove_Data->pos);
 			m_clients[PosMove_Data->id]->SendPacket(reinterpret_cast<Packet*>(&PosMove_Data));
 
-			cout << "변화된 위치값: " << "[x:" << PosMove_Data->pos.x << "\t" << "y:" << PosMove_Data->pos.y
+			cout << "ID: " << PosMove_Data->id << " 변화된 위치값: " << "[x:" << PosMove_Data->pos.x << "\t" << "y:" << PosMove_Data->pos.y
 				<< "\t" << "z:" << PosMove_Data->pos.z << "]" << "\t" << "w:" << PosMove_Data->pos.w << endl;
 
 			//변화된 포지션을 다른 클라에 전달
-			STC_SetOtherClient changedpos_to_otherplayer;
-			changedpos_to_otherplayer.player_data.ID = PosMove_Data->id;
-			changedpos_to_otherplayer.player_data.Pos = move(PosMove_Data->pos);
+			STC_ChangedPos changedpos_to_otherplayer;
+			changedpos_to_otherplayer.packet_size = sizeof(STC_ChangedPos);
+			changedpos_to_otherplayer.pack_type = PACKET_PROTOCOL_TYPE::CHANGED_PLAYER_POSITION;
+			changedpos_to_otherplayer.id = PosMove_Data->id;
+			changedpos_to_otherplayer.pos = move(PosMove_Data->pos);
 
 			for (auto client : m_clients)
 			{
 				//상대가 ai / 연결끊김 / 나일 경우 보낼 필요 없음
 				if (client->m_playerData.Is_AI == true) continue;
 				if (client->m_playerData.Connect_Status == false) continue;
-				if (client->m_playerData.ID == m_id) continue;
+				if (client->m_playerData.ID == PosMove_Data->id) continue;
+				//여기서 문제
 
 				//갱신된 나의 데이터를 상대방에게 전달
 				client->SendPacket(reinterpret_cast<Packet*>(&changedpos_to_otherplayer));

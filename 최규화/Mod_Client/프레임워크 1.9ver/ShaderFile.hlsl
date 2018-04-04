@@ -54,6 +54,7 @@ cbuffer ObjectData : register(b0)
 {
 	float4x4 gWorld; 
 	float Scale;
+	float SpecularParamater;
 	bool isAnimation;
 };
 
@@ -218,7 +219,7 @@ float4 PS(VertexOut pin) : SV_Target
 
 			reflection = normalize(2 * lightIntensity * pin.Normal - lightDir);
 
-			specular = pow(saturate(dot(reflection, viewDirection)), 256.0f);
+			specular = pow(saturate(dot(reflection, viewDirection)), 128.0f)*SpecularParamater;
 		}
 
 		// 0이면 (빛을 안 받는 부분이면)
@@ -231,7 +232,7 @@ float4 PS(VertexOut pin) : SV_Target
 
 			reflection = normalize(2 * lightIntensity * pin.Normal - lightDir);
 
-			specular = pow(saturate(dot(reflection, viewDirection)), 32.0f);
+			specular = pow(saturate(dot(reflection, viewDirection)), 32.0f)*SpecularParamater;
 		}
 
 		litColor = litColor * textureColor;  //엠비언트 * 텍스쳐 컬러

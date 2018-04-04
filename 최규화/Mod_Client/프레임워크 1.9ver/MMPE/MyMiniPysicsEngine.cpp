@@ -130,10 +130,7 @@ void PhysicsPoint::integrate(float DeltaTime, XMFLOAT4* ObjPos, XMFLOAT3* ObjVel
 
 	assert(DeltaTime > 0.0);
 
-	XMFLOAT3 temp_objPos;
-	temp_objPos.x = ObjPos->x; temp_objPos.y = ObjPos->y; temp_objPos.z = ObjPos->z;
-
-	XMVECTOR centerpos = XMLoadFloat3(&temp_objPos);
+	XMVECTOR centerpos = XMLoadFloat3(&CenterPos);
 	//중력에 의해 속도가 너무 빨라질경우를 대비한 if문이다.
 	//-40보다 더 늦게 떨어지면 그대로 가되, -40이상의 속도면 -40으로 고정한다.
 	//tempV를 이용한 이유는 실제 속도를 -40으로 변경해버리면 댐핑이후에 속도가 이전보다 느려지기 때문이다.
@@ -363,6 +360,7 @@ bool MiniPhysicsEngineG9::PhysicsPoint::CollisionTest(PhysicsPoint & p2, XMFLOAT
 	penetration = minoverlap;
 	pAxis = axis[minindex];
 	//중점을 이은벡터와 선택된 벡터가 내적시 0보다 크면 반대방향으로 바꿔줘야함. 왜냐하면 밀리는 방향은 나를향해야하므로
+	
 	float l = Float3Normalize(CenterL).x*axis[minindex].x + Float3Normalize(CenterL).y*axis[minindex].y + Float3Normalize(CenterL).z*axis[minindex].z;
 	if (l > 0)
 		pAxis = XMFLOAT3(-pAxis.x,-pAxis.y,-pAxis.z);
@@ -477,7 +475,13 @@ void MiniPhysicsEngineG9::PhysicsPoint::ResolveVelocity(PhysicsPoint & p2, XMFLO
 
 	}
 }
-
+//겹쳐질경우 서로를 밀어냄. 키보드 입력일땐 자신만 밀려남
+//공중일때가 좀 문제임 공중이면 상대방이 밀릴수있음 왜냐하면 이게 정상인게
+//공중상태로 내려갈때는 중력만 영향을 받게되므로 키보드 입력이 아니게됨 이때 충돌이 일어나면
+//대각선으로 보통 밀어내게 되고 이렇게 되면 y값을 제외하면 x나 z값이 0이아니게 되면서 밀리는것.
+//만약 이게 마음에 안들면 x와 z의 속도가 0이면 밀려나지 않도록 하는 방법이 있음.
+//물론 이게 또 문제가 뭐냐면 아예 완전히 겹쳐있는 순간에 안움직이고 있으면 안떼어내진다.
+//나는 그냥 공중에서는 밀어내도 상관 없도록 하는게 나을것 같음.
 void MiniPhysicsEngineG9::PhysicsPoint::ResolvePenetration(PhysicsPoint & p2, float DeltaTime,bool Keyboard)
 {
 	if (penetration <= 0)//밀어낼 필요가 없는경우
@@ -489,8 +493,10 @@ void MiniPhysicsEngineG9::PhysicsPoint::ResolvePenetration(PhysicsPoint & p2, fl
 		return;
 	//물체를 pAxis방향으로 옮긴다. 다만 질량에 반비례하게 움직임. 질량이클수록 덜움직인다.
 	XMFLOAT3 movevector(pAxis.x*(penetration / totalInverseMass), pAxis.y*(penetration / totalInverseMass), pAxis.z*(penetration / totalInverseMass));
-
-	if (FloatLength(movevector) <= MMPE_EPSILON)//충분히 작으면 움직이지 않는다.
+	
+	//충분히 작으면 움직이지 않는다.왜 엡실론을 안썻냐면 엡실론을쓸경우 penetration이 엡실론정도일때
+	//밀려나야할경우 안밀려나는 상황이 일어나서, 엡실론보다 10배작은 값으로 검사한다.
+	if (FloatLength(movevector) <=0.0001)
 		movevector = XMFLOAT3(0, 0, 0);
 
 	XMFLOAT3 m1(movevector.x*GetMass(), movevector.y*GetMass(), movevector.z*GetMass());
@@ -716,4 +722,17 @@ void MiniPhysicsEngineG9::GeneratorAnchor::Update(float DeltaTime, PhysicsPoint 
 	XMStoreFloat3(&FinalForce, obj_anc);
 	pp.AddForce(FinalForce);
 
+}
+
+void MiniPhysicsEngineG9::GeneratorJump::Update(float DeltaTime, PhysicsPoint & pp)
+{
+	//점프는 힘을 가하기보단 속도를 직접 가한다. 왜냐하면 힘을 가할경우 힘이 정말 무지막지하게 필요하다.
+	//왜냐하면 힘은 지속적으로 가해져야 쓸만하지, 스페이스바 눌렀을때 딱한번 발동되게 하려면 10000이상 줘야한다.
+	//따라서 그냥 깔끔하게 속도를 지정해서 준다. 이러면 속도는 고정값이므로 무난하게 점프가 된다.
+	pp.SetVelocity(Float3Add(pp.GetVelocity(),JumpVel));
+}
+
+void MiniPhysicsEngineG9::GeneratorJump::SetJumpVel(XMFLOAT3& Jump)
+{
+	JumpVel = Jump;
 }

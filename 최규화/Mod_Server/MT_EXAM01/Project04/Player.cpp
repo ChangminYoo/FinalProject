@@ -94,7 +94,8 @@ void Player::Accept_Event()
 
 				pNewSession->m_clients.emplace_back(pNewSession);
 
-				//pNewSession->InitData_To_Client();
+				//2. 초기화된 정보를 연결된 클라이언트로 보낸다.
+				pNewSession->InitData_To_Client();
 
 				cout << "클라이언트 [ " << m_playerIndex << " ] 데이터할당 완료. " << endl;
 

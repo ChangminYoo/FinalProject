@@ -1,6 +1,5 @@
 #include"mainFrameWork.h"
 
-boost::asio::io_service g_io_service;
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE prevInstance,
 				   PSTR cmdLine, int showCmd)
@@ -16,10 +15,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE prevInstance,
         if(!theApp.Initialize())
             return 0;
 
-		thread f_thread([](){g_io_service.run(); });
-
         return theApp.Run();
-
     }
     catch(DxException& e)
     {
@@ -42,8 +38,7 @@ bool MainFrameWork::Initialize()
     if(!FrameWork::Initialize())
 		return false;
 	
-	scene->Player->m_async_client = new AsyncClient();
-	scene->Player->m_async_client->Init(scene->Player->PlayerObject, scene);
+	
 
 	return true;
 }
@@ -80,7 +75,7 @@ void MainFrameWork::System(const GameTimer & gt)
 void MainFrameWork::GravitySystem(const GameTimer & gt)
 {
 	GeneratorGravity gg;
-	gg.SetGravityAccel(XMFLOAT3(0, -40, 0));
+	gg.SetGravityAccel(XMFLOAT3(0, -100, 0));
 	//고정된 물체를 제외한 모든오브젝트에 중력을 가한다.
 	for (auto i = scene->DynamicObject.begin(); i != scene->DynamicObject.end(); i++)
 	{
@@ -107,6 +102,10 @@ void MainFrameWork::AfterGravitySystem(const GameTimer & gt)
 			gp.y += hby - ppy;//그러면 반대로 하프박스y값-중점y만큼 올리면 된다.
 			(*i)->pp->SetPosition(gp);
 			(*i)->UpdatePPosCenterPos();
+			auto v=(*i)->pp->GetVelocity();
+			v.y = 0;//중력에 의한 속도를 0으로 만듬
+			(*i)->pp->SetVelocity(v);
+			(*i)->AirBone = false;
 		}
 	}
 }
@@ -126,21 +125,8 @@ void MainFrameWork::FrameAdvance(const GameTimer& gt)
 	mCommandList->RSSetViewports(1, &mScreenViewport);
 	mCommandList->RSSetScissorRects(1, &mScissorRect);
 
-	//scene->Player->m_async_client->RecvPacket
-	//(
-	//	scene->Player->PlayerObject,
-	//	(*scene)
-	//);
 
-	//scene->Player->m_async_client->ProcessPacket
-	//(
-	//	scene->Player->m_async_client->Get_RecvBuf(), 
-	//	scene->Player->PlayerObject, 
-	//	(*scene)
-	//);
 
-	//scene->player->asyncclient(패킷, scene->player->playerobject->centerpos);
-	
 	//현재백버퍼를 렌더타겟으로 변경
 	mCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(CurrentBackBuffer(),
 		D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
@@ -156,12 +142,8 @@ void MainFrameWork::FrameAdvance(const GameTimer& gt)
 	// RS 뷰포트와 시저렉트 , OM의 렌더타겟과 뎁스스텐실 뷰
 	//앞으로 해야할것. 루트시그니처와 VS,PS등 PSO, 정점버퍼, 인덱스버퍼 , 상수버퍼뷰
 
-	scene->Player->PlayerObject->CenterPos;
-
 	Update(gt);
 	Draw(gt);
-
-	scene->Player->PlayerObject->CenterPos;
 
 	//여기까지 왔으면 PSO에 모든게 다 연결되어 있고, 다 그려져있는것이다.
 	//리소스 베리어를 읽기용으로 변경한다.
@@ -194,12 +176,11 @@ void MainFrameWork::Update(const GameTimer& gt)
 
 	//중력 후처리 시스템은 틱함수 이후에 처리해야함
 	AfterGravitySystem(gt);
-
 	//충돌 처리 시스템은 틱함수 이후에 처리해야한다.
 	CollisionSystem(gt);
 }
 
 void MainFrameWork::Draw(const GameTimer& gt)
 {
-	scene->Render();
+	scene->Render(gt);
 }

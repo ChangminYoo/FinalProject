@@ -115,6 +115,14 @@ namespace MiniPhysicsEngineG9
 		void Update(float DeltaTime, PhysicsPoint& pp);
 	};
 
+	//3. 점프 힘 생성기
+	class GeneratorJump
+	{
+		XMFLOAT3 JumpVel;
+	public:
+		void Update(float DeltaTime, PhysicsPoint& pp);
+		void SetJumpVel(XMFLOAT3& Jump);
+	};
 
 
 

@@ -39,20 +39,20 @@ enum PLAYERS { NO_PLAYER, LUNA, CMETRA, RONDO, DONALD };
 
 struct Position
 {
-	float		x{ 100 };
-	float		y{ 100 };
-	float		z{ 50 };
-	float		w{ 0.0f };
+	float		x{ 100 };			           //4
+	float		y{ 100 };			           //4
+	float		z{ 50 };			           //4
+	float		w{ 0.0f };			           //4
 };
-//12
+//16
 
 struct Player_Status
 {
-	unsigned short			attack{ 50 };
-	unsigned short			defend{ 50 };
-	unsigned short			speed{ 100};
+	unsigned short			attack{ 50 };       //2
+	unsigned short			defend{ 50 };       //2
+	unsigned short			speed{ 100};        //2
 };
-//5
+//6
 
 struct Player_LoginDB
 {
@@ -64,27 +64,31 @@ struct Player_LoginDB
 struct Player_Info
 {
 	//PLAYER_CLASS player_class;
-	Player_Status				player_status;
-	unsigned short				exp{ 0 };
-	unsigned short				origin_hp{ 300 };
-	unsigned short   			cur_hp{ 300 };
-	unsigned short				origin_mp{ 100 };
-	unsigned short				cur_mp{ 100 };
-	unsigned char				level{ 1 };
+	Player_Status				player_status;    //6
+	unsigned short				exp{ 0 };         //2
+	unsigned short				origin_hp{ 300 }; //2
+	unsigned short   			cur_hp{ 300 };    //2
+	unsigned short				origin_mp{ 100 }; //2
+	unsigned short				cur_mp{ 100 };    //2
+	unsigned char				level{ 1 };		  //1 
 };
-// 6 - 2 - 2 - 2 - 2 - 2 - 1 = 17
+// 17 + 1 = 18
+
+#pragma pack (push, 1)
 
 struct Player_Data
 {
-	Player_LoginDB  LoginData;
-	Player_Info		UserInfo;
-	Position		Pos;
-	unsigned short	ID{ 0 };
-	char			Is_AI{ false };
-	char			Dir;
-	char			Connect_Status{ false };
+	Player_Info		UserInfo;					//18
+	unsigned short  ID{ 0 };				//2
+	Position		Pos;						//16
+	char			Is_AI{ false };				//1
+	char			Dir;						//1
+	char			Connect_Status{ false };    //1
+	//Player_LoginDB  LoginData;
 };
-// 127.5 - 17 - 16 - 2 - 1 - 1 
+// 18 + 16 + 2 + 1 + 1 + 1 = 40 -> 39 pragma pack 할시
+#pragma pack (pop)
+
 
 #pragma pack (push, 1)		//push 시작부터 1바이트씩 데이터를 잘라 캐시에 저장한다(캐시라인 문제 때문에) - pop에서 멈춘다
 
