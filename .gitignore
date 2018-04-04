@@ -1,4 +1,9 @@
 *.idb
 *.pch
 *.log
+*.obj
+*.pdb
+*.ilk
+*.tlog
 *.vs/
+*packages/
