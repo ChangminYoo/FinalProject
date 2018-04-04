@@ -1,5 +1,5 @@
 #include "server\main_client\AsyncClient.h"
-#include "../../Scene.h"
+#include "Scene.h"
 
 void AsyncClient::ProcessPacket(Packet* packet, CGameObject& obj, Scene& scene)
 {
