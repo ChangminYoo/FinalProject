@@ -336,6 +336,11 @@ public:
 
 };
 
+
+// ============================= UI==================================//
+
+
+
 // 도형만들기
 void CreateCube(CMesh* Mesh, float size);
 void CreateGrid(CMesh* Mesh, float width, float depth);
