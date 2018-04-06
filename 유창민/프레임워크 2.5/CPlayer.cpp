@@ -1,7 +1,7 @@
 #include "CPlayer.h"
 #include"Scene.h"
 
-CPlayer::CPlayer(ID3D12Device* Device, ID3D12GraphicsCommandList* commandlist, float asp, XMFLOAT3& e, XMFLOAT3& a, XMFLOAT3& u) : Camera(Device,commandlist,asp,e,a,u)
+CPlayer::CPlayer(HWND hWnd,ID3D12Device* Device, ID3D12GraphicsCommandList* commandlist, float asp, XMFLOAT3& e, XMFLOAT3& a, XMFLOAT3& u) : Camera(hWnd,Device,commandlist,asp,e,a,u)
 {
 	PlayerObject = NULL;
 }
@@ -13,6 +13,8 @@ CPlayer::~CPlayer()
 
 void CPlayer::TPSCameraSystem(int mx, int my,float DeltaTime)
 {
+
+	
 			bool rotate = false;
 			float playerYtheta = 0;
 			if (ox == -1 ||oy == -1)//마우스 좌표를 먼저 저장한다. 초기화임
@@ -22,21 +24,32 @@ void CPlayer::TPSCameraSystem(int mx, int my,float DeltaTime)
 			}
 			else
 			{
-				if (mx >ox)//오른쪽으로 이동
+				if (mx- ox >1)//오른쪽으로 이동
 				{
+					//차이가 클수록 더 빨리 회전한다. 즉 차이가 작으면 별로 안움직이므로 흔들림이 보정된다.
+					float dx = fabsf(mx - ox);
+					if (dx > 10)
+						dx = 10;
 
-					ytheta += (190 * MMPE_PI / 180)*DeltaTime;
+						ytheta += ((dx/10) * MMPE_PI* 120 / 180)*DeltaTime;
 
-					playerYtheta= (190 * MMPE_PI / 180)*DeltaTime;
-					ox = mx;
-					rotate = true;
+						playerYtheta = ((dx / 10) * MMPE_PI * 120 / 180)*DeltaTime;
+						ox = mx;
+						rotate = true;
+				
+					
 				}
-				else if (mx<ox)//왼쪽으로 이동
+				else if (mx- ox<-1)//왼쪽으로 이동
 				{
-					ytheta += (-190 *MMPE_PI / 180)*DeltaTime;
-					playerYtheta= (-190 * MMPE_PI / 180)*DeltaTime;
+					float dx = fabsf(mx - ox);
+					if (dx > 10)
+						dx = 10;
+
+					ytheta += ((-dx/10) * MMPE_PI*120 / 180)*DeltaTime;
+					playerYtheta = ((-dx / 10) * MMPE_PI * 120 / 180)*DeltaTime;
 					ox = mx;
 					rotate = true;
+				
 				}
 				else
 				{
@@ -46,31 +59,41 @@ void CPlayer::TPSCameraSystem(int mx, int my,float DeltaTime)
 
 
 
-				if (my > oy)//아래로이동
+				if (my- oy > 1)//아래로이동
 				{
-					xtheta += (120 * 3.14 / 180)*DeltaTime;
-					if (xtheta >= (85 * 3.14 / 180))
-						xtheta = (85 * 3.14 / 180);
+					float dy = fabsf(my - oy);
+					if (dy > 10)
+						dy = 10;
+						xtheta += ((dy/10) * MMPE_PI*100 / 180)*DeltaTime;
+						if (xtheta >= (85 * 3.14 / 180))
+							xtheta = (85 * 3.14 / 180);
 
 
 
-					oy = my;
+						oy = my;
+					
 				}
-				else if (my<oy)//위로이동
+				else if (my- oy<-1)//위로이동
 				{
-					xtheta += (-120 * 3.14 / 180)*DeltaTime;
 
-					if (xtheta <= (-65 * 3.14 / 180))
-						xtheta = (-65 * 3.14 / 180);
+					float dy = fabsf(my - oy);
+					if (dy > 10)
+						dy = 10;
 
-					oy = my;
+					xtheta += ((-dy / 10) * MMPE_PI * 100 / 180)*DeltaTime;
+
+						if (xtheta <= (-65 * 3.14 / 180))
+							xtheta = (-65 * 3.14 / 180);
+
+						oy = my;
+
 				}
 				else
 				{
 
 					oy = my;
 				}
-
+				//ytheta = 0;
 				
 				//1. AtToEye만큼 이동시킨다.
 				XMFLOAT3 oe(0, 0, -Camera.CamData.AtToEye);
@@ -466,7 +489,7 @@ void CPlayer::CreateBullet(ID3D12Device* Device, ID3D12GraphicsCommandList* cl,X
 		XMStoreFloat4(&ori, tempori);//최종 회전 방향
 
 
-		CGameObject* bul = new BulletCube(Device, cl,false, PlayerObject->ParticleList, PlayerObject, ori, lock, PlayerObject->CenterPos);
+		CGameObject* bul = new BulletCube(Device, cl, PlayerObject->ParticleList, PlayerObject, ori, lock, PlayerObject->CenterPos);
 
 		bulletlist->push_back(bul);
 		break;

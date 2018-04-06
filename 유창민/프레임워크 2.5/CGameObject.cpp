@@ -36,7 +36,7 @@ XMFLOAT3 CGameObject::GetUpvector()
 	return up;
 }
 
-CGameObject::CGameObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, bool isTexLoad, list<CGameObject*>*Plist,XMFLOAT4 cp)
+CGameObject::CGameObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist , list<CGameObject*>*Plist,XMFLOAT4 cp)
 {
 	
 	//여기서는 기본적인것들만 처리한다. 위치나 회전각 등 초기화
@@ -44,7 +44,6 @@ CGameObject::CGameObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* comm
 	this->commandlist = commandlist;
 	this->CenterPos = cp;//중점위치
 	this->ParticleList = Plist;
-	this->IsTexload = isTexLoad;
 
 	XMStoreFloat4(&Orient, XMQuaternionIdentity());//방향을 초기화 한다.
 	SetWorldMatrix();	//월드변환생성
@@ -173,7 +172,7 @@ void CGameObject::UpdateConstBuffer(ID3D12GraphicsCommandList * commandlist)
 	commandlist->SetGraphicsRootConstantBufferView(2, ConstBuffer->Resource()->GetGPUVirtualAddress());//월드행렬연결
 }
 
-CCubeManObject::CCubeManObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, bool isTexLoad, list<CGameObject*>*Plist, XMFLOAT4 cp) : CGameObject(m_Device,commandlist, isTexLoad, Plist,cp)
+CCubeManObject::CCubeManObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist , list<CGameObject*>*Plist, XMFLOAT4 cp) : CGameObject(m_Device,commandlist,  Plist,cp)
 {
 
 	//게임오브젝트 생성자에서 기본적인것을 처리했으므로 여기서는
@@ -191,8 +190,8 @@ CCubeManObject::CCubeManObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 		LoadTexture(m_Device, commandlist,this, Textures,SrvDescriptorHeap,"CubeManTex", L"textures/human/Female Aqua 01 Blue.dds",false);
 		SetMesh(m_Device, commandlist);
 		SetMaterial(m_Device, commandlist);
-		CreateMesh = true;
-		
+
+		CreateMesh = true;		
 	}
 
 	//게임오브젝트마다 룩벡터와 라이트벡터가 다르므로 초기 오프셋 설정을 해준다.
@@ -227,6 +226,11 @@ CCubeManObject::CCubeManObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 	pp->SetBounce(false);//튕기지 않는다.
 
 	
+	//머리위에 HP바 띄움
+	if (ParticleList != NULL)
+	{
+		ParticleList->push_back(new BarObject(m_Device, commandlist, ParticleList, this, XMFLOAT4(CenterPos.x, CenterPos.y + 25, CenterPos.z, 0)));
+	}
 
 }
 
@@ -275,7 +279,6 @@ void CCubeManObject::Tick(const GameTimer & gt)
 	TickValue += 1;
 
 	
-	
 }
 
 void CCubeManObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer& gt)
@@ -283,7 +286,6 @@ void CCubeManObject::Render(ID3D12GraphicsCommandList * commandlist, const GameT
 	//게임오브젝트의 렌더링은 간단하다. 
 	//텍스처를 연결하고, 월드행렬을 연결한다.
 
-	
 
 	if(Textures.size()>0)
 		SetTexture(commandlist,SrvDescriptorHeap, Textures["CubeManTex"].get()->Resource.Get(), false);
@@ -292,6 +294,7 @@ void CCubeManObject::Render(ID3D12GraphicsCommandList * commandlist, const GameT
 	Mat.UpdateConstantBuffer(commandlist);
 
 	//틱함수에서 업데이트한 애니메이션된 조인트를 연결함.
+	
 	commandlist->SetGraphicsRootConstantBufferView(3, jarr->Resource()->GetGPUVirtualAddress());
 	//이후 그린다.
 
@@ -363,7 +366,7 @@ void CCubeManObject::EndAnimation(int nAni)
 
 
 
-CZombieObject::CZombieObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, bool isTexLoad, list<CGameObject*>*Plist, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, isTexLoad, Plist, cp) 
+CZombieObject::CZombieObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist , list<CGameObject*>*Plist, XMFLOAT4 cp) : CGameObject(m_Device, commandlist,   Plist, cp) 
 {
 
 	//게임오브젝트 생성자에서 기본적인것을 처리했으므로 여기서는
@@ -636,7 +639,7 @@ void LoadTexture(ID3D12Device* device, ID3D12GraphicsCommandList* commandlist,CG
 
 //------------------- 투 사 체 -----------------------//
 
-BulletCube::BulletCube(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, bool isTexLoad, list<CGameObject*>*Plist, CGameObject* master,XMFLOAT4& ori,CGameObject* lockon, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, isTexLoad, Plist, cp)
+BulletCube::BulletCube(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist , list<CGameObject*>*Plist, CGameObject* master,XMFLOAT4& ori,CGameObject* lockon, XMFLOAT4 cp) : CGameObject(m_Device, commandlist,   Plist, cp)
 {
 
 	if (CreateMesh == false)
@@ -645,8 +648,7 @@ BulletCube::BulletCube(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 		Mesh.Index = NULL;
 		Mesh.SubResource = NULL;
 
-		if (IsTexload == false)
-			LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "BulletTex", L"textures/human/Male White Wizard 05 Red.dds", false);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "BulletTex", L"textures/effect/fire.dds", false);
 		SetMesh(m_Device, commandlist);
 		SetMaterial(m_Device, commandlist);
 		CreateMesh = true;
@@ -779,8 +781,9 @@ void BulletCube::Collision(list<CGameObject*>* collist, float DeltaTime)
 					// 파티클리스트에 데미지 오브젝트를 생성해서 넣음. 파티클을 띄운다.
 					if (ParticleList != NULL)
 					{
-						ParticleList->push_back(new DamageObject(device, commandlist, false, ParticleList, gamedata.Damage, XMFLOAT4((*i)->CenterPos.x, (*i)->CenterPos.y + 11, (*i)->CenterPos.z, 0)));
+						ParticleList->push_back(new DamageObject(device, commandlist, ParticleList, gamedata.Damage, XMFLOAT4((*i)->CenterPos.x, (*i)->CenterPos.y + 11, (*i)->CenterPos.z, 0)));
 					}
+					
 
 				}
 				else//고정된 물체면 충돌한 평면의 노멀방향으로 cn을 설정할것.
@@ -802,7 +805,7 @@ void BulletCube::Collision(list<CGameObject*>* collist, float DeltaTime)
 
 //---------------------- 스태틱 오브젝트 -----------------------------//
 
-SphereObject::SphereObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, bool isTexLoad, list<CGameObject*>*Plist, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, isTexLoad, Plist, cp)
+SphereObject::SphereObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist , list<CGameObject*>*Plist, XMFLOAT4 cp) : CGameObject(m_Device, commandlist,   Plist, cp)
 {
 
 	if (CreateMesh == false)
@@ -874,7 +877,7 @@ void SphereObject::Collision(list<CGameObject*>* collist, float DeltaTime)
 
 //////////////
 
-CubeObject::CubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, bool isTexLoad, list<CGameObject*>*Plist, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, isTexLoad, Plist, cp)
+CubeObject::CubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist , list<CGameObject*>*Plist, XMFLOAT4 cp) : CGameObject(m_Device, commandlist,   Plist, cp)
 {
 
 	if (CreateMesh == false)
@@ -883,8 +886,7 @@ CubeObject::CubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 		Mesh.Index = NULL;
 		Mesh.SubResource = NULL;
 
-		if (IsTexload == false)
-			LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "CubeTex", L"textures/bricks2.dds", false);
+			LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "CubeTex", L"textures/object/bricks2.dds", false);
 		SetMesh(m_Device, commandlist);
 		SetMaterial(m_Device, commandlist);
 		CreateMesh = true;
@@ -982,16 +984,14 @@ void CubeObject::Collision(list<CGameObject*>* collist, float DeltaTime)
 
 /////////////
 
-GridObject::GridObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, bool isTexLoad, list<CGameObject*>*Plist, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, isTexLoad, Plist, cp)
+GridObject::GridObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist , list<CGameObject*>*Plist, XMFLOAT4 cp) : CGameObject(m_Device, commandlist,   Plist, cp)
 {
 	if (CreateMesh == false)
 	{
 
 		Mesh.Index = NULL;
 		Mesh.SubResource = NULL;
-
-		if(IsTexload == false)
-			LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "GridTex", L"textures/tile.dds", false);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "GridTex", L"textures/object/tile1024.dds", false);
 		SetMesh(m_Device, commandlist);
 		SetMaterial(m_Device, commandlist);
 		CreateMesh = true;
@@ -1015,8 +1015,8 @@ GridObject::GridObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 
 void GridObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
 {
-	//CreateGrid(&Mesh, 200.0f, 300.0f);
-	CreateTile(&Mesh, 50);
+	CreateGrid(&Mesh, 800.0f, 800.0f);
+	//CreateTile(&Mesh, 50);
 
 	//Mesh.SetNormal(false);
 	Mesh.CreateVertexBuffer(m_Device, commandlist);
@@ -1052,7 +1052,7 @@ void GridObject::Collision(list<CGameObject*>* collist, float DeltaTime)
 
 ////////////////////
 
-TreeObject::TreeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, bool isTexLoad, list<CGameObject*>*Plist, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, isTexLoad, Plist, cp)
+TreeObject::TreeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist , list<CGameObject*>*Plist, XMFLOAT4 cp) : CGameObject(m_Device, commandlist,   Plist, cp)
 {
 
 	ObjData.isAnimation = 0;
@@ -1072,7 +1072,7 @@ TreeObject::TreeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 	{
 		Mesh.Index = NULL;
 		Mesh.SubResource = NULL;
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "TreeTex", L"textures/treearray.dds", false);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "TreeTex", L"textures/object/treearray.dds", false);
 		SetMesh(m_Device, commandlist);
 		CreateMesh = true;
 
@@ -1172,7 +1172,7 @@ void TreeObject::Collision(list<CGameObject*>* collist, float DeltaTime)
 
 ///////////////////////////////////
 
-DamageObject::DamageObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist,bool isTexLoad, list<CGameObject*>*Plist,  float Damaged, XMFLOAT4 cp) : CGameObject(m_Device, commandlist,isTexLoad, Plist, cp)
+DamageObject::DamageObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist,  list<CGameObject*>*Plist,  float Damaged, XMFLOAT4 cp) : CGameObject(m_Device, commandlist,  Plist, cp)
 {
 	ObjData.isAnimation = 0;
 	ObjData.Scale = 10.0f;
@@ -1213,16 +1213,16 @@ DamageObject::DamageObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * 
 
 void DamageObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
 {
-	UINT numOfitem = 2;
+	UINT numOfitem = 1;
 
 
-	Mesh.SubResource = new CVertex[numOfitem];
+	Mesh.SubResource = new CVertex;
 	Mesh.nVertex = numOfitem;
 	Mesh.nStride = sizeof(CVertex);
 	Mesh.nOffset = 0;
 
 
-	Mesh.Index = new UINT[numOfitem];
+	Mesh.Index = new UINT;
 	Mesh.nindex = numOfitem;
 	Mesh.nioffset = 0;
 	Mesh.nisize = sizeof(UINT);
@@ -1392,7 +1392,7 @@ void CreateCube(CMesh * Mesh, float size)
 
 void CreateGrid(CMesh* Mesh, float width, float depth)
 {
-	UINT m = 60; UINT n = 40;
+	UINT m = 160; UINT n = 160;
 	UINT vertexCount = m*n;
 	UINT faceCount = (m - 1)*(n - 1) * 2;
 
@@ -1450,20 +1450,33 @@ void CreateGrid(CMesh* Mesh, float width, float depth)
 
 }
 
-void CreateTile(CMesh* Mesh, float size)
+void CreateTile(CMesh* Mesh, float size, float sizey)
 {
 	Mesh->SubResource = new CVertex[4];
 	Mesh->nVertex = 4;
 	Mesh->nStride = sizeof(CVertex);
 	Mesh->nOffset = 0;
 
-	float half = size / 2;
+	if (sizey == 0)
+	{
+		float half = size / 2;
 
-	Mesh->SubResource[0].V = XMFLOAT3(-half, 0, -half);
-	Mesh->SubResource[1].V = XMFLOAT3(-half, 0, +half);
-	Mesh->SubResource[2].V = XMFLOAT3(+half, 0, +half);
-	Mesh->SubResource[3].V = XMFLOAT3(+half, 0, -half);
+		Mesh->SubResource[0].V = XMFLOAT3(-half, 0, -half);
+		Mesh->SubResource[1].V = XMFLOAT3(-half, 0, +half);
+		Mesh->SubResource[2].V = XMFLOAT3(+half, 0, +half);
+		Mesh->SubResource[3].V = XMFLOAT3(+half, 0, -half);
+	}
+	else
+	{
+		float half = size / 2;
+		float halfy = sizey / 2;
 
+		Mesh->SubResource[0].V = XMFLOAT3(-half, 0, -halfy);
+		Mesh->SubResource[1].V = XMFLOAT3(-half, 0, +halfy);
+		Mesh->SubResource[2].V = XMFLOAT3(+half, 0, +halfy);
+		Mesh->SubResource[3].V = XMFLOAT3(+half, 0, -halfy);
+
+	}
 	Mesh->SubResource[0].Tex = XMFLOAT2(0, 1);
 	Mesh->SubResource[1].Tex = XMFLOAT2(0, 0);
 	Mesh->SubResource[2].Tex = XMFLOAT2(1, 0);
@@ -1478,7 +1491,7 @@ void CreateTile(CMesh* Mesh, float size)
 	Mesh->Index[3] = 0; Mesh->Index[4] = 2; Mesh->Index[5] = 3;
 }
 
-RigidCubeObject::RigidCubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, bool isTexLoad, list<CGameObject*>*Plist, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, isTexLoad, Plist, cp)
+RigidCubeObject::RigidCubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist , list<CGameObject*>*Plist, XMFLOAT4 cp) : CGameObject(m_Device, commandlist,   Plist, cp)
 {
 	//메쉬와 텍스처 
 
@@ -1488,8 +1501,7 @@ RigidCubeObject::RigidCubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandL
 		Mesh.Index = NULL;
 		Mesh.SubResource = NULL;
 
-		if (IsTexload == false)
-			LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "CubeTex", L"textures/WoodCrate.dds", false);
+			LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "CubeTex", L"textures/object/WoodCrate.dds", false);
 		SetMesh(m_Device, commandlist);
 		SetMaterial(m_Device, commandlist);
 		CreateMesh = true;
@@ -1531,7 +1543,6 @@ RigidCubeObject::RigidCubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandL
 	rb->SetBounce(false);//튕기지 않는다.
 	rb->SetMass(1.5);//고정된 물체는 무게가 무한이다.
 	rb->SetIMoment(10,10,10);
-	rb->SetOrient(&Orient);
 	rb->SetOrient(&Orient);
 	
 	//테스트 코드
@@ -1589,4 +1600,194 @@ void RigidCubeObject::Render(ID3D12GraphicsCommandList * commandlist, const Game
 void RigidCubeObject::Collision(list<CGameObject*>* collist, float DeltaTime)
 {
 	//이후에 추가해야한다.
+}
+
+
+
+//-------------------------------------U I------------------------------------------------
+
+AimObject::AimObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
+{
+	ObjData.isAnimation = 0;
+	ObjData.Scale = 20.0f;
+	ObjData.SpecularParamater = 0.5f;//스페큘러를 낮게준다.
+
+
+	 //게임관련 데이터들
+	gamedata.GodMode = true;
+	staticobject = true;
+
+	if (CreateMesh == false)
+	{
+		Mesh.Index = NULL;
+		Mesh.SubResource = NULL;
+
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "AimTex", L"textures/aim_circle.dds", false);
+		SetMesh(m_Device, commandlist);
+		CreateMesh = true;
+
+	}
+
+}
+
+void AimObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
+{
+	UINT numOfitem = 1;
+
+
+	Mesh.SubResource = new CVertex;
+	Mesh.nVertex = numOfitem;
+	Mesh.nStride = sizeof(CVertex);
+	Mesh.nOffset = 0;
+
+
+	Mesh.Index = new UINT;
+	Mesh.nindex = numOfitem;
+	Mesh.nioffset = 0;
+	Mesh.nisize = sizeof(UINT);
+
+
+	//여기서 좌표를 일괄적으로 설정 할 수 있다
+	for (int i = 0; i < numOfitem; ++i)
+	{
+
+		Mesh.SubResource[i].V = XMFLOAT3(0, 0, 0);
+
+		Mesh.Index[i] = i;
+	}
+
+	Mesh.CreateVertexBuffer(m_Device, commandlist);
+	Mesh.CreateIndexBuffer(m_Device, commandlist);
+
+}
+
+
+void AimObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer & gt)
+{
+	//텍스처가 사이즈가 0 이상이면 연결
+	if (Textures.size()>0)
+		SetTexture(commandlist, SrvDescriptorHeap, Textures["AimTex"].get()->Resource.Get(), false);
+	//월드변환 업데이트 및 연결
+	UpdateConstBuffer(commandlist);
+
+	//애니메이션이 있으면 애니메이션또한 연결
+
+	//메쉬를 렌더해야하는데 포인트리스트로 설정해야하므로 그냥 이렇게 함.
+	D3D12_VERTEX_BUFFER_VIEW vbv;
+
+	vbv.BufferLocation = Mesh.VertexBuffer->GetGPUVirtualAddress();
+	vbv.StrideInBytes = Mesh.nStride;
+	vbv.SizeInBytes = Mesh.nStride *  Mesh.nVertex;
+
+	commandlist->IASetVertexBuffers(0, 1, &vbv);
+
+	D3D12_INDEX_BUFFER_VIEW ibv;
+	ibv.BufferLocation = Mesh.IndexBuffer->GetGPUVirtualAddress();
+	ibv.Format = DXGI_FORMAT_R16_UINT;
+	ibv.SizeInBytes = Mesh.nisize *  Mesh.nindex;
+
+	commandlist->IASetIndexBuffer(&ibv);
+	commandlist->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
+
+
+	commandlist->DrawIndexedInstanced(Mesh.nindex, 1, Mesh.nioffset, Mesh.nOffset, 0);
+}
+
+////////////////
+
+BarObject::BarObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, CGameObject* master, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
+{
+	ObjData.isAnimation = 0;
+	ObjData.Scale = 1.0f;
+	ObjData.SpecularParamater = 0.5f;//스페큘러를 낮게준다.
+	ObjData.CustomData1.x = 1;
+	Master = master;
+
+	 //게임관련 데이터들
+	gamedata.MAXHP = 0;
+	gamedata.HP = Master->gamedata.HP;
+	gamedata.Damage = 0;
+	gamedata.GodMode = true;
+	gamedata.Speed = 0;
+	staticobject = true;
+
+	if (CreateMesh == false)
+	{
+		Mesh.Index = NULL;
+		Mesh.SubResource = NULL;
+
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "HPTex", L"textures/damage/hpBar.dds", false);
+		SetMesh(m_Device, commandlist);
+		CreateMesh = true;
+
+	}
+}
+
+void BarObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
+{
+	UINT numOfitem = 1;
+
+	Mesh.SubResource = new CVertex;
+	Mesh.nVertex = numOfitem;
+	Mesh.nStride = sizeof(CVertex);
+	Mesh.nOffset = 0;
+
+
+	Mesh.Index = new UINT;
+	Mesh.nindex = numOfitem;
+	Mesh.nioffset = 0;
+	Mesh.nisize = sizeof(UINT);
+
+
+	//여기서 좌표를 일괄적으로 설정 할 수 있다
+	for (int i = 0; i < numOfitem; ++i)
+	{
+		Mesh.SubResource[i].V = XMFLOAT3(0, 0, 0);
+
+		Mesh.Index[i] = i;
+	}
+
+	Mesh.CreateVertexBuffer(m_Device, commandlist);
+	Mesh.CreateIndexBuffer(m_Device, commandlist);
+
+}
+
+void BarObject::Tick(const GameTimer & gt)
+{
+	//hp를 넣어주어서 shader에서 스케일크기만큼 바를 만든다. 
+
+	ObjData.Scale = gamedata.HP * 0.1f;
+
+	CenterPos.x = Master->CenterPos.x; CenterPos.y = Master->CenterPos.y + 10; CenterPos.z = Master->CenterPos.z;
+}
+
+void BarObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer & gt)
+{
+	if (Textures.size()>0)
+		SetTexture(commandlist, SrvDescriptorHeap, Textures["HPTex"].get()->Resource.Get(), false);
+	UpdateConstBuffer(commandlist);
+
+
+	D3D12_VERTEX_BUFFER_VIEW vbv;
+
+	vbv.BufferLocation = Mesh.VertexBuffer->GetGPUVirtualAddress();
+	vbv.StrideInBytes = Mesh.nStride;
+	vbv.SizeInBytes = Mesh.nStride *  Mesh.nVertex;
+
+	commandlist->IASetVertexBuffers(0, 1, &vbv);
+
+	D3D12_INDEX_BUFFER_VIEW ibv;
+	ibv.BufferLocation = Mesh.IndexBuffer->GetGPUVirtualAddress();
+	ibv.Format = DXGI_FORMAT_R16_UINT;
+	ibv.SizeInBytes = Mesh.nisize *  Mesh.nindex;
+
+	commandlist->IASetIndexBuffer(&ibv);
+	commandlist->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
+
+
+	commandlist->DrawIndexedInstanced(Mesh.nindex, 1, Mesh.nioffset, Mesh.nOffset, 0);
+}
+
+void BarObject::Collision(list<CGameObject*>* collist, float DeltaTime)
+{
 }

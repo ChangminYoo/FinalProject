@@ -22,7 +22,7 @@ struct ObjectData
 	float SpecularParamater=1;
 	int isAnimation = 0;
 	float BlendValue = 1.0f;//최종 블렌딩값
-	XMFLOAT4 CustomData1 = XMFLOAT4{ 1,2,3,4 };//오브젝트별 특화 데이터.
+	XMFLOAT4 CustomData1 = XMFLOAT4{ 0,0,0,0 };//오브젝트별 특화 데이터.
 	//XMFLOAT4 CustomData2;
 };
 
@@ -41,7 +41,7 @@ class CGameObject//이 클래스를 기본으로 상속받아 다른 오브젝트를 만듬. ex) 검사�
 public:
 	//오브젝트는 반드시 디바이스,커맨드리스트,파티클리스트,포지션을 받는다.
 	//왜파티클 리스트가 필요하냐면 충돌이나 마법효과에서 파티클을 넣기 위해서다.
-	CGameObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, bool isTexLoad, list<CGameObject*>*Plist, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
+	CGameObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist , list<CGameObject*>*Plist, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
 	CGameObject();
 	~CGameObject();
 	
@@ -84,7 +84,6 @@ public:
 	//기타 공용 데이터들
 	bool DelObj = false;//이게 참이면 실제로 제거된다.
 	bool Blending = false;
-	bool IsTexload = false; //큐브랑 타일만
 
 	GameData gamedata;
 	RayCastObject rco;//레이캐스트 오브젝트
@@ -134,7 +133,7 @@ void LoadTexture(ID3D12Device* device, ID3D12GraphicsCommandList* commandlist, C
 class CCubeManObject : public CGameObject
 {
 public:
-	CCubeManObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, bool isTexLoad, list<CGameObject*>*Plist, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
+	CCubeManObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist , list<CGameObject*>*Plist, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
 	
 public:
 	static CMaterial Mat;
@@ -157,7 +156,7 @@ public:
 class CZombieObject : public CGameObject
 {
 public:
-	CZombieObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, bool isTexLoad, list<CGameObject*>*Plist, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
+	CZombieObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist , list<CGameObject*>*Plist, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
 
 public:
 	static CMaterial Mat;
@@ -183,7 +182,7 @@ public:
 class BulletCube : public CGameObject
 {
 public:
-	BulletCube(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, bool isTexLoad, list<CGameObject*>*Plist,CGameObject* master,XMFLOAT4& ori,CGameObject* lockon=NULL, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
+	BulletCube(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist , list<CGameObject*>*Plist,CGameObject* master,XMFLOAT4& ori,CGameObject* lockon=NULL, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
 	CGameObject* Master = NULL;//소유자
 	CGameObject* LockOn = NULL;//유도시사용됨
 	float LifeTime = 10;//생존시간. 10초 후 제거됨
@@ -212,7 +211,7 @@ public:
 class SphereObject : public CGameObject
 {
 public:
-	SphereObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, bool isTexLoad, list<CGameObject*>*Plist, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
+	SphereObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist , list<CGameObject*>*Plist, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
 
 public:
 	static bool CreateMesh;//최초로 false며 메쉬를 만든후 true가된다.
@@ -231,7 +230,7 @@ public:
 class CubeObject : public CGameObject
 {
 public:
-	CubeObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, bool isTexLoad, list<CGameObject*>*Plist, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
+	CubeObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist , list<CGameObject*>*Plist, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
 
 public:
 	static CMaterial Mat;
@@ -252,7 +251,7 @@ public:
 class RigidCubeObject : public CGameObject
 {
 public:
-	RigidCubeObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, bool isTexLoad, list<CGameObject*>*Plist, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
+	RigidCubeObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist , list<CGameObject*>*Plist, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
 
 public:
 	static CMaterial Mat;
@@ -274,8 +273,8 @@ public:
 class GridObject : public CGameObject
 {
 public:
-	GridObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, bool isTexLoad, list<CGameObject*>*Plist, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
-	bool istexLoad = false;
+	GridObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist , list<CGameObject*>*Plist, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
+	
 public:
 	static CMaterial Mat;
 	static bool CreateMesh;//최초로 false며 메쉬를 만든후 true가된다.
@@ -296,7 +295,7 @@ public:
 class TreeObject : public CGameObject
 {
 public:
-	TreeObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, bool isTexLoad, list<CGameObject*>*Plist, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
+	TreeObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist , list<CGameObject*>*Plist, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
 	float LifeTime = 0.0f;
 
 public:
@@ -318,7 +317,7 @@ public:
 class DamageObject : public CGameObject
 {
 public:
-	DamageObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, bool isTexLoad, list<CGameObject*>*Plist, float damaged, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
+	DamageObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist , list<CGameObject*>*Plist, float damaged, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
 	float LifeTime = 1.5f;
 	float Damaged = 0.0f;
 
@@ -337,7 +336,55 @@ public:
 
 };
 
-// 도형만들기
+
+// ============================= UI==================================//
+
+class AimObject : public CGameObject
+{
+public:
+	AimObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
+
+
+public:
+	static bool CreateMesh;//최초로 false며 메쉬를 만든후 true가된다.
+	static unordered_map<string, unique_ptr<CTexture>> Textures;//텍스처들을 저장함
+	static CMesh Mesh;//오로지 한번만 만들어짐
+	static ComPtr<ID3D12DescriptorHeap> SrvDescriptorHeap;//텍스처 용 힙
+
+
+public:
+	virtual void SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist);//셋메시는 메시를 최종적으로 생성한다. 즉 메시를구성하는 정점과 삼각형을구성하는인덱스버퍼생성
+	
+	virtual void Render(ID3D12GraphicsCommandList* commandlist, const GameTimer& gt);
+	virtual void Collision(list<CGameObject*>* collist, float DeltaTime) {}
+
+};
+
+
+class BarObject : public CGameObject
+{
+public:
+	BarObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, CGameObject* master, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
+	CGameObject* Master = NULL;//소유자
+public:
+	static bool CreateMesh;//최초로 false며 메쉬를 만든후 true가된다.
+	static unordered_map<string, unique_ptr<CTexture>> Textures;//텍스처들을 저장함
+	static CMesh Mesh;//오로지 한번만 만들어짐
+	static ComPtr<ID3D12DescriptorHeap> SrvDescriptorHeap;//텍스처 용 힙
+
+
+public:
+	virtual void SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist);//셋메시는 메시를 최종적으로 생성한다. 즉 메시를구성하는 정점과 삼각형을구성하는인덱스버퍼생성
+	virtual void Tick(const GameTimer& gt);
+	virtual void Render(ID3D12GraphicsCommandList* commandlist, const GameTimer& gt);
+	virtual void Collision(list<CGameObject*>* collist, float DeltaTime);
+
+};
+
+
+
+
+//======================= 도형만들기====================================
 void CreateCube(CMesh* Mesh, float size);
 void CreateGrid(CMesh* Mesh, float width, float depth);
-void CreateTile(CMesh* Mesh, float size);
+void CreateTile(CMesh* Mesh, float size, float sizey = 0);

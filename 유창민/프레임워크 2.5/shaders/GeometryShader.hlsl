@@ -43,8 +43,21 @@ VertexOut VS(VertexIn vin)
 void GS(point VertexOut gin[1], inout TriangleStream<GeoOut> triStream)
 {
 
-	float halfWidth = 0.5f*Scale;			 
-	float halfHeight = 0.5f*Scale;										
+	float halfWidth;
+	float halfHeight;										
+	
+
+	if (CustomData1.x == 0)//정체성 0:데미지등, 1: hp바
+	{
+		halfWidth = 0.5f * Scale;
+		halfHeight = 0.5f * Scale;
+	}
+	else if (CustomData1.x == 1)
+	{
+		halfWidth = 0.5f * Scale;
+		halfHeight = 0.5f * Scale* 0.2;
+	}
+
 
 	float4 v[4];
 	for (int i = 0; i < 4; i++)
@@ -98,7 +111,15 @@ PSOUT PS(GeoOut pin)
 
 	PSOUT pout;
 	pout.Color = textureColor;
-	pout.Depth = -1;
+	
+	if (CustomData1.x == 0)//정체성 0:데미지등, 1: hp바
+	{
+		pout.Depth = -1;
+	}
+	else
+	{
+	}
+
 	return pout;
 
 }

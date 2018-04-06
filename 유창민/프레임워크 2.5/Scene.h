@@ -16,7 +16,7 @@ using Microsoft::WRL::ComPtr;
 class Scene
 {
 public:
-	Scene(ID3D12Device* m_Device, ID3D12GraphicsCommandList* m_DC, float cw, float ch);
+	Scene(HWND hwnd,ID3D12Device* m_Device, ID3D12GraphicsCommandList* m_DC, float cw, float ch);
 	Scene();
 	~Scene();
 	float mWidth = 0;
@@ -26,6 +26,7 @@ public:
 	int GAMESTATE = GS_START;//게임상태.
 	bool FirstLoad = true;//첫 로딩인가?
 
+	HWND hWnd;
 	ComPtr<ID3D12RootSignature> rootsg;//루트시그니처
 	array<const CD3DX12_STATIC_SAMPLER_DESC, 6> GetStaticSamplers();
 
@@ -40,6 +41,7 @@ public:
 	void CreateRootSignature();//루트시그니처는 항상 연결될 리소스들과 동일해야함.(물론 버텍스나 인덱스버퍼는 제외)
 	void CreateShaderObject();
 	void CreateGameObject();
+	void CreateUI();
 //	void CreateAllObject();
 //	void DeleteStaticMesh();
 
@@ -60,6 +62,9 @@ public:
 	list<CGameObject*> RigidObject;//리지드바디를 사용하는 오브젝트들.
 	CGameObject* SkyObject=NULL;//스카이박스용 객체를 다룬다. 스카이박스는 하나면 됨.
 	
-	list<CGameObject*> LandObject;
+	vector<CGameObject*> LandObject;
+
+
+	CGameObject* AimUI = NULL;
 };
 
