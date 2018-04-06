@@ -291,6 +291,7 @@ void CCubeManObject::Render(ID3D12GraphicsCommandList * commandlist, const GameT
 	Mat.UpdateConstantBuffer(commandlist);
 
 	//틱함수에서 업데이트한 애니메이션된 조인트를 연결함.
+	
 	commandlist->SetGraphicsRootConstantBufferView(3, jarr->Resource()->GetGPUVirtualAddress());
 	//이후 그린다.
 
@@ -1541,7 +1542,6 @@ RigidCubeObject::RigidCubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandL
 	rb->SetMass(1.5);//고정된 물체는 무게가 무한이다.
 	rb->SetIMoment(10,10,10);
 	rb->SetOrient(&Orient);
-	rb->SetOrient(&Orient);
 	
 	//테스트 코드
 	XMFLOAT3 testForce{ -5,-3,2 };
@@ -1599,3 +1599,97 @@ void RigidCubeObject::Collision(list<CGameObject*>* collist, float DeltaTime)
 {
 	//이후에 추가해야한다.
 }
+
+
+
+///////////////////////////////////
+
+AimObject::AimObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
+{
+	ObjData.isAnimation = 0;
+	ObjData.Scale = 14.0f;
+	ObjData.SpecularParamater = 0.5f;//스페큘러를 낮게준다.
+
+
+									 //게임관련 데이터들
+	gamedata.GodMode = true;
+	staticobject = true;
+
+	if (CreateMesh == false)
+	{
+		Mesh.Index = NULL;
+		Mesh.SubResource = NULL;
+
+			LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "DamageTex", L"textures/damage/damage50.dds", false);
+
+
+		SetMesh(m_Device, commandlist);
+		CreateMesh = true;
+
+	}
+
+}
+
+void AimObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
+{
+	UINT numOfitem = 1;
+
+
+	Mesh.SubResource = new CVertex;
+	Mesh.nVertex = numOfitem;
+	Mesh.nStride = sizeof(CVertex);
+	Mesh.nOffset = 0;
+
+
+	Mesh.Index = new UINT;
+	Mesh.nindex = numOfitem;
+	Mesh.nioffset = 0;
+	Mesh.nisize = sizeof(UINT);
+
+
+	//여기서 좌표를 일괄적으로 설정 할 수 있다
+	for (int i = 0; i < numOfitem; ++i)
+	{
+
+		Mesh.SubResource[i].V = XMFLOAT3(0, 0, 0);
+
+		Mesh.Index[i] = i;
+	}
+
+	Mesh.CreateVertexBuffer(m_Device, commandlist);
+	Mesh.CreateIndexBuffer(m_Device, commandlist);
+
+}
+
+
+void AimObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer & gt)
+{
+	//텍스처가 사이즈가 0 이상이면 연결
+	if (Textures.size()>0)
+		SetTexture(commandlist, SrvDescriptorHeap, Textures["DamageTex"].get()->Resource.Get(), false);
+	//월드변환 업데이트 및 연결
+	UpdateConstBuffer(commandlist);
+
+	//애니메이션이 있으면 애니메이션또한 연결
+
+	//메쉬를 렌더해야하는데 포인트리스트로 설정해야하므로 그냥 이렇게 함.
+	D3D12_VERTEX_BUFFER_VIEW vbv;
+
+	vbv.BufferLocation = Mesh.VertexBuffer->GetGPUVirtualAddress();
+	vbv.StrideInBytes = Mesh.nStride;
+	vbv.SizeInBytes = Mesh.nStride *  Mesh.nVertex;
+
+	commandlist->IASetVertexBuffers(0, 1, &vbv);
+
+	D3D12_INDEX_BUFFER_VIEW ibv;
+	ibv.BufferLocation = Mesh.IndexBuffer->GetGPUVirtualAddress();
+	ibv.Format = DXGI_FORMAT_R16_UINT;
+	ibv.SizeInBytes = Mesh.nisize *  Mesh.nindex;
+
+	commandlist->IASetIndexBuffer(&ibv);
+	commandlist->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
+
+
+	commandlist->DrawIndexedInstanced(Mesh.nindex, 1, Mesh.nioffset, Mesh.nOffset, 0);
+}
+

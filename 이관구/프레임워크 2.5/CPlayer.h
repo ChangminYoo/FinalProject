@@ -7,7 +7,7 @@ class Scene;
 class CPlayer
 {
 public:
-	CPlayer(ID3D12Device* Device, ID3D12GraphicsCommandList* commandlist, float asp, XMFLOAT3& e, XMFLOAT3& a, XMFLOAT3& u);
+	CPlayer(HWND hwnd,ID3D12Device* Device, ID3D12GraphicsCommandList* commandlist, float asp, XMFLOAT3& e, XMFLOAT3& a, XMFLOAT3& u);
 	~CPlayer();
 
 	void TPSCameraSystem(int mx,int my,float DeltaTime);

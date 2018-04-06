@@ -159,7 +159,7 @@ bool FrameWork::Initialize()
 	//처리될 수 있게됨.. 다시한번 빡치네
 	ThrowIfFailed(mCommandList->Reset(mDirectCmdListAlloc.Get(), nullptr));
 	if (scene == NULL)
-		scene = new Scene(Device.Get(), mCommandList.Get(),mClientWidth,mClientHeight);
+		scene = new Scene(hwnd,Device.Get(), mCommandList.Get(),mClientWidth,mClientHeight);
 	
 	// Execute the initialization commands.
 	ThrowIfFailed(mCommandList->Close());

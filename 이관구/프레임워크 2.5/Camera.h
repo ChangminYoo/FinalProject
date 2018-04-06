@@ -32,13 +32,13 @@ class CCamera
 {
 public:
 	CCamera();
-	CCamera(ID3D12Device* Device, ID3D12GraphicsCommandList* commandlist,float asp,XMFLOAT3& e,XMFLOAT3& a,XMFLOAT3& u);
+	CCamera(HWND hwnd,ID3D12Device* Device, ID3D12GraphicsCommandList* commandlist,float asp,XMFLOAT3& e,XMFLOAT3& a,XMFLOAT3& u);
 	~CCamera();
 
-
+	HWND hWnd;
 	CameraData CamData;
 	void UpdateConstantBuffer(ID3D12GraphicsCommandList* commandlist);
-
+	void UpdateConstantBufferOrtho(ID3D12GraphicsCommandList* commandlist);
 	
 	// Set frustum.
 	void SetLens(float fovY, float aspect, float zn, float zf);
@@ -47,6 +47,7 @@ public:
 	XMFLOAT3 offAt;//원점에서의 At위치
 	
 	UploadBuffer<CameraData>* ConstBuffer = nullptr;	//월드행렬과 커스텀데이터를 저장하기위한 버퍼	
+	UploadBuffer<CameraData>* ConstBufferOrtho = nullptr;	//월드행렬과 커스텀데이터를 저장하기위한 버퍼	
 	float mNearZ = 0.0f;
 	float mFarZ = 0.0f;
 private:

@@ -1,17 +1,17 @@
 #include "Scene.h"
 
 
-Scene::Scene(ID3D12Device * m_Device, ID3D12GraphicsCommandList * m_DC, float cw, float ch)
+Scene::Scene(HWND hwnd,ID3D12Device * m_Device, ID3D12GraphicsCommandList * m_DC, float cw, float ch)
 {
-
+	hWnd = hwnd;
 	device = m_Device;
 	commandlist = m_DC;
 
 	mWidth = cw;
 	mHeight = ch;
 	
-	XMFLOAT3 e(0, 60, -80);
-	XMFLOAT3 a(0, 0, 0);
+	XMFLOAT3 e(0, 50, -60);
+	XMFLOAT3 a(0, 10, 0);
 	XMFLOAT3 u(0, 1, 0);
 	
 	//루트시그니처와 쉐이더들을 생성한다.
@@ -20,11 +20,11 @@ Scene::Scene(ID3D12Device * m_Device, ID3D12GraphicsCommandList * m_DC, float cw
 	nShader = 1;
 	Shaders = new Shader;
 	CreateShaderObject();
-	Player = new CPlayer(m_Device, m_DC, cw / ch, e, a, u);
+	Player = new CPlayer(hWnd,m_Device, m_DC, cw / ch, e, a, u);
 	Shaders->player = Player;//이제 플레이어도 설정되야 한다.
 	light = new CLight(m_Device, m_DC);
 	CreateGameObject();
-
+	CreateUI();
 
 
 }
@@ -37,6 +37,9 @@ Scene::Scene()
 
 Scene::~Scene()
 {
+	if (AimUI != NULL)
+		delete AimUI;
+
 	if (Shaders != NULL)
 	{
 		
@@ -223,6 +226,12 @@ void Scene::CreateGameObject()
 
 }
 
+void Scene::CreateUI()
+{
+
+	AimUI = new AimObject(device,commandlist,NULL);
+}
+
 void Scene::Render(const GameTimer& gt)
 {
 
@@ -240,14 +249,20 @@ void Scene::Render(const GameTimer& gt)
 			//여기까지 오면  정점버퍼, 인덱스버퍼 , 상수버퍼뷰만 연결하면 된다.
 
 			//여기에 카메라행렬,프로젝션행렬을 추가한다.
+
 			Player->Camera.UpdateConstantBuffer(commandlist);
 			light->UpdateConstantBuffer(commandlist);
 			
 			
 			//쉐이더가 보유한 그려야할 오브젝트 목록을 그린다.
 			Shaders->Render(commandlist,gt);
-			
 		
+			//UI를 여기서 그린다. UI는 따로 리스트등이 없음.
+			Player->Camera.UpdateConstantBufferOrtho(commandlist);
+			Shaders->SetBillboardShader(commandlist);
+			AimUI->Render(commandlist, gt);
+			//다시 원상태로 바꿔줌. 이걸 안하면 피킹이 엉망이됨. 
+			Player->Camera.UpdateConstantBuffer(commandlist);
 	}
 }
 
