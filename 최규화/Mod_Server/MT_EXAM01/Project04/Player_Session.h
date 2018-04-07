@@ -7,6 +7,7 @@ enum PLAYER_STATE
 {
 	IDLE,
 	MOVE,
+	ROTATE,
 	ATTACK,
 	DEAD,
 };

@@ -31,6 +31,7 @@ enum PACKET_PROTOCOL_TYPE
 
 	//연결끊어짐
 	PLAYER_DISCONNECT,
+	PLAYER_ROTATE,
 	TEST
 };
 
@@ -47,6 +48,14 @@ enum CONNECT_STATE { DISCONNECT = -1, CONNECT = 1 };
 enum MONSTERS { NO_MONSTER, MONSTER01, MONSTER02, MONSTER03 };
 enum PLAYERS { NO_PLAYER, LUNA, CMETRA, RONDO, DONALD };
 
+struct Rotation
+{
+	float		x{ 0.0f };
+	float		y{ 0.0f };
+	float		z{ 0.0f };
+	float		w{ 0.0f };
+};
+
 struct Position
 {
 	float		x{ 100 };			           //4
@@ -54,6 +63,7 @@ struct Position
 	float		z{ 50 };			           //4
 	float		w{ 0.0f };			           //4
 };
+
 //16
 
 struct Player_Status
@@ -89,17 +99,18 @@ struct Player_Info
 struct Player_Data
 {
 	Player_Info		UserInfo;					//18
-	unsigned short	ID{ 0 };			    //2
+	unsigned short  ID{ 0 };					//2
 	Position		Pos;						//16
 	char			Is_AI{ false };				//1
 	char			Dir;						//1
 	char			Connect_Status{ false };    //1
 	char			Ani{ Ani_State::Idle };
+	Rotation		Rotate_status;
 	//Player_LoginDB  LoginData;
 };
 // 18 + 16 + 2 + 1 + 1 + 1 = 40 -> 39 pragma pack 할시
-
 #pragma pack (pop)
+
 
 #pragma pack (push, 1)		//push 시작부터 1바이트씩 데이터를 잘라 캐시에 저장한다(캐시라인 문제 때문에) - pop에서 멈춘다
 
@@ -144,8 +155,8 @@ typedef struct Server_To_Client_Player_Direction_Changed
 {
 	unsigned char packet_size = sizeof(Position) + sizeof(unsigned char) + sizeof(unsigned char) + sizeof(char);
 	unsigned char pack_type = PACKET_PROTOCOL_TYPE::CHANGED_PLAYER_DIRECTION;
-	Position pos;
 	char dir;
+	Position pos;
 
 }STC_ChangedDir;
 
@@ -156,5 +167,14 @@ typedef struct Server_To_Client_Player_Test
 	Player_Data player_data;
 
 }STC_Test;
+
+typedef struct Server_To_Client_Player_Rotate
+{
+	unsigned char packet_size = sizeof(Rotation) + sizeof(unsigned char) + sizeof(unsigned char) + sizeof(unsigned short);
+	unsigned char pack_type = PACKET_PROTOCOL_TYPE::PLAYER_ROTATE;
+	unsigned short id;
+	Rotation rotate_status;
+
+}STC_Rotation;
 
 #pragma pack (pop)

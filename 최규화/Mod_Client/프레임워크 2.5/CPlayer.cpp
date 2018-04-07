@@ -179,16 +179,12 @@ void CPlayer::SetPlayer(CGameObject * obj)
 //또한 항상 pp의 위치를 갱신해줘야한다.
 void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 {
-	//임시추가
-	bool key_flag = false;
-
 	if (PlayerObject != NULL)
 	{	
 		bool move = false;
 
 		if (GetKeyState(0x57) & 0x8000)//W키
 		{
-			key_flag = true;
 			move = true;
 
 			//룩벡터의 +방향으로 움직인다.
@@ -244,7 +240,6 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 		}
 		else if (GetKeyState(0x53) & 0x8000)//S키
 		{
-			key_flag = true;
 			move = true;
 
 			//룩벡터의 -방향으로 움직인다.
@@ -294,7 +289,6 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 
 		if (GetKeyState(0x41) & 0x8000)//A키
 		{
-			key_flag = true;
 			move = true;
 
 			//라이트벡터의 -방향으로 움직인다.
@@ -343,7 +337,6 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 		}
 		else if (GetKeyState(0x44) & 0x8000)//D키
 		{
-			key_flag = true;
 			move = true;
 
 			//라이트벡터의 +방향으로 움직인다.
@@ -399,29 +392,44 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 			PlayerObject->AirBone = true;//공중상태를 true로
 		}
 
+
+		STC_ChangedPos change_pos_ani;
+		change_pos_ani.id = PlayerObject->m_player_data.ID;
+		change_pos_ani.pos = { PlayerObject->CenterPos.x, PlayerObject->CenterPos.y, PlayerObject->CenterPos.z, PlayerObject->CenterPos.w };
+
 		if (move == true)//움직이고 있으면 움직이는 모션으로
 		{
 			if (PlayerObject->n_Animation != Ani_State::Attack)//공격모션이 아니면 다시 대기상태로
+			{
 				PlayerObject->SetAnimation(Ani_State::Run);
+
+				change_pos_ani.ani_state = Ani_State::Run;
+				m_async_client->SendPacket(reinterpret_cast<Packet*>(&change_pos_ani));
+			}
 		}
 		else
 		{
-			if(PlayerObject->n_Animation!= Ani_State::Attack)//공격모션이 아니면 다시 대기상태로
+			if (PlayerObject->n_Animation != Ani_State::Attack)//공격모션이 아니면 다시 대기상태로
+			{
 				PlayerObject->SetAnimation(Ani_State::Idle);
+
+				change_pos_ani.ani_state = Ani_State::Idle;
+				m_async_client->SendPacket(reinterpret_cast<Packet*>(&change_pos_ani));
+			}
 		}
 
 
-		if (key_flag)
-		{
-			STC_ChangedPos changed_pos;
-			changed_pos.packet_size = sizeof(STC_ChangedPos);
-			changed_pos.pack_type = PACKET_PROTOCOL_TYPE::CHANGED_PLAYER_POSITION;
-			changed_pos.id = PlayerObject->m_player_data.ID;
-			changed_pos.ani_state = Ani_State::Run;
-			changed_pos.pos = { PlayerObject->CenterPos.x, PlayerObject->CenterPos.y, PlayerObject->CenterPos.z, PlayerObject->CenterPos.w };
-
-			m_async_client->SendPacket(reinterpret_cast<Packet*>(&changed_pos));
-		}
+		//if (key_flag)
+		//{
+		//	STC_ChangedPos change_pos;
+		//	change_pos.id = PlayerObject->m_player_data.ID;
+		//	change_pos.ani_state = Ani_State::Run;
+		//	change_pos.pos = { PlayerObject->CenterPos.x, PlayerObject->CenterPos.y, PlayerObject->CenterPos.z, PlayerObject->CenterPos.w };
+		//
+		//	m_async_client->SendPacket(reinterpret_cast<Packet*>(&change_pos));
+		//
+		//	key_flag = false;
+		//}
 	}
 }
 

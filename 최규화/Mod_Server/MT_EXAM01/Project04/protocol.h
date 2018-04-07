@@ -30,12 +30,31 @@ enum PACKET_PROTOCOL_TYPE
 	CHANGED_PLAYER_DIRECTION,
 
 	//¿¬°á²÷¾îÁü
-	PLAYER_DISCONNECT
+	PLAYER_DISCONNECT,
+	PLAYER_ROTATE,
+	TEST
+};
+
+enum Ani_State
+{
+	Idle = 0,
+	Run,
+	Attack,
+	Victory,
+	Crying
 };
 
 enum CONNECT_STATE { DISCONNECT = -1, CONNECT = 1 };
 enum MONSTERS { NO_MONSTER, MONSTER01, MONSTER02, MONSTER03 };
 enum PLAYERS { NO_PLAYER, LUNA, CMETRA, RONDO, DONALD };
+
+struct Rotation
+{
+	float		x{ 0.0f };
+	float		y{ 0.0f };
+	float		z{ 0.0f };
+	float		w{ 0.0f };
+};
 
 struct Position
 {
@@ -44,6 +63,7 @@ struct Position
 	float		z{ 50 };			           //4
 	float		w{ 0.0f };			           //4
 };
+
 //16
 
 struct Player_Status
@@ -79,11 +99,13 @@ struct Player_Info
 struct Player_Data
 {
 	Player_Info		UserInfo;					//18
-	unsigned short  ID{ 0 };				//2
+	unsigned short  ID{ 0 };					//2
 	Position		Pos;						//16
 	char			Is_AI{ false };				//1
 	char			Dir;						//1
 	char			Connect_Status{ false };    //1
+	char			Ani{ Ani_State::Idle };
+	Rotation		Rotate_status;
 	//Player_LoginDB  LoginData;
 };
 // 18 + 16 + 2 + 1 + 1 + 1 = 40 -> 39 pragma pack ÇÒ½Ã
@@ -121,9 +143,10 @@ typedef struct Server_To_Client_Player_Disconnected_Info
 
 typedef struct Server_To_Client_Player_Position_Changed
 {
-	unsigned char packet_size = sizeof(unsigned short) + sizeof(Position) +  sizeof(unsigned char) + sizeof(unsigned char);
+	unsigned char packet_size = sizeof(unsigned short) + sizeof(Position) + sizeof(unsigned char) + sizeof(unsigned char) + sizeof(unsigned char);;
 	unsigned char pack_type = PACKET_PROTOCOL_TYPE::CHANGED_PLAYER_POSITION;
 	unsigned short id;
+	unsigned char ani_state;
 	Position pos;
 
 }STC_ChangedPos;
@@ -132,9 +155,26 @@ typedef struct Server_To_Client_Player_Direction_Changed
 {
 	unsigned char packet_size = sizeof(Position) + sizeof(unsigned char) + sizeof(unsigned char) + sizeof(char);
 	unsigned char pack_type = PACKET_PROTOCOL_TYPE::CHANGED_PLAYER_DIRECTION;
-	Position pos;
 	char dir;
+	Position pos;
 
 }STC_ChangedDir;
+
+typedef struct Server_To_Client_Player_Test
+{
+	unsigned char packet_size = sizeof(Player_Data) + sizeof(unsigned char) + sizeof(unsigned char);
+	unsigned char pack_type = PACKET_PROTOCOL_TYPE::TEST;
+	Player_Data player_data;
+
+}STC_Test;
+
+typedef struct Server_To_Client_Player_Rotate
+{
+	unsigned char packet_size = sizeof(Rotation) + sizeof(unsigned char) + sizeof(unsigned char) + sizeof(unsigned short);
+	unsigned char pack_type = PACKET_PROTOCOL_TYPE::PLAYER_ROTATE;
+	unsigned short id;
+	Rotation rotate_status;
+
+}STC_Rotation;
 
 #pragma pack (pop)

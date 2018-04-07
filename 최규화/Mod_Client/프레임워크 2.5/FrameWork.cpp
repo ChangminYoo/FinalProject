@@ -280,10 +280,10 @@ LRESULT FrameWork::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	case WM_ACTIVATE:
 		if (LOWORD(wParam) == WA_INACTIVE)
 		{
-			//bAppPaused = true;
-			//mTimer.Stop();
-			bAppPaused = false;
-			mTimer.Start();
+			bAppPaused = true;
+			mTimer.Stop();
+			//bAppPaused = false;
+			//mTimer.Start();
 		}
 		else
 		{
@@ -523,6 +523,18 @@ void FrameWork::OnMouseMove(WPARAM btnState, int x, int y)
 	//움직이고나서 다시 제자리로돌아오니까 까딱까딱만 되잖ㅏㅇ아아아
 
 	//ShowCursor(false);
+
+	//회전에 대한 패킷을 보냄
+	auto myobj = move(scene->Player->PlayerObject);
+
+	STC_Rotation rot_data;
+	rot_data.packet_size = sizeof(STC_Rotation);
+	rot_data.pack_type = PACKET_PROTOCOL_TYPE::PLAYER_ROTATE;
+	rot_data.id = scene->my_ClientID;
+	rot_data.rotate_status = { myobj->Orient.x, myobj->Orient.y, myobj->Orient.z, myobj->Orient.w };
+
+	scene->Player->m_async_client->SendPacket(reinterpret_cast<Packet*>(&rot_data));
+
 }
 
 

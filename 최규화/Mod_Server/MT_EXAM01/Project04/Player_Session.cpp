@@ -134,11 +134,13 @@ void Player_Session::Init_PlayerInfo()
 	m_playerData.Is_AI = false;
 	m_playerData.ID = m_id;
 	m_playerData.Dir = 0;
+	m_playerData.Ani = Ani_State::Idle;
+	m_playerData.Rotate_status = { 0.0f, 0.0f, 0.0f, 0.0f };
 
 	if (m_playerData.ID == 0)
 		m_playerData.Pos = { 0.0f , -1000.0f, 0.0f };
 	else if (m_playerData.ID == 1)
-		m_playerData.Pos = { 200.0f, -1000.0f, -100.0f };
+		m_playerData.Pos = { 100.0f, -1000.0f, 0.0f };
 
 	//m_playerData.Pos = { static_cast<float>(rand_x), 0.0f, static_cast<float>(rand_z) , 0.0f };
 	
@@ -146,7 +148,6 @@ void Player_Session::Init_PlayerInfo()
 	//wcscpy(m_playerData.LoginData.password, m_loginPW);
 
 	//2. 초기화된 정보를 연결된 클라이언트로 보낸다.
-	//InitData_To_Client(); 
 
 }
 
@@ -157,17 +158,11 @@ void Player_Session::InitData_To_Client()
 	init_player.pack_size = sizeof(STC_SetMyClient);
 	init_player.pack_type = PACKET_PROTOCOL_TYPE::INIT_CLIENT;
 	init_player.player_data = m_playerData;
-	//init_player.player_data.Pos = { 0.0f, -1000.0f, 0.0f };
-
-	//임시
-	//if (m_id == 1)
-		//init_player.player_data.Pos = { 200.0f, -500.0f, -100.0f };
 
 	cout << "Current ID: " << m_clients[m_id]->Get_ID() << endl;
 
 	// 내 초기화 정보를 일단 나와 연결된 클라이언트에 보낸다.
 	m_clients[m_id]->SendPacket(reinterpret_cast<Packet*>(&init_player));
-
 
 	//------------------------------------------------------------------------------------
 	//2. 다른 클라이언트 초기화정보
@@ -264,31 +259,34 @@ void Player_Session::RecvPacket()
 		// error = 0 성공 , error != 0 실패
 		if (error != 0)
 		{
-			//에러: 작업이 취소된 경우 
-			cout << "Client No. [ " << m_id << " ] error code : " << error.value() << endl;
-
-			cout << "IP: " << m_socket.remote_endpoint().address().to_string() << " // ";
-			cout << "PORT: " << m_socket.remote_endpoint().port() << endl;
-			// shutdown_both - 주고 받는 쪽 모두를 중단
-			m_socket.shutdown(m_socket.shutdown_both);
-			m_socket.close();
-
-			// 자신의 연결상태 - 끊음
-			Set_State(-1);
-			m_connect_state = false;
-
 			STC_Disconnected disconnect_data;
 			disconnect_data.connect = false;
 			disconnect_data.id = m_id;
 
 			// AI와 연결이 이미 끊긴 클라이언트에게는 연결을 끊으라는 패킷을 보내지 않는다
 			for (auto client : m_clients)
-			{			
+			{
+				if (client->Get_ID() == disconnect_data.id) continue;
 				if (client->Get_IsAI() != true && client->Get_Connect_State() != false)
 				{
 					client->SendPacket(reinterpret_cast<Packet*>(&disconnect_data));
 				}
 			}
+
+
+			//에러: 작업이 취소된 경우 
+			cout << "Client No. [ " << m_id << " ] error code : " << error.value() << endl;
+
+			cout << "IP: " << m_socket.remote_endpoint().address().to_string() << " // ";
+			cout << "PORT: " << m_socket.remote_endpoint().port() << endl;
+
+			// 자신의 연결상태 - 끊음
+			Set_State(-1);
+			m_connect_state = false;
+
+			// shutdown_both - 주고 받는 쪽 모두를 중단
+			m_socket.shutdown(m_socket.shutdown_both);
+			m_socket.close();
 
 			return;
 		}
@@ -373,45 +371,84 @@ void Player_Session::ProcessPacket(Packet * packet)
 
 	switch (packet[1])
 	{
+	
 	case PACKET_PROTOCOL_TYPE::CHANGED_PLAYER_POSITION:
 		{
-			if (m_state == PLAYER_STATE::DEAD) break;
-			m_state = PLAYER_STATE::MOVE;
+			if (m_state == PLAYER_STATE::DEAD)
+				break;
 
 			//1. 받아들인 데이터(키를 눌러 플레이어를 움직였음)에서 변화된 정보를 추출
 			auto PosMove_Data = (reinterpret_cast<STC_ChangedPos*>(packet));
 
-			//2. 변화된 정보를 서버에서 관리하고 있는 해당 클라이언트 객체에 저장 및 내 클라로 다시보냄
+			if (PosMove_Data->ani_state == Ani_State::Idle)
+				m_state = PLAYER_STATE::IDLE;
+			else if (PosMove_Data->ani_state == Ani_State::Run)
+				m_state = PLAYER_STATE::MOVE;
+
+			//2. 이동 - (애니메이션, 위치 변경) 변경된 데이터를 서버에서관리하는 내 클라이언트에 저장
 			m_clients[PosMove_Data->id]->m_playerData.Pos = move(PosMove_Data->pos);
-			m_clients[PosMove_Data->id]->SendPacket(reinterpret_cast<Packet*>(&PosMove_Data));
+			m_clients[PosMove_Data->id]->m_playerData.Ani = PosMove_Data->ani_state;
 
-			cout << "ID: " << PosMove_Data->id << " 변화된 위치값: " << "[x:" << PosMove_Data->pos.x << "\t" << "y:" << PosMove_Data->pos.y
-				<< "\t" << "z:" << PosMove_Data->pos.z << "]" << "\t" << "w:" << PosMove_Data->pos.w << endl;
+			//cout << "ID: " << PosMove_Data->id << " 변화된 위치값: " << "[x:" << PosMove_Data->pos.x << "\t" << "y:" << PosMove_Data->pos.y
+			//	<< "\t" << "z:" << PosMove_Data->pos.z << "]" << "\t" << "w:" << PosMove_Data->pos.w << endl;
 
-			//변화된 포지션을 다른 클라에 전달
-			STC_ChangedPos changedpos_to_otherplayer;
-			changedpos_to_otherplayer.packet_size = sizeof(STC_ChangedPos);
-			changedpos_to_otherplayer.pack_type = PACKET_PROTOCOL_TYPE::CHANGED_PLAYER_POSITION;
-			changedpos_to_otherplayer.id = PosMove_Data->id;
-			changedpos_to_otherplayer.pos = move(PosMove_Data->pos);
-
+			//3. 변화된 내 (포지션, 애니메이션) 정보를 다른 클라에 전달 - 반드시 이렇게 다시 만들어줘야함
+			//PosMove_Data를 바로 sendpacket에 packet으로 형변화하여 보내면 size error가 난다
+			STC_ChangedPos c_to_other;
+	
+			c_to_other.id = PosMove_Data->id;
+			c_to_other.ani_state = m_playerData.Ani;
+			c_to_other.pos = move(m_playerData.Pos);
+		
 			for (auto client : m_clients)
 			{
 				//상대가 ai / 연결끊김 / 나일 경우 보낼 필요 없음
 				if (client->m_playerData.Is_AI == true) continue;
 				if (client->m_playerData.Connect_Status == false) continue;
-				if (client->m_playerData.ID == PosMove_Data->id) continue;
+
+				//if (client->m_playerData.ID == PosMove_Data->id) continue;
 				//여기서 문제
 
 				//갱신된 나의 데이터를 상대방에게 전달
-				client->SendPacket(reinterpret_cast<Packet*>(&changedpos_to_otherplayer));
+				client->SendPacket(reinterpret_cast<Packet*>(&c_to_other));	
 			}
 
 		}
 		break;
 
+	case PACKET_PROTOCOL_TYPE::PLAYER_ROTATE:
+		{
+			if (m_state == PLAYER_STATE::DEAD)
+				break;
 
+			m_state = PLAYER_STATE::ROTATE;
+
+			auto Rotation_Data = reinterpret_cast<STC_Rotation*>(packet);	
+
+			// 1. 받은 정보를 내 클라이언트에 넣어주고
+			m_clients[Rotation_Data->id]->m_playerData.Rotate_status = move(Rotation_Data->rotate_status);
+
+			//cout << "ID: " << Rotation_Data->id << " 변화된 회전값: " << "[ x, y, z, w ]: "
+			//	<< Rotation_Data->rotate_status.x << ", " << Rotation_Data->rotate_status.y << ", " << Rotation_Data->rotate_status.z << ", " << Rotation_Data->rotate_status.w << endl;
+
+			// 2. 다른 클라에게 보낸다.
+			STC_Rotation r_to_other;
+
+			r_to_other.id = Rotation_Data->id;
+			r_to_other.rotate_status = move(Rotation_Data->rotate_status);
+
+			for (auto client : m_clients)
+			{
+				if (client->m_playerData.Is_AI == true) continue;
+				if (client->m_playerData.Connect_Status == false) continue;
+			
+				client->SendPacket(reinterpret_cast<Packet*>(&r_to_other));
+			}
+
+		}
 		break;
+
+	
 	}
 }
 

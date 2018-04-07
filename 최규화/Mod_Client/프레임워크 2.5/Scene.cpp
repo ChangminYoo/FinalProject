@@ -375,23 +375,79 @@ Player_Data* Scene::Get_MonsterServerData(const unsigned int& id)
 	return nullptr;
 }
 
-void Scene::Set_PlayerServerData(const unsigned int& id, Player_Data& playerdata)
+void Scene::SET_PLAYER_BY_SEVER_DATA(const unsigned short& id, Player_Data& playerdata, const unsigned char& packet_type)
 {
 	for (auto GameObject : DynamicObject)
 	{
 		if (GameObject->m_player_data.ID == id)
 		{
-			GameObject->m_player_data = move(playerdata);
-			GameObject->CenterPos = { playerdata.Pos.x , playerdata.Pos.y , playerdata.Pos.z , playerdata.Pos.w };
+			switch (packet_type)
+			{
+				case PACKET_PROTOCOL_TYPE::INIT_OTHER_CLIENT:
+				{
+					GameObject->m_player_data = move(playerdata);
 
-			GameObject->gamedata.Damage = move(playerdata.UserInfo.player_status.attack);
-			GameObject->gamedata.HP = move(playerdata.UserInfo.cur_hp);
-			GameObject->gamedata.MAXHP = move(playerdata.UserInfo.origin_hp);
-			GameObject->gamedata.Speed = move(playerdata.UserInfo.player_status.speed);
+					//GameObject->Orient = { playerdata.Rotate_status.x , playerdata.Rotate_status.y, playerdata.Rotate_status.z, playerdata.Rotate_status.w };
+					GameObject->CenterPos = { playerdata.Pos.x , playerdata.Pos.y , playerdata.Pos.z , playerdata.Pos.w };
+
+					GameObject->gamedata.Damage = move(playerdata.UserInfo.player_status.attack);
+					GameObject->gamedata.HP = move(playerdata.UserInfo.cur_hp);
+					GameObject->gamedata.MAXHP = move(playerdata.UserInfo.origin_hp);
+					GameObject->gamedata.Speed = move(playerdata.UserInfo.player_status.speed);
+
+				}
+				break;
+
+				case PACKET_PROTOCOL_TYPE::INIT_CLIENT:
+				{
+					GameObject->m_player_data = move(playerdata);
+
+					//GameObject->Orient = { playerdata.Rotate_status.x , playerdata.Rotate_status.y, playerdata.Rotate_status.z, playerdata.Rotate_status.w };
+					GameObject->CenterPos = { playerdata.Pos.x , playerdata.Pos.y , playerdata.Pos.z , playerdata.Pos.w };
+
+					GameObject->gamedata.Damage = move(playerdata.UserInfo.player_status.attack);
+					GameObject->gamedata.HP = move(playerdata.UserInfo.cur_hp);
+					GameObject->gamedata.MAXHP = move(playerdata.UserInfo.origin_hp);
+					GameObject->gamedata.Speed = move(playerdata.UserInfo.player_status.speed);
+
+					if (GameObject->m_player_data.ID == my_ClientID)
+						Player->SetPlayer(GameObject);
+				}
+				break;
+
+				case PACKET_PROTOCOL_TYPE::CHANGED_PLAYER_POSITION:
+				{
+					GameObject->m_player_data.Pos = move(playerdata.Pos);
+					GameObject->m_player_data.Ani = move(playerdata.Ani);
+
+					GameObject->CenterPos = { playerdata.Pos.x , playerdata.Pos.y , playerdata.Pos.z , playerdata.Pos.w };
+					GameObject->n_Animation = playerdata.Ani;
+
+				}
+				break;
+
+				case PACKET_PROTOCOL_TYPE::PLAYER_DISCONNECT:
+				{
+					//client 내 flag를 false로
+				}
+				break;
+
+				case PACKET_PROTOCOL_TYPE::PLAYER_ROTATE:
+				{
+					GameObject->m_player_data.Rotate_status = move(playerdata.Rotate_status);
+
+					GameObject->Orient = { playerdata.Rotate_status.x , playerdata.Rotate_status.y, playerdata.Rotate_status.z, playerdata.Rotate_status.w };
+				}
+				break;
+
+			break;
+
+			}
+			
+			//GameObject->Orient = { playerdata.Rotate_status.x , playerdata.Rotate_status.y , playerdata.Rotate_status.z , playerdata.Rotate_status.w };
 
 			//받아온 아이디가 내 클라이언트 아이디일 때
-			if (GameObject->m_player_data.ID == my_ClientID)
-				Player->SetPlayer(GameObject);
+			
 			//	GameObject->m_player->PlayerObject = move(GameObject);
 
 			//여기에서 이제 애니메이션 스테이트 넣어주고 패킷주고받을때마다 변화되야할 클라정보를 넣어주자

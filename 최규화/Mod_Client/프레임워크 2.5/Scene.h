@@ -68,7 +68,7 @@ public:
 	Player_Data* Get_MonsterServerData(const unsigned int& id);
 	int my_ClientID{ 0 };
 
-	void Set_PlayerServerData(const unsigned int& id, Player_Data& playerdata);
+	void SET_PLAYER_BY_SEVER_DATA(const unsigned short& id, Player_Data& playerdata, const unsigned char& packet_type);
 	void Set_RemovePlayerData(const unsigned int& id, Player_Data& playerdata);
 
 	//서버에서 받은 PlayerData를 이용하면 이 함수는 없어도됨

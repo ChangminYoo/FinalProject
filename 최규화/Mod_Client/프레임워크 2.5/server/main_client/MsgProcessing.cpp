@@ -17,12 +17,23 @@ switch (packet[1])
 		//wcscpy(new_initdata.LoginData.name, init_data->player_data.LoginData.name);
 		//wcscpy(new_initdata.LoginData.password, init_data->player_data.LoginData.password);
 		
-		new_initdata = move(init_data->player_data);
 		scene.my_ClientID = init_data->player_data.ID;
-		scene.Set_PlayerServerData(new_initdata.ID, new_initdata);
 
-		break;
+		//new_initdata = move(init_data->player_data);
+
+		new_initdata.Ani = move(init_data->player_data.Ani);
+		new_initdata.Connect_Status = move(init_data->player_data.Connect_Status);
+		new_initdata.Dir = move(init_data->player_data.Dir);
+		new_initdata.ID = move(init_data->player_data.ID);
+		new_initdata.Is_AI = move(init_data->player_data.Is_AI);
+		new_initdata.Pos = move(init_data->player_data.Pos);
+		new_initdata.UserInfo = move(init_data->player_data.UserInfo);
+
+
+		scene.SET_PLAYER_BY_SEVER_DATA(init_data->player_data.ID, new_initdata, packet[1]);
 	}
+	break;
+
 	case PACKET_PROTOCOL_TYPE::INIT_OTHER_CLIENT:
 	{
 		auto init_otherdata = reinterpret_cast<STC_SetOtherClient*>(packet);
@@ -30,23 +41,22 @@ switch (packet[1])
 		Player_Data new_initdata_other;
 		new_initdata_other = move(init_otherdata->player_data);
 
-		scene.Set_PlayerServerData(new_initdata_other.ID, new_initdata_other);
-
+		scene.SET_PLAYER_BY_SEVER_DATA(init_otherdata->player_data.ID, new_initdata_other, packet[1]);
 	}
-		break;
+	break;
+
 	case PACKET_PROTOCOL_TYPE::CHANGED_PLAYER_POSITION:
 	{
 		auto move_data = reinterpret_cast<STC_ChangedPos*>(packet);
 		Player_Data new_movedata;
 
 		new_movedata.Pos = move(move_data->pos);
-		new_movedata.ID = move(move_data->id);
 		new_movedata.Ani = move(move_data->ani_state);
+		//new_movedata.Rotate_status = move(move_data->rotate);
 
-		scene.Set_PlayerServerData(new_movedata.ID, new_movedata);
-
+		scene.SET_PLAYER_BY_SEVER_DATA(move_data->id, new_movedata, packet[1]);
 	}
-		break;
+	break;
 
 	case PACKET_PROTOCOL_TYPE::PLAYER_DISCONNECT:
 	{
@@ -56,7 +66,18 @@ switch (packet[1])
 		new_discdata.Connect_Status = disc_data->connect;
 		new_discdata.ID = disc_data->id;
 
-		scene.Set_RemovePlayerData(new_discdata.ID, new_discdata);
+		scene.SET_PLAYER_BY_SEVER_DATA(disc_data->id, new_discdata, packet[1]);
+	}
+	break;
+
+	case PACKET_PROTOCOL_TYPE::PLAYER_ROTATE:
+	{
+		auto rot_data = reinterpret_cast<STC_Rotation*>(packet);
+
+		Player_Data new_rotdata;
+		new_rotdata.Rotate_status = move(rot_data->rotate_status);
+
+		scene.SET_PLAYER_BY_SEVER_DATA(rot_data->id, new_rotdata, packet[1]);
 	}
 
 	break;
