@@ -328,8 +328,21 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 
 			//먼저 사잇각도를 구한다.
 			//기존에는 float으로 했는데, 0이아니어야 하는데 0이나오는경우가 생김..
-			double theta = acos(V1.x*V2.x + V1.y*V2.y + V1.z*V2.z);
 
+
+			auto tempdot = V1.x*V2.x + V1.y*V2.y + V1.z*V2.z;
+			if (abs(tempdot) > 1)
+			{
+				if (tempdot > 0)
+					tempdot = 1;
+				else
+					tempdot = -1;
+			}
+			//교정할 각도.
+			double theta = acos(tempdot);
+
+
+		
 			//충격량을 구함. 충격량이 특정 값 이하일때만 보정가능.
 
 			CollisionPoint fp;//충격량을 가할 지점
@@ -466,9 +479,24 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 				V3 = Float4Normalize(V3);
 				//이제 V2와 V3를 아니까 V2와 V3의 사잇각을 구한다음 V2에서 V3로 외적해서 Axis를 구한다.
 
-				//먼저 사잇각도를 구한다.
-				double theta = acos(V2.x*V3.x + V2.y*V3.y + V2.z*V3.z);
 
+				//교정되었을때 V1
+				auto V4 = Float4Add(V1, XMFloat3to4(ProjAB), false);
+				V4 = Float4Normalize(V4);
+				
+
+
+				//먼저 사잇각도를 구한다.
+				auto tempdot = V2.x*V3.x + V2.y*V3.y + V2.z*V3.z;
+				if (abs(tempdot) > 1)
+				{
+					if (tempdot > 0)
+						tempdot = 1;
+					else
+						tempdot = -1;
+				}
+				//교정할 각도.
+				double theta = acos(tempdot);
 
 				CollisionPoint fp;//충격량을 가할 지점
 				fp.Pos = XMFLOAT4(0, 0, 0, 0);
@@ -604,9 +632,18 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 				//교정되었을때 V1
 				auto V4 = Float4Add(V1, XMFloat3to4(ProjAB), false);
 				V4 = Float4Normalize(V4);
-
+				auto tempdot = V1.x*V4.x + V1.y*V4.y + V1.z*V4.z;
+				if (abs(tempdot) > 1)
+				{
+					if (tempdot > 0)
+						tempdot = 1;
+					else
+						tempdot = -1;
+				}
 				//교정할 각도.
-				double theta = acos(V1.x*V4.x + V1.y*V4.y + V1.z*V4.z);
+				double theta = acos(tempdot);
+
+				
 
 				double theta2 = -MMPE_PI / 180;
 

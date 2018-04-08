@@ -436,6 +436,9 @@ void CPlayer::CreateBullet(ID3D12Device* Device, ID3D12GraphicsCommandList* cl,X
 		
 		v = Float3Normalize(v);//새로운 룩벡터(발사방향)
 
+		//여기서 룩벡터라 함은, 플레이어가 아니라, 총알의 룩벡터다. 모든 오브젝트는 보통 룩벡터는 0,0,1 또는 0,0,-1 인데, 날아가는 방향을 바라보도록
+		//해야하므로 새로운 룩벡터를 필요로 하는것이다.
+
 							   //기존 룩벡터와 새로운 룩벡터를 외적해서 방향축을 구한다.
 		XMFLOAT3 l{ 0,0,1 };
 		XMVECTOR ol = XMLoadFloat3(&l);
@@ -445,6 +448,7 @@ void CPlayer::CreateBullet(ID3D12Device* Device, ID3D12GraphicsCommandList* cl,X
 		axis = XMVector3Normalize(axis);
 		XMFLOAT3 Axis;
 		XMStoreFloat3(&Axis, axis);
+
 		//이제 회전각도를 구해야한다. 내적을 통해 회전각도를 구한다.
 
 		auto temp = XMVector3Dot(ol, nl);
@@ -454,6 +458,7 @@ void CPlayer::CreateBullet(ID3D12Device* Device, ID3D12GraphicsCommandList* cl,X
 		if (fabsf(d) <= 1)//반드시 이 결과는 -1~1 사이여야한다. 그래야 각도가 구해진다.
 			d = acos(d);//각도 완성. 라디안임
 
+		
 		auto ori = QuaternionRotation(Axis, d);
 
 		//진짜 룩벡터를 구했으니 이제 진짜 Right벡터를 구한다. 진짜 Up은 진짜 룩과 진짜 라이트를 외적만하면됨.
