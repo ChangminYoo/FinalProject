@@ -16,6 +16,9 @@
     <Filter Include="소스 파일\Database">
       <UniqueIdentifier>{5fd2e0f9-962e-4651-acf3-d86eedbe2a87}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\PhysicsEngine">
+      <UniqueIdentifier>{0aa6597d-2afa-46eb-913d-0adb37f39877}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Player_Session.cpp">
@@ -29,6 +32,9 @@
     </ClCompile>
     <ClCompile Include="Database\CTextTest.cpp">
       <Filter>소스 파일\Database</Filter>
+    </ClCompile>
+    <ClCompile Include="PhysicsEngine\MyMiniPysicsEngine.cpp">
+      <Filter>소스 파일\PhysicsEngine</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -46,6 +52,9 @@
     </ClInclude>
     <ClInclude Include="Database\CTextTest.h">
       <Filter>소스 파일\Database</Filter>
+    </ClInclude>
+    <ClInclude Include="PhysicsEngine\MyMiniPysicsEngine.h">
+      <Filter>소스 파일\PhysicsEngine</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

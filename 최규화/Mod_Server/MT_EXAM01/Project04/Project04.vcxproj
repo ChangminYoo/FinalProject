@@ -144,12 +144,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Database\CTextTest.cpp" />
+    <ClCompile Include="PhysicsEngine\MyMiniPysicsEngine.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Player_Session.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Database\CTextTest.h" />
+    <ClInclude Include="PhysicsEngine\MyMiniPysicsEngine.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="Player_Session.h" />
     <ClInclude Include="protocol.h" />

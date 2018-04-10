@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "Database\CTextTest.h"
 #include "Player.h"
+#include "PhysicsEngine\MyMiniPysicsEngine.h"
 
 enum PLAYER_STATE 
 {
@@ -45,6 +46,23 @@ private:
 
 	//3. 몬스터 정보(1. 몬스터타입)																 
 	MONSTERS m_monsterType;
+
+	//4. 물리효과 처리
+	RigidBody *rb = nullptr;
+	PhysicsPoint *pp = nullptr;
+
+	//5. 고정된 물체인가
+	bool	staticobject{ false };
+	bool	AirBone{ false };
+
+	//룩벡터와 라이트벡터
+	XMFLOAT3 Lookvector;//룩벡터. 오브젝트가 바라보고있는 방향.
+	XMFLOAT3 Rightvector;//라이트벡터. 오브젝트가 바라보고있는 방향의 오른쪽방향.
+	XMFLOAT3 OffLookvector;//초기룩벡터. 오브젝트가 바라보고있는 방향.
+	XMFLOAT3 OffRightvector;//초기라이트벡터. 오브젝트가 바라보고있는 방향의 오른쪽방향.
+	XMFLOAT3 GetUpvector();//룩벡터와 라이트벡터를 이용해 업벡터를 얻는함수
+	
+	bool Delobj{ false };
 
 	//삭제
 	void handle_write(const boost::system::error_code& /*error*/, size_t /*bytes_transferred*/);

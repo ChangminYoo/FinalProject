@@ -29,11 +29,12 @@ enum PACKET_PROTOCOL_TYPE
 	CHANGED_PLAYER_POSITION,
 	CHANGED_PLAYER_DIRECTION,
 
-	//연결끊어짐
-	PLAYER_DISCONNECT,
-	PLAYER_ROTATE,
-	TEST
+	PLAYER_DISCONNECT,		//연결끊어짐
+	PLAYER_ROTATE,			//플레이어 회전
+	PLAYER_ATTACK,		    //플레이어 공격
+	TEST					//테스트용 패킷
 };
+
 
 enum Ani_State
 {
@@ -176,5 +177,12 @@ typedef struct Server_To_Client_Player_Rotate
 	Rotation rotate_status;
 
 }STC_Rotation;
+
+typedef struct Server_To_Client_Player_Attack
+{
+	unsigned char packet_size = sizeof(unsigned char) + sizeof(unsigned char);
+	unsigned char pack_type = PACKET_PROTOCOL_TYPE::PLAYER_ATTACK;
+
+}STC_Attack;
 
 #pragma pack (pop)

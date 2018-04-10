@@ -1,10 +1,14 @@
 #pragma once
+//#pragma comment(lib, "d3dx12")
+//#pragma comment(lib, "d3d12")
+
 #include <iostream>
 
 // boost asio 관련 헤더
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
 #include <memory>
+
 
 #include "protocol.h"
 //#include "Player.h"

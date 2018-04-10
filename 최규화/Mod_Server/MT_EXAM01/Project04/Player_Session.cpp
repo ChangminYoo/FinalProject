@@ -448,6 +448,11 @@ void Player_Session::ProcessPacket(Packet * packet)
 		}
 		break;
 
+	case PACKET_PROTOCOL_TYPE::PLAYER_ATTACK:
+		{
+
+		}
+		break;
 	
 	}
 }
@@ -468,6 +473,18 @@ void Player_Session::PostReceive()
 			boost::asio::placeholders::error,
 			boost::asio::placeholders::bytes_transferred)
 	);
+}
+
+XMFLOAT3 Player_Session::GetUpvector()
+{
+	XMVECTOR l = XMLoadFloat3(&Lookvector);
+	XMVECTOR r = XMLoadFloat3(&Rightvector);
+	auto u = XMVector3Cross(l, r);
+
+	XMFLOAT3 up;
+	XMStoreFloat3(&up, u);
+	up = Float3Normalize(up);
+	return up;
 }
 
 void Player_Session::handle_write(const boost::system::error_code &, size_t)
