@@ -1623,6 +1623,24 @@ void RigidCubeObject::Render(ID3D12GraphicsCommandList * commandlist, const Game
 void RigidCubeObject::Collision(list<CGameObject*>* collist, float DeltaTime)
 {
 	//이후에 추가해야한다.
+
+	CollisionList = collist;
+	//충돌리스트의 모든 요소와 충돌검사를 실시한다.
+	for (auto i = CollisionList->begin(); i != CollisionList->end(); i++)
+	{
+
+		if (*i != this)
+		{
+
+			bool test = rb->CollisionTest(*(*i)->rb, Lookvector, Rightvector, GetUpvector(), (*i)->Lookvector, (*i)->Rightvector, (*i)->GetUpvector());
+
+			if (test)//충돌했으면 충돌해소를 해야한다.
+			{
+				rb->ResolvePenetration(*(*i)->rb, DeltaTime);
+
+			}
+		}
+	}
 }
 
 
