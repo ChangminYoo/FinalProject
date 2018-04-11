@@ -224,6 +224,13 @@ void Scene::CreateGameObject()
 		++player_num;
 	}
 
+	player_num = 0;
+	for (auto sobj : StaticObject)
+	{
+		sobj->m_player_data.ID = player_num;
+		++player_num;
+	}
+
 	//플레이어의 오브젝트 설정. 이건 나중에 바꿔야함.
 	Player->SetPlayer(DynamicObject.front());
 	Player->PlayerObject->Blending = false;
@@ -453,6 +460,37 @@ void Scene::SET_PLAYER_BY_SEVER_DATA(const unsigned short& id, Player_Data& play
 			//여기에서 이제 애니메이션 스테이트 넣어주고 패킷주고받을때마다 변화되야할 클라정보를 넣어주자
 
 		}
+	}
+}
+
+void Scene::SET_SOBJECT_BY_SERVER_DATA(const unsigned short& id, Player_Data& playerdata, const unsigned char & type)
+{
+	switch (type)
+	{
+	case STATIC_OBJECT_TYPE::Box:
+		{
+			for (auto box : StaticObject)
+			{
+				if (box->m_player_data.ID == playerdata.ID)
+				{
+					box->m_player_data = move(playerdata);
+
+					box->Orient = { playerdata.Rotate_status.x , playerdata.Rotate_status.y , playerdata.Rotate_status.z, playerdata.Rotate_status.w };
+					box->CenterPos = { playerdata.Pos.x ,playerdata.Pos.y , playerdata.Pos.z, playerdata.Pos.w };
+
+					box->gamedata.Damage = playerdata.UserInfo.player_status.attack;
+					box->gamedata.GodMode = playerdata.GodMode;
+					box->gamedata.HP = playerdata.UserInfo.cur_hp;
+					box->gamedata.MAXHP = playerdata.UserInfo.origin_hp;
+					box->gamedata.Speed = playerdata.UserInfo.player_status.speed;
+
+					break;
+				}
+			}
+		}
+		break;
+	default:
+		break;
 	}
 }
 

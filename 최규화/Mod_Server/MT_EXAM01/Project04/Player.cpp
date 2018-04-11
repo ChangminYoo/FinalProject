@@ -90,6 +90,14 @@ void Player::Accept_Event()
 
 			if (pNewSession->CheckPlayerInfo())
 			{
+				if (pNewSession->m_InitFirst_SObjs)
+				{
+					pNewSession->m_staticobject->InitStaticObject();
+					pNewSession->m_InitFirst_SObjs = false;
+				}
+
+				pNewSession->m_staticobject->SendStaticObject();
+
 				pNewSession->Init_PlayerInfo();
 
 				pNewSession->m_clients.emplace_back(pNewSession);
@@ -103,6 +111,7 @@ void Player::Accept_Event()
 
 				//delete를 해주면 메모리에러가 남. pNewSession에서 작업을 아직 안 끝냈는데 죽이려고 하기때문에
 				//delete pNewSession;
+				delete pNewSession->m_staticobject;
 			}
 			else
 			{

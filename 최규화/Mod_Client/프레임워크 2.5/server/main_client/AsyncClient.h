@@ -34,6 +34,8 @@ public:
 
 	void ProcessPacket(Packet* packet, CGameObject& obj, Scene& scene);
 
+	void SendPacketRegular(CGameObject* obj);
+
 	//얘를 databuf -> recvbuf로 바꾸니 제대로 값이 서버에서 전달됨
 	//recv 함수에서 임시버퍼에 서버에서 받은 데이터를 차례로 담는과정없이 
 	//바로 프로세스패킷에 서버에서 받은 데이터를 전달한 상태임 지금은...

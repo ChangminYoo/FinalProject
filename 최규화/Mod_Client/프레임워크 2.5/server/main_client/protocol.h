@@ -29,11 +29,13 @@ enum PACKET_PROTOCOL_TYPE
 	CHANGED_PLAYER_POSITION,
 	CHANGED_PLAYER_DIRECTION,
 
-	//연결끊어짐
-	PLAYER_DISCONNECT,
-	PLAYER_ROTATE,
-	TEST
+	PLAYER_DISCONNECT,		//연결끊어짐
+	PLAYER_ROTATE,			//플레이어 회전
+	PLAYER_ATTACK,		    //플레이어 공격
+	STATIC_OBJECT,			//고정된 물체
+	TEST					//테스트용 패킷
 };
+
 
 enum Ani_State
 {
@@ -42,6 +44,12 @@ enum Ani_State
 	Attack,
 	Victory,
 	Crying
+};
+
+enum STATIC_OBJECT_TYPE
+{
+	Map,
+	Box
 };
 
 enum CONNECT_STATE { DISCONNECT = -1, CONNECT = 1 };
@@ -104,11 +112,12 @@ struct Player_Data
 	char			Is_AI{ false };				//1
 	char			Dir;						//1
 	char			Connect_Status{ false };    //1
-	char			Ani{ Ani_State::Idle };
-	Rotation		Rotate_status;
-	//Player_LoginDB  LoginData;
+	char			Ani{ Ani_State::Idle };     //1
+	char			GodMode{ false };			//1
+	Rotation		Rotate_status;		        //16
+												//Player_LoginDB  LoginData;
 };
-// 18 + 16 + 2 + 1 + 1 + 1 = 40 -> 39 pragma pack 할시
+// 18 + 16 + 2 + 1 + 1 + 1 + 1 + 16 = 58  pragma pack 할시
 #pragma pack (pop)
 
 
@@ -176,5 +185,21 @@ typedef struct Server_To_Client_Player_Rotate
 	Rotation rotate_status;
 
 }STC_Rotation;
+
+typedef struct Server_To_Client_Player_Attack
+{
+	unsigned char packet_size = sizeof(unsigned char) + sizeof(unsigned char);
+	unsigned char pack_type = PACKET_PROTOCOL_TYPE::PLAYER_ATTACK;
+
+}STC_Attack;
+
+typedef struct Server_To_Client_Static_Object
+{
+	unsigned char packet_size = sizeof(Position) + sizeof(unsigned char) + sizeof(unsigned char) + sizeof(unsigned char);
+	unsigned char pack_type = PACKET_PROTOCOL_TYPE::STATIC_OBJECT;
+	Player_Data player_data;
+	unsigned char type;
+
+}STC_StaticObject;
 
 #pragma pack (pop)

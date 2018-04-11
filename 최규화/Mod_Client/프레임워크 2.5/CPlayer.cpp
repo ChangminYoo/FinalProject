@@ -447,6 +447,7 @@ void CPlayer::CreateBullet(ID3D12Device* Device, ID3D12GraphicsCommandList* cl,X
 							   //기존 룩벡터와 새로운 룩벡터를 외적해서 방향축을 구한다.
 		XMFLOAT3 l{ 0,0,1 };
 		XMVECTOR ol = XMLoadFloat3(&l);
+
 		XMVECTOR nl = XMLoadFloat3(&v);
 		auto axis = XMVector3Cross(ol, nl);
 		//방향축을 완성.

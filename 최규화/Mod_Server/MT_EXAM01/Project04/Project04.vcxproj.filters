@@ -36,6 +36,12 @@
     <ClCompile Include="PhysicsEngine\MyMiniPysicsEngine.cpp">
       <Filter>소스 파일\PhysicsEngine</Filter>
     </ClCompile>
+    <ClCompile Include="Player_Collision.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="StaticObject.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -55,6 +61,9 @@
     </ClInclude>
     <ClInclude Include="PhysicsEngine\MyMiniPysicsEngine.h">
       <Filter>소스 파일\PhysicsEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="StaticObject.h">
+      <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -21,11 +21,11 @@ switch (packet[1])
 
 		//new_initdata = move(init_data->player_data);
 
-		new_initdata.Ani = move(init_data->player_data.Ani);
-		new_initdata.Connect_Status = move(init_data->player_data.Connect_Status);
-		new_initdata.Dir = move(init_data->player_data.Dir);
-		new_initdata.ID = move(init_data->player_data.ID);
-		new_initdata.Is_AI = move(init_data->player_data.Is_AI);
+		new_initdata.Ani = init_data->player_data.Ani;
+		new_initdata.Connect_Status = init_data->player_data.Connect_Status;
+		new_initdata.Dir = init_data->player_data.Dir;
+		new_initdata.ID = init_data->player_data.ID;
+		new_initdata.Is_AI = init_data->player_data.Is_AI;
 		new_initdata.Pos = move(init_data->player_data.Pos);
 		new_initdata.UserInfo = move(init_data->player_data.UserInfo);
 
@@ -50,8 +50,8 @@ switch (packet[1])
 		auto move_data = reinterpret_cast<STC_ChangedPos*>(packet);
 		Player_Data new_movedata;
 
-		new_movedata.Pos = move(move_data->pos);
-		new_movedata.Ani = move(move_data->ani_state);
+		new_movedata.Pos = move_data->pos;
+		new_movedata.Ani = move_data->ani_state;
 		//new_movedata.Rotate_status = move(move_data->rotate);
 
 		scene.SET_PLAYER_BY_SEVER_DATA(move_data->id, new_movedata, packet[1]);
@@ -81,8 +81,27 @@ switch (packet[1])
 	}
 
 	break;
+
+	case PACKET_PROTOCOL_TYPE::STATIC_OBJECT:
+	{
+		auto sobj_data = reinterpret_cast<STC_StaticObject*>(packet);
+
+		Player_Data new_sobjdata;
+		new_sobjdata = move(sobj_data->player_data);
+		
+		scene.SET_SOBJECT_BY_SERVER_DATA(new_sobjdata.ID, new_sobjdata, sobj_data->type);
+	}
+
+	break;
 }
 	
 
+}
+
+void AsyncClient::SendPacketRegular(CGameObject * obj)
+{
+	//클라이언트에서 매 프레임마다 정기적으로 보내줘야할 데이터 패킷
+	obj->Lookvector;
+	obj->Rightvector;
 }
 

@@ -116,6 +116,8 @@ void CGameObject::UpdateLookVector()
 
 	Lookvector = Float3Normalize(Lookvector);
 	Rightvector = Float3Normalize(Rightvector);
+
+	//마우스 움직일 때마다 rightvector 와 lookvector가 바뀐다
 }
 
 void CGameObject::SetAnimation(int n_Ani)
@@ -305,10 +307,8 @@ void CCubeManObject::Collision(list<CGameObject*>* collist, float DeltaTime)
 	//충돌리스트의 모든 요소와 충돌검사를 실시한다.
 	for (auto i = CollisionList->begin(); i != CollisionList->end(); i++)
 	{
-
 		if (*i != this)
 		{
-
 			bool test = pp->CollisionTest(*(*i)->pp, Lookvector, Rightvector, GetUpvector(), (*i)->Lookvector, (*i)->Rightvector, (*i)->GetUpvector());
 
 			if (test)//충돌했으면 충돌해소를 해야한다.
@@ -330,16 +330,11 @@ void CCubeManObject::Collision(list<CGameObject*>* collist, float DeltaTime)
 					//상대속도 방향을 구한다. A-B
 					cn = Float3Add(pp->GetPosition(), (*(*i)->pp).GetPosition(), false);
 					cn = Float3Normalize(cn);
-
-
-
 				}
 				else//고정된 물체면 충돌한 평면의 노멀방향으로 cn을 설정할것.
 				{
 					cn = pp->pAxis;
 				}
-
-
 
 				//충돌해소 호출. 충돌해소 이후에 반드시 변경된 질점의 위치로 오브젝트위치를 일치시켜야한다.
 				pp->CollisionResolve(*(*i)->pp, cn, DeltaTime);//좀비는 튕기지 않는다.

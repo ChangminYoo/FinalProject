@@ -147,7 +147,9 @@
     <ClCompile Include="PhysicsEngine\MyMiniPysicsEngine.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Player_Collision.cpp" />
     <ClCompile Include="Player_Session.cpp" />
+    <ClCompile Include="StaticObject.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Database\CTextTest.h" />
@@ -155,6 +157,7 @@
     <ClInclude Include="Player.h" />
     <ClInclude Include="Player_Session.h" />
     <ClInclude Include="protocol.h" />
+    <ClInclude Include="StaticObject.h" />
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <ItemGroup>

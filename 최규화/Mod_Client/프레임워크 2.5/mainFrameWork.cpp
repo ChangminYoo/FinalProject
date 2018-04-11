@@ -167,6 +167,7 @@ void MainFrameWork::AfterGravitySystem(const GameTimer & gt)
 			(*i)->AirBone = false;
 		}
 	}
+
 	for (auto i = scene->RigidObject.begin(); i != scene->RigidObject.end(); i++)
 	{
 		RigidBodyCollisionPlane(XMFLOAT3(0, 1, 0), 0, *i);
@@ -206,6 +207,9 @@ void MainFrameWork::FrameAdvance(const GameTimer& gt)
 	//앞으로 해야할것. 루트시그니처와 VS,PS등 PSO, 정점버퍼, 인덱스버퍼 , 상수버퍼뷰
 
 	Update(gt);
+
+	scene->Player->m_async_client->SendPacketRegular(scene->Player->PlayerObject);
+
 	Draw(gt);
 
 	//여기까지 왔으면 PSO에 모든게 다 연결되어 있고, 다 그려져있는것이다.

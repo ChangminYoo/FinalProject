@@ -6,6 +6,8 @@
 #define RAND_CREATE_Z_POS 100
 
 vector<Player_Session*> Player_Session::m_clients = vector<Player_Session*>();
+list<Player_Session*> Player_Session::m_staticobjs = list<Player_Session*>();
+bool Player_Session::m_InitFirst_SObjs = true;
 
 bool Player_Session::CheckPlayerInfo()
 {
@@ -56,6 +58,8 @@ bool Player_Session::CheckPlayerInfo()
 		m_socket.send(boost::asio::buffer(cur_logindata_packet, MAX_BUFFER_SIZE));
 
 		m_connect_state = true;
+
+		m_staticobject = new StaticObject();
 
 		return true;
 	}
@@ -118,8 +122,7 @@ void Player_Session::Init_MonsterInfo()
 
 void Player_Session::Init_PlayerInfo()
 {
-	//플레이어 정보 초기화 -> send 다음에 recv를 해줘야한다
-
+	//플레이어 정보 초기화 -> send 다음에 recv를 해줘야한
 	default_random_engine generator(time(0));
 	uniform_int_distribution<int> export_x(-RAND_CREATE_X_POS, RAND_CREATE_X_POS);
 	uniform_int_distribution<int> export_z(-RAND_CREATE_Z_POS, RAND_CREATE_Z_POS);
@@ -128,6 +131,7 @@ void Player_Session::Init_PlayerInfo()
 
 	m_state = PLAYER_STATE::IDLE;
 	m_playerType = PLAYERS::LUNA;
+	//m_myObjType = PLAYER_OBJECT_TYPE::PLAYER_OBJECT;
 	m_isAI = false;
 
 	m_playerData.Connect_Status = true;
@@ -136,11 +140,16 @@ void Player_Session::Init_PlayerInfo()
 	m_playerData.Dir = 0;
 	m_playerData.Ani = Ani_State::Idle;
 	m_playerData.Rotate_status = { 0.0f, 0.0f, 0.0f, 0.0f };
+	m_playerData.GodMode = false;
 
 	if (m_playerData.ID == 0)
 		m_playerData.Pos = { 0.0f , -1000.0f, 0.0f };
 	else if (m_playerData.ID == 1)
 		m_playerData.Pos = { 100.0f, -1000.0f, 0.0f };
+
+	//캐릭터일 경우 초기 룩, 라이트 벡터
+	OffLookvector = XMFLOAT3(0, 0, -1);
+	OffRightvector = XMFLOAT3(-1, 0, 0);	
 
 	//m_playerData.Pos = { static_cast<float>(rand_x), 0.0f, static_cast<float>(rand_z) , 0.0f };
 	
@@ -190,6 +199,64 @@ void Player_Session::InitData_To_Client()
 
 }
 
+void Player_Session::UpdateLookVector()
+{
+	auto wmatrix = XMMatrixIdentity();
+
+	//클라이언트에서 MouseMove를 통해 카메라를 회전할 때 마다 Rotate_status가 달라짐
+	XMFLOAT4 orient_xmfloat4 =
+	{ m_playerData.Rotate_status.x ,
+	  m_playerData.Rotate_status.y , 
+	  m_playerData.Rotate_status.z , 
+      m_playerData.Rotate_status.w };
+
+	auto quater = XMLoadFloat4(&orient_xmfloat4);
+	wmatrix *= XMMatrixRotationQuaternion(quater);
+
+	//OffLookvector 와 OffRightvector는 플레이어타입(캐릭터, 불렛, 스테틱오브젝트 등에 따라 다름)
+	auto ol = XMLoadFloat3(&OffLookvector);
+	auto or = XMLoadFloat3(&OffRightvector);
+
+	ol = XMVector4Transform(ol, wmatrix);
+	or = XMVector4Transform(or , wmatrix);
+
+	XMStoreFloat3(&Lookvector, ol);
+	XMStoreFloat3(&Rightvector, or );
+
+	if (fabsf(Lookvector.x) < MMPE_EPSILON / 10)
+		Lookvector.x = 0;
+	if (fabsf(Lookvector.y) < MMPE_EPSILON / 10)
+		Lookvector.y = 0;
+	if (fabsf(Lookvector.z) < MMPE_EPSILON / 10)
+		Lookvector.z = 0;
+
+
+	if (fabsf(Rightvector.x) < MMPE_EPSILON / 10)
+		Rightvector.x = 0;
+	if (fabsf(Rightvector.y) < MMPE_EPSILON / 10)
+		Rightvector.y = 0;
+	if (fabsf(Rightvector.z) < MMPE_EPSILON / 10)
+		Rightvector.z = 0;
+
+	Lookvector = Float3Normalize(Lookvector);
+	Rightvector = Float3Normalize(Rightvector);
+
+	GetUpvector();
+}
+
+
+void Player_Session::GetUpvector()
+{
+	XMVECTOR l = XMLoadFloat3(&Lookvector);
+	XMVECTOR r = XMLoadFloat3(&Rightvector);
+	auto u = XMVector3Cross(l, r);
+
+	XMFLOAT3 up;
+	XMStoreFloat3(&up, u);
+	up = Float3Normalize(up);
+
+	Upvector = move(up);
+}
 
 void Player_Session::SendPacket(Packet* packet)
 {
@@ -428,6 +495,8 @@ void Player_Session::ProcessPacket(Packet * packet)
 			// 1. 받은 정보를 내 클라이언트에 넣어주고
 			m_clients[Rotation_Data->id]->m_playerData.Rotate_status = move(Rotation_Data->rotate_status);
 
+			// 1 - 2. 받은 정보를 토대로 lookvector와 rightvector를 업데이트
+			m_clients[Rotation_Data->id]->UpdateLookVector();
 			//cout << "ID: " << Rotation_Data->id << " 변화된 회전값: " << "[ x, y, z, w ]: "
 			//	<< Rotation_Data->rotate_status.x << ", " << Rotation_Data->rotate_status.y << ", " << Rotation_Data->rotate_status.z << ", " << Rotation_Data->rotate_status.w << endl;
 
@@ -463,63 +532,3 @@ void Player_Session::Set_State(int state)
 		m_state = state;
 }
 
-void Player_Session::PostReceive()
-{
-	memset(&m_ReceiveBuffer, '\0', sizeof(m_ReceiveBuffer));
-	m_socket.async_read_some
-	(
-		boost::asio::buffer(m_ReceiveBuffer),
-		boost::bind(&Player_Session::handle_receive, this,
-			boost::asio::placeholders::error,
-			boost::asio::placeholders::bytes_transferred)
-	);
-}
-
-XMFLOAT3 Player_Session::GetUpvector()
-{
-	XMVECTOR l = XMLoadFloat3(&Lookvector);
-	XMVECTOR r = XMLoadFloat3(&Rightvector);
-	auto u = XMVector3Cross(l, r);
-
-	XMFLOAT3 up;
-	XMStoreFloat3(&up, u);
-	up = Float3Normalize(up);
-	return up;
-}
-
-void Player_Session::handle_write(const boost::system::error_code &, size_t)
-{
-}
-
-void Player_Session::handle_receive(const boost::system::error_code& error, size_t bytes_transferred)
-{
-	if (error)
-	{
-		if (error == boost::asio::error::eof)
-		{
-			cout << "클라이언트와 연결이 끊어졌습니다." << endl;
-		}
-		else
-		{
-			cout << "error No: " << error.value() << " error Message: " << error.message() << endl;
-		}
-	}
-	else
-	{
-		string strRecvMessage = m_ReceiveBuffer.data();
-
-		cout << "클라이언트에서 받은 메시지: " << strRecvMessage <<
-			", 받은 크기: " << bytes_transferred << endl;
-		string first_msg = "Re: ";
-		auto show_msg = first_msg + strRecvMessage;
-
-		m_WriteMessage = show_msg;
-
-		boost::asio::async_write(m_socket, boost::asio::buffer(m_WriteMessage),
-			boost::bind(&Player_Session::handle_write, this,
-				boost::asio::placeholders::error,
-				boost::asio::placeholders::bytes_transferred));
-
-		PostReceive();
-	}
-}

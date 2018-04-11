@@ -1,7 +1,8 @@
 #pragma once
 #include "stdafx.h"
-#include "Database\CTextTest.h"
 #include "Player.h"
+#include "StaticObject.h"
+#include "Database\CTextTest.h"
 #include "PhysicsEngine\MyMiniPysicsEngine.h"
 
 enum PLAYER_STATE 
@@ -13,17 +14,21 @@ enum PLAYER_STATE
 	DEAD,
 };
 
+//enum PLAYER_OBJECT_TYPE
+//{
+//	PLAYER_OBJECT,
+//	STATIC_OBJECT,
+//	BULLET_OBJECT,
+//};
+
 class Player;
+class StaticObject;
 
 class Player_Session
 {
-private:
+protected:
 	//0. 통신을 위한 소켓 정보
 	boost::asio::ip::tcp::socket m_socket;
-
-	//삭제
-	string m_WriteMessage;
-	array<char, 128> m_ReceiveBuffer;
 
 	//1. 플레이어 정보
 	unsigned short				 m_id{ 0 };
@@ -37,6 +42,7 @@ private:
 
 	Player_Data                  m_playerData;	 // 지금 이 클라이언트 객체가 관리하는 플레이어 정보(패킷으로 주고받는)
 	PLAYERS                      m_playerType;
+	//PLAYER_OBJECT_TYPE			 m_myObjType;
 
 
 	//2. 해당 클라이언트의 패킷 데이터(recv할 때 사용 )
@@ -45,44 +51,41 @@ private:
 
 
 	//3. 몬스터 정보(1. 몬스터타입)																 
-	MONSTERS m_monsterType;
+	MONSTERS				     m_monsterType;
 
 	//4. 물리효과 처리
-	RigidBody *rb = nullptr;
-	PhysicsPoint *pp = nullptr;
+	RigidBody					 *rb = nullptr;
+	PhysicsPoint				 *pp = nullptr;
 
 	//5. 고정된 물체인가
-	bool	staticobject{ false };
-	bool	AirBone{ false };
+	bool						  staticobject{ false };
 
-	//룩벡터와 라이트벡터
-	XMFLOAT3 Lookvector;//룩벡터. 오브젝트가 바라보고있는 방향.
-	XMFLOAT3 Rightvector;//라이트벡터. 오브젝트가 바라보고있는 방향의 오른쪽방향.
-	XMFLOAT3 OffLookvector;//초기룩벡터. 오브젝트가 바라보고있는 방향.
-	XMFLOAT3 OffRightvector;//초기라이트벡터. 오브젝트가 바라보고있는 방향의 오른쪽방향.
-	XMFLOAT3 GetUpvector();//룩벡터와 라이트벡터를 이용해 업벡터를 얻는함수
-	
-	bool Delobj{ false };
+	//6. 점프상태인가
+	bool						  AirBone{ false };
 
-	//삭제
-	void handle_write(const boost::system::error_code& /*error*/, size_t /*bytes_transferred*/);
+	//7. 룩벡터와 라이트벡터
+	XMFLOAT3					  Lookvector;//룩벡터. 오브젝트가 바라보고있는 방향.
+	XMFLOAT3					  Rightvector;//라이트벡터. 오브젝트가 바라보고있는 방향의 오른쪽방향.
+	XMFLOAT3					  Upvector; //업벡터
+	XMFLOAT3					  OffLookvector;//초기룩벡터. 오브젝트가 바라보고있는 방향.
+	XMFLOAT3					  OffRightvector;//초기라이트벡터. 오브젝트가 바라보고있는 방향의 오른쪽방향.
+	void						  GetUpvector();//룩벡터와 라이트벡터를 이용해 업벡터를 얻는함수
 
-	void handle_receive(const boost::system::error_code& error, size_t bytes_transferred);
-
-	// 로그인 데이터베이스
-	//CTextTest* m_ploginData;
-	//Packet *m_new_sendBuf;
-
-	//Player* m_player;
+	//8. 해당 오브젝트가 죽었나
+	bool						  Delobj{ false };
 
 public:
 	unsigned int m_cur_packet_size{ 0 };
 	unsigned int m_prev_packet_size{ 0 };
+	
+	StaticObject				  *m_staticobject{ nullptr };
+	static bool					   m_InitFirst_SObjs;
 
 public:
 	Player_Session(const int& count, boost::asio::ip::tcp::socket socket) : m_id(count), m_socket(move(socket))
 	{};
 	~Player_Session() {};
+
 
 	// ---------------------------------------------------------------------------------------
 	// [1]. 서버 통신 관련 함수
@@ -113,6 +116,10 @@ public:
 	void Init_PlayerInfo();
 	void InitData_To_Client();
 
+	void UpdateLookVector();
+
+	// 3. 움직이지 않는 오브젝트 생성 (예: 상자, 맵)
+	//void Init_StaticObject();
 
 	// ---------------------------------------------------------------------------------------
 	// [4].기타 GET - SET 함수
@@ -136,10 +143,8 @@ public:
 	// ---------------------------------------------------------------------------------------
 	// 서버에서 관리하는 클라이언트 객체들의 집합(vector 사용 - 나중에 멀쓰때 맞는 자료구조로 바꿀것)
 	static vector<Player_Session*> m_clients;
+	static list<Player_Session*> m_staticobjs;
 
-	//삭제
-	void PostReceive();
-	//void Set_MyPlayerData(Player_Data& playerdata) { m_playerData = move(playerdata); }
 };
 
 
