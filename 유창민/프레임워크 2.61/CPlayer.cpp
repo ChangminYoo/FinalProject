@@ -202,7 +202,7 @@ void CPlayer::SetPlayer(CGameObject * obj)
 //또한 항상 pp의 위치를 갱신해줘야한다.
 void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 {
-	if (PlayerObject != NULL)
+	if (PlayerObject != NULL && PlayerObject->gamedata.HP>0)
 	{
 
 		
@@ -435,8 +435,10 @@ void CPlayer::CreateBullet(ID3D12Device* Device, ID3D12GraphicsCommandList* cl,X
 		auto v = Float3Add(Goal, XMFloat4to3(PlayerObject->CenterPos), false);
 		
 		v = Float3Normalize(v);//새로운 룩벡터(발사방향)
+	    //여기서 룩벡터라 함은, 플레이어가 아니라, 총알의 룩벡터다. 모든 오브젝트는 보통 룩벡터는 0,0,1 또는 0,0,-1 인데, 날아가는 방향을 바라보도록  
+		//해야하므로 새로운 룩벡터를 필요로 하는것이다.  
 
-							   //기존 룩벡터와 새로운 룩벡터를 외적해서 방향축을 구한다.
+		//기존 룩벡터와 새로운 룩벡터를 외적해서 방향축을 구한다.
 		XMFLOAT3 l{ 0,0,1 };
 		XMVECTOR ol = XMLoadFloat3(&l);
 		XMVECTOR nl = XMLoadFloat3(&v);

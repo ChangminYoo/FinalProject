@@ -338,6 +338,8 @@ void CCubeManObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList*
 	LoadMD5Anim(m_Device, L".\\플레이어메쉬들\\cIdle.MD5ANIM",&Mesh, this, animations);//0
 	LoadMD5Anim(m_Device, L".\\플레이어메쉬들\\cRunning.MD5ANIM", &Mesh, this, animations);//1
 	LoadMD5Anim(m_Device, L".\\플레이어메쉬들\\cAttack.MD5ANIM", &Mesh, this, animations);//2
+	LoadMD5Anim(m_Device, L".\\플레이어메쉬들\\cDeath.MD5ANIM", &Mesh, this, animations);//2
+	
 	
 }
 
@@ -367,8 +369,12 @@ void CCubeManObject::Tick(const GameTimer & gt)
 		}
 	}
 	TickValue += 1;
-
 	
+}
+
+void CCubeManObject::ToDead()
+{
+	SetAnimation(Ani_State::Dead);
 }
 
 void CCubeManObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer& gt)
@@ -443,6 +449,9 @@ void CCubeManObject::Collision(list<CGameObject*>* collist, float DeltaTime)
 		}
 	}
 }
+
+
+
 void CCubeManObject::EndAnimation(int nAni)
 {
 	
@@ -452,6 +461,10 @@ void CCubeManObject::EndAnimation(int nAni)
 
 	}
 	
+	if (nAni == Ani_State::Dead)//죽는모션이었으면
+	{
+		DelObj = true;
+	}
 }
 
 
@@ -682,8 +695,7 @@ BulletCube::BulletCube(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 	LifeTime = 10;
 	Master = master;
 	LockOn = lockon;
-	ParticleTime = 0.5f;
-
+	
 	//광선충돌 검사용 육면체
 	XMFLOAT3 rx(1, 0, 0);
 	XMFLOAT3 ry(0, 1, 0);
@@ -698,7 +710,18 @@ BulletCube::BulletCube(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 	pp->SetBounce(false);//튕기지 않는다.
 	pp->SetVelocity(Lookvector.x*gamedata.Speed, Lookvector.y*gamedata.Speed, Lookvector.z*gamedata.Speed);//룩벡터로 날아감
 
+	if (ParticleList != NULL)
+	{
+		BulletParticles = new ParticleObject(m_Device, commandlist, ParticleList, this, XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, 0));
+		ParticleList->push_back(BulletParticles);
+	}
 
+}
+
+BulletCube::~BulletCube()
+{
+	if (BulletParticles != NULL)
+		BulletParticles->DelObj = true;
 }
 
 
@@ -707,7 +730,7 @@ void BulletCube::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList* com
 
 	//모델 로드
 	//LoadMD5Model(L".\\플레이어메쉬들\\Cube.MD5MESH", &Mesh, 0, 1);
-	CreateCube(&Mesh, 2);
+	CreateCube(&Mesh, 2, 2, 2);
 	//
 	Mesh.SetNormal(false);
 	Mesh.CreateVertexBuffer(m_Device, commandlist);
@@ -734,9 +757,9 @@ void BulletCube::Tick(const GameTimer & gt)
 
 	//No애니메이션!
 
-
 	//투사체는 생명 주기가 있어야 한다.
 	LifeTime -= gt.DeltaTime();
+
 	if (LifeTime <= 0)
 		DelObj = true;
 
@@ -951,7 +974,7 @@ CubeObject::CubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 
 void CubeObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
 {
-	CreateCube(&Mesh, 1);
+	CreateCube(&Mesh, 1,1,1);
 
 	//모델 로드
 	//LoadMD5Model(L".\\플레이어메쉬들\\Cube.MD5MESH", &Mesh, 0, 1);
@@ -1023,10 +1046,9 @@ GridObject::GridObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 
 void GridObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
 {
-	CreateGrid(&Mesh, 800.0f, 800.0f);
-	//CreateTile(&Mesh, 50);
+	//CreateGrid(&Mesh, 800.0f, 800.0f);
+	CreatePentagon(&Mesh, 800.0f);
 
-	//Mesh.SetNormal(false);
 	Mesh.CreateVertexBuffer(m_Device, commandlist);
 	Mesh.CreateIndexBuffer(m_Device, commandlist);
 }
@@ -1064,8 +1086,9 @@ ParticleObject::ParticleObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 {
 
 	ObjData.isAnimation = 0;
-	ObjData.Scale = 1.0f;
+	ObjData.Scale = 2.0f;
 	ObjData.SpecularParamater = 0.3f;//스페큘러를 낮게준다.
+	ObjData.CustomData1.x = 2;
 	Master = master;
 
 	//게임관련 데이터들
@@ -1086,14 +1109,14 @@ ParticleObject::ParticleObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 
 	}
 
-	Lookvector.x = -(Master->Lookvector.x); Lookvector.y = (Master->Lookvector.y); Lookvector.z = -(Master->Lookvector.z);
+	Lookvector.x = -(Master->Lookvector.x); Lookvector.y = -(Master->Lookvector.y); Lookvector.z = -(Master->Lookvector.z);
 	Lookvector = Float3Normalize(Lookvector);
 
 }
 
 void ParticleObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
 {
-	UINT numOfParticle = 2;
+	UINT numOfParticle = 10;
 
 	Mesh.SubResource = new CVertex[numOfParticle];
 	Mesh.nVertex = numOfParticle;
@@ -1127,21 +1150,20 @@ void ParticleObject::Tick(const GameTimer & gt)
 {
 	XMFLOAT3 Velocity = XMFLOAT3(Lookvector.x * gamedata.Speed, Lookvector.y * gamedata.Speed, Lookvector.z * gamedata.Speed);
 
-	float temp = gt.DeltaTime() + 1;
-	float newTime = 0;
+	LifeTime -= gt.DeltaTime();
+
+	if (LifeTime <= 0.0f)
+	{
+		CenterPos = Master->CenterPos;	
+		LifeTime = 1.0f;
+	}
 
 	CenterPos.x = CenterPos.x + (Velocity.x * gt.DeltaTime());
 	CenterPos.y = CenterPos.y + (Velocity.y * gt.DeltaTime());
 	CenterPos.z = CenterPos.z + (Velocity.z * gt.DeltaTime());
 
-	CenterPos.x += cosf(gt.DeltaTime() * MMPE_PI  * (rand() + 5));
-	CenterPos.y *= -(0.98f);
-	CenterPos.z += sinf(gt.DeltaTime() * MMPE_PI  * (rand() + 3));
-
-	LifeTime -= gt.DeltaTime();
-
-	if (LifeTime <= 0.0f)
-		DelObj = true;
+	ObjData.CustomData1.w = rand()%RAND_MAX;
+	ObjData.PTime = gt.DeltaTime();
 
 }
 
@@ -1294,9 +1316,11 @@ void DamageObject::Collision(list<CGameObject*>* collist, float DeltaTime)
 
 
 //-------------------------------------물체 만들기------------------------------------------------
-void CreateCube(CMesh * Mesh, float size)
+void CreateCube(CMesh * Mesh, float sizex, float sizey, float sizez)
 {
-	float half = 0.5 * size;
+	float halfx = 0.5 * sizex;
+	float halfy = 0.5 * sizey;
+	float halfz = 0.5 * sizez;
 
 	Mesh->SubResource = new CVertex[24];
 	Mesh->nVertex = 24;
@@ -1304,21 +1328,21 @@ void CreateCube(CMesh * Mesh, float size)
 	Mesh->nOffset = 0;
 
 	//front
-	Mesh->SubResource[0].V = XMFLOAT3(-half, -half, -half);
-	Mesh->SubResource[1].V = XMFLOAT3(-half, +half, -half);
-	Mesh->SubResource[2].V = XMFLOAT3(+half, +half, -half);
-	Mesh->SubResource[3].V = XMFLOAT3(+half, -half, -half);
-	
+	Mesh->SubResource[0].V = XMFLOAT3(-halfx, -halfy, -halfz);
+	Mesh->SubResource[1].V = XMFLOAT3(-halfx, +halfy, -halfz);
+	Mesh->SubResource[2].V = XMFLOAT3(+halfx, +halfy, -halfz);
+	Mesh->SubResource[3].V = XMFLOAT3(+halfx, -halfy, -halfz);
+
 	Mesh->SubResource[0].Tex = XMFLOAT2(0, 1);
 	Mesh->SubResource[1].Tex = XMFLOAT2(0, 0);
 	Mesh->SubResource[2].Tex = XMFLOAT2(1, 0);
 	Mesh->SubResource[3].Tex = XMFLOAT2(1, 1);
-	
+
 	//back
-	Mesh->SubResource[4].V = XMFLOAT3(-half, -half, +half);
-	Mesh->SubResource[5].V = XMFLOAT3(+half, -half, +half);
-	Mesh->SubResource[6].V = XMFLOAT3(+half, +half, +half);
-	Mesh->SubResource[7].V = XMFLOAT3(-half, +half, +half);
+	Mesh->SubResource[4].V = XMFLOAT3(-halfx, -halfy, +halfz);
+	Mesh->SubResource[5].V = XMFLOAT3(+halfx, -halfy, +halfz);
+	Mesh->SubResource[6].V = XMFLOAT3(+halfx, +halfy, +halfz);
+	Mesh->SubResource[7].V = XMFLOAT3(-halfx, +halfy, +halfz);
 
 	Mesh->SubResource[4].Tex = XMFLOAT2(1, 1);
 	Mesh->SubResource[5].Tex = XMFLOAT2(0, 1);
@@ -1326,10 +1350,10 @@ void CreateCube(CMesh * Mesh, float size)
 	Mesh->SubResource[7].Tex = XMFLOAT2(1, 0);
 
 	//top
-	Mesh->SubResource[8].V = XMFLOAT3(-half, +half, -half);
-	Mesh->SubResource[9].V = XMFLOAT3(-half, +half, +half);
-	Mesh->SubResource[10].V = XMFLOAT3(+half, +half, +half);
-	Mesh->SubResource[11].V = XMFLOAT3(+half, +half, -half);
+	Mesh->SubResource[8].V = XMFLOAT3(-halfx, +halfy, -halfz);
+	Mesh->SubResource[9].V = XMFLOAT3(-halfx, +halfy, +halfz);
+	Mesh->SubResource[10].V = XMFLOAT3(+halfx, +halfy, +halfz);
+	Mesh->SubResource[11].V = XMFLOAT3(+halfx, +halfy, -halfz);
 
 	Mesh->SubResource[8].Tex = XMFLOAT2(0, 1);
 	Mesh->SubResource[9].Tex = XMFLOAT2(0, 0);
@@ -1338,10 +1362,10 @@ void CreateCube(CMesh * Mesh, float size)
 
 
 	//bottom
-	Mesh->SubResource[12].V = XMFLOAT3(-half, -half, -half);
-	Mesh->SubResource[13].V = XMFLOAT3(+half, -half, -half);
-	Mesh->SubResource[14].V = XMFLOAT3(+half, -half, +half);
-	Mesh->SubResource[15].V = XMFLOAT3(-half, -half, +half);
+	Mesh->SubResource[12].V = XMFLOAT3(-halfx, -halfy, -halfz);
+	Mesh->SubResource[13].V = XMFLOAT3(+halfx, -halfy, -halfz);
+	Mesh->SubResource[14].V = XMFLOAT3(+halfx, -halfy, +halfz);
+	Mesh->SubResource[15].V = XMFLOAT3(-halfx, -halfy, +halfz);
 
 	Mesh->SubResource[12].Tex = XMFLOAT2(1, 1);
 	Mesh->SubResource[13].Tex = XMFLOAT2(0, 1);
@@ -1349,21 +1373,21 @@ void CreateCube(CMesh * Mesh, float size)
 	Mesh->SubResource[15].Tex = XMFLOAT2(1, 0);
 
 	//left
-	Mesh->SubResource[16].V = XMFLOAT3(-half, -half, +half);
-	Mesh->SubResource[17].V = XMFLOAT3(-half, +half, +half);
-	Mesh->SubResource[18].V = XMFLOAT3(-half, +half, -half);
-	Mesh->SubResource[19].V = XMFLOAT3(-half, -half, -half);
-	
+	Mesh->SubResource[16].V = XMFLOAT3(-halfx, -halfy, +halfz);
+	Mesh->SubResource[17].V = XMFLOAT3(-halfx, +halfy, +halfz);
+	Mesh->SubResource[18].V = XMFLOAT3(-halfx, +halfy, -halfz);
+	Mesh->SubResource[19].V = XMFLOAT3(-halfx, -halfy, -halfz);
+
 	Mesh->SubResource[16].Tex = XMFLOAT2(0, 1);
 	Mesh->SubResource[17].Tex = XMFLOAT2(0, 0);
 	Mesh->SubResource[18].Tex = XMFLOAT2(1, 0);
 	Mesh->SubResource[19].Tex = XMFLOAT2(1, 1);
 
 	//right
-	Mesh->SubResource[20].V = XMFLOAT3(+half, -half, -half);
-	Mesh->SubResource[21].V = XMFLOAT3(+half, +half, -half);
-	Mesh->SubResource[22].V = XMFLOAT3(+half, +half, +half);
-	Mesh->SubResource[23].V = XMFLOAT3(+half, -half, +half);
+	Mesh->SubResource[20].V = XMFLOAT3(+halfx, -halfy, -halfz);
+	Mesh->SubResource[21].V = XMFLOAT3(+halfx, +halfy, -halfz);
+	Mesh->SubResource[22].V = XMFLOAT3(+halfx, +halfy, +halfz);
+	Mesh->SubResource[23].V = XMFLOAT3(+halfx, -halfy, +halfz);
 
 	Mesh->SubResource[20].Tex = XMFLOAT2(0, 1);
 	Mesh->SubResource[21].Tex = XMFLOAT2(0, 0);
@@ -1386,10 +1410,10 @@ void CreateCube(CMesh * Mesh, float size)
 
 	Mesh->Index[18] = 12; Mesh->Index[19] = 13; Mesh->Index[20] = 14;
 	Mesh->Index[21] = 12; Mesh->Index[22] = 14; Mesh->Index[23] = 15;
-						 					  
+
 	Mesh->Index[24] = 16; Mesh->Index[25] = 17; Mesh->Index[26] = 18;
 	Mesh->Index[27] = 16; Mesh->Index[28] = 18; Mesh->Index[29] = 19;
-						 					  
+
 	Mesh->Index[30] = 20; Mesh->Index[31] = 21; Mesh->Index[32] = 22;
 	Mesh->Index[33] = 20; Mesh->Index[34] = 22; Mesh->Index[35] = 23;
 
@@ -1456,45 +1480,78 @@ void CreateGrid(CMesh* Mesh, float width, float depth)
 
 }
 
-void CreateTile(CMesh* Mesh, float size, float sizey)
+void CreatePentagon(CMesh* Mesh, float size, float sizey)
 {
-	Mesh->SubResource = new CVertex[4];
-	Mesh->nVertex = 4;
+	float half = 0.5 * size;
+	float y = 0.0f;
+	float z = half / 1.732050f;
+
+	Mesh->SubResource = new CVertex[15];
+	Mesh->nVertex = 15;
 	Mesh->nStride = sizeof(CVertex);
 	Mesh->nOffset = 0;
 
-	if (sizey == 0)
-	{
-		float half = size / 2;
 
-		Mesh->SubResource[0].V = XMFLOAT3(-half, 0, -half);
-		Mesh->SubResource[1].V = XMFLOAT3(-half, 0, +half);
-		Mesh->SubResource[2].V = XMFLOAT3(+half, 0, +half);
-		Mesh->SubResource[3].V = XMFLOAT3(+half, 0, -half);
-	}
-	else
-	{
-		float half = size / 2;
-		float halfy = sizey / 2;
+	Mesh->SubResource[0].V = XMFLOAT3(-half, y, z);
+	Mesh->SubResource[1].V = XMFLOAT3(0, y, half);
+	Mesh->SubResource[2].V = XMFLOAT3(0, y, 0);
 
-		Mesh->SubResource[0].V = XMFLOAT3(-half, 0, -halfy);
-		Mesh->SubResource[1].V = XMFLOAT3(-half, 0, +halfy);
-		Mesh->SubResource[2].V = XMFLOAT3(+half, 0, +halfy);
-		Mesh->SubResource[3].V = XMFLOAT3(+half, 0, -halfy);
-
-	}
-	Mesh->SubResource[0].Tex = XMFLOAT2(0, 1);
-	Mesh->SubResource[1].Tex = XMFLOAT2(0, 0);
+	Mesh->SubResource[0].Tex = XMFLOAT2(0, 0);
+	Mesh->SubResource[1].Tex = XMFLOAT2(1, 1);
 	Mesh->SubResource[2].Tex = XMFLOAT2(1, 0);
-	Mesh->SubResource[3].Tex = XMFLOAT2(1, 1);
 
-	Mesh->Index = new UINT[6];
-	Mesh->nindex = 6;
+	//
+	Mesh->SubResource[3].V = XMFLOAT3(0, y, 0);
+	Mesh->SubResource[4].V = XMFLOAT3(0, y, half);
+	Mesh->SubResource[5].V = XMFLOAT3(half, y, z);
+	
+	Mesh->SubResource[3].Tex = XMFLOAT2(1, 0);
+	Mesh->SubResource[4].Tex = XMFLOAT2(0, 0);
+	Mesh->SubResource[5].Tex = XMFLOAT2(1, 1);
+	
+	//
+	Mesh->SubResource[6].V = XMFLOAT3(half*0.5f, y, -half);
+	Mesh->SubResource[7].V = XMFLOAT3(0, y, 0);
+	Mesh->SubResource[8].V = XMFLOAT3(half, y, z);
+	
+	Mesh->SubResource[6].Tex = XMFLOAT2(1, 0);
+	Mesh->SubResource[7].Tex = XMFLOAT2(0, 0);
+	Mesh->SubResource[8].Tex = XMFLOAT2(1, 1);
+
+	//
+	Mesh->SubResource[9] = XMFLOAT3(-half * 0.5f, y, -half);
+	Mesh->SubResource[10] = XMFLOAT3(0, y, 0);
+	Mesh->SubResource[11] = XMFLOAT3(half*0.5f, y, -half);
+	
+	Mesh->SubResource[9].Tex = XMFLOAT2(0, 0);
+	Mesh->SubResource[10].Tex = XMFLOAT2(1, 1);
+	Mesh->SubResource[11].Tex = XMFLOAT2(1, 0);
+	
+	//
+	Mesh->SubResource[12] = XMFLOAT3(-half, y, z);
+	Mesh->SubResource[13] = XMFLOAT3(0, y, 0);
+	Mesh->SubResource[14] = XMFLOAT3(-half*0.5f, y, -half);
+
+	Mesh->SubResource[12].Tex = XMFLOAT2(0, 0);
+	Mesh->SubResource[13].Tex = XMFLOAT2(1, 1);
+	Mesh->SubResource[14].Tex = XMFLOAT2(1, 0);
+
+
+
+	Mesh->Index = new UINT[15];
+	Mesh->nindex = 15;
 	Mesh->nioffset = 0;
 	Mesh->nisize = sizeof(UINT);
 
-	Mesh->Index[0] = 0; Mesh->Index[1] = 1; Mesh->Index[2] = 2;
-	Mesh->Index[3] = 0; Mesh->Index[4] = 2; Mesh->Index[5] = 3;
+	Mesh->Index[0] = 0; Mesh->Index[1] = 1; Mesh->Index[2] = 2;	
+	Mesh->Index[3] = 3; Mesh->Index[4] = 4; Mesh->Index[5] =5;
+	Mesh->Index[6] = 6; Mesh->Index[7] = 7; Mesh->Index[8] = 8;
+	Mesh->Index[9] = 9; Mesh->Index[10] = 10; Mesh->Index[11] = 11;
+	Mesh->Index[12] = 12; Mesh->Index[13] = 13; Mesh->Index[14] = 14;
+
+
+
+
 }
 
 RigidCubeObject::RigidCubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist , list<CGameObject*>*Plist, XMFLOAT4 cp) : CGameObject(m_Device, commandlist,   Plist, cp)
@@ -1571,7 +1628,7 @@ void RigidCubeObject::Tick(const GameTimer & gt)
 
 void RigidCubeObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
 {
-	CreateCube(&Mesh, 1);
+	CreateCube(&Mesh, 1,1,1);
 
 	Mesh.SetNormal(false);
 	Mesh.CreateVertexBuffer(m_Device, commandlist);
@@ -1606,6 +1663,24 @@ void RigidCubeObject::Render(ID3D12GraphicsCommandList * commandlist, const Game
 void RigidCubeObject::Collision(list<CGameObject*>* collist, float DeltaTime)
 {
 	//이후에 추가해야한다.
+
+	CollisionList = collist;
+	//충돌리스트의 모든 요소와 충돌검사를 실시한다.
+	for (auto i = CollisionList->begin(); i != CollisionList->end(); i++)
+	{
+
+		if (*i != this)
+		{
+
+			bool test = rb->CollisionTest(*(*i)->rb, Lookvector, Rightvector, GetUpvector(), (*i)->Lookvector, (*i)->Rightvector, (*i)->GetUpvector());
+
+			if (test)//충돌했으면 충돌해소를 해야한다.
+			{
+				rb->ResolvePenetration(*(*i)->rb, DeltaTime);
+
+			}
+		}
+	}
 }
 
 
@@ -1764,6 +1839,9 @@ void BarObject::Tick(const GameTimer & gt)
 	//hp를 넣어주어서 shader에서 스케일크기만큼 바를 만든다. 
 	
 	//HP바는 커스텀데이터 y를 사용하며 여기에 마스터 HP 비율을 넣음.
+	if (Master->gamedata.HP <= 0)
+		Master->gamedata.HP = 0;
+
 	ObjData.CustomData1.y = Master->gamedata.HP/Master->gamedata.MAXHP;
 	CenterPos.x = Master->CenterPos.x; CenterPos.y = Master->CenterPos.y + 10; CenterPos.z = Master->CenterPos.z;
 }
@@ -1798,3 +1876,311 @@ void BarObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer 
 void BarObject::Collision(list<CGameObject*>* collist, float DeltaTime)
 {
 }
+
+//================================벽오브젝트=======================================
+
+
+SmallWallObject::SmallWallObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
+{
+
+	if (CreateMesh == false)
+	{
+
+		Mesh.Index = NULL;
+		Mesh.SubResource = NULL;
+
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "CubeTex", L"textures/object/bricks.dds", false);
+		SetMesh(m_Device, commandlist);
+		SetMaterial(m_Device, commandlist);
+		CreateMesh = true;
+
+	}
+
+	//게임오브젝트마다 룩벡터와 라이트벡터가 다르므로 초기 오프셋 설정을 해준다.
+	//실제 룩벡터 등은 모두 UpdateLookVector에서 처리된다(라이트벡터도) 따라서 Tick함수에서 반드시 호출해야한다.
+	OffLookvector = XMFLOAT3(0, 0, 1);
+	OffRightvector = XMFLOAT3(1, 0, 0);
+
+	UpdateLookVector();
+	ObjData.isAnimation = 0;
+	ObjData.Scale = 10.0f;
+	ObjData.SpecularParamater = 0.0f;//스페큘러를 낮게준다.
+
+
+
+									 //게임관련 데이터들
+	gamedata.MAXHP = 100;
+	gamedata.HP = 100;
+	gamedata.Damage = 0;
+	gamedata.GodMode = true;
+	gamedata.Speed = 0;
+	staticobject = true;
+
+	//광선충돌 검사용 육면체
+	XMFLOAT3 rx(20, 0, 0);
+	XMFLOAT3 ry(0, 10, 0);
+	XMFLOAT3 rz(0, 0, 5);
+	rco.SetPlane(rx, ry, rz);
+
+	//질점오브젝트 사용시 필요한 데이터들 설정
+	pp = new PhysicsPoint();
+	pp->SetPosition(CenterPos);//이 값은 항상 갱신되야한다.
+	pp->SetHalfBox(20, 10, 5);//충돌 박스의 x,y,z 크기
+	pp->SetDamping(0.5f);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
+	pp->SetBounce(false);//튕기지 않는다.
+	pp->SetMass(INFINITY);//고정된 물체는 무게가 무한이다.
+
+						  //테스트용 리지드 바디
+						  //rb = new RigidBody();
+						  //rb->SetPosition(&CenterPos);//이 값은 항상 갱신되야한다.
+						  //rb->SetHalfBox(5, 5, 5);//충돌 박스의 x,y,z 크기
+						  //rb->SetDamping(0.8f, 0.8f);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
+						  //rb->SetBounce(false);//튕기지 않는다.
+						  //rb->SetMass(5);//고정된 물체는 무게가 무한이다.
+						  //rb->SetIMoment(5, 5, 5);
+						  //rb->SetOrient(&Orient);
+						  //XMFLOAT3 testForce{ 0,0,1000 };
+						  //XMFLOAT3 testPoint{ -15,0,-5 };
+						  //rb->AddForcePoint(testForce, testPoint);
+}
+
+void SmallWallObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
+{
+	CreateCube(&Mesh, 4, 2, 1);
+
+	//모델 로드
+	//LoadMD5Model(L".\\플레이어메쉬들\\Cube.MD5MESH", &Mesh, 0, 1);
+	//
+	Mesh.SetNormal(false);
+	Mesh.CreateVertexBuffer(m_Device, commandlist);
+	Mesh.CreateIndexBuffer(m_Device, commandlist);
+
+}
+
+void SmallWallObject::SetMaterial(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
+{
+	if (Mat.ConstBuffer == NULL)
+		Mat.ConstBuffer = new UploadBuffer<MaterialData>(m_Device, 1, true);
+
+
+	Mat.MatData.Roughness = 0.2f;
+}
+
+void SmallWallObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer & gt)
+{
+	//게임오브젝트의 렌더링은 간단하다. 
+	//텍스처를 연결하고, 월드행렬을 연결한다.
+
+	if (Textures.size()>0)
+		SetTexture(commandlist, SrvDescriptorHeap, Textures["CubeTex"].get()->Resource.Get(), false);
+	UpdateConstBuffer(commandlist);
+
+	//이후 그린다.
+
+	Mesh.Render(commandlist);
+}
+
+
+
+
+BigWallObject::BigWallObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
+{
+
+	if (CreateMesh == false)
+	{
+
+		Mesh.Index = NULL;
+		Mesh.SubResource = NULL;
+
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "CubeTex", L"textures/object/bricks.dds", false);
+		SetMesh(m_Device, commandlist);
+		SetMaterial(m_Device, commandlist);
+		CreateMesh = true;
+
+	}
+
+	//게임오브젝트마다 룩벡터와 라이트벡터가 다르므로 초기 오프셋 설정을 해준다.
+	//실제 룩벡터 등은 모두 UpdateLookVector에서 처리된다(라이트벡터도) 따라서 Tick함수에서 반드시 호출해야한다.
+	OffLookvector = XMFLOAT3(0, 0, 1);
+	OffRightvector = XMFLOAT3(1, 0, 0);
+
+	UpdateLookVector();
+	ObjData.isAnimation = 0;
+	ObjData.Scale = 10.0f;
+	ObjData.SpecularParamater = 0.0f;//스페큘러를 낮게준다.
+
+
+
+									 //게임관련 데이터들
+	gamedata.MAXHP = 100;
+	gamedata.HP = 100;
+	gamedata.Damage = 0;
+	gamedata.GodMode = true;
+	gamedata.Speed = 0;
+	staticobject = true;
+
+	//광선충돌 검사용 육면체
+	XMFLOAT3 rx(80, 0, 0);
+	XMFLOAT3 ry(0, 80, 0);
+	XMFLOAT3 rz(0, 0, 5);
+	rco.SetPlane(rx, ry, rz);
+
+	//질점오브젝트 사용시 필요한 데이터들 설정
+	pp = new PhysicsPoint();
+	pp->SetPosition(CenterPos);//이 값은 항상 갱신되야한다.
+	pp->SetHalfBox(80, 80, 5);//충돌 박스의 x,y,z 크기
+	pp->SetDamping(0.5f);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
+	pp->SetBounce(false);//튕기지 않는다.
+	pp->SetMass(INFINITY);//고정된 물체는 무게가 무한이다.
+
+						  //테스트용 리지드 바디
+						  //rb = new RigidBody();
+						  //rb->SetPosition(&CenterPos);//이 값은 항상 갱신되야한다.
+						  //rb->SetHalfBox(5, 5, 5);//충돌 박스의 x,y,z 크기
+						  //rb->SetDamping(0.8f, 0.8f);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
+						  //rb->SetBounce(false);//튕기지 않는다.
+						  //rb->SetMass(5);//고정된 물체는 무게가 무한이다.
+						  //rb->SetIMoment(5, 5, 5);
+						  //rb->SetOrient(&Orient);
+						  //XMFLOAT3 testForce{ 0,0,1000 };
+						  //XMFLOAT3 testPoint{ -15,0,-5 };
+						  //rb->AddForcePoint(testForce, testPoint);
+}
+
+void BigWallObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
+{
+	CreateCube(&Mesh, 16, 16, 1);
+
+	//모델 로드
+	//LoadMD5Model(L".\\플레이어메쉬들\\Cube.MD5MESH", &Mesh, 0, 1);
+	//
+	Mesh.SetNormal(false);
+	Mesh.CreateVertexBuffer(m_Device, commandlist);
+	Mesh.CreateIndexBuffer(m_Device, commandlist);
+
+}
+
+void BigWallObject::SetMaterial(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
+{
+	if (Mat.ConstBuffer == NULL)
+		Mat.ConstBuffer = new UploadBuffer<MaterialData>(m_Device, 1, true);
+
+
+	Mat.MatData.Roughness = 0.2f;
+}
+
+void BigWallObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer & gt)
+{
+	//게임오브젝트의 렌더링은 간단하다. 
+	//텍스처를 연결하고, 월드행렬을 연결한다.
+
+	if (Textures.size()>0)
+		SetTexture(commandlist, SrvDescriptorHeap, Textures["CubeTex"].get()->Resource.Get(), false);
+	UpdateConstBuffer(commandlist);
+
+	//이후 그린다.
+
+	Mesh.Render(commandlist);
+}
+
+
+BuildingObject::BuildingObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
+{
+
+	if (CreateMesh == false)
+	{
+
+		Mesh.Index = NULL;
+		Mesh.SubResource = NULL;
+
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "CubeTex", L"textures/object/bricks.dds", false);
+		SetMesh(m_Device, commandlist);
+		SetMaterial(m_Device, commandlist);
+		CreateMesh = true;
+
+	}
+
+	//게임오브젝트마다 룩벡터와 라이트벡터가 다르므로 초기 오프셋 설정을 해준다.
+	//실제 룩벡터 등은 모두 UpdateLookVector에서 처리된다(라이트벡터도) 따라서 Tick함수에서 반드시 호출해야한다.
+	OffLookvector = XMFLOAT3(0, 0, 1);
+	OffRightvector = XMFLOAT3(1, 0, 0);
+
+	UpdateLookVector();
+	ObjData.isAnimation = 0;
+	ObjData.Scale = 10.0f;
+	ObjData.SpecularParamater = 0.0f;//스페큘러를 낮게준다.
+
+
+
+									 //게임관련 데이터들
+	gamedata.MAXHP = 100;
+	gamedata.HP = 100;
+	gamedata.Damage = 0;
+	gamedata.GodMode = true;
+	gamedata.Speed = 0;
+	staticobject = true;
+
+	//광선충돌 검사용 육면체
+	XMFLOAT3 rx(20, 0, 0);
+	XMFLOAT3 ry(0, 45, 0);
+	XMFLOAT3 rz(0, 0, 20);
+	rco.SetPlane(rx, ry, rz);
+
+	//질점오브젝트 사용시 필요한 데이터들 설정
+	pp = new PhysicsPoint();
+	pp->SetPosition(CenterPos);//이 값은 항상 갱신되야한다.
+	pp->SetHalfBox(20, 45, 20);//충돌 박스의 x,y,z 크기
+	pp->SetDamping(0.5f);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
+	pp->SetBounce(false);//튕기지 않는다.
+	pp->SetMass(INFINITY);//고정된 물체는 무게가 무한이다.
+
+						  //테스트용 리지드 바디
+						  //rb = new RigidBody();
+						  //rb->SetPosition(&CenterPos);//이 값은 항상 갱신되야한다.
+						  //rb->SetHalfBox(5, 5, 5);//충돌 박스의 x,y,z 크기
+						  //rb->SetDamping(0.8f, 0.8f);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
+						  //rb->SetBounce(false);//튕기지 않는다.
+						  //rb->SetMass(5);//고정된 물체는 무게가 무한이다.
+						  //rb->SetIMoment(5, 5, 5);
+						  //rb->SetOrient(&Orient);
+						  //XMFLOAT3 testForce{ 0,0,1000 };
+						  //XMFLOAT3 testPoint{ -15,0,-5 };
+						  //rb->AddForcePoint(testForce, testPoint);
+}
+
+void BuildingObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
+{
+	CreateCube(&Mesh, 4, 9, 4);
+
+	//모델 로드
+	//LoadMD5Model(L".\\플레이어메쉬들\\Cube.MD5MESH", &Mesh, 0, 1);
+	//
+	Mesh.SetNormal(false);
+	Mesh.CreateVertexBuffer(m_Device, commandlist);
+	Mesh.CreateIndexBuffer(m_Device, commandlist);
+
+}
+
+void BuildingObject::SetMaterial(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
+{
+	if (Mat.ConstBuffer == NULL)
+		Mat.ConstBuffer = new UploadBuffer<MaterialData>(m_Device, 1, true);
+
+
+	Mat.MatData.Roughness = 0.2f;
+}
+
+void BuildingObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer & gt)
+{
+	//게임오브젝트의 렌더링은 간단하다. 
+	//텍스처를 연결하고, 월드행렬을 연결한다.
+
+	if (Textures.size()>0)
+		SetTexture(commandlist, SrvDescriptorHeap, Textures["CubeTex"].get()->Resource.Get(), false);
+	UpdateConstBuffer(commandlist);
+
+	//이후 그린다.
+
+	Mesh.Render(commandlist);
+}
+

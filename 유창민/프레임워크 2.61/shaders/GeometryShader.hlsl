@@ -35,6 +35,13 @@ VertexOut VS(VertexIn vin)
 	vout.Pos = mul(vout.Pos, gView);
 
 
+	if (CustomData1.x == 2)//총알 파티클
+	{
+		vout.Pos.x += cos((PTime + CustomData1.w)*3.141592);
+		vout.Pos.z += sin((PTime + CustomData1.w)*3.141592);
+	}
+
+
 	return vout;
 
 }
@@ -47,15 +54,21 @@ void GS(point VertexOut gin[1], inout TriangleStream<GeoOut> triStream)
 	float halfHeight;										
 	
 
-	if (CustomData1.x == 0)//정체성 0:데미지등, 1: hp바
+	//CustomData1.x : 파티클의 정체성
+	if (CustomData1.x == 0)//데미지
 	{
 		halfWidth = 0.5f * Scale;
 		halfHeight = 0.5f * Scale;
 	}
-	else if (CustomData1.x == 1)
+	else if (CustomData1.x == 1)//HP바
 	{
 		halfWidth = 0.5f * Scale*CustomData1.y;
 		halfHeight = 0.1f * Scale * 0.7;
+	}
+	else if (CustomData1.x == 2)//총알 파티클
+	{
+		halfWidth = 0.5f * Scale;
+		halfHeight = 0.5f * Scale;
 	}
 
 

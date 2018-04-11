@@ -412,90 +412,90 @@ void FrameWork::OnMouseDown(WPARAM btnState, int x, int y)
 {
 	
 	//레이를 쏜다.
-	
-	//공격 애니메이션으로 전환
-	scene->Player->PlayerObject->SetAnimation(2);
-	auto RAY=MousePicking(x, y,scene->Player->Camera.CamData.EyePos, scene->Player->Camera.CamData.View,scene->Player->Camera.CamData.Proj);
-	XMFLOAT3 savepoint;
+	if (scene->Player->PlayerObject->gamedata.HP > 0)
+	{//공격 애니메이션으로 전환
+		scene->Player->PlayerObject->SetAnimation(2);
+		auto RAY = MousePicking(x, y, scene->Player->Camera.CamData.EyePos, scene->Player->Camera.CamData.View, scene->Player->Camera.CamData.Proj);
+		XMFLOAT3 savepoint;
 
-	bool Shot = false;
-	//여기에 모든 오브젝트리스트들을 돌아가면서 검사를 한다.
-	for (auto b = scene->DynamicObject.begin(); b != scene->DynamicObject.end(); b++)
-	{
-		if ((*b) != scene->Player->PlayerObject)//플레이어가 아닐경우
+		bool Shot = false;
+		//여기에 모든 오브젝트리스트들을 돌아가면서 검사를 한다.
+		for (auto b = scene->DynamicObject.begin(); b != scene->DynamicObject.end(); b++)
 		{
-			//광선의 길이보다 가까울때
-			if (FloatLength(Float4Add(scene->Player->PlayerObject->CenterPos, (*b)->CenterPos)) <= MAXRAYLEN)
+			if ((*b) != scene->Player->PlayerObject)//플레이어가 아닐경우
 			{
-
-
-				if ((*b)->rco.RayCasting(RAY.RayOrgin, RAY.RayDir, XMFloat4to3((*b)->CenterPos), XMFloat4to3(scene->Player->PlayerObject->CenterPos),
-					scene->Player->PlayerObject->Lookvector, &savepoint) == true&& Shot == false)//광선이 다른 오브젝트를 맞출경우
+				//광선의 길이보다 가까울때
+				if (FloatLength(Float4Add(scene->Player->PlayerObject->CenterPos, (*b)->CenterPos)) <= MAXRAYLEN)
 				{
-					//여기서 뭔가를 처리한다.
-					//플레이어가 현재 사용할 투사체 넘버를 통해 자체적으로 투사체를 생성해서 불렛오브젝트 리스트에 저장함.
-					scene->Player->CreateBullet(Device.Get(), mCommandList.Get(), savepoint, (*b), &scene->BulletObject);
-					Shot = true;
+
+
+					if ((*b)->rco.RayCasting(RAY.RayOrgin, RAY.RayDir, XMFloat4to3((*b)->CenterPos), XMFloat4to3(scene->Player->PlayerObject->CenterPos),
+						scene->Player->PlayerObject->Lookvector, &savepoint) == true && Shot == false)//광선이 다른 오브젝트를 맞출경우
+					{
+						//여기서 뭔가를 처리한다.
+						//플레이어가 현재 사용할 투사체 넘버를 통해 자체적으로 투사체를 생성해서 불렛오브젝트 리스트에 저장함.
+						scene->Player->CreateBullet(Device.Get(), mCommandList.Get(), savepoint, (*b), &scene->BulletObject);
+						Shot = true;
+					}
 				}
 			}
 		}
-	}
-	
 
-	for (auto b = scene->StaticObject.begin(); b != scene->StaticObject.end(); b++)
-	{
-		if ((*b) != scene->Player->PlayerObject)//플레이어가 아닐경우
+
+		for (auto b = scene->StaticObject.begin(); b != scene->StaticObject.end(); b++)
 		{
-			//광선의 길이보다 가까울때
-			if (FloatLength(Float4Add(scene->Player->PlayerObject->CenterPos, (*b)->CenterPos)) <= MAXRAYLEN)
+			if ((*b) != scene->Player->PlayerObject)//플레이어가 아닐경우
 			{
-
-
-				if ((*b)->rco.RayCasting(RAY.RayOrgin, RAY.RayDir, XMFloat4to3((*b)->CenterPos), XMFloat4to3(scene->Player->PlayerObject->CenterPos),
-					scene->Player->PlayerObject->Lookvector, &savepoint) == true && Shot == false)//광선이 다른 오브젝트를 맞출경우
+				//광선의 길이보다 가까울때
+				if (FloatLength(Float4Add(scene->Player->PlayerObject->CenterPos, (*b)->CenterPos)) <= MAXRAYLEN)
 				{
-					//여기서 뭔가를 처리한다.
-					//플레이어가 현재 사용할 투사체 넘버를 통해 자체적으로 투사체를 생성해서 불렛오브젝트 리스트에 저장함.
-					scene->Player->CreateBullet(Device.Get(), mCommandList.Get(), savepoint, (*b), &scene->BulletObject);
-					Shot = true;
+
+
+					if ((*b)->rco.RayCasting(RAY.RayOrgin, RAY.RayDir, XMFloat4to3((*b)->CenterPos), XMFloat4to3(scene->Player->PlayerObject->CenterPos),
+						scene->Player->PlayerObject->Lookvector, &savepoint) == true && Shot == false)//광선이 다른 오브젝트를 맞출경우
+					{
+						//여기서 뭔가를 처리한다.
+						//플레이어가 현재 사용할 투사체 넘버를 통해 자체적으로 투사체를 생성해서 불렛오브젝트 리스트에 저장함.
+						scene->Player->CreateBullet(Device.Get(), mCommandList.Get(), savepoint, (*b), &scene->BulletObject);
+						Shot = true;
+					}
+
+
 				}
-
-
 			}
-		}
 
-	}
-	//리지드 바디도 검사해야함.
-	for (auto b = scene->RigidObject.begin(); b != scene->RigidObject.end(); b++)
-	{
-		if ((*b) != scene->Player->PlayerObject)//플레이어가 아닐경우
+		}
+		//리지드 바디도 검사해야함.
+		for (auto b = scene->RigidObject.begin(); b != scene->RigidObject.end(); b++)
 		{
-			//광선의 길이보다 가까울때
-			if (FloatLength(Float4Add(scene->Player->PlayerObject->CenterPos, (*b)->CenterPos)) <= MAXRAYLEN)
+			if ((*b) != scene->Player->PlayerObject)//플레이어가 아닐경우
 			{
-
-
-				if ((*b)->rco.RayCasting(RAY.RayOrgin, RAY.RayDir, XMFloat4to3((*b)->CenterPos), XMFloat4to3(scene->Player->PlayerObject->CenterPos),
-					scene->Player->PlayerObject->Lookvector, &savepoint) == true && Shot == false)//광선이 다른 오브젝트를 맞출경우
+				//광선의 길이보다 가까울때
+				if (FloatLength(Float4Add(scene->Player->PlayerObject->CenterPos, (*b)->CenterPos)) <= MAXRAYLEN)
 				{
-					//여기서 뭔가를 처리한다.
-					//플레이어가 현재 사용할 투사체 넘버를 통해 자체적으로 투사체를 생성해서 불렛오브젝트 리스트에 저장함.
-					scene->Player->CreateBullet(Device.Get(), mCommandList.Get(), savepoint, (*b), &scene->BulletObject);
-					Shot = true;
+
+
+					if ((*b)->rco.RayCasting(RAY.RayOrgin, RAY.RayDir, XMFloat4to3((*b)->CenterPos), XMFloat4to3(scene->Player->PlayerObject->CenterPos),
+						scene->Player->PlayerObject->Lookvector, &savepoint) == true && Shot == false)//광선이 다른 오브젝트를 맞출경우
+					{
+						//여기서 뭔가를 처리한다.
+						//플레이어가 현재 사용할 투사체 넘버를 통해 자체적으로 투사체를 생성해서 불렛오브젝트 리스트에 저장함.
+						scene->Player->CreateBullet(Device.Get(), mCommandList.Get(), savepoint, (*b), &scene->BulletObject);
+						Shot = true;
+					}
+
+
 				}
-
-
 			}
-		}
 
-	}
+		}
 
 		if (Shot == false)//명중시킨 적이 없으면.
 		{
 			savepoint = RayShot(RAY.RayOrgin, RAY.RayDir, MAXRAYLEN);
 			scene->Player->CreateBullet(Device.Get(), mCommandList.Get(), savepoint, NULL, &scene->BulletObject);
 		}
-	
+	}
 }
 
 void FrameWork::OnMouseMove(WPARAM btnState, int x, int y)
