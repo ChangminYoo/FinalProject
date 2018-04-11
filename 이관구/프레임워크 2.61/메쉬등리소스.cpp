@@ -75,3 +75,28 @@ bool BarObject::CreateMesh = false;
 unordered_map<string, unique_ptr<CTexture>> BarObject::Textures;//텍스처들을 저장함
 CMesh  BarObject::Mesh;//나중에 메쉬는 static으로 둬야함
 ComPtr<ID3D12DescriptorHeap> BarObject::SrvDescriptorHeap;//텍스처 용 힙
+
+// --------------------------------------------------------------------------------------
+
+CMaterial SmallWallObject::Mat;
+bool SmallWallObject::CreateMesh;//최초로 false며 메쉬를 만든후 true가된다.
+unordered_map<string, unique_ptr<CTexture>> SmallWallObject::Textures;//텍스처들을 저장함
+CMesh SmallWallObject::Mesh;//오로지 한번만 만들어짐
+ComPtr<ID3D12DescriptorHeap> SmallWallObject::SrvDescriptorHeap;//텍스처 용 힙
+
+// --------------------------------------------------------------------------------------
+
+CMaterial BigWallObject::Mat;
+bool BigWallObject::CreateMesh;//최초로 false며 메쉬를 만든후 true가된다.
+unordered_map<string, unique_ptr<CTexture>> BigWallObject::Textures;//텍스처들을 저장함
+CMesh BigWallObject::Mesh;//오로지 한번만 만들어짐
+ComPtr<ID3D12DescriptorHeap> BigWallObject::SrvDescriptorHeap;//텍스처 용 힙
+
+
+// --------------------------------------------------------------------------------------
+
+CMaterial BuildingObject::Mat;
+bool BuildingObject::CreateMesh;//최초로 false며 메쉬를 만든후 true가된다.
+unordered_map<string, unique_ptr<CTexture>> BuildingObject::Textures;//텍스처들을 저장함
+CMesh BuildingObject::Mesh;//오로지 한번만 만들어짐
+ComPtr<ID3D12DescriptorHeap> BuildingObject::SrvDescriptorHeap;//텍스처 용 힙
