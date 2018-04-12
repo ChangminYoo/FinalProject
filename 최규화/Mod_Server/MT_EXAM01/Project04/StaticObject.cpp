@@ -1,11 +1,6 @@
 #include "StaticObject.h"
 
 
-
-StaticObject::StaticObject()
-{
-}
-
 void StaticObject::SET_PosOfBox()
 {
 	m_boxPos = 
@@ -17,68 +12,133 @@ void StaticObject::SET_PosOfBox()
 	};
 }
 
-void StaticObject::InitStaticObject()
+void StaticObject::InitBoxObjects()
 {
 	//1. StaticObjectList에 데이터 넣어주기.
 	//   한번 생성하고 바뀌지 않으므로 초기 한번만 실행
-
 	SET_PosOfBox();
-
-	StaticObject *sobj = new StaticObject();
-
-	sobj->m_connect_state = true;
-	sobj->m_state = PLAYER_STATE::IDLE;
-	sobj->m_playerData.Ani = Ani_State::Idle;
-	sobj->m_playerData.Connect_Status = true;
-	sobj->m_playerData.Dir = 0;
-	sobj->m_playerData.GodMode = true;
-	sobj->m_playerData.Is_AI = false;
-	sobj->m_playerData.Rotate_status = { 0.0f, 0.0f, 0.0f, 0.0f };
-	sobj->m_playerData.UserInfo.cur_hp = 100;
-	sobj->m_playerData.UserInfo.origin_hp = 100;
-	sobj->m_playerData.UserInfo.player_status.attack = 0;
-	sobj->m_playerData.UserInfo.player_status.speed = 0;
-	sobj->m_playerType = PLAYERS::NO_PLAYER;
-	sobj->m_monsterType = MONSTERS::NO_MONSTER;
-	sobj->staticobject = true;
-	sobj->OffLookvector = XMFLOAT3(0, 0, 1);
-	sobj->OffRightvector = XMFLOAT3(1, 0, 0);
-	
-	sobj->UpdateLookVector();
-	sobj->GetUpvector();
 
 	for (int i = 0; i < MAX_BOX_NUM; ++i)
 	{
-		sobj->m_id = i;
-		sobj->m_playerData.ID = i;
-		sobj->m_playerData.Pos = move(m_boxPos[i]);
+		StaticObject *sobj = new StaticObject();
 
-		m_staticobjs.emplace_back(sobj);
+		sobj->sobj_data.Ani = Ani_State::Idle;
+		sobj->sobj_data.Connect_Status = true;
+		sobj->sobj_data.Dir = 0;
+		sobj->sobj_data.GodMode = true;
+		sobj->sobj_data.ID = i;
+		sobj->sobj_data.Is_AI = false;
+		sobj->sobj_data.Pos = m_boxPos[i];
+		sobj->sobj_data.Rotate_status = { 0.0f, 0.0f, 0.0f, 0.0f };
+		sobj->sobj_data.UserInfo.cur_hp = 100;
+		sobj->sobj_data.UserInfo.origin_hp = 100;
+		sobj->sobj_data.UserInfo.player_status.attack = 0;
+		sobj->sobj_data.UserInfo.player_status.speed = 0;
+
+		sobj->OffLookvector = XMFLOAT3(0, 0, 1);
+		sobj->OffRightvector = XMFLOAT3(1, 0, 0);
+
+		sobj->UpdateLookVector();
+		sobj->GetUpVector();
+
+		m_staticObjs.emplace_back(sobj);
 	}
+	
+
+	//sobj->m_connect_state = true;
+	//sobj->m_state = PLAYER_STATE::IDLE;
+	//sobj->m_playerData.Ani = Ani_State::Idle;
+	//sobj->m_playerData.Connect_Status = true;
+
+	//sobj_data.Connect_Status = true;
+	//sobj->m_playerData.Dir = 0;
+	//sobj->m_playerData.GodMode = true;
+	//sobj->m_playerData.Is_AI = false;
+	//sobj->m_playerData.Rotate_status = { 0.0f, 0.0f, 0.0f, 0.0f };
+	//sobj->m_playerData.UserInfo.cur_hp = 100;
+	//sobj->m_playerData.UserInfo.origin_hp = 100;
+	//sobj->m_playerData.UserInfo.player_status.attack = 0;
+	//sobj->m_playerData.UserInfo.player_status.speed = 0;
+	//sobj->m_playerType = PLAYERS::NO_PLAYER;
+	//sobj->m_monsterType = MONSTERS::NO_MONSTER;
+	//sobj->staticobject = true;
+	//sobj->OffLookvector = XMFLOAT3(0, 0, 1);
+	//sobj->OffRightvector = XMFLOAT3(1, 0, 0);
+	
+
+	//for (int i = 0; i < MAX_BOX_NUM; ++i)
+	//{
+	//	sobj->m_id = i;
+	//	sobj->m_playerData.ID = i;
+	//	sobj->m_playerData.Pos = move(m_boxPos[i]);
+	//
+	//	m_staticobjs.emplace_back(sobj);
+	//}
 	
 }
 
-void StaticObject::SendStaticObject()
+void StaticObject::UpdateLookVector()
 {
-	//1. 각종 staticobject를 초기화하는 부분. 1000개 이상의 staticobject를 사용하지 않는다면 
-	//   굳이 한 패킷에 여러개의 데이터를 모아서 한꺼번에 보낼 필요까지는 없다
-	//   또한 여러번 오고 가야되는게 아니라 초기화 때 한번만 해줄 것이므로 . . .
+	auto wmatrix = XMMatrixIdentity();
 
-	m_soID = m_id;
-	STC_StaticObject stc_sobj;
+	//클라이언트에서 MouseMove를 통해 카메라를 회전할 때 마다 Rotate_status가 달라짐
+	XMFLOAT4 orient_xmfloat4 =
+	{	sobj_data.Rotate_status.x ,
+		sobj_data.Rotate_status.y ,
+		sobj_data.Rotate_status.z ,
+		sobj_data.Rotate_status.w };
 
-	//1. 상자에 대한 데이터를 보냄
-	for (auto iter = m_staticobjs.begin(); iter != m_staticobjs.end(); ++iter)
-	{
-		stc_sobj.player_data = move((*iter)->GetPlayerData());
-		stc_sobj.type = STATIC_OBJECT_TYPE::Box;
+	auto quater = XMLoadFloat4(&orient_xmfloat4);
+	wmatrix *= XMMatrixRotationQuaternion(quater);
 
-		m_clients[m_soID]->SendPacket(reinterpret_cast<Packet*>(&stc_sobj));
-	}
-	
+	//OffLookvector 와 OffRightvector는 플레이어타입(캐릭터, 불렛, 스테틱오브젝트 등에 따라 다름)
+	auto ol = XMLoadFloat3(&OffLookvector);
+	auto or = XMLoadFloat3(&OffRightvector);
+
+	ol = XMVector4Transform(ol, wmatrix);
+	or = XMVector4Transform(or , wmatrix);
+
+	XMStoreFloat3(&Lookvector, ol);
+	XMStoreFloat3(&Rightvector, or );
+
+	if (fabsf(Lookvector.x) < MMPE_EPSILON / 10)
+		Lookvector.x = 0;
+	if (fabsf(Lookvector.y) < MMPE_EPSILON / 10)
+		Lookvector.y = 0;
+	if (fabsf(Lookvector.z) < MMPE_EPSILON / 10)
+		Lookvector.z = 0;
+
+
+	if (fabsf(Rightvector.x) < MMPE_EPSILON / 10)
+		Rightvector.x = 0;
+	if (fabsf(Rightvector.y) < MMPE_EPSILON / 10)
+		Rightvector.y = 0;
+	if (fabsf(Rightvector.z) < MMPE_EPSILON / 10)
+		Rightvector.z = 0;
+
+	Lookvector = Float3Normalize(Lookvector);
+	Rightvector = Float3Normalize(Rightvector);
+
+}
+
+void StaticObject::GetUpVector()
+{
+	XMVECTOR l = XMLoadFloat3(&Lookvector);
+	XMVECTOR r = XMLoadFloat3(&Rightvector);
+	auto u = XMVector3Cross(l, r);
+
+	XMFLOAT3 up;
+	XMStoreFloat3(&up, u);
+	up = Float3Normalize(up);
+
+	Upvector = move(up);
 }
 
 
 StaticObject::~StaticObject()
 {
+	for (auto obj : m_staticObjs)
+		delete obj;
+
 }
+

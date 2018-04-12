@@ -1,5 +1,6 @@
 #pragma once
 #include "Player_Session.h"
+#include "StaticObject.h"
 #include <thread>
 
 class Player_Session;
@@ -17,6 +18,7 @@ private:
 
 	//vector<Player_Session*> m_clients;
 	vector<thread*> m_pworkerThread;
+	StaticObject   *m_SObjs;
 
 public:
 	Player();
@@ -27,6 +29,9 @@ public:
 	void Monster_Init();
 	void Accept_Event();
 	void MainLogic();
+
+	void SetStaticObjects();
+	StaticObject* Get_SObj_Value() { return m_SObjs; }
 
 	//vector<Player_Session*>* Get_Clients() { return &m_clients; }
 };

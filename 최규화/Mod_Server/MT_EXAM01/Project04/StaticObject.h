@@ -1,21 +1,36 @@
 #pragma once
-#include "Player_Session.h"
+#include "stdafx.h"
+#include "PhysicsEngine\MyMiniPysicsEngine.h"
 #include <unordered_map>
 
-class StaticObject : public Player_Session
+class StaticObject 
 {
 private:
-	int m_soID{ -1 };
 	unordered_map<int, Position> m_boxPos;
 
+	bool staticobject{ true };
+
+	XMFLOAT3 OffLookvector;
+	XMFLOAT3 OffRightvector;
+
+	XMFLOAT3 Lookvector; 
+	XMFLOAT3 Rightvector;
+	XMFLOAT3 Upvector;
+
+	StaticObject_Info sobj_data;
+
+	list<StaticObject*> m_staticObjs;
+	
 public:
-	StaticObject();
+	StaticObject(){};
 
 	void SET_PosOfBox();
+	void InitBoxObjects();
 
-	void InitStaticObject();
+	void UpdateLookVector();
+	void GetUpVector();
 
-	void SendStaticObject();
+	list<StaticObject*> GET_SObj_List() const { return m_staticObjs; } 
 
 	~StaticObject();
 };

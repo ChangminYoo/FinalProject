@@ -10,8 +10,10 @@ Player::Player() : m_acceptor(g_io_service,
 
 	CheckMyCPUCore();
 
-	//몬스터 초기화는 게임판마다 실행되어야함
+	//스테틱오브젝트 초기화
+	SetStaticObjects();
 
+	//몬스터 초기화는 게임판마다 실행되어야함
 	//1. 초기화
 	//Monster_Init();
 
@@ -24,9 +26,11 @@ Player::Player() : m_acceptor(g_io_service,
 
 Player::~Player()
 {
-	//for (auto del : m_clients)
-	//	delete del;
+	m_SObjs->~StaticObject();
+	delete m_SObjs;
 
+	for (auto thread : m_pworkerThread)
+		delete thread;
 
 }
 
@@ -90,17 +94,17 @@ void Player::Accept_Event()
 
 			if (pNewSession->CheckPlayerInfo())
 			{
-				if (pNewSession->m_InitFirst_SObjs)
-				{
-					pNewSession->m_staticobject->InitStaticObject();
-					pNewSession->m_InitFirst_SObjs = false;
-				}
-
-				pNewSession->m_staticobject->SendStaticObject();
+				//if (pNewSession->m_InitFirst_SObjs)
+				//{
+					//pNewSession->InitStaticObjects(move(pNewSession->Socket()));
+				//	pNewSession->InitStaticObjects();
+				//	pNewSession->m_InitFirst_SObjs = false;
+				//}
 
 				pNewSession->Init_PlayerInfo();
-
 				pNewSession->m_clients.emplace_back(pNewSession);
+
+				pNewSession->SendStaticObjects(Get_SObj_Value()->GET_SObj_List());
 
 				//2. 초기화된 정보를 연결된 클라이언트로 보낸다.
 				pNewSession->InitData_To_Client();
@@ -111,7 +115,7 @@ void Player::Accept_Event()
 
 				//delete를 해주면 메모리에러가 남. pNewSession에서 작업을 아직 안 끝냈는데 죽이려고 하기때문에
 				//delete pNewSession;
-				delete pNewSession->m_staticobject;
+
 			}
 			else
 			{
@@ -151,6 +155,13 @@ void Player::MainLogic()
 	//	thread->join();
 	//	delete thread;
 	//}
+}
+
+void Player::SetStaticObjects()
+{
+	m_SObjs = new StaticObject();
+
+	m_SObjs->InitBoxObjects();
 }
 
 /*#include "ChattingServer.h"

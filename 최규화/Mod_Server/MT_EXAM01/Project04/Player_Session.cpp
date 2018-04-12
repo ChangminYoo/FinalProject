@@ -6,8 +6,7 @@
 #define RAND_CREATE_Z_POS 100
 
 vector<Player_Session*> Player_Session::m_clients = vector<Player_Session*>();
-list<Player_Session*> Player_Session::m_staticobjs = list<Player_Session*>();
-bool Player_Session::m_InitFirst_SObjs = true;
+//list<Player_Session*> Player_Session::m_staticobjs = list<Player_Session*>();
 
 bool Player_Session::CheckPlayerInfo()
 {
@@ -59,7 +58,7 @@ bool Player_Session::CheckPlayerInfo()
 
 		m_connect_state = true;
 
-		m_staticobject = new StaticObject();
+		//m_staticobject = new StaticObject();
 
 		return true;
 	}
@@ -164,11 +163,12 @@ void Player_Session::InitData_To_Client()
 {
 	//1. 내 초기화정보
 	STC_SetMyClient init_player;
-	init_player.pack_size = sizeof(STC_SetMyClient);
-	init_player.pack_type = PACKET_PROTOCOL_TYPE::INIT_CLIENT;
+	//init_player.pack_size = sizeof(STC_SetMyClient);
+	//init_player.pack_type = PACKET_PROTOCOL_TYPE::INIT_CLIENT;
 	init_player.player_data = m_playerData;
 
 	cout << "Current ID: " << m_clients[m_id]->Get_ID() << endl;
+	//cout << "socket : " << reinterpret_cast<int*>(&m_clients[m_id]->m_socket) << endl;
 
 	// 내 초기화 정보를 일단 나와 연결된 클라이언트에 보낸다.
 	m_clients[m_id]->SendPacket(reinterpret_cast<Packet*>(&init_player));
@@ -176,8 +176,8 @@ void Player_Session::InitData_To_Client()
 	//------------------------------------------------------------------------------------
 	//2. 다른 클라이언트 초기화정보
 	STC_SetOtherClient init_otherplayer;
-	init_otherplayer.pack_size = sizeof(STC_SetOtherClient);
-	init_otherplayer.pack_type = PACKET_PROTOCOL_TYPE::INIT_OTHER_CLIENT;
+	//init_otherplayer.pack_size = sizeof(STC_SetOtherClient);
+	//init_otherplayer.pack_type = PACKET_PROTOCOL_TYPE::INIT_OTHER_CLIENT;
 
 	//2. 내 정보를 다른 클라이언트에게 넘겨준다
 	for (auto i = 0; i < m_clients.size(); ++i)
@@ -261,6 +261,7 @@ void Player_Session::GetUpvector()
 void Player_Session::SendPacket(Packet* packet)
 {
 	int packet_size = packet[0];
+	cout << "packet_size : " << packet_size << endl;
 	Packet *new_sendBuf = new Packet[packet_size];
 	memcpy(new_sendBuf, packet, packet_size);
 
@@ -272,8 +273,9 @@ void Player_Session::SendPacket(Packet* packet)
 	//1. async_write_some - 비동기 IO / 받은데이터를 즉시 보냄(따로 버퍼에 저장X)
 	//2. async_write - 비동기 IO / 보내고자 하는 데이터가 모두 버퍼에 담기면 데이터를 보냄
 	boost::asio::async_write(m_socket, boost::asio::buffer(new_sendBuf, packet_size),
-		[&](const boost::system::error_code& error, size_t bytes_transferred)
+		[=](const boost::system::error_code& error, size_t bytes_transferred)
 	{
+		cout << "Packet_Size : " << packet_size << "bytes_transferred : " << bytes_transferred << endl;
 		if (error != 0)
 		{
 			if (bytes_transferred != packet_size)
@@ -285,28 +287,27 @@ void Player_Session::SendPacket(Packet* packet)
 			return;
 		}
 		
-		RecvPacket();
+		//RecvPacket();
 	});
+	
 
-	/*
-	m_socket.async_write_some(boost::asio::buffer(new_sendBuf, packet_size),
-		[=](const boost::system::error_code& error, size_t bytes_transferred)
-		-> void
+	/*m_socket.async_write_some(boost::asio::buffer(new_sendBuf, packet_size),
+		[&](const boost::system::error_code& error, size_t bytes_transferred)
 	{
 		if (error != 0)
 		{
 			if (bytes_transferred != packet_size)
 			{
 				cout << "Client No. [ " << m_id << " ] send no same size packet data by async_write_some" << endl;
+				cout << "packet_size: " << packet_size << " , " << "bytes_transferred: " << bytes_transferred << endl;
 			}
 
 			delete[] new_sendBuf;
+			return;
 		}
-
-		cout << "Client No. [ " << a.ID << " ] send " << "X: " << a.Pos.x << "Y: " << a.Pos.y << "Z: " << a.Pos.z << endl;
-
 	});
 	*/
+
 	
 
 }

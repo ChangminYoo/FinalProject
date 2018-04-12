@@ -56,6 +56,13 @@ enum CONNECT_STATE { DISCONNECT = -1, CONNECT = 1 };
 enum MONSTERS { NO_MONSTER, MONSTER01, MONSTER02, MONSTER03 };
 enum PLAYERS { NO_PLAYER, LUNA, CMETRA, RONDO, DONALD };
 
+struct CollisionBox
+{
+	float	x{ 0.0f };
+	float	y{ 0.0f };
+	float	z{ 0.0f };
+};
+
 struct Rotation
 {
 	float		x{ 0.0f };
@@ -101,6 +108,20 @@ struct Player_Info
 	unsigned char				level{ 1 };		  //1 
 };
 // 17 + 1 = 18
+
+struct StaticObject_Info
+{
+	Position					Pos;					//16
+	Rotation				    Rotate_status;			//16
+	CollisionBox				CollisionBox_Size;		//12
+	unsigned short				origin_hp{ 100 };		//2
+	unsigned short   			cur_hp{ 100 };			//2
+	Player_Status				player_status;			//6
+	unsigned short				ID{ 0 };				//2
+	char						GodMode{ false };		//1
+	char						Ani{ Ani_State::Idle }; //1
+
+};
 
 #pragma pack (push, 1)
 
@@ -195,7 +216,7 @@ typedef struct Server_To_Client_Player_Attack
 
 typedef struct Server_To_Client_Static_Object
 {
-	unsigned char packet_size = sizeof(Position) + sizeof(unsigned char) + sizeof(unsigned char) + sizeof(unsigned char);
+	unsigned char packet_size = sizeof(Player_Data) + sizeof(unsigned char) + sizeof(unsigned char) + sizeof(unsigned char);
 	unsigned char pack_type = PACKET_PROTOCOL_TYPE::STATIC_OBJECT;
 	Player_Data player_data;
 	unsigned char type;

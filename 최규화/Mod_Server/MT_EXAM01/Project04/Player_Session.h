@@ -1,7 +1,6 @@
 #pragma once
 #include "stdafx.h"
 #include "Player.h"
-#include "StaticObject.h"
 #include "Database\CTextTest.h"
 #include "PhysicsEngine\MyMiniPysicsEngine.h"
 
@@ -74,16 +73,18 @@ protected:
 	//8. 해당 오브젝트가 죽었나
 	bool						  Delobj{ false };
 
+	unordered_map<int, Position>  m_boxPos;
+
 public:
 	unsigned int m_cur_packet_size{ 0 };
 	unsigned int m_prev_packet_size{ 0 };
 	
-	StaticObject				  *m_staticobject{ nullptr };
-	static bool					   m_InitFirst_SObjs;
-
+	//StaticObject				  *m_staticobject{ nullptr };
+	
 public:
-	Player_Session(const int& count, boost::asio::ip::tcp::socket socket) : m_id(count), m_socket(move(socket))
+	Player_Session(const short& count, boost::asio::ip::tcp::socket socket) : m_id(count), m_socket(move(socket))
 	{};
+
 	~Player_Session() {};
 
 
@@ -116,6 +117,11 @@ public:
 	void Init_PlayerInfo();
 	void InitData_To_Client();
 
+	//void InitStaticObjects(boost::asio::ip::tcp::socket my_sock);
+	//void InitStaticObjects();
+	//void SET_PosOfBox();
+	void SendStaticObjects(const list<StaticObject*>& SObjList);
+
 	void UpdateLookVector();
 
 	// 3. 움직이지 않는 오브젝트 생성 (예: 상자, 맵)
@@ -125,20 +131,20 @@ public:
 	// [4].기타 GET - SET 함수
 	Player_Data GetPlayerData() { return m_playerData; } const
 
-	int Get_ID() const { return m_id; }
+	int		Get_ID() const { return m_id; }
 
-	void Set_State(int state);
-	int Get_State() const { return m_state; }
+	void    Set_State(int state);
+	int		Get_State() const { return m_state; }
 
-	void Set_Connect_State(bool flag) { m_connect_state = flag; }
-	bool Get_Connect_State() const { return m_connect_state; }
+	void	Set_Connect_State(bool flag) { m_connect_state = flag; }
+	bool	Get_Connect_State() const { return m_connect_state; }
 
-	void Set_DataBuf(Packet* buf) { memcpy(m_dataBuf, buf, sizeof(buf)); }
+	void    Set_DataBuf(Packet* buf) { memcpy(m_dataBuf, buf, sizeof(buf)); }
 
 	Packet* Get_DataBuf() { return m_dataBuf; }
 	Packet* Get_RecvBuf() { return m_recvBuf; }
 
-	bool Get_IsAI() const { return m_isAI; }
+	bool	Get_IsAI() const { return m_isAI; } 
 
 	// ---------------------------------------------------------------------------------------
 	// 서버에서 관리하는 클라이언트 객체들의 집합(vector 사용 - 나중에 멀쓰때 맞는 자료구조로 바꿀것)
