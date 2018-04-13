@@ -1935,18 +1935,7 @@ SmallWallObject::SmallWallObject(ID3D12Device * m_Device, ID3D12GraphicsCommandL
 	pp->SetBounce(false);//튕기지 않는다.
 	pp->SetMass(INFINITY);//고정된 물체는 무게가 무한이다.
 
-						  //테스트용 리지드 바디
-						  //rb = new RigidBody();
-						  //rb->SetPosition(&CenterPos);//이 값은 항상 갱신되야한다.
-						  //rb->SetHalfBox(5, 5, 5);//충돌 박스의 x,y,z 크기
-						  //rb->SetDamping(0.8f, 0.8f);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
-						  //rb->SetBounce(false);//튕기지 않는다.
-						  //rb->SetMass(5);//고정된 물체는 무게가 무한이다.
-						  //rb->SetIMoment(5, 5, 5);
-						  //rb->SetOrient(&Orient);
-						  //XMFLOAT3 testForce{ 0,0,1000 };
-						  //XMFLOAT3 testPoint{ -15,0,-5 };
-						  //rb->AddForcePoint(testForce, testPoint);
+		
 }
 
 void SmallWallObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
@@ -2019,8 +2008,6 @@ BigWallObject::BigWallObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList 
 	ObjData.Scale = 1.0f;
 	ObjData.SpecularParamater = 0.0f;//스페큘러를 낮게준다.
 
-
-
 	//게임관련 데이터들
 	gamedata.MAXHP = 100;
 	gamedata.HP = 100;
@@ -2030,36 +2017,25 @@ BigWallObject::BigWallObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList 
 	staticobject = true;
 
 	//광선충돌 검사용 육면체
-	XMFLOAT3 rx(200, 0, 0);
-	XMFLOAT3 ry(0, 80, 0);
+	XMFLOAT3 rx(235, 0, 0);
+	XMFLOAT3 ry(0, 50, 0);
 	XMFLOAT3 rz(0, 0, 5);
 	rco.SetPlane(rx, ry, rz);
 
 	//질점오브젝트 사용시 필요한 데이터들 설정
 	pp = new PhysicsPoint();
 	pp->SetPosition(CenterPos);//이 값은 항상 갱신되야한다.
-	pp->SetHalfBox(200, 80, 5);//충돌 박스의 x,y,z 크기
+	pp->SetHalfBox(235, 50, 5);//충돌 박스의 x,y,z 크기
 	pp->SetDamping(0.5f);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
 	pp->SetBounce(false);//튕기지 않는다.
 	pp->SetMass(INFINITY);//고정된 물체는 무게가 무한이다.
 
-						  //테스트용 리지드 바디
-						  //rb = new RigidBody();
-						  //rb->SetPosition(&CenterPos);//이 값은 항상 갱신되야한다.
-						  //rb->SetHalfBox(5, 5, 5);//충돌 박스의 x,y,z 크기
-						  //rb->SetDamping(0.8f, 0.8f);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
-						  //rb->SetBounce(false);//튕기지 않는다.
-						  //rb->SetMass(5);//고정된 물체는 무게가 무한이다.
-						  //rb->SetIMoment(5, 5, 5);
-						  //rb->SetOrient(&Orient);
-						  //XMFLOAT3 testForce{ 0,0,1000 };
-						  //XMFLOAT3 testPoint{ -15,0,-5 };
-						  //rb->AddForcePoint(testForce, testPoint);
+
 }
 
 void BigWallObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
 {
-	CreateCube(&Mesh, 400, 160, 10);
+	CreateCube(&Mesh, 470, 100, 10);
 
 	//모델 로드
 	//LoadMD5Model(L".\\플레이어메쉬들\\Cube.MD5MESH", &Mesh, 0, 1);
@@ -2144,18 +2120,6 @@ BuildingObject::BuildingObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 	pp->SetBounce(false);//튕기지 않는다.
 	pp->SetMass(INFINITY);//고정된 물체는 무게가 무한이다.
 
-						  //테스트용 리지드 바디
-						  //rb = new RigidBody();
-						  //rb->SetPosition(&CenterPos);//이 값은 항상 갱신되야한다.
-						  //rb->SetHalfBox(5, 5, 5);//충돌 박스의 x,y,z 크기
-						  //rb->SetDamping(0.8f, 0.8f);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
-						  //rb->SetBounce(false);//튕기지 않는다.
-						  //rb->SetMass(5);//고정된 물체는 무게가 무한이다.
-						  //rb->SetIMoment(5, 5, 5);
-						  //rb->SetOrient(&Orient);
-						  //XMFLOAT3 testForce{ 0,0,1000 };
-						  //XMFLOAT3 testPoint{ -15,0,-5 };
-						  //rb->AddForcePoint(testForce, testPoint);
 }
 
 void BuildingObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)

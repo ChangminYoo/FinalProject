@@ -201,24 +201,27 @@ void Scene::CreateGameObject()
 	StaticObject.push_back(new BuildingObject(device, commandlist, &BbObject, 0, XMFLOAT4(50, 0, -40, 0)));
 	StaticObject.push_back(new SmallWallObject(device, commandlist, &BbObject, 0, XMFLOAT4(30, 0, 40, 0)));
 
+
+	//BigWall
 	float BigWall_X1 = 200 * sinf(0.4f * MMPE_PI);
-	float BigWall_Y1 = (400 * cosf(0.4f * MMPE_PI) + 400) / 2;
+	float BigWall_Z1 = (400 * cosf(0.4f * MMPE_PI) + 400) / 2;
 	
 	float BigWall_X2 = ( (400 * sinf(0.4f * MMPE_PI)) + (400 * sinf(0.8f * MMPE_PI)) ) / 2;
-	float BigWall_Y2 = ((400 * cosf(0.4f * MMPE_PI)) + (400 * cosf(0.2f * MMPE_PI))) / 2;
+	float BigWall_Z2 = ( (400 * cosf(0.4f * MMPE_PI)) + (-400 * cosf(0.2f * MMPE_PI)) ) / 2;
+
+	float BigWall_Z3 = -400 * cosf(0.2f * MMPE_PI);
 
 	float BigWall_Rad1 = MMPE_PI / 5; //36degree
 	float BigWall_Rad2 = (MMPE_PI / 5) ; //72degree
 
+	StaticObject.push_back(new BigWallObject(device, commandlist, &BbObject, -BigWall_Rad1, XMFLOAT4(-BigWall_X1, 0, BigWall_Z1, 0)));
+	StaticObject.push_back(new BigWallObject(device, commandlist, &BbObject, BigWall_Rad1, XMFLOAT4(BigWall_X1, 0, BigWall_Z1, 0)));
 
-	StaticObject.push_back(new BigWallObject(device, commandlist, &BbObject, -BigWall_Rad1, XMFLOAT4(-BigWall_X1, 0, BigWall_Y1, 0)));
-	StaticObject.push_back(new BigWallObject(device, commandlist, &BbObject, BigWall_Rad1, XMFLOAT4(BigWall_X1, 0, BigWall_Y1, 0)));
-
-	StaticObject.push_back(new BigWallObject(device, commandlist, &BbObject, -BigWall_Rad1 *2, XMFLOAT4(-BigWall_X2, 0, -BigWall_Y2, 0)));
-	StaticObject.push_back(new BigWallObject(device, commandlist, &BbObject, BigWall_Rad1 *2, XMFLOAT4(BigWall_X2, 0, -BigWall_Y2, 0)));
+	StaticObject.push_back(new BigWallObject(device, commandlist, &BbObject,- BigWall_Rad1 *2, XMFLOAT4(BigWall_X2, 0, BigWall_Z2, 0)));
+	StaticObject.push_back(new BigWallObject(device, commandlist, &BbObject, BigWall_Rad1 *2, XMFLOAT4(-BigWall_X2, 0, BigWall_Z2, 0)));
 	
-	//StaticObject.push_back(new BigWallObject(device, commandlist, &BbObject, 0, XMFLOAT4(0, 0,-400, 0)));
-
+	StaticObject.push_back(new BigWallObject(device, commandlist, &BbObject, 0, XMFLOAT4(0, 0, BigWall_Z3, 0)));
+	
 
 	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, XMFLOAT4(25, 200, 10, 0)));
 	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, XMFLOAT4(0.5, 50, 3, 0)));
