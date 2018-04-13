@@ -1484,7 +1484,12 @@ void CreatePentagon(CMesh* Mesh, float size, float sizey)
 {
 	float half = 0.5 * size;
 	float y = 0.0f;
-	float z = half / 1.732050f;
+	
+	float s1 = half * sinf(0.4f * MMPE_PI);
+	float s2 = half * sinf(0.8f * MMPE_PI);
+
+	float c1 = half * cosf(0.4f * MMPE_PI);
+	float c2 = half * cosf(0.2f * MMPE_PI);
 
 	Mesh->SubResource = new CVertex[15];
 	Mesh->nVertex = 15;
@@ -1492,10 +1497,10 @@ void CreatePentagon(CMesh* Mesh, float size, float sizey)
 	Mesh->nOffset = 0;
 
 
-	Mesh->SubResource[0].V = XMFLOAT3(-half, y, z);
-	Mesh->SubResource[1].V = XMFLOAT3(0, y, half);
-	Mesh->SubResource[2].V = XMFLOAT3(0, y, 0);
-
+	Mesh->SubResource[0].V = XMFLOAT3(0, y, half);
+	Mesh->SubResource[1].V = XMFLOAT3(0, y, 0);
+	Mesh->SubResource[2].V = XMFLOAT3(-s1, y, c1);
+	
 	Mesh->SubResource[0].Tex = XMFLOAT2(0, 0);
 	Mesh->SubResource[1].Tex = XMFLOAT2(1, 1);
 	Mesh->SubResource[2].Tex = XMFLOAT2(1, 0);
@@ -1503,34 +1508,34 @@ void CreatePentagon(CMesh* Mesh, float size, float sizey)
 	//
 	Mesh->SubResource[3].V = XMFLOAT3(0, y, 0);
 	Mesh->SubResource[4].V = XMFLOAT3(0, y, half);
-	Mesh->SubResource[5].V = XMFLOAT3(half, y, z);
+	Mesh->SubResource[5].V = XMFLOAT3(s1, y, c1);
 	
-	Mesh->SubResource[3].Tex = XMFLOAT2(1, 0);
+	Mesh->SubResource[3].Tex = XMFLOAT2(1, 1);
 	Mesh->SubResource[4].Tex = XMFLOAT2(0, 0);
-	Mesh->SubResource[5].Tex = XMFLOAT2(1, 1);
+	Mesh->SubResource[5].Tex = XMFLOAT2(1, 0);
 	
 	//
-	Mesh->SubResource[6].V = XMFLOAT3(half*0.5f, y, -half);
+	Mesh->SubResource[6].V = XMFLOAT3(s2, y, -c2);
 	Mesh->SubResource[7].V = XMFLOAT3(0, y, 0);
-	Mesh->SubResource[8].V = XMFLOAT3(half, y, z);
+	Mesh->SubResource[8].V = XMFLOAT3(s1, y, c1);
 	
 	Mesh->SubResource[6].Tex = XMFLOAT2(1, 0);
 	Mesh->SubResource[7].Tex = XMFLOAT2(0, 0);
 	Mesh->SubResource[8].Tex = XMFLOAT2(1, 1);
 
 	//
-	Mesh->SubResource[9] = XMFLOAT3(-half * 0.5f, y, -half);
+	Mesh->SubResource[9] = XMFLOAT3(-s2, y, -c2);
 	Mesh->SubResource[10] = XMFLOAT3(0, y, 0);
-	Mesh->SubResource[11] = XMFLOAT3(half*0.5f, y, -half);
+	Mesh->SubResource[11] = XMFLOAT3(s2, y, -c2);
 	
 	Mesh->SubResource[9].Tex = XMFLOAT2(0, 0);
 	Mesh->SubResource[10].Tex = XMFLOAT2(1, 1);
 	Mesh->SubResource[11].Tex = XMFLOAT2(1, 0);
 	
 	//
-	Mesh->SubResource[12] = XMFLOAT3(-half, y, z);
+	Mesh->SubResource[12] = XMFLOAT3(-s1, y, c1);
 	Mesh->SubResource[13] = XMFLOAT3(0, y, 0);
-	Mesh->SubResource[14] = XMFLOAT3(-half*0.5f, y, -half);
+	Mesh->SubResource[14] = XMFLOAT3(-s2, y, -c2);
 
 	Mesh->SubResource[12].Tex = XMFLOAT2(0, 0);
 	Mesh->SubResource[13].Tex = XMFLOAT2(1, 1);
@@ -1880,7 +1885,7 @@ void BarObject::Collision(list<CGameObject*>* collist, float DeltaTime)
 //================================벽오브젝트=======================================
 
 
-SmallWallObject::SmallWallObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
+SmallWallObject::SmallWallObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, float dgree, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
 {
 
 	if (CreateMesh == false)
@@ -1983,7 +1988,7 @@ void SmallWallObject::Render(ID3D12GraphicsCommandList * commandlist, const Game
 
 
 
-BigWallObject::BigWallObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
+BigWallObject::BigWallObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, float dgree, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
 {
 
 	if (CreateMesh == false)
@@ -2004,14 +2009,19 @@ BigWallObject::BigWallObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList 
 	OffLookvector = XMFLOAT3(0, 0, 1);
 	OffRightvector = XMFLOAT3(1, 0, 0);
 
+	auto q = XMLoadFloat4(&Orient);//방향을 degree만큼 돌리려 한다.
+	XMFLOAT3 axis{ 0,1,0 };
+	auto q2 = QuaternionRotation(axis, dgree);
+	Orient = QuaternionMultiply(Orient, q2);
+
 	UpdateLookVector();
 	ObjData.isAnimation = 0;
-	ObjData.Scale = 10.0f;
+	ObjData.Scale = 1.0f;
 	ObjData.SpecularParamater = 0.0f;//스페큘러를 낮게준다.
 
 
 
-									 //게임관련 데이터들
+	//게임관련 데이터들
 	gamedata.MAXHP = 100;
 	gamedata.HP = 100;
 	gamedata.Damage = 0;
@@ -2020,7 +2030,7 @@ BigWallObject::BigWallObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList 
 	staticobject = true;
 
 	//광선충돌 검사용 육면체
-	XMFLOAT3 rx(80, 0, 0);
+	XMFLOAT3 rx(200, 0, 0);
 	XMFLOAT3 ry(0, 80, 0);
 	XMFLOAT3 rz(0, 0, 5);
 	rco.SetPlane(rx, ry, rz);
@@ -2028,7 +2038,7 @@ BigWallObject::BigWallObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList 
 	//질점오브젝트 사용시 필요한 데이터들 설정
 	pp = new PhysicsPoint();
 	pp->SetPosition(CenterPos);//이 값은 항상 갱신되야한다.
-	pp->SetHalfBox(80, 80, 5);//충돌 박스의 x,y,z 크기
+	pp->SetHalfBox(200, 80, 5);//충돌 박스의 x,y,z 크기
 	pp->SetDamping(0.5f);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
 	pp->SetBounce(false);//튕기지 않는다.
 	pp->SetMass(INFINITY);//고정된 물체는 무게가 무한이다.
@@ -2049,7 +2059,7 @@ BigWallObject::BigWallObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList 
 
 void BigWallObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
 {
-	CreateCube(&Mesh, 16, 16, 1);
+	CreateCube(&Mesh, 400, 160, 10);
 
 	//모델 로드
 	//LoadMD5Model(L".\\플레이어메쉬들\\Cube.MD5MESH", &Mesh, 0, 1);
@@ -2084,7 +2094,7 @@ void BigWallObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTi
 }
 
 
-BuildingObject::BuildingObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
+BuildingObject::BuildingObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, float dgree, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
 {
 
 	if (CreateMesh == false)
@@ -2112,7 +2122,7 @@ BuildingObject::BuildingObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 
 
 
-									 //게임관련 데이터들
+	//게임관련 데이터들
 	gamedata.MAXHP = 100;
 	gamedata.HP = 100;
 	gamedata.Damage = 0;

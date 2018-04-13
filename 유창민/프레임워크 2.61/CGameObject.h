@@ -357,7 +357,7 @@ public:
 class SmallWallObject : public CGameObject
 {
 public:
-	SmallWallObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
+	SmallWallObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, float dgree, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
 
 public:
 	static CMaterial Mat;
@@ -378,7 +378,7 @@ public:
 class BigWallObject : public CGameObject
 {
 public:
-	BigWallObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
+	BigWallObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, float dgree, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
 
 public:
 	static CMaterial Mat;
@@ -400,7 +400,7 @@ public:
 class BuildingObject : public CGameObject
 {
 public:
-	BuildingObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
+	BuildingObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, float dgree, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
 
 public:
 	static CMaterial Mat;
