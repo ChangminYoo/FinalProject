@@ -303,6 +303,13 @@ LRESULT FrameWork::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			{
 				scene->SkillBackGround->CenterPos.y = 0.9*-mClientHeight / 2;
 			}
+			for(int i=0;i<4;i++)
+				if (scene->SkillCoolBar[i] != NULL)
+				{
+					//XMFLOAT4(i * 100 - 150, 0.95*-mHeight / 2, 0, 0)
+					scene->SkillCoolBar[i]->CenterPos.y = 0.98*-mClientHeight / 2;
+					//scene->SkillCoolBar[i]
+				}
 		}
 
 		if (Device)
@@ -422,7 +429,7 @@ void FrameWork::OnMouseDown(WPARAM btnState, int x, int y)
 {
 	
 	//레이를 쏜다. 단 플레이어 오브젝트가 살아있고, 해당 스킬이 쏠수있는 true상태라면!
-	if (scene->Player->PlayerObject->gamedata.HP > 0 && scene->Player->isSkillOn[scene->Player->SellectBulletIndex])
+	if (scene->Player->PlayerObject->gamedata.HP > 0 && scene->Player->skilldata.isSkillOn[scene->Player->skilldata.SellectBulletIndex])
 	{//공격 애니메이션으로 전환
 		scene->Player->PlayerObject->SetAnimation(2);
 		auto RAY = MousePicking(x, y, scene->Player->Camera.CamData.EyePos, scene->Player->Camera.CamData.View, scene->Player->Camera.CamData.Proj);

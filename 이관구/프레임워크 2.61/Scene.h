@@ -42,6 +42,8 @@ public:
 	void CreateShaderObject();
 	void CreateGameObject();
 	void CreateUI();
+	//UI마다 틱함수를 만들기보단 그냥 UI들의 모든틱을 여기에서 처리함. 왜이렇게하냐면 UI는 딱히 어떤 오브젝트리스트에 들어가지 않기때문.
+	void UITick(const GameTimer& gt);
 //	void CreateAllObject();
 //	void DeleteStaticMesh();
 
@@ -67,5 +69,8 @@ public:
 
 	CGameObject* AimUI = NULL;
 	CGameObject* SkillBackGround = NULL;
+
+	CGameObject* SkillCoolBar[4] = { NULL };
+
 };
 

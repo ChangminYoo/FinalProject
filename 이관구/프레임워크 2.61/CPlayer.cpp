@@ -429,16 +429,16 @@ void CPlayer::Tick(float DeltaTime)
 {
 	for (int i = 0; i < 4; i++)
 	{
-		if (SkillsCoolTime[i] > 0)
+		if (skilldata.SkillsCoolTime[i] > 0)
 		{
-			SkillsCoolTime[i] -= DeltaTime;
-			isSkillOn[i] = false;
+			skilldata.SkillsCoolTime[i] -= DeltaTime;
+			skilldata.isSkillOn[i] = false;
 		}
 		
-		if (SkillsCoolTime[i] <= 0)
+		if (skilldata.SkillsCoolTime[i] <= 0)
 		{
-			SkillsCoolTime[i] = 0;
-			isSkillOn[i] = true;
+			skilldata.SkillsCoolTime[i] = 0;
+			skilldata.isSkillOn[i] = true;
 		}
 	}
 
@@ -448,13 +448,13 @@ void CPlayer::CreateBullet(ID3D12Device* Device, ID3D12GraphicsCommandList* cl,X
 {
 	//현재선택된 0~3번 마법중 하나를 인덱스로 넣어주면 그 Skills[인덱스]의 결과가 바로 어떤 마법인지를 나타냄.
 
-	switch (Skills[SellectBulletIndex])
+	switch (skilldata.Skills[skilldata.SellectBulletIndex])
 	{
 	case 0://불렛큐브(라이트 큐브)
 		
 		//먼저 해당스킬의 쿨타임을 넣어주자.
-		SkillsCoolTime[SellectBulletIndex] = 0.3f;
-		isSkillOn[SellectBulletIndex] = false;
+		skilldata.SkillsCoolTime[skilldata.SellectBulletIndex] = 0.3f;
+		skilldata.isSkillOn[skilldata.SellectBulletIndex] = false;
 
 
 		auto v = Float3Add(Goal, XMFloat4to3(PlayerObject->CenterPos), false);

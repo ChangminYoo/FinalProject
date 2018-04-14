@@ -39,6 +39,12 @@ Scene::~Scene()
 {
 	if (AimUI != NULL)
 		delete AimUI;
+	if (SkillBackGround != NULL)
+		delete SkillBackGround;
+
+	for (int i = 0; i < 4; i++)
+		if(SkillCoolBar[i]!=NULL)
+			delete SkillCoolBar[i];
 
 	if (Shaders != NULL)
 	{
@@ -252,6 +258,35 @@ void Scene::CreateUI()
 	AimUI = new AimObject(device,commandlist,NULL);
 	
 	SkillBackGround = new SkillUIObject(device, commandlist, NULL,XMFLOAT4(0, 0.9*-mHeight / 2,0,0));
+
+
+	
+	for (int i = 0; i < 4; i++)
+	{
+		float ct = 0;
+		switch (Player->skilldata.Skills[i])
+		{
+		case 0://라이트큐브
+			ct = 0.3f;
+			break;
+		}
+
+		SkillCoolBar[i] = new CoolBarObject(device, commandlist, NULL,ct, Player->PlayerObject, XMFLOAT4(i*100-150,0.98*-mHeight / 2, 0, 0));
+	}
+
+}
+
+void Scene::UITick(const GameTimer & gt)
+{
+	if (Player->PlayerObject != NULL)
+	{
+		//스킬쿨타임 UI 커스텀데이터y값을 쿨타임에 맞게 변경
+		for (int i = 0; i < 4; i++)
+		{
+			SkillCoolBar[i]->ObjData.CustomData1.y = Player->skilldata.SkillsCoolTime[i] / ((CoolBarObject*)SkillCoolBar[i])->MaxCoolTime;
+
+		}
+	}
 }
 
 void Scene::Render(const GameTimer& gt)
@@ -283,6 +318,13 @@ void Scene::Render(const GameTimer& gt)
 			Player->Camera.UpdateConstantBufferOrtho(commandlist);
 			Shaders->SetBillboardShader(commandlist);
 			AimUI->Render(commandlist, gt);
+			for (int i = 0; i < 4; i++)
+			{
+				
+				SkillCoolBar[i]->Render(commandlist, gt);
+			}
+
+			//가장 마지막에 그려야한다. 안그려면 가려짐
 			SkillBackGround->Render(commandlist, gt);
 			//다시 원상태로 바꿔줌. 이걸 안하면 피킹이 엉망이됨. 
 			Player->Camera.UpdateConstantBuffer(commandlist);
@@ -380,6 +422,7 @@ void Scene::Tick(const GameTimer & gt)
 
 	Player->Tick(gt.DeltaTime());
 	
+	UITick(gt);
 	//카메라 리 로케이트 
 	Player->PlayerCameraReLocate();
 }
