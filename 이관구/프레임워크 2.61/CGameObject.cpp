@@ -304,7 +304,7 @@ CCubeManObject::CCubeManObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 	pp = new PhysicsPoint();
 	pp->SetPosition(CenterPos);//이 값은 항상 갱신되야한다.
 	pp->SetHalfBox(3, 10, 3);//충돌 박스의 x,y,z 크기
-	pp->SetDamping(0.7);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
+	pp->SetDamping(0.45);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
 	pp->SetBounce(false);//튕기지 않는다.
 
 	
@@ -814,7 +814,8 @@ void BulletCube::Collision(list<CGameObject*>* collist, float DeltaTime)
 					{
 						ParticleList->push_back(new DamageObject(device, commandlist, ParticleList, gamedata.Damage, XMFLOAT4((*i)->CenterPos.x, (*i)->CenterPos.y + 11, (*i)->CenterPos.z, 0)));
 					}
-					
+					//고정된 물체가아니면 잠깐 바운스를 풀어둔다. 그래야 튕기니까.
+					(*i)->pp->SetBounce(true);
 
 				}
 				else//고정된 물체면 충돌한 평면의 노멀방향으로 cn을 설정할것.
@@ -823,7 +824,9 @@ void BulletCube::Collision(list<CGameObject*>* collist, float DeltaTime)
 				}
 
 				//충돌후 속도를 계산함.
+				
 				pp->ResolveVelocity(*(*i)->pp, cn, DeltaTime);
+				(*i)->pp->SetBounce(false);
 				//겹치는 부분을 제거할필요가 없는게 투사체는 어처피 사라지니까.
 				DelObj = true;
 				
