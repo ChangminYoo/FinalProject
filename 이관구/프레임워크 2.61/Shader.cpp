@@ -282,19 +282,9 @@ void Shader::Render(ID3D12GraphicsCommandList * CommandList, const GameTimer& gt
 			}
 			else//블랜딩 안씀
 			{
-				if (ishalfalphaRender(*b) == false)
+				
 					(*b)->Render(CommandList, gt);
-				else
-				{
-					auto tempv = (*b)->ObjData.BlendValue;
-					(*b)->ObjData.BlendValue = 0.75f;
-					SetShader(CommandList, true);
-					//블랜딩용 PSO로 그림
-					(*b)->Render(CommandList, gt);
-					//다시 원상태 PSO로 연결
-					SetShader(CommandList, false);
-					(*b)->ObjData.BlendValue = tempv;
-				}
+				
 
 			}
 		}
@@ -322,7 +312,7 @@ void Shader::Render(ID3D12GraphicsCommandList * CommandList, const GameTimer& gt
 				else
 				{
 					auto tempv = (*b)->ObjData.BlendValue;
-					(*b)->ObjData.BlendValue = 0.5f;
+					(*b)->ObjData.BlendValue = 0.45f;
 					SetShader(CommandList, true);
 					//블랜딩용 PSO로 그림
 					(*b)->Render(CommandList, gt);
@@ -358,9 +348,9 @@ void Shader::Render(ID3D12GraphicsCommandList * CommandList, const GameTimer& gt
 				else
 				{
 					auto tempv = (*b)->ObjData.BlendValue;
-					(*b)->ObjData.BlendValue = 0.75f;
+					(*b)->ObjData.BlendValue = 0.5f;
 					SetShader(CommandList, true);
-					//블랜딩용 PSO로 그림
+					//블랜딩용 PSO로 그림1
 					(*b)->Render(CommandList, gt);
 					//다시 원상태 PSO로 연결
 					SetShader(CommandList, false);
@@ -440,15 +430,41 @@ bool Shader::ishalfalphaRender(CGameObject * obj)
 
 	if (player != NULL)
 	{
-		auto v = Float3Add(XMFloat4to3(obj->CenterPos), player->Camera.CamData.EyePos, false);
+		//플레이어가 카메라를 향하는 벡터
+		auto v = Float3Add(player->Camera.CamData.EyePos,XMFloat4to3(obj->CenterPos) , false);
+		//플레이어가 해당 사물을 향하는 벡터
 		auto v2 = Float3Add(XMFloat4to3(obj->CenterPos), XMFloat4to3(player->PlayerObject->CenterPos), false);
 
-		v = Float3Normalize(v);
-		v2 = Float3Normalize(v2);
+		auto n = Float3Normalize(v);
+		auto n2 = Float3Normalize(v2);
 
-		auto d = v2.x*v.x + v2.y*v.y + v2.z*v.z;
-		if (d < -0.5)//내적 결과가 뒤에있을경우
+		//내적결과가 0이상이면 카메라는 플레이어보다 뒤에있고, 사물도 플레이어보다 뒤에있으므로, 반투명화.
+		auto d = n2.x*n.x + n2.y*n.y + n2.z*n.z;
+		if (d > 0.0)
 			return true;
+
+
+		//그렇지만 가끔 벽이나 건물처럼 아주 높은 위치에 중점이있는경우 분명히 플레이어보다 뒤에있지만 각도로 계산하면 90도가 넘어서 가려진느경우가 있음.
+		//이를위해 카메라에서 플레이어와 물체를 볼때 y값을 0으로 두고, 거리를 계산해서 플레이어가 건물이나 이런거보다 앞에있으면 건물을 반투명하게한다.
+
+		auto n3=player->Camera.CamData.Look.x*player->PlayerObject->CenterPos.x + player->Camera.CamData.Look.y*player->PlayerObject->CenterPos.y + player->Camera.CamData.Look.z*player->PlayerObject->CenterPos.z;
+		auto n4 = player->Camera.CamData.Look.x*obj->CenterPos.x + player->Camera.CamData.Look.y*obj->CenterPos.y + player->Camera.CamData.Look.z*obj->CenterPos.z;
+		
+		if (n3 > n4)
+			return true;
+		//
+		//auto v3 = Float3Add(player->Camera.CamData.EyePos, XMFloat4to3(player->PlayerObject->CenterPos), false);
+		//v.y = 0;
+		//v3.y = 0;
+
+		//
+
+		////건물보다 플레이어가 앞에있으면 반투명화
+		//if (FloatLength(v) < FloatLength(v3))
+		//	return true;
+
+		
+
 	}
 	return false;
 }

@@ -66,5 +66,6 @@ public:
 
 
 	CGameObject* AimUI = NULL;
+	CGameObject* SkillBackGround = NULL;
 };
 

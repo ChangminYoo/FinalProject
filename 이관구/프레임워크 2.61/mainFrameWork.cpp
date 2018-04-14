@@ -96,7 +96,7 @@ void MainFrameWork::System(const GameTimer & gt)
 void MainFrameWork::GravitySystem(const GameTimer & gt)
 {
 	GeneratorGravity gg;
-	gg.SetGravityAccel(XMFLOAT3(0, -130, 0));
+	gg.SetGravityAccel(XMFLOAT3(0, -100, 0));
 	//고정된 물체를 제외한 모든오브젝트에 중력을 가한다. 단 투사체는 제외한다.
 	for (auto i = scene->DynamicObject.begin(); i != scene->DynamicObject.end(); i++)
 	{

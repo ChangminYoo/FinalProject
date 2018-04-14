@@ -11,7 +11,7 @@ Scene::Scene(HWND hwnd,ID3D12Device * m_Device, ID3D12GraphicsCommandList * m_DC
 	mHeight = ch;
 	
 	XMFLOAT3 e(0, 55, -65);
-	XMFLOAT3 a(0, 15, 0);
+	XMFLOAT3 a(0, 13, 0);
 	XMFLOAT3 u(0, 1, 0);
 	
 	//루트시그니처와 쉐이더들을 생성한다.
@@ -187,28 +187,52 @@ void Scene::CreateGameObject()
 	
 	SkyObject = new SphereObject(device, commandlist,  &BbObject, XMFLOAT4(0, 0, 0, 0));
 
-	DynamicObject.push_back(new CCubeManObject(device, commandlist,&BbObject, XMFLOAT4(0, 0, -50, 0)));
+	DynamicObject.push_back(new CCubeManObject(device, commandlist,&BbObject, XMFLOAT4(50, 100, -40, 0)));
 	DynamicObject.push_back(new CCubeManObject(device, commandlist,&BbObject, XMFLOAT4(30, 0, -40, 0)));
 	//DynamicObject.back()->pp->SetBounce(true);
 	//DynamicObject.back()->pp->AddForce(-600, 0, 600);
 	//DynamicObject.back()->pp->integrate(0.1f);//힘은 지속적으로 가해지는것이며 즉발적이려면 힘을 가한 시간을 통해 계산한다.
-	StaticObject.push_back(new CubeObject(device, commandlist,  &BbObject, XMFLOAT4(-20, 0, 0, 0)));
-	StaticObject.push_back(new CubeObject(device, commandlist,  &BbObject, XMFLOAT4(10, 20, -40, 0)));
+
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(-20, 0, 0, 0)));
+
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(10, 20, -40, 0)));
 	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(20, 35, -50, 0)));
 	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(20, 70, -50, 0)));
 
 	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(5, 50, -40, 0)));
-	StaticObject.push_back(new BuildingObject(device, commandlist,  &BbObject, XMFLOAT4(50, 0, -40, 0)));
-	StaticObject.push_back(new SmallWallObject(device, commandlist,  &BbObject, XMFLOAT4(30, 0, 40, 0)));
-	StaticObject.push_back(new BigWallObject(device, commandlist, &BbObject, XMFLOAT4(0, 0, 400, 0)));
 
-	RigidObject.push_back(new RigidCubeObject(device, commandlist,  &BbObject, XMFLOAT4(25, 200, 10, 0)));
-	RigidObject.push_back(new RigidCubeObject(device, commandlist,  &BbObject, XMFLOAT4(0.5, 50, 3, 0)));
-	RigidObject.push_back(new RigidCubeObject(device, commandlist,  &BbObject, XMFLOAT4(15, 40, 39, 0)));
+	//BigWall
+	float BigWall_X1 = 200 * sinf(0.4f * MMPE_PI);
+	float BigWall_Z1 = (400 * cosf(0.4f * MMPE_PI) + 400) / 2;
+	
+	float BigWall_X2 = ( (400 * sinf(0.4f * MMPE_PI)) + (400 * sinf(0.8f * MMPE_PI)) ) / 2;
+	float BigWall_Z2 = ( (400 * cosf(0.4f * MMPE_PI)) + (-400 * cosf(0.2f * MMPE_PI)) ) / 2;
+
+	float BigWall_Z3 = -400 * cosf(0.2f * MMPE_PI);
+
+	float BigWall_Rad1 = MMPE_PI / 5; //36degree
+	float BigWall_Rad2 = (MMPE_PI / 5) ; //72degree
+
+	StaticObject.push_back(new BigWallObject(device, commandlist, &BbObject, -BigWall_Rad1, XMFLOAT4(-BigWall_X1, 0, BigWall_Z1, 0)));
+	StaticObject.push_back(new BigWallObject(device, commandlist, &BbObject, BigWall_Rad1, XMFLOAT4(BigWall_X1, 0, BigWall_Z1, 0)));
+
+	StaticObject.push_back(new BigWallObject(device, commandlist, &BbObject,- BigWall_Rad1 *2, XMFLOAT4(BigWall_X2, 0, BigWall_Z2, 0)));
+	StaticObject.push_back(new BigWallObject(device, commandlist, &BbObject, BigWall_Rad1 *2, XMFLOAT4(-BigWall_X2, 0, BigWall_Z2, 0)));
+	
+	StaticObject.push_back(new BigWallObject(device, commandlist, &BbObject, 0, XMFLOAT4(0, 0, BigWall_Z3, 0)));
+	
+
+	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, XMFLOAT4(25, 200, 10, 0)));
+	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, XMFLOAT4(0.5, 50, 3, 0)));
+	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, XMFLOAT4(15, 40, 39, 0)));
 	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, XMFLOAT4(20, 100, 0, 0)));
-	RigidObject.push_back(new RigidCubeObject(device, commandlist,  &BbObject, XMFLOAT4(-11, 130, 10, 0)));
-	RigidObject.push_back(new RigidCubeObject(device, commandlist,  &BbObject, XMFLOAT4(-11, 0, 10, 0)));
+	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, XMFLOAT4(-11, 130, 10, 0)));
+	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, XMFLOAT4(-11, 0, 10, 0)));
 
+
+	StaticObject.push_back(new SmallWallObject(device, commandlist, &BbObject, 0, XMFLOAT4(30, 0, 40, 0)));
+	StaticObject.push_back(new BuildingObject(device, commandlist, &BbObject, 0, XMFLOAT4(50, 0, -40, 0)));
+	
 
 	LandObject.push_back(new GridObject(device, commandlist,&BbObject, XMFLOAT4(0, -0.2, 0, 0)));
 
@@ -226,6 +250,8 @@ void Scene::CreateUI()
 {
 
 	AimUI = new AimObject(device,commandlist,NULL);
+	
+	SkillBackGround = new SkillUIObject(device, commandlist, NULL,XMFLOAT4(0, 0.9*-mHeight / 2,0,0));
 }
 
 void Scene::Render(const GameTimer& gt)
@@ -257,6 +283,7 @@ void Scene::Render(const GameTimer& gt)
 			Player->Camera.UpdateConstantBufferOrtho(commandlist);
 			Shaders->SetBillboardShader(commandlist);
 			AimUI->Render(commandlist, gt);
+			SkillBackGround->Render(commandlist, gt);
 			//다시 원상태로 바꿔줌. 이걸 안하면 피킹이 엉망이됨. 
 			Player->Camera.UpdateConstantBuffer(commandlist);
 	}
@@ -340,19 +367,9 @@ void Scene::Tick(const GameTimer & gt)
 
 	//불렛
 	for (auto b = BulletObject.begin(); b != BulletObject.end(); b++)
-	{
 		(*b)->Tick(gt);
 
-		
-		/*f ((*b)->ParticleTime <= 0.0f)
-		{
-			(*b)->ParticleList->push_back(new ParticleObject(device, commandlist, &BbObject, *b, (*b)->CenterPos));
-			(*b)->ParticleTime = 0.2f;
-		}*/
-	}
 	
-
-
 	for (auto b = BbObject.begin(); b != BbObject.end(); b++)
 		(*b)->Tick(gt);
 	
@@ -360,6 +377,8 @@ void Scene::Tick(const GameTimer & gt)
 	for (auto b = RigidObject.begin(); b != RigidObject.end(); b++)
 		(*b)->Tick(gt);
 
+
+	Player->Tick(gt.DeltaTime());
 	
 	//카메라 리 로케이트 
 	Player->PlayerCameraReLocate();

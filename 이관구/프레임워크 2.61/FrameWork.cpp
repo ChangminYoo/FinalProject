@@ -295,6 +295,16 @@ LRESULT FrameWork::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		// Save the new client area dimensions.
 		mClientWidth = LOWORD(lParam);
 		mClientHeight = HIWORD(lParam);
+
+	//윈도우 사이즈가 바뀔때 마다 UI의 위치를 달리해야한다. 물론 틱함수를 만들어도 되지만, 굳이 매틱마다 불릴필요는 없으니까 이렇게 처리하자.
+		if (scene != NULL)
+		{
+			if (scene->SkillBackGround != NULL)
+			{
+				scene->SkillBackGround->CenterPos.y = 0.9*-mClientHeight / 2;
+			}
+		}
+
 		if (Device)
 		{
 			if (wParam == SIZE_MINIMIZED)
@@ -411,8 +421,8 @@ LRESULT FrameWork::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 void FrameWork::OnMouseDown(WPARAM btnState, int x, int y)
 {
 	
-	//레이를 쏜다.
-	if (scene->Player->PlayerObject->gamedata.HP > 0)
+	//레이를 쏜다. 단 플레이어 오브젝트가 살아있고, 해당 스킬이 쏠수있는 true상태라면!
+	if (scene->Player->PlayerObject->gamedata.HP > 0 && scene->Player->isSkillOn[scene->Player->SellectBulletIndex])
 	{//공격 애니메이션으로 전환
 		scene->Player->PlayerObject->SetAnimation(2);
 		auto RAY = MousePicking(x, y, scene->Player->Camera.CamData.EyePos, scene->Player->Camera.CamData.View, scene->Player->Camera.CamData.Proj);

@@ -35,6 +35,13 @@ VertexOut VS(VertexIn vin)
 	vout.Pos = mul(vout.Pos, gView);
 
 
+	if (CustomData1.x == 2)//총알 파티클
+	{
+		vout.Pos.x += cos((PTime + CustomData1.w)*3.141592);
+		vout.Pos.z += sin((PTime + CustomData1.w)*3.141592);
+	}
+
+
 	return vout;
 
 }
@@ -47,33 +54,89 @@ void GS(point VertexOut gin[1], inout TriangleStream<GeoOut> triStream)
 	float halfHeight;										
 	
 
-	if (CustomData1.x == 0)//정체성 0:데미지등, 1: hp바
-	{
-		halfWidth = 0.5f * Scale;
-		halfHeight = 0.5f * Scale;
-	}
-	else if (CustomData1.x == 1)
-	{
-		halfWidth = 0.5f * Scale*CustomData1.y;
-		halfHeight = 0.1f * Scale * 0.7;
-	}
-
-
 	float4 v[4];
 	for (int i = 0; i < 4; i++)
 		v[i] = gin[0].Pos;
+
+	//CustomData1.x : 파티클의 정체성
+	if (CustomData1.x == 0)//데미지 나, 에임등 고정된 크기를 갖는 경우.
+	{
+		halfWidth = 0.5f * Scale;
+		halfHeight = 0.5f * Scale;
+
+		v[0].x += -halfWidth;
+		v[0].y  += -halfHeight;
+
+		v[1].x += -halfWidth;
+		v[1].y += halfHeight;
+
+		v[2].x += halfWidth;
+		v[2].y += -halfHeight;
+
+		v[3].x += halfWidth;
+		v[3].y += halfHeight;
+	}
+	else if (CustomData1.x == 1)//HP바
+	{
+		halfWidth = 0.5f * Scale;
+		halfHeight = 0.1f * Scale * 0.7;
+		v[0].x += -halfWidth;
+		v[0].y  += -halfHeight;
+
+		v[1].x += -halfWidth;
+		v[1].y += halfHeight;
 	
-	v[0].x += -halfWidth;
-	v[0].y  += -halfHeight;
+		v[2].x += halfWidth -2*halfWidth*(1-CustomData1.y);
+		v[2].y += -halfHeight;
 
-	v[1].x += -halfWidth;
-	v[1].y += halfHeight;
+		v[3].x += halfWidth  -2*halfWidth *(1-CustomData1.y);
+		v[3].y += halfHeight;
 
-	v[2].x += halfWidth;
-	v[2].y += -halfHeight;
 
-	v[3].x += halfWidth;
-	v[3].y += halfHeight;
+	}
+	else if (CustomData1.x == 2)//총알 파티클
+	{
+		halfWidth = 0.5f * Scale;
+		halfHeight = 0.5f * Scale;
+		
+		
+
+		v[0].x += -halfWidth;
+		v[0].y  += -halfHeight;
+
+		v[1].x += -halfWidth;
+		v[1].y += halfHeight;
+
+		v[2].x += halfWidth;
+		v[2].y += -halfHeight;
+
+		v[3].x += halfWidth;
+		v[3].y += +halfHeight;
+
+
+	}
+	else if(CustomData1.x == 3) // 스킬 백그라운드
+	{
+		halfWidth = 0.5f * Scale;
+		halfHeight = 0.5f * Scale*0.2;
+		
+		v[0].x += -halfWidth;
+		v[0].y  += -halfHeight;
+
+		v[1].x += -halfWidth;
+		v[1].y += halfHeight;
+
+		v[2].x += halfWidth;
+		v[2].y += -halfHeight;
+
+		v[3].x += halfWidth;
+		v[3].y += halfHeight;
+
+	}
+
+
+	
+	
 
 	float2 tex[4];
 	tex[0] = float2(0.0f, 1.0f);

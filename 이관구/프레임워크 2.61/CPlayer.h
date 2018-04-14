@@ -23,7 +23,22 @@ public:
 	float xtheta = 0;
 	float ytheta = 0;
 
-	int SellectBulletNumber = 0;
+	//현재 선택한 스킬인덱스. 0~3까지 값만 가진다. Skills의 인덱스다.
+	int SellectBulletIndex = 0;
+
+	//스킬들 총 4개까지 있음. 내부의 값이 의미하는것은 생성할때 사용될 스킬넘버링
+	int Skills[4] = { 0 };
+
+	//각 스킬별로 쿨타임.
+	float SkillsCoolTime[4] = { 0.0f };
+
+	//스킬별 사용가능 여부
+	bool isSkillOn[4] = { true };
+
+	void Tick(float DeltaTime);
 	void CreateBullet(ID3D12Device* Device,ID3D12GraphicsCommandList* cl, XMFLOAT3& Goal, CGameObject* lock, list<CGameObject*>* bulletlist);
+
+	
+
 };
 
