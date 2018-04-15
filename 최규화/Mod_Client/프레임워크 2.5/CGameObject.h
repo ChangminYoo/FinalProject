@@ -124,6 +124,8 @@ public:
 
 public:
 	Player_Data m_player_data;
+	StaticObject_Info m_sobj_data;
+
 	CPlayer* m_player{ nullptr };
 	
 	

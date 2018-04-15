@@ -151,6 +151,9 @@ public:
 	static vector<Player_Session*> m_clients;
 	static list<Player_Session*> m_staticobjs;
 
+	int t_cnt{ 0 };
+	void Update_Temp();
+	float prevTime = 0.f, curTime = 0.f, elapsedTime = 0.f;
 };
 
 

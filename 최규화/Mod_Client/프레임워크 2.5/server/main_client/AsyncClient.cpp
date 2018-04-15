@@ -156,7 +156,7 @@ void AsyncClient::SendPacket(Packet * packet)
 	auto a = reinterpret_cast<STC_ChangedPos*>(packet);
 
 	boost::asio::async_write(m_socket, boost::asio::buffer(new_sendBuf, packet_size),
-		[&](const boost::system::error_code& error, size_t bytes_transferred)
+		[=](const boost::system::error_code& error, size_t bytes_transferred)
 	{
 		if (error != 0)
 		{
@@ -171,5 +171,23 @@ void AsyncClient::SendPacket(Packet * packet)
 
 		//RecvPacket();
 	});
+	
+
+	/*m_socket.async_write_some(boost::asio::buffer(new_sendBuf, packet_size),
+		[&](const boost::system::error_code& error, size_t bytes_transferred)
+	{
+		if (error != 0)
+		{
+			//if (bytes_transferred != packet_size)
+			//{
+			//	cout << "Client No. [ " << m_id << " ] send no same size packet data by async_write_some" << endl;
+			//}
+
+			delete[] new_sendBuf;
+			return;
+		}
+	});
+	*/
+
 }
 

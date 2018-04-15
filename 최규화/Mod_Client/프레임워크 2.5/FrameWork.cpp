@@ -522,16 +522,17 @@ void FrameWork::OnMouseMove(WPARAM btnState, int x, int y)
 
 	//ShowCursor(false);
 
-	//회전에 대한 패킷을 보냄
-	auto myobj = move(scene->Player->PlayerObject);
+	
+	CGameObject* myobj = move(scene->Player->PlayerObject);		//마우스 움직일때마다 바뀐 캐릭터회전값이 저장된 캐릭터오브젝트
+	
+	scene->Player->m_async_client->RgCkInfo.RtCheck.RotationInfo =
+	{ myobj->Orient.x , myobj->Orient.y , myobj->Orient.z , myobj->Orient.w };
 
-	STC_Rotation rot_data;
-	rot_data.packet_size = sizeof(STC_Rotation);
-	rot_data.pack_type = PACKET_PROTOCOL_TYPE::PLAYER_ROTATE;
-	rot_data.id = scene->my_ClientID;
-	rot_data.rotate_status = { myobj->Orient.x, myobj->Orient.y, myobj->Orient.z, myobj->Orient.w };
 
-	scene->Player->m_async_client->SendPacket(reinterpret_cast<Packet*>(&rot_data));
+	//STC_Rotation rot_data;
+	//rot_data.id = scene->my_ClientID;
+	//rot_data.rotate_status = { myobj->Orient.x, myobj->Orient.y, myobj->Orient.z, myobj->Orient.w };
+	//scene->Player->m_async_client->SendPacket(reinterpret_cast<Packet*>(&rot_data));
 
 }
 

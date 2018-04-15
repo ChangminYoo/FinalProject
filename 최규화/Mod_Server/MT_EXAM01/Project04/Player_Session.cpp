@@ -105,9 +105,7 @@ void Player_Session::Init_MonsterInfo()
 
 	m_playerData.UserInfo.origin_hp = 100;
 	m_playerData.UserInfo.cur_hp = m_playerData.UserInfo.origin_hp;
-	m_playerData.UserInfo.origin_mp = 50;
-	m_playerData.UserInfo.cur_mp = m_playerData.UserInfo.origin_mp;
-
+	
 	m_playerData.UserInfo.exp = 200;
 	m_playerData.UserInfo.level = 1;
 	m_playerData.UserInfo.player_status.attack = 20;
@@ -133,16 +131,25 @@ void Player_Session::Init_PlayerInfo()
 	//m_myObjType = PLAYER_OBJECT_TYPE::PLAYER_OBJECT;
 	m_isAI = false;
 
-	m_playerData.Connect_Status = true;
-	m_playerData.Is_AI = false;
-	m_playerData.ID = m_id;
-	m_playerData.Dir = 0;
 	m_playerData.Ani = Ani_State::Idle;
-	m_playerData.Rotate_status = { 0.0f, 0.0f, 0.0f, 0.0f };
+	m_playerData.Connect_Status = true;
+	m_playerData.Dir = 0;
 	m_playerData.GodMode = false;
+	m_playerData.ID = m_id;
+	m_playerData.Is_AI = false;
+	m_playerData.Rotate_status = { 0.0f, 0.0f, 0.0f, 0.0f };
+
+	m_playerData.UserInfo.player_status.attack = 50;
+	m_playerData.UserInfo.player_status.defend = 50;
+	m_playerData.UserInfo.player_status.speed = 100;
+
+	m_playerData.UserInfo.cur_hp = 300;
+	m_playerData.UserInfo.origin_hp = 300;
+	m_playerData.UserInfo.exp = 0;
+	m_playerData.UserInfo.level = 1;
 
 	if (m_playerData.ID == 0)
-		m_playerData.Pos = { 0.0f , -1000.0f, 0.0f };
+		m_playerData.Pos = { -100.0f , -1000.0f, 0.0f };
 	else if (m_playerData.ID == 1)
 		m_playerData.Pos = { 100.0f, -1000.0f, 0.0f };
 
@@ -163,8 +170,8 @@ void Player_Session::InitData_To_Client()
 {
 	//1. 내 초기화정보
 	STC_SetMyClient init_player;
-	//init_player.pack_size = sizeof(STC_SetMyClient);
-	//init_player.pack_type = PACKET_PROTOCOL_TYPE::INIT_CLIENT;
+	init_player.pack_size = sizeof(STC_SetMyClient);
+	init_player.pack_type = PACKET_PROTOCOL_TYPE::INIT_CLIENT;
 	init_player.player_data = m_playerData;
 
 	cout << "Current ID: " << m_clients[m_id]->Get_ID() << endl;
@@ -176,8 +183,8 @@ void Player_Session::InitData_To_Client()
 	//------------------------------------------------------------------------------------
 	//2. 다른 클라이언트 초기화정보
 	STC_SetOtherClient init_otherplayer;
-	//init_otherplayer.pack_size = sizeof(STC_SetOtherClient);
-	//init_otherplayer.pack_type = PACKET_PROTOCOL_TYPE::INIT_OTHER_CLIENT;
+	init_otherplayer.pack_size = sizeof(STC_SetOtherClient);
+	init_otherplayer.pack_type = PACKET_PROTOCOL_TYPE::INIT_OTHER_CLIENT;
 
 	//2. 내 정보를 다른 클라이언트에게 넘겨준다
 	for (auto i = 0; i < m_clients.size(); ++i)
@@ -261,7 +268,7 @@ void Player_Session::GetUpvector()
 void Player_Session::SendPacket(Packet* packet)
 {
 	int packet_size = packet[0];
-	cout << "packet_size : " << packet_size << endl;
+	//cout << "packet_size : " << packet_size << endl;
 	Packet *new_sendBuf = new Packet[packet_size];
 	memcpy(new_sendBuf, packet, packet_size);
 
@@ -273,21 +280,21 @@ void Player_Session::SendPacket(Packet* packet)
 	//1. async_write_some - 비동기 IO / 받은데이터를 즉시 보냄(따로 버퍼에 저장X)
 	//2. async_write - 비동기 IO / 보내고자 하는 데이터가 모두 버퍼에 담기면 데이터를 보냄
 	boost::asio::async_write(m_socket, boost::asio::buffer(new_sendBuf, packet_size),
-		[=](const boost::system::error_code& error, size_t bytes_transferred)
+		[=](const boost::system::error_code& error, const size_t& bytes_transferred)
 	{
-		cout << "Packet_Size : " << packet_size << "bytes_transferred : " << bytes_transferred << endl;
+		//cout << "Packet_Size : " << packet_size << "bytes_transferred : " << bytes_transferred << endl;
 		if (error != 0)
 		{
 			if (bytes_transferred != packet_size)
 			{
-				cout << "Client No. [ " << m_id << " ] error code : " << error.value() << endl;
+				cout << "Client No. [ " << m_id << " ] async_write error code : " << error.value() << endl;
 			}
 
 			delete[] new_sendBuf;
 			return;
 		}
 		
-		//RecvPacket();
+		RecvPacket();
 	});
 	
 
@@ -322,7 +329,7 @@ void Player_Session::RecvPacket()
 	//boost::asio::async_read(m_socket, boost::asio::buffer(m_recvBuf , 1),
 	//	[&](const boost::system::error_code& error, size_t bytes_transferred)
 	m_socket.async_read_some(boost::asio::buffer(m_recvBuf, MAX_BUFFER_SIZE),
-		[&](const boost::system::error_code& error,const size_t& bytes_transferred)
+		[=](const boost::system::error_code& error,const size_t& bytes_transferred)
 	{	
 		// error = 0 성공 , error != 0 실패
 		if (error != 0)
@@ -463,6 +470,8 @@ void Player_Session::ProcessPacket(Packet * packet)
 			//3. 변화된 내 (포지션, 애니메이션) 정보를 다른 클라에 전달 - 반드시 이렇게 다시 만들어줘야함
 			//PosMove_Data를 바로 sendpacket에 packet으로 형변화하여 보내면 size error가 난다
 			STC_ChangedPos c_to_other;
+			c_to_other.packet_size = sizeof(STC_ChangedPos);
+			c_to_other.pack_type = PACKET_PROTOCOL_TYPE::CHANGED_PLAYER_POSITION;
 	
 			c_to_other.id = PosMove_Data->id;
 			c_to_other.ani_state = m_playerData.Ani;
@@ -497,12 +506,15 @@ void Player_Session::ProcessPacket(Packet * packet)
 			m_clients[Rotation_Data->id]->m_playerData.Rotate_status = move(Rotation_Data->rotate_status);
 
 			// 1 - 2. 받은 정보를 토대로 lookvector와 rightvector를 업데이트
-			m_clients[Rotation_Data->id]->UpdateLookVector();
+			m_clients[Rotation_Data->id]->UpdateLookVector(); //이거넣으면 20byte -> 21byte씩 다시보내게됨
+
 			//cout << "ID: " << Rotation_Data->id << " 변화된 회전값: " << "[ x, y, z, w ]: "
 			//	<< Rotation_Data->rotate_status.x << ", " << Rotation_Data->rotate_status.y << ", " << Rotation_Data->rotate_status.z << ", " << Rotation_Data->rotate_status.w << endl;
 
 			// 2. 다른 클라에게 보낸다.
 			STC_Rotation r_to_other;
+			r_to_other.packet_size = sizeof(STC_Rotation);
+			r_to_other.pack_type = PACKET_PROTOCOL_TYPE::PLAYER_ROTATE;
 
 			r_to_other.id = Rotation_Data->id;
 			r_to_other.rotate_status = move(Rotation_Data->rotate_status);
@@ -523,6 +535,20 @@ void Player_Session::ProcessPacket(Packet * packet)
 
 		}
 		break;
+
+	case PACKET_PROTOCOL_TYPE::TEST:
+		{
+			if (m_state == PLAYER_STATE::DEAD)
+				break;
+
+			auto test_data = reinterpret_cast<STC_Test*>(packet);
+			
+
+			cout << "ID: " << test_data->player_data.ID << "ElaspedTime: " << test_data->time.t_time << "------"
+				"PrevTime: " << test_data->time.p_time << endl;
+
+		}
+		break;
 	
 	}
 }
@@ -531,5 +557,15 @@ void Player_Session::Set_State(int state)
 {
 	if (state != -1)
 		m_state = state;
+}
+
+void Player_Session::Update_Temp()
+{
+	while (true)
+	{
+		++t_cnt;
+		cout << "t_cnt: " << t_cnt << endl;
+		//cout << "응응응" << endl;
+	}
 }
 

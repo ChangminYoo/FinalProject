@@ -71,7 +71,7 @@ void Player_Session::SendStaticObjects(const list<StaticObject*>& SObjList)
 	//1. 상자에 대한 데이터를 보냄
 	for (auto iter = SObjList.begin(); iter != SObjList.end(); ++iter)
 	{
-		stc_sobj.player_data = move((*iter)->GetPlayerData());
+		stc_sobj.sobj_data = move((*iter)->GET_InfoOfSObjs());
 		stc_sobj.type = STATIC_OBJECT_TYPE::Box;
 
 		//cout << "socket: " << reinterpret_cast<int*>(&((*iter)->m_socket)) << endl;

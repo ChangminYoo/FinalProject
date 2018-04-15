@@ -192,10 +192,14 @@ void Scene::CreateGameObject()
 	//DynamicObject.back()->pp->SetBounce(true);
 	//DynamicObject.back()->pp->AddForce(-600, 0, 600);
 	//DynamicObject.back()->pp->integrate(0.1f);//힘은 지속적으로 가해지는것이며 즉발적이려면 힘을 가한 시간을 통해 계산한다.
-	StaticObject.push_back(new CubeObject(device, commandlist,  &BbObject, XMFLOAT4(-20, 0, 0, 0)));
-	StaticObject.push_back(new CubeObject(device, commandlist,  &BbObject, XMFLOAT4(-40, 10, 0, 0)));
-	StaticObject.push_back(new CubeObject(device, commandlist,  &BbObject, XMFLOAT4(50, 0, -40, 0)));
-	StaticObject.push_back(new CubeObject(device, commandlist,  &BbObject, XMFLOAT4(30, 0, 40, 0)));
+	//StaticObject.push_back(new CubeObject(device, commandlist,  &BbObject, XMFLOAT4(-20, 0, 0, 0)));
+	//StaticObject.push_back(new CubeObject(device, commandlist,  &BbObject, XMFLOAT4(-40, 10, 0, 0)));
+	//StaticObject.push_back(new CubeObject(device, commandlist,  &BbObject, XMFLOAT4(50, 0, -40, 0)));
+	//StaticObject.push_back(new CubeObject(device, commandlist,  &BbObject, XMFLOAT4(30, 0, 40, 0)));
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(0, 0, 0, 0)));
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(0, 0, 0, 0)));
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(0, 0, 0, 0)));
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(0, 0, 0, 0)));
 
 	RigidObject.push_back(new RigidCubeObject(device, commandlist,  &BbObject, XMFLOAT4(25, 200, 10, 0)));
 	RigidObject.push_back(new RigidCubeObject(device, commandlist,  &BbObject, XMFLOAT4(-11, 130, 10, 0)));
@@ -227,7 +231,7 @@ void Scene::CreateGameObject()
 	player_num = 0;
 	for (auto sobj : StaticObject)
 	{
-		sobj->m_player_data.ID = player_num;
+		sobj->m_sobj_data.ID = player_num;
 		++player_num;
 	}
 
@@ -447,23 +451,16 @@ void Scene::SET_PLAYER_BY_SEVER_DATA(const unsigned short& id, Player_Data& play
 				}
 				break;
 
-			break;
-
+				default:
+					break;
+				//break; //이거문제
 			}
-			
-			//GameObject->Orient = { playerdata.Rotate_status.x , playerdata.Rotate_status.y , playerdata.Rotate_status.z , playerdata.Rotate_status.w };
-
-			//받아온 아이디가 내 클라이언트 아이디일 때
-			
-			//	GameObject->m_player->PlayerObject = move(GameObject);
-
-			//여기에서 이제 애니메이션 스테이트 넣어주고 패킷주고받을때마다 변화되야할 클라정보를 넣어주자
 
 		}
 	}
 }
 
-void Scene::SET_SOBJECT_BY_SERVER_DATA(const unsigned short& id, Player_Data& playerdata, const unsigned char & type)
+void Scene::SET_SOBJECT_BY_SERVER_DATA(const unsigned short& id, StaticObject_Info& sobjdata, const unsigned char & type)
 {
 	switch (type)
 	{
@@ -471,18 +468,22 @@ void Scene::SET_SOBJECT_BY_SERVER_DATA(const unsigned short& id, Player_Data& pl
 		{
 			for (auto box : StaticObject)
 			{
-				if (box->m_player_data.ID == playerdata.ID)
+				if (box->m_sobj_data.ID == sobjdata.ID)
 				{
-					box->m_player_data = move(playerdata);
+					box->m_sobj_data = move(sobjdata);
 
-					box->Orient = { playerdata.Rotate_status.x , playerdata.Rotate_status.y , playerdata.Rotate_status.z, playerdata.Rotate_status.w };
-					box->CenterPos = { playerdata.Pos.x ,playerdata.Pos.y , playerdata.Pos.z, playerdata.Pos.w };
+					box->Orient = { sobjdata.Rotate_status.x , sobjdata.Rotate_status.y , sobjdata.Rotate_status.z, sobjdata.Rotate_status.w };
+					box->CenterPos = { sobjdata.Pos.x ,sobjdata.Pos.y , sobjdata.Pos.z, sobjdata.Pos.w };
 
-					box->gamedata.Damage = playerdata.UserInfo.player_status.attack;
-					box->gamedata.GodMode = playerdata.GodMode;
-					box->gamedata.HP = playerdata.UserInfo.cur_hp;
-					box->gamedata.MAXHP = playerdata.UserInfo.origin_hp;
-					box->gamedata.Speed = playerdata.UserInfo.player_status.speed;
+					box->gamedata.Damage = sobjdata.player_status.attack;
+					box->gamedata.GodMode = sobjdata.GodMode;
+					box->gamedata.HP = sobjdata.cur_hp;
+					box->gamedata.MAXHP = sobjdata.origin_hp;
+					box->gamedata.Speed = sobjdata.player_status.speed;
+
+					box->n_Animation = sobjdata.Ani;
+
+					box->pp->SetPosition(box->CenterPos);
 
 					break;
 				}

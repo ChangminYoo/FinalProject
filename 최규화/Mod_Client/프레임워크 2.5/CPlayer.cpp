@@ -394,6 +394,9 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 
 
 		STC_ChangedPos change_pos_ani;
+		change_pos_ani.packet_size = sizeof(STC_ChangedPos);
+		change_pos_ani.pack_type = PACKET_PROTOCOL_TYPE::CHANGED_PLAYER_POSITION;
+		
 		change_pos_ani.id = PlayerObject->m_player_data.ID;
 		change_pos_ani.pos = { PlayerObject->CenterPos.x, PlayerObject->CenterPos.y, PlayerObject->CenterPos.z, PlayerObject->CenterPos.w };
 
@@ -402,6 +405,11 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 			if (PlayerObject->n_Animation != Ani_State::Attack)//공격모션이 아니면 다시 대기상태로
 			{
 				PlayerObject->SetAnimation(Ani_State::Run);
+
+				//
+				m_async_client->RgCkInfo.PtCheck.PositionInfo = { PlayerObject->CenterPos.x, PlayerObject->CenterPos.y, PlayerObject->CenterPos.z, PlayerObject->CenterPos.w };
+				m_async_client->RgCkInfo.PtCheck.AniState = Ani_State::Run;
+
 
 				change_pos_ani.ani_state = Ani_State::Run;
 				m_async_client->SendPacket(reinterpret_cast<Packet*>(&change_pos_ani));
@@ -412,6 +420,10 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 			if (PlayerObject->n_Animation != Ani_State::Attack)//공격모션이 아니면 다시 대기상태로
 			{
 				PlayerObject->SetAnimation(Ani_State::Idle);
+
+				//
+				m_async_client->RgCkInfo.PtCheck.PositionInfo = { PlayerObject->CenterPos.x, PlayerObject->CenterPos.y, PlayerObject->CenterPos.z, PlayerObject->CenterPos.w };
+				m_async_client->RgCkInfo.PtCheck.AniState = Ani_State::Idle;
 
 				change_pos_ani.ani_state = Ani_State::Idle;
 				m_async_client->SendPacket(reinterpret_cast<Packet*>(&change_pos_ani));

@@ -10,7 +10,6 @@
 #include <boost/bind.hpp>
 #include <memory>
 
-
 #include "protocol.h"
 //#include "Player.h"
 //#include "Database\CTextTest.h"

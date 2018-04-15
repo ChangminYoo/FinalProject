@@ -5,6 +5,28 @@
 
 class Scene;
 
+#define MAX_ROTATE_PACKET_TIME 0.2
+#define MAX_POSITION_MOVE_PACKET_TIME 0.2
+
+struct RotateCheck
+{
+	Time t;
+	Rotation RotationInfo;
+};
+
+struct PositionCheck
+{
+	Time t;
+	Position PositionInfo;
+	Ani_State AniState;
+};
+
+struct RegularCheckInfo
+{
+	RotateCheck RtCheck;
+	PositionCheck PtCheck;
+};
+
 class AsyncClient
 {
 private:
@@ -21,6 +43,8 @@ private:
 	CGameObject* m_myObj;
 	Scene* m_myScene;
 
+	float m_totalTime{ 0.0f };
+
 public:
 	AsyncClient() : m_socket(g_io_service) {};
 	~AsyncClient();
@@ -34,12 +58,14 @@ public:
 
 	void ProcessPacket(Packet* packet, CGameObject& obj, Scene& scene);
 
-	void SendPacketRegular(CGameObject* obj);
+	void SendPacketRegular(CGameObject& gobj , const GameTimer& gt);
 
 	//얘를 databuf -> recvbuf로 바꾸니 제대로 값이 서버에서 전달됨
 	//recv 함수에서 임시버퍼에 서버에서 받은 데이터를 차례로 담는과정없이 
 	//바로 프로세스패킷에 서버에서 받은 데이터를 전달한 상태임 지금은...
 	Packet* Get_RecvBuf() { return m_recvBuf; }
+
+	RegularCheckInfo RgCkInfo;
 	
 	//유보 - frameadvance에서 서버에서 받은 데이터가 processpacket 함수를 지나서
 	//해당 변경된 gameobject의 데이터를 dynamicobject에 넣어줄것인지? -> 서버에서 데이터를 받을 때마다

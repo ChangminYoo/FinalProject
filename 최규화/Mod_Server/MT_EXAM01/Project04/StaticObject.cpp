@@ -22,18 +22,16 @@ void StaticObject::InitBoxObjects()
 	{
 		StaticObject *sobj = new StaticObject();
 
-		sobj->sobj_data.Ani = Ani_State::Idle;
-		sobj->sobj_data.Connect_Status = true;
-		sobj->sobj_data.Dir = 0;
-		sobj->sobj_data.GodMode = true;
-		sobj->sobj_data.ID = i;
-		sobj->sobj_data.Is_AI = false;
-		sobj->sobj_data.Pos = m_boxPos[i];
-		sobj->sobj_data.Rotate_status = { 0.0f, 0.0f, 0.0f, 0.0f };
-		sobj->sobj_data.UserInfo.cur_hp = 100;
-		sobj->sobj_data.UserInfo.origin_hp = 100;
-		sobj->sobj_data.UserInfo.player_status.attack = 0;
-		sobj->sobj_data.UserInfo.player_status.speed = 0;
+		sobj->m_sobjdata.Ani = Ani_State::Idle;
+		sobj->m_sobjdata.GodMode = true;
+		sobj->m_sobjdata.ID = i;
+		sobj->m_sobjdata.Pos = m_boxPos[i];
+		sobj->m_sobjdata.Rotate_status = { 0.0f, 0.0f, 0.0f, 0.0f };
+		sobj->m_sobjdata.cur_hp = 100;
+		sobj->m_sobjdata.origin_hp = 100;
+		sobj->m_sobjdata.player_status.attack = 0;
+		sobj->m_sobjdata.player_status.speed = 0;
+		sobj->m_sobjdata.Fixed = true;
 
 		sobj->OffLookvector = XMFLOAT3(0, 0, 1);
 		sobj->OffRightvector = XMFLOAT3(1, 0, 0);
@@ -83,10 +81,10 @@ void StaticObject::UpdateLookVector()
 
 	//클라이언트에서 MouseMove를 통해 카메라를 회전할 때 마다 Rotate_status가 달라짐
 	XMFLOAT4 orient_xmfloat4 =
-	{	sobj_data.Rotate_status.x ,
-		sobj_data.Rotate_status.y ,
-		sobj_data.Rotate_status.z ,
-		sobj_data.Rotate_status.w };
+	{	m_sobjdata.Rotate_status.x ,
+		m_sobjdata.Rotate_status.y ,
+		m_sobjdata.Rotate_status.z ,
+		m_sobjdata.Rotate_status.w };
 
 	auto quater = XMLoadFloat4(&orient_xmfloat4);
 	wmatrix *= XMMatrixRotationQuaternion(quater);

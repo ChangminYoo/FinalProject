@@ -8,8 +8,6 @@ class StaticObject
 private:
 	unordered_map<int, Position> m_boxPos;
 
-	bool staticobject{ true };
-
 	XMFLOAT3 OffLookvector;
 	XMFLOAT3 OffRightvector;
 
@@ -17,7 +15,7 @@ private:
 	XMFLOAT3 Rightvector;
 	XMFLOAT3 Upvector;
 
-	StaticObject_Info sobj_data;
+	StaticObject_Info m_sobjdata;
 
 	list<StaticObject*> m_staticObjs;
 	
@@ -31,6 +29,7 @@ public:
 	void GetUpVector();
 
 	list<StaticObject*> GET_SObj_List() const { return m_staticObjs; } 
+	StaticObject_Info GET_InfoOfSObjs() const { return m_sobjdata; }
 
 	~StaticObject();
 };

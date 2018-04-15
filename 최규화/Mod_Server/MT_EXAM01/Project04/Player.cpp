@@ -28,7 +28,7 @@ Player::~Player()
 {
 	m_SObjs->~StaticObject();
 	delete m_SObjs;
-
+	
 	for (auto thread : m_pworkerThread)
 		delete thread;
 
@@ -104,7 +104,7 @@ void Player::Accept_Event()
 				pNewSession->Init_PlayerInfo();
 				pNewSession->m_clients.emplace_back(pNewSession);
 
-				pNewSession->SendStaticObjects(Get_SObj_Value()->GET_SObj_List());
+				//pNewSession->SendStaticObjects(Get_SObj_Value()->GET_SObj_List());
 
 				//2. 초기화된 정보를 연결된 클라이언트로 보낸다.
 				pNewSession->InitData_To_Client();

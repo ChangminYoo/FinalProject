@@ -153,6 +153,9 @@ void MainFrameWork::AfterGravitySystem(const GameTimer & gt)
 		//왜 실제 중점이 아닌 pp의 중점으로 처리하냐면 실제중점을 움직인후 pp의 중점을 움직이나
 		//pp의중점을 움직이고 실제중점을 움직이나 같지만, UpdatePPosCenterPos를 쓰기위해
 		//pp를 움직이고 cp를 pp로 맞춘다.
+		//XMFLOAT4 t_pos = { (*i)->m_sobj_data.Pos.x, (*i)->m_sobj_data.Pos.y, (*i)->m_sobj_data.Pos.z, (*i)->m_sobj_data.Pos.w };
+		//(*i)->pp->SetPosition(t_pos);
+
 		float ppy = (*i)->pp->GetPosition().y;
 		float hby = (*i)->pp->GetHalfBox().y;
 		if (ppy - hby < 0)//pp의 중점y-하프박스의 y값을 한결과가 0보다 작으면 땅아래에 묻힌셈
@@ -208,7 +211,7 @@ void MainFrameWork::FrameAdvance(const GameTimer& gt)
 
 	Update(gt);
 
-	scene->Player->m_async_client->SendPacketRegular(scene->Player->PlayerObject);
+	scene->Player->m_async_client->SendPacketRegular(*scene->Player->PlayerObject, gt);
 
 	Draw(gt);
 
