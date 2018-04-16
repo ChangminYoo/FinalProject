@@ -360,15 +360,12 @@ void CCubeManObject::Tick(const GameTimer & gt)
 	
 	if (ObjData.isAnimation == true)
 	{
-		if (TickValue > 1)
-		{
-			//애니메이션 업데이트
-			UpdateMD5Model(commandlist, &Mesh, this, gt.DeltaTime() * 8, n_Animation, animations, jarr);
+		
+			//애니메이션 업데이트 애니메이션은 24프레임으로 구성됨. 문제는 FPS가 24프레임이 아님. 그보다 큰 프레임. 따라서 24프레임으로 해당프레임을 나눠 보정.
+			UpdateMD5Model(commandlist, &Mesh, this, gt.DeltaTime()*60.0/24.0, n_Animation, animations, jarr);
 
-			TickValue = 0;
-		}
 	}
-	TickValue += 1;
+	
 	
 }
 
@@ -558,15 +555,12 @@ void CZombieObject::Tick(const GameTimer & gt)
 
 	if (ObjData.isAnimation == true)
 	{
-		if (TickValue > 1)
-		{
-			//애니메이션 업데이트
-			UpdateMD5Model(commandlist, &Mesh, this, gt.DeltaTime() * 8, n_Animation, animations, jarr);
+		//애니메이션 업데이트 애니메이션은 24프레임으로 구성됨. 문제는 FPS가 24프레임이 아님. 그보다 큰 프레임. 따라서 24프레임으로 해당프레임을 나눠 보정.
+		UpdateMD5Model(commandlist, &Mesh, this, gt.DeltaTime()*60.0 / 24.0, n_Animation, animations, jarr);
 
-			TickValue = 0;
-		}
+
 	}
-	TickValue += 1;
+
 
 
 

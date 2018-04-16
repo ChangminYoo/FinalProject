@@ -290,40 +290,7 @@ void Shader::Render(ID3D12GraphicsCommandList * CommandList, const GameTimer& gt
 		}
 	}
 	
-	//리지드 바디
-	SetShader(CommandList, false);
-	for (auto b = RigidObject->cbegin(); b != RigidObject->cend(); b++)
-	{
-		if (isRender(*b) == true)
-		{
-			if ((*b)->Blending)
-			{
-				//블랜딩용 PSO 연결
-				SetShader(CommandList, true);
-				//블랜딩용 PSO로 그림
-				(*b)->Render(CommandList, gt);
-				//다시 원상태 PSO로 연결
-				SetShader(CommandList, false);
-			}
-			else//블랜딩 안씀
-			{
-				if (ishalfalphaRender(*b) == false)
-					(*b)->Render(CommandList, gt);
-				else
-				{
-					auto tempv = (*b)->ObjData.BlendValue;
-					(*b)->ObjData.BlendValue = 0.45f;
-					SetShader(CommandList, true);
-					//블랜딩용 PSO로 그림
-					(*b)->Render(CommandList, gt);
-					//다시 원상태 PSO로 연결
-					SetShader(CommandList, false);
-					(*b)->ObjData.BlendValue = tempv;
-				}
 
-			}
-		}
-	}
 
 	//이제 이렇게 그릴때 마다 그리기전에 옳바른 PSO를 연결하고, 오브젝트들을 그린다.
 	//투사체또한 그린다.
@@ -360,39 +327,84 @@ void Shader::Render(ID3D12GraphicsCommandList * CommandList, const GameTimer& gt
 		}
 	}
 
-	SetShader(CommandList, false);
+
+	//============ 스태틱오브젝트와 리지드바디 오브젝트는 블렌딩이 일어나므로, 노블랜딩 -> 블랜딩 오브젝트 순으로 그려야한다. ==================//
+	vector<CGameObject*> NoBlendingVector;//블랜딩안씀
+	vector<CGameObject*> BlendingVector;//애초에 블랜딩쓰는 물체
+	vector<CGameObject*> HalfBlendingVector;//블랜딩 안쓰는데 가려져서 임시적으로 블랜딩된 물체
+
+	//리지드 바디
+	
+	for (auto b = RigidObject->cbegin(); b != RigidObject->cend(); b++)
+	{
+		if (isRender(*b) == true)
+		{
+			if ((*b)->Blending)
+			{
+				BlendingVector.push_back(*b);
+			}
+			else//블랜딩 안씀
+			{
+				if (ishalfalphaRender(*b) == false)
+					NoBlendingVector.push_back(*b);
+				else
+					HalfBlendingVector.push_back(*b);
+			
+
+			}
+		}
+	}
+
 	for (auto b = StaticObject->cbegin(); b != StaticObject->cend(); b++)
 	{
 		if (isRender(*b) == true)
 		{
 			if ((*b)->Blending)
 			{
-				//블랜딩용 PSO 연결
-				SetShader(CommandList, true);
-				//블랜딩용 PSO로 그림
-				(*b)->Render(CommandList, gt);
-				//다시 원상태 PSO로 연결
-				SetShader(CommandList, false);
+				BlendingVector.push_back(*b);
 			}
 			else//블랜딩 안씀
 			{
 				if (ishalfalphaRender(*b) == false)
-					(*b)->Render(CommandList, gt);
+					NoBlendingVector.push_back(*b);
 				else
-				{
-					auto tempv = (*b)->ObjData.BlendValue;
-					(*b)->ObjData.BlendValue = 0.75f;
-					SetShader(CommandList, true);
-					//블랜딩용 PSO로 그림
-					(*b)->Render(CommandList, gt);
-					//다시 원상태 PSO로 연결
-					SetShader(CommandList, false);
-					(*b)->ObjData.BlendValue = tempv;
-				}
+					HalfBlendingVector.push_back(*b);
+
+
 			}
 		}
 	}
 
+	//블랜딩이 안되는 오브젝트.
+	SetShader(CommandList, false);
+	for (auto b = NoBlendingVector.cbegin(); b != NoBlendingVector.cend(); b++)
+	{
+		(*b)->Render(CommandList, gt);
+	}
+
+	//블랜딩 쓰는 오브젝트
+	SetShader(CommandList, true);
+	for (auto b = BlendingVector.cbegin(); b != BlendingVector.cend(); b++)
+	{
+		(*b)->Render(CommandList, gt);
+	}
+
+	//하프블랜딩 쓰는 오브젝트.
+	SetShader(CommandList, true);
+	for (auto b = HalfBlendingVector.cbegin(); b != HalfBlendingVector.cend(); b++)
+	{
+		//기존 블렌딩벨류 저장.
+		auto tempblend = (*b)->ObjData.BlendValue;
+
+		//하프블렌딩용 블렌딩벨류 설정.
+		(*b)->ObjData.BlendValue = 0.4f;
+		//그리기
+		(*b)->Render(CommandList, gt);
+		//블렌딩 벨류 원상복구
+		(*b)->ObjData.BlendValue = tempblend;
+	}	
+
+	// ========================= 파티클 ======================================//
 	SetParticleShader(CommandList);
 	for (auto b = BbObject->cbegin(); b != BbObject->cend(); b++)
 	{	
