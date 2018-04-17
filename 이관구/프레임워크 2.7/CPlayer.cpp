@@ -422,6 +422,12 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 			if(PlayerObject->n_Animation!= Ani_State::Attack)//공격모션이 아니면 다시 대기상태로
 				PlayerObject->SetAnimation(Ani_State::Idle);
 		}
+
+		if (GetKeyState(0x31) & 0x8000)
+			skilldata.SellectBulletIndex = 0;
+		else if (GetKeyState(0x32) & 0x8000)
+			skilldata.SellectBulletIndex = 1;
+
 	}
 }
 

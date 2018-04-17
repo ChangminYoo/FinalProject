@@ -694,7 +694,7 @@ BulletCube::BulletCube(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 	gamedata.Damage = 10;
 	gamedata.GodMode = true;
 	gamedata.Speed = 50;
-	LifeTime = 10;
+	LifeTime = 7;
 	Master = master;
 	LockOn = lockon;
 	
@@ -880,7 +880,7 @@ HeavyBulletCube::HeavyBulletCube(ID3D12Device * m_Device, ID3D12GraphicsCommandL
 	gamedata.Damage = 30;
 	gamedata.GodMode = true;
 	gamedata.Speed = 80;
-	LifeTime = 10;
+	LifeTime = 7;
 	Master = master;
 	LockOn = lockon;
 
