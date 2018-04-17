@@ -129,7 +129,6 @@ int FrameWork::Run()
 			{
 				CalculateFrameStats();
 				FrameAdvance(mTimer);
-
 			}
 			else
 			{

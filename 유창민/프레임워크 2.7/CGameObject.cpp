@@ -177,27 +177,23 @@ void CGameObject::UpdateConstBuffer(ID3D12GraphicsCommandList * commandlist)
 
 void SetTexture(ID3D12GraphicsCommandList * commandlist, ComPtr<ID3D12DescriptorHeap>& SrvDescriptorHeap, ID3D12Resource* texture, bool isCubeMap)
 {
-	static ID3D12Resource* OldResource = NULL;
 
-	if (OldResource == NULL)
-		OldResource = texture;
-	else
-	{
-		commandlist->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(OldResource,
-			D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE));
-	}
+	commandlist->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(texture,
+		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE));
+
 
 	//텍스처는 테이블을 쓸것이므로 힙과 테이블 두개를 연결해야함.
 	ID3D12DescriptorHeap* descriptorHeaps[] = { SrvDescriptorHeap.Get() };
 	commandlist->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
 
-	CD3DX12_GPU_DESCRIPTOR_HANDLE tex(SrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
-	tex.Offset(0, CbvSrvDescriptorSize);
-
 	if (isCubeMap)
+	{
+		CD3DX12_GPU_DESCRIPTOR_HANDLE tex(SrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
+		tex.Offset(0, CbvSrvDescriptorSize);
 		commandlist->SetGraphicsRootDescriptorTable(0, tex);
+	}
 	else
-		commandlist->SetGraphicsRootDescriptorTable(1, tex);
+		commandlist->SetGraphicsRootDescriptorTable(1, SrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
 
 	commandlist->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(texture,
 		D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE));
@@ -1290,7 +1286,12 @@ ParticleObject::ParticleObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 
 	auto q = XMLoadFloat4(&Orient);
 	XMFLOAT3 axis = { 0,1,0 };
-	auto q2 = QuaternionRotation(axis, 0);
+	XMFLOAT4 q2;
+	if(Lookvector.z >0)
+		q2 = QuaternionRotation(axis, MMPE_PI/2 * Lookvector.x);
+	else if(Lookvector.z <0)
+		q2 = QuaternionRotation(axis, MMPE_PI / 2 * -Lookvector.x);
+
 	Orient = QuaternionMultiply(Orient, q2);
 
 	UpdateLookVector();
