@@ -422,6 +422,12 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 			if(PlayerObject->n_Animation!= Ani_State::Attack)//공격모션이 아니면 다시 대기상태로
 				PlayerObject->SetAnimation(Ani_State::Idle);
 		}
+
+		if (GetKeyState(0x31) & 0x8000)
+			skilldata.SellectBulletIndex = 0;
+		else if (GetKeyState(0x32) & 0x8000)
+			skilldata.SellectBulletIndex = 1;
+
 	}
 }
 
@@ -451,16 +457,16 @@ void CPlayer::CreateBullet(ID3D12Device* Device, ID3D12GraphicsCommandList* cl,X
 	switch (skilldata.Skills[skilldata.SellectBulletIndex])
 	{
 	case 0://불렛큐브(라이트 큐브)
-		
+	{
 		//먼저 해당스킬의 쿨타임을 넣어주자.
-		skilldata.SkillsCoolTime[skilldata.SellectBulletIndex] = 0.3f;
+		skilldata.SkillsCoolTime[skilldata.SellectBulletIndex] = 0.45f;
 		skilldata.isSkillOn[skilldata.SellectBulletIndex] = false;
 
 
 		auto v = Float3Add(Goal, XMFloat4to3(PlayerObject->CenterPos), false);
-		
+
 		v = Float3Normalize(v);//새로운 룩벡터(발사방향)
-	    //여기서 룩벡터라 함은, 플레이어가 아니라, 총알의 룩벡터다. 모든 오브젝트는 보통 룩벡터는 0,0,1 또는 0,0,-1 인데, 날아가는 방향을 바라보도록  
+		//여기서 룩벡터라 함은, 플레이어가 아니라, 총알의 룩벡터다. 모든 오브젝트는 보통 룩벡터는 0,0,1 또는 0,0,-1 인데, 날아가는 방향을 바라보도록  
 		//해야하므로 새로운 룩벡터를 필요로 하는것이다.  
 
 		//기존 룩벡터와 새로운 룩벡터를 외적해서 방향축을 구한다.
@@ -520,6 +526,69 @@ void CPlayer::CreateBullet(ID3D12Device* Device, ID3D12GraphicsCommandList* cl,X
 
 		bulletlist->push_back(bul);
 		break;
+	}
+	case 1://불렛큐브(헤비 큐브)
+	{
+		//먼저 해당스킬의 쿨타임을 넣어주자.
+		skilldata.SkillsCoolTime[skilldata.SellectBulletIndex] = 1.1f;
+		skilldata.isSkillOn[skilldata.SellectBulletIndex] = false;
+
+
+		auto v = Float3Add(Goal, XMFloat4to3(PlayerObject->CenterPos), false);
+
+		v = Float3Normalize(v);//새로운 룩벡터(발사방향)
+							   //여기서 룩벡터라 함은, 플레이어가 아니라, 총알의 룩벡터다. 모든 오브젝트는 보통 룩벡터는 0,0,1 또는 0,0,-1 인데, 날아가는 방향을 바라보도록  
+							   //해야하므로 새로운 룩벡터를 필요로 하는것이다.  
+
+							   //기존 룩벡터와 새로운 룩벡터를 외적해서 방향축을 구한다.
+		XMFLOAT3 l{ 0,0,1 };
+		XMVECTOR ol = XMLoadFloat3(&l);
+		XMVECTOR nl = XMLoadFloat3(&v);
+		auto axis = XMVector3Cross(ol, nl);
+		//방향축을 완성.
+		axis = XMVector3Normalize(axis);
+		XMFLOAT3 Axis;
+		XMStoreFloat3(&Axis, axis);
+		//이제 회전각도를 구해야한다. 내적을 통해 회전각도를 구한다.
+
+		auto temp = XMVector3Dot(ol, nl);
+
+		float d;//기존 룩벡터와 새로운 룩벡터를 내적한 결과.
+		XMStoreFloat(&d, temp);
+		if (fabsf(d) <= 1)//반드시 이 결과는 -1~1 사이여야한다. 그래야 각도가 구해진다.
+			d = acos(d);//각도 완성. 라디안임
+
+		auto ori = QuaternionRotation(Axis, d);
+
+		auto wmatrix = XMMatrixIdentity();
+		auto quater = XMLoadFloat4(&ori);
+		wmatrix *= XMMatrixRotationQuaternion(quater);
+
+		auto or = XMVectorSet(1, 0, 0, 0);
+		or = XMVector4Transform(or , wmatrix);//가짜 라이트 벡터
+		or = XMVector3Normalize(or );
+		auto RealRight = XMVector3Cross(axis, nl);//진짜 라이트벡터
+		RealRight = XMVector3Normalize(RealRight);
+
+		//진짜 라이트 벡터와 가짜 라이트 벡터를 내적함.
+		temp = XMVector3Dot(RealRight, or );
+
+		XMStoreFloat(&d, temp);
+		if (fabsf(d) <= 1)//반드시 이 결과는 -1~1 사이여야한다. 그래야 각도가 구해진다.
+			d = acos(d);//각도 완성. 라디안임
+		auto ori2 = XMQuaternionRotationAxis(nl, d);//진짜 룩벡터를 회전축으로 삼고 진짜라이트와 가짜라이트의 사잇각만큼회전
+
+		auto tempori = XMLoadFloat4(&ori);
+		tempori = XMQuaternionMultiply(tempori, ori2);
+		XMStoreFloat4(&ori, tempori);//최종 회전 방향
+
+
+		CGameObject* bul = new HeavyBulletCube(Device, cl, PlayerObject->ParticleList, PlayerObject, ori, lock, PlayerObject->CenterPos);
+
+		bulletlist->push_back(bul);
+		break;
+
+	}
 
 	}
 }

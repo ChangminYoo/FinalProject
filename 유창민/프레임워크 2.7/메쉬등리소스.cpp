@@ -25,6 +25,13 @@ ComPtr<ID3D12DescriptorHeap> BulletCube::SrvDescriptorHeap;//텍스처 용 힙
 CMaterial BulletCube::Mat;
 
 //--------------------------------------------------------------------------------------
+bool HeavyBulletCube::CreateMesh = false;
+unordered_map<string, unique_ptr<CTexture>> HeavyBulletCube::Textures;//텍스처들을 저장함
+CMesh  HeavyBulletCube::Mesh;//나중에 메쉬는 static으로 둬야함
+ComPtr<ID3D12DescriptorHeap> HeavyBulletCube::SrvDescriptorHeap;//텍스처 용 힙
+CMaterial HeavyBulletCube::Mat;
+
+//--------------------------------------------------------------------------------------
 bool SphereObject::CreateMesh = false;
 unordered_map<string, unique_ptr<CTexture>> SphereObject::Textures;//텍스처들을 저장함
 CMesh  SphereObject::Mesh;//나중에 메쉬는 static으로 둬야함

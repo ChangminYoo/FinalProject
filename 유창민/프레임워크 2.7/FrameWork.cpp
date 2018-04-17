@@ -307,8 +307,7 @@ LRESULT FrameWork::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			for(int i=0;i<4;i++)
 				if (scene->SkillCoolBar[i] != NULL)
 				{
-					//XMFLOAT4(i * 100 - 150, 0.95*-mHeight / 2, 0, 0)
-
+		
 					scene->SkillCoolBar[i]->ObjData.Scale = mClientWidth / 10;
 					scene->SkillCoolBar[i]->CenterPos.x = i * mClientWidth / 8 - (mClientWidth / 8)*1.5;
 					scene->SkillCoolBar[i]->CenterPos.y = 0.98*-mClientHeight / 2;
@@ -316,7 +315,7 @@ LRESULT FrameWork::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 					scene->SkillUI[i]->ObjData.Scale = mClientWidth / 10;
 					scene->SkillUI[i]->CenterPos.x = i * mClientWidth / 8 - (mClientWidth / 8)*1.5;
 					scene->SkillUI[i]->CenterPos.y = 0.95*-mClientHeight / 2;
-					//scene->SkillCoolBar[i]
+			
 				}
 		}
 
