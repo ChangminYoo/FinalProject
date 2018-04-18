@@ -296,8 +296,6 @@ void Player_Session::SendPacket(Packet* packet)
 			delete[] new_sendBuf;
 			return;
 		}
-		
-		RecvPacket();
 	});
 	
 
@@ -370,34 +368,6 @@ void Player_Session::RecvPacket()
 			return;
 		}
 
-		//Packet *buf = Get_RecvBuf();
-		//ProcessPacket(buf);
-
-		/*
-		Packet *buf = Get_RecvBuf();
-		int cur_data_processing = static_cast<int>(bytes_transferred);
-
-		while (cur_data_processing > 0)
-		{
-			if (m_cur_packet_size == 0)
-			{
-				m_cur_packet_size = buf[0];
-			}
-
-			//1바이트 데이터를 받은 만큼 다음 read에서 사이즈를 빼줘야한다
-			boost::asio::async_read(m_socket, boost::asio::buffer(Get_DataBuf(), m_cur_packet_size - 1),
-				[&](const boost::system::error_code& error, size_t bytes_transferred)
-			{
-				//여기에서 처리할 때도 버퍼[0]부분에 있는 사이즈를 제외하고 데이터를 읽어줘야한다
-				ProcessPacket(buf);
-
-				m_cur_packet_size = 0;
-			});
-		}
-		
-	
-		RecvPacket();
-		*/
 
 		int cur_data_proc = static_cast<int>(bytes_transferred);
 		Packet* temp_buf = m_recvBuf;

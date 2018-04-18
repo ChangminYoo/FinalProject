@@ -115,6 +115,7 @@ void Player::Accept_Event()
 
 				//delete를 해주면 메모리에러가 남. pNewSession에서 작업을 아직 안 끝냈는데 죽이려고 하기때문에
 				//delete pNewSession;
+				pNewSession->RecvPacket();
 
 			}
 			else
