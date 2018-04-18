@@ -1,6 +1,3 @@
-//#pragma once
-//#include "stdafx.h"
-
 #include "Player.h"
 
 Player::Player() : m_acceptor(g_io_service,
@@ -82,7 +79,7 @@ void Player::Accept_Event()
 {
 	//1. 클라이언트와 연결시도 2. 연결됐다면 람다함수내에서 해당 클라이언트 정보 초기화진행 및 데이터 저장
 	m_acceptor.async_accept(m_socket,
-		[&](/*Player_Session* session, */ const boost::system::error_code& error)
+		[&](const boost::system::error_code& error)
 	{
 		if (!error)
 		{
@@ -94,13 +91,6 @@ void Player::Accept_Event()
 
 			if (pNewSession->CheckPlayerInfo())
 			{
-				//if (pNewSession->m_InitFirst_SObjs)
-				//{
-					//pNewSession->InitStaticObjects(move(pNewSession->Socket()));
-				//	pNewSession->InitStaticObjects();
-				//	pNewSession->m_InitFirst_SObjs = false;
-				//}
-
 				pNewSession->Init_PlayerInfo();
 				pNewSession->m_clients.emplace_back(pNewSession);
 
@@ -113,6 +103,8 @@ void Player::Accept_Event()
 
 				++m_playerIndex;
 
+				pNewSession->RecvPacket();
+
 				//delete를 해주면 메모리에러가 남. pNewSession에서 작업을 아직 안 끝냈는데 죽이려고 하기때문에
 				//delete pNewSession;
 
@@ -121,10 +113,7 @@ void Player::Accept_Event()
 			{
 				cout << "클라이언트 [ " << m_playerIndex << " ] 데이터할당 오류. " << endl;
 			}
-			
 
-			//요거 이제 처리
-			//session->PostReceive();
 		}
 
 		if (m_serverShutDown == false)
@@ -166,16 +155,3 @@ void Player::SetStaticObjects()
 
 	m_SObjs->InitBoxObjects();
 }
-
-/*#include "ChattingServer.h"
-
-void ChatServer::Init(const int nMaxSessionCount)
-{
-	for (auto i = 0; i < nMaxSessionCount; ++i)
-	{
-		Session *pNewSession = new Session(i, m_acceptor.get_io_service(), this);
-		m_SessionList.push_back(pNewSession);
-		m_SessionQueue.push_back(i);
-
-	}
-}*/

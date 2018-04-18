@@ -278,7 +278,7 @@ void Player_Session::SendPacket(Packet* packet)
 	//shared_ptr<Packet*> new_sendBuf(new Packet[packet_size]);
 	//m_new_sendBuf = new Packet[packet_size];
 
-	auto a = *(reinterpret_cast<Player_Data*>(&new_sendBuf[2]));
+	//auto a = *(reinterpret_cast<Player_Data*>(&new_sendBuf[2]));
 
 	//1. async_write_some - 비동기 IO / 받은데이터를 즉시 보냄(따로 버퍼에 저장X)
 	//2. async_write - 비동기 IO / 보내고자 하는 데이터가 모두 버퍼에 담기면 데이터를 보냄
@@ -296,8 +296,7 @@ void Player_Session::SendPacket(Packet* packet)
 			delete[] new_sendBuf;
 			return;
 		}
-		
-		RecvPacket();
+
 	});
 	
 
@@ -334,7 +333,7 @@ void Player_Session::RecvPacket()
 	m_socket.async_read_some(boost::asio::buffer(m_recvBuf, MAX_BUFFER_SIZE),
 		[&](const boost::system::error_code& error,const size_t& bytes_transferred)
 	{	
-		//cout << "Bytes_Transferred: " << bytes_transferred << endl;
+		cout << "Bytes_Transferred: " << bytes_transferred << endl;
 		// error = 0 성공 , error != 0 실패
 		if (error)
 		{
@@ -370,35 +369,6 @@ void Player_Session::RecvPacket()
 			return;
 		}
 
-		//Packet *buf = Get_RecvBuf();
-		//ProcessPacket(buf);
-
-		/*
-		Packet *buf = Get_RecvBuf();
-		int cur_data_processing = static_cast<int>(bytes_transferred);
-
-		while (cur_data_processing > 0)
-		{
-			if (m_cur_packet_size == 0)
-			{
-				m_cur_packet_size = buf[0];
-			}
-
-			//1바이트 데이터를 받은 만큼 다음 read에서 사이즈를 빼줘야한다
-			boost::asio::async_read(m_socket, boost::asio::buffer(Get_DataBuf(), m_cur_packet_size - 1),
-				[&](const boost::system::error_code& error, size_t bytes_transferred)
-			{
-				//여기에서 처리할 때도 버퍼[0]부분에 있는 사이즈를 제외하고 데이터를 읽어줘야한다
-				ProcessPacket(buf);
-
-				m_cur_packet_size = 0;
-			});
-		}
-		
-	
-		RecvPacket();
-		*/
-
 		int cur_data_proc = static_cast<int>(bytes_transferred);
 		Packet* temp_buf = m_recvBuf;
 
@@ -427,7 +397,7 @@ void Player_Session::RecvPacket()
 				m_prev_packet_size = 0;
 				m_cur_packet_size = 0;
 
-				//cout << "cur_data_proc: " << cur_data_proc << " --- " << "need_to_read: " << need_to_read << endl;
+				cout << "cur_data_proc: " << cur_data_proc << " --- " << "need_to_read: " << need_to_read << endl;
 			}
 			else
 			{

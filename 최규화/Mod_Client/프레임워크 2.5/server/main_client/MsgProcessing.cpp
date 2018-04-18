@@ -183,7 +183,7 @@ void AsyncClient::SendPacketRegular(CGameObject& gobj, const GameTimer& gt)
 		//SendPacket(reinterpret_cast<Packet*>(&cts_test));
 
 		
-		/*
+		
 		if (gobj.m_player_data.Pos.x != RgCkInfo.PtCheck.PositionInfo.x ||
 			gobj.m_player_data.Pos.y != RgCkInfo.PtCheck.PositionInfo.y ||
 			gobj.m_player_data.Pos.z != RgCkInfo.PtCheck.PositionInfo.z ||
@@ -208,7 +208,7 @@ void AsyncClient::SendPacketRegular(CGameObject& gobj, const GameTimer& gt)
 
 
 		}
-		*/
+		
 		
 	}
 	//obj->Lookvector;

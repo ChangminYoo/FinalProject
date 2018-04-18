@@ -16,7 +16,6 @@ private:
 	const unsigned int m_monsterCnt{ MAX_MONSTER_NUM };
 	bool m_serverShutDown{ false };
 
-	//vector<Player_Session*> m_clients;
 	vector<thread*> m_pworkerThread;
 	StaticObject   *m_SObjs;
 
@@ -33,19 +32,4 @@ public:
 	void SetStaticObjects();
 	StaticObject* Get_SObj_Value() { return m_SObjs; }
 
-	//vector<Player_Session*>* Get_Clients() { return &m_clients; }
 };
-
-
-/*
-class ChatServer
-{
-private:
-boost::asio::ip::tcp::acceptor m_acceptor;
-vector<Session*> m_SessionList;
-vector<int> m_SessionQueue;
-
-public:
-void Init(const int nMaxSessionCount);
-};
-*/

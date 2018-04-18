@@ -407,12 +407,12 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 				PlayerObject->SetAnimation(Ani_State::Run);
 
 				//
-				//m_async_client->RgCkInfo.PtCheck.PositionInfo = { PlayerObject->CenterPos.x, PlayerObject->CenterPos.y, PlayerObject->CenterPos.z, PlayerObject->CenterPos.w };
-				//m_async_client->RgCkInfo.PtCheck.AniState = Ani_State::Run;
+				m_async_client->RgCkInfo.PtCheck.PositionInfo = { PlayerObject->CenterPos.x, PlayerObject->CenterPos.y, PlayerObject->CenterPos.z, PlayerObject->CenterPos.w };
+				m_async_client->RgCkInfo.PtCheck.AniState = Ani_State::Run;
 
 
-				change_pos_ani.ani_state = Ani_State::Run;
-				m_async_client->SendPacket(reinterpret_cast<Packet*>(&change_pos_ani));
+				//change_pos_ani.ani_state = Ani_State::Run;
+				//m_async_client->SendPacket(reinterpret_cast<Packet*>(&change_pos_ani));
 			}
 		}
 		else
@@ -422,11 +422,11 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 				PlayerObject->SetAnimation(Ani_State::Idle);
 
 				//
-				//m_async_client->RgCkInfo.PtCheck.PositionInfo = { PlayerObject->CenterPos.x, PlayerObject->CenterPos.y, PlayerObject->CenterPos.z, PlayerObject->CenterPos.w };
-				//m_async_client->RgCkInfo.PtCheck.AniState = Ani_State::Idle;
+				m_async_client->RgCkInfo.PtCheck.PositionInfo = { PlayerObject->CenterPos.x, PlayerObject->CenterPos.y, PlayerObject->CenterPos.z, PlayerObject->CenterPos.w };
+				m_async_client->RgCkInfo.PtCheck.AniState = Ani_State::Idle;
 
-				change_pos_ani.ani_state = Ani_State::Idle;
-				m_async_client->SendPacket(reinterpret_cast<Packet*>(&change_pos_ani));
+				//change_pos_ani.ani_state = Ani_State::Idle;
+				//m_async_client->SendPacket(reinterpret_cast<Packet*>(&change_pos_ani));
 			}
 		}
 

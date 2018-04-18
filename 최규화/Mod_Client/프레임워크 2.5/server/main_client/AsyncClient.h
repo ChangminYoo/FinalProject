@@ -5,8 +5,8 @@
 
 class Scene;
 
-#define MAX_ROTATE_PACKET_TIME 0.1
-#define MAX_POSITION_MOVE_PACKET_TIME 0.1
+#define MAX_ROTATE_PACKET_TIME 0.05
+#define MAX_POSITION_MOVE_PACKET_TIME 0.05
 
 struct RotateCheck
 {
