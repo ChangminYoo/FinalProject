@@ -6,7 +6,10 @@
 #define RAND_CREATE_Z_POS 100
 
 vector<Player_Session*> Player_Session::m_clients = vector<Player_Session*>();
-//list<Player_Session*> Player_Session::m_staticobjs = list<Player_Session*>();
+//list<StaticObject*> Player_Session::m_staticobjs = list<StaticObject*>();
+list<BulletObject*> Player_Session::m_bullobjs = list <BulletObject*>();
+unsigned short Player_Session::m_bullID = 0;
+int Player_Session::m_tempcount = 0;
 
 bool Player_Session::CheckPlayerInfo()
 {
@@ -329,10 +332,11 @@ void Player_Session::RecvPacket()
 	//boost::asio::async_read(m_socket, boost::asio::buffer(m_recvBuf , 1),
 	//	[&](const boost::system::error_code& error, size_t bytes_transferred)
 	m_socket.async_read_some(boost::asio::buffer(m_recvBuf, MAX_BUFFER_SIZE),
-		[=](const boost::system::error_code& error,const size_t& bytes_transferred)
+		[&](const boost::system::error_code& error,const size_t& bytes_transferred)
 	{	
+		//cout << "Bytes_Transferred: " << bytes_transferred << endl;
 		// error = 0 성공 , error != 0 실패
-		if (error != 0)
+		if (error)
 		{
 			STC_Disconnected disconnect_data;
 			disconnect_data.connect = false;
@@ -411,6 +415,7 @@ void Player_Session::RecvPacket()
 			}
 				
 			int need_to_read = m_cur_packet_size - m_prev_packet_size;
+
 			if (need_to_read <= cur_data_proc)
 			{
 				memcpy(m_dataBuf + m_prev_packet_size, temp_buf, need_to_read);
@@ -421,16 +426,21 @@ void Player_Session::RecvPacket()
 				temp_buf += need_to_read;
 				m_prev_packet_size = 0;
 				m_cur_packet_size = 0;
+
+				//cout << "cur_data_proc: " << cur_data_proc << " --- " << "need_to_read: " << need_to_read << endl;
 			}
 			else
 			{
 				memcpy(m_dataBuf + m_prev_packet_size, temp_buf, cur_data_proc);
 				m_prev_packet_size += cur_data_proc;
-				cur_data_proc = 0;
-
-				//temp_buf += cur_data_proc;
+				cur_data_proc -= cur_data_proc;
+				temp_buf += cur_data_proc;
 			}
 		}
+
+		//cur_data_proc 문제
+		//bytes_transferred 은 20인데, need_to_read 와 m_prev_packet_size 와 m_cur_packet_size = 0인 현상
+		//20bytes 가 넘어왔는데 들어있는 데이터가 모두 0 인상태
 
 		RecvPacket();
 	});
@@ -459,6 +469,10 @@ void Player_Session::ProcessPacket(Packet * packet)
 				m_state = PLAYER_STATE::IDLE;
 			else if (PosMove_Data->ani_state == Ani_State::Run)
 				m_state = PLAYER_STATE::MOVE;
+
+			//++m_tempcount;
+
+			//cout << "pos_count : " << m_tempcount << endl;
 
 			//2. 이동 - (애니메이션, 위치 변경) 변경된 데이터를 서버에서관리하는 내 클라이언트에 저장
 			m_clients[PosMove_Data->id]->m_playerData.Pos = move(PosMove_Data->pos);
@@ -523,7 +537,8 @@ void Player_Session::ProcessPacket(Packet * packet)
 			{
 				if (client->m_playerData.Is_AI == true) continue;
 				if (client->m_playerData.Connect_Status == false) continue;
-			
+				//if (client->m_playerData.ID == Rotation_Data->id) continue;
+
 				client->SendPacket(reinterpret_cast<Packet*>(&r_to_other));
 			}
 
@@ -532,7 +547,33 @@ void Player_Session::ProcessPacket(Packet * packet)
 
 	case PACKET_PROTOCOL_TYPE::PLAYER_ATTACK:
 		{
+			if (m_state == PLAYER_STATE::DEAD)
+				break;
 
+			auto n_bldata = reinterpret_cast<STC_Attack*>(packet);
+
+			m_bulllObj = new BulletObject(n_bldata->bull_data.Master_ID, n_bldata->bull_data.LookOn_ID,
+				n_bldata->bull_data.pos, n_bldata->bull_data.Rotate_status, n_bldata->start_time, m_bullID);
+
+			//여기에 받은 총알 데이터하나의 물리효과 적용해주기
+			pp->integrate(n_bldata->start_time, reinterpret_cast<XMFLOAT4*>(&n_bldata->bull_data.pos));
+			m_bulllObj->Set_LifeTime(n_bldata->start_time);
+
+			m_bullobjs.emplace_back(m_bulllObj);
+
+			++m_bullID;
+
+			for (auto client : m_clients)
+			{
+				if (client->m_id == n_bldata->bull_data.Master_ID) continue;
+				if (client->m_isAI == true || client->m_connect_state == false) continue;
+
+				STC_Attack stc_attack;
+				stc_attack.bull_data = move(n_bldata->bull_data);
+				stc_attack.start_time = n_bldata->start_time;
+
+				//client->SendPacket(reinterpret_cast<Packet*>(&stc_attack));
+			}
 		}
 		break;
 
@@ -544,8 +585,8 @@ void Player_Session::ProcessPacket(Packet * packet)
 			auto test_data = reinterpret_cast<STC_Test*>(packet);
 			
 
-			cout << "ID: " << test_data->player_data.ID << "ElaspedTime: " << test_data->time.t_time << "------"
-				"PrevTime: " << test_data->time.p_time << endl;
+			//cout << "ID: " << test_data->player_data.ID << "ElaspedTime: " << test_data->time.t_time << "------"
+			//	"PrevTime: " << test_data->time.p_time << endl;
 
 		}
 		break;

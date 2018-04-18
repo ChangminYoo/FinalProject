@@ -104,7 +104,7 @@ void Player::Accept_Event()
 				pNewSession->Init_PlayerInfo();
 				pNewSession->m_clients.emplace_back(pNewSession);
 
-				//pNewSession->SendStaticObjects(Get_SObj_Value()->GET_SObj_List());
+				pNewSession->SendStaticObjects(Get_SObj_Value()->GET_SObj_List());
 
 				//2. 초기화된 정보를 연결된 클라이언트로 보낸다.
 				pNewSession->InitData_To_Client();
@@ -143,18 +143,21 @@ void Player::MainLogic()
 		auto work = make_shared<boost::asio::io_service::work>(g_io_service);
 		g_io_service.run(); 
 	});
-
+	
 	f_thread.join();
-	//for (auto i = 0; i < m_myCPUCoreCnt; ++i)
-	//{
-	//	m_pworkerThread.emplace_back(new thread{ [&]() {g_io_service.run(); } });
-	//}
-	//
-	//for (auto thread : m_pworkerThread)
-	//{
-	//	thread->join();
-	//	delete thread;
-	//}
+
+	/*
+	for (auto i = 0; i < m_myCPUCoreCnt - 2; ++i)
+	{
+		m_pworkerThread.emplace_back(new thread{ [&]() {g_io_service.run(); } });
+	}
+	
+	for (auto thread : m_pworkerThread)
+	{
+		thread->join();
+		delete thread;
+	}
+	*/
 }
 
 void Player::SetStaticObjects()

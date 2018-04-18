@@ -45,6 +45,9 @@
     <ClCompile Include="Manage_StaticObjects.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="BulletObject.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -66,6 +69,9 @@
       <Filter>소스 파일\PhysicsEngine</Filter>
     </ClInclude>
     <ClInclude Include="StaticObject.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="BulletObject.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1,6 +1,7 @@
 #pragma once
 #include "stdafx.h"
 #include "Player.h"
+#include "BulletObject.h"
 #include "Database\CTextTest.h"
 #include "PhysicsEngine\MyMiniPysicsEngine.h"
 
@@ -74,6 +75,8 @@ protected:
 	bool						  Delobj{ false };
 
 	unordered_map<int, Position>  m_boxPos;
+
+	BulletObject				 *m_bulllObj;
 
 public:
 	unsigned int m_cur_packet_size{ 0 };
@@ -149,8 +152,12 @@ public:
 	// ---------------------------------------------------------------------------------------
 	// 서버에서 관리하는 클라이언트 객체들의 집합(vector 사용 - 나중에 멀쓰때 맞는 자료구조로 바꿀것)
 	static vector<Player_Session*> m_clients;
-	static list<Player_Session*> m_staticobjs;
+	//static list<StaticObject*> m_staticobjs;
+	static list<BulletObject*> m_bullobjs;
 
+	static unsigned short	   m_bullID;
+
+	static int m_tempcount;
 	int t_cnt{ 0 };
 	void Update_Temp();
 	float prevTime = 0.f, curTime = 0.f, elapsedTime = 0.f;

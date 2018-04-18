@@ -93,6 +93,13 @@ switch (packet[1])
 	}
 
 	break;
+
+	case PACKET_PROTOCOL_TYPE::PLAYER_ATTACK:
+	{
+		auto bull_data = reinterpret_cast<STC_Attack*>(packet);
+	}
+
+	break;
 }
 	
 
@@ -111,7 +118,7 @@ void AsyncClient::SendPacketRegular(CGameObject& gobj, const GameTimer& gt)
 		STC_Test cts_test;
 		cts_test.packet_size = sizeof(STC_Test);
 		cts_test.pack_type = PACKET_PROTOCOL_TYPE::TEST;
-		cts_test.time.t_time = RgCkInfo.PtCheck.t.t_time;
+		cts_test.time.t_time = RgCkInfo.RtCheck.t.t_time;
 		//
 
 		RgCkInfo.RtCheck.t.p_time = RgCkInfo.RtCheck.t.t_time - MAX_ROTATE_PACKET_TIME;
@@ -120,7 +127,7 @@ void AsyncClient::SendPacketRegular(CGameObject& gobj, const GameTimer& gt)
 		RgCkInfo.RtCheck.t.t_time += RgCkInfo.RtCheck.t.p_time;
 
 		//
-		cts_test.time.p_time = RgCkInfo.PtCheck.t.p_time;
+		cts_test.time.p_time = RgCkInfo.RtCheck.t.p_time;
 		//
 
 		RgCkInfo.RtCheck.t.p_time = 0.f;
@@ -141,7 +148,8 @@ void AsyncClient::SendPacketRegular(CGameObject& gobj, const GameTimer& gt)
 
 			cts_test.player_data.ID = cts_rot.id;
 			cts_test.player_data.Rotate_status = cts_rot.rotate_status;
-			SendPacket(reinterpret_cast<Packet*>(&cts_test));
+
+			//SendPacket(reinterpret_cast<Packet*>(&cts_test));
 
 			SendPacket(reinterpret_cast<Packet*>(&cts_rot));
 
@@ -157,6 +165,7 @@ void AsyncClient::SendPacketRegular(CGameObject& gobj, const GameTimer& gt)
 		STC_Test cts_test;
 		cts_test.packet_size = sizeof(STC_Test);
 		cts_test.pack_type = PACKET_PROTOCOL_TYPE::TEST;
+
 		cts_test.time.t_time = RgCkInfo.PtCheck.t.t_time;
 		//
 
@@ -171,10 +180,15 @@ void AsyncClient::SendPacketRegular(CGameObject& gobj, const GameTimer& gt)
 
 		RgCkInfo.PtCheck.t.p_time = 0.f;
 
+		//SendPacket(reinterpret_cast<Packet*>(&cts_test));
+
+		
+		/*
 		if (gobj.m_player_data.Pos.x != RgCkInfo.PtCheck.PositionInfo.x ||
 			gobj.m_player_data.Pos.y != RgCkInfo.PtCheck.PositionInfo.y ||
 			gobj.m_player_data.Pos.z != RgCkInfo.PtCheck.PositionInfo.z ||
-			gobj.m_player_data.Pos.w != RgCkInfo.PtCheck.PositionInfo.w)
+			gobj.m_player_data.Pos.w != RgCkInfo.PtCheck.PositionInfo.w ||
+			gobj.m_player_data.Ani != RgCkInfo.PtCheck.AniState)
 		{
 			STC_ChangedPos cts_pos;
 			cts_pos.packet_size = sizeof(STC_ChangedPos);
@@ -188,12 +202,14 @@ void AsyncClient::SendPacketRegular(CGameObject& gobj, const GameTimer& gt)
 			//
 			cts_test.player_data.ID = cts_pos.id;
 			cts_test.player_data.Pos = cts_pos.pos;
-			SendPacket(reinterpret_cast<Packet*>(&cts_test));
+			//SendPacket(reinterpret_cast<Packet*>(&cts_test));
 
 			SendPacket(reinterpret_cast<Packet*>(&cts_pos));
 
 
 		}
+		*/
+		
 	}
 	//obj->Lookvector;
 	//obj->Rightvector;

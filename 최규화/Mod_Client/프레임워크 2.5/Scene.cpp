@@ -186,8 +186,11 @@ void Scene::CreateGameObject()
 	
 	SkyObject = new SphereObject(device, commandlist,  &BbObject, XMFLOAT4(0, 0, 0, 0));
 
-	DynamicObject.push_back(new CCubeManObject(device, commandlist,&BbObject, XMFLOAT4(0, 0, -50, 0)));
-	DynamicObject.push_back(new CCubeManObject(device, commandlist,&BbObject, XMFLOAT4(0, 0, -20, 0)));
+	//DynamicObject.push_back(new CCubeManObject(device, commandlist,&BbObject, XMFLOAT4(0, 0, -50, 0)));
+	//DynamicObject.push_back(new CCubeManObject(device, commandlist,&BbObject, XMFLOAT4(0, 0, -20, 0)));
+	DynamicObject.push_back(new CCubeManObject(device, commandlist, &BbObject, XMFLOAT4(0, 0, -1000, 0)));
+	DynamicObject.push_back(new CCubeManObject(device, commandlist, &BbObject, XMFLOAT4(0, 0, -1000, 0)));
+
 
 	//DynamicObject.back()->pp->SetBounce(true);
 	//DynamicObject.back()->pp->AddForce(-600, 0, 600);

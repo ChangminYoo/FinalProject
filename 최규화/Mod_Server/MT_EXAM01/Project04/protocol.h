@@ -129,6 +129,22 @@ struct StaticObject_Info
 
 };
 
+struct BulletObject_Info
+{
+	Position					pos;					//16
+	Rotation					Rotate_status;			//16
+	//CollisionBox				CollisionBox_Size;		//12
+	//unsigned short				origin_hp{ 1 };			//2
+	//unsigned short				cur_hp{ 1 };			//2  -- 16
+	//unsigned short				Damage{ 10 };			//2
+	//unsigned short				Speed{ 50 };			//2
+	//unsigned short				ID{ 0 };				//2
+	unsigned short				Master_ID{ 0 };			//2
+	short						LookOn_ID{ -1 };			//2
+	//char						GodMode{ true };		//1
+	//char						Ani{ Ani_State::Attack }; //1   -- 12
+};
+
 #pragma pack (push, 1)
 
 struct Player_Data
@@ -206,12 +222,12 @@ typedef struct Server_To_Client_Player_Rotate
 
 }STC_Rotation;
 
-typedef struct Server_To_Client_Player_Attack
-{
-	unsigned char packet_size = sizeof(unsigned char) + sizeof(unsigned char);
-	unsigned char pack_type = PACKET_PROTOCOL_TYPE::PLAYER_ATTACK;
-
-}STC_Attack;
+//typedef struct Server_To_Client_Player_Attack
+//{
+//	unsigned char packet_size = sizeof(unsigned char) + sizeof(unsigned char);
+//	unsigned char pack_type = PACKET_PROTOCOL_TYPE::PLAYER_ATTACK;
+//
+//}STC_Attack;
 
 typedef struct Server_To_Client_Static_Object
 {
@@ -221,6 +237,16 @@ typedef struct Server_To_Client_Static_Object
 	unsigned char type;
 
 }STC_StaticObject;
+
+typedef struct Server_To_Client_Attack_Info
+{
+	unsigned char pack_size = sizeof(BulletObject_Info) + sizeof(unsigned char) + sizeof(unsigned char) + sizeof(float);
+	unsigned char pack_type = PACKET_PROTOCOL_TYPE::PLAYER_ATTACK;
+	BulletObject_Info bull_data;
+	float			  start_time;
+
+}STC_Attack;
+
 
 typedef struct Server_To_Client_Player_Test
 {

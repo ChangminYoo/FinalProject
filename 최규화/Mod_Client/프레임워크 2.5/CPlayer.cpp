@@ -407,8 +407,8 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 				PlayerObject->SetAnimation(Ani_State::Run);
 
 				//
-				m_async_client->RgCkInfo.PtCheck.PositionInfo = { PlayerObject->CenterPos.x, PlayerObject->CenterPos.y, PlayerObject->CenterPos.z, PlayerObject->CenterPos.w };
-				m_async_client->RgCkInfo.PtCheck.AniState = Ani_State::Run;
+				//m_async_client->RgCkInfo.PtCheck.PositionInfo = { PlayerObject->CenterPos.x, PlayerObject->CenterPos.y, PlayerObject->CenterPos.z, PlayerObject->CenterPos.w };
+				//m_async_client->RgCkInfo.PtCheck.AniState = Ani_State::Run;
 
 
 				change_pos_ani.ani_state = Ani_State::Run;
@@ -422,8 +422,8 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 				PlayerObject->SetAnimation(Ani_State::Idle);
 
 				//
-				m_async_client->RgCkInfo.PtCheck.PositionInfo = { PlayerObject->CenterPos.x, PlayerObject->CenterPos.y, PlayerObject->CenterPos.z, PlayerObject->CenterPos.w };
-				m_async_client->RgCkInfo.PtCheck.AniState = Ani_State::Idle;
+				//m_async_client->RgCkInfo.PtCheck.PositionInfo = { PlayerObject->CenterPos.x, PlayerObject->CenterPos.y, PlayerObject->CenterPos.z, PlayerObject->CenterPos.w };
+				//m_async_client->RgCkInfo.PtCheck.AniState = Ani_State::Idle;
 
 				change_pos_ani.ani_state = Ani_State::Idle;
 				m_async_client->SendPacket(reinterpret_cast<Packet*>(&change_pos_ani));
@@ -513,6 +513,17 @@ void CPlayer::CreateBullet(ID3D12Device* Device, ID3D12GraphicsCommandList* cl,X
 		CGameObject* bul = new BulletCube(Device, cl, PlayerObject->ParticleList, PlayerObject, ori, lock, PlayerObject->CenterPos);
 
 		bulletlist->push_back(bul);
+		
+		STC_Attack cts_att;
+		cts_att.bull_data.LookOn_ID = -1;
+		cts_att.bull_data.Master_ID = PlayerObject->m_player_data.ID;
+		cts_att.bull_data.pos = { PlayerObject->CenterPos.x, PlayerObject->CenterPos.y, PlayerObject->CenterPos.z, PlayerObject->CenterPos.w };
+		cts_att.bull_data.Rotate_status = { PlayerObject->Orient.x, PlayerObject->Orient.y, PlayerObject->Orient.z, PlayerObject->Orient.w };
+		cts_att.start_time = 0.f;
+
+
+
+		//m_async_client->SendPacket(reinterpret_cast<Packet*>(&cts_att));
 		break;
 
 	}
