@@ -175,7 +175,7 @@ void CGameObject::UpdateConstBuffer(ID3D12GraphicsCommandList * commandlist)
 
 //========================================= 텍스쳐 세팅 =========================================================================
 
-void SetTexture(ID3D12GraphicsCommandList * commandlist, ComPtr<ID3D12DescriptorHeap>& SrvDescriptorHeap, ID3D12Resource* texture, bool isCubeMap)
+void SetTexture(ID3D12GraphicsCommandList * commandlist, ComPtr<ID3D12DescriptorHeap>& SrvDescriptorHeap, ID3D12Resource* texture, bool isCubeMap, int Offset)
 {
 
 	commandlist->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(texture,
@@ -185,21 +185,23 @@ void SetTexture(ID3D12GraphicsCommandList * commandlist, ComPtr<ID3D12Descriptor
 	//텍스처는 테이블을 쓸것이므로 힙과 테이블 두개를 연결해야함.
 	ID3D12DescriptorHeap* descriptorHeaps[] = { SrvDescriptorHeap.Get() };
 	commandlist->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
-
+	
+	CD3DX12_GPU_DESCRIPTOR_HANDLE tex(SrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
 	if (isCubeMap)
 	{
-		CD3DX12_GPU_DESCRIPTOR_HANDLE tex(SrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
 		tex.Offset(0, CbvSrvDescriptorSize);
 		commandlist->SetGraphicsRootDescriptorTable(0, tex);
 	}
 	else
-		commandlist->SetGraphicsRootDescriptorTable(1, SrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
-
+	{
+		tex.Offset(Offset, CbvSrvDescriptorSize);
+		commandlist->SetGraphicsRootDescriptorTable(1, tex);
+	}
 	commandlist->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(texture,
 		D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE));
 }
 
-void LoadTexture(ID3D12Device* device, ID3D12GraphicsCommandList* commandlist, CGameObject* obj, unordered_map<string, unique_ptr<CTexture>>& Textures, ComPtr<ID3D12DescriptorHeap>& SrvDescriptorHeap, string texturename, wstring FileName, bool isCubeMap)
+void LoadTexture(ID3D12Device* device, ID3D12GraphicsCommandList* commandlist, CGameObject* obj, unordered_map<string, unique_ptr<CTexture>>& Textures, ComPtr<ID3D12DescriptorHeap>& SrvDescriptorHeap, string texturename, wstring FileName, bool isCubeMap, int NumDescriptors, int Offset)
 {
 
 	auto Tex = make_unique<CTexture>();
@@ -213,15 +215,20 @@ void LoadTexture(ID3D12Device* device, ID3D12GraphicsCommandList* commandlist, C
 	Textures[Tex->Name] = move(Tex);
 
 
-	//디스크립터 힙 생성
-	D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc = {};
-	srvHeapDesc.NumDescriptors = 1;
-	srvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-	srvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+	if (SrvDescriptorHeap.Get() == NULL)
+	{
+		//디스크립터 힙 생성
+		D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc = {};
+		srvHeapDesc.NumDescriptors = NumDescriptors;
+		srvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+		srvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 
-	ThrowIfFailed(device->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(&SrvDescriptorHeap)));
+		ThrowIfFailed(device->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(&SrvDescriptorHeap)));
+	}
 
 	CD3DX12_CPU_DESCRIPTOR_HANDLE hDescriptor(SrvDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
+
+	hDescriptor.Offset(Offset, CbvSrvDescriptorSize);
 
 	auto Texs = Textures[texturename]->Resource;
 
@@ -1381,7 +1388,7 @@ DamageObject::DamageObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * 
 	ObjData.Scale = 8.0f;
 	ObjData.SpecularParamater = 0.5f;//스페큘러를 낮게준다.
 
-
+	damaged = Damaged;
 	//게임관련 데이터들
 	gamedata.MAXHP = 0;
 	gamedata.HP = 0;
@@ -1395,20 +1402,16 @@ DamageObject::DamageObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * 
 		Mesh.Index = NULL;
 		Mesh.SubResource = NULL;
 
-		if (Damaged == 10.0f)
-			LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "DamageTex", L"textures/damage/damage10.dds", false);
-		else if (Damaged == 20.0f)
-			LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "DamageTex", L"textures/damage/damage20.dds", false);
-		else if (Damaged == 30.0f)
-			LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "DamageTex", L"textures/damage/damage30.dds", false);
-		else if (Damaged == 40.0f)
-			LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "DamageTex", L"textures/damage/damage40.dds", false);
-		else if (Damaged == 50.0f)
-			LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "DamageTex", L"textures/damage/damage50.dds", false);
+
+			LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "DamageTex10", L"textures/damage/damage10.dds", false,5 ,0);
+			LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "DamageTex20", L"textures/damage/damage20.dds", false, 5,1);
+			LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "DamageTex30", L"textures/damage/damage30.dds", false, 5,2);
+			LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "DamageTex40", L"textures/damage/damage40.dds", false, 5,3);
+			LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "DamageTex50", L"textures/damage/damage50.dds", false, 5,4);
 
 
 		SetMesh(m_Device, commandlist);
-		//CreateMesh = true;
+		CreateMesh = true;
 
 	}
 
@@ -1458,8 +1461,19 @@ void DamageObject::Tick(const GameTimer & gt)
 
 void DamageObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer & gt)
 {
-	if (Textures.size()>0)
-		SetTexture(commandlist, SrvDescriptorHeap, Textures["DamageTex"].get()->Resource.Get(), false);
+	if (Textures.size() > 0)
+	{
+		if(damaged == 10)
+			SetTexture(commandlist, SrvDescriptorHeap, Textures["DamageTex10"].get()->Resource.Get(), false, 0);
+		else if(damaged == 20)
+			SetTexture(commandlist, SrvDescriptorHeap, Textures["DamageTex20"].get()->Resource.Get(), false, 1);
+		else if (damaged == 30)
+			SetTexture(commandlist, SrvDescriptorHeap, Textures["DamageTex30"].get()->Resource.Get(), false, 2);
+		else if (damaged == 40)
+			SetTexture(commandlist, SrvDescriptorHeap, Textures["DamageTex40"].get()->Resource.Get(), false, 3);
+		else if (damaged == 50)
+			SetTexture(commandlist, SrvDescriptorHeap, Textures["DamageTex50"].get()->Resource.Get(), false, 4);	
+	}
 	UpdateConstBuffer(commandlist);
 
 
