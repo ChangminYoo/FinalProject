@@ -296,7 +296,10 @@ void Player_Session::SendPacket(Packet* packet)
 			delete[] new_sendBuf;
 			return;
 		}
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/master
 	});
 	
 
@@ -369,6 +372,10 @@ void Player_Session::RecvPacket()
 			return;
 		}
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> origin/master
 		int cur_data_proc = static_cast<int>(bytes_transferred);
 		Packet* temp_buf = m_recvBuf;
 
