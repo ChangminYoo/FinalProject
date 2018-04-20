@@ -56,8 +56,8 @@ void MainFrameWork::CollisionSystem(const GameTimer& gt)
 	for (auto i = scene->RigidObject.begin(); i != scene->RigidObject.end(); i++)
 	{
 		(*i)->Collision(&scene->RigidObject, gt.DeltaTime());
-		/*(*i)->Collision(&scene->DynamicObject, gt.DeltaTime());
-		(*i)->Collision(&scene->StaticObject, gt.DeltaTime());
+		(*i)->Collision(&scene->DynamicObject, gt.DeltaTime());
+		/*(*i)->Collision(&scene->StaticObject, gt.DeltaTime());
 		(*i)->Collision(&scene->BulletObject, gt.DeltaTime());*/
 
 	}

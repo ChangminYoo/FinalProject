@@ -421,13 +421,18 @@ void CCubeManObject::Collision(list<CGameObject*>* collist, float DeltaTime)
 			{
 
 				//충돌 했을때 축이 (0,1,0) 이면 Airbone을 false로 둔다. 이는 내가 위에있음을 나타낸다.
-				if (pp->pAxis.y >0)
+				if (pp->pAxis.y > 0)
+				{
+					pp->SetVelocity(pp->GetVelocity().x, 0, pp->GetVelocity().z);
 					AirBone = false;
+				}
 				//충돌했을때  축이 (0,-1,0)이면 상대방 Airbone을 false로 둔다.  이는 상대가 내 위에있음을 나타낸다.
 				//설사 상대 위에 다른 상대가 있어도 걱정말자. 자연스러운것임.
-				if (pp->pAxis.y <0)
+				if (pp->pAxis.y < 0)
+				{
+					(*i)->pp->SetVelocity((*i)->pp->GetVelocity().x, 0, (*i)->pp->GetVelocity().z);
 					(*i)->AirBone = false;
-
+				}
 
 				XMFLOAT3 cn;
 				//고정된 물체가 아니면
@@ -1612,12 +1617,73 @@ void RigidCubeObject::Collision(list<CGameObject*>* collist, float DeltaTime)
 
 		if (*i != this)
 		{
-
-			bool test = rb->CollisionTest(*(*i)->rb, Lookvector, Rightvector, GetUpvector(), (*i)->Lookvector, (*i)->Rightvector, (*i)->GetUpvector());
-
-			if (test)//충돌했으면 충돌해소를 해야한다.
+			if ((*i)->rb != NULL)
 			{
-				rb->ResolvePenetration(*(*i)->rb, DeltaTime);
+				bool test = rb->CollisionTest(*(*i)->rb, Lookvector, Rightvector, GetUpvector(), (*i)->Lookvector, (*i)->Rightvector, (*i)->GetUpvector());
+
+				if (test)//충돌했으면 충돌해소를 해야한다.
+				{
+					
+					
+					//충돌 했을때 축이 (0,1,0) 이면 Airbone을 false로 둔다. 이는 내가 위에있음을 나타낸다.
+					if (rb->CollisionPointVector[0].pAxis.y > 0)
+					{
+						
+						rb->SetVelocity(rb->GetVelocity().x, 0, rb->GetVelocity().z);
+						AirBone = false;
+					}
+					//충돌했을때  축이 (0,-1,0)이면 상대방 Airbone을 false로 둔다.  이는 상대가 내 위에있음을 나타낸다.
+					//설사 상대 위에 다른 상대가 있어도 걱정말자. 자연스러운것임.
+					if (rb->CollisionPointVector[0].pAxis.y < 0)
+					{
+						(*i)->rb->SetVelocity((*i)->rb->GetVelocity().x, 0, (*i)->rb->GetVelocity().z);
+						(*i)->AirBone = false;
+					}
+
+
+					rb->ResolvePenetration(*(*i)->rb, DeltaTime);
+
+				}
+			}
+			else
+			{
+
+				RigidBody ppConvertrb;
+				ppConvertrb.SetVelocity((*i)->pp->GetVelocity());
+				ppConvertrb.SetPosition(&(*i)->CenterPos);
+				ppConvertrb.SetMass((*i)->pp->GetMass(false));
+				ppConvertrb.SetHalfBox((*i)->pp->GetHalfBox().x, (*i)->pp->GetHalfBox().y, (*i)->pp->GetHalfBox().z);
+				ppConvertrb.SetE(1);
+				ppConvertrb.SetDamping((*i)->pp->GetDamping(),0);
+				ppConvertrb.SetBounce((*i)->pp->GetBounce());
+				ppConvertrb.SetAngularVelocity(0, 0, 0);
+				ppConvertrb.SetAccel((*i)->pp->GetAccel());
+
+
+				
+				
+
+				bool test = rb->CollisionTest(ppConvertrb, Lookvector, Rightvector, GetUpvector(), (*i)->Lookvector, (*i)->Rightvector, (*i)->GetUpvector());
+
+				if (test)//충돌했으면 충돌해소를 해야한다.
+				{
+					//충돌 했을때 축이 내가 아래로 내려가면 Airbone을 false로 둔다. 이는 내가 아래에있음을 나타낸다.
+					//즉 플레이어가 위에있고 내가 아래임.
+					if (rb->CollisionPointVector[0].pAxis.y < 0)
+					{
+
+						ppConvertrb.SetVelocity(ppConvertrb.GetVelocity().x, 0, ppConvertrb.GetVelocity().z);
+						(*i)->AirBone = false;
+					}
+
+					rb->ResolvePenetration(ppConvertrb, DeltaTime);
+					(*i)->pp->SetVelocity(ppConvertrb.GetVelocity());
+					(*i)->pp->SetPosition(ppConvertrb.GetPosition());
+					(*i)->pp->SetAccel(ppConvertrb.GetAccel());
+					(*i)->UpdatePPosCenterPos();
+
+
+				}
 
 			}
 		}
