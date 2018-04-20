@@ -211,21 +211,31 @@ void Scene::CreateGameObject()
 	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(-10, 0, 0, 0)));
 	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(10, 10, -40, 0)));
 	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(-15, 30, -30, 0)));
-	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(-5, 45, -60, 0)));
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(-5, 45, 20, 0)));
 	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(20, 70, -50, 0)));
 	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(5, 50, -40, 0)));
+
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(95, 25, -70, 0)));
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(62, 61, 30, 0)));
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(88, 43, -5, 0)));
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(55, 17, -95, 0)));
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(55, 62, -75, 0)));
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(45, 51, -49, 0)));
+
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(-55, 42, -15, 0)));
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(-67, 22, 16, 0)));
 
 	//BigWall
 	StaticObject.push_back(new BigWallObject(device, commandlist, &BbObject, -BigWall_Rad1, XMFLOAT4(-BigWall_X1, 0, BigWall_Z1, 0)));
 	StaticObject.push_back(new BigWallObject(device, commandlist, &BbObject, BigWall_Rad1, XMFLOAT4(BigWall_X1, 0, BigWall_Z1, 0)));
-	StaticObject.push_back(new BigWallObject(device, commandlist, &BbObject, -BigWall_Rad1 *2, XMFLOAT4(BigWall_X2, 0, BigWall_Z2, 0)));
+	StaticObject.push_back(new BigWallObject(device, commandlist, &BbObject, -BigWall_Rad1 * 2, XMFLOAT4(BigWall_X2, 0, BigWall_Z2, 0)));
 	StaticObject.push_back(new BigWallObject(device, commandlist, &BbObject, 0, XMFLOAT4(0, 0, BigWall_Z3, 0)));
-	StaticObject.push_back(new BigWallObject(device, commandlist, &BbObject, BigWall_Rad1 *2, XMFLOAT4(-BigWall_X2, 0, BigWall_Z2, 0)));
+	StaticObject.push_back(new BigWallObject(device, commandlist, &BbObject, BigWall_Rad1 * 2, XMFLOAT4(-BigWall_X2, 0, BigWall_Z2, 0)));
 
 	//SmallWall
 	StaticObject.push_back(new SmallWallObject(device, commandlist, &BbObject, 0, XMFLOAT4(-BigWall_X1 - 150, 0, 350 * cosf(0.4f * MMPE_PI), 0)));
 	StaticObject.push_back(new SmallWallObject(device, commandlist, &BbObject, 0, XMFLOAT4(-BigWall_X1 - 100, 0, 350 * cosf(0.4f * MMPE_PI), 0)));
-	StaticObject.push_back(new SmallWallObject(device, commandlist, &BbObject, 0, XMFLOAT4(-BigWall_X1 - 50 , 0, 350 * cosf(0.4f * MMPE_PI), 0)));
+	StaticObject.push_back(new SmallWallObject(device, commandlist, &BbObject, 0, XMFLOAT4(-BigWall_X1 - 50, 0, 350 * cosf(0.4f * MMPE_PI), 0)));
 
 	StaticObject.push_back(new SmallWallObject(device, commandlist, &BbObject, MMPE_PI / 2, XMFLOAT4(0, 0, 350, 0)));
 	StaticObject.push_back(new SmallWallObject(device, commandlist, &BbObject, MMPE_PI / 2, XMFLOAT4(0, 0, 300, 0)));
@@ -233,30 +243,32 @@ void Scene::CreateGameObject()
 
 	StaticObject.push_back(new SmallWallObject(device, commandlist, &BbObject, 0, XMFLOAT4(BigWall_X1 + 150, 0, 350 * cosf(0.4f * MMPE_PI), 0)));
 	StaticObject.push_back(new SmallWallObject(device, commandlist, &BbObject, 0, XMFLOAT4(BigWall_X1 + 100, 0, 350 * cosf(0.4f * MMPE_PI), 0)));
-	StaticObject.push_back(new SmallWallObject(device, commandlist, &BbObject, 0, XMFLOAT4(BigWall_X1 + 50 , 0, 350 * cosf(0.4f * MMPE_PI), 0)));
+	StaticObject.push_back(new SmallWallObject(device, commandlist, &BbObject, 0, XMFLOAT4(BigWall_X1 + 50, 0, 350 * cosf(0.4f * MMPE_PI), 0)));
 
-	StaticObject.push_back(new SmallWallObject(device, commandlist, &BbObject, MMPE_PI/3, XMFLOAT4(320 * sinf(0.8f * MMPE_PI), 0, -350 * cosf(0.2f * MMPE_PI), 0)));
-	StaticObject.push_back(new SmallWallObject(device, commandlist, &BbObject, MMPE_PI/3, XMFLOAT4(280 * sinf(0.8f * MMPE_PI), 0, -300 * cosf(0.2f * MMPE_PI), 0)));
-	StaticObject.push_back(new SmallWallObject(device, commandlist, &BbObject, MMPE_PI/3, XMFLOAT4(240 * sinf(0.8f * MMPE_PI), 0, -250 * cosf(0.2f * MMPE_PI), 0)));
+	StaticObject.push_back(new SmallWallObject(device, commandlist, &BbObject, MMPE_PI / 3, XMFLOAT4(320 * sinf(0.8f * MMPE_PI), 0, -350 * cosf(0.2f * MMPE_PI), 0)));
+	StaticObject.push_back(new SmallWallObject(device, commandlist, &BbObject, MMPE_PI / 3, XMFLOAT4(280 * sinf(0.8f * MMPE_PI), 0, -300 * cosf(0.2f * MMPE_PI), 0)));
+	StaticObject.push_back(new SmallWallObject(device, commandlist, &BbObject, MMPE_PI / 3, XMFLOAT4(240 * sinf(0.8f * MMPE_PI), 0, -250 * cosf(0.2f * MMPE_PI), 0)));
 
-	StaticObject.push_back(new SmallWallObject(device, commandlist, &BbObject, -MMPE_PI/3, XMFLOAT4(-320 * sinf(0.8f * MMPE_PI), 0, -350 * cosf(0.2f * MMPE_PI), 0)));
-	StaticObject.push_back(new SmallWallObject(device, commandlist, &BbObject, -MMPE_PI/3, XMFLOAT4(-280 * sinf(0.8f * MMPE_PI), 0, -300 * cosf(0.2f * MMPE_PI), 0)));
-	StaticObject.push_back(new SmallWallObject(device, commandlist, &BbObject, -MMPE_PI/3, XMFLOAT4(-240 * sinf(0.8f * MMPE_PI), 0, -250 * cosf(0.2f * MMPE_PI), 0)));
+	StaticObject.push_back(new SmallWallObject(device, commandlist, &BbObject, -MMPE_PI / 3, XMFLOAT4(-320 * sinf(0.8f * MMPE_PI), 0, -350 * cosf(0.2f * MMPE_PI), 0)));
+	StaticObject.push_back(new SmallWallObject(device, commandlist, &BbObject, -MMPE_PI / 3, XMFLOAT4(-280 * sinf(0.8f * MMPE_PI), 0, -300 * cosf(0.2f * MMPE_PI), 0)));
+	StaticObject.push_back(new SmallWallObject(device, commandlist, &BbObject, -MMPE_PI / 3, XMFLOAT4(-240 * sinf(0.8f * MMPE_PI), 0, -250 * cosf(0.2f * MMPE_PI), 0)));
 
 
 	//RigidObject
 	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, XMFLOAT4(0, 200, 190, 0)));
-	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, XMFLOAT4(-200, 50, 60, 0)));
-	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, XMFLOAT4(200, 60, 60, 0)));
-	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, XMFLOAT4(-110, 100, -100, 0)));
-	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, XMFLOAT4(130, 110, -120, 0)));
-	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, XMFLOAT4(-51, 10, 10, 0)));
-	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, XMFLOAT4(31, 50, -90, 0)));
-	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, XMFLOAT4(-10, 70, 60, 0)));
+	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, XMFLOAT4(-200, 250, 60, 0)));
+	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, XMFLOAT4(200, 330, 60, 0)));
+	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, XMFLOAT4(-110, 390, -100, 0)));
+	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, XMFLOAT4(130, 180, -120, 0)));
+	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, XMFLOAT4(-51, 310, -30, 0)));
+	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, XMFLOAT4(31, 250, -90, 0)));
+	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, XMFLOAT4(-10, 270, 60, 0)));
+	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, XMFLOAT4(103, 220, -50, 0)));
+	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, XMFLOAT4(93, 160, 40, 0)));
 
 
 	StaticObject.push_back(new BuildingObject(device, commandlist, &BbObject, 0, XMFLOAT4(50, 0, -40, 0)));
-	
+	StaticObject.push_back(new BuildingObject(device, commandlist, &BbObject, 0, XMFLOAT4(-40, 0, 10, 0)));
 
 
 
@@ -281,7 +293,10 @@ void Scene::CreateUI()
 		switch (Player->skilldata.Skills[i])
 		{
 		case 0://라이트큐브
-			ct = 0.3f;
+			ct = 0.45f;
+			break;
+		case 1://헤비큐브
+			ct = 1.1f;
 			break;
 		}
 

@@ -131,8 +131,8 @@ public:
 	
 	
 };
-void SetTexture(ID3D12GraphicsCommandList * commandlist, ComPtr<ID3D12DescriptorHeap>& SrvDescriptorHeap, ID3D12Resource* texture, bool isCubeMap);
-void LoadTexture(ID3D12Device* device, ID3D12GraphicsCommandList* commandlist, CGameObject* obj, unordered_map<string, unique_ptr<CTexture>>& Textures, ComPtr<ID3D12DescriptorHeap>& SrvDescriptorHeap, string texturename, wstring FileName, bool isCubeMap);
+void SetTexture(ID3D12GraphicsCommandList * commandlist, ComPtr<ID3D12DescriptorHeap>& SrvDescriptorHeap, ID3D12Resource* texture, bool isCubeMap, int Offset = 0);
+void LoadTexture(ID3D12Device* device, ID3D12GraphicsCommandList* commandlist, CGameObject* obj, unordered_map<string, unique_ptr<CTexture>>& Textures, ComPtr<ID3D12DescriptorHeap>& SrvDescriptorHeap, string texturename, wstring FileName, bool isCubeMap, int NumDescriptors = 1, int Offset = 0);
 
 //상속받은 게임오브젝트는 다음과 같은것을 처리할것.
 //1. 생성자
@@ -562,7 +562,7 @@ class DamageObject : public CGameObject
 public:
 	DamageObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist , list<CGameObject*>*Plist, float damaged, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
 	float LifeTime = 1.5f;
-	float Damaged = 0.0f;
+	int damaged = 0;
 
 public:
 	static bool CreateMesh;//최초로 false며 메쉬를 만든후 true가된다.

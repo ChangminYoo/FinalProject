@@ -767,17 +767,17 @@ bool MiniPhysicsEngineG9::RayCastObject::RayCasting(XMFLOAT3 & RayOrgin, XMFLOAT
 		//여기까지 오면 t와 SavePos는 유효한 판정을 가지는 교점이다.
 		//다만 이 교점이 최종적으로 갱신되기 위해선
 		//1. 기존 교점보다 카메라에 가까워야 하고
-		//2. 플레이어의 오브젝트 앞에 존재해야한다.
+		//2. 플레이어의 오브젝트 앞에 X가 존재해야한다.
 		//즉 플레이어와 카메라가 떨어져있는 3인칭 게임에서 플레이어 몬스터 카메라 순으로 있는 경우
 		//플레이어는 앞을 보고 있을테므로, 뒤로 탄이 날아가면 안되기 때문에
 		//몬스터가 플레이어 앞에 있을때만 레이캐스팅이 성공해야한다.
-		//이를 위해 교점을 구했던 평면(defaultpos+objpos)의 위치에서 플레이어 위치를 뺀 벡터와
+		//이를 위해 교점의 위치에서 플레이어 위치를 뺀 벡터와
 		//카메라가 바라보고있는 방향(만약 오차가 심하면 플레이어의 Look으로 해야한다.)과 내적시
 		//0이상이고, t가 카메라에 더 가까우면 그 값으로 갱신한다.
 		if (In == true)
 		{
 			float isfront = 0;
-			auto ntp = XMVector3Normalize(defaultpos + objpos - playerpos);
+			auto ntp = XMVector3Normalize(X - playerpos);
 			XMStoreFloat(&isfront, XMVector3Dot(look, ntp));
 
 			if (fabsf(t) < fabsf(mint) && isfront >= 0)
@@ -795,6 +795,74 @@ bool MiniPhysicsEngineG9::RayCastObject::RayCasting(XMFLOAT3 & RayOrgin, XMFLOAT
 		return false;
 
 	return true;
+}
+
+bool MiniPhysicsEngineG9::RayCastObject::RayCastingField(XMFLOAT3 & RayOrgin, XMFLOAT3 & RayDir, XMFLOAT3 & PlayerPos, XMFLOAT3 & Look, XMFLOAT3 * SavePos)
+{
+	
+
+	
+	XMVECTOR playerpos = XMLoadFloat3(&PlayerPos);
+	XMVECTOR Rd = XMLoadFloat3(&RayDir);
+	XMVECTOR Ro = XMLoadFloat3(&RayOrgin);
+	XMVECTOR look = XMLoadFloat3(&Look);
+	//먼저 오브젝트가 플레이어 뒤에있으면 검사 대상에서 벗어난다.
+
+
+	//땅은 원점에 존재하는 평면이다.
+
+	
+		XMVECTOR N = XMVectorSet(0,1,0,0);
+
+		XMFLOAT3 NdotRayDir;
+		XMStoreFloat3(&NdotRayDir, XMVector3Dot(N, Rd));
+		if (NdotRayDir.x == 0)//광선과 평면의 노멀이 수직이면 교점이 없음(무수히 많거나 없거나)
+		{
+			return false;
+		}
+
+		//여기에 오면 우선 교점은 있다는 소리
+
+		//이를 위해 t를 구해야함. 직선위의 임의의 점은 X = RayOrgin + RayDir*t
+		//평면위 의 임의의점은 Plane[i].Normal*(X-(Plane[i].DefaultCenterPos+ObjCenterPos))=0
+		//Plane[i].Normal*(RayOrgin+RayDir*t - (Plane[i].DefaultCenterPos+ObjCenterPos))=0
+		//Plane[i].Normal*(RayOrgin+RayDir*t)-Plane[i].Normal*(Plane[i].DefaultCenterPos+ObjCenterPos)=0
+		//t={((Plane[i].DefaultCenterPos+ObjCenterPos) - RayOrgin)/Plane[i].Normal 도트 RayDir}  도트 Plane[i].Normal
+		
+
+		auto sik1 = (- Ro) / NdotRayDir.x;
+		XMFLOAT3 temp;
+		XMStoreFloat3(&temp, XMVector3Dot(sik1, N));
+
+		float t = temp.x;
+
+		//이제 t를 이용해 교점X가 유한평면 안에 있는지 검사한다.
+		//이후 유한평면안에있으면서 dir와 testP-playerpos를 내적시 0보다 크거나 같으면 
+		//mint를 갱신한다.SavePos도 갱신한다. 아니라면 continue
+
+		auto X = Ro + Rd * t;
+		//X가 6개의 평면에서 하나라도 0보다 큰게 있으면 바깥에있는것이며 충돌안한것이다.
+		
+			float isfront = 0;
+			auto ntp = XMVector3Normalize(X - playerpos);
+			XMStoreFloat(&isfront, XMVector3Dot(look, ntp));
+
+			if (isfront >= 0)
+			{
+
+				XMStoreFloat3(SavePos, X);
+				return true;
+
+			}
+			else
+				return false;
+		
+
+	
+
+
+	
+	
 }
 
 void MiniPhysicsEngineG9::RayCastObject::SetPlane(XMFLOAT3 & x, XMFLOAT3 & y, XMFLOAT3 & z)

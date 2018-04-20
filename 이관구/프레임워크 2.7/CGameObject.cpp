@@ -175,35 +175,33 @@ void CGameObject::UpdateConstBuffer(ID3D12GraphicsCommandList * commandlist)
 
 //========================================= 텍스쳐 세팅 =========================================================================
 
-void SetTexture(ID3D12GraphicsCommandList * commandlist, ComPtr<ID3D12DescriptorHeap>& SrvDescriptorHeap, ID3D12Resource* texture, bool isCubeMap)
+void SetTexture(ID3D12GraphicsCommandList * commandlist, ComPtr<ID3D12DescriptorHeap>& SrvDescriptorHeap, ID3D12Resource* texture, bool isCubeMap, int Offset)
 {
-	static ID3D12Resource* OldResource = NULL;
 
-	if (OldResource == NULL)
-		OldResource = texture;
-	else
-	{
-		commandlist->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(OldResource,
-			D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE));
-	}
+	commandlist->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(texture,
+		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE));
+
 
 	//텍스처는 테이블을 쓸것이므로 힙과 테이블 두개를 연결해야함.
 	ID3D12DescriptorHeap* descriptorHeaps[] = { SrvDescriptorHeap.Get() };
 	commandlist->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
-
+	
 	CD3DX12_GPU_DESCRIPTOR_HANDLE tex(SrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
-	tex.Offset(0, CbvSrvDescriptorSize);
-
 	if (isCubeMap)
+	{
+		tex.Offset(0, CbvSrvDescriptorSize);
 		commandlist->SetGraphicsRootDescriptorTable(0, tex);
+	}
 	else
+	{
+		tex.Offset(Offset, CbvSrvDescriptorSize);
 		commandlist->SetGraphicsRootDescriptorTable(1, tex);
-
+	}
 	commandlist->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(texture,
 		D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE));
 }
 
-void LoadTexture(ID3D12Device* device, ID3D12GraphicsCommandList* commandlist, CGameObject* obj, unordered_map<string, unique_ptr<CTexture>>& Textures, ComPtr<ID3D12DescriptorHeap>& SrvDescriptorHeap, string texturename, wstring FileName, bool isCubeMap)
+void LoadTexture(ID3D12Device* device, ID3D12GraphicsCommandList* commandlist, CGameObject* obj, unordered_map<string, unique_ptr<CTexture>>& Textures, ComPtr<ID3D12DescriptorHeap>& SrvDescriptorHeap, string texturename, wstring FileName, bool isCubeMap, int NumDescriptors, int Offset)
 {
 
 	auto Tex = make_unique<CTexture>();
@@ -217,15 +215,20 @@ void LoadTexture(ID3D12Device* device, ID3D12GraphicsCommandList* commandlist, C
 	Textures[Tex->Name] = move(Tex);
 
 
-	//디스크립터 힙 생성
-	D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc = {};
-	srvHeapDesc.NumDescriptors = 1;
-	srvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-	srvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+	if (SrvDescriptorHeap.Get() == NULL)
+	{
+		//디스크립터 힙 생성
+		D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc = {};
+		srvHeapDesc.NumDescriptors = NumDescriptors;
+		srvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+		srvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 
-	ThrowIfFailed(device->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(&SrvDescriptorHeap)));
+		ThrowIfFailed(device->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(&SrvDescriptorHeap)));
+	}
 
 	CD3DX12_CPU_DESCRIPTOR_HANDLE hDescriptor(SrvDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
+
+	hDescriptor.Offset(Offset, CbvSrvDescriptorSize);
 
 	auto Texs = Textures[texturename]->Resource;
 
@@ -251,6 +254,7 @@ void LoadTexture(ID3D12Device* device, ID3D12GraphicsCommandList* commandlist, C
 
 	device->CreateShaderResourceView(Texs.Get(), &srvDesc, hDescriptor);
 }
+
 
 //=================================================== 오브젝트 생성 ===============================================================
 
@@ -292,7 +296,7 @@ CCubeManObject::CCubeManObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 	//게임 데이터 (스텟)을 찍는다. 캐릭터는 데미지를 갖지 않고, 탄환이 데미지를 갖도록하자.
 	gamedata.MAXHP = 100;
 	gamedata.HP = 100;
-	gamedata.Speed = 60;
+	gamedata.Speed = 50;
 	
 	//광선충돌 검사용 육면체
 	XMFLOAT3 rx(3, 0, 0);
@@ -693,7 +697,7 @@ BulletCube::BulletCube(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 	gamedata.HP = 1;
 	gamedata.Damage = 10;
 	gamedata.GodMode = true;
-	gamedata.Speed = 50;
+	gamedata.Speed = 100;
 	LifeTime = 7;
 	Master = master;
 	LockOn = lockon;
@@ -735,8 +739,6 @@ BulletCube::~BulletCube()
 void BulletCube::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList* commandlist)
 {
 
-	//모델 로드
-	//LoadMD5Model(L".\\플레이어메쉬들\\Cube.MD5MESH", &Mesh, 0, 1);
 	CreateCube(&Mesh, 2, 2, 2);
 	//
 	Mesh.SetNormal(false);
@@ -879,7 +881,7 @@ HeavyBulletCube::HeavyBulletCube(ID3D12Device * m_Device, ID3D12GraphicsCommandL
 	gamedata.HP = 1;
 	gamedata.Damage = 30;
 	gamedata.GodMode = true;
-	gamedata.Speed = 80;
+	gamedata.Speed = 70;
 	LifeTime = 7;
 	Master = master;
 	LockOn = lockon;
@@ -920,8 +922,7 @@ HeavyBulletCube::~HeavyBulletCube()
 void HeavyBulletCube::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList* commandlist)
 {
 
-	//모델 로드
-	//LoadMD5Model(L".\\플레이어메쉬들\\Cube.MD5MESH", &Mesh, 0, 1);
+	
 	CreateCube(&Mesh, 4, 4, 4);
 	//
 	Mesh.SetNormal(false);
@@ -1058,12 +1059,12 @@ SphereObject::SphereObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * 
 	UpdateLookVector();
 
 	ObjData.isAnimation = 0;
-	ObjData.Scale = 1.0f;
+	ObjData.Scale = 1024.0f;
 	ObjData.SpecularParamater = 0.0f;//스페큘러를 낮게준다.
 
 	//게임관련 데이터들
-	gamedata.MAXHP = 100000;
-	gamedata.HP = 100000;
+	gamedata.MAXHP = 1;
+	gamedata.HP = 1;
 	gamedata.Damage = 0;
 	gamedata.GodMode = true;
 	gamedata.Speed = 0;
@@ -1076,7 +1077,7 @@ SphereObject::SphereObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * 
 void SphereObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
 {
 	//모델 로드
-	LoadMD5Model(L".\\플레이어메쉬들\\sphere.MD5MESH", &Mesh, 0, 1024);
+	LoadMD5Model(L".\\플레이어메쉬들\\sphere.MD5MESH", &Mesh, 0, 1);
 	//
 	Mesh.SetNormal(false);
 	Mesh.CreateVertexBuffer(m_Device, commandlist);
@@ -1272,13 +1273,6 @@ ParticleObject::ParticleObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 	gamedata.Speed = 10;
 	staticobject = true;
 
-	Lookvector.x = -(Master->Lookvector.x); Lookvector.y = -(Master->Lookvector.y); Lookvector.z = -(Master->Lookvector.z);
-	Lookvector = Float3Normalize(Lookvector);
-
-	XMFLOAT3 Vel = XMFLOAT3(Lookvector.x * gamedata.Speed, Lookvector.y * gamedata.Speed, Lookvector.z * gamedata.Speed);
-	ParticleTime = LifeTime;
-	ObjData.Velocity = Vel;
-
 
 	if (CreateMesh == false)
 	{
@@ -1290,7 +1284,24 @@ ParticleObject::ParticleObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 
 	}
 
+	Lookvector.x = -(Master->Lookvector.x); Lookvector.y = -(Master->Lookvector.y); Lookvector.z = -(Master->Lookvector.z);
+	Lookvector = Float3Normalize(Lookvector);
 
+	XMFLOAT3 Vel = XMFLOAT3(Lookvector.x * gamedata.Speed, Lookvector.y * gamedata.Speed, Lookvector.z * gamedata.Speed);
+	ParticleTime = LifeTime;
+	ObjData.Velocity = Vel;
+
+	auto q = XMLoadFloat4(&Orient);
+	XMFLOAT3 axis = { 0,1,0 };
+	XMFLOAT4 q2;
+	if(Lookvector.z >0)
+		q2 = QuaternionRotation(axis, MMPE_PI/2 * Lookvector.x);
+	else if(Lookvector.z <0)
+		q2 = QuaternionRotation(axis, MMPE_PI / 2 * -Lookvector.x);
+
+	Orient = QuaternionMultiply(Orient, q2);
+
+	UpdateLookVector();
 }
 
 void ParticleObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
@@ -1377,7 +1388,7 @@ DamageObject::DamageObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * 
 	ObjData.Scale = 8.0f;
 	ObjData.SpecularParamater = 0.5f;//스페큘러를 낮게준다.
 
-
+	damaged = Damaged;
 	//게임관련 데이터들
 	gamedata.MAXHP = 0;
 	gamedata.HP = 0;
@@ -1391,16 +1402,12 @@ DamageObject::DamageObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * 
 		Mesh.Index = NULL;
 		Mesh.SubResource = NULL;
 
-		if (Damaged == 10.0f)
-			LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "DamageTex", L"textures/damage/damage10.dds", false);
-		else if (Damaged == 20.0f)
-			LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "DamageTex", L"textures/damage/damage20.dds", false);
-		else if (Damaged == 30.0f)
-			LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "DamageTex", L"textures/damage/damage30.dds", false);
-		else if (Damaged == 40.0f)
-			LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "DamageTex", L"textures/damage/damage40.dds", false);
-		else if (Damaged == 50.0f)
-			LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "DamageTex", L"textures/damage/damage50.dds", false);
+
+			LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "DamageTex10", L"textures/damage/damage10.dds", false,5 ,0);
+			LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "DamageTex20", L"textures/damage/damage20.dds", false, 5,1);
+			LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "DamageTex30", L"textures/damage/damage30.dds", false, 5,2);
+			LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "DamageTex40", L"textures/damage/damage40.dds", false, 5,3);
+			LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "DamageTex50", L"textures/damage/damage50.dds", false, 5,4);
 
 
 		SetMesh(m_Device, commandlist);
@@ -1454,8 +1461,19 @@ void DamageObject::Tick(const GameTimer & gt)
 
 void DamageObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer & gt)
 {
-	if (Textures.size()>0)
-		SetTexture(commandlist, SrvDescriptorHeap, Textures["DamageTex"].get()->Resource.Get(), false);
+	if (Textures.size() > 0)
+	{
+		if(damaged == 10)
+			SetTexture(commandlist, SrvDescriptorHeap, Textures["DamageTex10"].get()->Resource.Get(), false, 0);
+		else if(damaged == 20)
+			SetTexture(commandlist, SrvDescriptorHeap, Textures["DamageTex20"].get()->Resource.Get(), false, 1);
+		else if (damaged == 30)
+			SetTexture(commandlist, SrvDescriptorHeap, Textures["DamageTex30"].get()->Resource.Get(), false, 2);
+		else if (damaged == 40)
+			SetTexture(commandlist, SrvDescriptorHeap, Textures["DamageTex40"].get()->Resource.Get(), false, 3);
+		else if (damaged == 50)
+			SetTexture(commandlist, SrvDescriptorHeap, Textures["DamageTex50"].get()->Resource.Get(), false, 4);	
+	}
 	UpdateConstBuffer(commandlist);
 
 
@@ -2210,15 +2228,15 @@ BuildingObject::BuildingObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 	staticobject = true;
 
 	//광선충돌 검사용 육면체
-	XMFLOAT3 rx(20, 0, 0);
+	XMFLOAT3 rx(15, 0, 0);
 	XMFLOAT3 ry(0, 45, 0);
-	XMFLOAT3 rz(0, 0, 20);
+	XMFLOAT3 rz(0, 0, 15);
 	rco.SetPlane(rx, ry, rz);
 
 	//질점오브젝트 사용시 필요한 데이터들 설정
 	pp = new PhysicsPoint();
 	pp->SetPosition(CenterPos);//이 값은 항상 갱신되야한다.
-	pp->SetHalfBox(20, 45, 20);//충돌 박스의 x,y,z 크기
+	pp->SetHalfBox(15, 45, 15);//충돌 박스의 x,y,z 크기
 	pp->SetDamping(0.5f);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
 	pp->SetBounce(false);//튕기지 않는다.
 	pp->SetMass(INFINITY);//고정된 물체는 무게가 무한이다.
@@ -2227,7 +2245,7 @@ BuildingObject::BuildingObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 
 void BuildingObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
 {
-	CreateCube(&Mesh, 40, 90, 40);
+	CreateCube(&Mesh, 30, 90, 30);
 
 	//모델 로드
 	//LoadMD5Model(L".\\플레이어메쉬들\\Cube.MD5MESH", &Mesh, 0, 1);

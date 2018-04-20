@@ -129,7 +129,6 @@ int FrameWork::Run()
 			{
 				CalculateFrameStats();
 				FrameAdvance(mTimer);
-
 			}
 			else
 			{
@@ -307,8 +306,7 @@ LRESULT FrameWork::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			for(int i=0;i<4;i++)
 				if (scene->SkillCoolBar[i] != NULL)
 				{
-					//XMFLOAT4(i * 100 - 150, 0.95*-mHeight / 2, 0, 0)
-
+		
 					scene->SkillCoolBar[i]->ObjData.Scale = mClientWidth / 10;
 					scene->SkillCoolBar[i]->CenterPos.x = i * mClientWidth / 8 - (mClientWidth / 8)*1.5;
 					scene->SkillCoolBar[i]->CenterPos.y = 0.98*-mClientHeight / 2;
@@ -316,7 +314,7 @@ LRESULT FrameWork::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 					scene->SkillUI[i]->ObjData.Scale = mClientWidth / 10;
 					scene->SkillUI[i]->CenterPos.x = i * mClientWidth / 8 - (mClientWidth / 8)*1.5;
 					scene->SkillUI[i]->CenterPos.y = 0.95*-mClientHeight / 2;
-					//scene->SkillCoolBar[i]
+			
 				}
 		}
 
@@ -517,8 +515,18 @@ void FrameWork::OnMouseDown(WPARAM btnState, int x, int y)
 
 		if (Shot == false)//명중시킨 적이 없으면.
 		{
-			savepoint = RayShot(RAY.RayOrgin, RAY.RayDir, MAXRAYLEN);
-			scene->Player->CreateBullet(Device.Get(), mCommandList.Get(), savepoint, NULL, &scene->BulletObject);
+			//땅과 검사를 해봄.
+			if (scene->Player->PlayerObject->rco.RayCastingField(RAY.RayOrgin, RAY.RayDir, XMFloat4to3(scene->Player->PlayerObject->CenterPos),
+				scene->Player->PlayerObject->Lookvector, &savepoint) == true)
+			{
+				scene->Player->CreateBullet(Device.Get(), mCommandList.Get(), savepoint,NULL, &scene->BulletObject);
+				Shot = true;
+			}
+			else//오브젝트랑 땅 모두 안맞았으면 허공에쏜다.
+			{
+				savepoint = RayShot(RAY.RayOrgin, RAY.RayDir, MAXRAYLEN);
+				scene->Player->CreateBullet(Device.Get(), mCommandList.Get(), savepoint, NULL, &scene->BulletObject);
+			}
 		}
 	}
 }
