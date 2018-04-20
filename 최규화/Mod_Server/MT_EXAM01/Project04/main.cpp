@@ -1,19 +1,13 @@
 
-//#include "Database\CTextTest.h"
-#include "Player.h"
 #include "stdafx.h"
-
-//#include "stdafx.h"
+#include "ShareHeader.h"
+#include "Player.h"
 
 boost::asio::io_service g_io_service;
-
-//CTextTest g_database;
+TimerWorker				g_timer_queue;
 
 int main()
 {
-	//CTextTest *t = new CTextTest();
-	//t->FileOpen("Test.txt");
-
 	try
 	{
 		Player player;
@@ -23,5 +17,5 @@ int main()
 	{
 		cout << "Main Thread error : " << e.what() << endl;
 	}
-	//getchar();
+
 }

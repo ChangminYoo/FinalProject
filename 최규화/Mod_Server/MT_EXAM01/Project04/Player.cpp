@@ -17,18 +17,21 @@ Player::Player() : m_acceptor(g_io_service,
 	//2. 클라이언트 연결 및 유저데이터 초기화
 	Accept_Event();
 
+	//m_collcheck = new CollisionCheck();
+
 	//3.cpu 갯수만큼 스레드 생성 -> 멀티스레드를 이용한 패킷교환
 	MainLogic();
 }
 
 Player::~Player()
 {
-	m_SObjs->~StaticObject();
-	delete m_SObjs;
+	m_psobj->~StaticObject();
+	delete m_psobj;
 	
 	for (auto thread : m_pworkerThread)
 		delete thread;
 
+	//delete m_collcheck;
 }
 
 void Player::GetMyServerIP(boost::asio::io_service& io_service)
@@ -78,6 +81,7 @@ void Player::Monster_Init()
 void Player::Accept_Event()
 {
 	//1. 클라이언트와 연결시도 2. 연결됐다면 람다함수내에서 해당 클라이언트 정보 초기화진행 및 데이터 저장
+	//Accept -> Recv -> Send 순 
 	m_acceptor.async_accept(m_socket,
 		[&](const boost::system::error_code& error)
 	{
@@ -94,7 +98,7 @@ void Player::Accept_Event()
 				pNewSession->Init_PlayerInfo();
 				pNewSession->m_clients.emplace_back(pNewSession);
 
-				pNewSession->SendStaticObjects(Get_SObj_Value()->GET_SObj_List());
+				pNewSession->SendStaticObjects(GetPSObject()->GetSObjUdSet());
 
 				//2. 초기화된 정보를 연결된 클라이언트로 보낸다.
 				pNewSession->InitData_To_Client();
@@ -107,7 +111,6 @@ void Player::Accept_Event()
 
 				//delete를 해주면 메모리에러가 남. pNewSession에서 작업을 아직 안 끝냈는데 죽이려고 하기때문에
 				//delete pNewSession;
-				pNewSession->RecvPacket();
 
 			}
 			else
@@ -133,8 +136,18 @@ void Player::MainLogic()
 		auto work = make_shared<boost::asio::io_service::work>(g_io_service);
 		g_io_service.run(); 
 	});
+
+	m_pworkerThread.emplace_back(new thread{ [&]() { g_timer_queue.TimerThread(); } });
 	
+	//m_pworkerThread.emplace_back(new thread{ [&]() { GetCollsionCheck()->Update(); } });
+
 	f_thread.join();
+
+	for (auto thread : m_pworkerThread)
+	{
+		thread->join();
+		delete thread;
+	}
 
 	/*
 	for (auto i = 0; i < m_myCPUCoreCnt - 2; ++i)
@@ -152,7 +165,7 @@ void Player::MainLogic()
 
 void Player::SetStaticObjects()
 {
-	m_SObjs = new StaticObject();
+	m_psobj = new StaticObject();
 
-	m_SObjs->InitBoxObjects();
+	m_psobj->CycleStaticObjects();
 }

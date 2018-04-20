@@ -115,10 +115,10 @@ void AsyncClient::SendPacketRegular(CGameObject& gobj, const GameTimer& gt)
 	if (RgCkInfo.RtCheck.t.t_time > MAX_ROTATE_PACKET_TIME)
 	{
 		//
-		STC_Test cts_test;
-		cts_test.packet_size = sizeof(STC_Test);
-		cts_test.pack_type = PACKET_PROTOCOL_TYPE::TEST;
-		cts_test.time.t_time = RgCkInfo.RtCheck.t.t_time;
+		//STC_Test cts_test;
+		//cts_test.packet_size = sizeof(STC_Test);
+		//cts_test.pack_type = PACKET_PROTOCOL_TYPE::TEST;
+		//cts_test.time.t_time = RgCkInfo.RtCheck.t.t_time;
 		//
 
 		RgCkInfo.RtCheck.t.p_time = RgCkInfo.RtCheck.t.t_time - MAX_ROTATE_PACKET_TIME;
@@ -127,7 +127,7 @@ void AsyncClient::SendPacketRegular(CGameObject& gobj, const GameTimer& gt)
 		RgCkInfo.RtCheck.t.t_time += RgCkInfo.RtCheck.t.p_time;
 
 		//
-		cts_test.time.p_time = RgCkInfo.RtCheck.t.p_time;
+		//cts_test.time.p_time = RgCkInfo.RtCheck.t.p_time;
 		//
 
 		RgCkInfo.RtCheck.t.p_time = 0.f;
@@ -146,8 +146,8 @@ void AsyncClient::SendPacketRegular(CGameObject& gobj, const GameTimer& gt)
 			cts_rot.rotate_status = { RgCkInfo.RtCheck.RotationInfo.x,  RgCkInfo.RtCheck.RotationInfo.y,
 									  RgCkInfo.RtCheck.RotationInfo.z, RgCkInfo.RtCheck.RotationInfo.w };
 
-			cts_test.player_data.ID = cts_rot.id;
-			cts_test.player_data.Rotate_status = cts_rot.rotate_status;
+			//cts_test.player_data.ID = cts_rot.id;
+			//cts_test.player_data.Rotate_status = cts_rot.rotate_status;
 
 			//SendPacket(reinterpret_cast<Packet*>(&cts_test));
 
@@ -162,11 +162,11 @@ void AsyncClient::SendPacketRegular(CGameObject& gobj, const GameTimer& gt)
 	if (RgCkInfo.PtCheck.t.t_time > MAX_POSITION_MOVE_PACKET_TIME)
 	{
 		//
-		STC_Test cts_test;
-		cts_test.packet_size = sizeof(STC_Test);
-		cts_test.pack_type = PACKET_PROTOCOL_TYPE::TEST;
+		//STC_Test cts_test;
+		//cts_test.packet_size = sizeof(STC_Test);
+		//cts_test.pack_type = PACKET_PROTOCOL_TYPE::TEST;
 
-		cts_test.time.t_time = RgCkInfo.PtCheck.t.t_time;
+		//cts_test.time.t_time = RgCkInfo.PtCheck.t.t_time;
 		//
 
 		RgCkInfo.PtCheck.t.p_time = RgCkInfo.PtCheck.t.t_time - MAX_POSITION_MOVE_PACKET_TIME;
@@ -175,15 +175,13 @@ void AsyncClient::SendPacketRegular(CGameObject& gobj, const GameTimer& gt)
 		RgCkInfo.PtCheck.t.t_time += RgCkInfo.PtCheck.t.p_time;
 
 		//
-		cts_test.time.p_time = RgCkInfo.PtCheck.t.p_time;
+		//cts_test.time.p_time = RgCkInfo.PtCheck.t.p_time;
 		//
 
 		RgCkInfo.PtCheck.t.p_time = 0.f;
 
 		//SendPacket(reinterpret_cast<Packet*>(&cts_test));
-
-		
-		
+	
 		if (gobj.m_player_data.Pos.x != RgCkInfo.PtCheck.PositionInfo.x ||
 			gobj.m_player_data.Pos.y != RgCkInfo.PtCheck.PositionInfo.y ||
 			gobj.m_player_data.Pos.z != RgCkInfo.PtCheck.PositionInfo.z ||
@@ -198,10 +196,11 @@ void AsyncClient::SendPacketRegular(CGameObject& gobj, const GameTimer& gt)
 			cts_pos.pos = { RgCkInfo.PtCheck.PositionInfo.x, RgCkInfo.PtCheck.PositionInfo.y,
 							RgCkInfo.PtCheck.PositionInfo.z, RgCkInfo.PtCheck.PositionInfo.w };
 			cts_pos.ani_state = RgCkInfo.PtCheck.AniState;
+			cts_pos.deltime = RgCkInfo.PtCheck.Deltime;
 
 			//
-			cts_test.player_data.ID = cts_pos.id;
-			cts_test.player_data.Pos = cts_pos.pos;
+			//cts_test.player_data.ID = cts_pos.id;
+			//cts_test.player_data.Pos = cts_pos.pos;
 			//SendPacket(reinterpret_cast<Packet*>(&cts_test));
 
 			SendPacket(reinterpret_cast<Packet*>(&cts_pos));

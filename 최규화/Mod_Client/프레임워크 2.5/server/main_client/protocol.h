@@ -52,6 +52,13 @@ enum STATIC_OBJECT_TYPE
 	Box
 };
 
+enum OBJECT_TYPE
+{
+	PLAYER,
+	FIXED_OBJECT,
+	BULLET
+};
+
 enum CONNECT_STATE { DISCONNECT = -1, CONNECT = 1 };
 enum MONSTERS { NO_MONSTER, MONSTER01, MONSTER02, MONSTER03 };
 enum PLAYERS { NO_PLAYER, LUNA, CMETRA, RONDO, DONALD };
@@ -118,7 +125,6 @@ struct StaticObject_Info
 {
 	Position					Pos;					//16
 	Rotation				    Rotate_status;			//16
-	CollisionBox				CollisionBox_Size;		//12
 	unsigned short				origin_hp{ 100 };		//2
 	unsigned short   			cur_hp{ 100 };			//2
 	Player_Status				player_status;			//6
@@ -195,10 +201,11 @@ typedef struct Server_To_Client_Player_Disconnected_Info
 
 typedef struct Server_To_Client_Player_Position_Changed
 {
-	unsigned char packet_size = sizeof(unsigned short) + sizeof(Position) + sizeof(unsigned char) + sizeof(unsigned char) + sizeof(unsigned char);;
+	unsigned char packet_size = sizeof(unsigned short) + sizeof(Position) + sizeof(unsigned char) + sizeof(unsigned char) + sizeof(unsigned char) + sizeof(float);
 	unsigned char pack_type = PACKET_PROTOCOL_TYPE::CHANGED_PLAYER_POSITION;
 	unsigned short id;
 	unsigned char ani_state;
+	float deltime;
 	Position pos;
 
 }STC_ChangedPos;

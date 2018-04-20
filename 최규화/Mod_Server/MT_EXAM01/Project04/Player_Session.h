@@ -1,9 +1,13 @@
 #pragma once
-#include "stdafx.h"
+
+#include "Database\CTextTest.h"
 #include "Player.h"
 #include "BulletObject.h"
-#include "Database\CTextTest.h"
-#include "PhysicsEngine\MyMiniPysicsEngine.h"
+#include "StaticObject.h"
+
+#include "PhysicalEffect.h"
+
+#include "ShareHeader.h"
 
 enum PLAYER_STATE 
 {
@@ -14,19 +18,13 @@ enum PLAYER_STATE
 	DEAD,
 };
 
-//enum PLAYER_OBJECT_TYPE
-//{
-//	PLAYER_OBJECT,
-//	STATIC_OBJECT,
-//	BULLET_OBJECT,
-//};
-
 class Player;
 class StaticObject;
+class BulletObject;
 
 class Player_Session
 {
-protected:
+private:
 	//0. 통신을 위한 소켓 정보
 	boost::asio::ip::tcp::socket m_socket;
 
@@ -54,8 +52,9 @@ protected:
 	MONSTERS				     m_monsterType;
 
 	//4. 물리효과 처리
-	RigidBody					 *rb = nullptr;
-	PhysicsPoint				 *pp = nullptr;
+	RigidBody					 *rb{ nullptr };
+	PhysicsPoint				 *pp{ nullptr };
+	PhysicalEffect				 *pe{ nullptr };
 
 	//5. 고정된 물체인가
 	bool						  staticobject{ false };
@@ -69,14 +68,16 @@ protected:
 	XMFLOAT3					  Upvector; //업벡터
 	XMFLOAT3					  OffLookvector;//초기룩벡터. 오브젝트가 바라보고있는 방향.
 	XMFLOAT3					  OffRightvector;//초기라이트벡터. 오브젝트가 바라보고있는 방향의 오른쪽방향.
-	void						  GetUpvector();//룩벡터와 라이트벡터를 이용해 업벡터를 얻는함수
+	//void						  GetUpvector();//룩벡터와 라이트벡터를 이용해 업벡터를 얻는함수
 
 	//8. 해당 오브젝트가 죽었나
-	bool						  Delobj{ false };
+	bool						  delobj{ false };
 
-	unordered_map<int, Position>  m_boxPos;
+	//unordered_map<int, Position>  m_boxPos;
 
 	BulletObject				 *m_bulllObj;
+
+	RayCastObject				  rco;
 
 public:
 	unsigned int m_cur_packet_size{ 0 };
@@ -88,7 +89,7 @@ public:
 	Player_Session(const short& count, boost::asio::ip::tcp::socket socket) : m_id(count), m_socket(move(socket))
 	{};
 
-	~Player_Session() {};
+	~Player_Session();
 
 
 	// ---------------------------------------------------------------------------------------
@@ -120,15 +121,7 @@ public:
 	void Init_PlayerInfo();
 	void InitData_To_Client();
 
-	//void InitStaticObjects(boost::asio::ip::tcp::socket my_sock);
-	//void InitStaticObjects();
-	//void SET_PosOfBox();
-	void SendStaticObjects(const list<StaticObject*>& SObjList);
-
-	void UpdateLookVector();
-
-	// 3. 움직이지 않는 오브젝트 생성 (예: 상자, 맵)
-	//void Init_StaticObject();
+	void SendStaticObjects(const unordered_set<StaticObject*>& sobjudset);
 
 	// ---------------------------------------------------------------------------------------
 	// [4].기타 GET - SET 함수
@@ -149,18 +142,41 @@ public:
 
 	bool	Get_IsAI() const { return m_isAI; } 
 
+	vector<Player_Session*>* GetPlayerSession() { return &m_clients; }
+
+	void	Damaged(float damage);
+	// ---------------------------------------------------------------------------------------
+	// [5]. 물리효과 함수
+
+	XMFLOAT3				GetLookVector()  const { return Lookvector;  }
+	XMFLOAT3				GetRightVecotr() const { return Rightvector; }
+	XMFLOAT3				GetUpVector()	 const { return Upvector;    }
+
+	PhysicsPoint*			GetPhysicsPoint() { return pp; }
+	//void UpdateLookVector();
+
+	//void UpdatePPosCenterPos();
+
+	//void GravitySystem(float time);
+
+	//void AfterGravitySystem(float time);
+
 	// ---------------------------------------------------------------------------------------
 	// 서버에서 관리하는 클라이언트 객체들의 집합(vector 사용 - 나중에 멀쓰때 맞는 자료구조로 바꿀것)
 	static vector<Player_Session*> m_clients;
 	//static list<StaticObject*> m_staticobjs;
-	static list<BulletObject*> m_bullobjs;
+	static list<BulletObject*>     m_bullobjs;
 
 	static unsigned short	   m_bullID;
 
 	static int m_tempcount;
 	int t_cnt{ 0 };
-	void Update_Temp();
+	//void Update_Temp();
 	float prevTime = 0.f, curTime = 0.f, elapsedTime = 0.f;
+
+	//1. 플레이어와 스테틱 오브젝트들의 충돌
+	void Collision_StaticObjects(unordered_set<StaticObject*>& sobjs, float DeltaTime);
+	void Collision_Players(vector<Player_Session*>& clients, float DeltaTime);
 };
 
 

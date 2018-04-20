@@ -200,11 +200,14 @@ CCubeManObject::CCubeManObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 	//실제 룩벡터 등은 모두 UpdateLookVector에서 처리된다(라이트벡터도) 따라서 Tick함수에서 반드시 호출해야한다.
 	OffLookvector = XMFLOAT3(0, 0, -1);
 	OffRightvector = XMFLOAT3(-1, 0, 0);
+
 	auto q = XMLoadFloat4(&Orient);//방향을 180도 돌리려 한다.
 	XMFLOAT3 axis{ 0,1,0 };
 	auto q2 = QuaternionRotation(axis, MMPE_PI);
 	Orient = QuaternionMultiply(Orient, q2);
+
 	UpdateLookVector();
+
 	ObjData.isAnimation = true;
 	ObjData.Scale =3;
 	ObjData.SpecularParamater = 0.0f;//스페큘러를 낮게준다.
@@ -772,7 +775,9 @@ void BulletCube::Collision(list<CGameObject*>* collist, float DeltaTime)
 					// 파티클리스트에 데미지 오브젝트를 생성해서 넣음. 파티클을 띄운다.
 					if (ParticleList != NULL)
 					{
-						ParticleList->push_back(new DamageObject(device, commandlist, ParticleList, gamedata.Damage, XMFLOAT4((*i)->CenterPos.x, (*i)->CenterPos.y + 11, (*i)->CenterPos.z, 0)));
+						ParticleList->push_back(
+							new DamageObject(device, commandlist, ParticleList, gamedata.Damage, 
+								XMFLOAT4((*i)->CenterPos.x, (*i)->CenterPos.y + 11, (*i)->CenterPos.z, 0)));
 					}
 
 				}

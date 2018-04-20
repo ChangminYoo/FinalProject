@@ -19,6 +19,7 @@ struct PositionCheck
 	Time t;
 	Position PositionInfo;
 	Ani_State AniState;
+	float Deltime;
 };
 
 struct RegularCheckInfo

@@ -9,10 +9,10 @@
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
 #include <memory>
+#include <mutex>
+#include <queue>
 
 #include "protocol.h"
-//#include "Player.h"
-//#include "Database\CTextTest.h"
 
 const char SERVERIP[] = "127.0.0.1";
 const unsigned short PORT = 31400;
@@ -25,4 +25,5 @@ using namespace std;
 extern boost::asio::io_service g_io_service;
 
 
-//extern CTextTest g_database;
+
+

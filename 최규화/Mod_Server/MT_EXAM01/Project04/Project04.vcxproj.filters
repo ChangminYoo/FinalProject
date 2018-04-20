@@ -36,9 +36,6 @@
     <ClCompile Include="PhysicsEngine\MyMiniPysicsEngine.cpp">
       <Filter>소스 파일\PhysicsEngine</Filter>
     </ClCompile>
-    <ClCompile Include="Player_Collision.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="StaticObject.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
@@ -46,6 +43,15 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="BulletObject.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="PhysicalEffect.cpp">
+      <Filter>소스 파일\PhysicsEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="CollisionCheck.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="TimerWorker.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
@@ -74,13 +80,22 @@
     <ClInclude Include="BulletObject.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="PhysicalEffect.h">
+      <Filter>소스 파일\PhysicsEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="CollisionCheck.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="TimerWorker.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="ShareHeader.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="Database\Test.txt">
       <Filter>리소스 파일</Filter>
     </Text>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
   </ItemGroup>
 </Project>

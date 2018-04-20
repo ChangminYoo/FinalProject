@@ -1,7 +1,10 @@
 #pragma once
+#include <thread>
 #include "Player_Session.h"
 #include "StaticObject.h"
-#include <thread>
+#include "CollisionCheck.h"
+#include "ShareHeader.h"
+
 
 class Player_Session;
 
@@ -16,8 +19,9 @@ private:
 	const unsigned int m_monsterCnt{ MAX_MONSTER_NUM };
 	bool m_serverShutDown{ false };
 
-	vector<thread*> m_pworkerThread;
-	StaticObject   *m_SObjs;
+	vector<thread*>  m_pworkerThread;
+	StaticObject    *m_psobj;
+	//CollisionCheck	*m_collcheck;
 
 public:
 	Player();
@@ -30,6 +34,8 @@ public:
 	void MainLogic();
 
 	void SetStaticObjects();
-	StaticObject* Get_SObj_Value() { return m_SObjs; }
+	StaticObject* GetPSObject() { return m_psobj; }
+
+	//CollisionCheck* GetCollsionCheck() { return m_collcheck; }
 
 };

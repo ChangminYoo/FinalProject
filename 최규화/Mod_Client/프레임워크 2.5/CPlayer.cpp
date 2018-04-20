@@ -428,6 +428,8 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 				//change_pos_ani.ani_state = Ani_State::Idle;
 				//m_async_client->SendPacket(reinterpret_cast<Packet*>(&change_pos_ani));
 			}
+
+			m_async_client->RgCkInfo.PtCheck.Deltime = DeltaTime;
 		}
 
 

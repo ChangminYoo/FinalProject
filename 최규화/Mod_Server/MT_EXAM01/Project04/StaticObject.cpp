@@ -1,7 +1,19 @@
 #include "StaticObject.h"
 
 
-void StaticObject::SET_PosOfBox()
+void StaticObject::CycleStaticObjects()
+{
+	pe = new PhysicalEffect();
+
+	//1. 상자
+	SetPosOfBox();
+
+	InitBoxObjects();
+
+	AfterGravitySystem();
+}
+
+void StaticObject::SetPosOfBox()
 {
 	m_boxPos = 
 	{
@@ -16,12 +28,12 @@ void StaticObject::InitBoxObjects()
 {
 	//1. StaticObjectList에 데이터 넣어주기.
 	//   한번 생성하고 바뀌지 않으므로 초기 한번만 실행
-	SET_PosOfBox();
 
 	for (int i = 0; i < MAX_BOX_NUM; ++i)
 	{
 		StaticObject *sobj = new StaticObject();
-
+		sobj->pp = new PhysicsPoint();
+		
 		sobj->m_sobjdata.Ani = Ani_State::Idle;
 		sobj->m_sobjdata.GodMode = true;
 		sobj->m_sobjdata.ID = i;
@@ -36,107 +48,62 @@ void StaticObject::InitBoxObjects()
 		sobj->OffLookvector = XMFLOAT3(0, 0, 1);
 		sobj->OffRightvector = XMFLOAT3(1, 0, 0);
 
-		sobj->UpdateLookVector();
-		sobj->GetUpVector();
+		sobj->pe->UpdateLookVector(sobj->OffLookvector, sobj->OffRightvector, sobj->m_sobjdata.Rotate_status,
+								   sobj->Lookvector, sobj->Rightvector);
 
-		m_staticObjs.emplace_back(sobj);
+		sobj->pe->GetUpVector(sobj->Lookvector, sobj->Rightvector, sobj->Upvector);
+
+		XMFLOAT4 xmf4 = { sobj->m_sobjdata.Pos.x, sobj->m_sobjdata.Pos.y, sobj->m_sobjdata.Pos.z, sobj->m_sobjdata.Pos.w };
+		sobj->pp->SetPosition(xmf4);
+		sobj->pp->SetHalfBox(5, 5, 5);
+		sobj->pp->SetDamping(0.5f);
+		sobj->pp->SetBounce(false);
+		sobj->pp->SetMass(INFINITY);
+
+		m_sobjs.insert(sobj);
 	}
-	
-
-	//sobj->m_connect_state = true;
-	//sobj->m_state = PLAYER_STATE::IDLE;
-	//sobj->m_playerData.Ani = Ani_State::Idle;
-	//sobj->m_playerData.Connect_Status = true;
-
-	//sobj_data.Connect_Status = true;
-	//sobj->m_playerData.Dir = 0;
-	//sobj->m_playerData.GodMode = true;
-	//sobj->m_playerData.Is_AI = false;
-	//sobj->m_playerData.Rotate_status = { 0.0f, 0.0f, 0.0f, 0.0f };
-	//sobj->m_playerData.UserInfo.cur_hp = 100;
-	//sobj->m_playerData.UserInfo.origin_hp = 100;
-	//sobj->m_playerData.UserInfo.player_status.attack = 0;
-	//sobj->m_playerData.UserInfo.player_status.speed = 0;
-	//sobj->m_playerType = PLAYERS::NO_PLAYER;
-	//sobj->m_monsterType = MONSTERS::NO_MONSTER;
-	//sobj->staticobject = true;
-	//sobj->OffLookvector = XMFLOAT3(0, 0, 1);
-	//sobj->OffRightvector = XMFLOAT3(1, 0, 0);
-	
-
-	//for (int i = 0; i < MAX_BOX_NUM; ++i)
-	//{
-	//	sobj->m_id = i;
-	//	sobj->m_playerData.ID = i;
-	//	sobj->m_playerData.Pos = move(m_boxPos[i]);
-	//
-	//	m_staticobjs.emplace_back(sobj);
-	//}
-	
 }
 
-void StaticObject::UpdateLookVector()
+void StaticObject::AfterGravitySystem()
 {
-	auto wmatrix = XMMatrixIdentity();
-
-	//클라이언트에서 MouseMove를 통해 카메라를 회전할 때 마다 Rotate_status가 달라짐
-	XMFLOAT4 orient_xmfloat4 =
-	{	m_sobjdata.Rotate_status.x ,
-		m_sobjdata.Rotate_status.y ,
-		m_sobjdata.Rotate_status.z ,
-		m_sobjdata.Rotate_status.w };
-
-	auto quater = XMLoadFloat4(&orient_xmfloat4);
-	wmatrix *= XMMatrixRotationQuaternion(quater);
-
-	//OffLookvector 와 OffRightvector는 플레이어타입(캐릭터, 불렛, 스테틱오브젝트 등에 따라 다름)
-	auto ol = XMLoadFloat3(&OffLookvector);
-	auto or = XMLoadFloat3(&OffRightvector);
-
-	ol = XMVector4Transform(ol, wmatrix);
-	or = XMVector4Transform(or , wmatrix);
-
-	XMStoreFloat3(&Lookvector, ol);
-	XMStoreFloat3(&Rightvector, or );
-
-	if (fabsf(Lookvector.x) < MMPE_EPSILON / 10)
-		Lookvector.x = 0;
-	if (fabsf(Lookvector.y) < MMPE_EPSILON / 10)
-		Lookvector.y = 0;
-	if (fabsf(Lookvector.z) < MMPE_EPSILON / 10)
-		Lookvector.z = 0;
-
-
-	if (fabsf(Rightvector.x) < MMPE_EPSILON / 10)
-		Rightvector.x = 0;
-	if (fabsf(Rightvector.y) < MMPE_EPSILON / 10)
-		Rightvector.y = 0;
-	if (fabsf(Rightvector.z) < MMPE_EPSILON / 10)
-		Rightvector.z = 0;
-
-	Lookvector = Float3Normalize(Lookvector);
-	Rightvector = Float3Normalize(Rightvector);
-
+	for(auto sobj : m_sobjs)
+	{
+		//왜 실제 중점이 아닌 pp의 중점으로 처리하냐면 실제중점을 움직인후 pp의 중점을 움직이나
+		//pp의중점을 움직이고 실제중점을 움직이나 같지만, UpdatePPosCenterPos를 쓰기위해
+		//pp를 움직이고 cp를 pp로 맞춘다.
+		float ppy = sobj->pp->GetPosition().y;
+		float hby = sobj->pp->GetHalfBox().y;
+		if (ppy - hby < 0)											//pp의 중점y-하프박스의 y값을 한결과가 0보다 작으면 땅아래에 묻힌셈
+		{
+			XMFLOAT3 gp = sobj->pp->GetPosition();
+			gp.y += hby - ppy;										//그러면 반대로 하프박스y값-중점y만큼 올리면 된다.
+			sobj->pp->SetPosition(gp);
+			sobj->UpdatePPosCenterPos(sobj->pp->GetPosition());
+			auto v = sobj->pp->GetVelocity();
+			v.y = 0;												//중력에 의한 속도를 0으로 만듬
+			sobj->pp->SetVelocity(v);
+			sobj->m_airbone = false;
+		}
+	}
 }
 
-void StaticObject::GetUpVector()
+void StaticObject::UpdatePPosCenterPos(XMFLOAT3& xmf3)
 {
-	XMVECTOR l = XMLoadFloat3(&Lookvector);
-	XMVECTOR r = XMLoadFloat3(&Rightvector);
-	auto u = XMVector3Cross(l, r);
+	XMFLOAT4 xmf4 = XMFloat3to4(xmf3);
 
-	XMFLOAT3 up;
-	XMStoreFloat3(&up, u);
-	up = Float3Normalize(up);
-
-	Upvector = move(up);
+	m_sobjdata.Pos.x = xmf4.x;
+	m_sobjdata.Pos.y = xmf4.y; 
+	m_sobjdata.Pos.z = xmf4.z;
+	m_sobjdata.Pos.w = xmf4.w;
 }
 
 
 StaticObject::~StaticObject()
 {
-	for (auto obj : m_staticObjs)
-		delete obj;
+	for (auto sobj : m_sobjs)
+		delete sobj;
+
+	delete pe;
 
 }
 

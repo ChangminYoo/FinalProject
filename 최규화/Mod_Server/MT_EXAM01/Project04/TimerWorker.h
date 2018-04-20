@@ -1,0 +1,47 @@
+#pragma once
+#include "stdafx.h"
+
+class Player_Session;
+
+enum TIMER_EVENT_TYPE
+{
+	DEAD_TO_ALIVE = 1,
+	CHANGE_PLAYER_STATE,
+	ATTACK_CYCLE
+};
+
+using event_type = struct Event_Type
+{
+	unsigned short id;
+	float wakeup_time;
+	char type;
+	bool AI{ false };
+};
+
+class waketime_cmp
+{
+public:
+	bool operator()(const event_type *lhs_val, const event_type *rhs_val) const
+	{
+		return (lhs_val->wakeup_time > rhs_val->wakeup_time);
+	}
+};
+
+class TimerWorker
+{
+private:
+	mutex t_lock;
+
+public:
+	TimerWorker();
+	void lock() { t_lock.lock(); }
+	void unlock() { t_lock.unlock(); }
+
+	void TimerThread();
+	void ProcessPacket(event_type* et);
+	void AddEvent(const unsigned short& id, const float& sec, TIMER_EVENT_TYPE type, bool is_ai);
+
+	priority_queue<event_type*, vector<event_type*>, waketime_cmp> t_queue;
+	~TimerWorker();
+};
+

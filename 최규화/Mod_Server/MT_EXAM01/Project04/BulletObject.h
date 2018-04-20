@@ -1,10 +1,29 @@
 #pragma once
-#include "stdafx.h"
-#include "PhysicsEngine\MyMiniPysicsEngine.h"
+#include "PhysicalEffect.h"
+#include "Player_Session.h"
+#include "StaticObject.h"
+
+class StaticObject;
+class Player_Session;
 
 class BulletObject
 {
 private:
+	float		   lifetime;
+
+	unsigned short  origin_hp{ 1 };
+	unsigned short  cur_hp{ 1 };
+	float			Damage{ 10 };
+	unsigned short  Speed{ 50 };
+	char		    GodMode{ true };
+	char		    Ani{ Ani_State::Attack };
+
+	CollisionBox  CollisionBox_Size;		//12
+	bool		  alive{ true };
+
+	short		  myID{ -1 };
+
+	BulletObject_Info m_bulldata;
 
 	XMFLOAT3 OffLookvector;
 	XMFLOAT3 OffRightvector;
@@ -13,22 +32,14 @@ private:
 	XMFLOAT3 Rightvector;
 	XMFLOAT3 Upvector;
 
-	BulletObject_Info m_bulldata;
+	RigidBody					 *rb{ nullptr };
+	PhysicsPoint				 *pp{ nullptr };
+	PhysicalEffect				 *pe{ nullptr };
 
-	float		   lifetime;
+	RayCastObject				  rco;
 
-	unsigned short origin_hp{ 1 };
-	unsigned short cur_hp{ 1 };
-	unsigned short Damage{ 10 };
-	unsigned short Speed{ 50 };
+	bool						  m_delobj{ false };
 
-	char		   GodMode{ true };
-	char		   Ani{ Ani_State::Attack };
-
-	CollisionBox  CollisionBox_Size;		//12
-	bool		  alive{ true };
-
-	short		  myID{ -1 };
 public:
 	BulletObject(const unsigned short& master_id, const unsigned short& target_id,
 				 const Position& pos, const Rotation& rot, float bulltime, const unsigned short& my_id);
@@ -40,6 +51,10 @@ public:
 
 	float Get_LifeTime() const { return lifetime; }
 	void Set_LifeTime(float time) { lifetime += time; }
+
+	void Collision_StaticObjects(unordered_set<StaticObject*>& sobjs, float DeltaTime);
+	void Collision_Players(vector<Player_Session*>& clients, float DeltaTime);
+
 	~BulletObject();
 };
 

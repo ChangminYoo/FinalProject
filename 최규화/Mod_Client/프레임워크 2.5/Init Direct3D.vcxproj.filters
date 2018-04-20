@@ -180,7 +180,4 @@
       <Filter>헤더파일\서버</Filter>
     </ClInclude>
   </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
 </Project>

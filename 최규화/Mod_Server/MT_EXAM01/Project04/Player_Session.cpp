@@ -6,7 +6,6 @@
 #define RAND_CREATE_Z_POS 100
 
 vector<Player_Session*> Player_Session::m_clients = vector<Player_Session*>();
-//list<StaticObject*> Player_Session::m_staticobjs = list<StaticObject*>();
 list<BulletObject*> Player_Session::m_bullobjs = list <BulletObject*>();
 unsigned short Player_Session::m_bullID = 0;
 int Player_Session::m_tempcount = 0;
@@ -122,7 +121,7 @@ void Player_Session::Init_MonsterInfo()
 
 void Player_Session::Init_PlayerInfo()
 {
-	//플레이어 정보 초기화 -> send 다음에 recv를 해줘야한
+	//플레이어 정보 초기화 
 	default_random_engine generator(time(0));
 	uniform_int_distribution<int> export_x(-RAND_CREATE_X_POS, RAND_CREATE_X_POS);
 	uniform_int_distribution<int> export_z(-RAND_CREATE_Z_POS, RAND_CREATE_Z_POS);
@@ -155,18 +154,37 @@ void Player_Session::Init_PlayerInfo()
 		m_playerData.Pos = { -100.0f , -1000.0f, 0.0f };
 	else if (m_playerData.ID == 1)
 		m_playerData.Pos = { 100.0f, -1000.0f, 0.0f };
+	//
 
-	//캐릭터일 경우 초기 룩, 라이트 벡터
+
+	//Lookvector, Rightvector, Upvector 설정 - PhysicalEffect 클래스 함수이용
+	pe = new PhysicalEffect();
+
 	OffLookvector = XMFLOAT3(0, 0, -1);
 	OffRightvector = XMFLOAT3(-1, 0, 0);	
+	
+	pe->UpdateLookVector(OffLookvector, OffRightvector, m_playerData.Rotate_status, Lookvector, Rightvector);
+	pe->GetUpVector(Lookvector, Rightvector, Upvector);
+	//
 
-	//m_playerData.Pos = { static_cast<float>(rand_x), 0.0f, static_cast<float>(rand_z) , 0.0f };
+	//평면과의 레이캐스팅
+	XMFLOAT3 rx(3, 0, 0);
+	XMFLOAT3 ry(0, 10, 0);
+	XMFLOAT3 rz(0, 0, 3);
+	rco.SetPlane(rx, ry, rz);
+	//
+
+	//물리효과 및 충돌처리를 위한 PhysicsPoint 클래스
+	pp = new PhysicsPoint();
+	pp->SetPosition(m_playerData.Pos.x, m_playerData.Pos.y, m_playerData.Pos.z);
+	pp->SetHalfBox(3, 10, 3);
+	pp->SetDamping(0.7);
+	pp->SetBounce(false);
+	//
+	
 	
 	//wcscpy(m_playerData.LoginData.name, m_loginID);
 	//wcscpy(m_playerData.LoginData.password, m_loginPW);
-
-	//2. 초기화된 정보를 연결된 클라이언트로 보낸다.
-
 }
 
 void Player_Session::InitData_To_Client()
@@ -209,76 +227,11 @@ void Player_Session::InitData_To_Client()
 
 }
 
-void Player_Session::UpdateLookVector()
-{
-	auto wmatrix = XMMatrixIdentity();
-
-	//클라이언트에서 MouseMove를 통해 카메라를 회전할 때 마다 Rotate_status가 달라짐
-	XMFLOAT4 orient_xmfloat4 =
-	{ m_playerData.Rotate_status.x ,
-	  m_playerData.Rotate_status.y , 
-	  m_playerData.Rotate_status.z , 
-      m_playerData.Rotate_status.w };
-
-	auto quater = XMLoadFloat4(&orient_xmfloat4);
-	wmatrix *= XMMatrixRotationQuaternion(quater);
-
-	//OffLookvector 와 OffRightvector는 플레이어타입(캐릭터, 불렛, 스테틱오브젝트 등에 따라 다름)
-	auto ol = XMLoadFloat3(&OffLookvector);
-	auto or = XMLoadFloat3(&OffRightvector);
-
-	ol = XMVector4Transform(ol, wmatrix);
-	or = XMVector4Transform(or , wmatrix);
-
-	XMStoreFloat3(&Lookvector, ol);
-	XMStoreFloat3(&Rightvector, or );
-
-	if (fabsf(Lookvector.x) < MMPE_EPSILON / 10)
-		Lookvector.x = 0;
-	if (fabsf(Lookvector.y) < MMPE_EPSILON / 10)
-		Lookvector.y = 0;
-	if (fabsf(Lookvector.z) < MMPE_EPSILON / 10)
-		Lookvector.z = 0;
-
-
-	if (fabsf(Rightvector.x) < MMPE_EPSILON / 10)
-		Rightvector.x = 0;
-	if (fabsf(Rightvector.y) < MMPE_EPSILON / 10)
-		Rightvector.y = 0;
-	if (fabsf(Rightvector.z) < MMPE_EPSILON / 10)
-		Rightvector.z = 0;
-
-	Lookvector = Float3Normalize(Lookvector);
-	Rightvector = Float3Normalize(Rightvector);
-
-	GetUpvector();
-}
-
-
-void Player_Session::GetUpvector()
-{
-	XMVECTOR l = XMLoadFloat3(&Lookvector);
-	XMVECTOR r = XMLoadFloat3(&Rightvector);
-	auto u = XMVector3Cross(l, r);
-
-	XMFLOAT3 up;
-	XMStoreFloat3(&up, u);
-	up = Float3Normalize(up);
-
-	Upvector = move(up);
-}
-
 void Player_Session::SendPacket(Packet* packet)
 {
 	int packet_size = packet[0];
-	//cout << "packet_size : " << packet_size << endl;
 	Packet *new_sendBuf = new Packet[packet_size];
 	memcpy(new_sendBuf, packet, packet_size);
-
-	//shared_ptr<Packet*> new_sendBuf(new Packet[packet_size]);
-	//m_new_sendBuf = new Packet[packet_size];
-
-	//auto a = *(reinterpret_cast<Player_Data*>(&new_sendBuf[2]));
 
 	//1. async_write_some - 비동기 IO / 받은데이터를 즉시 보냄(따로 버퍼에 저장X)
 	//2. async_write - 비동기 IO / 보내고자 하는 데이터가 모두 버퍼에 담기면 데이터를 보냄
@@ -296,32 +249,8 @@ void Player_Session::SendPacket(Packet* packet)
 			delete[] new_sendBuf;
 			return;
 		}
-<<<<<<< HEAD
-
-=======
->>>>>>> origin/master
 	});
 	
-
-	/*m_socket.async_write_some(boost::asio::buffer(new_sendBuf, packet_size),
-		[&](const boost::system::error_code& error, size_t bytes_transferred)
-	{
-		if (error != 0)
-		{
-			if (bytes_transferred != packet_size)
-			{
-				cout << "Client No. [ " << m_id << " ] send no same size packet data by async_write_some" << endl;
-				cout << "packet_size: " << packet_size << " , " << "bytes_transferred: " << bytes_transferred << endl;
-			}
-
-			delete[] new_sendBuf;
-			return;
-		}
-	});
-	*/
-
-	
-
 }
 
 void Player_Session::RecvPacket()
@@ -336,7 +265,7 @@ void Player_Session::RecvPacket()
 	m_socket.async_read_some(boost::asio::buffer(m_recvBuf, MAX_BUFFER_SIZE),
 		[&](const boost::system::error_code& error,const size_t& bytes_transferred)
 	{	
-		cout << "Bytes_Transferred: " << bytes_transferred << endl;
+		//cout << "Bytes_Transferred: " << bytes_transferred << endl;
 		// error = 0 성공 , error != 0 실패
 		if (error)
 		{
@@ -372,10 +301,6 @@ void Player_Session::RecvPacket()
 			return;
 		}
 
-<<<<<<< HEAD
-=======
-
->>>>>>> origin/master
 		int cur_data_proc = static_cast<int>(bytes_transferred);
 		Packet* temp_buf = m_recvBuf;
 
@@ -404,7 +329,7 @@ void Player_Session::RecvPacket()
 				m_prev_packet_size = 0;
 				m_cur_packet_size = 0;
 
-				cout << "cur_data_proc: " << cur_data_proc << " --- " << "need_to_read: " << need_to_read << endl;
+				//cout << "cur_data_proc: " << cur_data_proc << " --- " << "need_to_read: " << need_to_read << endl;
 			}
 			else
 			{
@@ -439,7 +364,7 @@ void Player_Session::ProcessPacket(Packet * packet)
 			if (m_state == PLAYER_STATE::DEAD)
 				break;
 
-			//1. 받아들인 데이터(키를 눌러 플레이어를 움직였음)에서 변화된 정보를 추출
+			//1. 받아들인 데이터(키를 눌러 플레이어를 움직였음)에서 변화된 정보를 추출(물리효과 적용x)
 			auto PosMove_Data = (reinterpret_cast<STC_ChangedPos*>(packet));
 
 			if (PosMove_Data->ani_state == Ani_State::Idle)
@@ -447,18 +372,25 @@ void Player_Session::ProcessPacket(Packet * packet)
 			else if (PosMove_Data->ani_state == Ani_State::Run)
 				m_state = PLAYER_STATE::MOVE;
 
-			//++m_tempcount;
+			//2. 물리효과 적용
+			pp->SetPosition(PosMove_Data->pos.x, PosMove_Data->pos.y, PosMove_Data->pos.z);
 
-			//cout << "pos_count : " << m_tempcount << endl;
+			pe->GravitySystem(PosMove_Data->deltime, pp);
 
-			//2. 이동 - (애니메이션, 위치 변경) 변경된 데이터를 서버에서관리하는 내 클라이언트에 저장
+			XMFLOAT4 xmf4 = { PosMove_Data->pos.x, PosMove_Data->pos.y, PosMove_Data->pos.z, PosMove_Data->pos.w };
+			pp->integrate(PosMove_Data->deltime, &xmf4);
+			PosMove_Data->pos.x = xmf4.x; PosMove_Data->pos.y = xmf4.y;  PosMove_Data->pos.z = xmf4.z;  PosMove_Data->pos.w = xmf4.w;
+
+			pe->AfterGravitySystem(PosMove_Data->deltime, pp, OBJECT_TYPE::PLAYER, PosMove_Data->pos, AirBone);
+
+			//3. 이동 - (애니메이션, 위치 변경) 변경된 데이터를 서버에서관리하는 내 클라이언트에 저장
 			m_clients[PosMove_Data->id]->m_playerData.Pos = move(PosMove_Data->pos);
 			m_clients[PosMove_Data->id]->m_playerData.Ani = PosMove_Data->ani_state;
 
 			//cout << "ID: " << PosMove_Data->id << " 변화된 위치값: " << "[x:" << PosMove_Data->pos.x << "\t" << "y:" << PosMove_Data->pos.y
 			//	<< "\t" << "z:" << PosMove_Data->pos.z << "]" << "\t" << "w:" << PosMove_Data->pos.w << endl;
 
-			//3. 변화된 내 (포지션, 애니메이션) 정보를 다른 클라에 전달 - 반드시 이렇게 다시 만들어줘야함
+			//4. 변화된 내 (포지션, 애니메이션) 정보를 다른 클라에 전달 - 반드시 이렇게 다시 만들어줘야함
 			//PosMove_Data를 바로 sendpacket에 packet으로 형변화하여 보내면 size error가 난다
 			STC_ChangedPos c_to_other;
 			c_to_other.packet_size = sizeof(STC_ChangedPos);
@@ -496,13 +428,15 @@ void Player_Session::ProcessPacket(Packet * packet)
 			// 1. 받은 정보를 내 클라이언트에 넣어주고
 			m_clients[Rotation_Data->id]->m_playerData.Rotate_status = move(Rotation_Data->rotate_status);
 
-			// 1 - 2. 받은 정보를 토대로 lookvector와 rightvector를 업데이트
-			m_clients[Rotation_Data->id]->UpdateLookVector(); //이거넣으면 20byte -> 21byte씩 다시보내게됨
+			// 2. 받은 정보를 토대로 lookvector와 rightvector를 업데이트
+			//m_clients[Rotation_Data->id]->UpdateLookVector(); //이거넣으면 20byte -> 21byte씩 다시보내게됨
+			pe->UpdateLookVector(OffLookvector, OffRightvector, Rotation_Data->rotate_status, Lookvector, Rightvector);
+			pe->GetUpVector(Lookvector, Rightvector, Upvector);
 
 			//cout << "ID: " << Rotation_Data->id << " 변화된 회전값: " << "[ x, y, z, w ]: "
 			//	<< Rotation_Data->rotate_status.x << ", " << Rotation_Data->rotate_status.y << ", " << Rotation_Data->rotate_status.z << ", " << Rotation_Data->rotate_status.w << endl;
 
-			// 2. 다른 클라에게 보낸다.
+			// 3. 다른 클라에게 보낸다.
 			STC_Rotation r_to_other;
 			r_to_other.packet_size = sizeof(STC_Rotation);
 			r_to_other.pack_type = PACKET_PROTOCOL_TYPE::PLAYER_ROTATE;
@@ -534,9 +468,12 @@ void Player_Session::ProcessPacket(Packet * packet)
 
 			//여기에 받은 총알 데이터하나의 물리효과 적용해주기
 			pp->integrate(n_bldata->start_time, reinterpret_cast<XMFLOAT4*>(&n_bldata->bull_data.pos));
+
 			m_bulllObj->Set_LifeTime(n_bldata->start_time);
 
 			m_bullobjs.emplace_back(m_bulllObj);
+			
+			//g_timer_queue.AddEvent()
 
 			++m_bullID;
 
@@ -560,8 +497,7 @@ void Player_Session::ProcessPacket(Packet * packet)
 				break;
 
 			auto test_data = reinterpret_cast<STC_Test*>(packet);
-			
-
+		
 			//cout << "ID: " << test_data->player_data.ID << "ElaspedTime: " << test_data->time.t_time << "------"
 			//	"PrevTime: " << test_data->time.p_time << endl;
 
@@ -577,6 +513,195 @@ void Player_Session::Set_State(int state)
 		m_state = state;
 }
 
+void Player_Session::Damaged(float damage)
+{
+	if (m_playerData.GodMode == false && m_playerData.UserInfo.cur_hp > 0)
+	{
+		m_playerData.UserInfo.cur_hp -= damage;
+	}
+
+	if (m_playerData.UserInfo.cur_hp <= 0)
+	{
+		delobj = true;
+
+		//리스폰 후처리 - timer_queue
+	}
+
+		
+}
+
+//1. 플레이어와 스테틱 오브젝트들의 충돌
+void Player_Session::Collision_StaticObjects(unordered_set<StaticObject*>& sobjs, float DeltaTime)
+{
+	for (auto iter = sobjs.begin(); iter != sobjs.end(); ++iter)
+	{
+		bool test = pp->CollisionTest(*(*iter)->GetPhysicsPoint(),
+					Lookvector, Rightvector, Upvector,
+					(*iter)->GetLookVector(), (*iter)->GetRightVector(), (*iter)->GetUpVector());
+
+		if (test)
+		{
+			if (pp->pAxis.y > 0)
+				AirBone = false;
+
+			if (pp->pAxis.y < 0)
+				(*iter)->SetAirBone(false);
+
+			XMFLOAT3 cn;
+			if ((*iter)->GetIsStatic() == false)
+			{
+				cn = Float3Add(pp->GetPosition(), (*iter)->GetPhysicsPoint()->GetPosition(), false);
+				cn = Float3Normalize(cn);
+			}
+			else
+			{
+				cn = pp->pAxis;
+			}
+
+			pp->CollisionResolve(*(*iter)->GetPhysicsPoint(), cn, DeltaTime);
+			pe->UpdatePPosCenterPos(pp->GetPosition(), m_playerData.Pos);
+			(*iter)->UpdatePPosCenterPos((*iter)->GetPhysicsPoint()->GetPosition());
+			
+		}
+	}
+}
+
+void Player_Session::Collision_Players(vector<Player_Session*>& clients, float DeltaTime)
+{
+	for (auto iter = clients.begin(); iter != clients.end(); ++iter)
+	{
+		if (*iter != this)
+		{
+			bool test = pp->CollisionTest(*(*iter)->pp,
+						Lookvector, Rightvector, Upvector,
+						(*iter)->Lookvector, (*iter)->Rightvector, (*iter)->Upvector);
+
+			if (test)//충돌했으면 충돌해소를 해야한다.
+			{
+				//충돌 했을때 축이 (0,1,0) 이면 Airbone을 false로 둔다. 이는 내가 위에있음을 나타낸다.
+				if (pp->pAxis.y > 0)
+					AirBone = false;
+
+				//충돌했을때  축이 (0,-1,0)이면 상대방 Airbone을 false로 둔다.  이는 상대가 내 위에있음을 나타낸다.
+				//설사 상대 위에 다른 상대가 있어도 걱정말자. 자연스러운것임.
+				if (pp->pAxis.y < 0)
+					(*iter)->AirBone = false;
+
+				XMFLOAT3 cn;
+				if ((*iter)->staticobject == false)
+				{
+					cn = Float3Add(pp->GetPosition(), (*iter)->pp->GetPosition(), false);
+					cn = Float3Normalize(cn);
+				}
+				else//고정된 물체면 충돌한 평면의 노멀방향으로 cn을 설정할것.
+				{
+					cn = pp->pAxis;
+				}
+
+				//충돌해소 호출. 충돌해소 이후에 반드시 변경된 질점의 위치로 오브젝트위치를 일치시켜야한다.
+				pp->CollisionResolve(*(*iter)->pp, cn, DeltaTime);
+				pe->UpdatePPosCenterPos(pp->GetPosition(), m_playerData.Pos);
+				(*iter)->pe->UpdatePPosCenterPos((*iter)->pp->GetPosition(), (*iter)->m_playerData.Pos);
+					
+			}
+		}
+	}
+}
+
+Player_Session::~Player_Session()
+{
+	delete pe;
+	delete rb;
+	delete pp;
+}
+/*
+void Player_Session::GetUpvector()
+{
+	XMVECTOR l = XMLoadFloat3(&Lookvector);
+	XMVECTOR r = XMLoadFloat3(&Rightvector);
+	auto u = XMVector3Cross(l, r);
+
+	XMFLOAT3 up;
+	XMStoreFloat3(&up, u);
+	up = Float3Normalize(up);
+
+	Upvector = move(up);
+}
+
+
+void Player_Session::UpdateLookVector()
+{
+	auto wmatrix = XMMatrixIdentity();
+
+	//클라이언트에서 MouseMove를 통해 카메라를 회전할 때 마다 Rotate_status가 달라짐
+	XMFLOAT4 orient_xmfloat4 =
+	{ m_playerData.Rotate_status.x ,
+		m_playerData.Rotate_status.y ,
+		m_playerData.Rotate_status.z ,
+		m_playerData.Rotate_status.w };
+
+	auto quater = XMLoadFloat4(&orient_xmfloat4);
+	wmatrix *= XMMatrixRotationQuaternion(quater);
+
+	//OffLookvector 와 OffRightvector는 플레이어타입(캐릭터, 불렛, 스테틱오브젝트 등에 따라 다름)
+	auto ol = XMLoadFloat3(&OffLookvector);
+	auto or = XMLoadFloat3(&OffRightvector);
+
+	ol = XMVector4Transform(ol, wmatrix);
+	or = XMVector4Transform(or , wmatrix);
+
+	XMStoreFloat3(&Lookvector, ol);
+	XMStoreFloat3(&Rightvector, or );
+
+	if (fabsf(Lookvector.x) < MMPE_EPSILON / 10)
+		Lookvector.x = 0;
+	if (fabsf(Lookvector.y) < MMPE_EPSILON / 10)
+		Lookvector.y = 0;
+	if (fabsf(Lookvector.z) < MMPE_EPSILON / 10)
+		Lookvector.z = 0;
+
+
+	if (fabsf(Rightvector.x) < MMPE_EPSILON / 10)
+		Rightvector.x = 0;
+	if (fabsf(Rightvector.y) < MMPE_EPSILON / 10)
+		Rightvector.y = 0;
+	if (fabsf(Rightvector.z) < MMPE_EPSILON / 10)
+		Rightvector.z = 0;
+
+	Lookvector = Float3Normalize(Lookvector);
+	Rightvector = Float3Normalize(Rightvector);
+
+	GetUpvector();
+}
+
+void Player_Session::GravitySystem(float time)
+{
+	//고정된 물체를 제외한 모든오브젝트에 중력을 가한다. 단 투사체는 제외한다.
+
+	GeneratorGravity gg;
+	gg.SetGravityAccel(XMFLOAT3(0, -100, 0));
+
+	gg.Update(time, *pp);
+}
+
+void Player_Session::AfterGravitySystem(float time)
+{
+	float ppy = pp->GetPosition().y;
+	float hby = pp->GetHalfBox().y;
+	if (ppy - hby < 0)//pp의 중점y-하프박스의 y값을 한결과가 0보다 작으면 땅아래에 묻힌셈
+	{
+		XMFLOAT3 gp = pp->GetPosition();
+		gp.y += hby - ppy;//그러면 반대로 하프박스y값-중점y만큼 올리면 된다.
+		pp->SetPosition(gp);
+		(*i)->UpdatePPosCenterPos();
+		auto v = (*i)->pp->GetVelocity();
+		v.y = 0;//중력에 의한 속도를 0으로 만듬
+		(*i)->pp->SetVelocity(v);
+		(*i)->AirBone = false;
+	}
+}
+
+
 void Player_Session::Update_Temp()
 {
 	while (true)
@@ -586,4 +711,4 @@ void Player_Session::Update_Temp()
 		//cout << "응응응" << endl;
 	}
 }
-
+*/
