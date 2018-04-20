@@ -94,7 +94,8 @@ public:
 	//기타 공용 데이터들
 	bool DelObj = false;//이게 참이면 실제로 제거된다.
 	bool Blending = false;
-	
+	//벽들에 굳이 마우스를 움직일때마다 체크할 필요는 없으므로 추가함. 또 벽은 또 벽대로 뭔가 처리할게 있을것같음.
+	bool Wall = false;
 
 	GameData gamedata;
 	RayCastObject rco;//레이캐스트 오브젝트

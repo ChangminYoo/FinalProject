@@ -214,6 +214,7 @@ namespace MiniPhysicsEngineG9
 		RayCastPlane Plane[6];
 
 	public:
+		bool isTopPlane = false;
 		bool RayCasting(XMFLOAT3& RayOrgin, XMFLOAT3& RayDir,XMFLOAT3& ObjCenterPos,XMFLOAT3& PlayerPos,XMFLOAT3& Look, XMFLOAT3* SavePos = NULL);
 		bool RayCastingField(XMFLOAT3& RayOrgin, XMFLOAT3& RayDir, XMFLOAT3& PlayerPos, XMFLOAT3& Look, XMFLOAT3* SavePos = NULL);
 		void SetPlane(XMFLOAT3& x, XMFLOAT3& y, XMFLOAT3& z);

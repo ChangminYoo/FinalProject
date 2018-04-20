@@ -3,12 +3,16 @@
 
 CPlayer::CPlayer(HWND hWnd,ID3D12Device* Device, ID3D12GraphicsCommandList* commandlist, float asp, XMFLOAT3& e, XMFLOAT3& a, XMFLOAT3& u) : Camera(hWnd,Device,commandlist,asp,e,a,u)
 {
+	//벽대신 다른 오브젝트를 추가할것.
+	TraceObject = new SmallWallObject(Device, commandlist, NULL, 0, XMFLOAT4(-10000, -10000, -10000, 1));
 	PlayerObject = NULL;
 }
 
 
 CPlayer::~CPlayer()
 {
+	if (TraceObject != NULL)
+		delete TraceObject;
 }
 
 void CPlayer::TPSCameraSystem(int mx, int my,float DeltaTime)
@@ -428,6 +432,8 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 		else if (GetKeyState(0x32) & 0x8000)
 			skilldata.SellectBulletIndex = 1;
 
+		//키를 누를때마다 해당 스킬을 검사해서 추적오브젝트가 있어야 하는지 검사한다.
+		CheckTraceSkill();
 	}
 }
 
@@ -591,4 +597,21 @@ void CPlayer::CreateBullet(ID3D12Device* Device, ID3D12GraphicsCommandList* cl,X
 	}
 
 	}
+}
+
+void CPlayer::CheckTraceSkill()
+{
+	switch (skilldata.Skills[ skilldata.SellectBulletIndex])
+	{
+
+	case 0://0번스킬일때 일단 테스트용으로 라이트큐브일때는 추적기를 켜야한다고 설정한다.
+		MouseTrace = true;
+		break;
+
+	default:
+		MouseTrace = false;
+		TraceObject->CenterPos = XMFLOAT4(-10000, -10000, -10000, 1);
+		TraceObject->pp->SetPosition(XMFLOAT4(-10000, -10000, -10000, 1));
+	}
+
 }

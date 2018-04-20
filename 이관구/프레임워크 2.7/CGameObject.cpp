@@ -2035,7 +2035,7 @@ SmallWallObject::SmallWallObject(ID3D12Device * m_Device, ID3D12GraphicsCommandL
 	gamedata.GodMode = true;
 	gamedata.Speed = 0;
 	staticobject = true;
-
+	Wall = true;
 	//광선충돌 검사용 육면체
 	XMFLOAT3 rx(20, 0, 0);
 	XMFLOAT3 ry(0, 10, 0);
@@ -2131,6 +2131,7 @@ BigWallObject::BigWallObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList 
 	gamedata.GodMode = true;
 	gamedata.Speed = 0;
 	staticobject = true;
+	Wall = true;
 
 	//광선충돌 검사용 육면체
 	XMFLOAT3 rx(235, 0, 0);
@@ -2226,6 +2227,7 @@ BuildingObject::BuildingObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 	gamedata.GodMode = true;
 	gamedata.Speed = 0;
 	staticobject = true;
+	Wall = true;
 
 	//광선충돌 검사용 육면체
 	XMFLOAT3 rx(15, 0, 0);

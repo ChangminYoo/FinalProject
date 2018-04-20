@@ -17,13 +17,16 @@ typedef struct SkillData
 
 	//스킬별 사용가능 여부
 	bool isSkillOn[4] = { true };
+
+	
 };
 class CPlayer
 {
 public:
+	
 	CPlayer(HWND hwnd,ID3D12Device* Device, ID3D12GraphicsCommandList* commandlist, float asp, XMFLOAT3& e, XMFLOAT3& a, XMFLOAT3& u);
 	~CPlayer();
-
+	CGameObject* TraceObject=NULL;
 	void TPSCameraSystem(int mx,int my,float DeltaTime);
 	void PlayerCameraReLocate();
 	void SetPlayer(CGameObject* obj);
@@ -42,8 +45,8 @@ public:
 
 	void Tick(float DeltaTime);
 	void CreateBullet(ID3D12Device* Device,ID3D12GraphicsCommandList* cl, XMFLOAT3& Goal, CGameObject* lock, list<CGameObject*>* bulletlist);
-
-	
+	void CheckTraceSkill();//현재 선택한 스킬넘버링이 추적데이터가 존재해야하는지 검사하고, 검사한 결과를 MouseTrace에 입힌다. 
+	bool MouseTrace = false;
 
 };
 

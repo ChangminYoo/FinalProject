@@ -259,6 +259,7 @@ void Shader::Render(ID3D12GraphicsCommandList * CommandList, const GameTimer& gt
 	(*SkyObject)->Render(CommandList, gt);
 
 	SetShader(CommandList, false);
+
 	for (auto b = LandObject->cbegin(); b != LandObject->cend(); b++)
 	{
 
@@ -412,6 +413,10 @@ void Shader::Render(ID3D12GraphicsCommandList * CommandList, const GameTimer& gt
 	}
 
 
+
+	//플레이어의 추적오브젝트.
+	SetShader(CommandList, false);
+	player->TraceObject->Render(CommandList, gt);
 
 }
 

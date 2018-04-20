@@ -784,6 +784,11 @@ bool MiniPhysicsEngineG9::RayCastObject::RayCasting(XMFLOAT3 & RayOrgin, XMFLOAT
 			{
 				mint = t;
 				XMStoreFloat3(SavePos, X);
+
+				if (i == 5)
+					isTopPlane = true;
+				else
+					isTopPlane = false;
 			}
 
 		}
