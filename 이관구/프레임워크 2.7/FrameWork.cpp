@@ -591,7 +591,7 @@ void FrameWork::OnMouseMove(WPARAM btnState, int x, int y)
 							scene->Player->PlayerObject->Lookvector, &savepoint) == true && Shot == false)//광선이 다른 오브젝트를 맞출경우
 						{
 							scene->Player->TraceObject->CenterPos = XMFloat3to4(savepoint);
-							scene->Player->TraceObject->pp->SetPosition(savepoint);
+							
 							Shot = true;
 						}
 					}
@@ -618,7 +618,7 @@ void FrameWork::OnMouseMove(WPARAM btnState, int x, int y)
 						{
 							Shot = true;
 							scene->Player->TraceObject->CenterPos = XMFloat3to4(savepoint);
-							scene->Player->TraceObject->pp->SetPosition(savepoint);
+						
 						}
 
 
@@ -638,7 +638,7 @@ void FrameWork::OnMouseMove(WPARAM btnState, int x, int y)
 				if (scene->Player->MouseTrace)
 				{
 					scene->Player->TraceObject->CenterPos = XMFloat3to4(savepoint);
-					scene->Player->TraceObject->pp->SetPosition(savepoint);
+					
 				}
 
 				Shot = true;
@@ -647,7 +647,7 @@ void FrameWork::OnMouseMove(WPARAM btnState, int x, int y)
 			{
 				savepoint = XMFLOAT3(-10000,-10000,-10000);
 				scene->Player->TraceObject->CenterPos = XMFloat3to4(savepoint);
-				scene->Player->TraceObject->pp->SetPosition(savepoint);
+				
 			}
 		}
 	}

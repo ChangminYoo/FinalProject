@@ -4,7 +4,7 @@
 CPlayer::CPlayer(HWND hWnd,ID3D12Device* Device, ID3D12GraphicsCommandList* commandlist, float asp, XMFLOAT3& e, XMFLOAT3& a, XMFLOAT3& u) : Camera(hWnd,Device,commandlist,asp,e,a,u)
 {
 	//벽대신 다른 오브젝트를 추가할것.
-	TraceObject = new SmallWallObject(Device, commandlist, NULL, 0, XMFLOAT4(-10000, -10000, -10000, 1));
+	TraceObject = new RangeObject(Device, commandlist, NULL,  XMFLOAT4(-10000, -10000, -10000, 1));
 	PlayerObject = NULL;
 }
 
@@ -611,7 +611,7 @@ void CPlayer::CheckTraceSkill()
 	default:
 		MouseTrace = false;
 		TraceObject->CenterPos = XMFLOAT4(-10000, -10000, -10000, 1);
-		TraceObject->pp->SetPosition(XMFLOAT4(-10000, -10000, -10000, 1));
+		
 	}
 
 }

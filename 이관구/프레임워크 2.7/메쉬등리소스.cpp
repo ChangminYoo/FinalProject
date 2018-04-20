@@ -130,3 +130,11 @@ bool BuildingObject::CreateMesh;//최초로 false며 메쉬를 만든후 true가된다.
 unordered_map<string, unique_ptr<CTexture>> BuildingObject::Textures;//텍스처들을 저장함
 CMesh BuildingObject::Mesh;//오로지 한번만 만들어짐
 ComPtr<ID3D12DescriptorHeap> BuildingObject::SrvDescriptorHeap;//텍스처 용 힙
+
+ //--------------------------------------------------------------------------------------
+
+bool RangeObject::CreateMesh = false;
+unordered_map<string, unique_ptr<CTexture>> RangeObject::Textures;//텍스처들을 저장함
+CMesh  RangeObject::Mesh;//나중에 메쉬는 static으로 둬야함
+ComPtr<ID3D12DescriptorHeap> RangeObject::SrvDescriptorHeap;//텍스처 용 힙
+CMaterial RangeObject::Mat;

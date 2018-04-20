@@ -415,7 +415,7 @@ void Shader::Render(ID3D12GraphicsCommandList * CommandList, const GameTimer& gt
 
 
 	//플레이어의 추적오브젝트.
-	SetShader(CommandList, false);
+	SetShader(CommandList, true);
 	player->TraceObject->Render(CommandList, gt);
 
 }
