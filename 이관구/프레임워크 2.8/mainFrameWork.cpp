@@ -249,6 +249,11 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 
 	if (obj->rb != NULL)
 	{
+		if (obj->rb->AmendTime > 0)
+			obj->rb->AmendTime -= mTimer.DeltaTime();
+		else
+			obj->rb->AmendTime = 0;
+
 		XMFLOAT4 arr[8];
 		obj->rb->GetEightPoint(arr, obj->GetUpvector(), obj->Lookvector, obj->Rightvector);//먼저 8 개의 점을 가져온다.
 		std::vector<CollisionPoint> allpoint;
@@ -368,7 +373,7 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 			//그후 사잇각이 특정각도 이하면 보정시킨다. 
 			//단 이게 double로 해도 0이아닌데 0이나오는경우가 생긴다.
 			//따라서 0일경우 그냥 충격량을 가해서 각도를 변경시킨다.
-			if (abs(theta) <= MMPE_PI / 26 && abs(theta) != 0 && abs(impurse) <= 200)//대략 5도 이하면 보정시킴.
+			if (abs(theta) <= MMPE_PI / 26 && abs(theta) != 0 && abs(impurse) <= 200&& obj->rb->AmendTime <= 0)//대략 5도 이하면 보정시킴.
 			{
 				//회전축을 구하고..
 				XMFLOAT3 mAxis = XMFloat4to3(Float4Cross(V1, V2));
@@ -524,7 +529,7 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 
 
 				//그후 사잇각이 특정각도 이하면 보정시킨다. 
-				if (abs(theta) <= MMPE_PI / 18 && abs(theta) != 0 && abs(impurse) <= 300)//대략 5도 이하면 보정시킴.
+				if (abs(theta) <= MMPE_PI / 18 && abs(theta) != 0 && abs(impurse) <= 300 && obj->rb->AmendTime <= 0)//대략 5도 이하면 보정시킴.
 				{
 					//회전축을 구하고
 					XMFLOAT3 mAxis = XMFloat4to3(Float4Cross(V2, V3));
@@ -649,7 +654,7 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 				//교정할 각도.  
 				double theta = acos(tempdot);
 
-				if (abs(theta) != 0)
+				if (abs(theta) != 0 && obj->rb->AmendTime <= 0)
 				{
 
 					//회전축을 구하고
@@ -730,7 +735,7 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 			float temppenetration = tarr[i].x*Normal.x + tarr[i].y*Normal.y + tarr[i].z*Normal.z;
 			//충돌 점을 생성한다음 저장한다.
 			CollisionPoint cp;
-			cp.Pos = arr[i];
+			cp.Pos = tarr[i];
 			cp.penetration = temppenetration;
 			cp.pAxis = Normal;
 			tallpoint.push_back(cp);
@@ -753,9 +758,9 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 
 		if (ttempcollisionpoint.size() > 0)
 		{
-			auto px = fabsf(contactpoint[0].penetration)*Normal.x;
-			auto py = fabsf(contactpoint[0].penetration)*Normal.y;
-			auto pz = fabsf(contactpoint[0].penetration)*Normal.z;
+			auto px = fabsf(ttempcollisionpoint[0].penetration)*Normal.x;
+			auto py = fabsf(ttempcollisionpoint[0].penetration)*Normal.y;
+			auto pz = fabsf(ttempcollisionpoint[0].penetration)*Normal.z;
 			obj->CenterPos.x += px;
 			obj->CenterPos.y += py;
 			obj->CenterPos.z += pz;
