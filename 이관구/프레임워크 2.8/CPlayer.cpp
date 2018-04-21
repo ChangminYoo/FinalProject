@@ -6,6 +6,11 @@ CPlayer::CPlayer(HWND hWnd,ID3D12Device* Device, ID3D12GraphicsCommandList* comm
 	//벽대신 다른 오브젝트를 추가할것.
 	TraceObject = new RangeObject(Device, commandlist, NULL,  XMFLOAT4(-10000, -10000, -10000, 1));
 	PlayerObject = NULL;
+
+
+	skilldata.Skills[0] = 0;
+	skilldata.Skills[1] = 1;
+	skilldata.Skills[2] = 2;
 }
 
 
@@ -431,6 +436,10 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 			skilldata.SellectBulletIndex = 0;
 		else if (GetKeyState(0x32) & 0x8000)
 			skilldata.SellectBulletIndex = 1;
+		else if (GetKeyState(0x33) & 0x8000)
+			skilldata.SellectBulletIndex = 2;
+		else if (GetKeyState(0x34) & 0x8000)
+			skilldata.SellectBulletIndex = 3;
 
 		//키를 누를때마다 해당 스킬을 검사해서 추적오브젝트가 있어야 하는지 검사한다.
 		CheckTraceSkill();
@@ -528,9 +537,9 @@ void CPlayer::CreateBullet(ID3D12Device* Device, ID3D12GraphicsCommandList* cl,X
 		XMStoreFloat4(&ori, tempori);//최종 회전 방향
 
 
-		CGameObject* bul = new BulletCube(Device, cl, PlayerObject->ParticleList, PlayerObject, ori, lock, PlayerObject->CenterPos);
+	 
 
-		bulletlist->push_back(bul);
+		bulletlist->push_back(new BulletCube(Device, cl, PlayerObject->ParticleList, PlayerObject, ori, lock, PlayerObject->CenterPos));
 		break;
 	}
 	case 1://불렛큐브(헤비 큐브)
@@ -589,12 +598,23 @@ void CPlayer::CreateBullet(ID3D12Device* Device, ID3D12GraphicsCommandList* cl,X
 		XMStoreFloat4(&ori, tempori);//최종 회전 방향
 
 
-		CGameObject* bul = new HeavyBulletCube(Device, cl, PlayerObject->ParticleList, PlayerObject, ori, lock, PlayerObject->CenterPos);
-
-		bulletlist->push_back(bul);
+		
+		bulletlist->push_back(new HeavyBulletCube(Device, cl, PlayerObject->ParticleList, PlayerObject, ori, lock, PlayerObject->CenterPos));
 		break;
 
 	}
+	case 2://테트라이크
+	{
+		//먼저 해당스킬의 쿨타임을 넣어주자.
+		skilldata.SkillsCoolTime[skilldata.SellectBulletIndex] = 25.0f;
+		skilldata.isSkillOn[skilldata.SellectBulletIndex] = false;
+
+		
+		bulletlist->push_back(new Tetrike(Device, cl, PlayerObject->ParticleList,bulletlist, PlayerObject, lock, XMFloat3to4(Goal)));
+		break;
+
+	}
+
 
 	}
 }
@@ -604,7 +624,7 @@ void CPlayer::CheckTraceSkill()
 	switch (skilldata.Skills[ skilldata.SellectBulletIndex])
 	{
 
-	case 0://0번스킬일때 일단 테스트용으로 라이트큐브일때는 추적기를 켜야한다고 설정한다.
+	case 2://2번스킬일때 일단 테스트용으로 라이트큐브일때는 추적기를 켜야한다고 설정한다.
 		MouseTrace = true;
 		break;
 

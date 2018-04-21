@@ -1036,6 +1036,908 @@ void HeavyBulletCube::Collision(list<CGameObject*>* collist, float DeltaTime)
 	}
 }
 
+//-------------------- 테트라이크 ---------------------------------//
+
+Tetris1::Tetris1(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, CGameObject* master,CGameObject* lockon, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
+{
+
+	if (CreateMesh == false)
+	{
+
+		Mesh.Index = NULL;
+		Mesh.SubResource = NULL;
+
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "BulletTex", L"textures/effect/fire.dds", false);
+		SetMesh(m_Device, commandlist);
+		SetMaterial(m_Device, commandlist);
+		CreateMesh = true;
+
+	}
+
+	//게임오브젝트마다 룩벡터와 라이트벡터가 다르므로 초기 오프셋 설정을 해준다.
+	//실제 룩벡터 등은 모두 UpdateLookVector에서 처리된다(라이트벡터도) 따라서 Tick함수에서 반드시 호출해야한다.
+	OffLookvector = XMFLOAT3(0, 0, 1);
+	OffRightvector = XMFLOAT3(1, 0, 0);
+	
+
+	UpdateLookVector();
+
+	ObjData.isAnimation = 0;
+	ObjData.Scale = 1.0;
+	ObjData.SpecularParamater = 0.0f;//스페큘러를 낮게준다.
+
+									 //게임관련 데이터들
+	gamedata.MAXHP = 1;
+	gamedata.HP = 1;
+	gamedata.Damage = 10;
+	gamedata.GodMode = true;
+	gamedata.Speed = 3;
+	LifeTime = 10;
+	Master = master;
+	LockOn = lockon;
+
+	//광선충돌 검사용 육면체
+	XMFLOAT3 rx(1, 0, 0);
+	XMFLOAT3 ry(0, 1, 0);
+	XMFLOAT3 rz(0, 0, 1);
+	rco.SetPlane(rx, ry, rz);
+
+	//질점오브젝트 사용시 필요한 데이터들 설정
+	pp = new PhysicsPoint();
+	pp->SetPosition(CenterPos);//이 값은 항상 갱신되야한다.
+	pp->SetHalfBox(4, 4, 4);//충돌 박스의 x,y,z 크기
+	pp->SetDamping(1);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
+	pp->SetBounce(false);//튕기지 않는다.
+	pp->SetVelocity(0, -1 * gamedata.Speed, 0);
+	pp->SetMass(2);
+
+	if (ParticleList != NULL)
+	{
+		BulletParticles = new ParticleObject(m_Device, commandlist, ParticleList, this, 0.2f, XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, 0));
+		ParticleList->push_back(BulletParticles);
+		BulletParticles2 = new ParticleObject(m_Device, commandlist, ParticleList, this, 0.3f, XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, 0));
+		ParticleList->push_back(BulletParticles2);
+	}
+
+}
+
+Tetris1::~Tetris1()
+{
+	if (BulletParticles != NULL)
+		BulletParticles->DelObj = true;
+	if (BulletParticles2 != NULL)
+		BulletParticles2->DelObj = true;
+}
+
+
+void Tetris1::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList* commandlist)
+{
+
+
+	CreateCube(&Mesh, 8,8, 8);
+	//
+	Mesh.SetNormal(false);
+	Mesh.CreateVertexBuffer(m_Device, commandlist);
+	Mesh.CreateIndexBuffer(m_Device, commandlist);
+
+
+}
+
+void Tetris1::SetMaterial(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
+{
+	if (Mat.ConstBuffer == NULL)
+		Mat.ConstBuffer = new UploadBuffer<MaterialData>(m_Device, 1, true);
+
+
+	Mat.MatData.Roughness = 0.3f;
+}
+
+void Tetris1::Tick(const GameTimer & gt)
+{
+	//적분기. 적분기란? 매 틱마다 힘! 에의해서 변화 되는 가속도/속도/위치를 갱신한다.
+	//이때 pp의 position과 CenterPos를 일치시켜야하므로 CenterPos의 포인터를 인자로 넘겨야 한다.
+	pp->AddForce(0, -300, 0);
+	pp->integrate(gt.DeltaTime(), &CenterPos);
+
+	//No애니메이션!
+
+	//투사체는 생명 주기가 있어야 한다.
+	LifeTime -= gt.DeltaTime();
+
+	
+	if (LifeTime <= 0)
+		DelObj = true;
+
+}
+
+void Tetris1::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer& gt)
+{
+	//게임오브젝트의 렌더링은 간단하다. 
+	//텍스처를 연결하고, 월드행렬을 연결한다.
+
+	if (Textures.size()>0)
+		SetTexture(commandlist, SrvDescriptorHeap, Textures["BulletTex"].get()->Resource.Get(), false);
+	UpdateConstBuffer(commandlist);
+
+	Mat.UpdateConstantBuffer(commandlist);
+
+	//이후 그린다.
+
+	Mesh.Render(commandlist);
+
+}
+
+//충돌기. 충돌검출과 충돌해소를 맡는다.
+void Tetris1::Collision(list<CGameObject*>* collist, float DeltaTime)
+{
+	CollisionList = collist;
+	//충돌리스트의 모든 요소와 충돌검사를 실시한다.
+	for (auto i = CollisionList->begin(); i != CollisionList->end(); i++)
+	{
+
+		if (*i != this && *i != Master && (*i)->pp != NULL) // pp가 NULL이 아니면 질점 오브젝트이다.
+		{
+
+			bool test = pp->CollisionTest(*(*i)->pp, Lookvector, Rightvector, GetUpvector(), (*i)->Lookvector, (*i)->Rightvector, (*i)->GetUpvector());
+
+			if (test)//충돌했으면 pp의 경우는 그냥 데미지를 주고 자신을 없애면 됨. 
+			{
+				//1. 먼저 데미지를 준다.
+				(*i)->ToDamage(gamedata.Damage);
+
+
+				XMFLOAT3 cn;
+				//고정된 물체가 아니면
+				if ((*i)->staticobject == false)
+				{
+					//상대속도 방향을 구한다. A-B
+					cn = Float3Add(pp->GetPosition(), (*(*i)->pp).GetPosition(), false);
+					cn = Float3Normalize(cn);
+
+					// 파티클리스트에 데미지 오브젝트를 생성해서 넣음. 파티클을 띄운다.
+					if (ParticleList != NULL)
+					{
+						ParticleList->push_back(new DamageObject(device, commandlist, ParticleList, gamedata.Damage, XMFLOAT4((*i)->CenterPos.x, (*i)->CenterPos.y + 11, (*i)->CenterPos.z, 0)));
+					}
+					
+				}
+				else//고정된 물체면 충돌한 평면의 노멀방향으로 cn을 설정할것.
+				{
+					cn = pp->pAxis;
+				}
+
+				//충돌후 속도를 계산함.
+
+				pp->ResolveVelocity(*(*i)->pp, cn, DeltaTime);
+				
+				//겹치는 부분을 제거할필요가 없는게 투사체는 어처피 사라지니까.
+				DelObj = true;
+
+
+			}
+		}
+	}
+}
+
+Tetris2::Tetris2(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, CGameObject* master, CGameObject* lockon, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
+{
+
+	if (CreateMesh == false)
+	{
+
+		Mesh.Index = NULL;
+		Mesh.SubResource = NULL;
+
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "BulletTex", L"textures/effect/fire.dds", false);
+		SetMesh(m_Device, commandlist);
+		SetMaterial(m_Device, commandlist);
+		CreateMesh = true;
+
+	}
+
+	//게임오브젝트마다 룩벡터와 라이트벡터가 다르므로 초기 오프셋 설정을 해준다.
+	//실제 룩벡터 등은 모두 UpdateLookVector에서 처리된다(라이트벡터도) 따라서 Tick함수에서 반드시 호출해야한다.
+	OffLookvector = XMFLOAT3(0, 0, 1);
+	OffRightvector = XMFLOAT3(1, 0, 0);
+
+
+	UpdateLookVector();
+
+	ObjData.isAnimation = 0;
+	ObjData.Scale = 1.0;
+	ObjData.SpecularParamater = 0.0f;//스페큘러를 낮게준다.
+
+									 //게임관련 데이터들
+	gamedata.MAXHP = 1;
+	gamedata.HP = 1;
+	gamedata.Damage = 10;
+	gamedata.GodMode = true;
+	gamedata.Speed = 15;
+	LifeTime = 10;
+	Master = master;
+	LockOn = lockon;
+
+	//광선충돌 검사용 육면체
+	XMFLOAT3 rx(1, 0, 0);
+	XMFLOAT3 ry(0, 1, 0);
+	XMFLOAT3 rz(0, 0, 1);
+	rco.SetPlane(rx, ry, rz);
+
+	//질점오브젝트 사용시 필요한 데이터들 설정
+	pp = new PhysicsPoint();
+	pp->SetPosition(CenterPos);//이 값은 항상 갱신되야한다.
+	pp->SetHalfBox(3, 9, 3);//충돌 박스의 x,y,z 크기
+	pp->SetDamping(1);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
+	pp->SetBounce(false);//튕기지 않는다.
+	pp->SetVelocity(0, -1*gamedata.Speed, 0);
+	pp->SetMass(2);
+
+	if (ParticleList != NULL)
+	{
+		BulletParticles = new ParticleObject(m_Device, commandlist, ParticleList, this, 0.2f, XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, 0));
+		ParticleList->push_back(BulletParticles);
+		BulletParticles2 = new ParticleObject(m_Device, commandlist, ParticleList, this, 0.3f, XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, 0));
+		ParticleList->push_back(BulletParticles2);
+	}
+
+}
+
+Tetris2::~Tetris2()
+{
+	if (BulletParticles != NULL)
+		BulletParticles->DelObj = true;
+	if (BulletParticles2 != NULL)
+		BulletParticles2->DelObj = true;
+}
+
+
+void Tetris2::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList* commandlist)
+{
+
+
+	CreateCube(&Mesh, 6, 18, 6);
+	//
+	Mesh.SetNormal(false);
+	Mesh.CreateVertexBuffer(m_Device, commandlist);
+	Mesh.CreateIndexBuffer(m_Device, commandlist);
+
+
+}
+
+void Tetris2::SetMaterial(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
+{
+	if (Mat.ConstBuffer == NULL)
+		Mat.ConstBuffer = new UploadBuffer<MaterialData>(m_Device, 1, true);
+
+
+	Mat.MatData.Roughness = 0.3f;
+}
+
+void Tetris2::Tick(const GameTimer & gt)
+{
+	//적분기. 적분기란? 매 틱마다 힘! 에의해서 변화 되는 가속도/속도/위치를 갱신한다.
+	//이때 pp의 position과 CenterPos를 일치시켜야하므로 CenterPos의 포인터를 인자로 넘겨야 한다.
+	pp->AddForce(0, -100, 0);
+	pp->integrate(gt.DeltaTime(), &CenterPos);
+
+	//No애니메이션!
+
+	//투사체는 생명 주기가 있어야 한다.
+	LifeTime -= gt.DeltaTime();
+
+
+	if (LifeTime <= 0)
+		DelObj = true;
+
+}
+
+void Tetris2::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer& gt)
+{
+	//게임오브젝트의 렌더링은 간단하다. 
+	//텍스처를 연결하고, 월드행렬을 연결한다.
+
+	if (Textures.size()>0)
+		SetTexture(commandlist, SrvDescriptorHeap, Textures["BulletTex"].get()->Resource.Get(), false);
+	UpdateConstBuffer(commandlist);
+
+	Mat.UpdateConstantBuffer(commandlist);
+
+	//이후 그린다.
+
+	Mesh.Render(commandlist);
+
+}
+
+//충돌기. 충돌검출과 충돌해소를 맡는다.
+void Tetris2::Collision(list<CGameObject*>* collist, float DeltaTime)
+{
+	CollisionList = collist;
+	//충돌리스트의 모든 요소와 충돌검사를 실시한다.
+	for (auto i = CollisionList->begin(); i != CollisionList->end(); i++)
+	{
+
+		if (*i != this && *i != Master && (*i)->pp != NULL) // pp가 NULL이 아니면 질점 오브젝트이다.
+		{
+
+			bool test = pp->CollisionTest(*(*i)->pp, Lookvector, Rightvector, GetUpvector(), (*i)->Lookvector, (*i)->Rightvector, (*i)->GetUpvector());
+
+			if (test)//충돌했으면 pp의 경우는 그냥 데미지를 주고 자신을 없애면 됨. 
+			{
+				//1. 먼저 데미지를 준다.
+				(*i)->ToDamage(gamedata.Damage);
+
+
+				XMFLOAT3 cn;
+				//고정된 물체가 아니면
+				if ((*i)->staticobject == false)
+				{
+					//상대속도 방향을 구한다. A-B
+					cn = Float3Add(pp->GetPosition(), (*(*i)->pp).GetPosition(), false);
+					cn = Float3Normalize(cn);
+
+					// 파티클리스트에 데미지 오브젝트를 생성해서 넣음. 파티클을 띄운다.
+					if (ParticleList != NULL)
+					{
+						ParticleList->push_back(new DamageObject(device, commandlist, ParticleList, gamedata.Damage, XMFLOAT4((*i)->CenterPos.x, (*i)->CenterPos.y + 11, (*i)->CenterPos.z, 0)));
+					}
+					
+
+				}
+				else//고정된 물체면 충돌한 평면의 노멀방향으로 cn을 설정할것.
+				{
+					cn = pp->pAxis;
+				}
+
+				//충돌후 속도를 계산함.
+
+				pp->ResolveVelocity(*(*i)->pp, cn, DeltaTime);
+				
+				//겹치는 부분을 제거할필요가 없는게 투사체는 어처피 사라지니까.
+				DelObj = true;
+
+
+			}
+		}
+	}
+}
+
+Tetris3::Tetris3(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, CGameObject* master, CGameObject* lockon, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
+{
+
+	if (CreateMesh == false)
+	{
+
+		Mesh.Index = NULL;
+		Mesh.SubResource = NULL;
+
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "BulletTex", L"textures/effect/fire.dds", false);
+		SetMesh(m_Device, commandlist);
+		SetMaterial(m_Device, commandlist);
+		CreateMesh = true;
+
+	}
+
+	//게임오브젝트마다 룩벡터와 라이트벡터가 다르므로 초기 오프셋 설정을 해준다.
+	//실제 룩벡터 등은 모두 UpdateLookVector에서 처리된다(라이트벡터도) 따라서 Tick함수에서 반드시 호출해야한다.
+	OffLookvector = XMFLOAT3(0, 0, 1);
+	OffRightvector = XMFLOAT3(1, 0, 0);
+
+
+	UpdateLookVector();
+
+	ObjData.isAnimation = 0;
+	ObjData.Scale = 1.0;
+	ObjData.SpecularParamater = 0.0f;//스페큘러를 낮게준다.
+
+									 //게임관련 데이터들
+	gamedata.MAXHP = 1;
+	gamedata.HP = 1;
+	gamedata.Damage = 10;
+	gamedata.GodMode = true;
+	gamedata.Speed = 5;
+	LifeTime = 10;
+	Master = master;
+	LockOn = lockon;
+
+	//광선충돌 검사용 육면체
+	XMFLOAT3 rx(1, 0, 0);
+	XMFLOAT3 ry(0, 1, 0);
+	XMFLOAT3 rz(0, 0, 1);
+	rco.SetPlane(rx, ry, rz);
+
+	//질점오브젝트 사용시 필요한 데이터들 설정
+	pp = new PhysicsPoint();
+	pp->SetPosition(CenterPos);//이 값은 항상 갱신되야한다.
+	pp->SetHalfBox(4, 8, 2);//충돌 박스의 x,y,z 크기
+	pp->SetDamping(1);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
+	pp->SetBounce(false);//튕기지 않는다.
+	pp->SetVelocity(0, -1 * gamedata.Speed, 0);
+	pp->SetMass(2);
+
+	if (ParticleList != NULL)
+	{
+		BulletParticles = new ParticleObject(m_Device, commandlist, ParticleList, this, 0.2f, XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, 0));
+		ParticleList->push_back(BulletParticles);
+		BulletParticles2 = new ParticleObject(m_Device, commandlist, ParticleList, this, 0.3f, XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, 0));
+		ParticleList->push_back(BulletParticles2);
+	}
+
+}
+
+Tetris3::~Tetris3()
+{
+	if (BulletParticles != NULL)
+		BulletParticles->DelObj = true;
+	if (BulletParticles2 != NULL)
+		BulletParticles2->DelObj = true;
+}
+
+
+void Tetris3::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList* commandlist)
+{
+
+
+	CreateTetrisL(&Mesh, 4, 16, 4);
+	//
+	Mesh.SetNormal(false);
+	Mesh.CreateVertexBuffer(m_Device, commandlist);
+	Mesh.CreateIndexBuffer(m_Device, commandlist);
+
+
+}
+
+void Tetris3::SetMaterial(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
+{
+	if (Mat.ConstBuffer == NULL)
+		Mat.ConstBuffer = new UploadBuffer<MaterialData>(m_Device, 1, true);
+
+
+	Mat.MatData.Roughness = 0.3f;
+}
+
+void Tetris3::Tick(const GameTimer & gt)
+{
+	//적분기. 적분기란? 매 틱마다 힘! 에의해서 변화 되는 가속도/속도/위치를 갱신한다.
+	//이때 pp의 position과 CenterPos를 일치시켜야하므로 CenterPos의 포인터를 인자로 넘겨야 한다.
+	pp->AddForce(0, -180, 0);
+	pp->integrate(gt.DeltaTime(), &CenterPos);
+
+	//No애니메이션!
+
+	//투사체는 생명 주기가 있어야 한다.
+	LifeTime -= gt.DeltaTime();
+
+
+	if (LifeTime <= 0)
+		DelObj = true;
+
+}
+
+void Tetris3::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer& gt)
+{
+	//게임오브젝트의 렌더링은 간단하다. 
+	//텍스처를 연결하고, 월드행렬을 연결한다.
+
+	if (Textures.size()>0)
+		SetTexture(commandlist, SrvDescriptorHeap, Textures["BulletTex"].get()->Resource.Get(), false);
+	UpdateConstBuffer(commandlist);
+
+	Mat.UpdateConstantBuffer(commandlist);
+
+	//이후 그린다.
+
+	Mesh.Render(commandlist);
+
+}
+
+//충돌기. 충돌검출과 충돌해소를 맡는다.
+void Tetris3::Collision(list<CGameObject*>* collist, float DeltaTime)
+{
+	CollisionList = collist;
+	//충돌리스트의 모든 요소와 충돌검사를 실시한다.
+	for (auto i = CollisionList->begin(); i != CollisionList->end(); i++)
+	{
+
+		if (*i != this && *i != Master && (*i)->pp != NULL) // pp가 NULL이 아니면 질점 오브젝트이다.
+		{
+
+			bool test = pp->CollisionTest(*(*i)->pp, Lookvector, Rightvector, GetUpvector(), (*i)->Lookvector, (*i)->Rightvector, (*i)->GetUpvector());
+
+			if (test)//충돌했으면 pp의 경우는 그냥 데미지를 주고 자신을 없애면 됨. 
+			{
+				//1. 먼저 데미지를 준다.
+				(*i)->ToDamage(gamedata.Damage);
+
+
+				XMFLOAT3 cn;
+				//고정된 물체가 아니면
+				if ((*i)->staticobject == false)
+				{
+					//상대속도 방향을 구한다. A-B
+					cn = Float3Add(pp->GetPosition(), (*(*i)->pp).GetPosition(), false);
+					cn = Float3Normalize(cn);
+
+					// 파티클리스트에 데미지 오브젝트를 생성해서 넣음. 파티클을 띄운다.
+					if (ParticleList != NULL)
+					{
+						ParticleList->push_back(new DamageObject(device, commandlist, ParticleList, gamedata.Damage, XMFLOAT4((*i)->CenterPos.x, (*i)->CenterPos.y + 11, (*i)->CenterPos.z, 0)));
+					}
+					
+
+				}
+				else//고정된 물체면 충돌한 평면의 노멀방향으로 cn을 설정할것.
+				{
+					cn = pp->pAxis;
+				}
+
+				//충돌후 속도를 계산함.
+
+				pp->ResolveVelocity(*(*i)->pp, cn, DeltaTime);
+							DelObj = true;
+
+
+			}
+		}
+	}
+}
+
+
+Tetris4::Tetris4(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, CGameObject* master, CGameObject* lockon, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
+{
+
+	if (CreateMesh == false)
+	{
+
+		Mesh.Index = NULL;
+		Mesh.SubResource = NULL;
+
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "BulletTex", L"textures/effect/fire.dds", false);
+		SetMesh(m_Device, commandlist);
+		SetMaterial(m_Device, commandlist);
+		CreateMesh = true;
+
+	}
+
+	//게임오브젝트마다 룩벡터와 라이트벡터가 다르므로 초기 오프셋 설정을 해준다.
+	//실제 룩벡터 등은 모두 UpdateLookVector에서 처리된다(라이트벡터도) 따라서 Tick함수에서 반드시 호출해야한다.
+	OffLookvector = XMFLOAT3(0, 0, 1);
+	OffRightvector = XMFLOAT3(1, 0, 0);
+
+
+	UpdateLookVector();
+
+	ObjData.isAnimation = 0;
+	ObjData.Scale = 1.0;
+	ObjData.SpecularParamater = 0.0f;//스페큘러를 낮게준다.
+
+									 //게임관련 데이터들
+	gamedata.MAXHP = 1;
+	gamedata.HP = 1;
+	gamedata.Damage = 10;
+	gamedata.GodMode = true;
+	gamedata.Speed = 10;
+	LifeTime = 10;
+	Master = master;
+	LockOn = lockon;
+
+	//광선충돌 검사용 육면체
+	XMFLOAT3 rx(1, 0, 0);
+	XMFLOAT3 ry(0, 1, 0);
+	XMFLOAT3 rz(0, 0, 1);
+	rco.SetPlane(rx, ry, rz);
+
+	//질점오브젝트 사용시 필요한 데이터들 설정
+	pp = new PhysicsPoint();
+	pp->SetPosition(CenterPos);//이 값은 항상 갱신되야한다.
+	pp->SetHalfBox(4, 8, 2);//충돌 박스의 x,y,z 크기
+	pp->SetDamping(1);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
+	pp->SetBounce(false);//튕기지 않는다.
+	pp->SetVelocity(0, -1 * gamedata.Speed, 0);
+	pp->SetMass(2);
+
+	if (ParticleList != NULL)
+	{
+		BulletParticles = new ParticleObject(m_Device, commandlist, ParticleList, this, 0.2f, XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, 0));
+		ParticleList->push_back(BulletParticles);
+		BulletParticles2 = new ParticleObject(m_Device, commandlist, ParticleList, this, 0.3f, XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, 0));
+		ParticleList->push_back(BulletParticles2);
+	}
+
+}
+
+Tetris4::~Tetris4()
+{
+	if (BulletParticles != NULL)
+		BulletParticles->DelObj = true;
+	if (BulletParticles2 != NULL)
+		BulletParticles2->DelObj = true;
+}
+
+
+void Tetris4::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList* commandlist)
+{
+
+
+	CreateTetrisㅗ(&Mesh, 4, 16, 4);
+	//
+	Mesh.SetNormal(false);
+	Mesh.CreateVertexBuffer(m_Device, commandlist);
+	Mesh.CreateIndexBuffer(m_Device, commandlist);
+
+
+}
+
+void Tetris4::SetMaterial(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
+{
+	if (Mat.ConstBuffer == NULL)
+		Mat.ConstBuffer = new UploadBuffer<MaterialData>(m_Device, 1, true);
+
+
+	Mat.MatData.Roughness = 0.3f;
+}
+
+void Tetris4::Tick(const GameTimer & gt)
+{
+	//적분기. 적분기란? 매 틱마다 힘! 에의해서 변화 되는 가속도/속도/위치를 갱신한다.
+	//이때 pp의 position과 CenterPos를 일치시켜야하므로 CenterPos의 포인터를 인자로 넘겨야 한다.
+	pp->AddForce(0, -150, 0);
+	pp->integrate(gt.DeltaTime(), &CenterPos);
+
+	//No애니메이션!
+
+	//투사체는 생명 주기가 있어야 한다.
+	LifeTime -= gt.DeltaTime();
+
+
+	if (LifeTime <= 0)
+		DelObj = true;
+
+}
+
+void Tetris4::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer& gt)
+{
+	//게임오브젝트의 렌더링은 간단하다. 
+	//텍스처를 연결하고, 월드행렬을 연결한다.
+
+	if (Textures.size()>0)
+		SetTexture(commandlist, SrvDescriptorHeap, Textures["BulletTex"].get()->Resource.Get(), false);
+	UpdateConstBuffer(commandlist);
+
+	Mat.UpdateConstantBuffer(commandlist);
+
+	//이후 그린다.
+
+	Mesh.Render(commandlist);
+
+}
+
+//충돌기. 충돌검출과 충돌해소를 맡는다.
+void Tetris4::Collision(list<CGameObject*>* collist, float DeltaTime)
+{
+	CollisionList = collist;
+	//충돌리스트의 모든 요소와 충돌검사를 실시한다.
+	for (auto i = CollisionList->begin(); i != CollisionList->end(); i++)
+	{
+
+		if (*i != this && *i != Master && (*i)->pp != NULL) // pp가 NULL이 아니면 질점 오브젝트이다.
+		{
+
+			bool test = pp->CollisionTest(*(*i)->pp, Lookvector, Rightvector, GetUpvector(), (*i)->Lookvector, (*i)->Rightvector, (*i)->GetUpvector());
+
+			if (test)//충돌했으면 pp의 경우는 그냥 데미지를 주고 자신을 없애면 됨. 
+			{
+				//1. 먼저 데미지를 준다.
+				(*i)->ToDamage(gamedata.Damage);
+
+
+				XMFLOAT3 cn;
+				//고정된 물체가 아니면
+				if ((*i)->staticobject == false)
+				{
+					//상대속도 방향을 구한다. A-B
+					cn = Float3Add(pp->GetPosition(), (*(*i)->pp).GetPosition(), false);
+					cn = Float3Normalize(cn);
+
+					// 파티클리스트에 데미지 오브젝트를 생성해서 넣음. 파티클을 띄운다.
+					if (ParticleList != NULL)
+					{
+						ParticleList->push_back(new DamageObject(device, commandlist, ParticleList, gamedata.Damage, XMFLOAT4((*i)->CenterPos.x, (*i)->CenterPos.y + 11, (*i)->CenterPos.z, 0)));
+					}
+					
+
+				}
+				else//고정된 물체면 충돌한 평면의 노멀방향으로 cn을 설정할것.
+				{
+					cn = pp->pAxis;
+				}
+
+				//충돌후 속도를 계산함.
+
+				pp->ResolveVelocity(*(*i)->pp, cn, DeltaTime);
+				
+				DelObj = true;
+
+
+			}
+		}
+	}
+}
+
+Tetrike::Tetrike(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, list<CGameObject*>*Bulletlist, CGameObject* master, CGameObject* lockon, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
+{
+
+	if (CreateMesh == false)
+	{
+
+		Mesh.Index = NULL;
+		Mesh.SubResource = NULL;
+
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "BulletTex", L"textures/effect/fire.dds", false);
+		SetMesh(m_Device, commandlist);
+		SetMaterial(m_Device, commandlist);
+		CreateMesh = true;
+
+	}
+
+	//게임오브젝트마다 룩벡터와 라이트벡터가 다르므로 초기 오프셋 설정을 해준다.
+	//실제 룩벡터 등은 모두 UpdateLookVector에서 처리된다(라이트벡터도) 따라서 Tick함수에서 반드시 호출해야한다.
+	OffLookvector = XMFLOAT3(0, 0, 1);
+	OffRightvector = XMFLOAT3(1, 0, 0);
+
+	CenterPos.y += 150;
+
+	Blist = Bulletlist;
+	
+
+	ObjData.isAnimation = 0;
+	ObjData.Scale = 1.0;
+	ObjData.SpecularParamater = 0.0f;//스페큘러를 낮게준다.
+
+									 //게임관련 데이터들
+	gamedata.GodMode = true;
+	
+	
+	Master = master;
+	LockOn = lockon;
+	pp = NULL;
+	
+
+	
+}
+
+Tetrike::~Tetrike()
+{
+
+}
+
+
+void Tetrike::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList* commandlist)
+{
+
+
+	CreateCube(&Mesh, 120, 0.01, 120);
+	
+	Mesh.SetNormal(false);
+	Mesh.CreateVertexBuffer(m_Device, commandlist);
+	Mesh.CreateIndexBuffer(m_Device, commandlist);
+
+
+}
+
+void Tetrike::SetMaterial(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
+{
+	if (Mat.ConstBuffer == NULL)
+		Mat.ConstBuffer = new UploadBuffer<MaterialData>(m_Device, 1, true);
+
+
+	Mat.MatData.Roughness = 0.3f;
+}
+
+void Tetrike::Tick(const GameTimer & gt)
+{
+	int c=abs((rand()*(int)(gt.TotalTime()*1000))) % 10;
+	c += 3;
+	//No애니메이션!
+	
+	if(ShotTime >=0.25)
+	{
+		ShotTime = 0;
+	}
+	if (ShotTime == 0)
+	{
+
+		for (int i = 0; i < c; i++)
+		{
+			auto pos = CenterPos;
+			float  n = abs((abs(rand())*(int)(fabsf(gt.TotalTime()) * 31430)) % 90) - 45;
+			float n2 = abs((abs(rand())*(int)(fabsf(gt.TotalTime()) * 12340)) % 90) - 45;
+			
+			/*float b = sqrt(n*n + n2 * n2);
+
+			if (b != 0)
+			{
+				n /= b;
+				n2 /= b;
+				n *= 60;
+				n2 *= 60;
+
+			}
+*/
+			
+			pos.x += n;
+			pos.z += n2;
+			pos.y += abs((abs(rand())*(int)(fabsf(gt.TotalTime()) * 12340)) % 5) - 5;
+
+			int g = (rand()*(int)(gt.TotalTime()*32524))%4;
+			if(g==0)
+				Blist->push_back(new Tetris1(device, commandlist, NULL, Master,NULL, pos));
+			else if (g == 1)
+			{
+				auto t = new Tetris2(device, commandlist, NULL, Master, NULL, pos);
+				int k = (rand()*(int)(gt.TotalTime() * 32524)) % 2;
+
+				if (k == 0)
+					t->Orient=QuaternionMultiply(t->Orient,QuaternionRotation(XMFLOAT3(1, 0, 0), MMPE_PI / 2));
+				Blist->push_back(t);
+			}
+			else if (g == 2)
+			{
+				auto t = new Tetris3(device, commandlist, NULL, Master, NULL, pos);
+				int k = (rand()*(int)(gt.TotalTime() * 32524)) % 3;
+
+				if (k == 0)
+					t->Orient = QuaternionMultiply(t->Orient, QuaternionRotation(XMFLOAT3(0, 0, 1), MMPE_PI / 2));
+				else if (k == 1)
+					t->Orient = QuaternionMultiply(t->Orient, QuaternionRotation(XMFLOAT3(0, 0, 1), MMPE_PI ));
+				else if (k == 2)
+					t->Orient = QuaternionMultiply(t->Orient, QuaternionRotation(XMFLOAT3(0, 0, 1), 3*MMPE_PI /2));
+				Blist->push_back(t);
+			}
+			else if (g == 3)
+			{
+				auto t = new Tetris4(device, commandlist, NULL, Master, NULL, pos);
+				int k = (rand()*(int)(gt.TotalTime() * 32524)) % 3;
+
+				if (k == 0)
+					t->Orient = QuaternionMultiply(t->Orient, QuaternionRotation(XMFLOAT3(0, 0, 1), MMPE_PI / 2));
+				else if (k == 1)
+					t->Orient = QuaternionMultiply(t->Orient, QuaternionRotation(XMFLOAT3(0, 0, 1), MMPE_PI));
+				else if (k == 2)
+					t->Orient = QuaternionMultiply(t->Orient, QuaternionRotation(XMFLOAT3(0, 0, 1), 3 * MMPE_PI / 2));
+				Blist->push_back(t);
+			}
+		}
+	}
+	ShotTime += gt.DeltaTime();
+
+
+
+
+	//투사체는 생명 주기가 있어야 한다.
+	LifeTime -= gt.DeltaTime();
+
+	
+	if (LifeTime <= 0)
+		DelObj = true;
+
+}
+
+void Tetrike::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer& gt)
+{
+	//게임오브젝트의 렌더링은 간단하다. 
+	//텍스처를 연결하고, 월드행렬을 연결한다.
+
+	if (Textures.size()>0)
+		SetTexture(commandlist, SrvDescriptorHeap, Textures["BulletTex"].get()->Resource.Get(), false);
+	UpdateConstBuffer(commandlist);
+
+	Mat.UpdateConstantBuffer(commandlist);
+
+	//이후 그린다.
+
+	Mesh.Render(commandlist);
+
+}
 
 
 //---------------------- 스태틱 오브젝트 -----------------------------//
@@ -2393,7 +3295,7 @@ RangeObject::RangeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * co
 
 void RangeObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
 {
-	CreateCube(&Mesh, 60, 0.01, 60);
+	CreateCube(&Mesh, 120, 0.01, 120);
 
 	//모델 로드
 	//LoadMD5Model(L".\\플레이어메쉬들\\Cube.MD5MESH", &Mesh, 0, 1);
@@ -2783,5 +3685,378 @@ void CreatePentagon(CMesh* Mesh, float size, float sizey)
 
 
 
+
+}
+
+void CreateTetrisL(CMesh * Mesh, float sizex, float sizey, float sizez)
+{
+	float halfx = 0.5 * sizex;
+	float halfy = 0.5 * sizey;
+	float halfz = 0.5 * sizez;
+
+	Mesh->SubResource = new CVertex[48];
+	Mesh->nVertex = 48;
+	Mesh->nStride = sizeof(CVertex);
+	Mesh->nOffset = 0;
+
+	//front
+	Mesh->SubResource[0].V = XMFLOAT3(-halfx, -halfy, -halfz);
+	Mesh->SubResource[1].V = XMFLOAT3(-halfx, +halfy, -halfz);
+	Mesh->SubResource[2].V = XMFLOAT3(+halfx, +halfy, -halfz);
+	Mesh->SubResource[3].V = XMFLOAT3(+halfx, -halfy, -halfz);
+
+	Mesh->SubResource[0].Tex = XMFLOAT2(0, 1);
+	Mesh->SubResource[1].Tex = XMFLOAT2(0, 0);
+	Mesh->SubResource[2].Tex = XMFLOAT2(1, 0);
+	Mesh->SubResource[3].Tex = XMFLOAT2(1, 1);
+
+	//back
+	Mesh->SubResource[4].V = XMFLOAT3(-halfx, -halfy, +halfz);
+	Mesh->SubResource[5].V = XMFLOAT3(+halfx, -halfy, +halfz);
+	Mesh->SubResource[6].V = XMFLOAT3(+halfx, +halfy, +halfz);
+	Mesh->SubResource[7].V = XMFLOAT3(-halfx, +halfy, +halfz);
+
+	Mesh->SubResource[4].Tex = XMFLOAT2(1, 1);
+	Mesh->SubResource[5].Tex = XMFLOAT2(0, 1);
+	Mesh->SubResource[6].Tex = XMFLOAT2(0, 0);
+	Mesh->SubResource[7].Tex = XMFLOAT2(1, 0);
+
+	//top
+	Mesh->SubResource[8].V = XMFLOAT3(-halfx, +halfy, -halfz);
+	Mesh->SubResource[9].V = XMFLOAT3(-halfx, +halfy, +halfz);
+	Mesh->SubResource[10].V = XMFLOAT3(+halfx, +halfy, +halfz);
+	Mesh->SubResource[11].V = XMFLOAT3(+halfx, +halfy, -halfz);
+
+	Mesh->SubResource[8].Tex = XMFLOAT2(0, 1);
+	Mesh->SubResource[9].Tex = XMFLOAT2(0, 0);
+	Mesh->SubResource[10].Tex = XMFLOAT2(1, 0);
+	Mesh->SubResource[11].Tex = XMFLOAT2(1, 1);
+
+
+	//bottom
+	Mesh->SubResource[12].V = XMFLOAT3(-halfx, -halfy, -halfz);
+	Mesh->SubResource[13].V = XMFLOAT3(+halfx, -halfy, -halfz);
+	Mesh->SubResource[14].V = XMFLOAT3(+halfx, -halfy, +halfz);
+	Mesh->SubResource[15].V = XMFLOAT3(-halfx, -halfy, +halfz);
+
+	Mesh->SubResource[12].Tex = XMFLOAT2(1, 1);
+	Mesh->SubResource[13].Tex = XMFLOAT2(0, 1);
+	Mesh->SubResource[14].Tex = XMFLOAT2(0, 0);
+	Mesh->SubResource[15].Tex = XMFLOAT2(1, 0);
+
+	//left
+	Mesh->SubResource[16].V = XMFLOAT3(-halfx, -halfy, +halfz);
+	Mesh->SubResource[17].V = XMFLOAT3(-halfx, +halfy, +halfz);
+	Mesh->SubResource[18].V = XMFLOAT3(-halfx, +halfy, -halfz);
+	Mesh->SubResource[19].V = XMFLOAT3(-halfx, -halfy, -halfz);
+
+	Mesh->SubResource[16].Tex = XMFLOAT2(0, 1);
+	Mesh->SubResource[17].Tex = XMFLOAT2(0, 0);
+	Mesh->SubResource[18].Tex = XMFLOAT2(1, 0);
+	Mesh->SubResource[19].Tex = XMFLOAT2(1, 1);
+
+	//right
+	Mesh->SubResource[20].V = XMFLOAT3(+halfx, -halfy, -halfz);
+	Mesh->SubResource[21].V = XMFLOAT3(+halfx, +halfy, -halfz);
+	Mesh->SubResource[22].V = XMFLOAT3(+halfx, +halfy, +halfz);
+	Mesh->SubResource[23].V = XMFLOAT3(+halfx, -halfy, +halfz);
+
+	Mesh->SubResource[20].Tex = XMFLOAT2(0, 1);
+	Mesh->SubResource[21].Tex = XMFLOAT2(0, 0);
+	Mesh->SubResource[22].Tex = XMFLOAT2(1, 0);
+	Mesh->SubResource[23].Tex = XMFLOAT2(1, 1);
+
+	
+	//front
+	Mesh->SubResource[24+0].V = XMFLOAT3(-halfx + halfx * 2, -halfx+halfx * 2, -halfz);
+	Mesh->SubResource[24+1].V = XMFLOAT3(-halfx + halfx * 2, +halfx+halfx * 2, -halfz);
+	Mesh->SubResource[24+2].V = XMFLOAT3(+halfx + halfx * 2, +halfx+halfx * 2, -halfz);
+	Mesh->SubResource[24+3].V = XMFLOAT3(+halfx + halfx * 2, -halfx+halfx * 2, -halfz);
+					  
+	Mesh->SubResource[24+0].Tex = XMFLOAT2(0, 1);
+	Mesh->SubResource[24+1].Tex = XMFLOAT2(0, 0);
+	Mesh->SubResource[24+2].Tex = XMFLOAT2(1, 0);
+	Mesh->SubResource[24+3].Tex = XMFLOAT2(1, 1);
+					  
+	//back			  24+
+	Mesh->SubResource[24+4].V = XMFLOAT3(-halfx+halfx * 2, -halfx+halfx * 2, +halfz);
+	Mesh->SubResource[24+5].V = XMFLOAT3(+halfx+halfx * 2, -halfx+halfx * 2, +halfz);
+	Mesh->SubResource[24+6].V = XMFLOAT3(+halfx+halfx * 2, +halfx+halfx * 2, +halfz);
+	Mesh->SubResource[24+7].V = XMFLOAT3(-halfx+halfx * 2, +halfx+halfx * 2, +halfz);
+					  
+	Mesh->SubResource[24+4].Tex = XMFLOAT2(1, 1);
+	Mesh->SubResource[24+5].Tex = XMFLOAT2(0, 1);
+	Mesh->SubResource[24+6].Tex = XMFLOAT2(0, 0);
+	Mesh->SubResource[24+7].Tex = XMFLOAT2(1, 0);
+					  
+	//top			  24+
+	Mesh->SubResource[24+8].V = XMFLOAT3(-halfx + halfx * 2,  +halfx+halfx * 2, -halfz);
+	Mesh->SubResource[24+9].V = XMFLOAT3(-halfx + halfx * 2,  +halfx+halfx * 2, +halfz);
+	Mesh->SubResource[24+10].V = XMFLOAT3(+halfx + halfx * 2, +halfx+halfx * 2, +halfz);
+	Mesh->SubResource[24+11].V = XMFLOAT3(+halfx + halfx * 2, +halfx+halfx * 2, -halfz);
+					  
+	Mesh->SubResource[24+8].Tex = XMFLOAT2(0, 1);
+	Mesh->SubResource[24+9].Tex = XMFLOAT2(0, 0);
+	Mesh->SubResource[24+10].Tex = XMFLOAT2(1, 0);
+	Mesh->SubResource[24+11].Tex = XMFLOAT2(1, 1);
+					  	//bottom		  24+
+	Mesh->SubResource[24+12].V = XMFLOAT3(-halfx + halfx * 2, -halfx+halfx * 2, -halfz);
+	Mesh->SubResource[24+13].V = XMFLOAT3(+halfx + halfx * 2, -halfx+halfx * 2, -halfz);
+	Mesh->SubResource[24+14].V = XMFLOAT3(+halfx + halfx * 2, -halfx+halfx * 2, +halfz);
+	Mesh->SubResource[24+15].V = XMFLOAT3(-halfx + halfx * 2, -halfx+halfx * 2, +halfz);
+					  
+
+	Mesh->SubResource[24+12].Tex = XMFLOAT2(1, 1);
+	Mesh->SubResource[24+13].Tex = XMFLOAT2(0, 1);
+	Mesh->SubResource[24+14].Tex = XMFLOAT2(0, 0);
+	Mesh->SubResource[24+15].Tex = XMFLOAT2(1, 0);
+	
+	//left			  24+
+	Mesh->SubResource[24+16].V = XMFLOAT3(-halfx+halfx * 2, -halfx+halfx * 2, +halfz);
+	Mesh->SubResource[24+17].V = XMFLOAT3(-halfx+halfx * 2, +halfx+halfx * 2, +halfz);
+	Mesh->SubResource[24+18].V = XMFLOAT3(-halfx+halfx * 2, +halfx+halfx * 2, -halfz);
+	Mesh->SubResource[24+19].V = XMFLOAT3(-halfx+halfx * 2, -halfx+halfx * 2, -halfz);
+	
+	Mesh->SubResource[24+16].Tex = XMFLOAT2(0, 1);
+	Mesh->SubResource[24+17].Tex = XMFLOAT2(0, 0);
+	Mesh->SubResource[24+18].Tex = XMFLOAT2(1, 0);
+	Mesh->SubResource[24+19].Tex = XMFLOAT2(1, 1);
+	
+	//right			  24+
+	Mesh->SubResource[24+20].V = XMFLOAT3(+halfx+halfx * 2, -halfx+halfx * 2, -halfz);
+	Mesh->SubResource[24+21].V = XMFLOAT3(+halfx+halfx * 2, +halfx+halfx * 2, -halfz);
+	Mesh->SubResource[24+22].V = XMFLOAT3(+halfx+halfx * 2, +halfx+halfx * 2, +halfz);
+	Mesh->SubResource[24+23].V = XMFLOAT3(+halfx+halfx * 2, -halfx+halfx * 2, +halfz);
+					  
+	Mesh->SubResource[24+20].Tex = XMFLOAT2(0, 1);
+	Mesh->SubResource[24+21].Tex = XMFLOAT2(0, 0);
+	Mesh->SubResource[24+22].Tex = XMFLOAT2(1, 0);
+	Mesh->SubResource[24+23].Tex = XMFLOAT2(1, 1);
+
+
+
+	Mesh->Index = new UINT[72];
+	Mesh->nindex = 72;
+	Mesh->nioffset = 0;
+	Mesh->nisize = sizeof(UINT);
+
+	Mesh->Index[0] = 0; Mesh->Index[1] = 1; Mesh->Index[2] = 2;
+	Mesh->Index[3] = 0; Mesh->Index[4] = 2; Mesh->Index[5] = 3;
+
+	Mesh->Index[6] = 4; Mesh->Index[7] = 5; Mesh->Index[8] = 6;
+	Mesh->Index[9] = 4; Mesh->Index[10] = 6; Mesh->Index[11] = 7;
+
+	Mesh->Index[12] = 8; Mesh->Index[13] = 9; Mesh->Index[14] = 10;
+	Mesh->Index[15] = 8; Mesh->Index[16] = 10; Mesh->Index[17] = 11;
+
+	Mesh->Index[18] = 12; Mesh->Index[19] = 13; Mesh->Index[20] = 14;
+	Mesh->Index[21] = 12; Mesh->Index[22] = 14; Mesh->Index[23] = 15;
+
+	Mesh->Index[24] = 16; Mesh->Index[25] = 17; Mesh->Index[26] = 18;
+	Mesh->Index[27] = 16; Mesh->Index[28] = 18; Mesh->Index[29] = 19;
+
+	Mesh->Index[30] = 20; Mesh->Index[31] = 21; Mesh->Index[32] = 22;
+	Mesh->Index[33] = 20; Mesh->Index[34] = 22; Mesh->Index[35] = 23;
+
+
+	Mesh->Index[36+0]  = 24+0; Mesh->Index[36+1]   = 24+1; Mesh->Index[36 + 2] = 24+2;
+	Mesh->Index[36+3]  = 24+0; Mesh->Index[36 + 4] = 24+2; Mesh->Index[36 + 5] = 24+3;
+	Mesh->Index[36+6]  = 24+4; Mesh->Index[36 + 7] = 24+5; Mesh->Index[36 + 8] = 24+6;
+	Mesh->Index[36+9]  = 24+4; Mesh->Index[36 + 10]= 24+6; Mesh->Index[36 + 11] = 24+7;
+	Mesh->Index[36+12] = 24+8; Mesh->Index[36 + 13]= 24+9; Mesh->Index[36 + 14] = 24+10;
+	Mesh->Index[36+15] = 24+8; Mesh->Index[36 + 16]= 24+10; Mesh->Index[36 + 17] = 24+11;
+	Mesh->Index[36+18] = 24+12; Mesh->Index[36 + 19]= 24+13; Mesh->Index[36 + 20] = 24+14;
+	Mesh->Index[36+21] = 24+12; Mesh->Index[36+22] = 24+14; Mesh->Index[36+23] = 24+15;				
+	Mesh->Index[36+24] = 24+16; Mesh->Index[36+25] = 24+17; Mesh->Index[36+26] = 24+18;
+	Mesh->Index[36+27] = 24+16; Mesh->Index[36+28] = 24+18; Mesh->Index[36+29] = 24+19;				
+	Mesh->Index[36+30] = 24+20; Mesh->Index[36+31] = 24+21; Mesh->Index[36+32] = 24+22;
+	Mesh->Index[36+33] = 24+20; Mesh->Index[36+34] = 24+22; Mesh->Index[36+35] = 24+23;
+
+}
+
+
+void CreateTetrisㅗ(CMesh * Mesh, float sizex, float sizey, float sizez)
+{
+	float halfx = 0.5 * sizex;
+	float halfy = 0.5 * sizey;
+	float halfz = 0.5 * sizez;
+
+	Mesh->SubResource = new CVertex[48];
+	Mesh->nVertex = 48;
+	Mesh->nStride = sizeof(CVertex);
+	Mesh->nOffset = 0;
+
+	//front
+	Mesh->SubResource[0].V = XMFLOAT3(-halfx, -halfy, -halfz);
+	Mesh->SubResource[1].V = XMFLOAT3(-halfx, +halfy, -halfz);
+	Mesh->SubResource[2].V = XMFLOAT3(+halfx, +halfy, -halfz);
+	Mesh->SubResource[3].V = XMFLOAT3(+halfx, -halfy, -halfz);
+
+	Mesh->SubResource[0].Tex = XMFLOAT2(0, 1);
+	Mesh->SubResource[1].Tex = XMFLOAT2(0, 0);
+	Mesh->SubResource[2].Tex = XMFLOAT2(1, 0);
+	Mesh->SubResource[3].Tex = XMFLOAT2(1, 1);
+
+	//back
+	Mesh->SubResource[4].V = XMFLOAT3(-halfx, -halfy, +halfz);
+	Mesh->SubResource[5].V = XMFLOAT3(+halfx, -halfy, +halfz);
+	Mesh->SubResource[6].V = XMFLOAT3(+halfx, +halfy, +halfz);
+	Mesh->SubResource[7].V = XMFLOAT3(-halfx, +halfy, +halfz);
+
+	Mesh->SubResource[4].Tex = XMFLOAT2(1, 1);
+	Mesh->SubResource[5].Tex = XMFLOAT2(0, 1);
+	Mesh->SubResource[6].Tex = XMFLOAT2(0, 0);
+	Mesh->SubResource[7].Tex = XMFLOAT2(1, 0);
+
+	//top
+	Mesh->SubResource[8].V = XMFLOAT3(-halfx, +halfy, -halfz);
+	Mesh->SubResource[9].V = XMFLOAT3(-halfx, +halfy, +halfz);
+	Mesh->SubResource[10].V = XMFLOAT3(+halfx, +halfy, +halfz);
+	Mesh->SubResource[11].V = XMFLOAT3(+halfx, +halfy, -halfz);
+
+	Mesh->SubResource[8].Tex = XMFLOAT2(0, 1);
+	Mesh->SubResource[9].Tex = XMFLOAT2(0, 0);
+	Mesh->SubResource[10].Tex = XMFLOAT2(1, 0);
+	Mesh->SubResource[11].Tex = XMFLOAT2(1, 1);
+
+
+	//bottom
+	Mesh->SubResource[12].V = XMFLOAT3(-halfx, -halfy, -halfz);
+	Mesh->SubResource[13].V = XMFLOAT3(+halfx, -halfy, -halfz);
+	Mesh->SubResource[14].V = XMFLOAT3(+halfx, -halfy, +halfz);
+	Mesh->SubResource[15].V = XMFLOAT3(-halfx, -halfy, +halfz);
+
+	Mesh->SubResource[12].Tex = XMFLOAT2(1, 1);
+	Mesh->SubResource[13].Tex = XMFLOAT2(0, 1);
+	Mesh->SubResource[14].Tex = XMFLOAT2(0, 0);
+	Mesh->SubResource[15].Tex = XMFLOAT2(1, 0);
+
+	//left
+	Mesh->SubResource[16].V = XMFLOAT3(-halfx, -halfy, +halfz);
+	Mesh->SubResource[17].V = XMFLOAT3(-halfx, +halfy, +halfz);
+	Mesh->SubResource[18].V = XMFLOAT3(-halfx, +halfy, -halfz);
+	Mesh->SubResource[19].V = XMFLOAT3(-halfx, -halfy, -halfz);
+
+	Mesh->SubResource[16].Tex = XMFLOAT2(0, 1);
+	Mesh->SubResource[17].Tex = XMFLOAT2(0, 0);
+	Mesh->SubResource[18].Tex = XMFLOAT2(1, 0);
+	Mesh->SubResource[19].Tex = XMFLOAT2(1, 1);
+
+	//right
+	Mesh->SubResource[20].V = XMFLOAT3(+halfx, -halfy, -halfz);
+	Mesh->SubResource[21].V = XMFLOAT3(+halfx, +halfy, -halfz);
+	Mesh->SubResource[22].V = XMFLOAT3(+halfx, +halfy, +halfz);
+	Mesh->SubResource[23].V = XMFLOAT3(+halfx, -halfy, +halfz);
+
+	Mesh->SubResource[20].Tex = XMFLOAT2(0, 1);
+	Mesh->SubResource[21].Tex = XMFLOAT2(0, 0);
+	Mesh->SubResource[22].Tex = XMFLOAT2(1, 0);
+	Mesh->SubResource[23].Tex = XMFLOAT2(1, 1);
+
+
+	//front
+	Mesh->SubResource[24 + 0].V = XMFLOAT3(-halfx + halfx * 2, -halfx, -halfz);
+	Mesh->SubResource[24 + 1].V = XMFLOAT3(-halfx + halfx * 2, +halfx, -halfz);
+	Mesh->SubResource[24 + 2].V = XMFLOAT3(+halfx + halfx * 2, +halfx, -halfz);
+	Mesh->SubResource[24 + 3].V = XMFLOAT3(+halfx + halfx * 2, -halfx, -halfz);
+
+	Mesh->SubResource[24 + 0].Tex = XMFLOAT2(0, 1);
+	Mesh->SubResource[24 + 1].Tex = XMFLOAT2(0, 0);
+	Mesh->SubResource[24 + 2].Tex = XMFLOAT2(1, 0);
+	Mesh->SubResource[24 + 3].Tex = XMFLOAT2(1, 1);
+
+	//back			  24+
+	Mesh->SubResource[24 + 4].V = XMFLOAT3(-halfx + halfx * 2, -halfx, +halfz);
+	Mesh->SubResource[24 + 5].V = XMFLOAT3(+halfx + halfx * 2, -halfx, +halfz);
+	Mesh->SubResource[24 + 6].V = XMFLOAT3(+halfx + halfx * 2, +halfx, +halfz);
+	Mesh->SubResource[24 + 7].V = XMFLOAT3(-halfx + halfx * 2, +halfx, +halfz);
+
+	Mesh->SubResource[24 + 4].Tex = XMFLOAT2(1, 1);
+	Mesh->SubResource[24 + 5].Tex = XMFLOAT2(0, 1);
+	Mesh->SubResource[24 + 6].Tex = XMFLOAT2(0, 0);
+	Mesh->SubResource[24 + 7].Tex = XMFLOAT2(1, 0);
+
+	//top			  24+
+	Mesh->SubResource[24 + 8].V = XMFLOAT3(-halfx + halfx * 2, +halfx, -halfz);
+	Mesh->SubResource[24 + 9].V = XMFLOAT3(-halfx + halfx * 2, +halfx, +halfz);
+	Mesh->SubResource[24 + 10].V = XMFLOAT3(+halfx + halfx * 2, +halfx, +halfz);
+	Mesh->SubResource[24 + 11].V = XMFLOAT3(+halfx + halfx * 2, +halfx, -halfz);
+
+	Mesh->SubResource[24 + 8].Tex = XMFLOAT2(0, 1);
+	Mesh->SubResource[24 + 9].Tex = XMFLOAT2(0, 0);
+	Mesh->SubResource[24 + 10].Tex = XMFLOAT2(1, 0);
+	Mesh->SubResource[24 + 11].Tex = XMFLOAT2(1, 1);
+	//bottom		  24+
+	Mesh->SubResource[24 + 12].V = XMFLOAT3(-halfx + halfx * 2, -halfx, -halfz);
+	Mesh->SubResource[24 + 13].V = XMFLOAT3(+halfx + halfx * 2, -halfx, -halfz);
+	Mesh->SubResource[24 + 14].V = XMFLOAT3(+halfx + halfx * 2, -halfx, +halfz);
+	Mesh->SubResource[24 + 15].V = XMFLOAT3(-halfx + halfx * 2, -halfx, +halfz);
+
+
+	Mesh->SubResource[24 + 12].Tex = XMFLOAT2(1, 1);
+	Mesh->SubResource[24 + 13].Tex = XMFLOAT2(0, 1);
+	Mesh->SubResource[24 + 14].Tex = XMFLOAT2(0, 0);
+	Mesh->SubResource[24 + 15].Tex = XMFLOAT2(1, 0);
+
+	//left			  24+
+	Mesh->SubResource[24 + 16].V = XMFLOAT3(-halfx + halfx * 2, -halfx, +halfz);
+	Mesh->SubResource[24 + 17].V = XMFLOAT3(-halfx + halfx * 2, +halfx, +halfz);
+	Mesh->SubResource[24 + 18].V = XMFLOAT3(-halfx + halfx * 2, +halfx, -halfz);
+	Mesh->SubResource[24 + 19].V = XMFLOAT3(-halfx + halfx * 2, -halfx, -halfz);
+
+	Mesh->SubResource[24 + 16].Tex = XMFLOAT2(0, 1);
+	Mesh->SubResource[24 + 17].Tex = XMFLOAT2(0, 0);
+	Mesh->SubResource[24 + 18].Tex = XMFLOAT2(1, 0);
+	Mesh->SubResource[24 + 19].Tex = XMFLOAT2(1, 1);
+
+	//right			  24+
+	Mesh->SubResource[24 + 20].V = XMFLOAT3(+halfx + halfx * 2, -halfx, -halfz);
+	Mesh->SubResource[24 + 21].V = XMFLOAT3(+halfx + halfx * 2, +halfx, -halfz);
+	Mesh->SubResource[24 + 22].V = XMFLOAT3(+halfx + halfx * 2, +halfx, +halfz);
+	Mesh->SubResource[24 + 23].V = XMFLOAT3(+halfx + halfx * 2, -halfx, +halfz);
+
+	Mesh->SubResource[24 + 20].Tex = XMFLOAT2(0, 1);
+	Mesh->SubResource[24 + 21].Tex = XMFLOAT2(0, 0);
+	Mesh->SubResource[24 + 22].Tex = XMFLOAT2(1, 0);
+	Mesh->SubResource[24 + 23].Tex = XMFLOAT2(1, 1);
+
+
+
+	Mesh->Index = new UINT[72];
+	Mesh->nindex = 72;
+	Mesh->nioffset = 0;
+	Mesh->nisize = sizeof(UINT);
+
+	Mesh->Index[0] = 0; Mesh->Index[1] = 1; Mesh->Index[2] = 2;
+	Mesh->Index[3] = 0; Mesh->Index[4] = 2; Mesh->Index[5] = 3;
+
+	Mesh->Index[6] = 4; Mesh->Index[7] = 5; Mesh->Index[8] = 6;
+	Mesh->Index[9] = 4; Mesh->Index[10] = 6; Mesh->Index[11] = 7;
+
+	Mesh->Index[12] = 8; Mesh->Index[13] = 9; Mesh->Index[14] = 10;
+	Mesh->Index[15] = 8; Mesh->Index[16] = 10; Mesh->Index[17] = 11;
+
+	Mesh->Index[18] = 12; Mesh->Index[19] = 13; Mesh->Index[20] = 14;
+	Mesh->Index[21] = 12; Mesh->Index[22] = 14; Mesh->Index[23] = 15;
+
+	Mesh->Index[24] = 16; Mesh->Index[25] = 17; Mesh->Index[26] = 18;
+	Mesh->Index[27] = 16; Mesh->Index[28] = 18; Mesh->Index[29] = 19;
+
+	Mesh->Index[30] = 20; Mesh->Index[31] = 21; Mesh->Index[32] = 22;
+	Mesh->Index[33] = 20; Mesh->Index[34] = 22; Mesh->Index[35] = 23;
+
+
+	Mesh->Index[36 + 0] = 24 + 0; Mesh->Index[36 + 1] = 24 + 1; Mesh->Index[36 + 2] = 24 + 2;
+	Mesh->Index[36 + 3] = 24 + 0; Mesh->Index[36 + 4] = 24 + 2; Mesh->Index[36 + 5] = 24 + 3;
+	Mesh->Index[36 + 6] = 24 + 4; Mesh->Index[36 + 7] = 24 + 5; Mesh->Index[36 + 8] = 24 + 6;
+	Mesh->Index[36 + 9] = 24 + 4; Mesh->Index[36 + 10] = 24 + 6; Mesh->Index[36 + 11] = 24 + 7;
+	Mesh->Index[36 + 12] = 24 + 8; Mesh->Index[36 + 13] = 24 + 9; Mesh->Index[36 + 14] = 24 + 10;
+	Mesh->Index[36 + 15] = 24 + 8; Mesh->Index[36 + 16] = 24 + 10; Mesh->Index[36 + 17] = 24 + 11;
+	Mesh->Index[36 + 18] = 24 + 12; Mesh->Index[36 + 19] = 24 + 13; Mesh->Index[36 + 20] = 24 + 14;
+	Mesh->Index[36 + 21] = 24 + 12; Mesh->Index[36 + 22] = 24 + 14; Mesh->Index[36 + 23] = 24 + 15;
+	Mesh->Index[36 + 24] = 24 + 16; Mesh->Index[36 + 25] = 24 + 17; Mesh->Index[36 + 26] = 24 + 18;
+	Mesh->Index[36 + 27] = 24 + 16; Mesh->Index[36 + 28] = 24 + 18; Mesh->Index[36 + 29] = 24 + 19;
+	Mesh->Index[36 + 30] = 24 + 20; Mesh->Index[36 + 31] = 24 + 21; Mesh->Index[36 + 32] = 24 + 22;
+	Mesh->Index[36 + 33] = 24 + 20; Mesh->Index[36 + 34] = 24 + 22; Mesh->Index[36 + 35] = 24 + 23;
 
 }

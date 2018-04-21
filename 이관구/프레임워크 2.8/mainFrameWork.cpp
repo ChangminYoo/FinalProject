@@ -57,8 +57,8 @@ void MainFrameWork::CollisionSystem(const GameTimer& gt)
 	{
 		(*i)->Collision(&scene->RigidObject, gt.DeltaTime());
 		(*i)->Collision(&scene->DynamicObject, gt.DeltaTime());
-		/*(*i)->Collision(&scene->StaticObject, gt.DeltaTime());
-		(*i)->Collision(&scene->BulletObject, gt.DeltaTime());*/
+		(*i)->Collision(&scene->StaticObject, gt.DeltaTime());
+		/*(*i)->Collision(&scene->BulletObject, gt.DeltaTime());*/
 
 	}
 
@@ -145,6 +145,7 @@ void MainFrameWork::AfterGravitySystem(const GameTimer & gt)
 
 	for (auto i = scene->StaticObject.begin(); i != scene->StaticObject.end(); i++)
 	{
+
 		//왜 실제 중점이 아닌 pp의 중점으로 처리하냐면 실제중점을 움직인후 pp의 중점을 움직이나
 		//pp의중점을 움직이고 실제중점을 움직이나 같지만, UpdatePPosCenterPos를 쓰기위해
 		//pp를 움직이고 cp를 pp로 맞춘다.
@@ -358,8 +359,8 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 
 
 			//최소 임펄스를 구한다.
-			if (fabsf(impurse) < 70)
-				impurse = 70;
+			if (fabsf(impurse) < 60)
+				impurse = 60;
 
 
 
@@ -367,7 +368,7 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 			//그후 사잇각이 특정각도 이하면 보정시킨다. 
 			//단 이게 double로 해도 0이아닌데 0이나오는경우가 생긴다.
 			//따라서 0일경우 그냥 충격량을 가해서 각도를 변경시킨다.
-			if (abs(theta) <= MMPE_PI / 36 && abs(theta) != 0 && fabsf(impurse) <= 75)//대략 5도 이하면 보정시킴.
+			if (abs(theta) <= MMPE_PI / 30 && abs(theta) != 0  && abs(impurse)<=200)//대략 5도 이하면 보정시킴.
 			{
 				//회전축을 구하고..
 				XMFLOAT3 mAxis = XMFloat4to3(Float4Cross(V1, V2));
@@ -378,7 +379,7 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 				//그리고 재귀 시킨다. 왜냐하면 보정이되었으면 allpoint,tempcollisionpoint,contactpoint , penetration 모두 다 바뀌어야 하기 때문이다.
 				//재귀 후 아마 2가지 경우의수가 있다. 충돌이 일어나거나, 아니면 살짝 떠있거나.. 어쨌든 잘 해결 된다.
 				obj->rb->SetAngularVelocity(0, 0, 0);
-				RigidBodyCollisionPlane(Normal, distance, obj);
+
 
 			}
 			else//아니라면 이제 충격량을 적당한 지점에 가한다!
@@ -518,12 +519,12 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 					impurse = 500;
 
 				//최소 임펄스를 구한다.
-				if (fabsf(impurse) < 70)
-					impurse = 70;
+				if (fabsf(impurse) < 60)
+					impurse = 60;
 
 
 				//그후 사잇각이 특정각도 이하면 보정시킨다. 
-				if (abs(theta) <= MMPE_PI / 36 && abs(theta) != 0 && fabsf(impurse) <= 75)//대략 5도 이하면 보정시킴.
+				if (abs(theta) <= MMPE_PI / 28 && abs(theta) != 0 && abs(impurse) <= 300)//대략 5도 이하면 보정시킴.
 				{
 					//회전축을 구하고
 					XMFLOAT3 mAxis = XMFloat4to3(Float4Cross(V2, V3));
@@ -534,7 +535,8 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 					//그리고 재귀 시킨다. 왜냐하면 보정이되었으면 allpoint,tempcollisionpoint,contactpoint , penetration 모두 다 바뀌어야 하기 때문이다.
 					//재귀 후 아마 2가지 경우의수가 있다. 충돌이 일어나거나, 아니면 살짝 떠있거나.. 어쨌든 잘 해결 된다.
 					obj->rb->SetAngularVelocity(0, 0, 0);
-					RigidBodyCollisionPlane(Normal, distance, obj);
+					obj->rb->SetAccel(0, 0, 0);
+
 
 				}
 				else//아니라면 이제 충격량을 적당한 지점에 가한다!
@@ -576,7 +578,7 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 						//그리고 재귀 시킨다. 왜냐하면 보정이되었으면 allpoint,tempcollisionpoint,contactpoint , penetration 모두 다 바뀌어야 하기 때문이다.
 						//재귀 후 아마 2가지 경우의수가 있다. 충돌이 일어나거나, 아니면 살짝 떠있거나.. 어쨌든 잘 해결 된다.
 						obj->rb->SetAngularVelocity(0, 0, 0);
-						RigidBodyCollisionPlane(Normal, distance, obj);
+						
 
 						return;
 					}
@@ -647,19 +649,18 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 				//교정할 각도.  
 				double theta = acos(tempdot);
 
+				if (abs(theta) != 0)
+				{
 
-				double theta2 = -MMPE_PI / 180;
-
-				//회전축을 구하고
-				XMFLOAT3 mAxis = XMFloat4to3(Float4Cross(V1, V4));
-				mAxis = Float3Normalize(mAxis);
+					//회전축을 구하고
+					XMFLOAT3 mAxis = XMFloat4to3(Float4Cross(V1, V4));
+					mAxis = Float3Normalize(mAxis);
 
 
-				//보정을 시킨다.
-				AmendObject(mAxis, theta, obj);
-
-				//보정이되면 바로 재귀시켜서 검사한다. 다만 자기자신을 보정하면 굳이 각속도를 변경 시키진 않아도 된다.
-				RigidBodyCollisionPlane(Normal, distance, obj);
+					//보정을 시킨다.
+					AmendObject(mAxis, theta, obj);
+				}
+				
 
 
 
@@ -683,7 +684,7 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 
 			//땅에 닿았으니 현재 속도의 y는 반감되어야 한다. 원래는 탄성계수가 있지만.. 그냥 절반 감소시킨후 부호를 -로 하자.
 			auto d = obj->rb->GetVelocity();
-			d.y = -0.2 * d.y;
+			d.y = -0.7 * d.y;
 			obj->rb->SetVelocity(d);
 			obj->rb->SetAccel(0, 0, 0);
 

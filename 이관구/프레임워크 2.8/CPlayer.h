@@ -10,7 +10,7 @@ typedef struct SkillData
 	int SellectBulletIndex = 0;
 
 	//스킬들 총 4개까지 있음. 내부의 값이 의미하는것은 생성할때 사용될 스킬넘버링
-	int Skills[4] = { 1,0,0,0 };
+	int Skills[4] = { 0,0,0,0 };
 
 	//각 스킬별로 쿨타임.
 	float SkillsCoolTime[4] = { 0.0f };

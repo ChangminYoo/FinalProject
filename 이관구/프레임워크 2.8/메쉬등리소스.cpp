@@ -30,6 +30,36 @@ unordered_map<string, unique_ptr<CTexture>> HeavyBulletCube::Textures;//텍스처들
 CMesh  HeavyBulletCube::Mesh;//나중에 메쉬는 static으로 둬야함
 ComPtr<ID3D12DescriptorHeap> HeavyBulletCube::SrvDescriptorHeap;//텍스처 용 힙
 CMaterial HeavyBulletCube::Mat;
+//--------------------------------------------------------------------------------------
+bool Tetris1::CreateMesh = false;
+unordered_map<string, unique_ptr<CTexture>> Tetris1::Textures;//텍스처들을 저장함
+CMesh  Tetris1::Mesh;//나중에 메쉬는 static으로 둬야함
+ComPtr<ID3D12DescriptorHeap> Tetris1::SrvDescriptorHeap;//텍스처 용 힙
+CMaterial Tetris1::Mat;
+//--------------------------------------------------------------------------------------
+bool Tetris2::CreateMesh = false;
+unordered_map<string, unique_ptr<CTexture>> Tetris2::Textures;//텍스처들을 저장함
+CMesh  Tetris2::Mesh;//나중에 메쉬는 static으로 둬야함
+ComPtr<ID3D12DescriptorHeap> Tetris2::SrvDescriptorHeap;//텍스처 용 힙
+CMaterial Tetris2::Mat;
+//--------------------------------------------------------------------------------------
+bool Tetris3::CreateMesh = false;
+unordered_map<string, unique_ptr<CTexture>> Tetris3::Textures;//텍스처들을 저장함
+CMesh  Tetris3::Mesh;//나중에 메쉬는 static으로 둬야함
+ComPtr<ID3D12DescriptorHeap> Tetris3::SrvDescriptorHeap;//텍스처 용 힙
+CMaterial Tetris3::Mat;
+//--------------------------------------------------------------------------------------
+bool Tetris4::CreateMesh = false;
+unordered_map<string, unique_ptr<CTexture>> Tetris4::Textures;//텍스처들을 저장함
+CMesh  Tetris4::Mesh;//나중에 메쉬는 static으로 둬야함
+ComPtr<ID3D12DescriptorHeap> Tetris4::SrvDescriptorHeap;//텍스처 용 힙
+CMaterial Tetris4::Mat;
+//--------------------------------------------------------------------------------------
+bool Tetrike::CreateMesh = false;
+unordered_map<string, unique_ptr<CTexture>> Tetrike::Textures;//텍스처들을 저장함
+CMesh  Tetrike::Mesh;//나중에 메쉬는 static으로 둬야함
+ComPtr<ID3D12DescriptorHeap> Tetrike::SrvDescriptorHeap;//텍스처 용 힙
+CMaterial Tetrike::Mat;
 
 //--------------------------------------------------------------------------------------
 bool SphereObject::CreateMesh = false;

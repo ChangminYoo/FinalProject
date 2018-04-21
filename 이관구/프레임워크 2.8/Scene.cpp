@@ -195,6 +195,17 @@ void Scene::CreateGameObject()
 	resource = new RigidCubeObject(device, commandlist, &BbObject, XMFLOAT4(0, 0, 0, 0));
 	delete resource;
 
+	resource = new RangeObject(device, commandlist, &BbObject, XMFLOAT4(0, 0, 0, 0));
+	delete resource;
+	resource = new Tetrike(device, commandlist, &BbObject,NULL,NULL,NULL, XMFLOAT4(0, 0, 0, 0));
+	delete resource;
+	resource = new Tetris1(device, commandlist, &BbObject, NULL, NULL, XMFLOAT4(0, 0, 0, 0));
+	delete resource;
+	resource = new Tetris2(device, commandlist, &BbObject, NULL, NULL, XMFLOAT4(0, 0, 0, 0));
+	delete resource;
+	resource = new Tetris3(device, commandlist, &BbObject, NULL, NULL, XMFLOAT4(0, 0, 0, 0));
+	delete resource;
+
 	//--------------------------------------------------//
 	
 	SkyObject = new SphereObject(device, commandlist,  &BbObject, XMFLOAT4(0, 0, 0, 0));
@@ -267,6 +278,8 @@ void Scene::CreateGameObject()
 	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, XMFLOAT4(93, 160, 40, 0)));
 
 
+
+
 	StaticObject.push_back(new BuildingObject(device, commandlist, &BbObject, 0, XMFLOAT4(50, 0, -40, 0)));
 	StaticObject.push_back(new BuildingObject(device, commandlist, &BbObject, 0, XMFLOAT4(-40, 0, 10, 0)));
 
@@ -298,6 +311,9 @@ void Scene::CreateUI()
 		case 1://헤비큐브
 			ct = 1.1f;
 			break;
+
+		case 2://테트라이크
+			ct = 25.0f;
 		}
 
 		SkillCoolBar[i] = new CoolBarObject(device, commandlist, NULL,ct, Player->PlayerObject, XMFLOAT4(i*100-150,0.98*-mHeight / 2, 0, 0));

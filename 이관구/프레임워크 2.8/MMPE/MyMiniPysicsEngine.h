@@ -115,7 +115,7 @@ namespace MiniPhysicsEngineG9
 
 		XMFLOAT3 halfbox;//x길이y길이z길이
 		bool Bounce = false;
-		float e = 0.6f;
+		float e = 0.35f;
 
 	public:
 		void integrate(float DeltaTime);//적분기. 속도와 가속도로 위치를 구하고 가속도를 이용해 속도를 갱신함.
