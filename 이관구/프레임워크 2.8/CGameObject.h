@@ -4,8 +4,8 @@
 #include"Timer.h"
 #include"CTexture.h"
 #include"CMaterial.h"
+#include"MakeGeometry.h"
 #include"MMPE\MyMiniPysicsEngine.h"
-
 
 #define CUBEMAN_HALFWIDTH 3
 #define CUBEMAN_HALFEIGHT 10
@@ -142,72 +142,6 @@ void LoadTexture(ID3D12Device* device, ID3D12GraphicsCommandList* commandlist, C
 //4. 렌더함수를 그대로 가져옴. 왜 이러냐면 static Mesh를 써야하기때문이다..
 //5. 콜리전함수 추가해야함. 질점오브젝트와 강체오브젝트는 서로 다르게 생성해야함.(우선 질점오브젝트밖에 없음.)
 
-
-// ============================= UI==================================//
-
-class AimObject : public CGameObject
-{
-public:
-	AimObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
-
-
-public:
-	static bool CreateMesh;//최초로 false며 메쉬를 만든후 true가된다.
-	static unordered_map<string, unique_ptr<CTexture>> Textures;//텍스처들을 저장함
-	static CMesh Mesh;//오로지 한번만 만들어짐
-	static ComPtr<ID3D12DescriptorHeap> SrvDescriptorHeap;//텍스처 용 힙
-
-
-public:
-	virtual void SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist);//셋메시는 메시를 최종적으로 생성한다. 즉 메시를구성하는 정점과 삼각형을구성하는인덱스버퍼생성
-
-	virtual void Render(ID3D12GraphicsCommandList* commandlist, const GameTimer& gt);
-	virtual void Collision(list<CGameObject*>* collist, float DeltaTime) {}
-
-};
-
-class SkillUIObject : public CGameObject
-{
-public:
-	SkillUIObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, int SkillNum,XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
-
-
-public:
-	static bool CreateMesh;//최초로 false며 메쉬를 만든후 true가된다.
-	static unordered_map<string, unique_ptr<CTexture>> Textures;//텍스처들을 저장함
-	static CMesh Mesh;//오로지 한번만 만들어짐
-	static ComPtr<ID3D12DescriptorHeap> SrvDescriptorHeap;//텍스처 용 힙
-
-
-public:
-	virtual void SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist);//셋메시는 메시를 최종적으로 생성한다. 즉 메시를구성하는 정점과 삼각형을구성하는인덱스버퍼생성
-
-	virtual void Render(ID3D12GraphicsCommandList* commandlist, const GameTimer& gt);
-	virtual void Collision(list<CGameObject*>* collist, float DeltaTime) {}
-
-};
-
-class BackGroundSkillObject : public CGameObject
-{
-public:
-	BackGroundSkillObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
-
-
-public:
-	static bool CreateMesh;//최초로 false며 메쉬를 만든후 true가된다.
-	static unordered_map<string, unique_ptr<CTexture>> Textures;//텍스처들을 저장함
-	static CMesh Mesh;//오로지 한번만 만들어짐
-	static ComPtr<ID3D12DescriptorHeap> SrvDescriptorHeap;//텍스처 용 힙
-
-
-public:
-	virtual void SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist);//셋메시는 메시를 최종적으로 생성한다. 즉 메시를구성하는 정점과 삼각형을구성하는인덱스버퍼생성
-	virtual void Render(ID3D12GraphicsCommandList* commandlist, const GameTimer& gt);
-	virtual void Collision(list<CGameObject*>* collist, float DeltaTime) {}
-
-};
-
-
 class BarObject : public CGameObject
 {
 public:
@@ -244,33 +178,9 @@ public:
 	virtual void SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist);//셋메시는 메시를 최종적으로 생성한다. 즉 메시를구성하는 정점과 삼각형을구성하는인덱스버퍼생성
 	virtual void Tick(const GameTimer& gt);
 	virtual void Render(ID3D12GraphicsCommandList* commandlist, const GameTimer& gt);
-	virtual void Collision(list<CGameObject*>* collist, float DeltaTime){}
-
-};
-
-//==========쿨타임 바 ==============
-
-class CoolBarObject : public CGameObject
-{
-public:
-	CoolBarObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist,float maxtime, CGameObject* master, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
-	CGameObject* Master = NULL;//소유자
-public:
-	static bool CreateMesh;//최초로 false며 메쉬를 만든후 true가된다.
-	static unordered_map<string, unique_ptr<CTexture>> Textures;//텍스처들을 저장함
-	static CMesh Mesh;//오로지 한번만 만들어짐
-	static ComPtr<ID3D12DescriptorHeap> SrvDescriptorHeap;//텍스처 용 힙
-
-	float MaxCoolTime = 0;
-public:
-	virtual void SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist);//셋메시는 메시를 최종적으로 생성한다. 즉 메시를구성하는 정점과 삼각형을구성하는인덱스버퍼생성
-	virtual void Render(ID3D12GraphicsCommandList* commandlist, const GameTimer& gt);
 	virtual void Collision(list<CGameObject*>* collist, float DeltaTime) {}
 
-	
 };
-
-
 //============ 캐릭터 ==========//
 class CCubeManObject : public CGameObject
 {
@@ -382,15 +292,14 @@ public:
 
 };
 
-
 //사각형모양
 class Tetris1 : public CGameObject
 {
 public:
-	Tetris1(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, CGameObject* master,  CGameObject* lockon = NULL, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
+	Tetris1(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, CGameObject* master, CGameObject* lockon = NULL, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
 	~Tetris1();
 	CGameObject* Master = NULL;//소유자
-	
+
 	float LifeTime = 10;//생존시간. 10초 후 제거됨
 	ParticleObject* BulletParticles = NULL;
 	ParticleObject* BulletParticles2 = NULL;
@@ -504,13 +413,13 @@ public:
 class Tetrike : public CGameObject
 {
 public:
-	Tetrike(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, list<CGameObject*>*Bulletlist, CGameObject* master,  CGameObject* lockon = NULL, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
+	Tetrike(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, list<CGameObject*>*Bulletlist, CGameObject* master, CGameObject* lockon = NULL, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
 	~Tetrike();
 	CGameObject* Master = NULL;//소유자
 	CGameObject* LockOn = NULL;//유도시사용됨
 	float LifeTime = 10;//생존시간. 10초 후 제거됨
 	float ShotTime = 0;//0.25초마다 발동
-	list<CGameObject*>* Blist=NULL;
+	list<CGameObject*>* Blist = NULL;
 public:
 	static CMaterial Mat;
 	static bool CreateMesh;//최초로 false며 메쉬를 만든후 true가된다.
@@ -527,7 +436,6 @@ public:
 	virtual void Collision(list<CGameObject*>* collist, float DeltaTime) {}
 
 };
-
 
 //================= 스태틱 오브젝트 ===============//
 
@@ -747,10 +655,3 @@ public:
 	virtual void Collision(list<CGameObject*>* collist, float DeltaTime){}
 
 };
-
-
-//======================= 도형만들기====================================
-void CreateCube(CMesh* Mesh, float sizex, float sizey, float sizez);
-void CreatePentagon(CMesh* Mesh, float size, float sizey = 0);
-void CreateTetrisL(CMesh* Mesh, float sizex, float sizey, float sizez);
-void CreateTetrisㅗ(CMesh* Mesh, float sizex, float sizey, float sizez);

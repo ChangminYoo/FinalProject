@@ -115,10 +115,10 @@ void GS(point VertexOut gin[1], inout TriangleStream<GeoOut> triStream)
 
 
 	}
-	else if(CustomData1.x == 3) // 스킬 백그라운드
+	else if(CustomData1.x == 3) // 스킬 ui
 	{
 		halfWidth = 0.5f * Scale;
-		halfHeight = 0.5f * Scale*0.2;
+		halfHeight = 0.5f * Scale*0.7;
 		
 		v[0].x += -halfWidth;
 		v[0].y  += -halfHeight;

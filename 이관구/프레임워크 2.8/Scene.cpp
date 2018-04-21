@@ -39,12 +39,14 @@ Scene::~Scene()
 {
 	if (AimUI != NULL)
 		delete AimUI;
-	if (SkillBackGround != NULL)
-		delete SkillBackGround;
+	//if (SkillBackGround != NULL)
+	//	delete SkillBackGround;
 
 	for (int i = 0; i < 4; i++)
 		if (SkillUI[i] != NULL)
 			delete SkillUI[i];
+	if (SelectBar != NULL)
+		delete SelectBar;
 
 	for (int i = 0; i < 4; i++)
 		if(SkillCoolBar[i]!=NULL)
@@ -197,7 +199,7 @@ void Scene::CreateGameObject()
 
 	resource = new RangeObject(device, commandlist, &BbObject, XMFLOAT4(0, 0, 0, 0));
 	delete resource;
-	resource = new Tetrike(device, commandlist, &BbObject,NULL,NULL,NULL, XMFLOAT4(0, 0, 0, 0));
+	resource = new Tetrike(device, commandlist, &BbObject, NULL, NULL, NULL, XMFLOAT4(0, 0, 0, 0));
 	delete resource;
 	resource = new Tetris1(device, commandlist, &BbObject, NULL, NULL, XMFLOAT4(0, 0, 0, 0));
 	delete resource;
@@ -205,7 +207,6 @@ void Scene::CreateGameObject()
 	delete resource;
 	resource = new Tetris3(device, commandlist, &BbObject, NULL, NULL, XMFLOAT4(0, 0, 0, 0));
 	delete resource;
-
 	//--------------------------------------------------//
 	
 	SkyObject = new SphereObject(device, commandlist,  &BbObject, XMFLOAT4(0, 0, 0, 0));
@@ -278,8 +279,6 @@ void Scene::CreateGameObject()
 	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, XMFLOAT4(93, 160, 40, 0)));
 
 
-
-
 	StaticObject.push_back(new BuildingObject(device, commandlist, &BbObject, 0, XMFLOAT4(50, 0, -40, 0)));
 	StaticObject.push_back(new BuildingObject(device, commandlist, &BbObject, 0, XMFLOAT4(-40, 0, 10, 0)));
 
@@ -296,8 +295,9 @@ void Scene::CreateUI()
 
 	AimUI = new AimObject(device,commandlist,NULL);
 	
-	SkillBackGround = new BackGroundSkillObject(device, commandlist, NULL,XMFLOAT4(0, 0.9*-mHeight / 2,0,0));
+	//SkillBackGround = new BackGroundSkillObject(device, commandlist, NULL,XMFLOAT4(0, 0.9*-mHeight / 2,0,0));
 
+	SelectBar = new SelectBarObject(device, commandlist, NULL, XMFLOAT4(0 * 100 - 150, 0.9*-mHeight / 2, 0, 0));
 
 	
 	for (int i = 0; i < 4; i++)
@@ -311,13 +311,12 @@ void Scene::CreateUI()
 		case 1://헤비큐브
 			ct = 1.1f;
 			break;
-
 		case 2://테트라이크
 			ct = 25.0f;
 		}
 
 		SkillCoolBar[i] = new CoolBarObject(device, commandlist, NULL,ct, Player->PlayerObject, XMFLOAT4(i*100-150,0.98*-mHeight / 2, 0, 0));
-		SkillUI[i] = new SkillUIObject(device, commandlist, NULL, Player->skilldata.Skills[i], XMFLOAT4(i * 100 - 150, 0.95*-mHeight / 2, 0, 0));
+		SkillUI[i] = new SkillUIObject(device, commandlist, NULL, Player->skilldata.Skills[i], XMFLOAT4(i * 100 - 150, 0.9*-mHeight / 2, 0, 0));
 	}
 
 }
@@ -331,6 +330,13 @@ void Scene::UITick(const GameTimer & gt)
 		{
 			SkillCoolBar[i]->ObjData.CustomData1.y = Player->skilldata.SkillsCoolTime[i] / ((CoolBarObject*)SkillCoolBar[i])->MaxCoolTime;
 
+			SelectBar->CenterPos = XMFLOAT4(Player->skilldata.SellectBulletIndex * mWidth / 8 - (mWidth / 8)*1.5, 0.9*-mHeight / 2, 0, 0);
+		}
+		
+		if (resize)
+		{
+			SelectBar->ObjData.Scale = mWidth / 10;
+			resize = false;
 		}
 	}
 }
@@ -364,15 +370,18 @@ void Scene::Render(const GameTimer& gt)
 			Player->Camera.UpdateConstantBufferOrtho(commandlist);
 			Shaders->SetBillboardShader(commandlist);
 			AimUI->Render(commandlist, gt);
+			
 			for (int i = 0; i < 4; i++)
-			{
-				
 				SkillCoolBar[i]->Render(commandlist, gt);
+
+			SelectBar->Render(commandlist, gt);
+
+			for (int i = 0; i < 4; i++)
 				SkillUI[i]->Render(commandlist, gt);
-			}
+
 
 			//가장 마지막에 그려야한다. 안그려면 가려짐
-			SkillBackGround->Render(commandlist, gt);
+			//SkillBackGround->Render(commandlist, gt);
 			//다시 원상태로 바꿔줌. 이걸 안하면 피킹이 엉망이됨. 
 			Player->Camera.UpdateConstantBuffer(commandlist);
 	}

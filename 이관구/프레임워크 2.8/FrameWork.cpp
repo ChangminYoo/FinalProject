@@ -298,11 +298,16 @@ LRESULT FrameWork::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	//윈도우 사이즈가 바뀔때 마다 UI의 위치를 달리해야한다. 물론 틱함수를 만들어도 되지만, 굳이 매틱마다 불릴필요는 없으니까 이렇게 처리하자.
 		if (scene != NULL)
 		{
-			if (scene->SkillBackGround != NULL)
-			{
-				scene->SkillBackGround->ObjData.Scale = mClientWidth / 2;
-				scene->SkillBackGround->CenterPos.y = 0.9*-mClientHeight / 2;
-			}
+			scene->mHeight = mClientHeight;
+			scene->mWidth = mClientWidth;
+
+			scene->resize = true;
+
+			//if (scene->SkillBackGround != NULL)
+			//{
+			//	scene->SkillBackGround->ObjData.Scale = mClientWidth / 2;
+			//	scene->SkillBackGround->CenterPos.y = 0.9*-mClientHeight / 2;
+			//}
 			for(int i=0;i<4;i++)
 				if (scene->SkillCoolBar[i] != NULL)
 				{
@@ -313,7 +318,7 @@ LRESULT FrameWork::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 					scene->SkillUI[i]->ObjData.Scale = mClientWidth / 10;
 					scene->SkillUI[i]->CenterPos.x = i * mClientWidth / 8 - (mClientWidth / 8)*1.5;
-					scene->SkillUI[i]->CenterPos.y = 0.95*-mClientHeight / 2;
+					scene->SkillUI[i]->CenterPos.y = 0.9*-mClientHeight / 2;
 			
 				}
 		}

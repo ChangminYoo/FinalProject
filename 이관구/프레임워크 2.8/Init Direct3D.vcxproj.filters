@@ -90,6 +90,12 @@
     <ClCompile Include="Light.cpp">
       <Filter>소스파일\장면구성</Filter>
     </ClCompile>
+    <ClCompile Include="CGameUIObject.cpp">
+      <Filter>소스파일\게임오브젝트관련</Filter>
+    </ClCompile>
+    <ClCompile Include="MakeGeometry.cpp">
+      <Filter>소스파일\게임오브젝트관련</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="d3dUtil.h">
@@ -145,6 +151,12 @@
     </ClInclude>
     <ClInclude Include="Light.h">
       <Filter>헤더파일\장면구성</Filter>
+    </ClInclude>
+    <ClInclude Include="CGameUIObject.h">
+      <Filter>헤더파일\게임오브젝트관련</Filter>
+    </ClInclude>
+    <ClInclude Include="MakeGeometry.h">
+      <Filter>헤더파일\게임오브젝트관련</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

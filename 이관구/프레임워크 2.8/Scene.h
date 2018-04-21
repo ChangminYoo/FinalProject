@@ -3,7 +3,6 @@
 #include"Shader.h"
 #include "Timer.h"
 #include"Light.h"
-#include"CPlayer.h"
 using Microsoft::WRL::ComPtr;
 
 #define LIGHT_MAX 10
@@ -21,6 +20,8 @@ public:
 	~Scene();
 	float mWidth = 0;
 	float mHeight = 0;
+	bool resize = false;
+
 	//게임오브젝트, 카메라,세이더오브젝트,라이트,샘플러 포함해야댐	
 	int nShader;//세이더 갯수
 	int GAMESTATE = GS_START;//게임상태.
@@ -71,7 +72,7 @@ public:
 	CGameObject* SkillBackGround = NULL;
 	CGameObject* SkillUI[4] = {NULL};
 	CGameObject* SkillCoolBar[4] = { NULL };
-
+	CGameObject* SelectBar = NULL; //스킬선택
 private:
 	//여기다 물체 배치에 대한 상수들 넣는다.
 	float BigWall_X1 = 200 * sinf(0.4f * MMPE_PI);

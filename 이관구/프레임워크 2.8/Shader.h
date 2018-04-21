@@ -1,6 +1,7 @@
 #pragma once
 #include "d3dUtil.h"
 #include"CGameObject.h"
+#include"CGameUIObject.h"
 #include"CPlayer.h"
 using Microsoft::WRL::ComPtr;
 

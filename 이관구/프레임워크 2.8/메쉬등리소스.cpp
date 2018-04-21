@@ -1,4 +1,5 @@
 #include"CGameObject.h"
+#include"CGameUIObject.h"
 
 
 bool CCubeManObject::CreateMesh=false;
@@ -129,7 +130,13 @@ bool BarFrameObject::CreateMesh = false;
 unordered_map<string, unique_ptr<CTexture>> BarFrameObject::Textures;//텍스처들을 저장함
 CMesh  BarFrameObject::Mesh;//나중에 메쉬는 static으로 둬야함
 ComPtr<ID3D12DescriptorHeap> BarFrameObject::SrvDescriptorHeap;//텍스처 용 힙
-														  
+
+//--------------------------------------------------------------------------------------
+bool SelectBarObject::CreateMesh = false;
+unordered_map<string, unique_ptr<CTexture>> SelectBarObject::Textures;//텍스처들을 저장함
+CMesh SelectBarObject::Mesh;//나중에 메쉬는 static으로 둬야함
+ComPtr<ID3D12DescriptorHeap> SelectBarObject::SrvDescriptorHeap;//텍스처 용 힙			
+
 //--------------------------------------------------------------------------------------
 bool CoolBarObject::CreateMesh = false;
 unordered_map<string, unique_ptr<CTexture>> CoolBarObject::Textures;//텍스처들을 저장함

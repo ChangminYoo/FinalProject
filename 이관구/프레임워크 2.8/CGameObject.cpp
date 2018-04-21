@@ -3,9 +3,6 @@
 extern UINT CbvSrvDescriptorSize;
 
 
-
-
-
 CGameObject::CGameObject()
 {
 	
@@ -1038,7 +1035,7 @@ void HeavyBulletCube::Collision(list<CGameObject*>* collist, float DeltaTime)
 
 //-------------------- 테트라이크 ---------------------------------//
 
-Tetris1::Tetris1(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, CGameObject* master,CGameObject* lockon, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
+Tetris1::Tetris1(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, CGameObject* master, CGameObject* lockon, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
 {
 
 	if (CreateMesh == false)
@@ -1058,7 +1055,7 @@ Tetris1::Tetris1(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlis
 	//실제 룩벡터 등은 모두 UpdateLookVector에서 처리된다(라이트벡터도) 따라서 Tick함수에서 반드시 호출해야한다.
 	OffLookvector = XMFLOAT3(0, 0, 1);
 	OffRightvector = XMFLOAT3(1, 0, 0);
-	
+
 
 	UpdateLookVector();
 
@@ -1114,7 +1111,7 @@ void Tetris1::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList* comman
 {
 
 
-	CreateCube(&Mesh, 8,8, 8);
+	CreateCube(&Mesh, 8, 8, 8);
 	//
 	Mesh.SetNormal(false);
 	Mesh.CreateVertexBuffer(m_Device, commandlist);
@@ -1144,7 +1141,7 @@ void Tetris1::Tick(const GameTimer & gt)
 	//투사체는 생명 주기가 있어야 한다.
 	LifeTime -= gt.DeltaTime();
 
-	
+
 	if (LifeTime <= 0)
 		DelObj = true;
 
@@ -1199,7 +1196,7 @@ void Tetris1::Collision(list<CGameObject*>* collist, float DeltaTime)
 					{
 						ParticleList->push_back(new DamageObject(device, commandlist, ParticleList, gamedata.Damage, XMFLOAT4((*i)->CenterPos.x, (*i)->CenterPos.y + 11, (*i)->CenterPos.z, 0)));
 					}
-					
+
 				}
 				else//고정된 물체면 충돌한 평면의 노멀방향으로 cn을 설정할것.
 				{
@@ -1209,7 +1206,7 @@ void Tetris1::Collision(list<CGameObject*>* collist, float DeltaTime)
 				//충돌후 속도를 계산함.
 
 				pp->ResolveVelocity(*(*i)->pp, cn, DeltaTime);
-				
+
 				//겹치는 부분을 제거할필요가 없는게 투사체는 어처피 사라지니까.
 				DelObj = true;
 
@@ -1269,7 +1266,7 @@ Tetris2::Tetris2(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlis
 	pp->SetHalfBox(3, 9, 3);//충돌 박스의 x,y,z 크기
 	pp->SetDamping(1);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
 	pp->SetBounce(false);//튕기지 않는다.
-	pp->SetVelocity(0, -1*gamedata.Speed, 0);
+	pp->SetVelocity(0, -1 * gamedata.Speed, 0);
 	pp->SetMass(2);
 
 	if (ParticleList != NULL)
@@ -1380,7 +1377,7 @@ void Tetris2::Collision(list<CGameObject*>* collist, float DeltaTime)
 					{
 						ParticleList->push_back(new DamageObject(device, commandlist, ParticleList, gamedata.Damage, XMFLOAT4((*i)->CenterPos.x, (*i)->CenterPos.y + 11, (*i)->CenterPos.z, 0)));
 					}
-					
+
 
 				}
 				else//고정된 물체면 충돌한 평면의 노멀방향으로 cn을 설정할것.
@@ -1391,7 +1388,7 @@ void Tetris2::Collision(list<CGameObject*>* collist, float DeltaTime)
 				//충돌후 속도를 계산함.
 
 				pp->ResolveVelocity(*(*i)->pp, cn, DeltaTime);
-				
+
 				//겹치는 부분을 제거할필요가 없는게 투사체는 어처피 사라지니까.
 				DelObj = true;
 
@@ -1562,7 +1559,7 @@ void Tetris3::Collision(list<CGameObject*>* collist, float DeltaTime)
 					{
 						ParticleList->push_back(new DamageObject(device, commandlist, ParticleList, gamedata.Damage, XMFLOAT4((*i)->CenterPos.x, (*i)->CenterPos.y + 11, (*i)->CenterPos.z, 0)));
 					}
-					
+
 
 				}
 				else//고정된 물체면 충돌한 평면의 노멀방향으로 cn을 설정할것.
@@ -1573,7 +1570,7 @@ void Tetris3::Collision(list<CGameObject*>* collist, float DeltaTime)
 				//충돌후 속도를 계산함.
 
 				pp->ResolveVelocity(*(*i)->pp, cn, DeltaTime);
-							DelObj = true;
+				DelObj = true;
 
 
 			}
@@ -1743,7 +1740,7 @@ void Tetris4::Collision(list<CGameObject*>* collist, float DeltaTime)
 					{
 						ParticleList->push_back(new DamageObject(device, commandlist, ParticleList, gamedata.Damage, XMFLOAT4((*i)->CenterPos.x, (*i)->CenterPos.y + 11, (*i)->CenterPos.z, 0)));
 					}
-					
+
 
 				}
 				else//고정된 물체면 충돌한 평면의 노멀방향으로 cn을 설정할것.
@@ -1754,7 +1751,7 @@ void Tetris4::Collision(list<CGameObject*>* collist, float DeltaTime)
 				//충돌후 속도를 계산함.
 
 				pp->ResolveVelocity(*(*i)->pp, cn, DeltaTime);
-				
+
 				DelObj = true;
 
 
@@ -1787,7 +1784,7 @@ Tetrike::Tetrike(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlis
 	CenterPos.y += 150;
 
 	Blist = Bulletlist;
-	
+
 
 	ObjData.isAnimation = 0;
 	ObjData.Scale = 1.0;
@@ -1795,14 +1792,14 @@ Tetrike::Tetrike(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlis
 
 									 //게임관련 데이터들
 	gamedata.GodMode = true;
-	
-	
+
+
 	Master = master;
 	LockOn = lockon;
 	pp = NULL;
-	
 
-	
+
+
 }
 
 Tetrike::~Tetrike()
@@ -1816,7 +1813,7 @@ void Tetrike::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList* comman
 
 
 	CreateCube(&Mesh, 120, 0.01, 120);
-	
+
 	Mesh.SetNormal(false);
 	Mesh.CreateVertexBuffer(m_Device, commandlist);
 	Mesh.CreateIndexBuffer(m_Device, commandlist);
@@ -1835,11 +1832,11 @@ void Tetrike::SetMaterial(ID3D12Device * m_Device, ID3D12GraphicsCommandList * c
 
 void Tetrike::Tick(const GameTimer & gt)
 {
-	int c=abs((rand()*(int)(gt.TotalTime()*1000))) % 10;
+	int c = abs((rand()*(int)(gt.TotalTime() * 1000))) % 10;
 	c += 3;
 	//No애니메이션!
-	
-	if(ShotTime >=0.25)
+
+	if (ShotTime >= 0.25)
 	{
 		ShotTime = 0;
 	}
@@ -1851,33 +1848,33 @@ void Tetrike::Tick(const GameTimer & gt)
 			auto pos = CenterPos;
 			float  n = abs((abs(rand())*(int)(fabsf(gt.TotalTime()) * 31430)) % 90) - 45;
 			float n2 = abs((abs(rand())*(int)(fabsf(gt.TotalTime()) * 12340)) % 90) - 45;
-			
+
 			/*float b = sqrt(n*n + n2 * n2);
 
 			if (b != 0)
 			{
-				n /= b;
-				n2 /= b;
-				n *= 60;
-				n2 *= 60;
+			n /= b;
+			n2 /= b;
+			n *= 60;
+			n2 *= 60;
 
 			}
-*/
-			
+			*/
+
 			pos.x += n;
 			pos.z += n2;
 			pos.y += abs((abs(rand())*(int)(fabsf(gt.TotalTime()) * 12340)) % 5) - 5;
 
-			int g = (rand()*(int)(gt.TotalTime()*32524))%4;
-			if(g==0)
-				Blist->push_back(new Tetris1(device, commandlist, NULL, Master,NULL, pos));
+			int g = (rand()*(int)(gt.TotalTime() * 32524)) % 4;
+			if (g == 0)
+				Blist->push_back(new Tetris1(device, commandlist, NULL, Master, NULL, pos));
 			else if (g == 1)
 			{
 				auto t = new Tetris2(device, commandlist, NULL, Master, NULL, pos);
 				int k = (rand()*(int)(gt.TotalTime() * 32524)) % 2;
 
 				if (k == 0)
-					t->Orient=QuaternionMultiply(t->Orient,QuaternionRotation(XMFLOAT3(1, 0, 0), MMPE_PI / 2));
+					t->Orient = QuaternionMultiply(t->Orient, QuaternionRotation(XMFLOAT3(1, 0, 0), MMPE_PI / 2));
 				Blist->push_back(t);
 			}
 			else if (g == 2)
@@ -1888,9 +1885,9 @@ void Tetrike::Tick(const GameTimer & gt)
 				if (k == 0)
 					t->Orient = QuaternionMultiply(t->Orient, QuaternionRotation(XMFLOAT3(0, 0, 1), MMPE_PI / 2));
 				else if (k == 1)
-					t->Orient = QuaternionMultiply(t->Orient, QuaternionRotation(XMFLOAT3(0, 0, 1), MMPE_PI ));
+					t->Orient = QuaternionMultiply(t->Orient, QuaternionRotation(XMFLOAT3(0, 0, 1), MMPE_PI));
 				else if (k == 2)
-					t->Orient = QuaternionMultiply(t->Orient, QuaternionRotation(XMFLOAT3(0, 0, 1), 3*MMPE_PI /2));
+					t->Orient = QuaternionMultiply(t->Orient, QuaternionRotation(XMFLOAT3(0, 0, 1), 3 * MMPE_PI / 2));
 				Blist->push_back(t);
 			}
 			else if (g == 3)
@@ -1916,7 +1913,7 @@ void Tetrike::Tick(const GameTimer & gt)
 	//투사체는 생명 주기가 있어야 한다.
 	LifeTime -= gt.DeltaTime();
 
-	
+
 	if (LifeTime <= 0)
 		DelObj = true;
 
@@ -1938,7 +1935,6 @@ void Tetrike::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer& g
 	Mesh.Render(commandlist);
 
 }
-
 
 //---------------------- 스태틱 오브젝트 -----------------------------//
 
@@ -2289,6 +2285,192 @@ void ParticleObject::Render(ID3D12GraphicsCommandList * commandlist, const GameT
 
 ///////////////////////////////////
 
+//HPBar오브젝트
+BarObject::BarObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, CGameObject* master, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
+{
+	ObjData.isAnimation = 0;
+	ObjData.Scale = 10.0f;
+	ObjData.SpecularParamater = 0.5f;//스페큘러를 낮게준다.
+	ObjData.CustomData1.x = 1;
+
+	Master = master;
+	ObjData.CustomData1.y = Master->gamedata.HP;
+
+	//게임관련 데이터들
+	gamedata.HP = Master->gamedata.HP;
+	gamedata.GodMode = true;
+	staticobject = true;
+
+	if (CreateMesh == false)
+	{
+		Mesh.Index = NULL;
+		Mesh.SubResource = NULL;
+
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "HPTex", L"textures/ui/HP.dds", false);
+
+		SetMesh(m_Device, commandlist);
+		CreateMesh = true;
+
+	}
+}
+
+void BarObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
+{
+	UINT numOfitem = 1;
+
+	Mesh.SubResource = new CVertex;
+	Mesh.nVertex = numOfitem;
+	Mesh.nStride = sizeof(CVertex);
+	Mesh.nOffset = 0;
+
+
+	Mesh.Index = new UINT;
+	Mesh.nindex = numOfitem;
+	Mesh.nioffset = 0;
+	Mesh.nisize = sizeof(UINT);
+
+
+	//여기서 좌표를 일괄적으로 설정 할 수 있다
+	for (int i = 0; i < numOfitem; ++i)
+	{
+		Mesh.SubResource[i].V = XMFLOAT3(0, 0, 0);
+
+		Mesh.Index[i] = i;
+	}
+
+	Mesh.CreateVertexBuffer(m_Device, commandlist);
+	Mesh.CreateIndexBuffer(m_Device, commandlist);
+
+}
+
+void BarObject::Tick(const GameTimer & gt)
+{
+	//hp를 넣어주어서 shader에서 스케일크기만큼 바를 만든다. 	
+	//HP바는 커스텀데이터 y를 사용하며 여기에 마스터 HP 비율을 넣음.
+	if (Master->gamedata.HP <= 0)
+		Master->gamedata.HP = 0;
+
+	ObjData.CustomData1.y = Master->gamedata.HP / Master->gamedata.MAXHP;
+	CenterPos.x = Master->CenterPos.x; CenterPos.y = Master->CenterPos.y + 10; CenterPos.z = Master->CenterPos.z;
+}
+
+void BarObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer & gt)
+{
+	if (Textures.size()>0)
+		SetTexture(commandlist, SrvDescriptorHeap, Textures["HPTex"].get()->Resource.Get(), false);
+	UpdateConstBuffer(commandlist);
+
+
+	D3D12_VERTEX_BUFFER_VIEW vbv;
+
+	vbv.BufferLocation = Mesh.VertexBuffer->GetGPUVirtualAddress();
+	vbv.StrideInBytes = Mesh.nStride;
+	vbv.SizeInBytes = Mesh.nStride *  Mesh.nVertex;
+
+	commandlist->IASetVertexBuffers(0, 1, &vbv);
+
+	D3D12_INDEX_BUFFER_VIEW ibv;
+	ibv.BufferLocation = Mesh.IndexBuffer->GetGPUVirtualAddress();
+	ibv.Format = DXGI_FORMAT_R16_UINT;
+	ibv.SizeInBytes = Mesh.nisize *  Mesh.nindex;
+
+	commandlist->IASetIndexBuffer(&ibv);
+	commandlist->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
+
+
+	commandlist->DrawIndexedInstanced(Mesh.nindex, 1, Mesh.nioffset, Mesh.nOffset, 0);
+}
+
+
+//HPbar 틀
+BarFrameObject::BarFrameObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, CGameObject * master, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
+{
+	ObjData.isAnimation = 0;
+	ObjData.Scale = 10.0f;
+	ObjData.SpecularParamater = 0.5f;//스페큘러를 낮게준다.
+	ObjData.CustomData1.x = 4;
+
+	Master = master;
+
+	//게임관련 데이터들
+	gamedata.HP = Master->gamedata.HP;
+	gamedata.GodMode = true;
+	staticobject = true;
+
+	if (CreateMesh == false)
+	{
+		Mesh.Index = NULL;
+		Mesh.SubResource = NULL;
+
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "HPFrameTex", L"textures/ui/Bar.dds", false);
+
+		SetMesh(m_Device, commandlist);
+		CreateMesh = true;
+
+	}
+}
+
+void BarFrameObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
+{
+	UINT numOfitem = 1;
+
+	Mesh.SubResource = new CVertex;
+	Mesh.nVertex = numOfitem;
+	Mesh.nStride = sizeof(CVertex);
+	Mesh.nOffset = 0;
+
+
+	Mesh.Index = new UINT;
+	Mesh.nindex = numOfitem;
+	Mesh.nioffset = 0;
+	Mesh.nisize = sizeof(UINT);
+
+
+	//여기서 좌표를 일괄적으로 설정 할 수 있다
+	for (int i = 0; i < numOfitem; ++i)
+	{
+		Mesh.SubResource[i].V = XMFLOAT3(0, 0, 0);
+
+		Mesh.Index[i] = i;
+	}
+
+	Mesh.CreateVertexBuffer(m_Device, commandlist);
+	Mesh.CreateIndexBuffer(m_Device, commandlist);
+}
+
+void BarFrameObject::Tick(const GameTimer & gt)
+{
+	CenterPos.x = Master->CenterPos.x; CenterPos.y = Master->CenterPos.y + 10; CenterPos.z = Master->CenterPos.z;
+}
+
+void BarFrameObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer & gt)
+{
+	if (Textures.size()>0)
+		SetTexture(commandlist, SrvDescriptorHeap, Textures["HPFrameTex"].get()->Resource.Get(), false);
+	UpdateConstBuffer(commandlist);
+
+
+	D3D12_VERTEX_BUFFER_VIEW vbv;
+
+	vbv.BufferLocation = Mesh.VertexBuffer->GetGPUVirtualAddress();
+	vbv.StrideInBytes = Mesh.nStride;
+	vbv.SizeInBytes = Mesh.nStride *  Mesh.nVertex;
+
+	commandlist->IASetVertexBuffers(0, 1, &vbv);
+
+	D3D12_INDEX_BUFFER_VIEW ibv;
+	ibv.BufferLocation = Mesh.IndexBuffer->GetGPUVirtualAddress();
+	ibv.Format = DXGI_FORMAT_R16_UINT;
+	ibv.SizeInBytes = Mesh.nisize *  Mesh.nindex;
+
+	commandlist->IASetIndexBuffer(&ibv);
+	commandlist->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
+
+
+	commandlist->DrawIndexedInstanced(Mesh.nindex, 1, Mesh.nioffset, Mesh.nOffset, 0);
+}
+
+
 DamageObject::DamageObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist,  list<CGameObject*>*Plist,  float Damaged, XMFLOAT4 cp) : CGameObject(m_Device, commandlist,  Plist, cp)
 {
 	ObjData.isAnimation = 0;
@@ -2452,7 +2634,7 @@ RigidCubeObject::RigidCubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandL
 	rb = new RigidBody();
 	rb->SetPosition(&CenterPos);//이 값은 항상 갱신되야한다.
 	rb->SetHalfBox(10,10,10);//충돌 박스의 x,y,z 크기
-	rb->SetDamping(0.6f, 0.6f);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
+	rb->SetDamping(0.5f, 0.45f);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
 	rb->SetBounce(false);//튕기지 않는다.
 	rb->SetMass(1.5);//고정된 물체는 무게가 무한이다.
 	rb->SetIMoment(10,10,10);
@@ -2592,375 +2774,6 @@ void RigidCubeObject::Collision(list<CGameObject*>* collist, float DeltaTime)
 	}
 }
 
-
-
-//-------------------------------------U I------------------------------------------------
-
-AimObject::AimObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
-{
-	ObjData.isAnimation = 0;
-	ObjData.Scale = 20.0f;
-	ObjData.SpecularParamater = 0.5f;//스페큘러를 낮게준다.
-
-
-	 //게임관련 데이터들
-	gamedata.GodMode = true;
-	staticobject = true;
-
-	if (CreateMesh == false)
-	{
-		Mesh.Index = NULL;
-		Mesh.SubResource = NULL;
-
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "AimTex", L"textures/ui/aim_circle.dds", false);
-		SetMesh(m_Device, commandlist);
-		CreateMesh = true;
-
-	}
-
-}
-
-void AimObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
-{
-	UINT numOfitem = 1;
-
-
-	Mesh.SubResource = new CVertex;
-	Mesh.nVertex = numOfitem;
-	Mesh.nStride = sizeof(CVertex);
-	Mesh.nOffset = 0;
-
-
-	Mesh.Index = new UINT;
-	Mesh.nindex = numOfitem;
-	Mesh.nioffset = 0;
-	Mesh.nisize = sizeof(UINT);
-
-
-	//여기서 좌표를 일괄적으로 설정 할 수 있다
-	for (int i = 0; i < numOfitem; ++i)
-	{
-
-		Mesh.SubResource[i].V = XMFLOAT3(0, 0, 0);
-
-		Mesh.Index[i] = i;
-	}
-
-	Mesh.CreateVertexBuffer(m_Device, commandlist);
-	Mesh.CreateIndexBuffer(m_Device, commandlist);
-
-}
-
-
-void AimObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer & gt)
-{
-	//텍스처가 사이즈가 0 이상이면 연결
-	if (Textures.size()>0)
-		SetTexture(commandlist, SrvDescriptorHeap, Textures["AimTex"].get()->Resource.Get(), false);
-	//월드변환 업데이트 및 연결
-	UpdateConstBuffer(commandlist);
-
-	//애니메이션이 있으면 애니메이션또한 연결
-
-	//메쉬를 렌더해야하는데 포인트리스트로 설정해야하므로 그냥 이렇게 함.
-	D3D12_VERTEX_BUFFER_VIEW vbv;
-
-	vbv.BufferLocation = Mesh.VertexBuffer->GetGPUVirtualAddress();
-	vbv.StrideInBytes = Mesh.nStride;
-	vbv.SizeInBytes = Mesh.nStride *  Mesh.nVertex;
-
-	commandlist->IASetVertexBuffers(0, 1, &vbv);
-
-	D3D12_INDEX_BUFFER_VIEW ibv;
-	ibv.BufferLocation = Mesh.IndexBuffer->GetGPUVirtualAddress();
-	ibv.Format = DXGI_FORMAT_R16_UINT;
-	ibv.SizeInBytes = Mesh.nisize *  Mesh.nindex;
-
-	commandlist->IASetIndexBuffer(&ibv);
-	commandlist->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
-
-
-	commandlist->DrawIndexedInstanced(Mesh.nindex, 1, Mesh.nioffset, Mesh.nOffset, 0);
-}
-
-
-//HPBar오브젝트
-BarObject::BarObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, CGameObject* master, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
-{
-	ObjData.isAnimation = 0;
-	ObjData.Scale = 10.0f;
-	ObjData.SpecularParamater = 0.5f;//스페큘러를 낮게준다.
-	ObjData.CustomData1.x = 1;
-
-	Master = master;
-	ObjData.CustomData1.y = Master->gamedata.HP;
-	 //게임관련 데이터들
-	gamedata.MAXHP = 0;
-	gamedata.HP = Master->gamedata.HP;
-	gamedata.Damage = 0;
-	gamedata.GodMode = true;
-	gamedata.Speed = 0;
-	staticobject = true;
-
-	if (CreateMesh == false)
-	{
-		Mesh.Index = NULL;
-		Mesh.SubResource = NULL;
-
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "HPTex", L"textures/ui/HP.dds", false);
-
-		SetMesh(m_Device, commandlist);
-		CreateMesh = true;
-
-	}
-}
-
-void BarObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
-{
-	UINT numOfitem = 1;
-
-	Mesh.SubResource = new CVertex;
-	Mesh.nVertex = numOfitem;
-	Mesh.nStride = sizeof(CVertex);
-	Mesh.nOffset = 0;
-
-
-	Mesh.Index = new UINT;
-	Mesh.nindex = numOfitem;
-	Mesh.nioffset = 0;
-	Mesh.nisize = sizeof(UINT);
-
-
-	//여기서 좌표를 일괄적으로 설정 할 수 있다
-	for (int i = 0; i < numOfitem; ++i)
-	{
-		Mesh.SubResource[i].V = XMFLOAT3(0, 0, 0);
-
-		Mesh.Index[i] = i;
-	}
-
-	Mesh.CreateVertexBuffer(m_Device, commandlist);
-	Mesh.CreateIndexBuffer(m_Device, commandlist);
-
-}
-
-void BarObject::Tick(const GameTimer & gt)
-{
-	//hp를 넣어주어서 shader에서 스케일크기만큼 바를 만든다. 	
-	//HP바는 커스텀데이터 y를 사용하며 여기에 마스터 HP 비율을 넣음.
-	if (Master->gamedata.HP <= 0)
-		Master->gamedata.HP = 0;
-
-	ObjData.CustomData1.y = Master->gamedata.HP/Master->gamedata.MAXHP;
-	CenterPos.x = Master->CenterPos.x; CenterPos.y = Master->CenterPos.y + 10; CenterPos.z = Master->CenterPos.z;
-}
-
-void BarObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer & gt)
-{
-	if (Textures.size()>0)
-		SetTexture(commandlist, SrvDescriptorHeap, Textures["HPTex"].get()->Resource.Get(), false);
-	UpdateConstBuffer(commandlist);
-
-
-	D3D12_VERTEX_BUFFER_VIEW vbv;
-
-	vbv.BufferLocation = Mesh.VertexBuffer->GetGPUVirtualAddress();
-	vbv.StrideInBytes = Mesh.nStride;
-	vbv.SizeInBytes = Mesh.nStride *  Mesh.nVertex;
-
-	commandlist->IASetVertexBuffers(0, 1, &vbv);
-
-	D3D12_INDEX_BUFFER_VIEW ibv;
-	ibv.BufferLocation = Mesh.IndexBuffer->GetGPUVirtualAddress();
-	ibv.Format = DXGI_FORMAT_R16_UINT;
-	ibv.SizeInBytes = Mesh.nisize *  Mesh.nindex;
-
-	commandlist->IASetIndexBuffer(&ibv);
-	commandlist->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
-
-
-	commandlist->DrawIndexedInstanced(Mesh.nindex, 1, Mesh.nioffset, Mesh.nOffset, 0);
-}
-
-
-//HPbar 틀
-BarFrameObject::BarFrameObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, CGameObject * master, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
-{
-	ObjData.isAnimation = 0;
-	ObjData.Scale = 10.0f;
-	ObjData.SpecularParamater = 0.5f;//스페큘러를 낮게준다.
-	ObjData.CustomData1.x = 4;
-
-	Master = master;
-
-	//게임관련 데이터들
-	gamedata.MAXHP = 0;
-	gamedata.HP = Master->gamedata.HP;
-	gamedata.Damage = 0;
-	gamedata.GodMode = true;
-	gamedata.Speed = 0;
-	staticobject = true;
-
-	if (CreateMesh == false)
-	{
-		Mesh.Index = NULL;
-		Mesh.SubResource = NULL;
-
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "HPFrameTex", L"textures/ui/Bar.dds", false);
-
-		SetMesh(m_Device, commandlist);
-		CreateMesh = true;
-
-	}
-}
-
-void BarFrameObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
-{
-	UINT numOfitem = 1;
-
-	Mesh.SubResource = new CVertex;
-	Mesh.nVertex = numOfitem;
-	Mesh.nStride = sizeof(CVertex);
-	Mesh.nOffset = 0;
-
-
-	Mesh.Index = new UINT;
-	Mesh.nindex = numOfitem;
-	Mesh.nioffset = 0;
-	Mesh.nisize = sizeof(UINT);
-
-
-	//여기서 좌표를 일괄적으로 설정 할 수 있다
-	for (int i = 0; i < numOfitem; ++i)
-	{
-		Mesh.SubResource[i].V = XMFLOAT3(0, 0, 0);
-
-		Mesh.Index[i] = i;
-	}
-
-	Mesh.CreateVertexBuffer(m_Device, commandlist);
-	Mesh.CreateIndexBuffer(m_Device, commandlist);
-}
-
-void BarFrameObject::Tick(const GameTimer & gt)
-{
-	CenterPos.x = Master->CenterPos.x; CenterPos.y = Master->CenterPos.y + 10; CenterPos.z = Master->CenterPos.z;
-}
-
-void BarFrameObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer & gt)
-{
-	if (Textures.size()>0)
-		SetTexture(commandlist, SrvDescriptorHeap, Textures["HPFrameTex"].get()->Resource.Get(), false);
-	UpdateConstBuffer(commandlist);
-
-
-	D3D12_VERTEX_BUFFER_VIEW vbv;
-
-	vbv.BufferLocation = Mesh.VertexBuffer->GetGPUVirtualAddress();
-	vbv.StrideInBytes = Mesh.nStride;
-	vbv.SizeInBytes = Mesh.nStride *  Mesh.nVertex;
-
-	commandlist->IASetVertexBuffers(0, 1, &vbv);
-
-	D3D12_INDEX_BUFFER_VIEW ibv;
-	ibv.BufferLocation = Mesh.IndexBuffer->GetGPUVirtualAddress();
-	ibv.Format = DXGI_FORMAT_R16_UINT;
-	ibv.SizeInBytes = Mesh.nisize *  Mesh.nindex;
-
-	commandlist->IASetIndexBuffer(&ibv);
-	commandlist->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
-
-
-	commandlist->DrawIndexedInstanced(Mesh.nindex, 1, Mesh.nioffset, Mesh.nOffset, 0);
-}
-
-CoolBarObject::CoolBarObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, float maxtime, CGameObject * master, XMFLOAT4 cp) : CGameObject(m_Device,commandlist,Plist,cp)
-{
-	MaxCoolTime = maxtime;
-	ObjData.isAnimation = 0;
-	ObjData.Scale =80.0f;
-	ObjData.SpecularParamater = 0.5f;//스페큘러를 낮게준다.
-	ObjData.CustomData1.x = 1;
-
-	Master = master;
-	ObjData.CustomData1.y = 0;
-	//게임관련 데이터들
-	gamedata.MAXHP = 0;
-	gamedata.HP = 1;
-	gamedata.Damage = 0;
-	gamedata.GodMode = true;
-	gamedata.Speed = 0;
-	staticobject = true;
-
-	if (CreateMesh == false)
-	{
-		Mesh.Index = NULL;
-		Mesh.SubResource = NULL;
-
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "CoolBarTex", L"textures/ui/HP.dds", false);
-		SetMesh(m_Device, commandlist);
-		CreateMesh = true;
-
-	}
-
-}
-
-void CoolBarObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
-{
-	UINT numOfitem = 1;
-
-	Mesh.SubResource = new CVertex;
-	Mesh.nVertex = numOfitem;
-	Mesh.nStride = sizeof(CVertex);
-	Mesh.nOffset = 0;
-
-
-	Mesh.Index = new UINT;
-	Mesh.nindex = numOfitem;
-	Mesh.nioffset = 0;
-	Mesh.nisize = sizeof(UINT);
-
-
-	//여기서 좌표를 일괄적으로 설정 할 수 있다
-	for (int i = 0; i < numOfitem; ++i)
-	{
-		Mesh.SubResource[i].V = XMFLOAT3(0, 0, 0);
-
-		Mesh.Index[i] = i;
-	}
-
-	Mesh.CreateVertexBuffer(m_Device, commandlist);
-	Mesh.CreateIndexBuffer(m_Device, commandlist);
-
-}
-
-void CoolBarObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer & gt)
-{
-	if (Textures.size()>0)
-		SetTexture(commandlist, SrvDescriptorHeap, Textures["CoolBarTex"].get()->Resource.Get(), false);
-	UpdateConstBuffer(commandlist);
-
-
-	D3D12_VERTEX_BUFFER_VIEW vbv;
-
-	vbv.BufferLocation = Mesh.VertexBuffer->GetGPUVirtualAddress();
-	vbv.StrideInBytes = Mesh.nStride;
-	vbv.SizeInBytes = Mesh.nStride *  Mesh.nVertex;
-
-	commandlist->IASetVertexBuffers(0, 1, &vbv);
-
-	D3D12_INDEX_BUFFER_VIEW ibv;
-	ibv.BufferLocation = Mesh.IndexBuffer->GetGPUVirtualAddress();
-	ibv.Format = DXGI_FORMAT_R16_UINT;
-	ibv.SizeInBytes = Mesh.nisize *  Mesh.nindex;
-
-	commandlist->IASetIndexBuffer(&ibv);
-	commandlist->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
-
-
-	commandlist->DrawIndexedInstanced(Mesh.nindex, 1, Mesh.nioffset, Mesh.nOffset, 0);
-
-}
 
 
 //================================벽오브젝트=======================================
@@ -3260,7 +3073,7 @@ RangeObject::RangeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * co
 		Mesh.Index = NULL;
 		Mesh.SubResource = NULL;
 
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "CubeTex", L"textures/object/bricks2.dds", false);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "CubeTex", L"textures/ui/range.dds", false);
 		SetMesh(m_Device, commandlist);
 		SetMaterial(m_Device, commandlist);
 		CreateMesh = true;
@@ -3282,7 +3095,7 @@ RangeObject::RangeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * co
 	
 
 
-									 //게임관련 데이터들
+	//게임관련 데이터들
 	gamedata.GodMode = true;
 	
 	staticobject = true;
@@ -3295,7 +3108,7 @@ RangeObject::RangeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * co
 
 void RangeObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
 {
-	CreateCube(&Mesh, 120, 0.01, 120);
+	CreateCube(&Mesh, 60, 0.01, 60);
 
 	//모델 로드
 	//LoadMD5Model(L".\\플레이어메쉬들\\Cube.MD5MESH", &Mesh, 0, 1);
@@ -3330,733 +3143,3 @@ void RangeObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTime
 }
 
 
-
-
-
-SkillUIObject::SkillUIObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, int SkillNum, XMFLOAT4 cp) : CGameObject(m_Device,commandlist,Plist,cp)
-{
-	ObjData.isAnimation = 0;
-	ObjData.Scale = 80.0f;
-	ObjData.SpecularParamater = 0.5f;//스페큘러를 낮게준다.
-	ObjData.CustomData1.x = 0;
-
-	//게임관련 데이터들
-	gamedata.GodMode = true;
-	staticobject = true;
-
-	if (CreateMesh == false)
-	{
-		Mesh.Index = NULL;
-		Mesh.SubResource = NULL;
-
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "SkillBG", L"textures/ui/MainBar.dds", false);
-		SetMesh(m_Device, commandlist);
-		CreateMesh = true;
-
-	}
-}
-
-void SkillUIObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
-{
-	UINT numOfitem = 1;
-
-
-	Mesh.SubResource = new CVertex;
-	Mesh.nVertex = numOfitem;
-	Mesh.nStride = sizeof(CVertex);
-	Mesh.nOffset = 0;
-
-
-	Mesh.Index = new UINT;
-	Mesh.nindex = numOfitem;
-	Mesh.nioffset = 0;
-	Mesh.nisize = sizeof(UINT);
-
-
-	//여기서 좌표를 일괄적으로 설정 할 수 있다
-	for (int i = 0; i < numOfitem; ++i)
-	{
-
-		Mesh.SubResource[i].V = XMFLOAT3(0, 0, 0);
-
-		Mesh.Index[i] = i;
-	}
-
-	Mesh.CreateVertexBuffer(m_Device, commandlist);
-	Mesh.CreateIndexBuffer(m_Device, commandlist);
-}
-
-void SkillUIObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer & gt)
-{
-	//텍스처가 사이즈가 0 이상이면 연결
-	if (Textures.size()>0)
-		SetTexture(commandlist, SrvDescriptorHeap, Textures["SkillBG"].get()->Resource.Get(), false);
-	//월드변환 업데이트 및 연결
-	UpdateConstBuffer(commandlist);
-
-	//애니메이션이 있으면 애니메이션또한 연결
-
-	//메쉬를 렌더해야하는데 포인트리스트로 설정해야하므로 그냥 이렇게 함.
-	D3D12_VERTEX_BUFFER_VIEW vbv;
-
-	vbv.BufferLocation = Mesh.VertexBuffer->GetGPUVirtualAddress();
-	vbv.StrideInBytes = Mesh.nStride;
-	vbv.SizeInBytes = Mesh.nStride *  Mesh.nVertex;
-
-	commandlist->IASetVertexBuffers(0, 1, &vbv);
-
-	D3D12_INDEX_BUFFER_VIEW ibv;
-	ibv.BufferLocation = Mesh.IndexBuffer->GetGPUVirtualAddress();
-	ibv.Format = DXGI_FORMAT_R16_UINT;
-	ibv.SizeInBytes = Mesh.nisize *  Mesh.nindex;
-
-	commandlist->IASetIndexBuffer(&ibv);
-	commandlist->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
-
-
-	commandlist->DrawIndexedInstanced(Mesh.nindex, 1, Mesh.nioffset, Mesh.nOffset, 0);
-}
-
-//----------
-BackGroundSkillObject::BackGroundSkillObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
-{
-	ObjData.isAnimation = 0;
-	ObjData.Scale = 400.0f;
-	ObjData.SpecularParamater = 0.5f;//스페큘러를 낮게준다.
-	ObjData.CustomData1.x = 3;
-
-	//게임관련 데이터들
-	gamedata.GodMode = true;
-	staticobject = true;
-
-	if (CreateMesh == false)
-	{
-		Mesh.Index = NULL;
-		Mesh.SubResource = NULL;
-
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "SkillBG", L"textures/ui/MainBar.dds", false);
-		SetMesh(m_Device, commandlist);
-		CreateMesh = true;
-
-	}
-}
-
-void BackGroundSkillObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
-{
-	UINT numOfitem = 1;
-
-
-	Mesh.SubResource = new CVertex;
-	Mesh.nVertex = numOfitem;
-	Mesh.nStride = sizeof(CVertex);
-	Mesh.nOffset = 0;
-
-
-	Mesh.Index = new UINT;
-	Mesh.nindex = numOfitem;
-	Mesh.nioffset = 0;
-	Mesh.nisize = sizeof(UINT);
-
-
-	//여기서 좌표를 일괄적으로 설정 할 수 있다
-	for (int i = 0; i < numOfitem; ++i)
-	{
-
-		Mesh.SubResource[i].V = XMFLOAT3(0, 0, 0);
-
-		Mesh.Index[i] = i;
-	}
-
-	Mesh.CreateVertexBuffer(m_Device, commandlist);
-	Mesh.CreateIndexBuffer(m_Device, commandlist);
-}
-
-void BackGroundSkillObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer & gt)
-{
-	//텍스처가 사이즈가 0 이상이면 연결
-	if (Textures.size()>0)
-		SetTexture(commandlist, SrvDescriptorHeap, Textures["SkillBG"].get()->Resource.Get(), false);
-	//월드변환 업데이트 및 연결
-	UpdateConstBuffer(commandlist);
-
-	//애니메이션이 있으면 애니메이션또한 연결
-
-	//메쉬를 렌더해야하는데 포인트리스트로 설정해야하므로 그냥 이렇게 함.
-	D3D12_VERTEX_BUFFER_VIEW vbv;
-
-	vbv.BufferLocation = Mesh.VertexBuffer->GetGPUVirtualAddress();
-	vbv.StrideInBytes = Mesh.nStride;
-	vbv.SizeInBytes = Mesh.nStride *  Mesh.nVertex;
-
-	commandlist->IASetVertexBuffers(0, 1, &vbv);
-
-	D3D12_INDEX_BUFFER_VIEW ibv;
-	ibv.BufferLocation = Mesh.IndexBuffer->GetGPUVirtualAddress();
-	ibv.Format = DXGI_FORMAT_R16_UINT;
-	ibv.SizeInBytes = Mesh.nisize *  Mesh.nindex;
-
-	commandlist->IASetIndexBuffer(&ibv);
-	commandlist->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
-
-
-	commandlist->DrawIndexedInstanced(Mesh.nindex, 1, Mesh.nioffset, Mesh.nOffset, 0);
-}
-
-
-
-//-------------------------------------물체 만들기------------------------------------------------
-void CreateCube(CMesh * Mesh, float sizex, float sizey, float sizez)
-{
-	float halfx = 0.5 * sizex;
-	float halfy = 0.5 * sizey;
-	float halfz = 0.5 * sizez;
-
-	Mesh->SubResource = new CVertex[24];
-	Mesh->nVertex = 24;
-	Mesh->nStride = sizeof(CVertex);
-	Mesh->nOffset = 0;
-
-	//front
-	Mesh->SubResource[0].V = XMFLOAT3(-halfx, -halfy, -halfz);
-	Mesh->SubResource[1].V = XMFLOAT3(-halfx, +halfy, -halfz);
-	Mesh->SubResource[2].V = XMFLOAT3(+halfx, +halfy, -halfz);
-	Mesh->SubResource[3].V = XMFLOAT3(+halfx, -halfy, -halfz);
-
-	Mesh->SubResource[0].Tex = XMFLOAT2(0, 1);
-	Mesh->SubResource[1].Tex = XMFLOAT2(0, 0);
-	Mesh->SubResource[2].Tex = XMFLOAT2(1, 0);
-	Mesh->SubResource[3].Tex = XMFLOAT2(1, 1);
-
-	//back
-	Mesh->SubResource[4].V = XMFLOAT3(-halfx, -halfy, +halfz);
-	Mesh->SubResource[5].V = XMFLOAT3(+halfx, -halfy, +halfz);
-	Mesh->SubResource[6].V = XMFLOAT3(+halfx, +halfy, +halfz);
-	Mesh->SubResource[7].V = XMFLOAT3(-halfx, +halfy, +halfz);
-
-	Mesh->SubResource[4].Tex = XMFLOAT2(1, 1);
-	Mesh->SubResource[5].Tex = XMFLOAT2(0, 1);
-	Mesh->SubResource[6].Tex = XMFLOAT2(0, 0);
-	Mesh->SubResource[7].Tex = XMFLOAT2(1, 0);
-
-	//top
-	Mesh->SubResource[8].V = XMFLOAT3(-halfx, +halfy, -halfz);
-	Mesh->SubResource[9].V = XMFLOAT3(-halfx, +halfy, +halfz);
-	Mesh->SubResource[10].V = XMFLOAT3(+halfx, +halfy, +halfz);
-	Mesh->SubResource[11].V = XMFLOAT3(+halfx, +halfy, -halfz);
-
-	Mesh->SubResource[8].Tex = XMFLOAT2(0, 1);
-	Mesh->SubResource[9].Tex = XMFLOAT2(0, 0);
-	Mesh->SubResource[10].Tex = XMFLOAT2(1, 0);
-	Mesh->SubResource[11].Tex = XMFLOAT2(1, 1);
-
-
-	//bottom
-	Mesh->SubResource[12].V = XMFLOAT3(-halfx, -halfy, -halfz);
-	Mesh->SubResource[13].V = XMFLOAT3(+halfx, -halfy, -halfz);
-	Mesh->SubResource[14].V = XMFLOAT3(+halfx, -halfy, +halfz);
-	Mesh->SubResource[15].V = XMFLOAT3(-halfx, -halfy, +halfz);
-
-	Mesh->SubResource[12].Tex = XMFLOAT2(1, 1);
-	Mesh->SubResource[13].Tex = XMFLOAT2(0, 1);
-	Mesh->SubResource[14].Tex = XMFLOAT2(0, 0);
-	Mesh->SubResource[15].Tex = XMFLOAT2(1, 0);
-
-	//left
-	Mesh->SubResource[16].V = XMFLOAT3(-halfx, -halfy, +halfz);
-	Mesh->SubResource[17].V = XMFLOAT3(-halfx, +halfy, +halfz);
-	Mesh->SubResource[18].V = XMFLOAT3(-halfx, +halfy, -halfz);
-	Mesh->SubResource[19].V = XMFLOAT3(-halfx, -halfy, -halfz);
-
-	Mesh->SubResource[16].Tex = XMFLOAT2(0, 1);
-	Mesh->SubResource[17].Tex = XMFLOAT2(0, 0);
-	Mesh->SubResource[18].Tex = XMFLOAT2(1, 0);
-	Mesh->SubResource[19].Tex = XMFLOAT2(1, 1);
-
-	//right
-	Mesh->SubResource[20].V = XMFLOAT3(+halfx, -halfy, -halfz);
-	Mesh->SubResource[21].V = XMFLOAT3(+halfx, +halfy, -halfz);
-	Mesh->SubResource[22].V = XMFLOAT3(+halfx, +halfy, +halfz);
-	Mesh->SubResource[23].V = XMFLOAT3(+halfx, -halfy, +halfz);
-
-	Mesh->SubResource[20].Tex = XMFLOAT2(0, 1);
-	Mesh->SubResource[21].Tex = XMFLOAT2(0, 0);
-	Mesh->SubResource[22].Tex = XMFLOAT2(1, 0);
-	Mesh->SubResource[23].Tex = XMFLOAT2(1, 1);
-
-	Mesh->Index = new UINT[36];
-	Mesh->nindex = 36;
-	Mesh->nioffset = 0;
-	Mesh->nisize = sizeof(UINT);
-
-	Mesh->Index[0] = 0; Mesh->Index[1] = 1; Mesh->Index[2] = 2;
-	Mesh->Index[3] = 0; Mesh->Index[4] = 2; Mesh->Index[5] = 3;
-
-	Mesh->Index[6] = 4; Mesh->Index[7] = 5; Mesh->Index[8] = 6;
-	Mesh->Index[9] = 4; Mesh->Index[10] = 6; Mesh->Index[11] = 7;
-
-	Mesh->Index[12] = 8; Mesh->Index[13] = 9; Mesh->Index[14] = 10;
-	Mesh->Index[15] = 8; Mesh->Index[16] = 10; Mesh->Index[17] = 11;
-
-	Mesh->Index[18] = 12; Mesh->Index[19] = 13; Mesh->Index[20] = 14;
-	Mesh->Index[21] = 12; Mesh->Index[22] = 14; Mesh->Index[23] = 15;
-
-	Mesh->Index[24] = 16; Mesh->Index[25] = 17; Mesh->Index[26] = 18;
-	Mesh->Index[27] = 16; Mesh->Index[28] = 18; Mesh->Index[29] = 19;
-
-	Mesh->Index[30] = 20; Mesh->Index[31] = 21; Mesh->Index[32] = 22;
-	Mesh->Index[33] = 20; Mesh->Index[34] = 22; Mesh->Index[35] = 23;
-
-
-}
-
-void CreatePentagon(CMesh* Mesh, float size, float sizey)
-{
-	float half = 0.5 * size;
-	float y = 0.0f;
-
-	float s1 = half * sinf(0.4f * MMPE_PI);
-	float s2 = half * sinf(0.8f * MMPE_PI);
-
-	float c1 = half * cosf(0.4f * MMPE_PI);
-	float c2 = half * cosf(0.2f * MMPE_PI);
-
-	Mesh->SubResource = new CVertex[15];
-	Mesh->nVertex = 15;
-	Mesh->nStride = sizeof(CVertex);
-	Mesh->nOffset = 0;
-
-
-	Mesh->SubResource[0].V = XMFLOAT3(0, y, half);
-	Mesh->SubResource[1].V = XMFLOAT3(0, y, 0);
-	Mesh->SubResource[2].V = XMFLOAT3(-s1, y, c1);
-
-	Mesh->SubResource[0].Tex = XMFLOAT2(0, 0);
-	Mesh->SubResource[1].Tex = XMFLOAT2(1, 1);
-	Mesh->SubResource[2].Tex = XMFLOAT2(1, 0);
-
-	//
-	Mesh->SubResource[3].V = XMFLOAT3(0, y, 0);
-	Mesh->SubResource[4].V = XMFLOAT3(0, y, half);
-	Mesh->SubResource[5].V = XMFLOAT3(s1, y, c1);
-
-	Mesh->SubResource[3].Tex = XMFLOAT2(1, 1);
-	Mesh->SubResource[4].Tex = XMFLOAT2(0, 0);
-	Mesh->SubResource[5].Tex = XMFLOAT2(1, 0);
-
-	//
-	Mesh->SubResource[6].V = XMFLOAT3(s2, y, -c2);
-	Mesh->SubResource[7].V = XMFLOAT3(0, y, 0);
-	Mesh->SubResource[8].V = XMFLOAT3(s1, y, c1);
-
-	Mesh->SubResource[6].Tex = XMFLOAT2(1, 0);
-	Mesh->SubResource[7].Tex = XMFLOAT2(0, 0);
-	Mesh->SubResource[8].Tex = XMFLOAT2(1, 1);
-
-	//
-	Mesh->SubResource[9] = XMFLOAT3(-s2, y, -c2);
-	Mesh->SubResource[10] = XMFLOAT3(0, y, 0);
-	Mesh->SubResource[11] = XMFLOAT3(s2, y, -c2);
-
-	Mesh->SubResource[9].Tex = XMFLOAT2(0, 0);
-	Mesh->SubResource[10].Tex = XMFLOAT2(1, 1);
-	Mesh->SubResource[11].Tex = XMFLOAT2(1, 0);
-
-	//
-	Mesh->SubResource[12] = XMFLOAT3(-s1, y, c1);
-	Mesh->SubResource[13] = XMFLOAT3(0, y, 0);
-	Mesh->SubResource[14] = XMFLOAT3(-s2, y, -c2);
-
-	Mesh->SubResource[12].Tex = XMFLOAT2(0, 0);
-	Mesh->SubResource[13].Tex = XMFLOAT2(1, 1);
-	Mesh->SubResource[14].Tex = XMFLOAT2(1, 0);
-
-
-
-	Mesh->Index = new UINT[15];
-	Mesh->nindex = 15;
-	Mesh->nioffset = 0;
-	Mesh->nisize = sizeof(UINT);
-
-	Mesh->Index[0] = 0; Mesh->Index[1] = 1; Mesh->Index[2] = 2;
-	Mesh->Index[3] = 3; Mesh->Index[4] = 4; Mesh->Index[5] = 5;
-	Mesh->Index[6] = 6; Mesh->Index[7] = 7; Mesh->Index[8] = 8;
-	Mesh->Index[9] = 9; Mesh->Index[10] = 10; Mesh->Index[11] = 11;
-	Mesh->Index[12] = 12; Mesh->Index[13] = 13; Mesh->Index[14] = 14;
-
-
-
-
-}
-
-void CreateTetrisL(CMesh * Mesh, float sizex, float sizey, float sizez)
-{
-	float halfx = 0.5 * sizex;
-	float halfy = 0.5 * sizey;
-	float halfz = 0.5 * sizez;
-
-	Mesh->SubResource = new CVertex[48];
-	Mesh->nVertex = 48;
-	Mesh->nStride = sizeof(CVertex);
-	Mesh->nOffset = 0;
-
-	//front
-	Mesh->SubResource[0].V = XMFLOAT3(-halfx, -halfy, -halfz);
-	Mesh->SubResource[1].V = XMFLOAT3(-halfx, +halfy, -halfz);
-	Mesh->SubResource[2].V = XMFLOAT3(+halfx, +halfy, -halfz);
-	Mesh->SubResource[3].V = XMFLOAT3(+halfx, -halfy, -halfz);
-
-	Mesh->SubResource[0].Tex = XMFLOAT2(0, 1);
-	Mesh->SubResource[1].Tex = XMFLOAT2(0, 0);
-	Mesh->SubResource[2].Tex = XMFLOAT2(1, 0);
-	Mesh->SubResource[3].Tex = XMFLOAT2(1, 1);
-
-	//back
-	Mesh->SubResource[4].V = XMFLOAT3(-halfx, -halfy, +halfz);
-	Mesh->SubResource[5].V = XMFLOAT3(+halfx, -halfy, +halfz);
-	Mesh->SubResource[6].V = XMFLOAT3(+halfx, +halfy, +halfz);
-	Mesh->SubResource[7].V = XMFLOAT3(-halfx, +halfy, +halfz);
-
-	Mesh->SubResource[4].Tex = XMFLOAT2(1, 1);
-	Mesh->SubResource[5].Tex = XMFLOAT2(0, 1);
-	Mesh->SubResource[6].Tex = XMFLOAT2(0, 0);
-	Mesh->SubResource[7].Tex = XMFLOAT2(1, 0);
-
-	//top
-	Mesh->SubResource[8].V = XMFLOAT3(-halfx, +halfy, -halfz);
-	Mesh->SubResource[9].V = XMFLOAT3(-halfx, +halfy, +halfz);
-	Mesh->SubResource[10].V = XMFLOAT3(+halfx, +halfy, +halfz);
-	Mesh->SubResource[11].V = XMFLOAT3(+halfx, +halfy, -halfz);
-
-	Mesh->SubResource[8].Tex = XMFLOAT2(0, 1);
-	Mesh->SubResource[9].Tex = XMFLOAT2(0, 0);
-	Mesh->SubResource[10].Tex = XMFLOAT2(1, 0);
-	Mesh->SubResource[11].Tex = XMFLOAT2(1, 1);
-
-
-	//bottom
-	Mesh->SubResource[12].V = XMFLOAT3(-halfx, -halfy, -halfz);
-	Mesh->SubResource[13].V = XMFLOAT3(+halfx, -halfy, -halfz);
-	Mesh->SubResource[14].V = XMFLOAT3(+halfx, -halfy, +halfz);
-	Mesh->SubResource[15].V = XMFLOAT3(-halfx, -halfy, +halfz);
-
-	Mesh->SubResource[12].Tex = XMFLOAT2(1, 1);
-	Mesh->SubResource[13].Tex = XMFLOAT2(0, 1);
-	Mesh->SubResource[14].Tex = XMFLOAT2(0, 0);
-	Mesh->SubResource[15].Tex = XMFLOAT2(1, 0);
-
-	//left
-	Mesh->SubResource[16].V = XMFLOAT3(-halfx, -halfy, +halfz);
-	Mesh->SubResource[17].V = XMFLOAT3(-halfx, +halfy, +halfz);
-	Mesh->SubResource[18].V = XMFLOAT3(-halfx, +halfy, -halfz);
-	Mesh->SubResource[19].V = XMFLOAT3(-halfx, -halfy, -halfz);
-
-	Mesh->SubResource[16].Tex = XMFLOAT2(0, 1);
-	Mesh->SubResource[17].Tex = XMFLOAT2(0, 0);
-	Mesh->SubResource[18].Tex = XMFLOAT2(1, 0);
-	Mesh->SubResource[19].Tex = XMFLOAT2(1, 1);
-
-	//right
-	Mesh->SubResource[20].V = XMFLOAT3(+halfx, -halfy, -halfz);
-	Mesh->SubResource[21].V = XMFLOAT3(+halfx, +halfy, -halfz);
-	Mesh->SubResource[22].V = XMFLOAT3(+halfx, +halfy, +halfz);
-	Mesh->SubResource[23].V = XMFLOAT3(+halfx, -halfy, +halfz);
-
-	Mesh->SubResource[20].Tex = XMFLOAT2(0, 1);
-	Mesh->SubResource[21].Tex = XMFLOAT2(0, 0);
-	Mesh->SubResource[22].Tex = XMFLOAT2(1, 0);
-	Mesh->SubResource[23].Tex = XMFLOAT2(1, 1);
-
-	
-	//front
-	Mesh->SubResource[24+0].V = XMFLOAT3(-halfx + halfx * 2, -halfx+halfx * 2, -halfz);
-	Mesh->SubResource[24+1].V = XMFLOAT3(-halfx + halfx * 2, +halfx+halfx * 2, -halfz);
-	Mesh->SubResource[24+2].V = XMFLOAT3(+halfx + halfx * 2, +halfx+halfx * 2, -halfz);
-	Mesh->SubResource[24+3].V = XMFLOAT3(+halfx + halfx * 2, -halfx+halfx * 2, -halfz);
-					  
-	Mesh->SubResource[24+0].Tex = XMFLOAT2(0, 1);
-	Mesh->SubResource[24+1].Tex = XMFLOAT2(0, 0);
-	Mesh->SubResource[24+2].Tex = XMFLOAT2(1, 0);
-	Mesh->SubResource[24+3].Tex = XMFLOAT2(1, 1);
-					  
-	//back			  24+
-	Mesh->SubResource[24+4].V = XMFLOAT3(-halfx+halfx * 2, -halfx+halfx * 2, +halfz);
-	Mesh->SubResource[24+5].V = XMFLOAT3(+halfx+halfx * 2, -halfx+halfx * 2, +halfz);
-	Mesh->SubResource[24+6].V = XMFLOAT3(+halfx+halfx * 2, +halfx+halfx * 2, +halfz);
-	Mesh->SubResource[24+7].V = XMFLOAT3(-halfx+halfx * 2, +halfx+halfx * 2, +halfz);
-					  
-	Mesh->SubResource[24+4].Tex = XMFLOAT2(1, 1);
-	Mesh->SubResource[24+5].Tex = XMFLOAT2(0, 1);
-	Mesh->SubResource[24+6].Tex = XMFLOAT2(0, 0);
-	Mesh->SubResource[24+7].Tex = XMFLOAT2(1, 0);
-					  
-	//top			  24+
-	Mesh->SubResource[24+8].V = XMFLOAT3(-halfx + halfx * 2,  +halfx+halfx * 2, -halfz);
-	Mesh->SubResource[24+9].V = XMFLOAT3(-halfx + halfx * 2,  +halfx+halfx * 2, +halfz);
-	Mesh->SubResource[24+10].V = XMFLOAT3(+halfx + halfx * 2, +halfx+halfx * 2, +halfz);
-	Mesh->SubResource[24+11].V = XMFLOAT3(+halfx + halfx * 2, +halfx+halfx * 2, -halfz);
-					  
-	Mesh->SubResource[24+8].Tex = XMFLOAT2(0, 1);
-	Mesh->SubResource[24+9].Tex = XMFLOAT2(0, 0);
-	Mesh->SubResource[24+10].Tex = XMFLOAT2(1, 0);
-	Mesh->SubResource[24+11].Tex = XMFLOAT2(1, 1);
-					  	//bottom		  24+
-	Mesh->SubResource[24+12].V = XMFLOAT3(-halfx + halfx * 2, -halfx+halfx * 2, -halfz);
-	Mesh->SubResource[24+13].V = XMFLOAT3(+halfx + halfx * 2, -halfx+halfx * 2, -halfz);
-	Mesh->SubResource[24+14].V = XMFLOAT3(+halfx + halfx * 2, -halfx+halfx * 2, +halfz);
-	Mesh->SubResource[24+15].V = XMFLOAT3(-halfx + halfx * 2, -halfx+halfx * 2, +halfz);
-					  
-
-	Mesh->SubResource[24+12].Tex = XMFLOAT2(1, 1);
-	Mesh->SubResource[24+13].Tex = XMFLOAT2(0, 1);
-	Mesh->SubResource[24+14].Tex = XMFLOAT2(0, 0);
-	Mesh->SubResource[24+15].Tex = XMFLOAT2(1, 0);
-	
-	//left			  24+
-	Mesh->SubResource[24+16].V = XMFLOAT3(-halfx+halfx * 2, -halfx+halfx * 2, +halfz);
-	Mesh->SubResource[24+17].V = XMFLOAT3(-halfx+halfx * 2, +halfx+halfx * 2, +halfz);
-	Mesh->SubResource[24+18].V = XMFLOAT3(-halfx+halfx * 2, +halfx+halfx * 2, -halfz);
-	Mesh->SubResource[24+19].V = XMFLOAT3(-halfx+halfx * 2, -halfx+halfx * 2, -halfz);
-	
-	Mesh->SubResource[24+16].Tex = XMFLOAT2(0, 1);
-	Mesh->SubResource[24+17].Tex = XMFLOAT2(0, 0);
-	Mesh->SubResource[24+18].Tex = XMFLOAT2(1, 0);
-	Mesh->SubResource[24+19].Tex = XMFLOAT2(1, 1);
-	
-	//right			  24+
-	Mesh->SubResource[24+20].V = XMFLOAT3(+halfx+halfx * 2, -halfx+halfx * 2, -halfz);
-	Mesh->SubResource[24+21].V = XMFLOAT3(+halfx+halfx * 2, +halfx+halfx * 2, -halfz);
-	Mesh->SubResource[24+22].V = XMFLOAT3(+halfx+halfx * 2, +halfx+halfx * 2, +halfz);
-	Mesh->SubResource[24+23].V = XMFLOAT3(+halfx+halfx * 2, -halfx+halfx * 2, +halfz);
-					  
-	Mesh->SubResource[24+20].Tex = XMFLOAT2(0, 1);
-	Mesh->SubResource[24+21].Tex = XMFLOAT2(0, 0);
-	Mesh->SubResource[24+22].Tex = XMFLOAT2(1, 0);
-	Mesh->SubResource[24+23].Tex = XMFLOAT2(1, 1);
-
-
-
-	Mesh->Index = new UINT[72];
-	Mesh->nindex = 72;
-	Mesh->nioffset = 0;
-	Mesh->nisize = sizeof(UINT);
-
-	Mesh->Index[0] = 0; Mesh->Index[1] = 1; Mesh->Index[2] = 2;
-	Mesh->Index[3] = 0; Mesh->Index[4] = 2; Mesh->Index[5] = 3;
-
-	Mesh->Index[6] = 4; Mesh->Index[7] = 5; Mesh->Index[8] = 6;
-	Mesh->Index[9] = 4; Mesh->Index[10] = 6; Mesh->Index[11] = 7;
-
-	Mesh->Index[12] = 8; Mesh->Index[13] = 9; Mesh->Index[14] = 10;
-	Mesh->Index[15] = 8; Mesh->Index[16] = 10; Mesh->Index[17] = 11;
-
-	Mesh->Index[18] = 12; Mesh->Index[19] = 13; Mesh->Index[20] = 14;
-	Mesh->Index[21] = 12; Mesh->Index[22] = 14; Mesh->Index[23] = 15;
-
-	Mesh->Index[24] = 16; Mesh->Index[25] = 17; Mesh->Index[26] = 18;
-	Mesh->Index[27] = 16; Mesh->Index[28] = 18; Mesh->Index[29] = 19;
-
-	Mesh->Index[30] = 20; Mesh->Index[31] = 21; Mesh->Index[32] = 22;
-	Mesh->Index[33] = 20; Mesh->Index[34] = 22; Mesh->Index[35] = 23;
-
-
-	Mesh->Index[36+0]  = 24+0; Mesh->Index[36+1]   = 24+1; Mesh->Index[36 + 2] = 24+2;
-	Mesh->Index[36+3]  = 24+0; Mesh->Index[36 + 4] = 24+2; Mesh->Index[36 + 5] = 24+3;
-	Mesh->Index[36+6]  = 24+4; Mesh->Index[36 + 7] = 24+5; Mesh->Index[36 + 8] = 24+6;
-	Mesh->Index[36+9]  = 24+4; Mesh->Index[36 + 10]= 24+6; Mesh->Index[36 + 11] = 24+7;
-	Mesh->Index[36+12] = 24+8; Mesh->Index[36 + 13]= 24+9; Mesh->Index[36 + 14] = 24+10;
-	Mesh->Index[36+15] = 24+8; Mesh->Index[36 + 16]= 24+10; Mesh->Index[36 + 17] = 24+11;
-	Mesh->Index[36+18] = 24+12; Mesh->Index[36 + 19]= 24+13; Mesh->Index[36 + 20] = 24+14;
-	Mesh->Index[36+21] = 24+12; Mesh->Index[36+22] = 24+14; Mesh->Index[36+23] = 24+15;				
-	Mesh->Index[36+24] = 24+16; Mesh->Index[36+25] = 24+17; Mesh->Index[36+26] = 24+18;
-	Mesh->Index[36+27] = 24+16; Mesh->Index[36+28] = 24+18; Mesh->Index[36+29] = 24+19;				
-	Mesh->Index[36+30] = 24+20; Mesh->Index[36+31] = 24+21; Mesh->Index[36+32] = 24+22;
-	Mesh->Index[36+33] = 24+20; Mesh->Index[36+34] = 24+22; Mesh->Index[36+35] = 24+23;
-
-}
-
-
-void CreateTetrisㅗ(CMesh * Mesh, float sizex, float sizey, float sizez)
-{
-	float halfx = 0.5 * sizex;
-	float halfy = 0.5 * sizey;
-	float halfz = 0.5 * sizez;
-
-	Mesh->SubResource = new CVertex[48];
-	Mesh->nVertex = 48;
-	Mesh->nStride = sizeof(CVertex);
-	Mesh->nOffset = 0;
-
-	//front
-	Mesh->SubResource[0].V = XMFLOAT3(-halfx, -halfy, -halfz);
-	Mesh->SubResource[1].V = XMFLOAT3(-halfx, +halfy, -halfz);
-	Mesh->SubResource[2].V = XMFLOAT3(+halfx, +halfy, -halfz);
-	Mesh->SubResource[3].V = XMFLOAT3(+halfx, -halfy, -halfz);
-
-	Mesh->SubResource[0].Tex = XMFLOAT2(0, 1);
-	Mesh->SubResource[1].Tex = XMFLOAT2(0, 0);
-	Mesh->SubResource[2].Tex = XMFLOAT2(1, 0);
-	Mesh->SubResource[3].Tex = XMFLOAT2(1, 1);
-
-	//back
-	Mesh->SubResource[4].V = XMFLOAT3(-halfx, -halfy, +halfz);
-	Mesh->SubResource[5].V = XMFLOAT3(+halfx, -halfy, +halfz);
-	Mesh->SubResource[6].V = XMFLOAT3(+halfx, +halfy, +halfz);
-	Mesh->SubResource[7].V = XMFLOAT3(-halfx, +halfy, +halfz);
-
-	Mesh->SubResource[4].Tex = XMFLOAT2(1, 1);
-	Mesh->SubResource[5].Tex = XMFLOAT2(0, 1);
-	Mesh->SubResource[6].Tex = XMFLOAT2(0, 0);
-	Mesh->SubResource[7].Tex = XMFLOAT2(1, 0);
-
-	//top
-	Mesh->SubResource[8].V = XMFLOAT3(-halfx, +halfy, -halfz);
-	Mesh->SubResource[9].V = XMFLOAT3(-halfx, +halfy, +halfz);
-	Mesh->SubResource[10].V = XMFLOAT3(+halfx, +halfy, +halfz);
-	Mesh->SubResource[11].V = XMFLOAT3(+halfx, +halfy, -halfz);
-
-	Mesh->SubResource[8].Tex = XMFLOAT2(0, 1);
-	Mesh->SubResource[9].Tex = XMFLOAT2(0, 0);
-	Mesh->SubResource[10].Tex = XMFLOAT2(1, 0);
-	Mesh->SubResource[11].Tex = XMFLOAT2(1, 1);
-
-
-	//bottom
-	Mesh->SubResource[12].V = XMFLOAT3(-halfx, -halfy, -halfz);
-	Mesh->SubResource[13].V = XMFLOAT3(+halfx, -halfy, -halfz);
-	Mesh->SubResource[14].V = XMFLOAT3(+halfx, -halfy, +halfz);
-	Mesh->SubResource[15].V = XMFLOAT3(-halfx, -halfy, +halfz);
-
-	Mesh->SubResource[12].Tex = XMFLOAT2(1, 1);
-	Mesh->SubResource[13].Tex = XMFLOAT2(0, 1);
-	Mesh->SubResource[14].Tex = XMFLOAT2(0, 0);
-	Mesh->SubResource[15].Tex = XMFLOAT2(1, 0);
-
-	//left
-	Mesh->SubResource[16].V = XMFLOAT3(-halfx, -halfy, +halfz);
-	Mesh->SubResource[17].V = XMFLOAT3(-halfx, +halfy, +halfz);
-	Mesh->SubResource[18].V = XMFLOAT3(-halfx, +halfy, -halfz);
-	Mesh->SubResource[19].V = XMFLOAT3(-halfx, -halfy, -halfz);
-
-	Mesh->SubResource[16].Tex = XMFLOAT2(0, 1);
-	Mesh->SubResource[17].Tex = XMFLOAT2(0, 0);
-	Mesh->SubResource[18].Tex = XMFLOAT2(1, 0);
-	Mesh->SubResource[19].Tex = XMFLOAT2(1, 1);
-
-	//right
-	Mesh->SubResource[20].V = XMFLOAT3(+halfx, -halfy, -halfz);
-	Mesh->SubResource[21].V = XMFLOAT3(+halfx, +halfy, -halfz);
-	Mesh->SubResource[22].V = XMFLOAT3(+halfx, +halfy, +halfz);
-	Mesh->SubResource[23].V = XMFLOAT3(+halfx, -halfy, +halfz);
-
-	Mesh->SubResource[20].Tex = XMFLOAT2(0, 1);
-	Mesh->SubResource[21].Tex = XMFLOAT2(0, 0);
-	Mesh->SubResource[22].Tex = XMFLOAT2(1, 0);
-	Mesh->SubResource[23].Tex = XMFLOAT2(1, 1);
-
-
-	//front
-	Mesh->SubResource[24 + 0].V = XMFLOAT3(-halfx + halfx * 2, -halfx, -halfz);
-	Mesh->SubResource[24 + 1].V = XMFLOAT3(-halfx + halfx * 2, +halfx, -halfz);
-	Mesh->SubResource[24 + 2].V = XMFLOAT3(+halfx + halfx * 2, +halfx, -halfz);
-	Mesh->SubResource[24 + 3].V = XMFLOAT3(+halfx + halfx * 2, -halfx, -halfz);
-
-	Mesh->SubResource[24 + 0].Tex = XMFLOAT2(0, 1);
-	Mesh->SubResource[24 + 1].Tex = XMFLOAT2(0, 0);
-	Mesh->SubResource[24 + 2].Tex = XMFLOAT2(1, 0);
-	Mesh->SubResource[24 + 3].Tex = XMFLOAT2(1, 1);
-
-	//back			  24+
-	Mesh->SubResource[24 + 4].V = XMFLOAT3(-halfx + halfx * 2, -halfx, +halfz);
-	Mesh->SubResource[24 + 5].V = XMFLOAT3(+halfx + halfx * 2, -halfx, +halfz);
-	Mesh->SubResource[24 + 6].V = XMFLOAT3(+halfx + halfx * 2, +halfx, +halfz);
-	Mesh->SubResource[24 + 7].V = XMFLOAT3(-halfx + halfx * 2, +halfx, +halfz);
-
-	Mesh->SubResource[24 + 4].Tex = XMFLOAT2(1, 1);
-	Mesh->SubResource[24 + 5].Tex = XMFLOAT2(0, 1);
-	Mesh->SubResource[24 + 6].Tex = XMFLOAT2(0, 0);
-	Mesh->SubResource[24 + 7].Tex = XMFLOAT2(1, 0);
-
-	//top			  24+
-	Mesh->SubResource[24 + 8].V = XMFLOAT3(-halfx + halfx * 2, +halfx, -halfz);
-	Mesh->SubResource[24 + 9].V = XMFLOAT3(-halfx + halfx * 2, +halfx, +halfz);
-	Mesh->SubResource[24 + 10].V = XMFLOAT3(+halfx + halfx * 2, +halfx, +halfz);
-	Mesh->SubResource[24 + 11].V = XMFLOAT3(+halfx + halfx * 2, +halfx, -halfz);
-
-	Mesh->SubResource[24 + 8].Tex = XMFLOAT2(0, 1);
-	Mesh->SubResource[24 + 9].Tex = XMFLOAT2(0, 0);
-	Mesh->SubResource[24 + 10].Tex = XMFLOAT2(1, 0);
-	Mesh->SubResource[24 + 11].Tex = XMFLOAT2(1, 1);
-	//bottom		  24+
-	Mesh->SubResource[24 + 12].V = XMFLOAT3(-halfx + halfx * 2, -halfx, -halfz);
-	Mesh->SubResource[24 + 13].V = XMFLOAT3(+halfx + halfx * 2, -halfx, -halfz);
-	Mesh->SubResource[24 + 14].V = XMFLOAT3(+halfx + halfx * 2, -halfx, +halfz);
-	Mesh->SubResource[24 + 15].V = XMFLOAT3(-halfx + halfx * 2, -halfx, +halfz);
-
-
-	Mesh->SubResource[24 + 12].Tex = XMFLOAT2(1, 1);
-	Mesh->SubResource[24 + 13].Tex = XMFLOAT2(0, 1);
-	Mesh->SubResource[24 + 14].Tex = XMFLOAT2(0, 0);
-	Mesh->SubResource[24 + 15].Tex = XMFLOAT2(1, 0);
-
-	//left			  24+
-	Mesh->SubResource[24 + 16].V = XMFLOAT3(-halfx + halfx * 2, -halfx, +halfz);
-	Mesh->SubResource[24 + 17].V = XMFLOAT3(-halfx + halfx * 2, +halfx, +halfz);
-	Mesh->SubResource[24 + 18].V = XMFLOAT3(-halfx + halfx * 2, +halfx, -halfz);
-	Mesh->SubResource[24 + 19].V = XMFLOAT3(-halfx + halfx * 2, -halfx, -halfz);
-
-	Mesh->SubResource[24 + 16].Tex = XMFLOAT2(0, 1);
-	Mesh->SubResource[24 + 17].Tex = XMFLOAT2(0, 0);
-	Mesh->SubResource[24 + 18].Tex = XMFLOAT2(1, 0);
-	Mesh->SubResource[24 + 19].Tex = XMFLOAT2(1, 1);
-
-	//right			  24+
-	Mesh->SubResource[24 + 20].V = XMFLOAT3(+halfx + halfx * 2, -halfx, -halfz);
-	Mesh->SubResource[24 + 21].V = XMFLOAT3(+halfx + halfx * 2, +halfx, -halfz);
-	Mesh->SubResource[24 + 22].V = XMFLOAT3(+halfx + halfx * 2, +halfx, +halfz);
-	Mesh->SubResource[24 + 23].V = XMFLOAT3(+halfx + halfx * 2, -halfx, +halfz);
-
-	Mesh->SubResource[24 + 20].Tex = XMFLOAT2(0, 1);
-	Mesh->SubResource[24 + 21].Tex = XMFLOAT2(0, 0);
-	Mesh->SubResource[24 + 22].Tex = XMFLOAT2(1, 0);
-	Mesh->SubResource[24 + 23].Tex = XMFLOAT2(1, 1);
-
-
-
-	Mesh->Index = new UINT[72];
-	Mesh->nindex = 72;
-	Mesh->nioffset = 0;
-	Mesh->nisize = sizeof(UINT);
-
-	Mesh->Index[0] = 0; Mesh->Index[1] = 1; Mesh->Index[2] = 2;
-	Mesh->Index[3] = 0; Mesh->Index[4] = 2; Mesh->Index[5] = 3;
-
-	Mesh->Index[6] = 4; Mesh->Index[7] = 5; Mesh->Index[8] = 6;
-	Mesh->Index[9] = 4; Mesh->Index[10] = 6; Mesh->Index[11] = 7;
-
-	Mesh->Index[12] = 8; Mesh->Index[13] = 9; Mesh->Index[14] = 10;
-	Mesh->Index[15] = 8; Mesh->Index[16] = 10; Mesh->Index[17] = 11;
-
-	Mesh->Index[18] = 12; Mesh->Index[19] = 13; Mesh->Index[20] = 14;
-	Mesh->Index[21] = 12; Mesh->Index[22] = 14; Mesh->Index[23] = 15;
-
-	Mesh->Index[24] = 16; Mesh->Index[25] = 17; Mesh->Index[26] = 18;
-	Mesh->Index[27] = 16; Mesh->Index[28] = 18; Mesh->Index[29] = 19;
-
-	Mesh->Index[30] = 20; Mesh->Index[31] = 21; Mesh->Index[32] = 22;
-	Mesh->Index[33] = 20; Mesh->Index[34] = 22; Mesh->Index[35] = 23;
-
-
-	Mesh->Index[36 + 0] = 24 + 0; Mesh->Index[36 + 1] = 24 + 1; Mesh->Index[36 + 2] = 24 + 2;
-	Mesh->Index[36 + 3] = 24 + 0; Mesh->Index[36 + 4] = 24 + 2; Mesh->Index[36 + 5] = 24 + 3;
-	Mesh->Index[36 + 6] = 24 + 4; Mesh->Index[36 + 7] = 24 + 5; Mesh->Index[36 + 8] = 24 + 6;
-	Mesh->Index[36 + 9] = 24 + 4; Mesh->Index[36 + 10] = 24 + 6; Mesh->Index[36 + 11] = 24 + 7;
-	Mesh->Index[36 + 12] = 24 + 8; Mesh->Index[36 + 13] = 24 + 9; Mesh->Index[36 + 14] = 24 + 10;
-	Mesh->Index[36 + 15] = 24 + 8; Mesh->Index[36 + 16] = 24 + 10; Mesh->Index[36 + 17] = 24 + 11;
-	Mesh->Index[36 + 18] = 24 + 12; Mesh->Index[36 + 19] = 24 + 13; Mesh->Index[36 + 20] = 24 + 14;
-	Mesh->Index[36 + 21] = 24 + 12; Mesh->Index[36 + 22] = 24 + 14; Mesh->Index[36 + 23] = 24 + 15;
-	Mesh->Index[36 + 24] = 24 + 16; Mesh->Index[36 + 25] = 24 + 17; Mesh->Index[36 + 26] = 24 + 18;
-	Mesh->Index[36 + 27] = 24 + 16; Mesh->Index[36 + 28] = 24 + 18; Mesh->Index[36 + 29] = 24 + 19;
-	Mesh->Index[36 + 30] = 24 + 20; Mesh->Index[36 + 31] = 24 + 21; Mesh->Index[36 + 32] = 24 + 22;
-	Mesh->Index[36 + 33] = 24 + 20; Mesh->Index[36 + 34] = 24 + 22; Mesh->Index[36 + 35] = 24 + 23;
-
-}

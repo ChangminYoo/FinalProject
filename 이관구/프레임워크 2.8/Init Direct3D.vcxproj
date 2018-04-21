@@ -154,8 +154,10 @@
     <ClCompile Include="d3dUtil.cpp" />
     <ClCompile Include="DDSTextureLoader.cpp" />
     <ClCompile Include="FrameWork.cpp" />
+    <ClCompile Include="CGameUIObject.cpp" />
     <ClCompile Include="Light.cpp" />
     <ClCompile Include="mainFrameWork.cpp" />
+    <ClCompile Include="MakeGeometry.cpp" />
     <ClCompile Include="MMPE\MyMiniPysicsEngine.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="Shader.cpp" />
@@ -174,8 +176,10 @@
     <ClInclude Include="d3dUtil.h" />
     <ClInclude Include="DDSTextureLoader.h" />
     <ClInclude Include="FrameWork.h" />
+    <ClInclude Include="CGameUIObject.h" />
     <ClInclude Include="Light.h" />
     <ClInclude Include="mainFrameWork.h" />
+    <ClInclude Include="MakeGeometry.h" />
     <ClInclude Include="MMPE\MyMiniPysicsEngine.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Shader.h" />
