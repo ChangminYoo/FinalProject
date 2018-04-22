@@ -2624,9 +2624,9 @@ RigidCubeObject::RigidCubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandL
 
 
 	//광선충돌 검사용 육면체
-	XMFLOAT3 rx(10, 0, 0);
-	XMFLOAT3 ry(0, 10, 0);
-	XMFLOAT3 rz(0, 0, 10);
+	XMFLOAT3 rx(13, 0, 0);
+	XMFLOAT3 ry(0, 13, 0);
+	XMFLOAT3 rz(0, 0, 13);
 	rco.SetPlane(rx, ry, rz);
 
 	//리지드 바디
@@ -2760,6 +2760,9 @@ void RigidCubeObject::Collision(list<CGameObject*>* collist, float DeltaTime)
 						(*i)->AirBone = false;
 					}
 
+					/*rb->AmendTime = 3;
+					rb->AddForcePoint(XMFLOAT3(0, 0, 300), rb->CollisionPointVector[0].Pos);
+					rb->integrate(0.01);*/
 					rb->ResolvePenetration(ppConvertrb, DeltaTime);
 					(*i)->pp->SetVelocity(ppConvertrb.GetVelocity());
 					(*i)->pp->SetPosition(ppConvertrb.GetPosition());
