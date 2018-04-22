@@ -121,7 +121,7 @@ namespace MiniPhysicsEngineG9
 		void integrate(float DeltaTime);//적분기. 속도와 가속도로 위치를 구하고 가속도를 이용해 속도를 갱신함.
 		void SetMass(float M);//무게의 역을 쉽게 저장하기 위한 함수. M을 넣으면 역수로 저장해줌
 		float GetMass(bool Inverse = true);//기본적으로 무게의 역을 구함. 다만 false로 두면 그대로 나온다.
-		
+		float AmendTime = 0;//보정이 일어날 수 있는 시간은 0초가 되었을때.즉 그전에는 안정적인 충돌을 보장.
 		void SetIMoment(XMFLOAT4X4& i);//관성모멘트 설정. 인자로 넣을땐 그냥 넣고 저장은 인버스형식으로 해둔다.
 		void SetIMoment(float x,float y,float z);//육면체용 관성모멘트
 		XMFLOAT4X4 GetIMoment(bool Inverse=true);//기본적으로 역텐션을 구한다.

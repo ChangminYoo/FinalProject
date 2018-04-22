@@ -453,7 +453,7 @@ void FrameWork::OnMouseDown(WPARAM btnState, int x, int y)
 			if ((*b) != scene->Player->PlayerObject)//플레이어가 아닐경우
 			{
 				//광선의 길이보다 가까울때
-				if (FloatLength(Float4Add(scene->Player->PlayerObject->CenterPos, (*b)->CenterPos)) <= MAXRAYLEN)
+				if (FloatLength(Float4Add(scene->Player->PlayerObject->CenterPos, (*b)->CenterPos, false)) <= MAXRAYLEN)
 				{
 
 
@@ -475,7 +475,7 @@ void FrameWork::OnMouseDown(WPARAM btnState, int x, int y)
 			if ((*b) != scene->Player->PlayerObject)//플레이어가 아닐경우
 			{
 				//광선의 길이보다 가까울때
-				if (FloatLength(Float4Add(scene->Player->PlayerObject->CenterPos, (*b)->CenterPos)) <= MAXRAYLEN)
+				if (FloatLength(Float4Add(scene->Player->PlayerObject->CenterPos, (*b)->CenterPos, false)) <= MAXRAYLEN)
 				{
 
 
@@ -499,7 +499,7 @@ void FrameWork::OnMouseDown(WPARAM btnState, int x, int y)
 			if ((*b) != scene->Player->PlayerObject)//플레이어가 아닐경우
 			{
 				//광선의 길이보다 가까울때
-				if (FloatLength(Float4Add(scene->Player->PlayerObject->CenterPos, (*b)->CenterPos)) <= MAXRAYLEN)
+				if (FloatLength(Float4Add(scene->Player->PlayerObject->CenterPos, (*b)->CenterPos,false)) <= MAXRAYLEN)
 				{
 
 
@@ -588,7 +588,7 @@ void FrameWork::OnMouseMove(WPARAM btnState, int x, int y)
 				if ((*b) != scene->Player->PlayerObject)//플레이어가 아닐경우
 				{
 					//광선의 길이보다 가까울때
-					if (FloatLength(Float4Add(scene->Player->PlayerObject->CenterPos, (*b)->CenterPos)) <= MAXRAYLEN)
+					if (FloatLength(Float4Add(scene->Player->PlayerObject->CenterPos, (*b)->CenterPos, false)) <= MAXRAYLEN)
 					{
 
 
@@ -614,7 +614,7 @@ void FrameWork::OnMouseMove(WPARAM btnState, int x, int y)
 				{
 
 					//광선의 길이보다 가까울때
-					if (FloatLength(Float4Add(scene->Player->PlayerObject->CenterPos, (*b)->CenterPos)) <= MAXRAYLEN)
+					if (FloatLength(Float4Add(scene->Player->PlayerObject->CenterPos, (*b)->CenterPos, false)) <= MAXRAYLEN)
 					{
 						
 						

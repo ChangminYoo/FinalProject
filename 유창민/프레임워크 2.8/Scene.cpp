@@ -182,6 +182,8 @@ void Scene::CreateGameObject()
 	CGameObject* resource = NULL;
 	resource = new CCubeManObject(device, commandlist, &BbObject, XMFLOAT4(0, -0, 0, 0));
 	delete resource;
+	resource = new CZombieObject(device, commandlist, &BbObject, XMFLOAT4(0, -0, 0, 0));
+	delete resource;
 	resource = new BulletCube(device, commandlist,  &BbObject,NULL,XMFLOAT4(0,0,0,1),NULL, XMFLOAT4(0, -0, 0, 0));
 	delete resource;
 	resource = new HeavyBulletCube(device, commandlist, &BbObject, NULL, XMFLOAT4(0, 0, 0, 1), NULL, XMFLOAT4(0, -0, 0, 0));
@@ -267,7 +269,7 @@ void Scene::CreateGameObject()
 
 	//RigidObject
 	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, XMFLOAT4(0, 200, 190, 0)));
-	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, XMFLOAT4(-200, 250, 60, 0)));
+	/*RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, XMFLOAT4(-200, 250, 60, 0)));
 	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, XMFLOAT4(200, 330, 60, 0)));
 	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, XMFLOAT4(-110, 390, -100, 0)));
 	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, XMFLOAT4(130, 180, -120, 0)));
@@ -276,7 +278,7 @@ void Scene::CreateGameObject()
 	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, XMFLOAT4(-10, 270, 60, 0)));
 	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, XMFLOAT4(103, 220, -50, 0)));
 	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, XMFLOAT4(93, 160, 40, 0)));
-
+*/
 
 	StaticObject.push_back(new BuildingObject(device, commandlist, &BbObject, 0, XMFLOAT4(50, 0, -40, 0)));
 	StaticObject.push_back(new BuildingObject(device, commandlist, &BbObject, 0, XMFLOAT4(-40, 0, 10, 0)));

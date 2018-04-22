@@ -243,12 +243,17 @@ void MainFrameWork::Draw(const GameTimer& gt)
 {
 	scene->Render(gt);
 }
-
 void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, CGameObject * obj)
 {
 
+
 	if (obj->rb != NULL)
 	{
+		if (obj->rb->AmendTime > 0)
+			obj->rb->AmendTime -= mTimer.DeltaTime();
+		else
+			obj->rb->AmendTime = 0;
+
 		XMFLOAT4 arr[8];
 		obj->rb->GetEightPoint(arr, obj->GetUpvector(), obj->Lookvector, obj->Rightvector);//먼저 8 개의 점을 가져온다.
 		std::vector<CollisionPoint> allpoint;
@@ -290,7 +295,7 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 		for (auto i : tempcollisionpoint)
 		{
 			//실제충돌의 첫번째 깊이 - penetration들을 비교해서 Epsilon이면 이제 실제 접촉점이 저장되는 곳에 넣는다.
-			if (fabsf(tempcollisionpoint.front().penetration - i.penetration) <= 0.1)//차가 0.1정도면 실제로 충돌 가능성이 있다고 판단한다.
+			if (fabsf(tempcollisionpoint.front().penetration - i.penetration) <= 0.12)//차가 0.1정도면 실제로 충돌 가능성이 있다고 판단한다.
 			{
 				contactpoint.push_back(i);
 			}
@@ -359,8 +364,8 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 
 
 			//최소 임펄스를 구한다.
-			if (fabsf(impurse) < 60)
-				impurse = 60;
+			if (fabsf(impurse) < 65)
+				impurse = 65;
 
 
 
@@ -368,7 +373,7 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 			//그후 사잇각이 특정각도 이하면 보정시킨다. 
 			//단 이게 double로 해도 0이아닌데 0이나오는경우가 생긴다.
 			//따라서 0일경우 그냥 충격량을 가해서 각도를 변경시킨다.
-			if (abs(theta) <= MMPE_PI / 30 && abs(theta) != 0  && abs(impurse)<=200)//대략 5도 이하면 보정시킴.
+			if (abs(theta) <= MMPE_PI / 26 && abs(theta) != 0 && abs(impurse) <= 200&& obj->rb->AmendTime <= 0)//대략 5도 이하면 보정시킴.
 			{
 				//회전축을 구하고..
 				XMFLOAT3 mAxis = XMFloat4to3(Float4Cross(V1, V2));
@@ -390,9 +395,9 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 
 				//현재 여기서 선속도의 가장 많은 부분을 차지함
 				auto d = obj->rb->GetVelocity();
-				d.x = -obj->rb->GetE() *d.x;
+				//d.x = -obj->rb->GetE() *d.x;
 				d.y = -obj->rb->GetE() * d.y;
-				d.z = -obj->rb->GetE() *d.z;
+				//d.z = -obj->rb->GetE() *d.z;
 				obj->rb->SetVelocity(d);
 
 
@@ -519,12 +524,12 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 					impurse = 500;
 
 				//최소 임펄스를 구한다.
-				if (fabsf(impurse) < 60)
-					impurse = 60;
+				if (fabsf(impurse) < 65)
+					impurse = 65;
 
 
 				//그후 사잇각이 특정각도 이하면 보정시킨다. 
-				if (abs(theta) <= MMPE_PI / 28 && abs(theta) != 0 && abs(impurse) <= 300)//대략 5도 이하면 보정시킴.
+				if (abs(theta) <= MMPE_PI / 18 && abs(theta) != 0 && abs(impurse) <= 300 && obj->rb->AmendTime <= 0)//대략 5도 이하면 보정시킴.
 				{
 					//회전축을 구하고
 					XMFLOAT3 mAxis = XMFloat4to3(Float4Cross(V2, V3));
@@ -578,7 +583,7 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 						//그리고 재귀 시킨다. 왜냐하면 보정이되었으면 allpoint,tempcollisionpoint,contactpoint , penetration 모두 다 바뀌어야 하기 때문이다.
 						//재귀 후 아마 2가지 경우의수가 있다. 충돌이 일어나거나, 아니면 살짝 떠있거나.. 어쨌든 잘 해결 된다.
 						obj->rb->SetAngularVelocity(0, 0, 0);
-						
+
 
 						return;
 					}
@@ -587,9 +592,9 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 
 					//현재 여기서 선속도의 가장 많은 부분을 차지함
 					auto d = obj->rb->GetVelocity();
-					d.x = -obj->rb->GetE() *d.x;
+					//d.x = -obj->rb->GetE() *d.x;
 					d.y = -obj->rb->GetE() * d.y;
-					d.z = -obj->rb->GetE() *d.z;
+					//d.z = -obj->rb->GetE() *d.z;
 					obj->rb->SetVelocity(d);
 
 
@@ -649,7 +654,7 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 				//교정할 각도.  
 				double theta = acos(tempdot);
 
-				if (abs(theta) != 0)
+				if (abs(theta) != 0 && obj->rb->AmendTime <= 0)
 				{
 
 					//회전축을 구하고
@@ -660,7 +665,7 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 					//보정을 시킨다.
 					AmendObject(mAxis, theta, obj);
 				}
-				
+
 
 
 
@@ -708,9 +713,60 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 
 		}
 
+		//==================================== 충돌 후 예외의 상황을 방지하기 위한 처리들 ============================================//
+
 		//너무 낮은위치에 있을때 속도를 0으로
 		if (obj->CenterPos.y < -200)
 			obj->rb->SetVelocity(0, 0, 0);
+
+
+		// 뭔가 보정을 하거나 한다음 겹쳐진 부분을 재해결.
+
+		XMFLOAT4 tarr[8];
+		obj->rb->GetEightPoint(tarr, obj->GetUpvector(), obj->Lookvector, obj->Rightvector);//먼저 8 개의 점을 가져온다.
+		std::vector<CollisionPoint> tallpoint;
+		std::vector<CollisionPoint> ttempcollisionpoint;
+		std::vector<CollisionPoint> tcontactpoint;
+
+
+
+		for (int i = 0; i < 8; i++)
+		{
+			float temppenetration = tarr[i].x*Normal.x + tarr[i].y*Normal.y + tarr[i].z*Normal.z;
+			//충돌 점을 생성한다음 저장한다.
+			CollisionPoint cp;
+			cp.Pos = tarr[i];
+			cp.penetration = temppenetration;
+			cp.pAxis = Normal;
+			tallpoint.push_back(cp);
+		}
+
+		//penetration이 작은 순으로 정렬
+		sort(tallpoint.begin(), tallpoint.end(), [](CollisionPoint& a, CollisionPoint& b)
+		{
+			return a.penetration < b.penetration;
+		});
+
+		//실제로 정렬된 녀석중 1차적으로 충돌이 된 녀석들을 tempcollisionpoint에 저장한다.
+		for (auto i : tallpoint)
+		{
+			float temppenetration = i.Pos.x*Normal.x + i.Pos.y*Normal.y + i.Pos.z*Normal.z;
+			if (temppenetration < 0)//0이하면 실제로 충돌함
+				ttempcollisionpoint.push_back(i);
+
+		}
+
+		if (ttempcollisionpoint.size() > 0)
+		{
+			auto px = fabsf(ttempcollisionpoint[0].penetration)*Normal.x;
+			auto py = fabsf(ttempcollisionpoint[0].penetration)*Normal.y;
+			auto pz = fabsf(ttempcollisionpoint[0].penetration)*Normal.z;
+			obj->CenterPos.x += px;
+			obj->CenterPos.y += py;
+			obj->CenterPos.z += pz;
+
+		}
+
 
 		allpoint.clear();
 		tempcollisionpoint.clear();
