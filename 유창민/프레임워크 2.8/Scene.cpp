@@ -182,8 +182,6 @@ void Scene::CreateGameObject()
 	CGameObject* resource = NULL;
 	resource = new CCubeManObject(device, commandlist, &BbObject, XMFLOAT4(0, -0, 0, 0));
 	delete resource;
-	resource = new CZombieObject(device, commandlist, &BbObject, XMFLOAT4(0, -0, 0, 0));
-	delete resource;
 	resource = new BulletCube(device, commandlist,  &BbObject,NULL,XMFLOAT4(0,0,0,1),NULL, XMFLOAT4(0, -0, 0, 0));
 	delete resource;
 	resource = new HeavyBulletCube(device, commandlist, &BbObject, NULL, XMFLOAT4(0, 0, 0, 1), NULL, XMFLOAT4(0, -0, 0, 0));
@@ -234,6 +232,7 @@ void Scene::CreateGameObject()
 	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(55, 62, -75, 0)));
 	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(45, 51, -49, 0)));
 
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(-39, 62, 31, 0)));
 	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(-55, 42, -15, 0)));
 	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(-67, 22, 16, 0)));
 
