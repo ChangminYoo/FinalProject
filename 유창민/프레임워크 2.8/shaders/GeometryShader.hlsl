@@ -208,6 +208,8 @@ float4 PS2(GeoOut pin) : SV_TARGET
 	//텍스쳐의 기본 색상 - 샘플러를 사용하여 값 추출
 	textureColor = gDiffuseMap.Sample(gsamAnisotropicWrap, pin.Tex);
 
+	//textureColor += Emissive;
+
 	//알파테스트 실행
 	clip(textureColor.a - 0.1f);
 

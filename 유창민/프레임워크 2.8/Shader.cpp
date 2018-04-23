@@ -177,7 +177,7 @@ void Shader::CreateShader(ID3D12Device * Device, ID3D12RootSignature * GraphicsR
 	Device->CreateGraphicsPipelineState(&d3dPipelineStateDesc, IID_PPV_ARGS(&PSO));//PSO생성
 
 
-																				   //블랜딩용 PSO를 만듬
+	//블랜딩용 PSO를 만듬
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC blendPsoDesc = d3dPipelineStateDesc;
 	blendPsoDesc.VS = CreateVertexShader(L"shaders/ShaderFile.hlsl", "VS", "vs_5_0");
 	blendPsoDesc.PS = CreatePixelShader(L"shaders/ShaderFile.hlsl", "PS", "ps_5_0");;
@@ -186,8 +186,13 @@ void Shader::CreateShader(ID3D12Device * Device, ID3D12RootSignature * GraphicsR
 	Device->CreateGraphicsPipelineState(&blendPsoDesc, IID_PPV_ARGS(&BlendPSO));//블랜드용 PSO생성
 
 
+	D3D12_GRAPHICS_PIPELINE_STATE_DESC bulletPsoDesc = d3dPipelineStateDesc;
+	bulletPsoDesc.VS = CreateVertexShader(L"shaders/ShaderFile.hlsl", "VS", "vs_5_0");
+	bulletPsoDesc.PS = CreatePixelShader(L"shaders/ShaderFile.hlsl", "PS2", "ps_5_0");;
+	Device->CreateGraphicsPipelineState(&bulletPsoDesc, IID_PPV_ARGS(&BulletPSO));//블랜드용 PSO생성
 
-																				//SKY PSO
+
+	//SKY PSO
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC skyPsoDesc = d3dPipelineStateDesc;
 	skyPsoDesc.VS = CreateVertexShader(L"shaders/Sky.hlsl", "VS", "vs_5_0");
 	skyPsoDesc.PS = CreatePixelShader(L"shaders/Sky.hlsl", "PS", "ps_5_0");
@@ -232,6 +237,10 @@ void Shader::SetShader(ID3D12GraphicsCommandList* commandlist, bool isBlend)
 	else
 		commandlist->SetPipelineState(BlendPSO.Get());
 
+}
+void Shader::SetBulletShader(ID3D12GraphicsCommandList* commandlist)
+{
+	commandlist->SetPipelineState(BulletPSO.Get());
 }
 
 void Shader::SetSkyShader(ID3D12GraphicsCommandList * commandlist)
@@ -278,8 +287,6 @@ void Shader::Render(ID3D12GraphicsCommandList * CommandList, const GameTimer& gt
 				SetShader(CommandList, true);
 				//블랜딩용 PSO로 그림
 				(*b)->Render(CommandList, gt);
-				//다시 원상태 PSO로 연결
-				SetShader(CommandList, false);
 			}
 			else//블랜딩 안씀
 			{
@@ -303,7 +310,7 @@ void Shader::Render(ID3D12GraphicsCommandList * CommandList, const GameTimer& gt
 			if ((*b)->Blending)
 			{
 				//블랜딩용 PSO 연결
-				SetShader(CommandList, true);
+				SetBulletShader(CommandList);
 				//블랜딩용 PSO로 그림
 				(*b)->Render(CommandList, gt);
 				//다시 원상태 PSO로 연결
@@ -312,12 +319,15 @@ void Shader::Render(ID3D12GraphicsCommandList * CommandList, const GameTimer& gt
 			else//블랜딩 안씀
 			{
 				if (ishalfalphaRender(*b) == false)
+				{
+					SetBulletShader(CommandList);
 					(*b)->Render(CommandList, gt);
+				}
 				else
 				{
 					auto tempv = (*b)->ObjData.BlendValue;
 					(*b)->ObjData.BlendValue = 0.5f;
-					SetShader(CommandList, true);
+					SetBulletShader(CommandList);
 					//블랜딩용 PSO로 그림1
 					(*b)->Render(CommandList, gt);
 					//다시 원상태 PSO로 연결

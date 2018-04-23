@@ -288,7 +288,7 @@ CCubeManObject::CCubeManObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 	UpdateLookVector();
 	ObjData.isAnimation = true;
 	ObjData.Scale = 3;
-	ObjData.SpecularParamater = 0.0f;//스페큘러를 낮게준다.
+	ObjData.SpecularParamater = 0.3f;//스페큘러를 낮게준다.
 	
 	//게임 데이터 (스텟)을 찍는다. 캐릭터는 데미지를 갖지 않고, 탄환이 데미지를 갖도록하자.
 	gamedata.MAXHP = 100;
@@ -692,7 +692,7 @@ BulletCube::BulletCube(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 
 	ObjData.isAnimation = 0;
 	ObjData.Scale = 1.0;
-	ObjData.SpecularParamater = 0.0f;//스페큘러를 낮게준다.
+	ObjData.SpecularParamater = 0.8f;//스페큘러를 낮게준다.
 	
 	//게임관련 데이터들
 	gamedata.MAXHP = 1;
@@ -755,8 +755,8 @@ void BulletCube::SetMaterial(ID3D12Device * m_Device, ID3D12GraphicsCommandList 
 	if (Mat.ConstBuffer == NULL)
 		Mat.ConstBuffer = new UploadBuffer<MaterialData>(m_Device, 1, true);
 
-
 	Mat.MatData.Roughness = 0.3f;
+	Mat.MatData.Emissive = XMFLOAT4{ 0.7f, 0.23f, 0.13f, 0.7f };
 }
 
 void BulletCube::Tick(const GameTimer & gt)
@@ -876,7 +876,7 @@ HeavyBulletCube::HeavyBulletCube(ID3D12Device * m_Device, ID3D12GraphicsCommandL
 
 	ObjData.isAnimation = 0;
 	ObjData.Scale = 2.0;
-	ObjData.SpecularParamater = 0.0f;//스페큘러를 낮게준다.
+	ObjData.SpecularParamater = 0.8f;//스페큘러를 낮게준다.
 
 									 //게임관련 데이터들
 	gamedata.MAXHP = 1;
@@ -939,7 +939,7 @@ void HeavyBulletCube::SetMaterial(ID3D12Device * m_Device, ID3D12GraphicsCommand
 	if (Mat.ConstBuffer == NULL)
 		Mat.ConstBuffer = new UploadBuffer<MaterialData>(m_Device, 1, true);
 
-
+	Mat.MatData.Emissive = XMFLOAT4{ 0.12f, 0.53f, 0.13f, 0.8f };
 	Mat.MatData.Roughness = 0.3f;
 }
 
@@ -1088,13 +1088,7 @@ Tetris1::Tetris1(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlis
 	pp->SetVelocity(0, -1 * gamedata.Speed, 0);
 	pp->SetMass(2);
 
-	if (ParticleList != NULL)
-	{
-		BulletParticles = new ParticleObject(m_Device, commandlist, ParticleList, this, 0.2f, XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, 0));
-		ParticleList->push_back(BulletParticles);
-		BulletParticles2 = new ParticleObject(m_Device, commandlist, ParticleList, this, 0.3f, XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, 0));
-		ParticleList->push_back(BulletParticles2);
-	}
+
 
 }
 
@@ -1269,13 +1263,6 @@ Tetris2::Tetris2(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlis
 	pp->SetVelocity(0, -1 * gamedata.Speed, 0);
 	pp->SetMass(2);
 
-	if (ParticleList != NULL)
-	{
-		BulletParticles = new ParticleObject(m_Device, commandlist, ParticleList, this, 0.2f, XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, 0));
-		ParticleList->push_back(BulletParticles);
-		BulletParticles2 = new ParticleObject(m_Device, commandlist, ParticleList, this, 0.3f, XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, 0));
-		ParticleList->push_back(BulletParticles2);
-	}
 
 }
 
@@ -1451,13 +1438,6 @@ Tetris3::Tetris3(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlis
 	pp->SetVelocity(0, -1 * gamedata.Speed, 0);
 	pp->SetMass(2);
 
-	if (ParticleList != NULL)
-	{
-		BulletParticles = new ParticleObject(m_Device, commandlist, ParticleList, this, 0.2f, XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, 0));
-		ParticleList->push_back(BulletParticles);
-		BulletParticles2 = new ParticleObject(m_Device, commandlist, ParticleList, this, 0.3f, XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, 0));
-		ParticleList->push_back(BulletParticles2);
-	}
 
 }
 
@@ -1631,14 +1611,6 @@ Tetris4::Tetris4(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlis
 	pp->SetBounce(false);//튕기지 않는다.
 	pp->SetVelocity(0, -1 * gamedata.Speed, 0);
 	pp->SetMass(2);
-
-	if (ParticleList != NULL)
-	{
-		BulletParticles = new ParticleObject(m_Device, commandlist, ParticleList, this, 0.2f, XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, 0));
-		ParticleList->push_back(BulletParticles);
-		BulletParticles2 = new ParticleObject(m_Device, commandlist, ParticleList, this, 0.3f, XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, 0));
-		ParticleList->push_back(BulletParticles2);
-	}
 
 }
 
@@ -2180,133 +2152,6 @@ void GridObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer
 	Mesh.Render(commandlist);
 }
 
-
-////////////////////
-
-ParticleObject::ParticleObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist , list<CGameObject*>*Plist, CGameObject* master, float LifeTime, XMFLOAT4 cp) : CGameObject(m_Device, commandlist,   Plist, cp)
-{
-
-	ObjData.isAnimation = 0;
-	ObjData.Scale = 1.0f;
-	ObjData.SpecularParamater = 0.3f;//스페큘러를 낮게준다.
-	ObjData.CustomData1.x = 2;
-	Master = master;
-
-	//게임관련 데이터들
-	gamedata.MAXHP = 0;
-	gamedata.HP = 0;
-	gamedata.Damage = 0;
-	gamedata.GodMode = true;
-	gamedata.Speed = 10;
-	staticobject = true;
-
-
-	if (CreateMesh == false)
-	{
-		Mesh.Index = NULL;
-		Mesh.SubResource = NULL;
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "sparkTex", L"textures/effect/sparkTex.dds", false);
-		SetMesh(m_Device, commandlist);
-		CreateMesh = true;
-
-	}
-
-	Lookvector.x = -(Master->Lookvector.x); Lookvector.y = -(Master->Lookvector.y); Lookvector.z = -(Master->Lookvector.z);
-	Lookvector = Float3Normalize(Lookvector);
-
-	XMFLOAT3 Vel = XMFLOAT3(Lookvector.x * gamedata.Speed, Lookvector.y * gamedata.Speed, Lookvector.z * gamedata.Speed);
-	ParticleTime = LifeTime;
-	ObjData.Velocity = Vel;
-
-	auto q = XMLoadFloat4(&Orient);
-	XMFLOAT3 axis = { 0,1,0 };
-	XMFLOAT4 q2;
-	if(Lookvector.z >0)
-		q2 = QuaternionRotation(axis, MMPE_PI/2 * Lookvector.x);
-	else if(Lookvector.z <0)
-		q2 = QuaternionRotation(axis, MMPE_PI / 2 * -Lookvector.x);
-
-	Orient = QuaternionMultiply(Orient, q2);
-
-	UpdateLookVector();
-}
-
-void ParticleObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
-{
-	UINT numOfParticle = 40;
-
-	Mesh.SubResource = new CVertex[numOfParticle];
-	Mesh.nVertex = numOfParticle;
-	Mesh.nStride = sizeof(CVertex);
-	Mesh.nOffset = 0;
-
-	
-	Mesh.Index = new UINT[numOfParticle];
-	Mesh.nindex = numOfParticle;
-	Mesh.nioffset = 0;
-	Mesh.nisize = sizeof(UINT);
-
-	float n = 0.1;
-	//여기서 좌표를 일괄적으로 설정 할 수 있다
-	for (int i = 0; i < numOfParticle; ++i)
-	{
-
-		Mesh.SubResource[i].V.x = CenterPos.x * Lookvector.x + (cosf(MMPE_PI * n));
-		Mesh.SubResource[i].V.y = CenterPos.y * Lookvector.y + (sinf(MMPE_PI * n));
-		Mesh.SubResource[i].V.z = CenterPos.z * Lookvector.z;
-
-		Mesh.Index[i] = i;
-		n += 0.1;
-	}
-
-	Mesh.CreateVertexBuffer(m_Device, commandlist);
-	Mesh.CreateIndexBuffer(m_Device, commandlist);
-
-}
-
-void ParticleObject::Tick(const GameTimer & gt)
-{
-	LifeTime -= gt.DeltaTime();
-
-	if (LifeTime <= 0.0f)
-	{
-		CenterPos = Master->CenterPos;	
-		LifeTime = ParticleTime;
-	}
-
-
-	ObjData.CustomData1.w = rand()%RAND_MAX;
-	ObjData.PTime = gt.DeltaTime();
-
-}
-
-void ParticleObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer & gt)
-{
-	if (Textures.size()>0)
-		SetTexture(commandlist, SrvDescriptorHeap, Textures["sparkTex"].get()->Resource.Get(), false);
-	UpdateConstBuffer(commandlist);
-
-
-	D3D12_VERTEX_BUFFER_VIEW vbv;
-
-	vbv.BufferLocation = Mesh.VertexBuffer->GetGPUVirtualAddress();
-	vbv.StrideInBytes = Mesh.nStride;
-	vbv.SizeInBytes = Mesh.nStride *  Mesh.nVertex;
-
-	commandlist->IASetVertexBuffers(0, 1, &vbv);
-
-	D3D12_INDEX_BUFFER_VIEW ibv;
-	ibv.BufferLocation = Mesh.IndexBuffer->GetGPUVirtualAddress();
-	ibv.Format = DXGI_FORMAT_R16_UINT;
-	ibv.SizeInBytes = Mesh.nisize *  Mesh.nindex;
-
-	commandlist->IASetIndexBuffer(&ibv);
-	commandlist->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
-
-
-	commandlist->DrawIndexedInstanced(Mesh.nindex, 1, Mesh.nioffset, Mesh.nOffset, 0);
-}
-
 ///////////////////////////////////
 
 //HPBar오브젝트
@@ -2314,7 +2159,7 @@ BarObject::BarObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comman
 {
 	ObjData.isAnimation = 0;
 	ObjData.Scale = 10.0f;
-	ObjData.SpecularParamater = 0.5f;//스페큘러를 낮게준다.
+	ObjData.SpecularParamater = 0.0f;//스페큘러를 낮게준다.
 	ObjData.CustomData1.x = 1;
 
 	Master = master;
@@ -2499,7 +2344,7 @@ DamageObject::DamageObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * 
 {
 	ObjData.isAnimation = 0;
 	ObjData.Scale = 8.0f;
-	ObjData.SpecularParamater = 0.5f;//스페큘러를 낮게준다.
+	ObjData.SpecularParamater = 0.0f;//스페큘러를 낮게준다.
 
 	damaged = Damaged;
 	//게임관련 데이터들
@@ -2834,7 +2679,7 @@ SmallWallObject::SmallWallObject(ID3D12Device * m_Device, ID3D12GraphicsCommandL
 	UpdateLookVector();
 	ObjData.isAnimation = 0;
 	ObjData.Scale = 1.0f;
-	ObjData.SpecularParamater = 0.0f;//스페큘러를 낮게준다.
+	ObjData.SpecularParamater = 0.1f;//스페큘러를 낮게준다.
 
 	 //게임관련 데이터들
 	gamedata.MAXHP = 100;
@@ -2930,7 +2775,7 @@ BigWallObject::BigWallObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList 
 	UpdateLookVector();
 	ObjData.isAnimation = 0;
 	ObjData.Scale = 1.0f;
-	ObjData.SpecularParamater = 0.0f;//스페큘러를 낮게준다.
+	ObjData.SpecularParamater = 0.2f;//스페큘러를 낮게준다.
 	
 	//게임관련 데이터들
 	gamedata.MAXHP = 100;
@@ -3170,3 +3015,129 @@ void RangeObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTime
 }
 
 
+
+////////////////////
+
+ParticleObject::ParticleObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, CGameObject* master, float LifeTime, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
+{
+
+	ObjData.isAnimation = 0;
+	ObjData.Scale = 1.0f;
+	ObjData.SpecularParamater = 0.3f;//스페큘러를 낮게준다.
+	ObjData.CustomData1.x = 2;
+	Master = master;
+
+	//게임관련 데이터들
+	gamedata.MAXHP = 0;
+	gamedata.HP = 0;
+	gamedata.Damage = 0;
+	gamedata.GodMode = true;
+	gamedata.Speed = 10;
+	staticobject = true;
+
+
+	if (CreateMesh == false)
+	{
+		Mesh.Index = NULL;
+		Mesh.SubResource = NULL;
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "sparkTex", L"textures/effect/sparkTex.dds", false);
+		SetMesh(m_Device, commandlist);
+		CreateMesh = true;
+
+	}
+
+	Lookvector.x = -(Master->Lookvector.x); Lookvector.y = -(Master->Lookvector.y); Lookvector.z = -(Master->Lookvector.z);
+	Lookvector = Float3Normalize(Lookvector);
+
+	XMFLOAT3 Vel = XMFLOAT3(Lookvector.x * gamedata.Speed, Lookvector.y * gamedata.Speed, Lookvector.z * gamedata.Speed);
+	ParticleTime = LifeTime;
+	ObjData.Velocity = Vel;
+
+	auto q = XMLoadFloat4(&Orient);
+	XMFLOAT3 axis = { 0,1,0 };
+	XMFLOAT4 q2;
+	if (Lookvector.z >0)
+		q2 = QuaternionRotation(axis, MMPE_PI / 2 * Lookvector.x);
+	else if (Lookvector.z <0)
+		q2 = QuaternionRotation(axis, MMPE_PI / 2 * -Lookvector.x);
+
+	Orient = QuaternionMultiply(Orient, q2);
+
+	UpdateLookVector();
+}
+
+void ParticleObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
+{
+	UINT numOfParticle = 40;
+
+	Mesh.SubResource = new CVertex[numOfParticle];
+	Mesh.nVertex = numOfParticle;
+	Mesh.nStride = sizeof(CVertex);
+	Mesh.nOffset = 0;
+
+
+	Mesh.Index = new UINT[numOfParticle];
+	Mesh.nindex = numOfParticle;
+	Mesh.nioffset = 0;
+	Mesh.nisize = sizeof(UINT);
+
+	float n = 0.1;
+	//여기서 좌표를 일괄적으로 설정 할 수 있다
+	for (int i = 0; i < numOfParticle; ++i)
+	{
+
+		Mesh.SubResource[i].V.x = CenterPos.x * Lookvector.x + (cosf(MMPE_PI * n));
+		Mesh.SubResource[i].V.y = CenterPos.y * Lookvector.y + (sinf(MMPE_PI * n));
+		Mesh.SubResource[i].V.z = CenterPos.z * Lookvector.z;
+
+		Mesh.Index[i] = i;
+		n += 0.1;
+	}
+
+	Mesh.CreateVertexBuffer(m_Device, commandlist);
+	Mesh.CreateIndexBuffer(m_Device, commandlist);
+
+}
+
+void ParticleObject::Tick(const GameTimer & gt)
+{
+	LifeTime -= gt.DeltaTime();
+
+	if (LifeTime <= 0.0f)
+	{
+		CenterPos = Master->CenterPos;
+		LifeTime = ParticleTime;
+	}
+
+
+	ObjData.CustomData1.w = rand() % RAND_MAX;
+	ObjData.PTime = gt.DeltaTime();
+
+}
+
+void ParticleObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer & gt)
+{
+	if (Textures.size()>0)
+		SetTexture(commandlist, SrvDescriptorHeap, Textures["sparkTex"].get()->Resource.Get(), false);
+	UpdateConstBuffer(commandlist);
+
+
+	D3D12_VERTEX_BUFFER_VIEW vbv;
+
+	vbv.BufferLocation = Mesh.VertexBuffer->GetGPUVirtualAddress();
+	vbv.StrideInBytes = Mesh.nStride;
+	vbv.SizeInBytes = Mesh.nStride *  Mesh.nVertex;
+
+	commandlist->IASetVertexBuffers(0, 1, &vbv);
+
+	D3D12_INDEX_BUFFER_VIEW ibv;
+	ibv.BufferLocation = Mesh.IndexBuffer->GetGPUVirtualAddress();
+	ibv.Format = DXGI_FORMAT_R16_UINT;
+	ibv.SizeInBytes = Mesh.nisize *  Mesh.nindex;
+
+	commandlist->IASetIndexBuffer(&ibv);
+	commandlist->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
+
+
+	commandlist->DrawIndexedInstanced(Mesh.nindex, 1, Mesh.nioffset, Mesh.nOffset, 0);
+}

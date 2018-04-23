@@ -112,43 +112,46 @@ float4 PS(VertexOut pin) : SV_Target
 	//알파 테스트
 	//clip(textureColor.a - 0.1f);
 	//
+	for (int i = 0; i < nLights; ++i)
+	{
 
-		viewDirection = gEyePos - pin.PosH.xyz;
+		viewDirection = gLights[i].Position - pin.PosH.xyz;
 		viewDirection = normalize(viewDirection);
 
-		
-		lightDir = -(gLights[0].Direction);
-		lightDir = normalize(lightDir);
-		litColor = gAmbientLight;
+			lightDir = -(gLights[i].Direction);
+			lightDir = normalize(lightDir);
+			litColor = gAmbientLight;
 
-		specular = float4(0.0f, 0.0f, 0.0f, 0.0f);
+			specular = float4(0.0f, 0.0f, 0.0f, 0.0f);
 
-		//픽셀당 비치는 빛의양 (0 ~ 1)
-		lightIntensity = saturate(dot(pin.Normal, lightDir));   //-> 람베르트 코사인 법칙 
+			//픽셀당 비치는 빛의양 (0 ~ 1)
+			lightIntensity = saturate(dot(pin.Normal, lightDir));   //-> 람베르트 코사인 법칙 
 
-		// 0보다 크면 (빛을 받는 부분이면)
-		if (lightIntensity > 0.0f)
-		{
-			litColor += (float4(gLights[0].DiffuseColor) * lightIntensity);
+			// 0보다 크면 (빛을 받는 부분이면)
+			if (lightIntensity > 0.0f)
+			{
+				litColor += (float4(gLights[i].DiffuseColor) * lightIntensity);
 
-			litColor = saturate(litColor);
+				litColor = saturate(litColor);
 
-			reflection = normalize(2 * lightIntensity * pin.Normal - lightDir);
+				reflection = normalize(2 * lightIntensity * pin.Normal - lightDir);
 
-			specular = pow(saturate(dot(reflection, viewDirection)), 128.0f)*SpecularParamater;
-		}
+				specular = pow(saturate(dot(reflection, viewDirection)), 32.0f)*SpecularParamater;
+			}
 
-		// 0이면 (빛을 안 받는 부분이면)
-		else if (lightIntensity <= 0.0f)
-		{
+			// 0이면 (빛을 안 받는 부분이면)
+			else if (lightIntensity <= 0.0f)
+			{
 
-			litColor += (float4(gLights[0].DiffuseColor) * float4(0.35f, 0.35f, 0.35f, 1.0f)); //여기 부분을 조정하면 빛을 안받는 부분의 음영을 조정할 수 있습니다.
+				litColor += (float4(gLights[i].DiffuseColor) * float4(0.35f, 0.35f, 0.35f, 1.0f)); //여기 부분을 조정하면 빛을 안받는 부분의 음영을 조정할 수 있습니다.
 
-			litColor = saturate(litColor);
+				litColor = saturate(litColor);
 
-			reflection = normalize(2 * lightIntensity * pin.Normal - lightDir);
+				reflection = normalize(2 * lightIntensity * pin.Normal - lightDir);
 
-			specular = pow(saturate(dot(reflection, viewDirection)), 32.0f)*SpecularParamater;
+				specular = pow(saturate(dot(reflection, viewDirection)), 32.0f)*SpecularParamater;
+			}
+
 		}
 
 		litColor = litColor * textureColor;  //엠비언트 * 텍스쳐 컬러
@@ -165,3 +168,73 @@ float4 PS(VertexOut pin) : SV_Target
 
 }
 
+float4 PS2(VertexOut pin) : SV_Target
+{
+	float4 textureColor; //텍스쳐 색상
+	float3 lightDir;     //빛벡터
+	float lightIntensity;
+	float3 reflection;   //반사광
+	float4 specular;
+	float4 litColor;
+	float3 viewDirection;
+	
+	
+	//텍스쳐의 기본 색상 - 샘플러를 사용하여 값 추출
+	textureColor = gDiffuseMap.Sample(gsamAnisotropicWrap, pin.Tex);
+	
+	//알파 테스트
+	//clip(textureColor.a - 0.1f);
+	//
+	
+	viewDirection = gEyePos - pin.PosH.xyz;
+	viewDirection = normalize(viewDirection);
+	
+	
+	lightDir = -(gLights[0].Direction);
+	lightDir = normalize(lightDir);
+	litColor = gAmbientLight;
+	
+	specular = float4(0.0f, 0.0f, 0.0f, 0.0f);
+	
+	//픽셀당 비치는 빛의양 (0 ~ 1)
+	lightIntensity = saturate(dot(pin.Normal, lightDir));   //-> 람베르트 코사인 법칙 
+	
+															// 0보다 크면 (빛을 받는 부분이면)
+	if (lightIntensity > 0.0f)
+	{
+		litColor += (float4(gLights[0].DiffuseColor) * lightIntensity);
+	
+		litColor = saturate(litColor);
+	
+		reflection = normalize(2 * lightIntensity * pin.Normal - lightDir);
+	
+		specular = pow(saturate(dot(reflection, viewDirection)), 32.0f)*SpecularParamater;
+	}
+	
+	// 0이면 (빛을 안 받는 부분이면)
+	else if (lightIntensity <= 0.0f)
+	{
+	
+		litColor += (float4(gLights[0].DiffuseColor) * float4(0.35f, 0.35f, 0.35f, 1.0f)); //여기 부분을 조정하면 빛을 안받는 부분의 음영을 조정할 수 있습니다.
+	
+		litColor = saturate(litColor);
+	
+		reflection = normalize(2 * lightIntensity * pin.Normal - lightDir);
+	
+		specular = pow(saturate(dot(reflection, viewDirection)), 32.0f)*SpecularParamater;
+	}
+	
+	litColor = litColor * textureColor;  //엠비언트 * 텍스쳐 컬러
+	
+	litColor = saturate(litColor+ Emissive + specular); //마지막으로 스패큘러 더한다.
+	litColor.w = BlendValue;
+	
+	//litColor.a = textureColor.a;
+	
+	if (nLights > 0)
+	return litColor;
+	else
+	return float4(0, 0, 0, 1);
+	
+	
+}

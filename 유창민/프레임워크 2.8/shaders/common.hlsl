@@ -91,4 +91,5 @@ cbuffer MaterialData : register(b4)
 	//float4   gDiffuseAlbedo;//MaterialData(상수버퍼임)
 	float    gRoughness;//MaterialData(상수버퍼임)
 	float3 CustomMaterialData;//커스텀용데이터 무조건 상수버퍼는 16바이트여야함.
+	float4 Emissive;
 }

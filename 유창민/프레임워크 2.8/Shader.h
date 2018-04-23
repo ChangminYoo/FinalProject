@@ -28,6 +28,7 @@ public:
 
 	virtual void CreateShader(ID3D12Device * Device, ID3D12RootSignature * GraphicsRootSignature);//PSO»ý¼º
 	virtual void SetShader(ID3D12GraphicsCommandList* commandlist,bool isBlend=false);
+	virtual void SetBulletShader(ID3D12GraphicsCommandList* commandlist);
 	virtual void SetSkyShader(ID3D12GraphicsCommandList* commandlist);
 	virtual void SetBillboardShader(ID3D12GraphicsCommandList* commandlist);
 	virtual void SetParticleShader(ID3D12GraphicsCommandList* commandlist);
@@ -42,6 +43,7 @@ protected:
 	ComPtr<ID3DBlob> GeometryShader = nullptr;
 
 	ComPtr<ID3D12PipelineState> PSO = nullptr;
+	ComPtr<ID3D12PipelineState> BulletPSO = nullptr;
 	ComPtr<ID3D12PipelineState> BlendPSO = nullptr;
 	ComPtr<ID3D12PipelineState> SkyPSO = nullptr;
 	ComPtr<ID3D12PipelineState> BillboardPSO = nullptr;

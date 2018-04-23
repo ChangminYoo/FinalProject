@@ -175,3 +175,8 @@ unordered_map<string, unique_ptr<CTexture>> RangeObject::Textures;//텍스처들을 �
 CMesh  RangeObject::Mesh;//나중에 메쉬는 static으로 둬야함
 ComPtr<ID3D12DescriptorHeap> RangeObject::SrvDescriptorHeap;//텍스처 용 힙
 CMaterial RangeObject::Mat;
+
+bool BloodParticleObject::CreateMesh = false;
+unordered_map<string, unique_ptr<CTexture>> BloodParticleObject::Textures;//텍스처들을 저장함
+CMesh BloodParticleObject::Mesh;//나중에 메쉬는 static으로 둬야함
+ComPtr<ID3D12DescriptorHeap> BloodParticleObject::SrvDescriptorHeap;//텍스처 용 힙
