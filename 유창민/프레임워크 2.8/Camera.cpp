@@ -7,7 +7,7 @@ CCamera::CCamera(HWND hwnd,ID3D12Device* Device, ID3D12GraphicsCommandList* comm
 	
 	hWnd = hwnd;
 	aspect = asp;
-	SetLens(0.25f*3.141592, aspect, 1.0f, 1000.0f);
+	SetLens(0.25f*3.141592, aspect, 1.0f, 1200.0f);
 
 	CamData.EyePos = e;
 	CamData.At = a;

@@ -75,13 +75,13 @@ public:
 	CGameObject* SelectBar = NULL; //스킬선택
 private:
 	//여기다 물체 배치에 대한 상수들 넣는다.
-	float BigWall_X1 = 200 * sinf(0.4f * MMPE_PI);
-	float BigWall_Z1 = (400 * cosf(0.4f * MMPE_PI) + 400) / 2;
+	float BigWall_X1 = 300 * sinf(0.4f * MMPE_PI);
+	float BigWall_Z1 = (600 * cosf(0.4f * MMPE_PI) + 600) / 2;
 
-	float BigWall_X2 = ((400 * sinf(0.4f * MMPE_PI)) + (400 * sinf(0.8f * MMPE_PI))) / 2;
-	float BigWall_Z2 = ((400 * cosf(0.4f * MMPE_PI)) + (-400 * cosf(0.2f * MMPE_PI))) / 2;
+	float BigWall_X2 = ((600 * sinf(0.4f * MMPE_PI)) + (600 * sinf(0.8f * MMPE_PI))) / 2;
+	float BigWall_Z2 = ((600 * cosf(0.4f * MMPE_PI)) + (-600 * cosf(0.2f * MMPE_PI))) / 2;
 
-	float BigWall_Z3 = -400 * cosf(0.2f * MMPE_PI);
+	float BigWall_Z3 = -600 * cosf(0.2f * MMPE_PI);
 
 	float BigWall_Rad1 = MMPE_PI / 5; //36degree
 
