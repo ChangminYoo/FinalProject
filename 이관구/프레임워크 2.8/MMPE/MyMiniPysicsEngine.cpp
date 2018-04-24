@@ -1133,7 +1133,8 @@ XMFLOAT4X4 MiniPhysicsEngineG9::RigidBody::GetIMoment(bool Inverse)
 		ii = XMMatrixInverse(&dt, ii);//역이아닌 정상적인 관성모멘트
 
 		XMVECTOR orient = XMLoadFloat4(Orient); // 물체가 회전한만큼 회전시킨다.
-		ii *= XMMatrixRotationQuaternion(orient);//ii는 디폴트 관성모멘트 * 방향쿼터니언행렬
+		XMMATRIX orientmatrix= XMMatrixRotationQuaternion(orient);
+		ii *= orientmatrix;//ii는 디폴트 관성모멘트 * 방향쿼터니언행렬
 
 		//다시 역행렬로 변환
 		dt = XMMatrixDeterminant(ii);//행렬식
@@ -2194,7 +2195,7 @@ float MiniPhysicsEngineG9::RigidBody::GetE()
 float MiniPhysicsEngineG9::RigidBody::CalculateImpulse(CollisionPoint& cp, RigidBody* rb2, float deltatime)
 {
 
-	float finalE = -(1 + e);
+	float finalE = -(1 + 1);
 	XMFLOAT3 SeparateVel = GetVelocity();
 	XMFLOAT3 v2;
 	if (rb2 != NULL)
@@ -2276,12 +2277,15 @@ float MiniPhysicsEngineG9::RigidBody::CalculateImpulse(CollisionPoint& cp, Rigid
 
 	//식2. u1+u2 + inverseMs
 
-	float Second = u1 + u2 + inverseMs;
+	//float Second = u1 + u2 + inverseMs;
+
+	//수정본. 이게더 자연스러움.
+	float Second =  inverseMs;
 
 	//식3 = (식1 / 식2)*충격량을 가한 시간  = 최종 임펄스
 
 	if (Second != 0)
-		return (First / Second)*deltatime;
+		return abs((First / Second)*deltatime);
 	else
 		return 0;
 

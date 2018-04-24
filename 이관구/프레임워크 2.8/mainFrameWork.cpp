@@ -359,13 +359,13 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 			float impurse = obj->rb->CalculateImpulse(fp, NULL, 1);
 
 			//최대임펄스를 구한다.
-			if (fabsf(impurse) > 500)
-				impurse = 500;
+			if (impurse > 400)
+				impurse = 400;
 
 
 			//최소 임펄스를 구한다.
-			if (fabsf(impurse) < 65)
-				impurse = 65;
+			if (impurse < 25 )
+				impurse = 25;
 
 
 
@@ -373,7 +373,7 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 			//그후 사잇각이 특정각도 이하면 보정시킨다. 
 			//단 이게 double로 해도 0이아닌데 0이나오는경우가 생긴다.
 			//따라서 0일경우 그냥 충격량을 가해서 각도를 변경시킨다.
-			if (abs(theta) <= MMPE_PI / 26 && abs(theta) != 0 && abs(impurse) <= 200&& obj->rb->AmendTime <= 0)//대략 5도 이하면 보정시킴.
+			if (abs(theta) <= MMPE_PI / 25 && abs(theta) != 0 && abs(impurse) <= 200&& obj->rb->AmendTime <= 0)//대략 5도 이하면 보정시킴.
 			{
 				//회전축을 구하고..
 				XMFLOAT3 mAxis = XMFloat4to3(Float4Cross(V1, V2));
@@ -393,21 +393,38 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 
 
 
-				//현재 여기서 선속도의 가장 많은 부분을 차지함
-				auto d = obj->rb->GetVelocity();
-				//d.x = -obj->rb->GetE() *d.x;
-				d.y = -obj->rb->GetE() * d.y;
-				//d.z = -obj->rb->GetE() *d.z;
-				obj->rb->SetVelocity(d);
+				//Jm = J/M
+				//임펄스의 비율을 나눈다.  즉. 일반적인 1:1 관계에서 1.3: 0.3 정도로 둔다.
+				//나머지 0.7은 소실된 에너지라 치자.
+
+				auto ratioImpurse =  impurse * 0.3;
+
+				auto Jm = Normal;
 
 
-				//충격량을 가함. impurse = impurse만큼 0.01초동안 가한것. 시간을 작게둔 이유는 힘을 줄이기 위해서.
-				XMFLOAT3 impurseV = Normal;
-				impurseV.x *= impurse;
-				impurseV.y *= impurse;
-				impurseV.z *= impurse;
-				obj->rb->AddForcePoint(impurseV, fp.Pos);
-				obj->rb->integrate(0.01);
+
+				Jm.x *= obj->rb->GetMass()*(impurse + ratioImpurse);
+				Jm.y *= obj->rb->GetMass()*(impurse + ratioImpurse);
+				Jm.z *= obj->rb->GetMass()*(impurse + ratioImpurse);
+
+
+
+				//각속도 계산
+				//W = 기존 각속도 + ((Q-P)Ximpurse)*InverseI
+				auto W = obj->rb->GetAngularVelocity();
+				XMVECTOR rxi = XMLoadFloat3(&XMFloat4to3(Float4Add(fp.Pos, obj->CenterPos, false)));
+				rxi = XMVector3Cross(rxi, XMLoadFloat3(&Normal));
+				rxi *= ( ratioImpurse);
+				rxi = XMVector3Transform(rxi, XMLoadFloat4x4(&obj->rb->GetIMoment()));
+
+				XMFLOAT3 ia;
+				XMStoreFloat3(&ia, rxi);
+
+				W = Float3Add(W, ia);
+				W = Float3Float(W, obj->rb->GetE() / 2);
+				XMFLOAT3 lastvel = obj->rb->GetVelocity();
+				obj->rb->SetVelocity(Float3Float(Float3Add(lastvel, Jm), obj->rb->GetE()));
+				obj->rb->SetAngularVelocity(W);
 
 
 				//이제 속도와 각속도는 변경 했으니, 겹쳐진 부분 해소
@@ -520,16 +537,16 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 				float impurse = obj->rb->CalculateImpulse(fp, NULL, 1);
 
 				//최대임펄스를 구한다.
-				if (fabsf(impurse) > 500)
-					impurse = 500;
+				if (impurse > 400)
+					impurse = 400;
 
 				//최소 임펄스를 구한다.
-				if (fabsf(impurse) < 65)
-					impurse = 65;
+				if (impurse < 25)
+					impurse = 25;
 
 
 				//그후 사잇각이 특정각도 이하면 보정시킨다. 
-				if (abs(theta) <= MMPE_PI / 18 && abs(theta) != 0 && abs(impurse) <= 300 && obj->rb->AmendTime <= 0)//대략 5도 이하면 보정시킴.
+				if (abs(theta) <= MMPE_PI / 20 && abs(theta) != 0 && abs(impurse) <= 300 && obj->rb->AmendTime <= 0)//대략 5도 이하면 보정시킴.
 				{
 					//회전축을 구하고
 					XMFLOAT3 mAxis = XMFloat4to3(Float4Cross(V2, V3));
@@ -590,21 +607,39 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 
 
 
-					//현재 여기서 선속도의 가장 많은 부분을 차지함
-					auto d = obj->rb->GetVelocity();
-					//d.x = -obj->rb->GetE() *d.x;
-					d.y = -obj->rb->GetE() * d.y;
-					//d.z = -obj->rb->GetE() *d.z;
-					obj->rb->SetVelocity(d);
+					//Jm = J/M
+
+					//임펄스의 비율을 나눈다.  즉. 일반적인 1:1 관계에서 1.3: 0.3 정도로 둔다.
+					
+					auto ratioImpurse = impurse * 0.3;
+
+					auto Jm = Normal;
+
+					
+
+					Jm.x *= obj->rb->GetMass()*(impurse + ratioImpurse);
+					Jm.y *= obj->rb->GetMass()*(impurse + ratioImpurse);
+					Jm.z *= obj->rb->GetMass()*(impurse + ratioImpurse);
 
 
-					//충격량을 가함. impurse = impurse만큼 0.01초동안 가한것. 시간을 작게둔 이유는 힘을 줄이기 위해서.
-					XMFLOAT3 impurseV = Normal;
-					impurseV.x *= impurse;
-					impurseV.y *= impurse;
-					impurseV.z *= impurse;
-					obj->rb->AddForcePoint(impurseV, fp.Pos);
-					obj->rb->integrate(0.01);
+
+					//각속도 계산
+					//W = 기존 각속도 + ((Q-P)Ximpurse)*InverseI
+					auto W = obj->rb->GetAngularVelocity();
+					XMVECTOR rxi = XMLoadFloat3(&XMFloat4to3(Float4Add(fp.Pos, obj->CenterPos, false)));
+					rxi = XMVector3Cross(rxi, XMLoadFloat3(&Normal));
+					rxi *= ( ratioImpurse);
+					rxi = XMVector3Transform(rxi, XMLoadFloat4x4(&obj->rb->GetIMoment()));
+
+					XMFLOAT3 ia;
+					XMStoreFloat3(&ia, rxi);
+
+					W = Float3Add(W, ia);
+					W = Float3Float(W, obj->rb->GetE() / 2);
+					XMFLOAT3 lastvel = obj->rb->GetVelocity();
+					obj->rb->SetVelocity(Float3Float(Float3Add(lastvel, Jm),obj->rb->GetE()));
+					obj->rb->SetAngularVelocity(W);
+
 
 					//이제 속도와 각속도는 변경 했으니, 겹쳐진 부분 해소
 					//가장 작은값의 penetration(가장 깊은)만큼 올리면 된다.
@@ -664,6 +699,8 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 
 					//보정을 시킨다.
 					AmendObject(mAxis, theta, obj);
+					obj->rb->SetAngularVelocity(0, 0, 0);
+
 				}
 
 

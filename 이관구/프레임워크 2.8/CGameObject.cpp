@@ -2634,10 +2634,11 @@ RigidCubeObject::RigidCubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandL
 	rb = new RigidBody();
 	rb->SetPosition(&CenterPos);//이 값은 항상 갱신되야한다.
 	rb->SetHalfBox(10,10,10);//충돌 박스의 x,y,z 크기
-	rb->SetDamping(0.5f, 0.45f);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
+	rb->SetDamping(0.5f, 0.325f);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
 	rb->SetBounce(false);//튕기지 않는다.
-	rb->SetMass(1.5);//고정된 물체는 무게가 무한이다.
+	rb->SetMass(2.5);//고정된 물체는 무게가 무한이다.
 	rb->SetIMoment(10,10,10);
+	
 	rb->SetOrient(&Orient);
 	
 	//테스트 코드

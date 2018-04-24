@@ -387,22 +387,32 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 
 
 
-				//현재 여기서 선속도의 가장 많은 부분을 차지함
-				auto d = obj->rb->GetVelocity();
-				d.x = -obj->rb->GetE() *d.x;
-				d.y = -obj->rb->GetE() * d.y;
-				d.z = -obj->rb->GetE() *d.z;
-				obj->rb->SetVelocity(d);
+				//선속도 계산.
+				//Jm = J/M
+				auto Jm = Normal;
 
+				Jm.x *= obj->rb->GetMass()*impurse;
+				Jm.y *= obj->rb->GetMass()*impurse;
+				Jm.z *= obj->rb->GetMass()*impurse;
 
-				//충격량을 가함. impurse = impurse만큼 0.01초동안 가한것. 시간을 작게둔 이유는 힘을 줄이기 위해서.
-				XMFLOAT3 impurseV = Normal;
-				impurseV.x *= impurse;
-				impurseV.y *= impurse;
-				impurseV.z *= impurse;
-				obj->rb->AddForcePoint(impurseV, fp.Pos);
-				obj->rb->integrate(0.01);
+				
 
+				//각속도 계산
+				//W = 기존 각속도 + ((Q-P)Ximpurse/2)*InverseI
+				auto W = obj->rb->GetAngularVelocity();
+				XMVECTOR rxi = XMLoadFloat3(&XMFloat4to3(Float4Add(fp.Pos, obj->CenterPos, false)));
+				rxi = XMVector3Cross(rxi, XMLoadFloat3(&Normal));
+				rxi *= impurse ;
+				rxi = XMVector3Transform(rxi, XMLoadFloat4x4(&obj->rb->GetIMoment()));
+
+				XMFLOAT3 ia;
+				XMStoreFloat3(&ia, rxi);
+
+				W = Float3Add(W, ia);
+				XMFLOAT3 lastvel = obj->rb->GetVelocity();
+	
+				obj->rb->SetVelocity( Float3Float(Float3Add(lastvel, Jm),0.15));
+				//obj->rb->SetAngularVelocity(W);
 
 				//이제 속도와 각속도는 변경 했으니, 겹쳐진 부분 해소
 				//가장 작은값의 penetration(가장 깊은)만큼 올리면 된다.
@@ -514,8 +524,8 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 				float impurse = obj->rb->CalculateImpulse(fp, NULL, 1);
 
 				//최대임펄스를 구한다.
-				if (fabsf(impurse) > 500)
-					impurse = 500;
+				//if (fabsf(impurse) > 500)
+				//	impurse = 500;
 
 				//최소 임펄스를 구한다.
 				if (fabsf(impurse) < 70)
@@ -583,22 +593,32 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 
 
 
-					//현재 여기서 선속도의 가장 많은 부분을 차지함
-					auto d = obj->rb->GetVelocity();
-					d.x = -obj->rb->GetE() *d.x;
-					d.y = -obj->rb->GetE() * d.y;
-					d.z = -obj->rb->GetE() *d.z;
-					obj->rb->SetVelocity(d);
+					//선속도 계산.
+					//Jm = J/M
+					auto Jm = Normal;
+
+					Jm.x *= obj->rb->GetMass()*impurse;
+					Jm.y *= obj->rb->GetMass()*impurse;
+					Jm.z *= obj->rb->GetMass()*impurse;
 
 
-					//충격량을 가함. impurse = impurse만큼 0.01초동안 가한것. 시간을 작게둔 이유는 힘을 줄이기 위해서.
-					XMFLOAT3 impurseV = Normal;
-					impurseV.x *= impurse;
-					impurseV.y *= impurse;
-					impurseV.z *= impurse;
-					obj->rb->AddForcePoint(impurseV, fp.Pos);
-					obj->rb->integrate(0.01);
 
+					//각속도 계산
+					//W = 기존 각속도 + ((Q-P)Ximpurse/2)*InverseI
+					auto W = obj->rb->GetAngularVelocity();
+					XMVECTOR rxi = XMLoadFloat3(&XMFloat4to3(Float4Add(fp.Pos, obj->CenterPos, false)));
+					rxi = XMVector3Cross(rxi, XMLoadFloat3(&Normal));
+					rxi *= impurse;
+					rxi = XMVector3Transform(rxi, XMLoadFloat4x4(&obj->rb->GetIMoment()));
+
+					XMFLOAT3 ia;
+					XMStoreFloat3(&ia, rxi);
+
+					W = Float3Add(W, ia);
+					XMFLOAT3 lastvel = obj->rb->GetVelocity();
+
+					obj->rb->SetVelocity(Float3Float(Float3Add(lastvel, Jm), 0.15));
+					//obj->rb->SetAngularVelocity(W);
 					//이제 속도와 각속도는 변경 했으니, 겹쳐진 부분 해소
 					//가장 작은값의 penetration(가장 깊은)만큼 올리면 된다.
 					auto px = fabsf(contactpoint[0].penetration)*Normal.x;
