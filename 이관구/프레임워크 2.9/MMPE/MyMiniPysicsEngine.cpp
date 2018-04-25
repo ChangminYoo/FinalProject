@@ -1269,8 +1269,8 @@ XMFLOAT3 MiniPhysicsEngineG9::RigidBody::GetTotalForce()
 {
 	return TotalForce;
 }
-
-void MiniPhysicsEngineG9::RigidBody::AddForcePoint(XMFLOAT3 & F, XMFLOAT3 & pointposition)
+//F2는 물체가 이동한 방향으로 힘을가하는것
+void MiniPhysicsEngineG9::RigidBody::AddForcePoint(XMFLOAT3 & F, XMFLOAT3 & pointposition, XMFLOAT3& F2 )
 {
 	XMFLOAT3 p = pointposition;
 	auto p2 = XMFloat4to3(*CenterPos);
@@ -1283,7 +1283,11 @@ void MiniPhysicsEngineG9::RigidBody::AddForcePoint(XMFLOAT3 & F, XMFLOAT3 & poin
 	if (fabsf(p.z) <= MMPE_EPSILON / 10)
 		p.z = 0;
 
-	XMFLOAT3 t = Float3Cross(p, F);//토크 = 중점으로부터 힘을 가해진 벡터 X 힘의 방향
+	XMFLOAT3 t;
+	if(F2.x==0&&F2.y==0&&F2.z==0)
+		t = Float3Cross(p, F);//토크 = 중점으로부터 힘을 가해진 벡터 X 힘의 방향
+	else
+		t = Float3Cross(p, F2);//토크 = 중점으로부터 힘을 가해진 벡터 X 힘의 방향
 
 	if (fabsf(t.x) <= MMPE_EPSILON / 10)
 		t.x = 0;
@@ -1296,7 +1300,8 @@ void MiniPhysicsEngineG9::RigidBody::AddForcePoint(XMFLOAT3 & F, XMFLOAT3 & poin
 	AddTorque(t);
 }
 
-void MiniPhysicsEngineG9::RigidBody::AddForcePoint(XMFLOAT3 & F, XMFLOAT4 & pointposition)
+//F2는 물체가 이동한 방향으로 힘을가하는것
+void MiniPhysicsEngineG9::RigidBody::AddForcePoint(XMFLOAT3 & F, XMFLOAT4 & pointposition, XMFLOAT3& F2)
 {
 	XMFLOAT4 p = pointposition;
 	auto p2 = *CenterPos;
@@ -1311,7 +1316,11 @@ void MiniPhysicsEngineG9::RigidBody::AddForcePoint(XMFLOAT3 & F, XMFLOAT4 & poin
 
 
 	XMFLOAT3 p1 = XMFloat4to3(p);
-	XMFLOAT3 t = Float3Cross(p1, F);//토크 = 중점으로부터 힘을 가해진 벡터 X 힘의 방향
+	XMFLOAT3 t;
+	if (F2.x == 0 && F2.y == 0 && F2.z == 0)
+		t = Float3Cross(p1, F);//토크 = 중점으로부터 힘을 가해진 벡터 X 힘의 방향
+	else
+		t = Float3Cross(p1, F2);//토크 = 중점으로부터 힘을 가해진 벡터 X 힘의 방향
 
 	if (fabsf(t.x) <= MMPE_EPSILON / 10)
 		t.x = 0;
@@ -2113,6 +2122,7 @@ bool MiniPhysicsEngineG9::RigidBody::CollisionTest(RigidBody & rb2, XMFLOAT3 & l
 		cp.penetration = penetration;
 		auto p = XMFloat3to4(pAxis);
 		cp.Pos = Float4Add(p, *CenterPos);
+		CollisionPointVector.push_back(cp);
 	}
 
 

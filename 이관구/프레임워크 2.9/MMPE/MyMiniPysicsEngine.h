@@ -156,8 +156,8 @@ namespace MiniPhysicsEngineG9
 		XMFLOAT3 GetTotalForce();//현재까지 총 힘을 반환.
 
 								 //특정지점에 힘을가함. 강체는 점이아니기에 특정지점에 힘을 가할수 잇다.보통 이때 토크가 같이 계산된다.
-		void AddForcePoint(XMFLOAT3& F, XMFLOAT3& pointposition);
-		void AddForcePoint(XMFLOAT3& F, XMFLOAT4& pointposition);
+		void AddForcePoint(XMFLOAT3& F, XMFLOAT3& pointposition,XMFLOAT3& F2=XMFLOAT3(0,0,0));
+		void AddForcePoint(XMFLOAT3& F, XMFLOAT4& pointposition, XMFLOAT3& F2 = XMFLOAT3(0, 0, 0));
 
 
 		void TorqueClear();//모든 힘 초기화

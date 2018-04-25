@@ -290,6 +290,7 @@ CCubeManObject::CCubeManObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 	ObjData.Scale = 3;
 	ObjData.SpecularParamater = 0.3f;//스페큘러를 낮게준다.
 	
+	obs = Dynamic;
 	//게임 데이터 (스텟)을 찍는다. 캐릭터는 데미지를 갖지 않고, 탄환이 데미지를 갖도록하자.
 	gamedata.MAXHP = 100;
 	gamedata.HP = 100;
@@ -502,6 +503,8 @@ BulletCube::BulletCube(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 
 	UpdateLookVector();
 
+	obs = Bullet;
+
 	ObjData.isAnimation = 0;
 	ObjData.Scale = 1.0;
 	ObjData.SpecularParamater = 0.2f;//스페큘러를 낮게준다.
@@ -516,6 +519,7 @@ BulletCube::BulletCube(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 	Master = master;
 	LockOn = lockon;
 	
+
 	//광선충돌 검사용 육면체
 	XMFLOAT3 rx(1, 0, 0);
 	XMFLOAT3 ry(0, 1, 0);
@@ -685,6 +689,8 @@ HeavyBulletCube::HeavyBulletCube(ID3D12Device * m_Device, ID3D12GraphicsCommandL
 	Orient = QuaternionMultiply(Orient, ori);
 
 	UpdateLookVector();
+
+	obs = Bullet;
 
 	ObjData.isAnimation = 0;
 	ObjData.Scale = 2.0;
@@ -875,6 +881,7 @@ Tetris1::Tetris1(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlis
 	ObjData.Scale = 1.0;
 	ObjData.SpecularParamater = 0.0f;//스페큘러를 낮게준다.
 
+	obs = Bullet;
 									 //게임관련 데이터들
 	gamedata.MAXHP = 1;
 	gamedata.HP = 1;
@@ -1050,6 +1057,7 @@ Tetris2::Tetris2(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlis
 	ObjData.Scale = 1.0;
 	ObjData.SpecularParamater = 0.0f;//스페큘러를 낮게준다.
 
+	obs = Bullet;
 									 //게임관련 데이터들
 	gamedata.MAXHP = 1;
 	gamedata.HP = 1;
@@ -1218,7 +1226,7 @@ Tetris3::Tetris3(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlis
 	OffLookvector = XMFLOAT3(0, 0, 1);
 	OffRightvector = XMFLOAT3(1, 0, 0);
 
-
+	obs = Bullet;
 	UpdateLookVector();
 
 	ObjData.isAnimation = 0;
@@ -1398,7 +1406,7 @@ Tetris4::Tetris4(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlis
 	ObjData.isAnimation = 0;
 	ObjData.Scale = 1.0;
 	ObjData.SpecularParamater = 0.0f;//스페큘러를 낮게준다.
-
+	obs = Bullet;
 									 //게임관련 데이터들
 	gamedata.MAXHP = 1;
 	gamedata.HP = 1;
@@ -1573,7 +1581,7 @@ Tetrike::Tetrike(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlis
 	ObjData.isAnimation = 0;
 	ObjData.Scale = 1.0;
 	ObjData.SpecularParamater = 0.0f;//스페큘러를 낮게준다.
-
+	obs = Bullet;
 									 //게임관련 데이터들
 	gamedata.GodMode = true;
 
@@ -1750,6 +1758,7 @@ SphereObject::SphereObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * 
 	ObjData.Scale = 1024.0f;
 	ObjData.SpecularParamater = 0.0f;//스페큘러를 낮게준다.
 
+	obs = Static;
 	//게임관련 데이터들
 	gamedata.MAXHP = 1;
 	gamedata.HP = 1;
@@ -1825,7 +1834,7 @@ CubeObject::CubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 	ObjData.Scale = 10.0f;
 	ObjData.SpecularParamater = 0.0f;//스페큘러를 낮게준다.
 	
-
+	obs = Static;
 	
 	//게임관련 데이터들
 	gamedata.MAXHP = 100;
@@ -1922,7 +1931,7 @@ GridObject::GridObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 	ObjData.Scale = 1.0f;
 	ObjData.SpecularParamater = 0.3f;//스페큘러를 낮게준다.
 
-
+	obs = Static;
 	//게임관련 데이터들
 	gamedata.MAXHP = 1;
 	gamedata.HP = 1;
@@ -1977,6 +1986,7 @@ BarObject::BarObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comman
 	Master = master;
 	ObjData.CustomData1.y = Master->gamedata.HP;
 
+	obs = UI;
 	//게임관련 데이터들
 	gamedata.HP = Master->gamedata.HP;
 	gamedata.GodMode = true;
@@ -2078,6 +2088,8 @@ BarFrameObject::BarFrameObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 	gamedata.GodMode = true;
 	staticobject = true;
 
+	obs = UI;
+
 	if (CreateMesh == false)
 	{
 		Mesh.Index = NULL;
@@ -2166,6 +2178,8 @@ DamageObject::DamageObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * 
 	gamedata.GodMode = true;
 	gamedata.Speed = 10;
 	staticobject = true;
+
+	obs = UI;
 
 	if (CreateMesh == false)
 	{
@@ -2293,6 +2307,7 @@ RigidCubeObject::RigidCubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandL
 	ObjData.Scale = 20.0f;
 	ObjData.SpecularParamater = 0.0f;//스페큘러를 낮게준다.
 
+	obs = Rigid;
 
 
 									 //게임관련 데이터들
@@ -2315,9 +2330,9 @@ RigidCubeObject::RigidCubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandL
 	rb = new RigidBody();
 	rb->SetPosition(&CenterPos);//이 값은 항상 갱신되야한다.
 	rb->SetHalfBox(10, 10, 10);//충돌 박스의 x,y,z 크기
-	rb->SetDamping(0.5f, 0.35f);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
+	rb->SetDamping(0.5f, 0.34f);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
 	rb->SetBounce(false);//튕기지 않는다.
-	rb->SetMass(1.5);//고정된 물체는 무게가 무한이다.
+	rb->SetMass(1);//고정된 물체는 무게가 무한이다.
 	rb->SetIMoment(10, 10, 10);
 
 	rb->SetOrient(&Orient);
@@ -2413,47 +2428,72 @@ void RigidCubeObject::Collision(list<CGameObject*>* collist, float DeltaTime)
 			}
 			else
 			{
-
-				RigidBody ppConvertrb;
-				ppConvertrb.SetVelocity((*i)->pp->GetVelocity());
-				ppConvertrb.SetPosition(&(*i)->CenterPos);
-				ppConvertrb.SetMass((*i)->pp->GetMass(false));
-				ppConvertrb.SetHalfBox((*i)->pp->GetHalfBox().x, (*i)->pp->GetHalfBox().y, (*i)->pp->GetHalfBox().z);
-				ppConvertrb.SetE(1);
-				ppConvertrb.SetDamping((*i)->pp->GetDamping(),0);
-				ppConvertrb.SetBounce((*i)->pp->GetBounce());
-				ppConvertrb.SetAngularVelocity(0, 0, 0);
-				ppConvertrb.SetAccel((*i)->pp->GetAccel());
-
-
-				
-				
-
-				bool test = rb->CollisionTest(ppConvertrb, Lookvector, Rightvector, GetUpvector(), (*i)->Lookvector, (*i)->Rightvector, (*i)->GetUpvector());
-
-				if (test)//충돌했으면 충돌해소를 해야한다.
+				if ((*i)->pp != NULL) // pp가 NULL이 아니면 질점 오브젝트이다.
 				{
-					//충돌 했을때 축이 내가 아래로 내려가면 Airbone을 false로 둔다. 이는 내가 아래에있음을 나타낸다.
-					//즉 플레이어가 위에있고 내가 아래임.
-					if (rb->CollisionPointVector[0].pAxis.y < 0)
-					{
 
-						ppConvertrb.SetVelocity(ppConvertrb.GetVelocity().x, 0, ppConvertrb.GetVelocity().z);
-						(*i)->AirBone = false;
+					RigidBody ppConvertrb;
+					ppConvertrb.SetVelocity((*i)->pp->GetVelocity());
+					ppConvertrb.SetPosition(&(*i)->CenterPos);
+					ppConvertrb.SetMass((*i)->pp->GetMass(false));
+					ppConvertrb.SetHalfBox((*i)->pp->GetHalfBox().x, (*i)->pp->GetHalfBox().y, (*i)->pp->GetHalfBox().z);
+					ppConvertrb.SetE(1);
+					ppConvertrb.SetDamping((*i)->pp->GetDamping(), 0);
+					ppConvertrb.SetBounce((*i)->pp->GetBounce());
+					ppConvertrb.SetAngularVelocity(0, 0, 0);
+					ppConvertrb.SetAccel((*i)->pp->GetAccel());
+
+
+
+
+
+					bool test = rb->CollisionTest(ppConvertrb, Lookvector, Rightvector, GetUpvector(), (*i)->Lookvector, (*i)->Rightvector, (*i)->GetUpvector());
+
+					if (test)//충돌했으면 충돌해소를 해야한다.
+					{
+						//충돌 했을때 축이 내가 아래로 내려가면 Airbone을 false로 둔다. 이는 내가 아래에있음을 나타낸다.
+						//즉 플레이어가 위에있고 내가 아래임.
+						if (rb->CollisionPointVector[0].pAxis.y < 0)
+						{
+
+							ppConvertrb.SetVelocity(ppConvertrb.GetVelocity().x, 0, ppConvertrb.GetVelocity().z);
+							(*i)->AirBone = false;
+						}
+
+						//충돌 테스트용 코드
+
+						if ((*i)->obs == Bullet)
+						{
+							(*i)->DelObj = true;
+
+							rb->AmendTime = 1.5;
+							auto cn = Float4Add(rb->GetPosition(), ppConvertrb.GetPosition(), false);
+							cn = Float4Normalize(cn);
+							cn = Float4Float(cn, 600);
+							auto vn = (*i)->pp->GetVelocity();
+							vn = Float3Normalize(vn);
+							vn = Float3Float(vn, 600);
+							if (rb->CollisionPointVector[0].Pos.y >= 7 && rb->CollisionPointVector[0].Pos.y <= 13)
+							{
+								rb->CollisionPointVector[0].Pos.y = 10;
+								vn = XMFLOAT3(0, 0, 600);
+							}
+							rb->AddForcePoint(XMFloat4to3(cn), rb->CollisionPointVector[0].Pos, vn);
+							rb->integrate(0.01);
+						}
+						else
+						{
+							rb->AmendTime = 0;
+							
+						}
+						rb->ResolvePenetration(ppConvertrb, DeltaTime);
+						(*i)->pp->SetVelocity(ppConvertrb.GetVelocity());
+						(*i)->pp->SetPosition(ppConvertrb.GetPosition());
+						(*i)->pp->SetAccel(ppConvertrb.GetAccel());
+						(*i)->UpdatePPosCenterPos();
+
 					}
 
-					/*rb->AmendTime = 3;
-					rb->AddForcePoint(XMFLOAT3(0, 0, 300), rb->CollisionPointVector[0].Pos);
-					rb->integrate(0.01);*/
-					rb->ResolvePenetration(ppConvertrb, DeltaTime);
-					(*i)->pp->SetVelocity(ppConvertrb.GetVelocity());
-					(*i)->pp->SetPosition(ppConvertrb.GetPosition());
-					(*i)->pp->SetAccel(ppConvertrb.GetAccel());
-					(*i)->UpdatePPosCenterPos();
-
-
 				}
-
 			}
 		}
 	}
@@ -2494,6 +2534,7 @@ SmallWallObject::SmallWallObject(ID3D12Device * m_Device, ID3D12GraphicsCommandL
 	ObjData.Scale = 1.0f;
 	ObjData.SpecularParamater = 0.1f;//스페큘러를 낮게준다.
 
+	obs = Static;
 	 //게임관련 데이터들
 	gamedata.MAXHP = 100;
 	gamedata.HP = 100;
@@ -2501,7 +2542,7 @@ SmallWallObject::SmallWallObject(ID3D12Device * m_Device, ID3D12GraphicsCommandL
 	gamedata.GodMode = true;
 	gamedata.Speed = 0;
 	staticobject = true;
-	Wall = true;
+	
 	//광선충돌 검사용 육면체
 	XMFLOAT3 rx(20, 0, 0);
 	XMFLOAT3 ry(0, 10, 0);
@@ -2585,6 +2626,7 @@ BigWallObject::BigWallObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList 
 	auto q2 = QuaternionRotation(axis, dgree);
 	Orient = QuaternionMultiply(Orient, q2);
 
+	obs = Static;
 	UpdateLookVector();
 	ObjData.isAnimation = 0;
 	ObjData.Scale = 1.0f;
@@ -2597,7 +2639,7 @@ BigWallObject::BigWallObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList 
 	gamedata.GodMode = true;
 	gamedata.Speed = 0;
 	staticobject = true;
-	Wall = true;
+	
 
 	//광선충돌 검사용 육면체
 	XMFLOAT3 rx(350, 0, 0);
@@ -2693,8 +2735,7 @@ BuildingObject::BuildingObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 	gamedata.GodMode = true;
 	gamedata.Speed = 0;
 	staticobject = true;
-	Wall = true;
-
+	obs = Static;
 	//광선충돌 검사용 육면체
 	XMFLOAT3 rx(15, 0, 0);
 	XMFLOAT3 ry(0, 45, 0);
@@ -2777,7 +2818,7 @@ RangeObject::RangeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * co
 	ObjData.SpecularParamater = 0.0f;//스페큘러를 낮게준다.
 	ObjData.BlendValue = 0.5f;
 	Blending = true;
-	
+	obs = UI;
 
 
 	//게임관련 데이터들
@@ -2847,7 +2888,7 @@ ParticleObject::ParticleObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 	gamedata.GodMode = true;
 	gamedata.Speed = 10;
 	staticobject = true;
-
+	obs = UI;
 
 	if (CreateMesh == false)
 	{

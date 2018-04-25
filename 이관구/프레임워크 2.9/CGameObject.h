@@ -11,6 +11,16 @@
 #define CUBEMAN_HALFEIGHT 10
 #define BULLET_SIZE 1
 
+enum Obj_State
+{
+	Dynamic=0,
+	Static,
+	Wall,
+	Particle,
+	Bullet,
+	Rigid,
+	UI
+};
 
 enum Ani_State 
 {
@@ -75,6 +85,8 @@ public:
 	XMFLOAT4 Orient;//방향을 나타낸다.
 	bool AirBone = false;
 
+
+
 	//룩벡터와 라이트벡터
 	XMFLOAT3 Lookvector;//룩벡터. 오브젝트가 바라보고있는 방향.
 	XMFLOAT3 Rightvector;//라이트벡터. 오브젝트가 바라보고있는 방향의 오른쪽방향.
@@ -95,13 +107,14 @@ public:
 	bool DelObj = false;//이게 참이면 실제로 제거된다.
 	bool Blending = false;
 	//벽들에 굳이 마우스를 움직일때마다 체크할 필요는 없으므로 추가함. 또 벽은 또 벽대로 뭔가 처리할게 있을것같음.
-	bool Wall = false;
+	Obj_State obs = Dynamic;
+
 
 	GameData gamedata;
 	RayCastObject rco;//레이캐스트 오브젝트
 	CGameObject* LockOn=NULL;
 
-
+	
 	//기타 공용 함수들
 	virtual void SetWorldMatrix();//월드매트릭스 설정.
 	

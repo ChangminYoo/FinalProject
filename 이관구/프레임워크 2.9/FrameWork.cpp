@@ -619,7 +619,7 @@ void FrameWork::OnMouseMove(WPARAM btnState, int x, int y)
 						
 						
 						if ((*b)->rco.RayCasting(RAY.RayOrgin, RAY.RayDir, XMFloat4to3((*b)->CenterPos), XMFloat4to3(scene->Player->PlayerObject->CenterPos),
-							scene->Player->PlayerObject->Lookvector, &savepoint) == true && Shot == false && (*b)->Wall==false&& (*b)->rco.isTopPlane==true)//광선이 다른 오브젝트를 맞출경우
+							scene->Player->PlayerObject->Lookvector, &savepoint) == true && Shot == false && (*b)->obs!=Wall&& (*b)->rco.isTopPlane==true)//광선이 다른 오브젝트를 맞출경우
 						{
 							Shot = true;
 							scene->Player->TraceObject->CenterPos = XMFloat3to4(savepoint);
