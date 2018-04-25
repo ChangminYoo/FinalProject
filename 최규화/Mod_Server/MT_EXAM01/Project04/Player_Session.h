@@ -1,12 +1,7 @@
 #pragma once
 
 #include "Database\CTextTest.h"
-#include "Player.h"
-#include "BulletObject.h"
-#include "StaticObject.h"
-
 #include "PhysicalEffect.h"
-
 #include "ShareHeader.h"
 
 enum PLAYER_STATE 

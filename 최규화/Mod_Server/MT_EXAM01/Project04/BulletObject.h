@@ -9,19 +9,15 @@ class Player_Session;
 class BulletObject
 {
 private:
-	float		   lifetime;
+	float		   lifetime{ 0.f };
 
 	unsigned short  origin_hp{ 1 };
 	unsigned short  cur_hp{ 1 };
 	float			Damage{ 10 };
 	unsigned short  Speed{ 50 };
-	char		    GodMode{ true };
-	char		    Ani{ Ani_State::Attack };
+	char		    GodMode{ false };
 
-	CollisionBox  CollisionBox_Size;		//12
-	bool		  alive{ true };
-
-	short		  myID{ -1 };
+	short		    myID{ -1 };
 
 	BulletObject_Info m_bulldata;
 
@@ -42,10 +38,10 @@ private:
 
 public:
 	BulletObject(const unsigned short& master_id, const unsigned short& target_id,
-				 const Position& pos, const Rotation& rot, float bulltime, const unsigned short& my_id);
+				 const Position& pos, const Rotation& rot, float bulltime, const unsigned short& my_id,
+				 Vel3f& vel);
 
-	void UpdateLookVector();
-	void GetUpVector();
+	void AfterGravitySystem();
 
 	void Update(float deltatime); //юс╫ц;
 

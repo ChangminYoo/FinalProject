@@ -85,6 +85,13 @@ struct Rotation
 	float		w{ 0.0f };
 };
 
+struct Vel3f
+{
+	float x{ 0.f };
+	float y{ 0.f };
+	float z{ 0.f };
+};
+
 struct Position
 {
 	float		x{ 100 };			           //4
@@ -92,7 +99,6 @@ struct Position
 	float		z{ 50 };			           //4
 	float		w{ 0.0f };			           //4
 };
-
 //16
 
 struct Player_Status
@@ -139,16 +145,9 @@ struct BulletObject_Info
 {
 	Position					pos;					//16
 	Rotation					Rotate_status;			//16
-	//CollisionBox				CollisionBox_Size;		//12
-	//unsigned short				origin_hp{ 1 };			//2
-	//unsigned short				cur_hp{ 1 };			//2  -- 16
-	//unsigned short				Damage{ 10 };			//2
-	//unsigned short				Speed{ 50 };			//2
-	//unsigned short				ID{ 0 };				//2
+	Vel3f						vel3f;
 	unsigned short				Master_ID{ 0 };			//2
-	short						LookOn_ID{ -1 };			//2
-	//char						GodMode{ true };		//1
-	//char						Ani{ Ani_State::Attack }; //1   -- 12
+	short						LookOn_ID{ -1 };		//2
 };
 
 #pragma pack (push, 1)

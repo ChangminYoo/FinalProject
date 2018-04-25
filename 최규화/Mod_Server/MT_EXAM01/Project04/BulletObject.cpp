@@ -1,7 +1,8 @@
 #include "BulletObject.h"
 
 BulletObject::BulletObject(const unsigned short& master_id, const unsigned short& target_id,
-						   const Position& pos, const Rotation& rot, float bulltime, const unsigned short& my_id)
+						   const Position& pos, const Rotation& rot, float bulltime, const unsigned short& my_id,
+						   Vel3f& vel)
 {
 	pe = new PhysicalEffect();
 
@@ -34,6 +35,10 @@ BulletObject::BulletObject(const unsigned short& master_id, const unsigned short
 	pp = new PhysicsPoint();
 
 	pp->SetPosition(m_bulldata.pos.x, m_bulldata.pos.y, m_bulldata.pos.z);
+
+	XMFLOAT3 xmf3;
+	xmf3.x = vel.x; xmf3.y = vel.y; xmf3.z = vel.z;
+	pp->SetVelocity(xmf3);
 	pp->SetHalfBox(1, 1, 1);
 	pp->SetDamping(1);
 	pp->SetBounce(false);
@@ -41,63 +46,11 @@ BulletObject::BulletObject(const unsigned short& master_id, const unsigned short
 
 }
 
-void BulletObject::UpdateLookVector()
+void BulletObject::AfterGravitySystem()
 {
-	auto wmatrix = XMMatrixIdentity();
-
-	//클라이언트에서 MouseMove를 통해 카메라를 회전할 때 마다 Rotate_status가 달라짐
-	XMFLOAT4 orient_xmfloat4 =
-	{	m_bulldata.Rotate_status.x ,
-		m_bulldata.Rotate_status.y ,
-		m_bulldata.Rotate_status.z ,
-		m_bulldata.Rotate_status.w };
-
-	auto quater = XMLoadFloat4(&orient_xmfloat4);
-	wmatrix *= XMMatrixRotationQuaternion(quater);
-
-	//OffLookvector 와 OffRightvector는 플레이어타입(캐릭터, 불렛, 스테틱오브젝트 등에 따라 다름)
-	auto ol = XMLoadFloat3(&OffLookvector);
-	auto or = XMLoadFloat3(&OffRightvector);
-
-	ol = XMVector4Transform(ol, wmatrix);
-	or = XMVector4Transform(or , wmatrix);
-
-	XMStoreFloat3(&Lookvector, ol);
-	XMStoreFloat3(&Rightvector, or );
-
-	if (fabsf(Lookvector.x) < MMPE_EPSILON / 10)
-		Lookvector.x = 0;
-	if (fabsf(Lookvector.y) < MMPE_EPSILON / 10)
-		Lookvector.y = 0;
-	if (fabsf(Lookvector.z) < MMPE_EPSILON / 10)
-		Lookvector.z = 0;
-
-
-	if (fabsf(Rightvector.x) < MMPE_EPSILON / 10)
-		Rightvector.x = 0;
-	if (fabsf(Rightvector.y) < MMPE_EPSILON / 10)
-		Rightvector.y = 0;
-	if (fabsf(Rightvector.z) < MMPE_EPSILON / 10)
-		Rightvector.z = 0;
-
-	Lookvector = Float3Normalize(Lookvector);
-	Rightvector = Float3Normalize(Rightvector);
-
+	if (m_bulldata.pos.y <= 0)
+		m_delobj = true;
 }
-
-void BulletObject::GetUpVector()
-{
-	XMVECTOR l = XMLoadFloat3(&Lookvector);
-	XMVECTOR r = XMLoadFloat3(&Rightvector);
-	auto u = XMVector3Cross(l, r);
-
-	XMFLOAT3 up;
-	XMStoreFloat3(&up, u);
-	up = Float3Normalize(up);
-
-	Upvector = move(up);
-}
-
 
 void BulletObject::Update(float deltatime)
 {

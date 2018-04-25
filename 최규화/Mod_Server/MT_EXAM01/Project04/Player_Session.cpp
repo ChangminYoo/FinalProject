@@ -1,6 +1,9 @@
 #include <random>
 #include <memory>
 #include "Player_Session.h"
+#include "Player.h"
+#include "BulletObject.h"
+#include "StaticObject.h"
 
 #define RAND_CREATE_X_POS 300
 #define RAND_CREATE_Z_POS 100
@@ -458,22 +461,24 @@ void Player_Session::ProcessPacket(Packet * packet)
 
 	case PACKET_PROTOCOL_TYPE::PLAYER_ATTACK:
 		{
-			if (m_state == PLAYER_STATE::DEAD)
-				break;
+			if (m_state == PLAYER_STATE::DEAD)		break;
 
 			auto n_bldata = reinterpret_cast<STC_Attack*>(packet);
 
+			//공격키를 눌렀을 시, 불렛 생성.
+			//불렛을 생성한 캐릭터 ID, 유도를 대비한 타겟 ID, 불렛 초기생성위치, 불렛 초기회전값, 불렛 생성시간, 불렛아이디
 			m_bulllObj = new BulletObject(n_bldata->bull_data.Master_ID, n_bldata->bull_data.LookOn_ID,
-				n_bldata->bull_data.pos, n_bldata->bull_data.Rotate_status, n_bldata->start_time, m_bullID);
+				n_bldata->bull_data.pos, n_bldata->bull_data.Rotate_status, n_bldata->start_time, m_bullID,
+				n_bldata->bull_data.vel3f);
 
-			//여기에 받은 총알 데이터하나의 물리효과 적용해주기
+			//불렛 데이터 하나의 물리효과 적용해주기 (integrate -> aftergravity) -> set bullet start time
 			pp->integrate(n_bldata->start_time, reinterpret_cast<XMFLOAT4*>(&n_bldata->bull_data.pos));
-
+			m_bulllObj->AfterGravitySystem();
 			m_bulllObj->Set_LifeTime(n_bldata->start_time);
 
 			m_bullobjs.emplace_back(m_bulllObj);
 			
-			//g_timer_queue.AddEvent()
+			g_timer_queue.AddEvent(m_bullID, 0, LIGHT_BULLET, true);
 
 			++m_bullID;
 

@@ -65,9 +65,9 @@ void TimerWorker::ProcessPacket(event_type * et)
 		}
 	break;
 
-	case ATTACK_CYCLE:
+	case LIGHT_BULLET:
 		{
-		
+			//초마다 불렛좌표 이동 
 		}
 	break;
 
