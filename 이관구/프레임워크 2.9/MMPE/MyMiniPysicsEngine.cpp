@@ -774,6 +774,7 @@ bool MiniPhysicsEngineG9::RayCastObject::RayCasting(XMFLOAT3 & RayOrgin, XMFLOAT
 		//이를 위해 교점의 위치에서 플레이어 위치를 뺀 벡터와
 		//카메라가 바라보고있는 방향(만약 오차가 심하면 플레이어의 Look으로 해야한다.)과 내적시
 		//0이상이고, t가 카메라에 더 가까우면 그 값으로 갱신한다.
+
 		if (In == true)
 		{
 			float isfront = 0;
@@ -1185,6 +1186,22 @@ void MiniPhysicsEngineG9::RigidBody::SetPosition(XMFLOAT4 * pos)
 void MiniPhysicsEngineG9::RigidBody::SetOrient(XMFLOAT4 * ori)
 {
 	Orient = ori;
+}
+
+void MiniPhysicsEngineG9::RigidBody::SetMinMaxImpurse(float min, float max)
+{
+	MaxImpurse = max;
+	MinImpurse = min;
+}
+
+float MiniPhysicsEngineG9::RigidBody::GetMinImpurse()
+{
+	return MinImpurse;
+}
+
+float MiniPhysicsEngineG9::RigidBody::GetMaxImpurse()
+{
+	return MaxImpurse;
 }
 
 
@@ -2155,8 +2172,29 @@ float MiniPhysicsEngineG9::RigidBody::GetSeparateVelocity(RigidBody & rb2, XMFLO
 	return 0.0f;
 }
 
-void MiniPhysicsEngineG9::RigidBody::ResolveVelocity(RigidBody & rb2, XMFLOAT3 & CollisionN, float DeltaTime)
+void MiniPhysicsEngineG9::RigidBody::ResolveVelocity(RigidBody & rb2, XMFLOAT3 & CollisionN, float DeltaTime,float i1,float i2,float amendtime)
 {
+	//고정된 물체가아니면.
+	if (rb2.GetMass() > MMPE_EPSILON)
+	{
+		AmendTime = amendtime;
+		auto cn = Float4Add(GetPosition(), rb2.GetPosition(), false);
+		cn = Float4Normalize(cn);
+		cn = Float4Float(cn, i1);
+		auto vn = rb2.GetVelocity();
+
+
+		if (CollisionPointVector[0].Pos.y >= GetPosition().y - GetHalfBox().y / 2 && CollisionPointVector[0].Pos.y <= GetPosition().y + GetHalfBox().y / 2)
+		{
+			CollisionPointVector[0].Pos.y = GetPosition().y;
+			vn.y = 0;
+
+		}
+		vn = Float3Normalize(vn);
+		vn = Float3Float(vn, i2);
+		AddForcePoint(XMFloat4to3(cn), CollisionPointVector[0].Pos, vn);
+		integrate(0.01);
+	}
 }
 
 void MiniPhysicsEngineG9::RigidBody::ResolvePenetration(RigidBody & rb2, float DeltaTime)

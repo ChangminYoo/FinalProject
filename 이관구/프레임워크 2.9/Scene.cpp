@@ -210,31 +210,47 @@ void Scene::CreateGameObject()
 	SkyObject = new SphereObject(device, commandlist,  &BbObject, XMFLOAT4(0, 0, 0, 0));
 	LandObject.push_back(new GridObject(device, commandlist, &BbObject, XMFLOAT4(0, -0.2, 0, 0)));
 
-	DynamicObject.push_back(new CCubeManObject(device, commandlist,&BbObject, XMFLOAT4(50, 100, -40, 0)));
-	DynamicObject.push_back(new CCubeManObject(device, commandlist,&BbObject, XMFLOAT4(-30, 0, -40, 0)));
+	DynamicObject.push_back(new CCubeManObject(device, commandlist,&BbObject, XMFLOAT4(0, 0, 220, 0)));
+	DynamicObject.push_back(new CCubeManObject(device, commandlist,&BbObject, XMFLOAT4(100, 0, 110, 0)));
 	//DynamicObject.back()->pp->SetBounce(true);
 	//DynamicObject.back()->pp->AddForce(-600, 0, 600);
 	//DynamicObject.back()->pp->integrate(0.1f);//힘은 지속적으로 가해지는것이며 즉발적이려면 힘을 가한 시간을 통해 계산한다.
+	
+	//MoveCube
+	DynamicObject.push_back(new MoveCubeObject(device, commandlist, &BbObject, 125.0f, XMFLOAT4(0, 35, 125, 0)));
+	DynamicObject.push_back(new MoveCubeObject(device, commandlist, &BbObject, -120.0f, XMFLOAT4(-120, 52, 10, 0)));
+	DynamicObject.push_back(new MoveCubeObject(device, commandlist, &BbObject, 115.0f, XMFLOAT4(115, 45, 0, 0)));
+	DynamicObject.push_back(new MoveCubeObject(device, commandlist, &BbObject, -115.0f, XMFLOAT4(-115, 20, 0, 0)));
+	DynamicObject.push_back(new MoveCubeObject(device, commandlist, &BbObject, -130.0f, XMFLOAT4(0, 17, -130, 0)));
+	DynamicObject.push_back(new MoveCubeObject(device, commandlist, &BbObject, 110.0f, XMFLOAT4(110, 34, 0, 0)));
+	DynamicObject.push_back(new MoveCubeObject(device, commandlist, &BbObject, 40.0f, XMFLOAT4(40, 111, 0, 0)));
 
 
 	//Cube
-	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(-10, 0, 0, 0)));
-	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(10, 10, -40, 0)));
-	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(-15, 30, -30, 0)));
-	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(-5, 45, 20, 0)));
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(10, 18, -40, 0)));
 	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(20, 70, -50, 0)));
 	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(5, 50, -40, 0)));
-
-	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(95, 25, -70, 0)));
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(88, 58, 17, 0)));
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(72, 69, 51, 0)));
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(28, 39, 48, 0)));
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(35, 25, -90, 0)));
 	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(62, 61, 30, 0)));
-	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(88, 43, -5, 0)));
-	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(55, 17, -95, 0)));
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(83, 26, -25, 0)));
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(35, 17, -65, 0)));
 	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(55, 62, -75, 0)));
-	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(45, 51, -49, 0)));
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(45, 41, -49, 0)));
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(52, 11, 4, 0)));
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(42, 53, 11, 0)));
 
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(-10, 10, 0, 0)));
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(-8, 48, -96, 0)));
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(-15, 30, -30, 0)));
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(-35, 40, -72, 0)));
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(-5, 35, 20, 0)));
 	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(-39, 62, 31, 0)));
 	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(-55, 42, -15, 0)));
-	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(-67, 22, 16, 0)));
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(-76, 40, 12, 0)));
+
 
 	//BigWall
 	StaticObject.push_back(new BigWallObject(device, commandlist, &BbObject, -BigWall_Rad1, XMFLOAT4(-BigWall_X1, 0, BigWall_Z1, 0)));//좌상
@@ -271,21 +287,21 @@ void Scene::CreateGameObject()
 
 
 	//RigidObject
-	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, XMFLOAT4(0, 200, 190, 0)));
-	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, XMFLOAT4(-200, 250, 60, 0)));
-	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, XMFLOAT4(200, 330, 60, 0)));
-	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, XMFLOAT4(-110, 390, -100, 0)));
-	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, XMFLOAT4(130, 180, -120, 0)));
-	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, XMFLOAT4(-51, 310, -30, 0)));
-	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, XMFLOAT4(31, 250, -90, 0)));
-	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, XMFLOAT4(-10, 270, 60, 0)));
-	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, XMFLOAT4(103, 220, -50, 0)));
-	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, XMFLOAT4(93, 160, 40, 0)));
+	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, XMFLOAT4(0, 200, 290, 0)));
+	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, XMFLOAT4(-270, 250, 60, 0)));
+	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, XMFLOAT4(270, 330, 60, 0)));
+	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, XMFLOAT4(-210, 390, -200, 0)));
+	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, XMFLOAT4(200, 180, -180, 0)));
+	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, XMFLOAT4(80, 310, -30, 0)));
+	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, XMFLOAT4(-31, 250, 160, 0)));
+	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, XMFLOAT4(90, 270, -340, 0)));
+	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, XMFLOAT4(-70, 220, -55, 0)));
+	//RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, XMFLOAT4(193, 160, 40, 0)));
 
 
-	StaticObject.push_back(new BuildingObject(device, commandlist, &BbObject, 0, XMFLOAT4(50, 0, -40, 0)));
-	StaticObject.push_back(new BuildingObject(device, commandlist, &BbObject, 0, XMFLOAT4(-40, 0, 10, 0)));
-
+	StaticObject.push_back(new BuildingObject(device, commandlist, &BbObject, 0, XMFLOAT4(60, 0, 30, 0)));
+	StaticObject.push_back(new BuildingObject(device, commandlist, &BbObject, 0, XMFLOAT4(-45, 0, 10, 0)));
+	StaticObject.push_back(new BuildingObject(device, commandlist, &BbObject, 0, XMFLOAT4(0, 0, -70, 0)));
 
 
 	//플레이어의 오브젝트 설정. 이건 나중에 바꿔야함.

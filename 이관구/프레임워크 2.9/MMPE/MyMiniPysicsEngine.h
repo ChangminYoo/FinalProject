@@ -117,6 +117,10 @@ namespace MiniPhysicsEngineG9
 		bool Bounce = false;
 		float e = 0.35f;
 
+		//최소 충격량과 최대충격량.
+		float MinImpurse = 60;
+		float MaxImpurse = 400;
+
 	public:
 		void integrate(float DeltaTime);//적분기. 속도와 가속도로 위치를 구하고 가속도를 이용해 속도를 갱신함.
 		void SetMass(float M);//무게의 역을 쉽게 저장하기 위한 함수. M을 넣으면 역수로 저장해줌
@@ -134,6 +138,10 @@ namespace MiniPhysicsEngineG9
 
 		void SetPosition(XMFLOAT4* pos);//중점 위치 설정
 		void SetOrient(XMFLOAT4* ori);//방향 설정
+
+		void SetMinMaxImpurse(float min,float max);
+		float GetMinImpurse();
+		float GetMaxImpurse();
 
 		XMFLOAT4 GetPosition();//중점 얻기
 		XMFLOAT4 GetOrient();
@@ -195,10 +203,10 @@ namespace MiniPhysicsEngineG9
 		//상대속도를 구한다.
 		float GetSeparateVelocity(RigidBody & rb2, XMFLOAT3& CollisionN);
 		//충돌후 속도를 구한다.
-		void ResolveVelocity(RigidBody & rb2, XMFLOAT3& CollisionN, float DeltaTime);
+		void ResolveVelocity(RigidBody & rb2, XMFLOAT3& CollisionN, float DeltaTime,float i1,float i2,float amendtime=1.5);
 		//겹쳐진 부분을 밀어낸다.
 		void ResolvePenetration(RigidBody & rb2, float DeltaTime);
-
+		
 
 	};
 

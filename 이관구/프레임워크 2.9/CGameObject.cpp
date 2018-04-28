@@ -5,7 +5,7 @@ extern UINT CbvSrvDescriptorSize;
 
 CGameObject::CGameObject()
 {
-	
+
 }
 
 
@@ -18,14 +18,14 @@ CGameObject::~CGameObject()
 		delete pp;
 	if (jarr != NULL)
 		delete jarr;
-	
+
 }
 
 XMFLOAT3 CGameObject::GetUpvector()
 {
 	XMVECTOR l = XMLoadFloat3(&Lookvector);
 	XMVECTOR r = XMLoadFloat3(&Rightvector);
-	auto u=XMVector3Cross(l, r);
+	auto u = XMVector3Cross(l, r);
 
 	XMFLOAT3 up;
 	XMStoreFloat3(&up, u);
@@ -33,9 +33,9 @@ XMFLOAT3 CGameObject::GetUpvector()
 	return up;
 }
 
-CGameObject::CGameObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist , list<CGameObject*>*Plist,XMFLOAT4 cp)
+CGameObject::CGameObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, XMFLOAT4 cp)
 {
-	
+
 	//여기서는 기본적인것들만 처리한다. 위치나 회전각 등 초기화
 	this->device = m_Device;
 	this->commandlist = commandlist;
@@ -59,7 +59,7 @@ void CGameObject::SetWorldMatrix()
 
 void CGameObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer& gt)
 {
-	
+
 }
 
 void CGameObject::ToDamage(float Damage)
@@ -118,11 +118,11 @@ void CGameObject::UpdateLookVector()
 void CGameObject::SetAnimation(int n_Ani)
 {
 	if (n_Ani != n_Animation)
-	{		
+	{
 		currAnimTime = 0;
 	}
 	n_Animation = n_Ani;
-	
+
 }
 
 void CGameObject::SetMaterial(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
@@ -130,7 +130,7 @@ void CGameObject::SetMaterial(ID3D12Device * m_Device, ID3D12GraphicsCommandList
 }
 
 void CGameObject::Tick(const GameTimer& gt)
-{	
+{
 }
 
 void CGameObject::CreateConstBuffer(ID3D12Device * m_Device)
@@ -139,7 +139,7 @@ void CGameObject::CreateConstBuffer(ID3D12Device * m_Device)
 	//상수버퍼를 만드는 방법
 	//UploadBuffer<넣을데이터>* buffer=new UploadBuffer<넣을데이터>(Device,1,true);//마지막 true는 만약 정점일경우 false로
 	//루트시그니처 생성항목으로 가서(씬클래스에 있다.)
-	
+
 	//CD3DX12_ROOT_PARAMETER RootParameter[1];
 	//RootParameter[0].InitAsConstantBufferView(0);
 	//이렇게 파라미터를 설정해서 만든다. 그후
@@ -148,14 +148,14 @@ void CGameObject::CreateConstBuffer(ID3D12Device * m_Device)
 
 
 	ConstBuffer = new UploadBuffer<ObjectData>(m_Device, 1, true);
-	
+
 }
 
 void CGameObject::UpdateConstBuffer(ID3D12GraphicsCommandList * commandlist)
 {
 	//항상 호출할것. 룩벡터와 라이트벡터를 업데이트해준다.
 	UpdateLookVector();
-	if (pp != NULL && rb==NULL)
+	if (pp != NULL && rb == NULL)
 		UpdatePPosCenterPos();//질점의 중점으로 센터포즈를 변경함. 반드시 충돌하거나 하면 처리해야함
 	SetWorldMatrix();//현재 포지션과 로테이션정보로 월드행렬을 만든다.
 
@@ -182,7 +182,7 @@ void SetTexture(ID3D12GraphicsCommandList * commandlist, ComPtr<ID3D12Descriptor
 	//텍스처는 테이블을 쓸것이므로 힙과 테이블 두개를 연결해야함.
 	ID3D12DescriptorHeap* descriptorHeaps[] = { SrvDescriptorHeap.Get() };
 	commandlist->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
-	
+
 	CD3DX12_GPU_DESCRIPTOR_HANDLE tex(SrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
 	if (isCubeMap)
 	{
@@ -255,26 +255,26 @@ void LoadTexture(ID3D12Device* device, ID3D12GraphicsCommandList* commandlist, C
 
 //=================================================== 오브젝트 생성 ===============================================================
 
-CCubeManObject::CCubeManObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist , list<CGameObject*>*Plist, XMFLOAT4 cp) : CGameObject(m_Device,commandlist,  Plist,cp)
+CCubeManObject::CCubeManObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
 {
 
 	//게임오브젝트 생성자에서 기본적인것을 처리했으므로 여기서는
 	//메쉬와 텍스처 사용시 불러오기와 애니메이션 로드등을 처리해야한다.
-	
+
 	//조인트가 저장될 배열.
 	jarr = new UploadBuffer<JointArr>(m_Device, 1, true);
 
 	if (CreateMesh == false)
 	{
-		
+
 		Mesh.Index = NULL;
 		Mesh.SubResource = NULL;
-	
-		LoadTexture(m_Device, commandlist,this, Textures,SrvDescriptorHeap,"CubeManTex", L"textures/human/Female Brown Knight 01 Black.dds",false);
+
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "CubeManTex", L"textures/human/Female Brown Knight 01 Black.dds", false);
 		SetMesh(m_Device, commandlist);
 		SetMaterial(m_Device, commandlist);
 
-		CreateMesh = true;		
+		CreateMesh = true;
 	}
 
 	//게임오브젝트마다 룩벡터와 라이트벡터가 다르므로 초기 오프셋 설정을 해준다.
@@ -289,13 +289,13 @@ CCubeManObject::CCubeManObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 	ObjData.isAnimation = true;
 	ObjData.Scale = 3;
 	ObjData.SpecularParamater = 0.3f;//스페큘러를 낮게준다.
-	
+
 	obs = Dynamic;
 	//게임 데이터 (스텟)을 찍는다. 캐릭터는 데미지를 갖지 않고, 탄환이 데미지를 갖도록하자.
 	gamedata.MAXHP = 100;
 	gamedata.HP = 100;
 	gamedata.Speed = 50;
-	
+
 	//광선충돌 검사용 육면체
 	XMFLOAT3 rx(3, 0, 0);
 	XMFLOAT3 ry(0, 10, 0);
@@ -309,13 +309,13 @@ CCubeManObject::CCubeManObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 	pp->SetDamping(0.45);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
 	pp->SetBounce(false);//튕기지 않는다.
 
-	
-	//머리위에 HP바 띄움
+
+						 //머리위에 HP바 띄움
 	if (ParticleList != NULL)
 	{
 		Hpbar = new BarObject(m_Device, commandlist, ParticleList, this, XMFLOAT4(CenterPos.x, CenterPos.y + 25, CenterPos.z, 0));
 		HPFrame = new BarFrameObject(m_Device, commandlist, ParticleList, this, XMFLOAT4(CenterPos.x, CenterPos.y + 25, CenterPos.z, 0));
-		
+
 		ParticleList->push_back(HPFrame);
 		ParticleList->push_back(Hpbar);
 	}
@@ -342,12 +342,12 @@ void CCubeManObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList*
 	Mesh.CreateIndexBuffer(m_Device, commandlist);
 
 	//애니메이션 로드
-	LoadMD5Anim(m_Device, L".\\플레이어메쉬들\\cIdle.MD5ANIM",&Mesh, this, animations);//0
+	LoadMD5Anim(m_Device, L".\\플레이어메쉬들\\cIdle.MD5ANIM", &Mesh, this, animations);//0
 	LoadMD5Anim(m_Device, L".\\플레이어메쉬들\\cRunning.MD5ANIM", &Mesh, this, animations);//1
 	LoadMD5Anim(m_Device, L".\\플레이어메쉬들\\cAttack.MD5ANIM", &Mesh, this, animations);//2
 	LoadMD5Anim(m_Device, L".\\플레이어메쉬들\\cDeath.MD5ANIM", &Mesh, this, animations);//2
-	
-	
+
+
 }
 
 void CCubeManObject::SetMaterial(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
@@ -373,7 +373,7 @@ void CCubeManObject::Tick(const GameTimer & gt)
 
 	}
 
-	
+
 }
 
 void CCubeManObject::ToDead()
@@ -387,14 +387,14 @@ void CCubeManObject::Render(ID3D12GraphicsCommandList * commandlist, const GameT
 	//텍스처를 연결하고, 월드행렬을 연결한다.
 
 
-	if(Textures.size()>0)
-		SetTexture(commandlist,SrvDescriptorHeap, Textures["CubeManTex"].get()->Resource.Get(), false);
+	if (Textures.size()>0)
+		SetTexture(commandlist, SrvDescriptorHeap, Textures["CubeManTex"].get()->Resource.Get(), false);
 	UpdateConstBuffer(commandlist);
-	
+
 	Mat.UpdateConstantBuffer(commandlist);
 
 	//틱함수에서 업데이트한 애니메이션된 조인트를 연결함.
-	
+
 	commandlist->SetGraphicsRootConstantBufferView(3, jarr->Resource()->GetGPUVirtualAddress());
 	//이후 그린다.
 
@@ -423,6 +423,13 @@ void CCubeManObject::Collision(list<CGameObject*>* collist, float DeltaTime)
 				{
 					pp->SetVelocity(pp->GetVelocity().x, 0, pp->GetVelocity().z);
 					AirBone = false;
+
+					if ((*i)->obs == Dynamic)
+					{
+						//pp->SetPosition((*i)->CenterPos.x, (*i)->CenterPos.y + 15, (*i)->CenterPos.z);
+					}
+
+
 				}
 				//충돌했을때  축이 (0,-1,0)이면 상대방 Airbone을 false로 둔다.  이는 상대가 내 위에있음을 나타낸다.
 				//설사 상대 위에 다른 상대가 있어도 걱정말자. 자연스러운것임.
@@ -440,15 +447,11 @@ void CCubeManObject::Collision(list<CGameObject*>* collist, float DeltaTime)
 					cn = Float3Add(pp->GetPosition(), (*(*i)->pp).GetPosition(), false);
 					cn = Float3Normalize(cn);
 
-
-
 				}
 				else//고정된 물체면 충돌한 평면의 노멀방향으로 cn을 설정할것.
 				{
 					cn = pp->pAxis;
 				}
-
-
 
 				//충돌해소 호출. 충돌해소 이후에 반드시 변경된 질점의 위치로 오브젝트위치를 일치시켜야한다.
 				pp->CollisionResolve(*(*i)->pp, cn, DeltaTime);//좀비는 튕기지 않는다.
@@ -463,13 +466,13 @@ void CCubeManObject::Collision(list<CGameObject*>* collist, float DeltaTime)
 
 void CCubeManObject::EndAnimation(int nAni)
 {
-	
-	if (nAni == (int)Ani_State::Attack )//공격하기였으면
+
+	if (nAni == (int)Ani_State::Attack)//공격하기였으면
 	{
 		SetAnimation((int)Ani_State::Idle);//대기상태로둔다.
 
 	}
-	
+
 	if (nAni == Ani_State::Dead)//죽는모션이었으면
 	{
 		DelObj = true;
@@ -478,7 +481,7 @@ void CCubeManObject::EndAnimation(int nAni)
 
 //------------------- 투 사 체 -----------------------//
 
-BulletCube::BulletCube(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist , list<CGameObject*>*Plist, CGameObject* master,XMFLOAT4& ori,CGameObject* lockon, XMFLOAT4 cp) : CGameObject(m_Device, commandlist,   Plist, cp)
+BulletCube::BulletCube(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, CGameObject* master, XMFLOAT4& ori, CGameObject* lockon, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
 {
 
 	if (CreateMesh == false)
@@ -508,8 +511,8 @@ BulletCube::BulletCube(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 	ObjData.isAnimation = 0;
 	ObjData.Scale = 1.0;
 	ObjData.SpecularParamater = 0.2f;//스페큘러를 낮게준다.
-	
-	//게임관련 데이터들
+
+									 //게임관련 데이터들
 	gamedata.MAXHP = 1;
 	gamedata.HP = 1;
 	gamedata.Damage = 10;
@@ -518,7 +521,7 @@ BulletCube::BulletCube(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 	LifeTime = 7;
 	Master = master;
 	LockOn = lockon;
-	
+
 
 	//광선충돌 검사용 육면체
 	XMFLOAT3 rx(1, 0, 0);
@@ -537,7 +540,7 @@ BulletCube::BulletCube(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 
 	if (ParticleList != NULL)
 	{
-		BulletParticles = new ParticleObject(m_Device, commandlist, ParticleList, this, 0.2f, XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, 0));		
+		BulletParticles = new ParticleObject(m_Device, commandlist, ParticleList, this, 0.2f, XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, 0));
 		ParticleList->push_back(BulletParticles);
 		BulletParticles2 = new ParticleObject(m_Device, commandlist, ParticleList, this, 0.3f, XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, 0));
 		ParticleList->push_back(BulletParticles2);
@@ -563,7 +566,7 @@ void BulletCube::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList* com
 	Mesh.CreateVertexBuffer(m_Device, commandlist);
 	Mesh.CreateIndexBuffer(m_Device, commandlist);
 
-	
+
 }
 
 void BulletCube::SetMaterial(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
@@ -616,8 +619,8 @@ void BulletCube::Collision(list<CGameObject*>* collist, float DeltaTime)
 	//충돌리스트의 모든 요소와 충돌검사를 실시한다.
 	for (auto i = CollisionList->begin(); i != CollisionList->end(); i++)
 	{
-		
-		if (*i != this && *i!=Master && (*i)->pp!=NULL) // pp가 NULL이 아니면 질점 오브젝트이다.
+
+		if (*i != this && *i != Master && (*i)->pp != NULL) // pp가 NULL이 아니면 질점 오브젝트이다.
 		{
 
 			bool test = pp->CollisionTest(*(*i)->pp, Lookvector, Rightvector, GetUpvector(), (*i)->Lookvector, (*i)->Rightvector, (*i)->GetUpvector());
@@ -651,13 +654,13 @@ void BulletCube::Collision(list<CGameObject*>* collist, float DeltaTime)
 				}
 
 				//충돌후 속도를 계산함.
-				
+
 				pp->ResolveVelocity(*(*i)->pp, cn, DeltaTime);
 				(*i)->pp->SetBounce(false);
 				//겹치는 부분을 제거할필요가 없는게 투사체는 어처피 사라지니까.
 				DelObj = true;
-				
-				
+
+
 			}
 		}
 	}
@@ -742,7 +745,7 @@ HeavyBulletCube::~HeavyBulletCube()
 void HeavyBulletCube::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList* commandlist)
 {
 
-	
+
 	CreateCube(&Mesh, 4, 4, 4);
 	//
 	Mesh.SetNormal(false);
@@ -882,7 +885,7 @@ Tetris1::Tetris1(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlis
 	ObjData.SpecularParamater = 0.0f;//스페큘러를 낮게준다.
 
 	obs = Bullet;
-									 //게임관련 데이터들
+	//게임관련 데이터들
 	gamedata.MAXHP = 1;
 	gamedata.HP = 1;
 	gamedata.Damage = 10;
@@ -1058,7 +1061,7 @@ Tetris2::Tetris2(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlis
 	ObjData.SpecularParamater = 0.0f;//스페큘러를 낮게준다.
 
 	obs = Bullet;
-									 //게임관련 데이터들
+	//게임관련 데이터들
 	gamedata.MAXHP = 1;
 	gamedata.HP = 1;
 	gamedata.Damage = 10;
@@ -1407,7 +1410,7 @@ Tetris4::Tetris4(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlis
 	ObjData.Scale = 1.0;
 	ObjData.SpecularParamater = 0.0f;//스페큘러를 낮게준다.
 	obs = Bullet;
-									 //게임관련 데이터들
+	//게임관련 데이터들
 	gamedata.MAXHP = 1;
 	gamedata.HP = 1;
 	gamedata.Damage = 10;
@@ -1576,13 +1579,13 @@ Tetrike::Tetrike(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlis
 	CenterPos.y += 150;
 
 	Blist = Bulletlist;
-
+	ParticleList = Plist;
 
 	ObjData.isAnimation = 0;
 	ObjData.Scale = 1.0;
 	ObjData.SpecularParamater = 0.0f;//스페큘러를 낮게준다.
 	obs = Bullet;
-									 //게임관련 데이터들
+	//게임관련 데이터들
 	gamedata.GodMode = true;
 
 
@@ -1659,10 +1662,10 @@ void Tetrike::Tick(const GameTimer & gt)
 
 			int g = (rand()*(int)(gt.TotalTime() * 32524)) % 4;
 			if (g == 0)
-				Blist->push_back(new Tetris1(device, commandlist, NULL, Master, NULL, pos));
+				Blist->push_back(new Tetris1(device, commandlist, ParticleList, Master, NULL, pos));
 			else if (g == 1)
 			{
-				auto t = new Tetris2(device, commandlist, NULL, Master, NULL, pos);
+				auto t = new Tetris2(device, commandlist, ParticleList, Master, NULL, pos);
 				int k = (rand()*(int)(gt.TotalTime() * 32524)) % 2;
 
 				if (k == 0)
@@ -1671,7 +1674,7 @@ void Tetrike::Tick(const GameTimer & gt)
 			}
 			else if (g == 2)
 			{
-				auto t = new Tetris3(device, commandlist, NULL, Master, NULL, pos);
+				auto t = new Tetris3(device, commandlist, ParticleList, Master, NULL, pos);
 				int k = (rand()*(int)(gt.TotalTime() * 32524)) % 3;
 
 				if (k == 0)
@@ -1684,7 +1687,7 @@ void Tetrike::Tick(const GameTimer & gt)
 			}
 			else if (g == 3)
 			{
-				auto t = new Tetris4(device, commandlist, NULL, Master, NULL, pos);
+				auto t = new Tetris4(device, commandlist, ParticleList, Master, NULL, pos);
 				int k = (rand()*(int)(gt.TotalTime() * 32524)) % 3;
 
 				if (k == 0)
@@ -1731,7 +1734,7 @@ void Tetrike::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer& g
 
 //---------------------- 스태틱 오브젝트 -----------------------------//
 
-SphereObject::SphereObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist , list<CGameObject*>*Plist, XMFLOAT4 cp) : CGameObject(m_Device, commandlist,   Plist, cp)
+SphereObject::SphereObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
 {
 
 	if (CreateMesh == false)
@@ -1740,7 +1743,7 @@ SphereObject::SphereObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * 
 		Mesh.Index = NULL;
 		Mesh.SubResource = NULL;
 
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "MapTex", L"textures/sky/snowcube1024.dds",true);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "MapTex", L"textures/sky/snowcube1024.dds", true);
 		SetMesh(m_Device, commandlist);
 		SetMaterial(m_Device, commandlist);
 		CreateMesh = true;
@@ -1801,7 +1804,7 @@ void SphereObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTim
 
 //////////////
 
-CubeObject::CubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist , list<CGameObject*>*Plist, XMFLOAT4 cp) : CGameObject(m_Device, commandlist,   Plist, cp)
+CubeObject::CubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
 {
 
 	if (CreateMesh == false)
@@ -1824,6 +1827,7 @@ CubeObject::CubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 
 	}
 	selectColor = rand() % 7 + 0;
+
 	//게임오브젝트마다 룩벡터와 라이트벡터가 다르므로 초기 오프셋 설정을 해준다.
 	//실제 룩벡터 등은 모두 UpdateLookVector에서 처리된다(라이트벡터도) 따라서 Tick함수에서 반드시 호출해야한다.
 	OffLookvector = XMFLOAT3(0, 0, 1);
@@ -1833,9 +1837,9 @@ CubeObject::CubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 	ObjData.isAnimation = 0;
 	ObjData.Scale = 10.0f;
 	ObjData.SpecularParamater = 0.0f;//스페큘러를 낮게준다.
-	
+
 	obs = Static;
-	
+
 	//게임관련 데이터들
 	gamedata.MAXHP = 100;
 	gamedata.HP = 100;
@@ -1863,7 +1867,7 @@ CubeObject::CubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 
 void CubeObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
 {
-	CreateCube(&Mesh, 1,1,1);
+	CreateCube(&Mesh, 1, 1, 1);
 
 	Mesh.SetNormal(false);
 	Mesh.CreateVertexBuffer(m_Device, commandlist);
@@ -1910,10 +1914,179 @@ void CubeObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer
 	Mesh.Render(commandlist);
 }
 
+MoveCubeObject::MoveCubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, float rad, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
+{
+	if (CreateMesh == false)
+	{
+
+		Mesh.Index = NULL;
+		Mesh.SubResource = NULL;
+
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "redTex", L"textures/object/red.dds", false, 7, 0);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "orangeTex", L"textures/object/orange.dds", false, 7, 1);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "yellowTex", L"textures/object/yellow.dds", false, 7, 2);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "pinkTex", L"textures/object/pink.dds", false, 7, 3);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "whiteTex", L"textures/object/white.dds", false, 7, 4);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "blueTex", L"textures/object/blue.dds", false, 7, 5);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "greenTex", L"textures/object/green.dds", false, 7, 6);
+
+		SetMesh(m_Device, commandlist);
+		SetMaterial(m_Device, commandlist);
+		CreateMesh = true;
+
+	}
+	selectColor = rand() % 7 + 0;
+	Rad = rad;
+
+	n = rand() % 30;
+
+	//게임오브젝트마다 룩벡터와 라이트벡터가 다르므로 초기 오프셋 설정을 해준다.
+	//실제 룩벡터 등은 모두 UpdateLookVector에서 처리된다(라이트벡터도) 따라서 Tick함수에서 반드시 호출해야한다.
+	OffLookvector = XMFLOAT3(0, 0, 1);
+	OffRightvector = XMFLOAT3(1, 0, 0);
+
+	UpdateLookVector();
+	ObjData.isAnimation = 0;
+	ObjData.Scale = 10.0f;
+	ObjData.SpecularParamater = 0.0f;//스페큘러를 낮게준다.
+
+
+									 //게임관련 데이터들
+	gamedata.MAXHP = 100;
+	gamedata.HP = 100;
+	gamedata.Damage = 0;
+	gamedata.GodMode = true;
+	gamedata.Speed = 0;
+	staticobject = true;
+
+	//광선충돌 검사용 육면체
+	XMFLOAT3 rx(10, 0, 0);
+	XMFLOAT3 ry(0, 5, 0);
+	XMFLOAT3 rz(0, 0, 10);
+	rco.SetPlane(rx, ry, rz);
+
+	//질점오브젝트 사용시 필요한 데이터들 설정
+	pp = new PhysicsPoint();
+	pp->SetPosition(CenterPos);//이 값은 항상 갱신되야한다.
+	pp->SetHalfBox(10, 5, 10);//충돌 박스의 x,y,z 크기
+	pp->SetDamping(0.5f);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
+	pp->SetBounce(false);//튕기지 않는다.
+	pp->SetMass(INFINITY);//고정된 물체는 무게가 무한이다.
+
+}
+
+
+void MoveCubeObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
+{
+	CreateCube(&Mesh, 2, 1, 2);
+
+	Mesh.SetNormal(false);
+	Mesh.CreateVertexBuffer(m_Device, commandlist);
+	Mesh.CreateIndexBuffer(m_Device, commandlist);
+
+}
+
+void MoveCubeObject::SetMaterial(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
+{
+	if (Mat.ConstBuffer == NULL)
+		Mat.ConstBuffer = new UploadBuffer<MaterialData>(m_Device, 1, true);
+
+
+	Mat.MatData.Roughness = 0.2f;
+}
+
+void MoveCubeObject::Tick(const GameTimer & gt)
+{
+	n += gt.DeltaTime();
+
+	CenterPos.x = Rad * cosf(MMPE_PI * n * 0.1f);
+	CenterPos.z = Rad * sinf(MMPE_PI * n * 0.1f);
+
+	pp->SetPosition(CenterPos);
+
+}
+
+void MoveCubeObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer & gt)
+{
+	if (Textures.size() > 0)
+	{
+		if (selectColor == 0)
+			SetTexture(commandlist, SrvDescriptorHeap, Textures["redTex"].get()->Resource.Get(), false, 0);
+		else if (selectColor == 1)
+			SetTexture(commandlist, SrvDescriptorHeap, Textures["orangeTex"].get()->Resource.Get(), false, 1);
+		else if (selectColor == 2)
+			SetTexture(commandlist, SrvDescriptorHeap, Textures["yellowTex"].get()->Resource.Get(), false, 2);
+		else if (selectColor == 3)
+			SetTexture(commandlist, SrvDescriptorHeap, Textures["pinkTex"].get()->Resource.Get(), false, 3);
+		else if (selectColor == 4)
+			SetTexture(commandlist, SrvDescriptorHeap, Textures["whiteTex"].get()->Resource.Get(), false, 4);
+		else if (selectColor == 5)
+			SetTexture(commandlist, SrvDescriptorHeap, Textures["blueTex"].get()->Resource.Get(), false, 5);
+		else if (selectColor == 6)
+			SetTexture(commandlist, SrvDescriptorHeap, Textures["greenTex"].get()->Resource.Get(), false, 6);
+	}
+	UpdateConstBuffer(commandlist);
+
+	//이후 그린다.
+	Mesh.Render(commandlist);
+}
+
+void MoveCubeObject::Collision(list<CGameObject*>* collist, float DeltaTime)
+{
+	CollisionList = collist;
+	//충돌리스트의 모든 요소와 충돌검사를 실시한다.
+	for (auto i = CollisionList->begin(); i != CollisionList->end(); i++)
+	{
+
+		if (*i != this)
+		{
+
+			bool test = pp->CollisionTest(*(*i)->pp, Lookvector, Rightvector, GetUpvector(), (*i)->Lookvector, (*i)->Rightvector, (*i)->GetUpvector());
+
+			if (test)//충돌했으면 충돌해소를 해야한다.
+			{
+
+				//충돌 했을때 축이 (0,1,0) 이면 Airbone을 false로 둔다. 이는 내가 위에있음을 나타낸다.
+				if (pp->pAxis.y > 0)
+				{
+					pp->SetVelocity(pp->GetVelocity().x, 0, pp->GetVelocity().z);
+					AirBone = false;
+
+				}
+				//충돌했을때  축이 (0,-1,0)이면 상대방 Airbone을 false로 둔다.  이는 상대가 내 위에있음을 나타낸다.
+				//설사 상대 위에 다른 상대가 있어도 걱정말자. 자연스러운것임.
+				if (pp->pAxis.y < 0)
+				{
+					(*i)->pp->SetVelocity((*i)->pp->GetVelocity().x, 0, (*i)->pp->GetVelocity().z);
+					(*i)->AirBone = false;
+				}
+
+				XMFLOAT3 cn;
+				//고정된 물체가 아니면
+				if ((*i)->staticobject == false)
+				{
+					//상대속도 방향을 구한다. A-B
+					cn = Float3Add(pp->GetPosition(), (*(*i)->pp).GetPosition(), false);
+					cn = Float3Normalize(cn);
+
+				}
+				else//고정된 물체면 충돌한 평면의 노멀방향으로 cn을 설정할것.
+				{
+					cn = pp->pAxis;
+				}
+
+				//충돌해소 호출. 충돌해소 이후에 반드시 변경된 질점의 위치로 오브젝트위치를 일치시켜야한다.
+				pp->CollisionResolve(*(*i)->pp, cn, DeltaTime);//좀비는 튕기지 않는다.
+				UpdatePPosCenterPos();
+				(*i)->UpdatePPosCenterPos();
+			}
+		}
+	}
+}
 
 /////////////
 
-GridObject::GridObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist , list<CGameObject*>*Plist, XMFLOAT4 cp) : CGameObject(m_Device, commandlist,   Plist, cp)
+GridObject::GridObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
 {
 	if (CreateMesh == false)
 	{
@@ -2164,7 +2337,7 @@ void BarFrameObject::Render(ID3D12GraphicsCommandList * commandlist, const GameT
 }
 
 
-DamageObject::DamageObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist,  list<CGameObject*>*Plist,  float Damaged, XMFLOAT4 cp) : CGameObject(m_Device, commandlist,  Plist, cp)
+DamageObject::DamageObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, float Damaged, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
 {
 	ObjData.isAnimation = 0;
 	ObjData.Scale = 8.0f;
@@ -2187,11 +2360,11 @@ DamageObject::DamageObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * 
 		Mesh.SubResource = NULL;
 
 
-			LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "DamageTex10", L"textures/damage/damage10.dds", false,5 ,0);
-			LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "DamageTex20", L"textures/damage/damage20.dds", false, 5,1);
-			LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "DamageTex30", L"textures/damage/damage30.dds", false, 5,2);
-			LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "DamageTex40", L"textures/damage/damage40.dds", false, 5,3);
-			LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "DamageTex50", L"textures/damage/damage50.dds", false, 5,4);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "DamageTex10", L"textures/damage/damage10.dds", false, 5, 0);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "DamageTex20", L"textures/damage/damage20.dds", false, 5, 1);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "DamageTex30", L"textures/damage/damage30.dds", false, 5, 2);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "DamageTex40", L"textures/damage/damage40.dds", false, 5, 3);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "DamageTex50", L"textures/damage/damage50.dds", false, 5, 4);
 
 
 		SetMesh(m_Device, commandlist);
@@ -2222,7 +2395,7 @@ void DamageObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * 
 	for (int i = 0; i < numOfitem; ++i)
 	{
 
-		Mesh.SubResource[i].V = XMFLOAT3(0,0,0);
+		Mesh.SubResource[i].V = XMFLOAT3(0, 0, 0);
 
 		Mesh.Index[i] = i;
 	}
@@ -2238,7 +2411,7 @@ void DamageObject::Tick(const GameTimer & gt)
 
 	if (LifeTime > 0.0f)
 		CenterPos.y += gamedata.Speed * gt.DeltaTime();
-	
+
 	if (LifeTime <= 0)
 		DelObj = true;
 }
@@ -2247,16 +2420,16 @@ void DamageObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTim
 {
 	if (Textures.size() > 0)
 	{
-		if(damaged == 10)
+		if (damaged == 10)
 			SetTexture(commandlist, SrvDescriptorHeap, Textures["DamageTex10"].get()->Resource.Get(), false, 0);
-		else if(damaged == 20)
+		else if (damaged == 20)
 			SetTexture(commandlist, SrvDescriptorHeap, Textures["DamageTex20"].get()->Resource.Get(), false, 1);
 		else if (damaged == 30)
 			SetTexture(commandlist, SrvDescriptorHeap, Textures["DamageTex30"].get()->Resource.Get(), false, 2);
 		else if (damaged == 40)
 			SetTexture(commandlist, SrvDescriptorHeap, Textures["DamageTex40"].get()->Resource.Get(), false, 3);
 		else if (damaged == 50)
-			SetTexture(commandlist, SrvDescriptorHeap, Textures["DamageTex50"].get()->Resource.Get(), false, 4);	
+			SetTexture(commandlist, SrvDescriptorHeap, Textures["DamageTex50"].get()->Resource.Get(), false, 4);
 	}
 	UpdateConstBuffer(commandlist);
 
@@ -2291,7 +2464,7 @@ RigidCubeObject::RigidCubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandL
 		Mesh.Index = NULL;
 		Mesh.SubResource = NULL;
 
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "CubeTex", L"textures/object/WoodCrate.dds", false);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "CubeTex", L"textures/object/wood crate.dds", false);
 		SetMesh(m_Device, commandlist);
 		SetMaterial(m_Device, commandlist);
 		CreateMesh = true;
@@ -2310,7 +2483,7 @@ RigidCubeObject::RigidCubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandL
 	obs = Rigid;
 
 
-									 //게임관련 데이터들
+	//게임관련 데이터들
 	gamedata.MAXHP = 100;
 	gamedata.HP = 100;
 	gamedata.Damage = 0;
@@ -2320,9 +2493,9 @@ RigidCubeObject::RigidCubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandL
 
 
 	//광선충돌 검사용 육면체
-	XMFLOAT3 rx(13, 0, 0);
-	XMFLOAT3 ry(0, 13, 0);
-	XMFLOAT3 rz(0, 0, 13);
+	XMFLOAT3 rx(10, 0, 0);
+	XMFLOAT3 ry(0, 10, 0);
+	XMFLOAT3 rz(0, 0, 10);
 	rco.SetPlane(rx, ry, rz);
 
 	//리지드 바디
@@ -2330,9 +2503,9 @@ RigidCubeObject::RigidCubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandL
 	rb = new RigidBody();
 	rb->SetPosition(&CenterPos);//이 값은 항상 갱신되야한다.
 	rb->SetHalfBox(10, 10, 10);//충돌 박스의 x,y,z 크기
-	rb->SetDamping(0.5f, 0.34f);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
+	rb->SetDamping(0.5f, 0.38f);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
 	rb->SetBounce(false);//튕기지 않는다.
-	rb->SetMass(1);//고정된 물체는 무게가 무한이다.
+	rb->SetMass(1.5);//고정된 물체는 무게가 무한이다.
 	rb->SetIMoment(10, 10, 10);
 
 	rb->SetOrient(&Orient);
@@ -2355,7 +2528,7 @@ void RigidCubeObject::Tick(const GameTimer & gt)
 
 void RigidCubeObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
 {
-	CreateCube(&Mesh, 1,1,1);
+	CreateCube(&Mesh, 1, 1, 1);
 
 	Mesh.SetNormal(false);
 	Mesh.CreateVertexBuffer(m_Device, commandlist);
@@ -2371,7 +2544,7 @@ void RigidCubeObject::SetMaterial(ID3D12Device * m_Device, ID3D12GraphicsCommand
 
 
 	Mat.MatData.Roughness = 0.2f;
-	
+
 
 }
 
@@ -2404,12 +2577,12 @@ void RigidCubeObject::Collision(list<CGameObject*>* collist, float DeltaTime)
 
 				if (test)//충돌했으면 충돌해소를 해야한다.
 				{
-					
-					
+
+
 					//충돌 했을때 축이 (0,1,0) 이면 Airbone을 false로 둔다. 이는 내가 위에있음을 나타낸다.
 					if (rb->CollisionPointVector[0].pAxis.y > 0)
 					{
-						
+
 						rb->SetVelocity(rb->GetVelocity().x, 0, rb->GetVelocity().z);
 						AirBone = false;
 					}
@@ -2465,25 +2638,13 @@ void RigidCubeObject::Collision(list<CGameObject*>* collist, float DeltaTime)
 						{
 							(*i)->DelObj = true;
 
-							rb->AmendTime = 1.5;
-							auto cn = Float4Add(rb->GetPosition(), ppConvertrb.GetPosition(), false);
-							cn = Float4Normalize(cn);
-							cn = Float4Float(cn, 600);
-							auto vn = (*i)->pp->GetVelocity();
-							vn = Float3Normalize(vn);
-							vn = Float3Float(vn, 600);
-							if (rb->CollisionPointVector[0].Pos.y >= 7 && rb->CollisionPointVector[0].Pos.y <= 13)
-							{
-								rb->CollisionPointVector[0].Pos.y = 10;
-								vn = XMFLOAT3(0, 0, 600);
-							}
-							rb->AddForcePoint(XMFloat4to3(cn), rb->CollisionPointVector[0].Pos, vn);
-							rb->integrate(0.01);
+							rb->ResolveVelocity(ppConvertrb, XMFLOAT3(0, 0, 0), DeltaTime, 6000, 1500, 1.5);
+							
 						}
 						else
 						{
 							rb->AmendTime = 0;
-							
+
 						}
 						rb->ResolvePenetration(ppConvertrb, DeltaTime);
 						(*i)->pp->SetVelocity(ppConvertrb.GetVelocity());
@@ -2535,18 +2696,31 @@ SmallWallObject::SmallWallObject(ID3D12Device * m_Device, ID3D12GraphicsCommandL
 	ObjData.SpecularParamater = 0.1f;//스페큘러를 낮게준다.
 
 	obs = Static;
-	 //게임관련 데이터들
+	//게임관련 데이터들
 	gamedata.MAXHP = 100;
 	gamedata.HP = 100;
 	gamedata.Damage = 0;
 	gamedata.GodMode = true;
 	gamedata.Speed = 0;
 	staticobject = true;
-	
+
+	XMFLOAT3 raxis{ 0,1,0 };
 	//광선충돌 검사용 육면체
 	XMFLOAT3 rx(20, 0, 0);
+	auto rqx = QuaternionRotation(raxis, dgree);
+	Orient = QuaternionMultiply(XMFLOAT4(rx.x, rx.y, rx.z, 0), rqx);
+	rx.x = Orient.x; rx.y = Orient.y, rx.z = Orient.z;
+
 	XMFLOAT3 ry(0, 10, 0);
+	auto rqy = QuaternionRotation(raxis, dgree);
+	Orient = QuaternionMultiply(XMFLOAT4(ry.x, ry.y, ry.z, 0), rqy);
+	ry.x = Orient.x; ry.y = Orient.y, ry.z = Orient.z;
+
 	XMFLOAT3 rz(0, 0, 5);
+	auto rqz = QuaternionRotation(raxis, dgree);
+	Orient = QuaternionMultiply(XMFLOAT4(ry.x, ry.y, ry.z, 0), rqz);
+	rz.x = Orient.x; rz.y = Orient.y, rz.z = Orient.z;
+
 	rco.SetPlane(rx, ry, rz);
 
 	//질점오브젝트 사용시 필요한 데이터들 설정
@@ -2557,7 +2731,7 @@ SmallWallObject::SmallWallObject(ID3D12Device * m_Device, ID3D12GraphicsCommandL
 	pp->SetBounce(false);//튕기지 않는다.
 	pp->SetMass(INFINITY);//고정된 물체는 무게가 무한이다.
 
-		
+
 }
 
 void SmallWallObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
@@ -2631,20 +2805,33 @@ BigWallObject::BigWallObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList 
 	ObjData.isAnimation = 0;
 	ObjData.Scale = 1.0f;
 	ObjData.SpecularParamater = 0.2f;//스페큘러를 낮게준다.
-	
-	//게임관련 데이터들
+
+									 //게임관련 데이터들
 	gamedata.MAXHP = 100;
 	gamedata.HP = 100;
 	gamedata.Damage = 0;
 	gamedata.GodMode = true;
 	gamedata.Speed = 0;
 	staticobject = true;
-	
 
+
+	XMFLOAT3 raxis{ 0,1,0 };
 	//광선충돌 검사용 육면체
 	XMFLOAT3 rx(350, 0, 0);
+	auto rqx = QuaternionRotation(raxis, dgree);
+	Orient = QuaternionMultiply(XMFLOAT4(rx.x, rx.y, rx.z, 0), rqx);
+	rx.x = Orient.x; rx.y = Orient.y, rx.z = Orient.z;
+
 	XMFLOAT3 ry(0, 50, 0);
+	auto rqy = QuaternionRotation(raxis, dgree);
+	Orient = QuaternionMultiply(XMFLOAT4(ry.x, ry.y, ry.z, 0), rqy);
+	ry.x = Orient.x; ry.y = Orient.y, ry.z = Orient.z;
+
 	XMFLOAT3 rz(0, 0, 5);
+	auto rqz = QuaternionRotation(raxis, dgree);
+	Orient = QuaternionMultiply(XMFLOAT4(ry.x, ry.y, ry.z, 0), rqz);
+	rz.x = Orient.x; rz.y = Orient.y, rz.z = Orient.z;
+
 	rco.SetPlane(rx, ry, rz);
 
 	//질점오브젝트 사용시 필요한 데이터들 설정
@@ -2728,7 +2915,7 @@ BuildingObject::BuildingObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 
 
 
-	//게임관련 데이터들
+									 //게임관련 데이터들
 	gamedata.MAXHP = 100;
 	gamedata.HP = 100;
 	gamedata.Damage = 0;
@@ -2823,10 +3010,10 @@ RangeObject::RangeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * co
 
 	//게임관련 데이터들
 	gamedata.GodMode = true;
-	
+
 	staticobject = true;
-	
-	
+
+
 	//질점오브젝트 사용시 필요한 데이터들 설정
 	pp = NULL;
 

@@ -332,9 +332,16 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 
 			//문제는 2인자점을 어느것으로 할것인가 이다. 경우의수는 2가지다. 왼쪽이나 오른쪽점 / 또는 대각선 점.
 
+			//가장가까운 2인자점.
 			auto V1 = Float4Add(allpoint[1].Pos, contactpoint[0].Pos, false);
 			V1 = Float4Normalize(V1);
 
+			//현재점의 대각선에 위치한 2인자점
+			auto sV1 = Float4Add(allpoint[3].Pos, contactpoint[0].Pos, false);
+			sV1 = Float4Normalize(sV1);
+
+			
+			//가장가까운 2인자점의 각도를 구하기
 			float NdotV1 = Normal.x*V1.x + Normal.y*V1.y + Normal.z*V1.z;
 
 			XMFLOAT3 ProjAB = Normal;
@@ -346,9 +353,7 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 			V2 = Float4Normalize(V2);
 
 
-			//먼저 사잇각도를 구한다.
-			//기존에는 float으로 했는데, 0이아니어야 하는데 0이나오는경우가 생김..
-
+			
 
 			auto tempdot = V1.x*V2.x + V1.y*V2.y + V1.z*V2.z;
 			if (abs(tempdot) > 1)
@@ -362,6 +367,34 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 			double theta = acos(tempdot);
 
 
+
+			//대각선 2인자점의 각도를 구하기
+			float sNdotV1 = Normal.x*sV1.x + Normal.y*sV1.y + Normal.z*sV1.z;
+
+			XMFLOAT3 sProjAB = Normal;
+			sProjAB.x *= sNdotV1;
+			sProjAB.y *= sNdotV1;
+			sProjAB.z *= sNdotV1;
+
+			auto sV2 = Float4Add(sV1, XMFloat3to4(sProjAB), false);
+			sV2 = Float4Normalize(sV2);
+
+
+
+
+			auto stempdot = sV1.x*sV2.x + sV1.y*sV2.y + sV1.z*sV2.z;
+			if (abs(stempdot) > 1)
+			{
+				if (stempdot > 0)
+					stempdot = 1;
+				else
+					stempdot = -1;
+			}
+			//교정할 각도.  
+			double stheta = acos(stempdot);
+
+
+
 			//충격량을 구함. 충격량이 특정 값 이하일때만 보정가능.
 
 			CollisionPoint fp;//충격량을 가할 지점
@@ -373,13 +406,13 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 			float impurse = obj->rb->CalculateImpulse(fp, NULL, 1);
 
 			//최대임펄스를 구한다.
-			if (impurse > 400)
-				impurse = 400;
+			if (impurse > obj->rb->GetMaxImpurse())
+				impurse = obj->rb->GetMaxImpurse();
 
 
 			//최소 임펄스를 구한다.
-			if (impurse < 40)
-				impurse = 40;
+			if (impurse < obj->rb->GetMinImpurse())
+				impurse = obj->rb->GetMinImpurse();
 
 
 
@@ -387,7 +420,21 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 			//그후 사잇각이 특정각도 이하면 보정시킨다. 
 			//단 이게 double로 해도 0이아닌데 0이나오는경우가 생긴다.
 			//따라서 0일경우 그냥 충격량을 가해서 각도를 변경시킨다.
-			if (abs(theta) <= MMPE_PI / 25 && abs(theta) != 0 && abs(impurse) <= 200 && obj->rb->AmendTime <= 0)//대략 5도 이하면 보정시킴.
+
+			if (abs(stheta) <= MMPE_PI / 20 &&  abs(stheta) != 0 && abs(impurse) < obj->rb->GetMaxImpurse() && obj->rb->AmendTime <= 0)
+			{
+				//회전축을 구하고..
+				XMFLOAT3 mAxis = XMFloat4to3(Float4Cross(sV1, sV2));
+				mAxis = Float3Normalize(mAxis);
+				//보정을 시킨다.
+				AmendObject(mAxis, theta, obj);
+
+				//그리고 재귀 시킨다. 왜냐하면 보정이되었으면 allpoint,tempcollisionpoint,contactpoint , penetration 모두 다 바뀌어야 하기 때문이다.
+				//재귀 후 아마 2가지 경우의수가 있다. 충돌이 일어나거나, 아니면 살짝 떠있거나.. 어쨌든 잘 해결 된다.
+				obj->rb->SetAngularVelocity(0, 0, 0);
+
+			}
+			else if (abs(theta) <= MMPE_PI / 25 && abs(theta) != 0 && abs(impurse) < obj->rb->GetMaxImpurse() && obj->rb->AmendTime <= 0)//대략 5도 이하면 보정시킴.
 			{
 				//회전축을 구하고..
 				XMFLOAT3 mAxis = XMFloat4to3(Float4Cross(V1, V2));
@@ -552,16 +599,17 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 				float impurse = obj->rb->CalculateImpulse(fp, NULL, 1);
 
 				//최대임펄스를 구한다.
-				if (impurse > 400)
-					impurse = 400;
+				if (impurse > obj->rb->GetMaxImpurse())
+					impurse = obj->rb->GetMaxImpurse();
+
 
 				//최소 임펄스를 구한다.
-				if (impurse < 40)
-					impurse = 40;
+				if (impurse < obj->rb->GetMinImpurse())
+					impurse = obj->rb->GetMinImpurse();
 
 
 				//그후 사잇각이 특정각도 이하면 보정시킨다. 
-				if (abs(theta) <= MMPE_PI / 20 && abs(theta) != 0 && abs(impurse) <= 300 && obj->rb->AmendTime <= 0)//대략 5도 이하면 보정시킴.
+				if (abs(theta) <= MMPE_PI / 25 && abs(theta) != 0 && abs(impurse) < obj->rb->GetMaxImpurse() && obj->rb->AmendTime <= 0)//대략 5도 이하면 보정시킴.
 				{
 					//회전축을 구하고
 					XMFLOAT3 mAxis = XMFloat4to3(Float4Cross(V2, V3));
@@ -743,7 +791,7 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 
 			//땅에 닿았으니 현재 속도의 y는 반감되어야 한다. 원래는 탄성계수가 있지만.. 그냥 절반 감소시킨후 부호를 -로 하자.
 			auto d = obj->rb->GetVelocity();
-			d.y = -0.3 * d.y;
+			d.y = -0.01 * d.y;
 			obj->rb->SetVelocity(d);
 			obj->rb->SetAccel(0, 0, 0);
 
@@ -761,7 +809,7 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 
 			//땅에 닿았으니 현재 속도의 y는 반감되어야 한다. 원래는 탄성계수가 있지만.. 그냥 절반 감소시킨후 부호를 -로 하자.
 			auto d = obj->rb->GetVelocity();
-			d.y = -0.3 * d.y;
+			d.y = -0.01 * d.y;
 			obj->rb->SetVelocity(d);
 			obj->rb->SetAccel(0, 0, 0);
 
