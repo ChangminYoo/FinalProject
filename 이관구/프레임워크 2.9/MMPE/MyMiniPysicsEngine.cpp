@@ -2163,8 +2163,11 @@ bool MiniPhysicsEngineG9::RigidBody::CollisionTest(RigidBody & rb2, XMFLOAT3 & l
 }
 
 
-void MiniPhysicsEngineG9::RigidBody::CollisionResolve(RigidBody & rb2, XMFLOAT3 & CollisionN, float DeltaTime)
+void MiniPhysicsEngineG9::RigidBody::CollisionResolve(RigidBody & rb2, XMFLOAT3 & CollisionN, float DeltaTime, float i1, float i2, float amendtime)
 {
+	ResolveVelocity(rb2, CollisionN, DeltaTime, i1, i2, amendtime);
+	ResolvePenetration(rb2, DeltaTime);
+
 }
 
 float MiniPhysicsEngineG9::RigidBody::GetSeparateVelocity(RigidBody & rb2, XMFLOAT3 & CollisionN)

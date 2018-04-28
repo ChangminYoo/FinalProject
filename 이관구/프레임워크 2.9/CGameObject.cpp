@@ -2632,25 +2632,30 @@ void RigidCubeObject::Collision(list<CGameObject*>* collist, float DeltaTime)
 							(*i)->AirBone = false;
 						}
 
-						//충돌 테스트용 코드
-
+						
 						if ((*i)->obs == Bullet)
 						{
 							(*i)->DelObj = true;
+							//충돌 처리. 충격량을 가하고 겹침부분해소
+							rb->CollisionResolve(ppConvertrb, XMFLOAT3(0, 0, 0), DeltaTime, 6000, 1500, 1.5);
 
-							rb->ResolveVelocity(ppConvertrb, XMFLOAT3(0, 0, 0), DeltaTime, 6000, 1500, 1.5);
-							
+							(*i)->pp->SetVelocity(ppConvertrb.GetVelocity());
+							(*i)->pp->SetPosition(ppConvertrb.GetPosition());
+							(*i)->pp->SetAccel(ppConvertrb.GetAccel());
+							(*i)->UpdatePPosCenterPos();
 						}
 						else
 						{
-							rb->AmendTime = 0;
+							//충돌처리 현재는 그냥 겹침부분만 해소중
 
+							rb->AmendTime = 0;
+							rb->ResolvePenetration(ppConvertrb, DeltaTime);
+							(*i)->pp->SetVelocity(ppConvertrb.GetVelocity());
+							(*i)->pp->SetPosition(ppConvertrb.GetPosition());
+							(*i)->pp->SetAccel(ppConvertrb.GetAccel());
+							(*i)->UpdatePPosCenterPos();
 						}
-						rb->ResolvePenetration(ppConvertrb, DeltaTime);
-						(*i)->pp->SetVelocity(ppConvertrb.GetVelocity());
-						(*i)->pp->SetPosition(ppConvertrb.GetPosition());
-						(*i)->pp->SetAccel(ppConvertrb.GetAccel());
-						(*i)->UpdatePPosCenterPos();
+						
 
 					}
 
