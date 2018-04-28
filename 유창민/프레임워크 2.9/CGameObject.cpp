@@ -421,15 +421,15 @@ void CCubeManObject::Collision(list<CGameObject*>* collist, float DeltaTime)
 				//충돌 했을때 축이 (0,1,0) 이면 Airbone을 false로 둔다. 이는 내가 위에있음을 나타낸다.
 				if (pp->pAxis.y > 0)
 				{
-
-					//if ((*i)->obs == Dynamic)
-					//{
-					//	pp->AddForce((*i)->CenterPos.x, 0, (*i)->CenterPos.z);
-					//	pp->integrate(DeltaTime, &CenterPos);
-					//}
-
 					pp->SetVelocity(pp->GetVelocity().x, 0, pp->GetVelocity().z);
 					AirBone = false;
+
+					if ((*i)->obs == Dynamic)
+					{
+						//pp->SetPosition((*i)->CenterPos.x, (*i)->CenterPos.y + 15, (*i)->CenterPos.z);
+					}
+
+	
 				}
 				//충돌했을때  축이 (0,-1,0)이면 상대방 Airbone을 false로 둔다.  이는 상대가 내 위에있음을 나타낸다.
 				//설사 상대 위에 다른 상대가 있어도 걱정말자. 자연스러운것임.
@@ -1579,7 +1579,7 @@ Tetrike::Tetrike(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlis
 	CenterPos.y += 150;
 
 	Blist = Bulletlist;
-
+	ParticleList = Plist;
 
 	ObjData.isAnimation = 0;
 	ObjData.Scale = 1.0;
@@ -1662,10 +1662,10 @@ void Tetrike::Tick(const GameTimer & gt)
 
 			int g = (rand()*(int)(gt.TotalTime() * 32524)) % 4;
 			if (g == 0)
-				Blist->push_back(new Tetris1(device, commandlist, NULL, Master, NULL, pos));
+				Blist->push_back(new Tetris1(device, commandlist, ParticleList, Master, NULL, pos));
 			else if (g == 1)
 			{
-				auto t = new Tetris2(device, commandlist, NULL, Master, NULL, pos);
+				auto t = new Tetris2(device, commandlist, ParticleList, Master, NULL, pos);
 				int k = (rand()*(int)(gt.TotalTime() * 32524)) % 2;
 
 				if (k == 0)
@@ -1674,7 +1674,7 @@ void Tetrike::Tick(const GameTimer & gt)
 			}
 			else if (g == 2)
 			{
-				auto t = new Tetris3(device, commandlist, NULL, Master, NULL, pos);
+				auto t = new Tetris3(device, commandlist, ParticleList, Master, NULL, pos);
 				int k = (rand()*(int)(gt.TotalTime() * 32524)) % 3;
 
 				if (k == 0)
@@ -1687,7 +1687,7 @@ void Tetrike::Tick(const GameTimer & gt)
 			}
 			else if (g == 3)
 			{
-				auto t = new Tetris4(device, commandlist, NULL, Master, NULL, pos);
+				auto t = new Tetris4(device, commandlist, ParticleList, Master, NULL, pos);
 				int k = (rand()*(int)(gt.TotalTime() * 32524)) % 3;
 
 				if (k == 0)
@@ -1827,6 +1827,7 @@ CubeObject::CubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 
 	}
 	selectColor = rand() % 7 + 0;
+
 	//게임오브젝트마다 룩벡터와 라이트벡터가 다르므로 초기 오프셋 설정을 해준다.
 	//실제 룩벡터 등은 모두 UpdateLookVector에서 처리된다(라이트벡터도) 따라서 Tick함수에서 반드시 호출해야한다.
 	OffLookvector = XMFLOAT3(0, 0, 1);
@@ -1937,7 +1938,7 @@ MoveCubeObject::MoveCubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 	selectColor = rand() % 7 + 0;
 	Rad = rad;
 
-	n = rand() % 20;
+	n = rand() % 30;
 
 	//게임오브젝트마다 룩벡터와 라이트벡터가 다르므로 초기 오프셋 설정을 해준다.
 	//실제 룩벡터 등은 모두 UpdateLookVector에서 처리된다(라이트벡터도) 따라서 Tick함수에서 반드시 호출해야한다.
@@ -1950,7 +1951,7 @@ MoveCubeObject::MoveCubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 	ObjData.SpecularParamater = 0.0f;//스페큘러를 낮게준다.
 
 
-									 //게임관련 데이터들
+	//게임관련 데이터들
 	gamedata.MAXHP = 100;
 	gamedata.HP = 100;
 	gamedata.Damage = 0;
@@ -1959,15 +1960,15 @@ MoveCubeObject::MoveCubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 	staticobject = true;
 
 	//광선충돌 검사용 육면체
-	XMFLOAT3 rx(5, 0, 0);
+	XMFLOAT3 rx(10, 0, 0);
 	XMFLOAT3 ry(0, 5, 0);
-	XMFLOAT3 rz(0, 0, 5);
+	XMFLOAT3 rz(0, 0, 10);
 	rco.SetPlane(rx, ry, rz);
 
 	//질점오브젝트 사용시 필요한 데이터들 설정
 	pp = new PhysicsPoint();
 	pp->SetPosition(CenterPos);//이 값은 항상 갱신되야한다.
-	pp->SetHalfBox(5, 5, 5);//충돌 박스의 x,y,z 크기
+	pp->SetHalfBox(10, 5, 10);//충돌 박스의 x,y,z 크기
 	pp->SetDamping(0.5f);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
 	pp->SetBounce(false);//튕기지 않는다.
 	pp->SetMass(INFINITY);//고정된 물체는 무게가 무한이다.
@@ -1977,7 +1978,7 @@ MoveCubeObject::MoveCubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 
 void MoveCubeObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
 {
-	CreateCube(&Mesh, 1, 1, 1);
+	CreateCube(&Mesh, 2, 1, 2);
 
 	Mesh.SetNormal(false);
 	Mesh.CreateVertexBuffer(m_Device, commandlist);
@@ -1996,16 +1997,13 @@ void MoveCubeObject::SetMaterial(ID3D12Device * m_Device, ID3D12GraphicsCommandL
 
 void MoveCubeObject::Tick(const GameTimer & gt)
 {
+	n += gt.DeltaTime();
+
 	CenterPos.x = Rad * cosf(MMPE_PI * n * 0.1f);
 	CenterPos.z = Rad * sinf(MMPE_PI * n * 0.1f);
 
-
-	n += gt.DeltaTime();
-
-
 	pp->SetPosition(CenterPos);
-
-
+	
 }
 
 void MoveCubeObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer & gt)
@@ -2035,6 +2033,55 @@ void MoveCubeObject::Render(ID3D12GraphicsCommandList * commandlist, const GameT
 
 void MoveCubeObject::Collision(list<CGameObject*>* collist, float DeltaTime)
 {
+	CollisionList = collist;
+	//충돌리스트의 모든 요소와 충돌검사를 실시한다.
+	for (auto i = CollisionList->begin(); i != CollisionList->end(); i++)
+	{
+
+		if (*i != this)
+		{
+
+			bool test = pp->CollisionTest(*(*i)->pp, Lookvector, Rightvector, GetUpvector(), (*i)->Lookvector, (*i)->Rightvector, (*i)->GetUpvector());
+
+			if (test)//충돌했으면 충돌해소를 해야한다.
+			{
+
+				//충돌 했을때 축이 (0,1,0) 이면 Airbone을 false로 둔다. 이는 내가 위에있음을 나타낸다.
+				if (pp->pAxis.y > 0)
+				{
+					pp->SetVelocity(pp->GetVelocity().x, 0, pp->GetVelocity().z);
+					AirBone = false;
+
+				}
+				//충돌했을때  축이 (0,-1,0)이면 상대방 Airbone을 false로 둔다.  이는 상대가 내 위에있음을 나타낸다.
+				//설사 상대 위에 다른 상대가 있어도 걱정말자. 자연스러운것임.
+				if (pp->pAxis.y < 0)
+				{
+					(*i)->pp->SetVelocity((*i)->pp->GetVelocity().x, 0, (*i)->pp->GetVelocity().z);
+					(*i)->AirBone = false;
+				}
+
+				XMFLOAT3 cn;
+				//고정된 물체가 아니면
+				if ((*i)->staticobject == false)
+				{
+					//상대속도 방향을 구한다. A-B
+					cn = Float3Add(pp->GetPosition(), (*(*i)->pp).GetPosition(), false);
+					cn = Float3Normalize(cn);
+
+				}
+				else//고정된 물체면 충돌한 평면의 노멀방향으로 cn을 설정할것.
+				{
+					cn = pp->pAxis;
+				}
+
+				//충돌해소 호출. 충돌해소 이후에 반드시 변경된 질점의 위치로 오브젝트위치를 일치시켜야한다.
+				pp->CollisionResolve(*(*i)->pp, cn, DeltaTime);//좀비는 튕기지 않는다.
+				UpdatePPosCenterPos();
+				(*i)->UpdatePPosCenterPos();
+			}
+		}
+	}
 }
 
 /////////////
@@ -2436,7 +2483,7 @@ RigidCubeObject::RigidCubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandL
 	obs = Rigid;
 
 
-									 //게임관련 데이터들
+	//게임관련 데이터들
 	gamedata.MAXHP = 100;
 	gamedata.HP = 100;
 	gamedata.Damage = 0;
