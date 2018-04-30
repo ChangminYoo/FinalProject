@@ -2637,7 +2637,7 @@ void RigidCubeObject::Collision(list<CGameObject*>* collist, float DeltaTime)
 						{
 							(*i)->DelObj = true;
 							//충돌 처리. 충격량을 가하고 겹침부분해소
-							rb->CollisionResolve(ppConvertrb, XMFLOAT3(0, 0, 0), DeltaTime, 6000, 1500, 1.5);
+							rb->CollisionResolve(ppConvertrb, XMFLOAT3(0, 0, 0), DeltaTime, 6000, 1400, 1.5);
 
 							(*i)->pp->SetVelocity(ppConvertrb.GetVelocity());
 							(*i)->pp->SetPosition(ppConvertrb.GetPosition());

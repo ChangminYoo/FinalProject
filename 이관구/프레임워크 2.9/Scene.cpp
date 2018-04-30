@@ -39,8 +39,8 @@ Scene::~Scene()
 {
 	if (AimUI != NULL)
 		delete AimUI;
-	//if (SkillBackGround != NULL)
-	//	delete SkillBackGround;
+	if (BackGround != NULL)
+		delete BackGround;
 
 	for (int i = 0; i < 4; i++)
 		if (SkillUI[i] != NULL)
@@ -315,7 +315,7 @@ void Scene::CreateUI()
 
 	AimUI = new AimObject(device,commandlist,NULL);
 	
-	//SkillBackGround = new BackGroundSkillObject(device, commandlist, NULL,XMFLOAT4(0, 0.9*-mHeight / 2,0,0));
+	BackGround = new BackGroundObject(device, commandlist, NULL,XMFLOAT4(0, 0,0,0));
 
 	SelectBar = new SelectBarObject(device, commandlist, NULL, XMFLOAT4(0 * 100 - 150, 0.9*-mHeight / 2, 0, 0));
 
@@ -401,7 +401,7 @@ void Scene::Render(const GameTimer& gt)
 
 
 			//가장 마지막에 그려야한다. 안그려면 가려짐
-			//SkillBackGround->Render(commandlist, gt);
+		//	BackGround->Render(commandlist, gt);
 			//다시 원상태로 바꿔줌. 이걸 안하면 피킹이 엉망이됨. 
 			Player->Camera.UpdateConstantBuffer(commandlist);
 	}

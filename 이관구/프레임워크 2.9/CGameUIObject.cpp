@@ -341,12 +341,15 @@ void SelectBarObject::Render(ID3D12GraphicsCommandList * commandlist, const Game
 }
 
 //----------
-BackGroundSkillObject::BackGroundSkillObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
+BackGroundObject::BackGroundObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
 {
+	//이녀석은 스케일을 x 길이로 CustomData1.x는 5로 설정해서 뭐하는녀석인지 선택하게 한후 CustomData1.y가 y길이로 하는 사각형이된다.
+
 	ObjData.isAnimation = 0;
-	ObjData.Scale = 400.0f;
+	ObjData.Scale = 800.0f;
+	ObjData.CustomData1.y = 600;
 	ObjData.SpecularParamater = 0.5f;//스페큘러를 낮게준다.
-	ObjData.CustomData1.x = 3;
+	ObjData.CustomData1.x = 5;
 
 	//게임관련 데이터들
 	gamedata.GodMode = true;
@@ -357,14 +360,14 @@ BackGroundSkillObject::BackGroundSkillObject(ID3D12Device * m_Device, ID3D12Grap
 		Mesh.Index = NULL;
 		Mesh.SubResource = NULL;
 
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "SkillBG", L"textures/ui/MainBar.dds", false);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "SkillBG", L"textures/ui/Range.dds", false);
 		SetMesh(m_Device, commandlist);
 		CreateMesh = true;
 
 	}
 }
 
-void BackGroundSkillObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
+void BackGroundObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
 {
 	UINT numOfitem = 1;
 
@@ -394,7 +397,7 @@ void BackGroundSkillObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsComma
 	Mesh.CreateIndexBuffer(m_Device, commandlist);
 }
 
-void BackGroundSkillObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer & gt)
+void BackGroundObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer & gt)
 {
 	//텍스처가 사이즈가 0 이상이면 연결
 	if (Textures.size()>0)

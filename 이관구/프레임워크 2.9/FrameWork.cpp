@@ -303,11 +303,12 @@ LRESULT FrameWork::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 			scene->resize = true;
 
-			//if (scene->SkillBackGround != NULL)
-			//{
-			//	scene->SkillBackGround->ObjData.Scale = mClientWidth / 2;
-			//	scene->SkillBackGround->CenterPos.y = 0.9*-mClientHeight / 2;
-			//}
+			if (scene->BackGround != NULL)
+			{
+				scene->BackGround->ObjData.Scale = mClientWidth;
+				scene->BackGround->ObjData.CustomData1.y = mClientHeight;
+				
+			}
 			for(int i=0;i<4;i++)
 				if (scene->SkillCoolBar[i] != NULL)
 				{

@@ -150,7 +150,23 @@ void GS(point VertexOut gin[1], inout TriangleStream<GeoOut> triStream)
 		v[3].x += halfWidth;
 		v[3].y += +halfHeight;
 	}
+	else if (CustomData1.x == 5)//백그라운드
+	{
+		halfWidth = 0.5f * Scale;
+		halfHeight = 0.5f *CustomData1.y;
 
+		v[0].x += -halfWidth;
+		v[0].y += -halfHeight;
+
+		v[1].x += -halfWidth;
+		v[1].y += halfHeight;
+
+		v[2].x += halfWidth;
+		v[2].y += -halfHeight;
+
+		v[3].x += halfWidth;
+		v[3].y += +halfHeight;
+	}
 	
 	
 
