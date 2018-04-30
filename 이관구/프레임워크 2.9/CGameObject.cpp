@@ -1631,7 +1631,7 @@ void Tetrike::Tick(const GameTimer & gt)
 	c += 3;
 	//No애니메이션!
 
-	if (ShotTime >= 0.25)
+	if (ShotTime >= 0.5)
 	{
 		ShotTime = 0;
 	}
@@ -2493,9 +2493,9 @@ RigidCubeObject::RigidCubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandL
 
 
 	//광선충돌 검사용 육면체
-	XMFLOAT3 rx(10, 0, 0);
+	XMFLOAT3 rx(12, 0, 0);
 	XMFLOAT3 ry(0, 10, 0);
-	XMFLOAT3 rz(0, 0, 10);
+	XMFLOAT3 rz(0, 0, 12);
 	rco.SetPlane(rx, ry, rz);
 
 	//리지드 바디

@@ -237,8 +237,6 @@ void Scene::CreateGameObject()
 	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(62, 61, 30, 0)));
 	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(83, 26, -25, 0)));
 	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(35, 17, -65, 0)));
-	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(55, 62, -75, 0)));
-	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(45, 41, -49, 0)));
 	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(52, 11, 4, 0)));
 	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(42, 53, 11, 0)));
 
@@ -246,7 +244,6 @@ void Scene::CreateGameObject()
 	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(-8, 48, -96, 0)));
 	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(-15, 30, -30, 0)));
 	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(-35, 40, -72, 0)));
-	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(-5, 35, 20, 0)));
 	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(-39, 62, 31, 0)));
 	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(-55, 42, -15, 0)));
 	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(-76, 40, 12, 0)));
@@ -383,27 +380,33 @@ void Scene::Render(const GameTimer& gt)
 			light->UpdateConstantBuffer(commandlist);
 			
 			
-			//쉐이더가 보유한 그려야할 오브젝트 목록을 그린다.
-			Shaders->Render(commandlist,gt);
-		
-			//UI를 여기서 그린다. UI는 따로 리스트등이 없음.
-			Player->Camera.UpdateConstantBufferOrtho(commandlist);
-			Shaders->SetBillboardShader(commandlist);
-			AimUI->Render(commandlist, gt);
+			if (GetGameState() == GS_PLAY)
+			{
+				//쉐이더가 보유한 그려야할 오브젝트 목록을 그린다.
+				Shaders->Render(commandlist, gt);
+
+				//UI를 여기서 그린다. UI는 따로 리스트등이 없음.
+				Player->Camera.UpdateConstantBufferOrtho(commandlist);
+				Shaders->SetBillboardShader(commandlist);
+				AimUI->Render(commandlist, gt);
+
+				for (int i = 0; i < 4; i++)
+					SkillCoolBar[i]->Render(commandlist, gt);
+
+				SelectBar->Render(commandlist, gt);
+
+				for (int i = 0; i < 4; i++)
+					SkillUI[i]->Render(commandlist, gt);
+
+
 			
-			for (int i = 0; i < 4; i++)
-				SkillCoolBar[i]->Render(commandlist, gt);
-
-			SelectBar->Render(commandlist, gt);
-
-			for (int i = 0; i < 4; i++)
-				SkillUI[i]->Render(commandlist, gt);
-
-
-			//가장 마지막에 그려야한다. 안그려면 가려짐
-		//	BackGround->Render(commandlist, gt);
-			//다시 원상태로 바꿔줌. 이걸 안하면 피킹이 엉망이됨. 
-			Player->Camera.UpdateConstantBuffer(commandlist);
+				//다시 원상태로 바꿔줌. 이걸 안하면 피킹이 엉망이됨. 
+				Player->Camera.UpdateConstantBuffer(commandlist);
+			}
+			else if (GetGameState() == GS_START)
+			{
+				BackGround->Render(commandlist, gt);
+			}
 	}
 }
 
@@ -412,95 +415,98 @@ void Scene::Tick(const GameTimer & gt)
 	//플레이어 입력처리 
 	Player->PlayerInput(gt.DeltaTime(),this);
 
-	//--------------------------------------------------------------
-	//오브젝트 삭제
-	//--------------------------------------------------------------
-	//애니메이션있는 오브젝트
-	for (auto i = DynamicObject.begin(); i != DynamicObject.end();)
+	if (GetGameState() == GS_PLAY)
 	{
-		
-		if ((*i)->DelObj == true)
+		//--------------------------------------------------------------
+		//오브젝트 삭제
+		//--------------------------------------------------------------
+		//애니메이션있는 오브젝트
+		for (auto i = DynamicObject.begin(); i != DynamicObject.end();)
 		{
-			delete *i;//실제 게임오브젝트의 메모리 해제
-			i = DynamicObject.erase(i);//리스트상에서 해당 요소를 지움
+
+			if ((*i)->DelObj == true)
+			{
+				delete *i;//실제 게임오브젝트의 메모리 해제
+				i = DynamicObject.erase(i);//리스트상에서 해당 요소를 지움
+			}
+			else
+				i++;
 		}
-		else
-			i++;
-	}
-	//투사체
-	for (auto i = BulletObject.begin(); i != BulletObject.end();)
-	{
-		
-		if ((*i)->DelObj == true)
+		//투사체
+		for (auto i = BulletObject.begin(); i != BulletObject.end();)
 		{
-			delete *i;//실제 게임오브젝트의 메모리 해제
-			i = BulletObject.erase(i);//리스트상에서 해당 요소를 지움
 
+			if ((*i)->DelObj == true)
+			{
+				delete *i;//실제 게임오브젝트의 메모리 해제
+				i = BulletObject.erase(i);//리스트상에서 해당 요소를 지움
+
+			}
+			else
+				i++;
 		}
-		else
-			i++;
-	}
-	//스테틱 오브젝트
-	for (auto i = StaticObject.begin(); i != StaticObject.end();)
-	{
-		if ((*i)->DelObj == true)
+		//스테틱 오브젝트
+		for (auto i = StaticObject.begin(); i != StaticObject.end();)
 		{
-			delete *i;//실제 게임오브젝트의 메모리 해제
-			i = StaticObject.erase(i);//리스트상에서 해당 요소를 지움
+			if ((*i)->DelObj == true)
+			{
+				delete *i;//실제 게임오브젝트의 메모리 해제
+				i = StaticObject.erase(i);//리스트상에서 해당 요소를 지움
+			}
+			else
+				i++;
 		}
-		else
-			i++;
-	}
 
-	for (auto i = BbObject.begin(); i != BbObject.end();)
-	{
-
-		if ((*i)->DelObj == true)
+		for (auto i = BbObject.begin(); i != BbObject.end();)
 		{
-			delete *i;//실제 게임오브젝트의 메모리 해제
-			i = BbObject.erase(i);//리스트상에서 해당 요소를 지움
+
+			if ((*i)->DelObj == true)
+			{
+				delete *i;//실제 게임오브젝트의 메모리 해제
+				i = BbObject.erase(i);//리스트상에서 해당 요소를 지움
+			}
+			else
+				i++;
 		}
-		else
-			i++;
-	}
-	//리지드바디 오브젝트
-	for (auto i = RigidObject.begin(); i != RigidObject.end();)
-	{
-		
-		if ((*i)->DelObj == true)
+		//리지드바디 오브젝트
+		for (auto i = RigidObject.begin(); i != RigidObject.end();)
 		{
-			delete *i;//실제 게임오브젝트의 메모리 해제
-			i = RigidObject.erase(i);//리스트상에서 해당 요소를 지움
+
+			if ((*i)->DelObj == true)
+			{
+				delete *i;//실제 게임오브젝트의 메모리 해제
+				i = RigidObject.erase(i);//리스트상에서 해당 요소를 지움
+			}
+			else
+				i++;
 		}
-		else
-			i++;
+
+
+		//--------------------------------------------------------------
+		//오브젝트 틱함수 처리
+		//--------------------------------------------------------------
+		for (auto b = DynamicObject.begin(); b != DynamicObject.end(); b++)
+			(*b)->Tick(gt);
+
+		//불렛
+		for (auto b = BulletObject.begin(); b != BulletObject.end(); b++)
+			(*b)->Tick(gt);
+
+
+		for (auto b = BbObject.begin(); b != BbObject.end(); b++)
+			(*b)->Tick(gt);
+
+		//리지드 바디
+		for (auto b = RigidObject.begin(); b != RigidObject.end(); b++)
+			(*b)->Tick(gt);
+
+
+		Player->Tick(gt.DeltaTime());
+
+		UITick(gt);
+		//카메라 리 로케이트 
+		Player->PlayerCameraReLocate();
 	}
-
-
-	//--------------------------------------------------------------
-	//오브젝트 틱함수 처리
-	//--------------------------------------------------------------
-	for (auto b = DynamicObject.begin(); b != DynamicObject.end(); b++)
-		(*b)->Tick(gt);
-
-	//불렛
-	for (auto b = BulletObject.begin(); b != BulletObject.end(); b++)
-		(*b)->Tick(gt);
-
-	
-	for (auto b = BbObject.begin(); b != BbObject.end(); b++)
-		(*b)->Tick(gt);
-	
-	//리지드 바디
-	for (auto b = RigidObject.begin(); b != RigidObject.end(); b++)
-		(*b)->Tick(gt);
-
-
-	Player->Tick(gt.DeltaTime());
-	
-	UITick(gt);
-	//카메라 리 로케이트 
-	Player->PlayerCameraReLocate();
 }
 
 

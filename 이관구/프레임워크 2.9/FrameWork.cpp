@@ -296,7 +296,7 @@ LRESULT FrameWork::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		mClientHeight = HIWORD(lParam);
 
 	//윈도우 사이즈가 바뀔때 마다 UI의 위치를 달리해야한다. 물론 틱함수를 만들어도 되지만, 굳이 매틱마다 불릴필요는 없으니까 이렇게 처리하자.
-		if (scene != NULL)
+		if (scene != NULL && scene->GetGameState()==GS_PLAY)
 		{
 			scene->mHeight = mClientHeight;
 			scene->mWidth = mClientWidth;
@@ -412,15 +412,18 @@ LRESULT FrameWork::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	case WM_LBUTTONDOWN:
 	case WM_MBUTTONDOWN:
 	case WM_RBUTTONDOWN:
-		OnMouseDown(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+		if(scene->GetGameState()==GS_PLAY)
+			OnMouseDown(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
 		return 0;
 	case WM_LBUTTONUP:
 	case WM_MBUTTONUP:
 	case WM_RBUTTONUP:
+
 		OnMouseUp(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
 		return 0;
 	case WM_MOUSEMOVE:
-		OnMouseMove(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+		if (scene->GetGameState() == GS_PLAY)
+			OnMouseMove(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
 		return 0;
 	case WM_KEYUP:
 		if (wParam == VK_ESCAPE)
