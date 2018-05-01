@@ -360,7 +360,10 @@ BackGroundObject::BackGroundObject(ID3D12Device * m_Device, ID3D12GraphicsComman
 		Mesh.Index = NULL;
 		Mesh.SubResource = NULL;
 
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "SkillBG", L"textures/ui/Range.dds", false);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "StartBG", L"textures/ui/Range.dds", false,2,0);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "LoadBG", L"textures/ui/MainBar.dds", false,2,1);
+		TextureName = "StartBG";
+
 		SetMesh(m_Device, commandlist);
 		CreateMesh = true;
 
@@ -401,7 +404,7 @@ void BackGroundObject::Render(ID3D12GraphicsCommandList * commandlist, const Gam
 {
 	//텍스처가 사이즈가 0 이상이면 연결
 	if (Textures.size()>0)
-		SetTexture(commandlist, SrvDescriptorHeap, Textures["SkillBG"].get()->Resource.Get(), false);
+		SetTexture(commandlist, SrvDescriptorHeap, Textures[TextureName].get()->Resource.Get(), false,TexOff);
 	//월드변환 업데이트 및 연결
 	UpdateConstBuffer(commandlist);
 

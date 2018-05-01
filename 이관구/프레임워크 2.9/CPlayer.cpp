@@ -447,13 +447,7 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 			CheckTraceSkill();
 		}
 	}
-	else if (scene->GetGameState() == GS_START)
-	{
-		if (GetAsyncKeyState(VK_SPACE) & 0x8000)
-		{
-			scene->SetGameState(GS_PLAY);
-		}
-	}
+	
 }
 
 void CPlayer::Tick(float DeltaTime)

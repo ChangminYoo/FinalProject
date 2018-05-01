@@ -2360,7 +2360,7 @@ DamageObject::DamageObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * 
 		Mesh.SubResource = NULL;
 
 
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "DamageTex10", L"textures/damage/damage10.dds", false, 5, 0);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "DamageTex10", L"textures/damage/damage10.dds", false,5, 0);
 		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "DamageTex20", L"textures/damage/damage20.dds", false, 5, 1);
 		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "DamageTex30", L"textures/damage/damage30.dds", false, 5, 2);
 		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "DamageTex40", L"textures/damage/damage40.dds", false, 5, 3);

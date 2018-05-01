@@ -86,7 +86,8 @@ public:
 	bool AirBone = false;
 
 
-
+	char* TextureName = NULL;
+	UINT TexOff = 0;
 	//룩벡터와 라이트벡터
 	XMFLOAT3 Lookvector;//룩벡터. 오브젝트가 바라보고있는 방향.
 	XMFLOAT3 Rightvector;//라이트벡터. 오브젝트가 바라보고있는 방향의 오른쪽방향.

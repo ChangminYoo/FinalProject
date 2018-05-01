@@ -23,7 +23,6 @@ Scene::Scene(HWND hwnd,ID3D12Device * m_Device, ID3D12GraphicsCommandList * m_DC
 	Player = new CPlayer(hWnd,m_Device, m_DC, cw / ch, e, a, u);
 	Shaders->player = Player;//이제 플레이어도 설정되야 한다.
 	light = new CLight(m_Device, m_DC);
-	CreateGameObject();
 	CreateUI();
 
 
@@ -98,6 +97,36 @@ Scene::~Scene()
 		delete light;
 }
 
+
+void Scene::SceneState()
+{
+	if (GAMESTATE == GS_START)//시작시 생성자에서 UI등 기본적인것은 거기서 로드함.
+	{
+		if (GetAsyncKeyState(VK_SPACE) & 0x8000)
+		{
+			
+			SetGameState(GS_LOAD);
+		}
+
+	}
+	else if (GAMESTATE == GS_LOAD)
+	{
+		if (FirstLoad == true)
+		{
+			CreateGameObject();
+			FirstLoad = false;
+			SetGameState(GS_PLAY);
+		}
+		else
+		{
+			//여기에서 로딩용 텍스처를 선택함.
+			BackGround->TextureName = "LoadBG";
+			BackGround->TexOff = 1;//다수의 텍스처이므로 TexOff를이용함.
+			FirstLoad = true;
+
+		}
+	}
+}
 
 void Scene::CreateRootSignature()
 {
@@ -403,9 +432,12 @@ void Scene::Render(const GameTimer& gt)
 				//다시 원상태로 바꿔줌. 이걸 안하면 피킹이 엉망이됨. 
 				Player->Camera.UpdateConstantBuffer(commandlist);
 			}
-			else if (GetGameState() == GS_START)
+			else if (GetGameState() == GS_START || GetGameState()==GS_LOAD)
 			{
+				Player->Camera.UpdateConstantBufferOrtho(commandlist);
+				Shaders->SetBillboardShader(commandlist);
 				BackGround->Render(commandlist, gt);
+				Player->Camera.UpdateConstantBuffer(commandlist);
 			}
 	}
 }

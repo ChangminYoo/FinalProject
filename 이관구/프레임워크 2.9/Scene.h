@@ -25,7 +25,7 @@ public:
 	//게임오브젝트, 카메라,세이더오브젝트,라이트,샘플러 포함해야댐	
 	int nShader;//세이더 갯수
 	int GAMESTATE = GS_START;//게임상태.
-	bool FirstLoad = true;//첫 로딩인가?
+	bool FirstLoad = false;//첫 로딩인가?
 
 	HWND hWnd;
 	ComPtr<ID3D12RootSignature> rootsg;//루트시그니처
@@ -38,7 +38,7 @@ public:
 	ID3D12Device* device;//디바이스
 
 	void SetGameState(int num) { GAMESTATE = num; }//게임상태 변경
-
+	void SceneState();
 	void CreateRootSignature();//루트시그니처는 항상 연결될 리소스들과 동일해야함.(물론 버텍스나 인덱스버퍼는 제외)
 	void CreateShaderObject();
 	void CreateGameObject();

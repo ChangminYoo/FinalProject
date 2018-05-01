@@ -201,6 +201,7 @@ void MainFrameWork::FrameAdvance(const GameTimer& gt)
 	// RS 뷰포트와 시저렉트 , OM의 렌더타겟과 뎁스스텐실 뷰
 	//앞으로 해야할것. 루트시그니처와 VS,PS등 PSO, 정점버퍼, 인덱스버퍼 , 상수버퍼뷰
 
+	scene->SceneState();
 	Update(gt);
 	Draw(gt);
 
@@ -231,17 +232,18 @@ void MainFrameWork::Update(const GameTimer& gt)
 	
 		//먼저 시스템 클래스를 업데이트 한다. 시스템 클래스는 게임 전반적인것들을 관여함. 중력 등
 	if (scene->GetGameState() == GS_PLAY)
+	{
 		System(gt);
 		//씬클래스의 업데이트를 호출한다.
 		scene->Tick(gt);
 
 		//중력 후처리 시스템은 틱함수 이후에 처리해야함
-		if (scene->GetGameState() == GS_PLAY)
-			AfterGravitySystem(gt);
+
+		AfterGravitySystem(gt);
 		//충돌 처리 시스템은 틱함수 이후에 처리해야한다.
-		if (scene->GetGameState() == GS_PLAY)
-			 CollisionSystem(gt);
-	
+
+		CollisionSystem(gt);
+	}
 }
 
 void MainFrameWork::Draw(const GameTimer& gt)
