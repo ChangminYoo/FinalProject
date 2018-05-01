@@ -228,13 +228,6 @@ typedef struct Server_To_Client_Player_Rotate
 
 }STC_Rotation;
 
-//typedef struct Server_To_Client_Player_Attack
-//{
-//	unsigned char packet_size = sizeof(unsigned char) + sizeof(unsigned char);
-//	unsigned char pack_type = PACKET_PROTOCOL_TYPE::PLAYER_ATTACK;
-//
-//}STC_Attack;
-
 typedef struct Server_To_Client_Static_Object
 {
 	unsigned char packet_size = sizeof(Player_Data) + sizeof(unsigned char) + sizeof(unsigned char) + sizeof(unsigned char);

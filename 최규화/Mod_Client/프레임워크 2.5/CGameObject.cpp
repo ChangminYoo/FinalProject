@@ -686,6 +686,7 @@ BulletCube::BulletCube(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 	pp->SetBounce(false);//튕기지 않는다.
 	pp->SetVelocity(Lookvector.x*gamedata.Speed, Lookvector.y*gamedata.Speed, Lookvector.z*gamedata.Speed);//룩벡터로 날아감
 
+	cout << pp->GetVelocity().x << pp->GetVelocity().y << pp->GetVelocity().z << endl;
 
 }
 
@@ -724,7 +725,11 @@ void BulletCube::Tick(const GameTimer & gt)
 	//투사체는 생명 주기가 있어야 한다.
 	LifeTime -= gt.DeltaTime();
 	if (LifeTime <= 0)
+	{
 		DelObj = true;
+		CenterPos;
+		XMFLOAT3 t_vel = pp->GetVelocity();
+	}
 
 }
 

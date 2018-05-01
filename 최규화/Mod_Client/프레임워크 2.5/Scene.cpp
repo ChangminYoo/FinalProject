@@ -350,7 +350,18 @@ void Scene::Tick(const GameTimer & gt)
 
 	//ºÒ·¿
 	for (auto b = BulletObject.begin(); b != BulletObject.end(); b++)
+	{
 		(*b)->Tick(gt);
+
+		STC_Test stc_test;
+		stc_test.packet_size = sizeof(STC_Test);
+		stc_test.pack_type = PACKET_PROTOCOL_TYPE::TEST;
+		stc_test.player_data = Player->PlayerObject->m_player_data;
+		stc_test.time.c_time = gt.DeltaTime();
+
+
+	}
+
 
 
 	for (auto b = BbObject.begin(); b != BbObject.end(); b++)

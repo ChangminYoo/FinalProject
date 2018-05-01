@@ -2,6 +2,7 @@
 #include "stdafx.h"
 
 class Player_Session;
+class BulletObject;
 
 enum TIMER_EVENT_TYPE
 {
@@ -14,6 +15,7 @@ using event_type = struct Event_Type
 {
 	unsigned short id;
 	float wakeup_time;
+	float curr_time;
 	char type;
 	bool AI{ false };
 };
@@ -31,6 +33,7 @@ class TimerWorker
 {
 private:
 	mutex t_lock;
+	Player_Session *ps;
 
 public:
 	TimerWorker();

@@ -517,15 +517,18 @@ void CPlayer::CreateBullet(ID3D12Device* Device, ID3D12GraphicsCommandList* cl,X
 		bulletlist->push_back(bul);
 		
 		STC_Attack cts_att;
+		cts_att.pack_size = sizeof(STC_Attack);
+		cts_att.pack_type = PACKET_PROTOCOL_TYPE::PLAYER_ATTACK;
+
 		cts_att.bull_data.LookOn_ID = -1;
 		cts_att.bull_data.Master_ID = PlayerObject->m_player_data.ID;
 		cts_att.bull_data.pos = { PlayerObject->CenterPos.x, PlayerObject->CenterPos.y, PlayerObject->CenterPos.z, PlayerObject->CenterPos.w };
 		cts_att.bull_data.Rotate_status = { PlayerObject->Orient.x, PlayerObject->Orient.y, PlayerObject->Orient.z, PlayerObject->Orient.w };
+		cts_att.bull_data.vel3f = { bul->pp->GetVelocity().x, bul->pp->GetVelocity().y, bul->pp->GetVelocity().z };
+
 		cts_att.start_time = 0.f;
-
-
-
-		//m_async_client->SendPacket(reinterpret_cast<Packet*>(&cts_att));
+	
+		m_async_client->SendPacket(reinterpret_cast<Packet*>(&cts_att));
 		break;
 
 	}

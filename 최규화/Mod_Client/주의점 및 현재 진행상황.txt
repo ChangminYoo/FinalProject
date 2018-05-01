@@ -93,4 +93,9 @@
   
 4. timer_queue 와 충돌처리를 해주는 부분과 패킷처리해주는 worker_thread 간의 동기화 작업중
   - mutex lock, unlock 을 사용해서 작업 중
+
+2018. 05. 01
+1. 서버의 Timer_Queue 작업 중
+
+2. 충돌처리 작업 중 
  

@@ -153,6 +153,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Player_Session.cpp" />
     <ClCompile Include="StaticObject.cpp" />
+    <ClCompile Include="Timer.cpp" />
     <ClCompile Include="TimerWorker.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -167,6 +168,7 @@
     <ClInclude Include="ShareHeader.h" />
     <ClInclude Include="StaticObject.h" />
     <ClInclude Include="stdafx.h" />
+    <ClInclude Include="Timer.h" />
     <ClInclude Include="TimerWorker.h" />
   </ItemGroup>
   <ItemGroup>

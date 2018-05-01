@@ -161,7 +161,7 @@ void PhysicsPoint::integrate(float DeltaTime, XMFLOAT4* ObjPos, XMFLOAT3* ObjVel
 	if (InverseMass <= 0.0f)
 		return;
 
-	assert(DeltaTime > 0.0);
+	assert(DeltaTime >= 0.0);
 
 	XMFLOAT3 temp_objPos;
 	temp_objPos.x = ObjPos->x; temp_objPos.y = ObjPos->y; temp_objPos.z = ObjPos->z;

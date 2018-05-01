@@ -11,8 +11,10 @@
 #include <memory>
 #include <mutex>
 #include <queue>
+#include <chrono>
 
 #include "protocol.h"
+
 
 const char SERVERIP[] = "127.0.0.1";
 const unsigned short PORT = 31400;
@@ -20,6 +22,7 @@ const unsigned short PORT = 31400;
 #define MAX_BOX_NUM 4
 
 using namespace std;
+using namespace chrono;
 
 //io_service는 IO와 통신을 위해서사용 - 전역 하나만 있어도 된다
 extern boost::asio::io_service g_io_service;

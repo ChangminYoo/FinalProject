@@ -1,7 +1,7 @@
 #pragma once
-
 #include "Database\CTextTest.h"
 #include "PhysicalEffect.h"
+#include "StaticObject.h"
 #include "ShareHeader.h"
 
 enum PLAYER_STATE 
@@ -70,7 +70,7 @@ private:
 
 	//unordered_map<int, Position>  m_boxPos;
 
-	BulletObject				 *m_bulllObj;
+	BulletObject				 *m_bullObj;
 
 	RayCastObject				  rco;
 
@@ -159,7 +159,6 @@ public:
 	// ---------------------------------------------------------------------------------------
 	// 서버에서 관리하는 클라이언트 객체들의 집합(vector 사용 - 나중에 멀쓰때 맞는 자료구조로 바꿀것)
 	static vector<Player_Session*> m_clients;
-	//static list<StaticObject*> m_staticobjs;
 	static list<BulletObject*>     m_bullobjs;
 
 	static unsigned short	   m_bullID;
@@ -172,6 +171,8 @@ public:
 	//1. 플레이어와 스테틱 오브젝트들의 충돌
 	void Collision_StaticObjects(unordered_set<StaticObject*>& sobjs, float DeltaTime);
 	void Collision_Players(vector<Player_Session*>& clients, float DeltaTime);
+
+	list<BulletObject*>& GetBulletObjectsList() { return m_bullobjs; }
 };
 
 
