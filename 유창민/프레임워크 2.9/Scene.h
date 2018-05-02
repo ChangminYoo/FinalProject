@@ -25,7 +25,7 @@ public:
 	//게임오브젝트, 카메라,세이더오브젝트,라이트,샘플러 포함해야댐	
 	int nShader;//세이더 갯수
 	int GAMESTATE = GS_START;//게임상태.
-	bool FirstLoad = true;//첫 로딩인가?
+	bool FirstLoad = false;//첫 로딩인가?
 
 	HWND hWnd;
 	ComPtr<ID3D12RootSignature> rootsg;//루트시그니처
@@ -38,7 +38,7 @@ public:
 	ID3D12Device* device;//디바이스
 
 	void SetGameState(int num) { GAMESTATE = num; }//게임상태 변경
-
+	void SceneState();
 	void CreateRootSignature();//루트시그니처는 항상 연결될 리소스들과 동일해야함.(물론 버텍스나 인덱스버퍼는 제외)
 	void CreateShaderObject();
 	void CreateGameObject();
@@ -60,6 +60,7 @@ public:
 
 	list<CGameObject*> DynamicObject;//애니메이션이 되는 오브젝트들이 여기에 모임.
 	list<CGameObject*> BulletObject;//투사체들이 모인다.
+	//list<CGameObject*> MoveStaticObject;//애니메이션은 없지만 이동하는
 	list<CGameObject*> StaticObject;//애니메이션이 없는 모든 오브젝트들이 모인다.
 	list<CGameObject*> BbObject;//빌보드가 사용되는 오브젝트들(데미지, hp바, 기타 파티클등)
 	list<CGameObject*> RigidObject;//리지드바디를 사용하는 오브젝트들.
@@ -69,7 +70,7 @@ public:
 
 
 	CGameObject* AimUI = NULL;
-	CGameObject* SkillBackGround = NULL;
+	CGameObject* BackGround = NULL;
 	CGameObject* SkillUI[4] = {NULL};
 	CGameObject* SkillCoolBar[4] = { NULL };
 	CGameObject* SelectBar = NULL; //스킬선택

@@ -32,6 +32,7 @@ namespace MiniPhysicsEngineG9
 		XMFLOAT3 halfbox;//x길이y길이z길이
 		bool Bounce = false;
 
+		float rad = 0;
 
 	public:
 		void integrate(float DeltaTime, XMFLOAT4* ObjPos = NULL, XMFLOAT3* ObjVel = NULL);//적분기. 속도와 가속도로 위치를 구하고 가속도를 이용해 속도를 갱신함.
@@ -40,6 +41,7 @@ namespace MiniPhysicsEngineG9
 		void SetDamping(float D);//댐핑지수를 설정함.
 		float GetDamping();//댐핑지수 반환
 
+		float GetRad();
 		void SetBounce(bool bounce);
 		void SetPosition(XMFLOAT3& pos);//중점 위치 설정
 		void SetPosition(XMFLOAT4& pos);//중점 위치 설정
@@ -115,7 +117,12 @@ namespace MiniPhysicsEngineG9
 
 		XMFLOAT3 halfbox;//x길이y길이z길이
 		bool Bounce = false;
+		float rad = 0;
 		float e = 0.35f;
+
+		//최소 충격량과 최대충격량.
+		float MinImpurse = 60;
+		float MaxImpurse = 400;
 
 	public:
 		void integrate(float DeltaTime);//적분기. 속도와 가속도로 위치를 구하고 가속도를 이용해 속도를 갱신함.
@@ -134,6 +141,10 @@ namespace MiniPhysicsEngineG9
 
 		void SetPosition(XMFLOAT4* pos);//중점 위치 설정
 		void SetOrient(XMFLOAT4* ori);//방향 설정
+
+		void SetMinMaxImpurse(float min,float max);
+		float GetMinImpurse();
+		float GetMaxImpurse();
 
 		XMFLOAT4 GetPosition();//중점 얻기
 		XMFLOAT4 GetOrient();
@@ -175,6 +186,7 @@ namespace MiniPhysicsEngineG9
 
 
 		void SetHalfBox(float x, float y, float z);
+		float GetRad();
 		XMFLOAT3 GetHalfBox();
 
 		void GetEightPoint(XMFLOAT4* Parr, XMFLOAT3& Up, XMFLOAT3& Look, XMFLOAT3& Right);
@@ -191,14 +203,14 @@ namespace MiniPhysicsEngineG9
 
 		//충돌체 해소 관련. 이때 키보드 처리는 따로 해줘야함. 왜냐하면 대각선으로 눌렀을때 충돌안되는 부분은 스무스하게
 		//움직이게 하기위해서다. CollisionN은 충돌시 내가 밀려나야하는 방향을 나타낸다.
-		void CollisionResolve(RigidBody & rb2, XMFLOAT3& CollisionN, float DeltaTime);
+		void CollisionResolve(RigidBody & rb2, XMFLOAT3& CollisionN, float DeltaTime, float i1, float i2, float amendtime = 1.5);
 		//상대속도를 구한다.
 		float GetSeparateVelocity(RigidBody & rb2, XMFLOAT3& CollisionN);
 		//충돌후 속도를 구한다.
-		void ResolveVelocity(RigidBody & rb2, XMFLOAT3& CollisionN, float DeltaTime);
+		void ResolveVelocity(RigidBody & rb2, XMFLOAT3& CollisionN, float DeltaTime,float i1,float i2,float amendtime=1.5);
 		//겹쳐진 부분을 밀어낸다.
 		void ResolvePenetration(RigidBody & rb2, float DeltaTime);
-
+		
 
 	};
 

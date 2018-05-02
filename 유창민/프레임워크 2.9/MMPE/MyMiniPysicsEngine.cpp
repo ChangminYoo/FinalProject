@@ -264,6 +264,11 @@ float PhysicsPoint::GetDamping()
 	return damping;
 }
 
+float MiniPhysicsEngineG9::PhysicsPoint::GetRad()
+{
+	return rad;
+}
+
 void MiniPhysicsEngineG9::PhysicsPoint::SetBounce(bool bounce)
 {
 	Bounce = bounce;
@@ -350,6 +355,7 @@ void MiniPhysicsEngineG9::PhysicsPoint::SetHalfBox(float x, float y, float z)
 	halfbox.y = y;
 	halfbox.z = z;
 
+	rad = sqrt(x*x + y * y + z * z);
 }
 
 XMFLOAT3 MiniPhysicsEngineG9::PhysicsPoint::GetHalfBox()
@@ -359,70 +365,76 @@ XMFLOAT3 MiniPhysicsEngineG9::PhysicsPoint::GetHalfBox()
 
 bool MiniPhysicsEngineG9::PhysicsPoint::CollisionTest(PhysicsPoint & p2, XMFLOAT3 & l1, XMFLOAT3 & r1, XMFLOAT3 & u1, XMFLOAT3 & l2, XMFLOAT3 & r2, XMFLOAT3 & u2)
 {
-	//15번 검사를 해야하며, 각 축의 정보는 다음과같다.
-	XMFLOAT3 axis[15];
-	//1번 상자의 x,y,z축
-	axis[0] = r1;
-	axis[1] = u1;
-	axis[2] = l1;
-
-	//2번 상자의 x,y,z축
-	axis[3] = r2;
-	axis[4] = u2;
-	axis[5] = l2;
-
-	//1번과 2번 각 축과 축의 외적
-	axis[6] = Float3Cross(r1, r2);
-	axis[7] = Float3Cross(r1, u2);
-	axis[8] = Float3Cross(r1, l2);
-
-	axis[9] = Float3Cross(u1, r2);
-	axis[10] = Float3Cross(u1, u2);
-	axis[11] = Float3Cross(u1, l2);
-
-	axis[12] = Float3Cross(l1, r2);
-	axis[13] = Float3Cross(l1, u2);
-	axis[14] = Float3Cross(l1, l2);
-	XMFLOAT3 CenterL;//중점끼리 연결한 벡터
-					 //최소로 겹치는 부분을 찾아야함. 그곳이 겹치는 최소영역의 길이
-
-	float minoverlap = INFINITY;
-	//최소겹치는 영역에서 밀어내야할 방향의 인덱스
-	int minindex;
-	//15번 반복함
-	for (int i = 0; i < 15; i++)
+	//먼저 구 오브젝트로 검사한다.
+	float L = FloatLength(Float3Add(CenterPos, p2.CenterPos, false));
+	if (GetRad() + p2.GetRad() > L)
 	{
-		XMFLOAT3 a = axis[i];
-		if (FloatLength(a) < 0.001)//외적의 결과가 0이면(부동소수점오차때문에 0에가까우면) 사실상 0이므로 검사X
-			continue;
+		//15번 검사를 해야하며, 각 축의 정보는 다음과같다.
+		XMFLOAT3 axis[15];
+		//1번 상자의 x,y,z축
+		axis[0] = r1;
+		axis[1] = u1;
+		axis[2] = l1;
 
-		a = Float3Normalize(a);
-		CenterL = XMFLOAT3(p2.GetPosition().x - GetPosition().x, p2.GetPosition().y - GetPosition().y, p2.GetPosition().z - GetPosition().z);
+		//2번 상자의 x,y,z축
+		axis[3] = r2;
+		axis[4] = u2;
+		axis[5] = l2;
 
-		float overlap = penetrationAxis(p2, l1, r1, u1, l2, r2, u2, CenterL, a);
-		if (overlap < 0)//하나라도 겹치는 부분이 없으면 분리되어있음
-			return false;
-		if (overlap < minoverlap)
+		//1번과 2번 각 축과 축의 외적
+		axis[6] = Float3Cross(r1, r2);
+		axis[7] = Float3Cross(r1, u2);
+		axis[8] = Float3Cross(r1, l2);
+
+		axis[9] = Float3Cross(u1, r2);
+		axis[10] = Float3Cross(u1, u2);
+		axis[11] = Float3Cross(u1, l2);
+
+		axis[12] = Float3Cross(l1, r2);
+		axis[13] = Float3Cross(l1, u2);
+		axis[14] = Float3Cross(l1, l2);
+		XMFLOAT3 CenterL;//중점끼리 연결한 벡터
+						 //최소로 겹치는 부분을 찾아야함. 그곳이 겹치는 최소영역의 길이
+
+		float minoverlap = INFINITY;
+		//최소겹치는 영역에서 밀어내야할 방향의 인덱스
+		int minindex;
+		//15번 반복함
+		for (int i = 0; i < 15; i++)
 		{
-			minoverlap = overlap;
-			minindex = i;
+			XMFLOAT3 a = axis[i];
+			if (FloatLength(a) < 0.001)//외적의 결과가 0이면(부동소수점오차때문에 0에가까우면) 사실상 0이므로 검사X
+				continue;
+
+			a = Float3Normalize(a);
+			CenterL = XMFLOAT3(p2.GetPosition().x - GetPosition().x, p2.GetPosition().y - GetPosition().y, p2.GetPosition().z - GetPosition().z);
+
+			float overlap = penetrationAxis(p2, l1, r1, u1, l2, r2, u2, CenterL, a);
+			if (overlap < 0)//하나라도 겹치는 부분이 없으면 분리되어있음
+				return false;
+			if (overlap < minoverlap)
+			{
+				minoverlap = overlap;
+				minindex = i;
+			}
 		}
+
+		//여기 까지 왔으면 충돌한거임
+		penetration = minoverlap;
+		pAxis = axis[minindex];
+		//중점을 이은벡터와 선택된 벡터가 내적시 0보다 크면 반대방향으로 바꿔줘야함. 왜냐하면 밀리는 방향은 나를향해야하므로
+
+		float l = Float3Normalize(CenterL).x*axis[minindex].x + Float3Normalize(CenterL).y*axis[minindex].y + Float3Normalize(CenterL).z*axis[minindex].z;
+		if (l > 0)
+			pAxis = XMFLOAT3(-pAxis.x, -pAxis.y, -pAxis.z);
+
+		//return true;
+		if (penetration > MMPE_EPSILON)//엡실론보다 크면 충돌 아니면 정말 미세한 충돌이므로 처리를 할 필요가 없음
+			return true;
+		else
+			return false;
 	}
-
-	//여기 까지 왔으면 충돌한거임
-	penetration = minoverlap;
-	pAxis = axis[minindex];
-	//중점을 이은벡터와 선택된 벡터가 내적시 0보다 크면 반대방향으로 바꿔줘야함. 왜냐하면 밀리는 방향은 나를향해야하므로
-
-	float l = Float3Normalize(CenterL).x*axis[minindex].x + Float3Normalize(CenterL).y*axis[minindex].y + Float3Normalize(CenterL).z*axis[minindex].z;
-	if (l > 0)
-		pAxis = XMFLOAT3(-pAxis.x, -pAxis.y, -pAxis.z);
-
-	//return true;
-	if (penetration > MMPE_EPSILON)//엡실론보다 크면 충돌 아니면 정말 미세한 충돌이므로 처리를 할 필요가 없음
-		return true;
-	else
-		return false;
+	return false;
 }
 
 void MiniPhysicsEngineG9::PhysicsPoint::CollisionResolve(PhysicsPoint & p2, XMFLOAT3 & CollisionN, float DeltaTime)
@@ -774,6 +786,7 @@ bool MiniPhysicsEngineG9::RayCastObject::RayCasting(XMFLOAT3 & RayOrgin, XMFLOAT
 		//이를 위해 교점의 위치에서 플레이어 위치를 뺀 벡터와
 		//카메라가 바라보고있는 방향(만약 오차가 심하면 플레이어의 Look으로 해야한다.)과 내적시
 		//0이상이고, t가 카메라에 더 가까우면 그 값으로 갱신한다.
+
 		if (In == true)
 		{
 			float isfront = 0;
@@ -1187,6 +1200,22 @@ void MiniPhysicsEngineG9::RigidBody::SetOrient(XMFLOAT4 * ori)
 	Orient = ori;
 }
 
+void MiniPhysicsEngineG9::RigidBody::SetMinMaxImpurse(float min, float max)
+{
+	MaxImpurse = max;
+	MinImpurse = min;
+}
+
+float MiniPhysicsEngineG9::RigidBody::GetMinImpurse()
+{
+	return MinImpurse;
+}
+
+float MiniPhysicsEngineG9::RigidBody::GetMaxImpurse()
+{
+	return MaxImpurse;
+}
+
 
 XMFLOAT4 MiniPhysicsEngineG9::RigidBody::GetPosition()
 {
@@ -1367,6 +1396,12 @@ void MiniPhysicsEngineG9::RigidBody::SetHalfBox(float x, float y, float z)
 	halfbox.x = x;
 	halfbox.y = y;
 	halfbox.z = z;
+	rad = sqrt(x*x + y * y + z * z);
+}
+
+float MiniPhysicsEngineG9::RigidBody::GetRad()
+{
+	return rad;
 }
 
 XMFLOAT3 MiniPhysicsEngineG9::RigidBody::GetHalfBox()
@@ -1426,728 +1461,737 @@ float MiniPhysicsEngineG9::RigidBody::penetrationAxis(RigidBody & rb2, XMFLOAT3 
 }
 bool MiniPhysicsEngineG9::RigidBody::CollisionTest(RigidBody & rb2, XMFLOAT3 & l1, XMFLOAT3 & r1, XMFLOAT3 & u1, XMFLOAT3 & l2, XMFLOAT3 & r2, XMFLOAT3 & u2)
 {
-	CollisionPointVector.clear();
 
-	RigidBody* Testing = NULL;//정점검사 대상
-	RigidBody* Other = NULL;//아닌녀석
-
-							//15번 검사를 해야하며, 각 축의 정보는 다음과같다.
-	XMFLOAT3 axis[15];
-	//1번 상자의 x,y,z축
-	axis[0] = r1;
-	axis[1] = u1;
-	axis[2] = l1;
-
-	//2번 상자의 x,y,z축
-	axis[3] = r2;
-	axis[4] = u2;
-	axis[5] = l2;
-
-	//1번과 2번 각 축과 축의 외적
-	axis[6] = Float3Cross(r1, r2);
-	axis[6] = Float3Normalize(axis[6]);
-	axis[7] = Float3Cross(r1, u2);
-	axis[7] = Float3Normalize(axis[7]);
-	axis[8] = Float3Cross(r1, l2);
-	axis[8] = Float3Normalize(axis[8]);
-
-
-	axis[9] = Float3Cross(u1, r2);
-	axis[9] = Float3Normalize(axis[9]);
-	axis[10] = Float3Cross(u1, u2);
-	axis[10] = Float3Normalize(axis[10]);
-	axis[11] = Float3Cross(u1, l2);
-	axis[11] = Float3Normalize(axis[11]);
-
-	axis[12] = Float3Cross(l1, r2);
-	axis[12] = Float3Normalize(axis[12]);
-	axis[13] = Float3Cross(l1, u2);
-	axis[13] = Float3Normalize(axis[13]);
-	axis[14] = Float3Cross(l1, l2);
-	axis[14] = Float3Normalize(axis[14]);
-
-	XMFLOAT3 CenterL;//중점끼리 연결한 벡터
-					 //최소로 겹치는 부분을 찾아야함. 그곳이 겹치는 최소영역의 길이
-
-	float minoverlap = INFINITY;
-	//최소겹치는 영역에서 밀어내야할 방향의 인덱스
-	int minindex;
-	CenterL = XMFLOAT3(rb2.GetPosition().x - GetPosition().x, rb2.GetPosition().y - GetPosition().y, rb2.GetPosition().z - GetPosition().z);
-
-	//0~5중 현재 minindex;
-	int minSingleAxis = 0;
-	//15번 반복함
-	for (int i = 0; i < 15; i++)
+	//먼저 구 오브젝트로 검사한다.
+	float L = FloatLength(XMFloat4to3(Float4Add(*CenterPos, *rb2.CenterPos, false)));
+	if (GetRad() + rb2.GetRad() > L)
 	{
+		CollisionPointVector.clear();
 
-		XMFLOAT3 a = axis[i];
-		if (FloatLength(a) < 0.001)//외적의 결과가 0이면(부동소수점오차때문에 0에가까우면) 사실상 0이므로 검사X
-			continue;
+		RigidBody* Testing = NULL;//정점검사 대상
+		RigidBody* Other = NULL;//아닌녀석
 
-		a = Float3Normalize(a);
+								//15번 검사를 해야하며, 각 축의 정보는 다음과같다.
+		XMFLOAT3 axis[15];
+		//1번 상자의 x,y,z축
+		axis[0] = r1;
+		axis[1] = u1;
+		axis[2] = l1;
 
-		float overlap = penetrationAxis(rb2, l1, r1, u1, l2, r2, u2, CenterL, a);
-		if (overlap < 0)//하나라도 겹치는 부분이 없으면 분리되어있음
+		//2번 상자의 x,y,z축
+		axis[3] = r2;
+		axis[4] = u2;
+		axis[5] = l2;
+
+		//1번과 2번 각 축과 축의 외적
+		axis[6] = Float3Cross(r1, r2);
+		axis[6] = Float3Normalize(axis[6]);
+		axis[7] = Float3Cross(r1, u2);
+		axis[7] = Float3Normalize(axis[7]);
+		axis[8] = Float3Cross(r1, l2);
+		axis[8] = Float3Normalize(axis[8]);
+
+
+		axis[9] = Float3Cross(u1, r2);
+		axis[9] = Float3Normalize(axis[9]);
+		axis[10] = Float3Cross(u1, u2);
+		axis[10] = Float3Normalize(axis[10]);
+		axis[11] = Float3Cross(u1, l2);
+		axis[11] = Float3Normalize(axis[11]);
+
+		axis[12] = Float3Cross(l1, r2);
+		axis[12] = Float3Normalize(axis[12]);
+		axis[13] = Float3Cross(l1, u2);
+		axis[13] = Float3Normalize(axis[13]);
+		axis[14] = Float3Cross(l1, l2);
+		axis[14] = Float3Normalize(axis[14]);
+
+		XMFLOAT3 CenterL;//중점끼리 연결한 벡터
+						 //최소로 겹치는 부분을 찾아야함. 그곳이 겹치는 최소영역의 길이
+
+		float minoverlap = INFINITY;
+		//최소겹치는 영역에서 밀어내야할 방향의 인덱스
+		int minindex;
+		CenterL = XMFLOAT3(rb2.GetPosition().x - GetPosition().x, rb2.GetPosition().y - GetPosition().y, rb2.GetPosition().z - GetPosition().z);
+
+		//0~5중 현재 minindex;
+		int minSingleAxis = 0;
+		//15번 반복함
+		for (int i = 0; i < 15; i++)
+		{
+
+			XMFLOAT3 a = axis[i];
+			if (FloatLength(a) < 0.001)//외적의 결과가 0이면(부동소수점오차때문에 0에가까우면) 사실상 0이므로 검사X
+				continue;
+
+			a = Float3Normalize(a);
+
+			float overlap = penetrationAxis(rb2, l1, r1, u1, l2, r2, u2, CenterL, a);
+			if (overlap < 0)//하나라도 겹치는 부분이 없으면 분리되어있음
+				return false;
+			if (overlap < minoverlap)
+			{
+				minoverlap = overlap;
+				minindex = i;
+			}
+		}
+
+		//여기 까지 왔으면 충돌한거임
+
+		auto penetration = minoverlap;
+
+		//0~5까지 일경우 이값이  paxis가 된다.
+		auto pAxis = axis[minindex];
+
+		//방향은 나중에 바꿔주자. 우선 해야할건 정점을 검사할 오브젝트를 찾기 위한 CenterLNormal을 구하는것.
+
+		auto CenterLNormal = Float3Normalize(CenterL);
+
+		float DotCp = CenterLNormal.x*pAxis.x + CenterLNormal.y*pAxis.y + CenterLNormal.z*pAxis.z;
+
+		XMFLOAT4 arr[8]; // 저장될 정점 배열
+		XMFLOAT4 arr2[8]; // 저장될 정점 배열 other
+
+						  //6개의 Other 평면
+		XMFLOAT3 Plane[6];
+		//6개의 Testing평면
+		XMFLOAT3 Plane2[6];
+		//6개의 평면의 원점에서의 위치.
+		XMFLOAT3 PlaneOrg[6];
+		//6개의 평면의 원점에서의 위치.
+		XMFLOAT3 PlaneOrg2[6];
+
+
+		//결과가 양수면 정점 검사할 대상은 B 아니면 A.
+		if (DotCp >= 0)
+		{
+			Testing = &rb2;
+			Other = this;
+
+			Testing->GetEightPoint(arr, u2, l2, r2);
+			Other->GetEightPoint(arr2, u1, l1, r1);
+			Plane[0] = r1;
+			Plane[1] = u1;
+			Plane[2] = l1;
+			Plane[3] = Float3Float(r1, -1);
+			Plane[4] = Float3Float(u1, -1);
+			Plane[5] = Float3Float(l1, -1);
+
+
+			//6개의 평면에서의 위치
+			PlaneOrg[0] = Float3Float(r1, Other->halfbox.x);
+			PlaneOrg[1] = Float3Float(u1, Other->halfbox.y);
+			PlaneOrg[2] = Float3Float(l1, Other->halfbox.z);
+			PlaneOrg[3] = Float3Float(r1, -1 * Other->halfbox.x);
+			PlaneOrg[4] = Float3Float(u1, -1 * Other->halfbox.y);
+			PlaneOrg[5] = Float3Float(l1, -1 * Other->halfbox.z);
+
+
+			Plane2[0] = r2;
+			Plane2[1] = u2;
+			Plane2[2] = l2;
+			Plane2[3] = Float3Float(r2, -1);
+			Plane2[4] = Float3Float(u2, -1);
+			Plane2[5] = Float3Float(l2, -1);
+
+
+			//6개의 평면에서의 위치
+			PlaneOrg2[0] = Float3Float(r2, Testing->halfbox.x);
+			PlaneOrg2[1] = Float3Float(u2, Testing->halfbox.y);
+			PlaneOrg2[2] = Float3Float(l2, Testing->halfbox.z);
+			PlaneOrg2[3] = Float3Float(r2, -1 * Testing->halfbox.x);
+			PlaneOrg2[4] = Float3Float(u2, -1 * Testing->halfbox.y);
+			PlaneOrg2[5] = Float3Float(l2, -1 * Testing->halfbox.z);
+		}
+		else
+		{
+			Testing = this;
+			Other = &rb2;
+
+			Testing->GetEightPoint(arr, u1, l1, r1);
+			Other->GetEightPoint(arr2, u2, l2, r2);
+
+			Plane[0] = r2;
+			Plane[1] = u2;
+			Plane[2] = l2;
+			Plane[3] = Float3Float(r2, -1);
+			Plane[4] = Float3Float(u2, -1);
+			Plane[5] = Float3Float(l2, -1);
+
+
+			//6개의 평면에서의 위치
+			PlaneOrg[0] = Float3Float(r2, Other->halfbox.x);
+			PlaneOrg[1] = Float3Float(u2, Other->halfbox.y);
+			PlaneOrg[2] = Float3Float(l2, Other->halfbox.z);
+			PlaneOrg[3] = Float3Float(r2, -1 * Other->halfbox.x);
+			PlaneOrg[4] = Float3Float(u2, -1 * Other->halfbox.y);
+			PlaneOrg[5] = Float3Float(l2, -1 * Other->halfbox.z);
+
+
+			Plane2[0] = r1;
+			Plane2[1] = u1;
+			Plane2[2] = l1;
+			Plane2[3] = Float3Float(r1, -1);
+			Plane2[4] = Float3Float(u1, -1);
+			Plane2[5] = Float3Float(l1, -1);
+
+
+			//6개의 평면에서의 위치
+			PlaneOrg2[0] = Float3Float(r1, Testing->halfbox.x);
+			PlaneOrg2[1] = Float3Float(u1, Testing->halfbox.y);
+			PlaneOrg2[2] = Float3Float(l1, Testing->halfbox.z);
+			PlaneOrg2[3] = Float3Float(r1, -1 * Testing->halfbox.x);
+			PlaneOrg2[4] = Float3Float(u1, -1 * Testing->halfbox.y);
+			PlaneOrg2[5] = Float3Float(l1, -1 * Testing->halfbox.z);
+
+
+		}
+
+		std::vector<CollisionPoint> AllPoint;
+		std::vector<CollisionPoint> AllPoint2;
+
+		for (int i = 0; i < 8; i++)
+		{
+			CollisionPoint cp;
+			cp.Pos = arr[i];
+			cp.penetration = pAxis.x*arr[i].x + pAxis.y*arr[i].y + pAxis.z*arr[i].z;
+			AllPoint.push_back(cp);
+
+			//other
+			CollisionPoint cp2;
+			cp2.Pos = arr2[i];
+			cp2.penetration = pAxis.x*arr2[i].x + pAxis.y*arr2[i].y + pAxis.z*arr2[i].z;
+			AllPoint2.push_back(cp2);
+
+		}
+		//모든 정점을 상대적인 penetration으로 정렬한다. 굳이 정확하지 않아도 된다. 그저 가장 작은 penetration을 찾는게 목표니까.
+		sort(AllPoint.begin(), AllPoint.end(), [](CollisionPoint& p1, CollisionPoint& p2) {return p1.penetration < p2.penetration; });
+		//other은 크기가 큰순으로
+		sort(AllPoint2.begin(), AllPoint2.end(), [](CollisionPoint& p1, CollisionPoint& p2) {return p1.penetration > p2.penetration; });
+
+
+		//이제 정렬된 8개의 점중 평면의 방정식에 의해 일단 충돌되었다고 생각되는 점들을 찾는다.
+		//이 점의 갯수가 1개 2개 4개 일것이며, 그에따라 다르게 처리해야한다.
+		vector<CollisionPoint> ColPoint;//일단 충돌은 일어난 정점들.
+		vector<CollisionPoint> ColPoint2;//일단 충돌은 일어난 정점들. other
+
+										 //어처피 충돌이 일어났다면 가장 작은 penetration과 일치하는 점은 최대 4개밖에 없으므로 4번만 검사한다.
+		for (int i = 0; i < 4; i++)
+		{
+			if (fabsf(AllPoint[0].penetration - AllPoint[i].penetration) <= MMPE_EPSILON)
+				ColPoint.push_back(AllPoint[i]);
+
+			if (fabsf(AllPoint2[0].penetration - AllPoint2[i].penetration) <= MMPE_EPSILON)
+				ColPoint2.push_back(AllPoint2[i]);
+		}
+
+
+
+		//이제 ColPoint를 통해 실제로 충돌한 점이 무엇인지 검사한다. ColPoint에 저장된 녀석들은 일단 pAxis의 평면의 뒤쪽에 있기에 당첨된 점들이므로
+		//만약 점이 1개만 ColPoint라면 무조건 그점은 실제 충돌점이다. 왜? 일단 애초에 육면체 충돌이 일어났기 때문에 반드시 점 1개는 충돌했을텐데, 점이 딱 1개니까.
+		//2개라면 여기서 부터 좀 생각해야한다. 왜냐하면 점 2개일때는 선과 면충돌이 되서 충돌을 안하는경우가 생김. 이를 보정하기위해 중점3을 추가해서 육면체안에 있는지
+		//검사해야함.
+
+		int sz = ColPoint.size();
+		int sz2 = ColPoint2.size();
+
+
+		vector<CollisionPoint> lastPoints;
+
+		if (sz == 1)
+		{
+			CollisionPointVector.push_back(ColPoint[0]);
+
+		}
+		else if (sz == 2)
+		{
+			//최종적인 충돌점들.
+
+
+			XMFLOAT4 pos3 = Float4Add(ColPoint[0].Pos, ColPoint[1].Pos);
+			pos3 = Float4Float(pos3, 0.5);
+			CollisionPoint newPoint = ColPoint[0];
+			newPoint.Pos = pos3;
+			//중점3을 만들어서 넣음.
+			ColPoint.push_back(newPoint);
+
+			//상대방 육면체 안에 존재하는 점이 있는지 검사한다.
+			for (int i = 0; i < 3; i++)
+			{
+				bool In = true;
+				XMVECTOR X = XMLoadFloat4(&ColPoint[i].Pos);
+				for (int j = 0; j < 6; j++)
+				{
+
+
+					XMVECTOR testN = XMLoadFloat3(&Plane[j]);
+					XMVECTOR testP = XMLoadFloat4(Other->CenterPos);
+					XMVECTOR objpos = XMLoadFloat3(&PlaneOrg[j]);
+					auto testv = XMVector3Dot(testN, (X - (testP + objpos)));
+					XMFLOAT3 result;
+					XMStoreFloat3(&result, testv);
+
+					if (result.x > 0)//0보다 크면 바운딩박스 안에 없다.
+					{
+						In = false;
+						break;
+					}
+
+				}
+
+				//안에 존재하는 점이면 그점은 최종적인 충돌점에 추가한다.
+				if (In == true)
+				{
+					lastPoints.push_back(ColPoint[i]);
+				}
+
+			}
+
+
+			//여기선 lastPoints에 저장된 점을  CollisionPointVector 에 추가한다.
+
+			//만약에 충돌점이 0인경우 other로 다시 검사한다.
+			if (lastPoints.size() == 0)
+			{
+				if (sz2 == 1)
+				{
+					CollisionPointVector.push_back(ColPoint2[0]);
+				}
+				else if (sz2 == 2)
+				{
+
+					XMFLOAT4 pos3 = Float4Add(ColPoint2[0].Pos, ColPoint2[1].Pos);
+					pos3 = Float4Float(pos3, 0.5);
+					CollisionPoint newPoint = ColPoint2[0];
+					newPoint.Pos = pos3;
+					//중점3을 만들어서 넣음.
+					ColPoint2.push_back(newPoint);
+
+					//상대방 육면체 안에 존재하는 점이 있는지 검사한다.
+					for (int i = 0; i < 3; i++)
+					{
+						bool In = true;
+						XMVECTOR X = XMLoadFloat4(&ColPoint2[i].Pos);
+						for (int j = 0; j < 6; j++)
+						{
+
+							XMVECTOR testN = XMLoadFloat3(&Plane2[j]);
+							XMVECTOR testP = XMLoadFloat4(Testing->CenterPos);
+							XMVECTOR objpos = XMLoadFloat3(&PlaneOrg2[j]);
+							auto testv = XMVector3Dot(testN, (X - (testP + objpos)));
+							XMFLOAT3 result;
+							XMStoreFloat3(&result, testv);
+
+							if (result.x > 0)//0보다 크면 바운딩박스 안에 없다.
+							{
+								In = false;
+								break;
+							}
+
+						}
+
+						//안에 존재하는 점이면 그점은 최종적인 충돌점에 추가한다.
+						if (In == true)
+						{
+							lastPoints.push_back(ColPoint2[i]);
+						}
+
+
+					}
+					//상대방 점으로 계산해도 실패하면...
+					if (lastPoints.size() == 0)
+					{
+						//ColPoint2 의 중점을 이용해 가장가까운 점을 찾는다. 이때 좀더 정확하게 하기위해 ColPoint의 중점3과 점1의 중간점, 중점3과 점2의중간점을 추가
+						//해서 5개의 점으로 검사하자.
+						XMFLOAT4 pos4 = Float4Add(ColPoint[0].Pos, ColPoint[2].Pos);
+						pos4 = Float4Float(pos4, 0.5);
+						CollisionPoint newPoint = ColPoint[0];
+						newPoint.Pos = pos4;
+						//중점4를 만들어서 넣음.
+						ColPoint.push_back(newPoint);
+
+						pos4 = Float4Add(ColPoint[1].Pos, ColPoint[2].Pos);
+						pos4 = Float4Float(pos4, 0.5);
+						newPoint = ColPoint[0];
+						newPoint.Pos = pos4;
+						//중점5를 만들어서 넣음.
+						ColPoint.push_back(newPoint);
+
+						//Other가 가진 중점과 5개의 ColPoint점 중 가장 가까운 점한개를 찾음.
+						float MinLn = 10000;
+						int index = 0;
+						for (int g = 0; g < 5; g++)
+						{
+							auto vl = Float4Add(ColPoint2[2].Pos, ColPoint[g].Pos, false);
+							auto ml = FloatLength(vl);
+							if (MinLn > ml)
+							{
+								MinLn = ml;
+								index = g;
+							}
+						}
+
+						//가장짧았던 ColPoint의 인덱스의 점을 최종
+						lastPoints.push_back(ColPoint[index]);
+					}
+
+					if (lastPoints.size() == 1)//점1개  경우 그점을 최종점으로 한다.
+					{
+						CollisionPointVector.push_back(lastPoints[0]);
+					}
+					else//그외는 중점으로
+					{
+						CollisionPointVector.push_back(ColPoint2[2]);
+					}
+
+
+				}
+				else if (sz2 == 4)
+				{
+					XMFLOAT4 pos1 = Float4Add(ColPoint2[0].Pos, ColPoint2[1].Pos);
+					XMFLOAT4 pos2 = Float4Add(ColPoint2[2].Pos, ColPoint2[3].Pos);
+					XMFLOAT4 pos5 = Float4Add(pos1, pos2);
+					pos5 = Float4Float(pos5, 0.25);
+					CollisionPoint newPoint = ColPoint2[0];
+					newPoint.Pos = pos5;
+					//중점3을 만들어서 넣음.
+					ColPoint2.push_back(newPoint);
+
+					//상대방 육면체 안에 존재하는 점이 있는지 검사한다.
+					for (int i = 0; i < 5; i++)
+					{
+						bool In = true;
+						XMVECTOR X = XMLoadFloat4(&ColPoint2[i].Pos);
+						for (int j = 0; j < 6; j++)
+						{
+
+
+							XMVECTOR testN = XMLoadFloat3(&Plane2[j]);
+							XMVECTOR testP = XMLoadFloat4(Testing->CenterPos);
+							XMVECTOR objpos = XMLoadFloat3(&PlaneOrg2[j]);
+							auto testv = XMVector3Dot(testN, (X - (testP + objpos)));
+							XMFLOAT3 result;
+							XMStoreFloat3(&result, testv);
+
+							if (result.x > 0)//0보다 크면 바운딩박스 안에 없다.
+							{
+								In = false;
+								break;
+							}
+
+						}
+
+						//안에 존재하는 점이면 그점은 최종적인 충돌점에 추가한다.
+						if (In == true)
+						{
+							lastPoints.push_back(ColPoint2[i]);
+						}
+
+
+					}
+
+					if (lastPoints.size() == 1)//점1개면 그 점을 충돌점으로 한다.
+					{
+						CollisionPointVector.push_back(lastPoints[0]);
+					}
+					else if (lastPoints.size() == 2)//점2개면 두개의 중점.
+					{
+
+						XMFLOAT4 pos = Float4Add(lastPoints[0].Pos, lastPoints[1].Pos);
+						pos = Float4Float(pos, 0.5);
+						CollisionPoint newPoint = lastPoints[0];
+						newPoint.Pos = pos;
+
+						CollisionPointVector.push_back(newPoint);
+
+					}
+					else//점3개이상이면 중점5로
+					{
+						CollisionPointVector.push_back(ColPoint2[4]);
+					}
+
+
+				}
+			}
+			else if (lastPoints.size() == 1)//점1개  경우 그점을 최종점으로 한다.
+			{
+				CollisionPointVector.push_back(lastPoints[0]);
+			}
+			else//그외는 중점으로
+			{
+				CollisionPointVector.push_back(ColPoint[2]);
+			}
+		}
+		else if (sz == 4)
+		{
+			XMFLOAT4 pos1 = Float4Add(ColPoint[0].Pos, ColPoint[1].Pos);
+			XMFLOAT4 pos2 = Float4Add(ColPoint[2].Pos, ColPoint[3].Pos);
+			XMFLOAT4 pos5 = Float4Add(pos1, pos2);
+			pos5 = Float4Float(pos5, 0.25);
+			CollisionPoint newPoint = ColPoint[0];
+			newPoint.Pos = pos5;
+			//중점3을 만들어서 넣음.
+			ColPoint.push_back(newPoint);
+
+			//상대방 육면체 안에 존재하는 점이 있는지 검사한다.
+			for (int i = 0; i < 5; i++)
+			{
+				bool In = true;
+				XMVECTOR X = XMLoadFloat4(&ColPoint[i].Pos);
+				for (int j = 0; j < 6; j++)
+				{
+
+
+					XMVECTOR testN = XMLoadFloat3(&Plane[j]);
+					XMVECTOR testP = XMLoadFloat4(Other->CenterPos);
+					XMVECTOR objpos = XMLoadFloat3(&PlaneOrg[j]);
+					auto testv = XMVector3Dot(testN, (X - (testP + objpos)));
+					XMFLOAT3 result;
+					XMStoreFloat3(&result, testv);
+
+					if (result.x > 0)//0보다 크면 바운딩박스 안에 없다.
+					{
+						In = false;
+						break;
+					}
+
+				}
+
+				//안에 존재하는 점이면 그점은 최종적인 충돌점에 추가한다.
+				if (In == true)
+				{
+					lastPoints.push_back(ColPoint[i]);
+				}
+
+
+			}
+
+			//만약에 충돌점이 0인경우 other로 다시 검사한다.
+			if (lastPoints.size() == 0)
+			{
+				if (sz2 == 1)
+				{
+					CollisionPointVector.push_back(ColPoint2[0]);
+				}
+				else if (sz2 == 2)
+				{
+
+					XMFLOAT4 pos3 = Float4Add(ColPoint2[0].Pos, ColPoint2[1].Pos);
+					pos3 = Float4Float(pos3, 0.5);
+					CollisionPoint newPoint = ColPoint2[0];
+					newPoint.Pos = pos3;
+					//중점3을 만들어서 넣음.
+					ColPoint2.push_back(newPoint);
+
+					//상대방 육면체 안에 존재하는 점이 있는지 검사한다.
+					for (int i = 0; i < 3; i++)
+					{
+						bool In = true;
+						XMVECTOR X = XMLoadFloat4(&ColPoint2[i].Pos);
+						for (int j = 0; j < 6; j++)
+						{
+
+							XMVECTOR testN = XMLoadFloat3(&Plane2[j]);
+							XMVECTOR testP = XMLoadFloat4(Testing->CenterPos);
+							XMVECTOR objpos = XMLoadFloat3(&PlaneOrg2[j]);
+							auto testv = XMVector3Dot(testN, (X - (testP + objpos)));
+							XMFLOAT3 result;
+							XMStoreFloat3(&result, testv);
+
+							if (result.x > 0)//0보다 크면 바운딩박스 안에 없다.
+							{
+								In = false;
+								break;
+							}
+
+						}
+
+						//안에 존재하는 점이면 그점은 최종적인 충돌점에 추가한다.
+						if (In == true)
+						{
+							lastPoints.push_back(ColPoint2[i]);
+						}
+
+
+
+					}
+					//상대방 점으로 계산해도 실패하면...
+					if (lastPoints.size() == 0)
+					{
+						//ColPoint2 의 중점을 이용해 가장가까운 점을 찾는다. 이때 좀더 정확하게 하기위해 ColPoint의 중점3과 점1의 중간점, 중점3과 점2의중간점을 추가
+						//해서 5개의 점으로 검사하자.
+						XMFLOAT4 pos4 = Float4Add(ColPoint[0].Pos, ColPoint[2].Pos);
+						pos4 = Float4Float(pos4, 0.5);
+						CollisionPoint newPoint = ColPoint[0];
+						newPoint.Pos = pos4;
+						//중점4를 만들어서 넣음.
+						ColPoint.push_back(newPoint);
+
+						pos4 = Float4Add(ColPoint[1].Pos, ColPoint[2].Pos);
+						pos4 = Float4Float(pos4, 0.5);
+						newPoint = ColPoint[0];
+						newPoint.Pos = pos4;
+						//중점5를 만들어서 넣음.
+						ColPoint.push_back(newPoint);
+
+						//Other가 가진 중점과 5개의 ColPoint점 중 가장 가까운 점한개를 찾음.
+						float MinLn = 10000;
+						int index = 0;
+						for (int g = 0; g < 5; g++)
+						{
+							auto vl = Float4Add(ColPoint2[2].Pos, ColPoint[g].Pos, false);
+							auto ml = FloatLength(vl);
+							if (MinLn > ml)
+							{
+								MinLn = ml;
+								index = g;
+							}
+						}
+
+						//가장짧았던 ColPoint의 인덱스의 점을 최종
+						lastPoints.push_back(ColPoint[index]);
+					}
+
+					if (lastPoints.size() == 1)//점1개  경우 그점을 최종점으로 한다.
+					{
+						CollisionPointVector.push_back(lastPoints[0]);
+					}
+					else//그외는 중점으로
+					{
+						CollisionPointVector.push_back(ColPoint2[2]);
+					}
+
+
+				}
+				else if (sz2 == 4)
+				{
+
+					XMFLOAT4 pos1 = Float4Add(ColPoint2[0].Pos, ColPoint2[1].Pos);
+					XMFLOAT4 pos2 = Float4Add(ColPoint2[2].Pos, ColPoint2[3].Pos);
+					XMFLOAT4 pos5 = Float4Add(pos1, pos2);
+					pos5 = Float4Float(pos5, 0.25);
+					CollisionPoint newPoint = ColPoint2[0];
+					newPoint.Pos = pos5;
+					//중점3을 만들어서 넣음.
+					ColPoint2.push_back(newPoint);
+
+					//상대방 육면체 안에 존재하는 점이 있는지 검사한다.
+					for (int i = 0; i < 5; i++)
+					{
+						bool In = true;
+						XMVECTOR X = XMLoadFloat4(&ColPoint2[i].Pos);
+						for (int j = 0; j < 6; j++)
+						{
+
+
+							XMVECTOR testN = XMLoadFloat3(&Plane2[j]);
+							XMVECTOR testP = XMLoadFloat4(Testing->CenterPos);
+							XMVECTOR objpos = XMLoadFloat3(&PlaneOrg2[j]);
+							auto testv = XMVector3Dot(testN, (X - (testP + objpos)));
+							XMFLOAT3 result;
+							XMStoreFloat3(&result, testv);
+
+							if (result.x > 0)//0보다 크면 바운딩박스 안에 없다.
+							{
+								In = false;
+								break;
+							}
+
+						}
+
+						//안에 존재하는 점이면 그점은 최종적인 충돌점에 추가한다.
+						if (In == true)
+						{
+							lastPoints.push_back(ColPoint2[i]);
+						}
+
+
+					}
+
+					if (lastPoints.size() == 1)//점1개면 그 점을 충돌점으로 한다.
+					{
+						CollisionPointVector.push_back(lastPoints[0]);
+					}
+					else if (lastPoints.size() == 2)//점2개면 두개의 중점.
+					{
+
+						XMFLOAT4 pos = Float4Add(lastPoints[0].Pos, lastPoints[1].Pos);
+						pos = Float4Float(pos, 0.5);
+						CollisionPoint newPoint = lastPoints[0];
+						newPoint.Pos = pos;
+
+						CollisionPointVector.push_back(newPoint);
+
+					}
+					else//점3개이상이면 중점5로
+					{
+						CollisionPointVector.push_back(ColPoint2[4]);
+					}
+
+
+				}
+			}
+			else if (lastPoints.size() == 1)//점1개면 그 점을 충돌점으로 한다.
+			{
+				CollisionPointVector.push_back(lastPoints[0]);
+			}
+			else if (lastPoints.size() == 2)//점2개면 두개의 중점.
+			{
+
+				XMFLOAT4 pos = Float4Add(lastPoints[0].Pos, lastPoints[1].Pos);
+				pos = Float4Float(pos, 0.5);
+				CollisionPoint newPoint = lastPoints[0];
+				newPoint.Pos = pos;
+
+				CollisionPointVector.push_back(newPoint);
+
+			}
+			else//점3개이상이면 중점5로
+			{
+				CollisionPointVector.push_back(ColPoint[4]);
+			}
+
+
+		}
+
+		//모든 처리를 했는데 못찾은경우
+		if (CollisionPointVector.size() == 0)
+		{
+			CollisionPoint cp;
+			cp.pAxis = pAxis;
+			cp.penetration = penetration;
+			auto p = XMFloat3to4(pAxis);
+			cp.Pos = Float4Add(p, *CenterPos);
+			CollisionPointVector.push_back(cp);
+		}
+
+
+		//최종적인 pAxis
+		float l = Float3Normalize(CenterL).x*axis[minindex].x + Float3Normalize(CenterL).y*axis[minindex].y + Float3Normalize(CenterL).z*axis[minindex].z;
+		if (l > 0)
+			pAxis = XMFLOAT3(-pAxis.x, -pAxis.y, -pAxis.z);
+
+		for (int i = 0; i < CollisionPointVector.size(); i++)
+		{
+			CollisionPointVector[i].pAxis = pAxis;
+			CollisionPointVector[i].penetration = penetration;
+		}
+		if (penetration > MMPE_EPSILON)//엡실론보다 크면 충돌 아니면 정말 미세한 충돌이므로 처리를 할 필요가 없음
+			return true;
+		else
 			return false;
-		if (overlap < minoverlap)
-		{
-			minoverlap = overlap;
-			minindex = i;
-		}
-	}
-
-	//여기 까지 왔으면 충돌한거임
-
-	auto penetration = minoverlap;
-
-	//0~5까지 일경우 이값이  paxis가 된다.
-	auto pAxis = axis[minindex];
-
-	//방향은 나중에 바꿔주자. 우선 해야할건 정점을 검사할 오브젝트를 찾기 위한 CenterLNormal을 구하는것.
-
-	auto CenterLNormal = Float3Normalize(CenterL);
-
-	float DotCp = CenterLNormal.x*pAxis.x + CenterLNormal.y*pAxis.y + CenterLNormal.z*pAxis.z;
-
-	XMFLOAT4 arr[8]; // 저장될 정점 배열
-	XMFLOAT4 arr2[8]; // 저장될 정점 배열 other
-
-					  //6개의 Other 평면
-	XMFLOAT3 Plane[6];
-	//6개의 Testing평면
-	XMFLOAT3 Plane2[6];
-	//6개의 평면의 원점에서의 위치.
-	XMFLOAT3 PlaneOrg[6];
-	//6개의 평면의 원점에서의 위치.
-	XMFLOAT3 PlaneOrg2[6];
-
-
-	//결과가 양수면 정점 검사할 대상은 B 아니면 A.
-	if (DotCp >= 0)
-	{
-		Testing = &rb2;
-		Other = this;
-
-		Testing->GetEightPoint(arr, u2, l2, r2);
-		Other->GetEightPoint(arr2, u1, l1, r1);
-		Plane[0] = r1;
-		Plane[1] = u1;
-		Plane[2] = l1;
-		Plane[3] = Float3Float(r1, -1);
-		Plane[4] = Float3Float(u1, -1);
-		Plane[5] = Float3Float(l1, -1);
-
-
-		//6개의 평면에서의 위치
-		PlaneOrg[0] = Float3Float(r1, Other->halfbox.x);
-		PlaneOrg[1] = Float3Float(u1, Other->halfbox.y);
-		PlaneOrg[2] = Float3Float(l1, Other->halfbox.z);
-		PlaneOrg[3] = Float3Float(r1, -1 * Other->halfbox.x);
-		PlaneOrg[4] = Float3Float(u1, -1 * Other->halfbox.y);
-		PlaneOrg[5] = Float3Float(l1, -1 * Other->halfbox.z);
-
-
-		Plane2[0] = r2;
-		Plane2[1] = u2;
-		Plane2[2] = l2;
-		Plane2[3] = Float3Float(r2, -1);
-		Plane2[4] = Float3Float(u2, -1);
-		Plane2[5] = Float3Float(l2, -1);
-
-
-		//6개의 평면에서의 위치
-		PlaneOrg2[0] = Float3Float(r2, Testing->halfbox.x);
-		PlaneOrg2[1] = Float3Float(u2, Testing->halfbox.y);
-		PlaneOrg2[2] = Float3Float(l2, Testing->halfbox.z);
-		PlaneOrg2[3] = Float3Float(r2, -1 * Testing->halfbox.x);
-		PlaneOrg2[4] = Float3Float(u2, -1 * Testing->halfbox.y);
-		PlaneOrg2[5] = Float3Float(l2, -1 * Testing->halfbox.z);
-	}
-	else
-	{
-		Testing = this;
-		Other = &rb2;
-
-		Testing->GetEightPoint(arr, u1, l1, r1);
-		Other->GetEightPoint(arr2, u2, l2, r2);
-
-		Plane[0] = r2;
-		Plane[1] = u2;
-		Plane[2] = l2;
-		Plane[3] = Float3Float(r2, -1);
-		Plane[4] = Float3Float(u2, -1);
-		Plane[5] = Float3Float(l2, -1);
-
-
-		//6개의 평면에서의 위치
-		PlaneOrg[0] = Float3Float(r2, Other->halfbox.x);
-		PlaneOrg[1] = Float3Float(u2, Other->halfbox.y);
-		PlaneOrg[2] = Float3Float(l2, Other->halfbox.z);
-		PlaneOrg[3] = Float3Float(r2, -1 * Other->halfbox.x);
-		PlaneOrg[4] = Float3Float(u2, -1 * Other->halfbox.y);
-		PlaneOrg[5] = Float3Float(l2, -1 * Other->halfbox.z);
-
-
-		Plane2[0] = r1;
-		Plane2[1] = u1;
-		Plane2[2] = l1;
-		Plane2[3] = Float3Float(r1, -1);
-		Plane2[4] = Float3Float(u1, -1);
-		Plane2[5] = Float3Float(l1, -1);
-
-
-		//6개의 평면에서의 위치
-		PlaneOrg2[0] = Float3Float(r1, Testing->halfbox.x);
-		PlaneOrg2[1] = Float3Float(u1, Testing->halfbox.y);
-		PlaneOrg2[2] = Float3Float(l1, Testing->halfbox.z);
-		PlaneOrg2[3] = Float3Float(r1, -1 * Testing->halfbox.x);
-		PlaneOrg2[4] = Float3Float(u1, -1 * Testing->halfbox.y);
-		PlaneOrg2[5] = Float3Float(l1, -1 * Testing->halfbox.z);
-
 
 	}
-
-	std::vector<CollisionPoint> AllPoint;
-	std::vector<CollisionPoint> AllPoint2;
-
-	for (int i = 0; i < 8; i++)
-	{
-		CollisionPoint cp;
-		cp.Pos = arr[i];
-		cp.penetration = pAxis.x*arr[i].x + pAxis.y*arr[i].y + pAxis.z*arr[i].z;
-		AllPoint.push_back(cp);
-
-		//other
-		CollisionPoint cp2;
-		cp2.Pos = arr2[i];
-		cp2.penetration = pAxis.x*arr2[i].x + pAxis.y*arr2[i].y + pAxis.z*arr2[i].z;
-		AllPoint2.push_back(cp2);
-
-	}
-	//모든 정점을 상대적인 penetration으로 정렬한다. 굳이 정확하지 않아도 된다. 그저 가장 작은 penetration을 찾는게 목표니까.
-	sort(AllPoint.begin(), AllPoint.end(), [](CollisionPoint& p1, CollisionPoint& p2) {return p1.penetration < p2.penetration; });
-	//other은 크기가 큰순으로
-	sort(AllPoint2.begin(), AllPoint2.end(), [](CollisionPoint& p1, CollisionPoint& p2) {return p1.penetration > p2.penetration; });
-
-
-	//이제 정렬된 8개의 점중 평면의 방정식에 의해 일단 충돌되었다고 생각되는 점들을 찾는다.
-	//이 점의 갯수가 1개 2개 4개 일것이며, 그에따라 다르게 처리해야한다.
-	vector<CollisionPoint> ColPoint;//일단 충돌은 일어난 정점들.
-	vector<CollisionPoint> ColPoint2;//일단 충돌은 일어난 정점들. other
-
-									 //어처피 충돌이 일어났다면 가장 작은 penetration과 일치하는 점은 최대 4개밖에 없으므로 4번만 검사한다.
-	for (int i = 0; i < 4; i++)
-	{
-		if (fabsf(AllPoint[0].penetration - AllPoint[i].penetration) <= MMPE_EPSILON)
-			ColPoint.push_back(AllPoint[i]);
-
-		if (fabsf(AllPoint2[0].penetration - AllPoint2[i].penetration) <= MMPE_EPSILON)
-			ColPoint2.push_back(AllPoint2[i]);
-	}
-
-
-
-	//이제 ColPoint를 통해 실제로 충돌한 점이 무엇인지 검사한다. ColPoint에 저장된 녀석들은 일단 pAxis의 평면의 뒤쪽에 있기에 당첨된 점들이므로
-	//만약 점이 1개만 ColPoint라면 무조건 그점은 실제 충돌점이다. 왜? 일단 애초에 육면체 충돌이 일어났기 때문에 반드시 점 1개는 충돌했을텐데, 점이 딱 1개니까.
-	//2개라면 여기서 부터 좀 생각해야한다. 왜냐하면 점 2개일때는 선과 면충돌이 되서 충돌을 안하는경우가 생김. 이를 보정하기위해 중점3을 추가해서 육면체안에 있는지
-	//검사해야함.
-
-	int sz = ColPoint.size();
-	int sz2 = ColPoint2.size();
-
-
-	vector<CollisionPoint> lastPoints;
-
-	if (sz == 1)
-	{
-		CollisionPointVector.push_back(ColPoint[0]);
-
-	}
-	else if (sz == 2)
-	{
-		//최종적인 충돌점들.
-
-
-		XMFLOAT4 pos3 = Float4Add(ColPoint[0].Pos, ColPoint[1].Pos);
-		pos3 = Float4Float(pos3, 0.5);
-		CollisionPoint newPoint = ColPoint[0];
-		newPoint.Pos = pos3;
-		//중점3을 만들어서 넣음.
-		ColPoint.push_back(newPoint);
-
-		//상대방 육면체 안에 존재하는 점이 있는지 검사한다.
-		for (int i = 0; i < 3; i++)
-		{
-			bool In = true;
-			XMVECTOR X = XMLoadFloat4(&ColPoint[i].Pos);
-			for (int j = 0; j < 6; j++)
-			{
-
-
-				XMVECTOR testN = XMLoadFloat3(&Plane[j]);
-				XMVECTOR testP = XMLoadFloat4(Other->CenterPos);
-				XMVECTOR objpos = XMLoadFloat3(&PlaneOrg[j]);
-				auto testv = XMVector3Dot(testN, (X - (testP + objpos)));
-				XMFLOAT3 result;
-				XMStoreFloat3(&result, testv);
-
-				if (result.x > 0)//0보다 크면 바운딩박스 안에 없다.
-				{
-					In = false;
-					break;
-				}
-
-			}
-
-			//안에 존재하는 점이면 그점은 최종적인 충돌점에 추가한다.
-			if (In == true)
-			{
-				lastPoints.push_back(ColPoint[i]);
-			}
-
-		}
-
-
-		//여기선 lastPoints에 저장된 점을  CollisionPointVector 에 추가한다.
-
-		//만약에 충돌점이 0인경우 other로 다시 검사한다.
-		if (lastPoints.size() == 0)
-		{
-			if (sz2 == 1)
-			{
-				CollisionPointVector.push_back(ColPoint2[0]);
-			}
-			else if (sz2 == 2)
-			{
-
-				XMFLOAT4 pos3 = Float4Add(ColPoint2[0].Pos, ColPoint2[1].Pos);
-				pos3 = Float4Float(pos3, 0.5);
-				CollisionPoint newPoint = ColPoint2[0];
-				newPoint.Pos = pos3;
-				//중점3을 만들어서 넣음.
-				ColPoint2.push_back(newPoint);
-
-				//상대방 육면체 안에 존재하는 점이 있는지 검사한다.
-				for (int i = 0; i < 3; i++)
-				{
-					bool In = true;
-					XMVECTOR X = XMLoadFloat4(&ColPoint2[i].Pos);
-					for (int j = 0; j < 6; j++)
-					{
-
-						XMVECTOR testN = XMLoadFloat3(&Plane2[j]);
-						XMVECTOR testP = XMLoadFloat4(Testing->CenterPos);
-						XMVECTOR objpos = XMLoadFloat3(&PlaneOrg2[j]);
-						auto testv = XMVector3Dot(testN, (X - (testP + objpos)));
-						XMFLOAT3 result;
-						XMStoreFloat3(&result, testv);
-
-						if (result.x > 0)//0보다 크면 바운딩박스 안에 없다.
-						{
-							In = false;
-							break;
-						}
-
-					}
-
-					//안에 존재하는 점이면 그점은 최종적인 충돌점에 추가한다.
-					if (In == true)
-					{
-						lastPoints.push_back(ColPoint2[i]);
-					}
-
-
-				}
-				//상대방 점으로 계산해도 실패하면...
-				if (lastPoints.size() == 0)
-				{
-					//ColPoint2 의 중점을 이용해 가장가까운 점을 찾는다. 이때 좀더 정확하게 하기위해 ColPoint의 중점3과 점1의 중간점, 중점3과 점2의중간점을 추가
-					//해서 5개의 점으로 검사하자.
-					XMFLOAT4 pos4 = Float4Add(ColPoint[0].Pos, ColPoint[2].Pos);
-					pos4 = Float4Float(pos4, 0.5);
-					CollisionPoint newPoint = ColPoint[0];
-					newPoint.Pos = pos4;
-					//중점4를 만들어서 넣음.
-					ColPoint.push_back(newPoint);
-
-					pos4 = Float4Add(ColPoint[1].Pos, ColPoint[2].Pos);
-					pos4 = Float4Float(pos4, 0.5);
-					newPoint = ColPoint[0];
-					newPoint.Pos = pos4;
-					//중점5를 만들어서 넣음.
-					ColPoint.push_back(newPoint);
-
-					//Other가 가진 중점과 5개의 ColPoint점 중 가장 가까운 점한개를 찾음.
-					float MinLn = 10000;
-					int index = 0;
-					for (int g = 0; g < 5; g++)
-					{
-						auto vl = Float4Add(ColPoint2[2].Pos, ColPoint[g].Pos, false);
-						auto ml = FloatLength(vl);
-						if (MinLn > ml)
-						{
-							MinLn = ml;
-							index = g;
-						}
-					}
-
-					//가장짧았던 ColPoint의 인덱스의 점을 최종
-					lastPoints.push_back(ColPoint[index]);
-				}
-
-				if (lastPoints.size() == 1)//점1개  경우 그점을 최종점으로 한다.
-				{
-					CollisionPointVector.push_back(lastPoints[0]);
-				}
-				else//그외는 중점으로
-				{
-					CollisionPointVector.push_back(ColPoint2[2]);
-				}
-
-
-			}
-			else if (sz2 == 4)
-			{
-				XMFLOAT4 pos1 = Float4Add(ColPoint2[0].Pos, ColPoint2[1].Pos);
-				XMFLOAT4 pos2 = Float4Add(ColPoint2[2].Pos, ColPoint2[3].Pos);
-				XMFLOAT4 pos5 = Float4Add(pos1, pos2);
-				pos5 = Float4Float(pos5, 0.25);
-				CollisionPoint newPoint = ColPoint2[0];
-				newPoint.Pos = pos5;
-				//중점3을 만들어서 넣음.
-				ColPoint2.push_back(newPoint);
-
-				//상대방 육면체 안에 존재하는 점이 있는지 검사한다.
-				for (int i = 0; i < 5; i++)
-				{
-					bool In = true;
-					XMVECTOR X = XMLoadFloat4(&ColPoint2[i].Pos);
-					for (int j = 0; j < 6; j++)
-					{
-
-
-						XMVECTOR testN = XMLoadFloat3(&Plane2[j]);
-						XMVECTOR testP = XMLoadFloat4(Testing->CenterPos);
-						XMVECTOR objpos = XMLoadFloat3(&PlaneOrg2[j]);
-						auto testv = XMVector3Dot(testN, (X - (testP + objpos)));
-						XMFLOAT3 result;
-						XMStoreFloat3(&result, testv);
-
-						if (result.x > 0)//0보다 크면 바운딩박스 안에 없다.
-						{
-							In = false;
-							break;
-						}
-
-					}
-
-					//안에 존재하는 점이면 그점은 최종적인 충돌점에 추가한다.
-					if (In == true)
-					{
-						lastPoints.push_back(ColPoint2[i]);
-					}
-
-
-				}
-
-				if (lastPoints.size() == 1)//점1개면 그 점을 충돌점으로 한다.
-				{
-					CollisionPointVector.push_back(lastPoints[0]);
-				}
-				else if (lastPoints.size() == 2)//점2개면 두개의 중점.
-				{
-
-					XMFLOAT4 pos = Float4Add(lastPoints[0].Pos, lastPoints[1].Pos);
-					pos = Float4Float(pos, 0.5);
-					CollisionPoint newPoint = lastPoints[0];
-					newPoint.Pos = pos;
-
-					CollisionPointVector.push_back(newPoint);
-
-				}
-				else//점3개이상이면 중점5로
-				{
-					CollisionPointVector.push_back(ColPoint2[4]);
-				}
-
-
-			}
-		}
-		else if (lastPoints.size() == 1)//점1개  경우 그점을 최종점으로 한다.
-		{
-			CollisionPointVector.push_back(lastPoints[0]);
-		}
-		else//그외는 중점으로
-		{
-			CollisionPointVector.push_back(ColPoint[2]);
-		}
-	}
-	else if (sz == 4)
-	{
-		XMFLOAT4 pos1 = Float4Add(ColPoint[0].Pos, ColPoint[1].Pos);
-		XMFLOAT4 pos2 = Float4Add(ColPoint[2].Pos, ColPoint[3].Pos);
-		XMFLOAT4 pos5 = Float4Add(pos1, pos2);
-		pos5 = Float4Float(pos5, 0.25);
-		CollisionPoint newPoint = ColPoint[0];
-		newPoint.Pos = pos5;
-		//중점3을 만들어서 넣음.
-		ColPoint.push_back(newPoint);
-
-		//상대방 육면체 안에 존재하는 점이 있는지 검사한다.
-		for (int i = 0; i < 5; i++)
-		{
-			bool In = true;
-			XMVECTOR X = XMLoadFloat4(&ColPoint[i].Pos);
-			for (int j = 0; j < 6; j++)
-			{
-
-
-				XMVECTOR testN = XMLoadFloat3(&Plane[j]);
-				XMVECTOR testP = XMLoadFloat4(Other->CenterPos);
-				XMVECTOR objpos = XMLoadFloat3(&PlaneOrg[j]);
-				auto testv = XMVector3Dot(testN, (X - (testP + objpos)));
-				XMFLOAT3 result;
-				XMStoreFloat3(&result, testv);
-
-				if (result.x > 0)//0보다 크면 바운딩박스 안에 없다.
-				{
-					In = false;
-					break;
-				}
-
-			}
-
-			//안에 존재하는 점이면 그점은 최종적인 충돌점에 추가한다.
-			if (In == true)
-			{
-				lastPoints.push_back(ColPoint[i]);
-			}
-
-
-		}
-
-		//만약에 충돌점이 0인경우 other로 다시 검사한다.
-		if (lastPoints.size() == 0)
-		{
-			if (sz2 == 1)
-			{
-				CollisionPointVector.push_back(ColPoint2[0]);
-			}
-			else if (sz2 == 2)
-			{
-
-				XMFLOAT4 pos3 = Float4Add(ColPoint2[0].Pos, ColPoint2[1].Pos);
-				pos3 = Float4Float(pos3, 0.5);
-				CollisionPoint newPoint = ColPoint2[0];
-				newPoint.Pos = pos3;
-				//중점3을 만들어서 넣음.
-				ColPoint2.push_back(newPoint);
-
-				//상대방 육면체 안에 존재하는 점이 있는지 검사한다.
-				for (int i = 0; i < 3; i++)
-				{
-					bool In = true;
-					XMVECTOR X = XMLoadFloat4(&ColPoint2[i].Pos);
-					for (int j = 0; j < 6; j++)
-					{
-
-						XMVECTOR testN = XMLoadFloat3(&Plane2[j]);
-						XMVECTOR testP = XMLoadFloat4(Testing->CenterPos);
-						XMVECTOR objpos = XMLoadFloat3(&PlaneOrg2[j]);
-						auto testv = XMVector3Dot(testN, (X - (testP + objpos)));
-						XMFLOAT3 result;
-						XMStoreFloat3(&result, testv);
-
-						if (result.x > 0)//0보다 크면 바운딩박스 안에 없다.
-						{
-							In = false;
-							break;
-						}
-
-					}
-
-					//안에 존재하는 점이면 그점은 최종적인 충돌점에 추가한다.
-					if (In == true)
-					{
-						lastPoints.push_back(ColPoint2[i]);
-					}
-
-
-
-				}
-				//상대방 점으로 계산해도 실패하면...
-				if (lastPoints.size() == 0)
-				{
-					//ColPoint2 의 중점을 이용해 가장가까운 점을 찾는다. 이때 좀더 정확하게 하기위해 ColPoint의 중점3과 점1의 중간점, 중점3과 점2의중간점을 추가
-					//해서 5개의 점으로 검사하자.
-					XMFLOAT4 pos4 = Float4Add(ColPoint[0].Pos, ColPoint[2].Pos);
-					pos4 = Float4Float(pos4, 0.5);
-					CollisionPoint newPoint = ColPoint[0];
-					newPoint.Pos = pos4;
-					//중점4를 만들어서 넣음.
-					ColPoint.push_back(newPoint);
-
-					pos4 = Float4Add(ColPoint[1].Pos, ColPoint[2].Pos);
-					pos4 = Float4Float(pos4, 0.5);
-					newPoint = ColPoint[0];
-					newPoint.Pos = pos4;
-					//중점5를 만들어서 넣음.
-					ColPoint.push_back(newPoint);
-
-					//Other가 가진 중점과 5개의 ColPoint점 중 가장 가까운 점한개를 찾음.
-					float MinLn = 10000;
-					int index = 0;
-					for (int g = 0; g < 5; g++)
-					{
-						auto vl = Float4Add(ColPoint2[2].Pos, ColPoint[g].Pos, false);
-						auto ml = FloatLength(vl);
-						if (MinLn > ml)
-						{
-							MinLn = ml;
-							index = g;
-						}
-					}
-
-					//가장짧았던 ColPoint의 인덱스의 점을 최종
-					lastPoints.push_back(ColPoint[index]);
-				}
-
-				if (lastPoints.size() == 1)//점1개  경우 그점을 최종점으로 한다.
-				{
-					CollisionPointVector.push_back(lastPoints[0]);
-				}
-				else//그외는 중점으로
-				{
-					CollisionPointVector.push_back(ColPoint2[2]);
-				}
-
-
-			}
-			else if (sz2 == 4)
-			{
-
-				XMFLOAT4 pos1 = Float4Add(ColPoint2[0].Pos, ColPoint2[1].Pos);
-				XMFLOAT4 pos2 = Float4Add(ColPoint2[2].Pos, ColPoint2[3].Pos);
-				XMFLOAT4 pos5 = Float4Add(pos1, pos2);
-				pos5 = Float4Float(pos5, 0.25);
-				CollisionPoint newPoint = ColPoint2[0];
-				newPoint.Pos = pos5;
-				//중점3을 만들어서 넣음.
-				ColPoint2.push_back(newPoint);
-
-				//상대방 육면체 안에 존재하는 점이 있는지 검사한다.
-				for (int i = 0; i < 5; i++)
-				{
-					bool In = true;
-					XMVECTOR X = XMLoadFloat4(&ColPoint2[i].Pos);
-					for (int j = 0; j < 6; j++)
-					{
-
-
-						XMVECTOR testN = XMLoadFloat3(&Plane2[j]);
-						XMVECTOR testP = XMLoadFloat4(Testing->CenterPos);
-						XMVECTOR objpos = XMLoadFloat3(&PlaneOrg2[j]);
-						auto testv = XMVector3Dot(testN, (X - (testP + objpos)));
-						XMFLOAT3 result;
-						XMStoreFloat3(&result, testv);
-
-						if (result.x > 0)//0보다 크면 바운딩박스 안에 없다.
-						{
-							In = false;
-							break;
-						}
-
-					}
-
-					//안에 존재하는 점이면 그점은 최종적인 충돌점에 추가한다.
-					if (In == true)
-					{
-						lastPoints.push_back(ColPoint2[i]);
-					}
-
-
-				}
-
-				if (lastPoints.size() == 1)//점1개면 그 점을 충돌점으로 한다.
-				{
-					CollisionPointVector.push_back(lastPoints[0]);
-				}
-				else if (lastPoints.size() == 2)//점2개면 두개의 중점.
-				{
-
-					XMFLOAT4 pos = Float4Add(lastPoints[0].Pos, lastPoints[1].Pos);
-					pos = Float4Float(pos, 0.5);
-					CollisionPoint newPoint = lastPoints[0];
-					newPoint.Pos = pos;
-
-					CollisionPointVector.push_back(newPoint);
-
-				}
-				else//점3개이상이면 중점5로
-				{
-					CollisionPointVector.push_back(ColPoint2[4]);
-				}
-
-
-			}
-		}
-		else if (lastPoints.size() == 1)//점1개면 그 점을 충돌점으로 한다.
-		{
-			CollisionPointVector.push_back(lastPoints[0]);
-		}
-		else if (lastPoints.size() == 2)//점2개면 두개의 중점.
-		{
-
-			XMFLOAT4 pos = Float4Add(lastPoints[0].Pos, lastPoints[1].Pos);
-			pos = Float4Float(pos, 0.5);
-			CollisionPoint newPoint = lastPoints[0];
-			newPoint.Pos = pos;
-
-			CollisionPointVector.push_back(newPoint);
-
-		}
-		else//점3개이상이면 중점5로
-		{
-			CollisionPointVector.push_back(ColPoint[4]);
-		}
-
-
-	}
-
-	//모든 처리를 했는데 못찾은경우
-	if (CollisionPointVector.size() == 0)
-	{
-		CollisionPoint cp;
-		cp.pAxis = pAxis;
-		cp.penetration = penetration;
-		auto p = XMFloat3to4(pAxis);
-		cp.Pos = Float4Add(p, *CenterPos);
-		CollisionPointVector.push_back(cp);
-	}
-
-
-	//최종적인 pAxis
-	float l = Float3Normalize(CenterL).x*axis[minindex].x + Float3Normalize(CenterL).y*axis[minindex].y + Float3Normalize(CenterL).z*axis[minindex].z;
-	if (l > 0)
-		pAxis = XMFLOAT3(-pAxis.x, -pAxis.y, -pAxis.z);
-
-	for (int i = 0; i<CollisionPointVector.size(); i++)
-	{
-		CollisionPointVector[i].pAxis = pAxis;
-		CollisionPointVector[i].penetration = penetration;
-	}
-	if (penetration > MMPE_EPSILON)//엡실론보다 크면 충돌 아니면 정말 미세한 충돌이므로 처리를 할 필요가 없음
-		return true;
-	else
-		return false;
-
-
+	return false;
 
 }
 
 
-void MiniPhysicsEngineG9::RigidBody::CollisionResolve(RigidBody & rb2, XMFLOAT3 & CollisionN, float DeltaTime)
+void MiniPhysicsEngineG9::RigidBody::CollisionResolve(RigidBody & rb2, XMFLOAT3 & CollisionN, float DeltaTime, float i1, float i2, float amendtime)
 {
+	ResolveVelocity(rb2, CollisionN, DeltaTime, i1, i2, amendtime);
+	ResolvePenetration(rb2, DeltaTime);
+
 }
 
 float MiniPhysicsEngineG9::RigidBody::GetSeparateVelocity(RigidBody & rb2, XMFLOAT3 & CollisionN)
@@ -2155,8 +2199,29 @@ float MiniPhysicsEngineG9::RigidBody::GetSeparateVelocity(RigidBody & rb2, XMFLO
 	return 0.0f;
 }
 
-void MiniPhysicsEngineG9::RigidBody::ResolveVelocity(RigidBody & rb2, XMFLOAT3 & CollisionN, float DeltaTime)
+void MiniPhysicsEngineG9::RigidBody::ResolveVelocity(RigidBody & rb2, XMFLOAT3 & CollisionN, float DeltaTime,float i1,float i2,float amendtime)
 {
+	//고정된 물체가아니면.
+	if (rb2.GetMass() > MMPE_EPSILON)
+	{
+		AmendTime = amendtime;
+		auto cn = Float4Add(GetPosition(), rb2.GetPosition(), false);
+		cn = Float4Normalize(cn);
+		cn = Float4Float(cn, i1);
+		auto vn = rb2.GetVelocity();
+
+
+		if (CollisionPointVector[0].Pos.y >= GetPosition().y - GetHalfBox().y / 2 && CollisionPointVector[0].Pos.y <= GetPosition().y + GetHalfBox().y / 2)
+		{
+			CollisionPointVector[0].Pos.y = GetPosition().y;
+			vn.y = 0;
+
+		}
+		vn = Float3Normalize(vn);
+		vn = Float3Float(vn, i2);
+		AddForcePoint(XMFloat4to3(cn), CollisionPointVector[0].Pos, vn);
+		integrate(0.01);
+	}
 }
 
 void MiniPhysicsEngineG9::RigidBody::ResolvePenetration(RigidBody & rb2, float DeltaTime)

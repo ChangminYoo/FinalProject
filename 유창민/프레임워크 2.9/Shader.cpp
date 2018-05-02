@@ -368,22 +368,24 @@ void Shader::Render(ID3D12GraphicsCommandList * CommandList, const GameTimer& gt
 
 	for (auto b = StaticObject->cbegin(); b != StaticObject->cend(); b++)
 	{
-		if (isRender(*b) == true)
-		{
+		
 			if ((*b)->Blending)
 			{
 				BlendingVector.push_back(*b);
 			}
 			else//블랜딩 안씀
 			{
-				if (ishalfalphaRender(*b) == false)
-					NoBlendingVector.push_back(*b);
-				else
-					HalfBlendingVector.push_back(*b);
+				if (isRender(*b) == true)
+				{
 
+					if (ishalfalphaRender(*b) == false)
+						NoBlendingVector.push_back(*b);
+					else
+						HalfBlendingVector.push_back(*b);
 
+				}
 			}
-		}
+		
 	}
 
 	//블랜딩이 안되는 오브젝트.
@@ -444,7 +446,7 @@ bool Shader::isRender(CGameObject * obj)
 		v = Float3Normalize(v);
 		auto ae = Float3Add(player->Camera.CamData.At, player->Camera.CamData.EyePos, false);
 		auto d = ae.x*v.x + ae.y*v.y + ae.z*v.z;
-		if (d < -0.15)//내적 결과가 뒤에있을경우
+		if (d < -0.1)//내적 결과가 뒤에있을경우
 			return false;
 	}
 

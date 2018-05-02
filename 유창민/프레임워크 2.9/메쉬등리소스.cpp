@@ -106,10 +106,10 @@ ComPtr<ID3D12DescriptorHeap> AimObject::SrvDescriptorHeap;//텍스처 용 힙
 
  //--------------------------------------------------------------------------------------
 
-bool BackGroundSkillObject::CreateMesh = false;
-unordered_map<string, unique_ptr<CTexture>> BackGroundSkillObject::Textures;//텍스처들을 저장함
-CMesh  BackGroundSkillObject::Mesh;//나중에 메쉬는 static으로 둬야함
-ComPtr<ID3D12DescriptorHeap> BackGroundSkillObject::SrvDescriptorHeap;//텍스처 용 힙
+bool BackGroundObject::CreateMesh = false;
+unordered_map<string, unique_ptr<CTexture>> BackGroundObject::Textures;//텍스처들을 저장함
+CMesh  BackGroundObject::Mesh;//나중에 메쉬는 static으로 둬야함
+ComPtr<ID3D12DescriptorHeap> BackGroundObject::SrvDescriptorHeap;//텍스처 용 힙
 
 bool SkillUIObject::CreateMesh = false;
 unordered_map<string, unique_ptr<CTexture>> SkillUIObject::Textures;//텍스처들을 저장함

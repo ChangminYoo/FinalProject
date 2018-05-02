@@ -65,10 +65,14 @@ public:
 
 };
 
-class BackGroundSkillObject : public CGameObject
+//로딩창 , 로고창, 끝나기 창등에 쓰임.
+//기하쉐이더를 사용함. 커스텀데이터 x 항목을 이용해서 if문으로 background용 코드를 처리하며 x는 5다.
+//스케일은 가로길이를 , 커스텀데이터1의 y 항목을 세로길이로 사용한다.
+//콜리전이나 틱은 사용안하고 오로지 렌더만 됨. 다수의 텍스처를 저장해둬야함.(시작장면이나 이런거 다 다르니까)
+class BackGroundObject : public CGameObject
 {
 public:
-	BackGroundSkillObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
+	BackGroundObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
 
 
 public:
@@ -82,7 +86,7 @@ public:
 	virtual void SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist);//셋메시는 메시를 최종적으로 생성한다. 즉 메시를구성하는 정점과 삼각형을구성하는인덱스버퍼생성
 	virtual void Render(ID3D12GraphicsCommandList* commandlist, const GameTimer& gt);
 	virtual void Collision(list<CGameObject*>* collist, float DeltaTime) {}
-
+	
 };
 
 
