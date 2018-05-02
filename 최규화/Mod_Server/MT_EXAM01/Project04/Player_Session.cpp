@@ -241,7 +241,7 @@ void Player_Session::SendPacket(Packet* packet)
 		[=](const boost::system::error_code& error, const size_t& bytes_transferred)
 	{
 		//cout << "Packet_Size : " << packet_size << "bytes_transferred : " << bytes_transferred << endl;
-		if (error != 0)
+		if (!error)
 		{
 			if (bytes_transferred != packet_size)
 			{

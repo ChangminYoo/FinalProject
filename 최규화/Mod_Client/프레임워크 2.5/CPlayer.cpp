@@ -447,6 +447,8 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 	}
 }
 
+#undef or
+
 void CPlayer::CreateBullet(ID3D12Device* Device, ID3D12GraphicsCommandList* cl,XMFLOAT3 & Goal,CGameObject* lock, list<CGameObject*>* bulletlist)
 {
 	switch (SellectBulletNumber)
