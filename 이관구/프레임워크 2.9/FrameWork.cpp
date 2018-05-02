@@ -295,6 +295,8 @@ LRESULT FrameWork::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		mClientWidth = LOWORD(lParam);
 		mClientHeight = HIWORD(lParam);
 
+		
+
 	//윈도우 사이즈가 바뀔때 마다 UI의 위치를 달리해야한다. 물론 틱함수를 만들어도 되지만, 굳이 매틱마다 불릴필요는 없으니까 이렇게 처리하자.
 		if (scene != NULL && scene->GetGameState()==GS_PLAY)
 		{
@@ -303,12 +305,7 @@ LRESULT FrameWork::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 			scene->resize = true;
 
-			if (scene->BackGround != NULL)
-			{
-				scene->BackGround->ObjData.Scale = mClientWidth;
-				scene->BackGround->ObjData.CustomData1.y = mClientHeight;
-				
-			}
+			
 			for(int i=0;i<4;i++)
 				if (scene->SkillCoolBar[i] != NULL)
 				{
@@ -323,7 +320,15 @@ LRESULT FrameWork::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			
 				}
 		}
+		else if (scene != NULL && scene->GetGameState() == (GS_START || GS_LOAD))
+		{
+			if (scene->BackGround != NULL)
+			{
+				scene->BackGround->ObjData.Scale = mClientWidth;
+				scene->BackGround->ObjData.CustomData1.y = mClientHeight;
 
+			}
+		}
 		if (Device)
 		{
 			if (wParam == SIZE_MINIMIZED)

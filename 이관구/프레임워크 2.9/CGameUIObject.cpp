@@ -360,7 +360,7 @@ BackGroundObject::BackGroundObject(ID3D12Device * m_Device, ID3D12GraphicsComman
 		Mesh.Index = NULL;
 		Mesh.SubResource = NULL;
 
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "StartBG", L"textures/ui/Range.dds", false,2,0);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "StartBG", L"textures/ui/School.dds", false,2,0);
 		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "LoadBG", L"textures/ui/MainBar.dds", false,2,1);
 		TextureName = "StartBG";
 
