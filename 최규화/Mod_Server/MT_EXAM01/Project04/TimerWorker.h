@@ -8,7 +8,8 @@ enum TIMER_EVENT_TYPE
 {
 	DEAD_TO_ALIVE = 1,
 	CHANGE_PLAYER_STATE,
-	LIGHT_BULLET
+	LIGHT_BULLET,
+	REGULAR_PACKET_EXCHANGE
 };
 
 using event_type = struct Event_Type

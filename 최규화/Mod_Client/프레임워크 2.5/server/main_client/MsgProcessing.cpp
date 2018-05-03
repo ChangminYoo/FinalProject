@@ -112,7 +112,7 @@ void AsyncClient::SendPacketRegular(CGameObject& gobj, const GameTimer& gt)
 
 	// 1.서버에서 담고있는 캐릭터회전정보를 주기적으로 0.2초마다 검사 및 패킷송신
 	RgCkInfo.RtCheck.t.t_time += gt.DeltaTime();
-	if (RgCkInfo.RtCheck.t.t_time > MAX_ROTATE_PACKET_TIME)
+	if (RgCkInfo.RtCheck.t.t_time > RegularPacketExchangeTime)
 	{
 		//
 		//STC_Test cts_test;
@@ -121,7 +121,7 @@ void AsyncClient::SendPacketRegular(CGameObject& gobj, const GameTimer& gt)
 		//cts_test.time.t_time = RgCkInfo.RtCheck.t.t_time;
 		//
 
-		RgCkInfo.RtCheck.t.p_time = RgCkInfo.RtCheck.t.t_time - MAX_ROTATE_PACKET_TIME;
+		RgCkInfo.RtCheck.t.p_time = RgCkInfo.RtCheck.t.t_time - RegularPacketExchangeTime;
 
 		RgCkInfo.RtCheck.t.t_time = 0.f;
 		RgCkInfo.RtCheck.t.t_time += RgCkInfo.RtCheck.t.p_time;
@@ -159,7 +159,7 @@ void AsyncClient::SendPacketRegular(CGameObject& gobj, const GameTimer& gt)
 
 	// 2.서버에서 담고있는 캐릭터위치정보를 주기적으로 0.2초마다 검사 및 패킷송신
 	RgCkInfo.PtCheck.t.t_time += gt.DeltaTime();
-	if (RgCkInfo.PtCheck.t.t_time > MAX_POSITION_MOVE_PACKET_TIME)
+	if (RgCkInfo.PtCheck.t.t_time > RegularPacketExchangeTime)
 	{
 		//
 		//STC_Test cts_test;
@@ -169,7 +169,7 @@ void AsyncClient::SendPacketRegular(CGameObject& gobj, const GameTimer& gt)
 		//cts_test.time.t_time = RgCkInfo.PtCheck.t.t_time;
 		//
 
-		RgCkInfo.PtCheck.t.p_time = RgCkInfo.PtCheck.t.t_time - MAX_POSITION_MOVE_PACKET_TIME;
+		RgCkInfo.PtCheck.t.p_time = RgCkInfo.PtCheck.t.t_time - RegularPacketExchangeTime;
 
 		RgCkInfo.PtCheck.t.t_time = 0.f;
 		RgCkInfo.PtCheck.t.t_time += RgCkInfo.PtCheck.t.p_time;

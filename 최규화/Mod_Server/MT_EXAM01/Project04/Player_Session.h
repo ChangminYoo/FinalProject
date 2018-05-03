@@ -63,22 +63,25 @@ private:
 	XMFLOAT3					  Upvector; //업벡터
 	XMFLOAT3					  OffLookvector;//초기룩벡터. 오브젝트가 바라보고있는 방향.
 	XMFLOAT3					  OffRightvector;//초기라이트벡터. 오브젝트가 바라보고있는 방향의 오른쪽방향.
-	//void						  GetUpvector();//룩벡터와 라이트벡터를 이용해 업벡터를 얻는함수
 
 	//8. 해당 오브젝트가 죽었나
 	bool						  delobj{ false };
 
-	//unordered_map<int, Position>  m_boxPos;
-
+	//9. 불렛 생성(클라이언트가 공격키를 눌러 서버에서 불렛 한개 생성)
 	BulletObject				 *m_bullObj;
 
+	//10. 레이캐스팅 처리
 	RayCastObject				  rco;
+
+	//11. RegularUpdate함수를 위한 타이머변수 등록
+	float m_prevTime{ 0.f };
+	float m_ElaspedTime{ 0.f };
+
 
 public:
 	unsigned int m_cur_packet_size{ 0 };
 	unsigned int m_prev_packet_size{ 0 };
 	
-	//StaticObject				  *m_staticobject{ nullptr };
 	
 public:
 	Player_Session(const short& count, boost::asio::ip::tcp::socket socket) : m_id(count), m_socket(move(socket))
@@ -148,24 +151,18 @@ public:
 	XMFLOAT3				GetUpVector()	 const { return Upvector;    }
 
 	PhysicsPoint*			GetPhysicsPoint() { return pp; }
-	//void UpdateLookVector();
-
-	//void UpdatePPosCenterPos();
-
-	//void GravitySystem(float time);
-
-	//void AfterGravitySystem(float time);
+	
 
 	// ---------------------------------------------------------------------------------------
 	// 서버에서 관리하는 클라이언트 객체들의 집합(vector 사용 - 나중에 멀쓰때 맞는 자료구조로 바꿀것)
 	static vector<Player_Session*> m_clients;
 	static list<BulletObject*>     m_bullobjs;
 
-	static unsigned short	   m_bullID;
+	static unsigned short		   m_bullID;
+	static bool					   g_bullEnterOnce;
 
 	static int m_tempcount;
 	int t_cnt{ 0 };
-	//void Update_Temp();
 	float prevTime = 0.f, curTime = 0.f, elapsedTime = 0.f;
 
 	//1. 플레이어와 스테틱 오브젝트들의 충돌
@@ -173,6 +170,12 @@ public:
 	void Collision_Players(vector<Player_Session*>& clients, float DeltaTime);
 
 	list<BulletObject*>& GetBulletObjectsList() { return m_bullobjs; }
+
+	// ----------------------------------------------------------------
+	// [6]. 주기적인 업데이트를 위한 함수 RegularUpdate()
+	// 1초에 20번의 패킷을 보냄 - 모든 이동관련 작업들(캐릭이동, 불렛이동)
+
+	void RegularUpdate();
 };
 
 

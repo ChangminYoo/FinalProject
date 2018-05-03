@@ -13,6 +13,8 @@
 #define KEYINPUT_UP 0x0001
 #define KEYINPUT_DOWN 0x0010
 
+#define RegularPacketExchangeTime 0.05 // 1초에 20번 패킷을 교환(morpg 형식)
+
 //추가
 //레벨업 보상, 마법레벨
 
@@ -242,7 +244,7 @@ typedef struct Server_To_Client_Attack_Info
 	unsigned char pack_size = sizeof(BulletObject_Info) + sizeof(unsigned char) + sizeof(unsigned char) + sizeof(float);
 	unsigned char pack_type = PACKET_PROTOCOL_TYPE::PLAYER_ATTACK;
 	BulletObject_Info bull_data;
-	float			  start_time;
+	float			  lifetime;
 
 }STC_Attack;
 

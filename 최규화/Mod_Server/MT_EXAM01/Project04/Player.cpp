@@ -95,20 +95,24 @@ void Player::Accept_Event()
 
 			if (pNewSession->CheckPlayerInfo())
 			{
+				//1. Client 정보 초기화 및 Client 정보를 담은 벡터에 데이터 추가
 				pNewSession->Init_PlayerInfo();
 				pNewSession->m_clients.emplace_back(pNewSession);
 
+				//2. Static Object 초기화 
 				pNewSession->SendStaticObjects(GetPSObject()->GetSObjUdSet());
 
-				//2. 초기화된 정보를 연결된 클라이언트로 보낸다.
+				//3. 초기화된 정보를 연결된 클라이언트로 보낸다.
 				pNewSession->InitData_To_Client();
 
 				cout << "클라이언트 [ " << m_playerIndex << " ] 데이터할당 완료. " << endl;
-
 				++m_playerIndex;
 
+				//4.accept -> recv 순으로 해서 클라이언트로 부터 패킷을 받을 준비를 한다
 				pNewSession->RecvPacket();
 
+				g_timer_queue.AddEvent(0, RegularPacketExchangeTime, REGULAR_PACKET_EXCHANGE, true);
+				
 				//delete를 해주면 메모리에러가 남. pNewSession에서 작업을 아직 안 끝냈는데 죽이려고 하기때문에
 				//delete pNewSession;
 

@@ -84,6 +84,7 @@ void TimerWorker::ProcessPacket(event_type * et)
 				//auto sec = duration_cast<seconds>(durTime);
 				auto durTime = high_resolution_clock::now() - prevTime;
 				auto durTime_ms = duration_cast<milliseconds>(durTime).count();
+
 				float totaltime_sec = (et->curr_time + durTime_ms) / 1000;
 				lbul->SetBulletLifeTime(totaltime_sec);
 
@@ -108,6 +109,27 @@ void TimerWorker::ProcessPacket(event_type * et)
 				break;
 			}
 		}
+	}
+	break;
+
+	case REGULAR_PACKET_EXCHANGE:
+	{
+		// 1초에 20번 패킷을 정기적으로 보내줘야함 
+
+		//1. 라이트 불렛이 있다면, 이 정보를 정기적으로 클라이언트에 보내줘야함 
+		for (auto lbul : Player_Session::m_bullobjs)
+		{
+			STC_Attack stc_attack;
+			stc_attack.bull_data = move(lbul->GetBulletInfo());
+			stc_attack.lifetime = lbul->GetBulletLifeTime();
+
+			for (auto client : Player_Session::m_clients)
+			{
+				client->SendPacket(reinterpret_cast<Packet*>(&stc_attack));
+			}
+		}
+
+		AddEvent(et->id, RegularPacketExchangeTime, REGULAR_PACKET_EXCHANGE, true);
 	}
 	break;
 

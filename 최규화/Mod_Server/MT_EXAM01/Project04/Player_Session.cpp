@@ -12,6 +12,8 @@ list<BulletObject*> Player_Session::m_bullobjs = list <BulletObject*>();
 unsigned short Player_Session::m_bullID = 0;
 int Player_Session::m_tempcount = 0;
 
+bool Player_Session::g_bullEnterOnce = true;
+
 bool Player_Session::CheckPlayerInfo()
 {
 	/*
@@ -467,21 +469,23 @@ void Player_Session::ProcessPacket(Packet * packet)
 			//공격키를 눌렀을 시, 불렛 생성.
 			//불렛을 생성한 캐릭터 ID, 유도를 대비한 타겟 ID, 불렛 초기생성위치, 불렛 초기회전값, 불렛 생성시간, 불렛아이디
 			m_bullObj = new BulletObject(n_bldata->bull_data.Master_ID, n_bldata->bull_data.LookOn_ID,
-				n_bldata->bull_data.pos, n_bldata->bull_data.Rotate_status, n_bldata->start_time, m_bullID,
+				n_bldata->bull_data.pos, n_bldata->bull_data.Rotate_status, n_bldata->lifetime, m_bullID,
 				n_bldata->bull_data.vel3f);
 
 			//불렛 데이터 하나의 물리효과 적용해주기 (integrate -> aftergravity) -> set bullet start time
 			m_bullObj->GetPhysicsPoint()->SetVelocity(n_bldata->bull_data.vel3f.x, n_bldata->bull_data.vel3f.y, n_bldata->bull_data.vel3f.z);
-			m_bullObj->GetPhysicsPoint()->integrate(n_bldata->start_time, reinterpret_cast<XMFLOAT4*>(&n_bldata->bull_data.pos));
+			m_bullObj->GetPhysicsPoint()->integrate(n_bldata->lifetime, reinterpret_cast<XMFLOAT4*>(&n_bldata->bull_data.pos));
 			m_bullObj->AfterGravitySystem();
 
-			m_bullObj->SetBulletLifeTime(n_bldata->start_time); // 시간 0.1 ~ 0.2 추가
+			m_bullObj->SetBulletLifeTime(n_bldata->lifetime); // 시간 0.1 ~ 0.2 추가
 
 			m_bullobjs.emplace_back(m_bullObj);
 			g_timer_queue.AddEvent(m_bullID, 0, LIGHT_BULLET, true);
 
 			++m_bullID;
 
+			//불렛이 생성된 위치를 나 말고도 상대방도 알고 있어야함. 
+			//상대방 클라이언트에게 내 불렛 생성위치를 보냄
 			for (auto client : m_clients)
 			{
 				if (client->m_id == n_bldata->bull_data.Master_ID) continue;
@@ -489,7 +493,7 @@ void Player_Session::ProcessPacket(Packet * packet)
 
 				STC_Attack stc_attack;
 				stc_attack.bull_data = move(n_bldata->bull_data);
-				stc_attack.start_time = n_bldata->start_time;
+				stc_attack.lifetime = n_bldata->lifetime;
 
 				//client->SendPacket(reinterpret_cast<Packet*>(&stc_attack));
 			}
@@ -613,107 +617,45 @@ void Player_Session::Collision_Players(vector<Player_Session*>& clients, float D
 	}
 }
 
+void Player_Session::RegularUpdate()
+{
+	//RegularUpdate 함수는 한번 들어오면 Loop를 돌면서 1초에 20번씩 
+	//SendPacket을 해줘야함 - callback함수라 cost가 큼. 
+	//스레드를 많이 할당받은 이 WorkerThread에서 작업해야함 
+
+	auto local_prevTime = high_resolution_clock::now();
+	while (true)
+	{
+		//1. 0.05초 뒤 업데이트된 불렛 정보 보내기
+		auto local_durTime = high_resolution_clock::now() - local_prevTime;
+		auto local_durTime_to_ms = duration_cast<milliseconds>(local_durTime).count();
+
+		m_ElaspedTime = (local_durTime_to_ms / 1000.f) + m_prevTime;
+
+		if (m_ElaspedTime > RegularPacketExchangeTime)
+		{
+			for (auto bullet : m_bullobjs)
+			{
+				STC_Attack stc_attack;
+				stc_attack.pack_size = sizeof(STC_Attack);
+				stc_attack.pack_type = PACKET_PROTOCOL_TYPE::PLAYER_ATTACK;
+				stc_attack.bull_data = move(bullet->GetBulletInfo());
+
+				SendPacket(reinterpret_cast<Packet*>(&stc_attack));
+			}
+
+			m_prevTime = m_ElaspedTime - RegularPacketExchangeTime;
+		}
+	}
+}
+
+
+
 Player_Session::~Player_Session()
 {
 	delete pe;
 	delete rb;
 	delete pp;
 }
-/*
-void Player_Session::GetUpvector()
-{
-	XMVECTOR l = XMLoadFloat3(&Lookvector);
-	XMVECTOR r = XMLoadFloat3(&Rightvector);
-	auto u = XMVector3Cross(l, r);
-
-	XMFLOAT3 up;
-	XMStoreFloat3(&up, u);
-	up = Float3Normalize(up);
-
-	Upvector = move(up);
-}
 
 
-void Player_Session::UpdateLookVector()
-{
-	auto wmatrix = XMMatrixIdentity();
-
-	//클라이언트에서 MouseMove를 통해 카메라를 회전할 때 마다 Rotate_status가 달라짐
-	XMFLOAT4 orient_xmfloat4 =
-	{ m_playerData.Rotate_status.x ,
-		m_playerData.Rotate_status.y ,
-		m_playerData.Rotate_status.z ,
-		m_playerData.Rotate_status.w };
-
-	auto quater = XMLoadFloat4(&orient_xmfloat4);
-	wmatrix *= XMMatrixRotationQuaternion(quater);
-
-	//OffLookvector 와 OffRightvector는 플레이어타입(캐릭터, 불렛, 스테틱오브젝트 등에 따라 다름)
-	auto ol = XMLoadFloat3(&OffLookvector);
-	auto or = XMLoadFloat3(&OffRightvector);
-
-	ol = XMVector4Transform(ol, wmatrix);
-	or = XMVector4Transform(or , wmatrix);
-
-	XMStoreFloat3(&Lookvector, ol);
-	XMStoreFloat3(&Rightvector, or );
-
-	if (fabsf(Lookvector.x) < MMPE_EPSILON / 10)
-		Lookvector.x = 0;
-	if (fabsf(Lookvector.y) < MMPE_EPSILON / 10)
-		Lookvector.y = 0;
-	if (fabsf(Lookvector.z) < MMPE_EPSILON / 10)
-		Lookvector.z = 0;
-
-
-	if (fabsf(Rightvector.x) < MMPE_EPSILON / 10)
-		Rightvector.x = 0;
-	if (fabsf(Rightvector.y) < MMPE_EPSILON / 10)
-		Rightvector.y = 0;
-	if (fabsf(Rightvector.z) < MMPE_EPSILON / 10)
-		Rightvector.z = 0;
-
-	Lookvector = Float3Normalize(Lookvector);
-	Rightvector = Float3Normalize(Rightvector);
-
-	GetUpvector();
-}
-
-void Player_Session::GravitySystem(float time)
-{
-	//고정된 물체를 제외한 모든오브젝트에 중력을 가한다. 단 투사체는 제외한다.
-
-	GeneratorGravity gg;
-	gg.SetGravityAccel(XMFLOAT3(0, -100, 0));
-
-	gg.Update(time, *pp);
-}
-
-void Player_Session::AfterGravitySystem(float time)
-{
-	float ppy = pp->GetPosition().y;
-	float hby = pp->GetHalfBox().y;
-	if (ppy - hby < 0)//pp의 중점y-하프박스의 y값을 한결과가 0보다 작으면 땅아래에 묻힌셈
-	{
-		XMFLOAT3 gp = pp->GetPosition();
-		gp.y += hby - ppy;//그러면 반대로 하프박스y값-중점y만큼 올리면 된다.
-		pp->SetPosition(gp);
-		(*i)->UpdatePPosCenterPos();
-		auto v = (*i)->pp->GetVelocity();
-		v.y = 0;//중력에 의한 속도를 0으로 만듬
-		(*i)->pp->SetVelocity(v);
-		(*i)->AirBone = false;
-	}
-}
-
-
-void Player_Session::Update_Temp()
-{
-	while (true)
-	{
-		++t_cnt;
-		cout << "t_cnt: " << t_cnt << endl;
-		//cout << "응응응" << endl;
-	}
-}
-*/
