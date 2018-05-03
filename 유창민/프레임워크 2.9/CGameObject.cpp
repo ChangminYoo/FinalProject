@@ -278,7 +278,7 @@ CCubeManObject::CCubeManObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Male Black Knight",      L"textures/human/Male Black Knight 07 White.dds", false, num, 5);
 		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Male White Wizard",      L"textures/human/Male White Wizard 06 White.dds", false, num, 6);
 		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Male Black Archer",      L"textures/human/Male Black Archer 05 Green.dds", false, num, 7);
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Male White Barbarian",   L"textures/human/Male White Barbarian 04 Black.dds", false, num, 8);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Male Fire",              L"textures/human/Male Fire 01 Orange.dds", false, num, 8);
 		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Male White King",        L"textures/human/Male White King 01 Red.dds", false, num, 9);
 
 
@@ -296,7 +296,7 @@ CCubeManObject::CCubeManObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 	else if (select == 2)
 		TextureName = "Female Brown Sorceress"; 
 	else if (select == 3)
-		TextureName = "Female White Archer"; 
+		TextureName = "Female White Knight"; 
 	else if (select == 4)
 		TextureName = "Female White Barbarian"; 
 	else if (select == 5)
@@ -304,9 +304,9 @@ CCubeManObject::CCubeManObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 	else if (select == 6)
 		TextureName = "Male White Wizard"; 
 	else if (select == 7)
-		TextureName = "Male White Archer"; 
+		TextureName = "Male Black Archer"; 
 	else if (select == 8)
-		TextureName = "Male White Barbarian"; 
+		TextureName = "Male Fire"; 
 	else if (select == 9)
 		TextureName = "Male White King"; 
 	TexOff = select;
@@ -461,11 +461,6 @@ void CCubeManObject::Collision(list<CGameObject*>* collist, float DeltaTime)
 				{
 					pp->SetVelocity(pp->GetVelocity().x, 0, pp->GetVelocity().z);
 					AirBone = false;
-
-					if ((*i)->obs == Dynamic)
-					{
-						//pp->SetPosition((*i)->CenterPos.x, (*i)->CenterPos.y + 15, (*i)->CenterPos.z);
-					}
 
 
 				}

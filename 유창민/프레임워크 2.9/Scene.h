@@ -72,6 +72,7 @@ public:
 	CGameObject* AimUI = NULL;
 	CGameObject* BackGround = NULL;
 	CGameObject* SkillUI[4] = {NULL};
+	CGameObject* SkillFrameUI[4] = { NULL };
 	CGameObject* SkillCoolBar[4] = { NULL };
 	CGameObject* SelectBar = NULL; //스킬선택
 private:

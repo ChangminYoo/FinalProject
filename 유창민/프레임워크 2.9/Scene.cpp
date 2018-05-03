@@ -40,7 +40,9 @@ Scene::~Scene()
 		delete AimUI;
 	if (BackGround != NULL)
 		delete BackGround;
-
+	for (int i = 0; i < 4; i++)
+		if (SkillFrameUI[i] != NULL)
+			delete SkillFrameUI[i];
 	for (int i = 0; i < 4; i++)
 		if (SkillUI[i] != NULL)
 			delete SkillUI[i];
@@ -281,6 +283,11 @@ void Scene::CreateGameObject()
 	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(-55, 42, -15, 0)));
 	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(-76, 40, 12, 0)));
 
+	//building
+	StaticObject.push_back(new BuildingObject(device, commandlist, &BbObject, 0, XMFLOAT4(60, 0, 30, 0)));
+	StaticObject.push_back(new BuildingObject(device, commandlist, &BbObject, 0, XMFLOAT4(-45, 0, 10, 0)));
+	StaticObject.push_back(new BuildingObject(device, commandlist, &BbObject, 0, XMFLOAT4(0, 0, -70, 0)));
+
 
 	//BigWall
 	StaticObject.push_back(new BigWallObject(device, commandlist, &BbObject, -BigWall_Rad1, XMFLOAT4(-BigWall_X1, 0, BigWall_Z1, 0)));//좌상
@@ -329,11 +336,6 @@ void Scene::CreateGameObject()
 	//RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, XMFLOAT4(193, 160, 40, 0)));
 
 
-	StaticObject.push_back(new BuildingObject(device, commandlist, &BbObject, 0, XMFLOAT4(60, 0, 30, 0)));
-	StaticObject.push_back(new BuildingObject(device, commandlist, &BbObject, 0, XMFLOAT4(-45, 0, 10, 0)));
-	StaticObject.push_back(new BuildingObject(device, commandlist, &BbObject, 0, XMFLOAT4(0, 0, -70, 0)));
-
-
 	//플레이어의 오브젝트 설정. 이건 나중에 바꿔야함.
 	Player->SetPlayer(DynamicObject.front());
 	Player->PlayerObject->Blending = false;
@@ -366,6 +368,7 @@ void Scene::CreateUI()
 		}
 
 		SkillCoolBar[i] = new CoolBarObject(device, commandlist, NULL,ct, Player->PlayerObject, XMFLOAT4(i*100-150,0.98*-mHeight / 2, 0, 0));
+		SkillFrameUI[i] = new SkillFrameUIObject(device, commandlist, NULL, Player->skilldata.Skills[i], XMFLOAT4(i * 100 - 150, 0.9*-mHeight / 2, 0, 0));
 		SkillUI[i] = new SkillUIObject(device, commandlist, NULL, Player->skilldata.Skills[i], XMFLOAT4(i * 100 - 150, 0.9*-mHeight / 2, 0, 0));
 	}
 
@@ -424,12 +427,14 @@ void Scene::Render(const GameTimer& gt)
 				AimUI->Render(commandlist, gt);
 
 				for (int i = 0; i < 4; i++)
+				{
 					SkillCoolBar[i]->Render(commandlist, gt);
+					SkillUI[0]->Render(commandlist, gt);//여기 나중에 수정
+				}
 
 				SelectBar->Render(commandlist, gt);
-
 				for (int i = 0; i < 4; i++)
-					SkillUI[i]->Render(commandlist, gt);
+					SkillFrameUI[i]->Render(commandlist, gt);
 
 
 			

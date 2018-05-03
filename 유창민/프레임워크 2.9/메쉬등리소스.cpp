@@ -111,12 +111,15 @@ unordered_map<string, unique_ptr<CTexture>> BackGroundObject::Textures;//텍스처�
 CMesh  BackGroundObject::Mesh;//나중에 메쉬는 static으로 둬야함
 ComPtr<ID3D12DescriptorHeap> BackGroundObject::SrvDescriptorHeap;//텍스처 용 힙
 
+bool SkillFrameUIObject::CreateMesh = false;
+unordered_map<string, unique_ptr<CTexture>> SkillFrameUIObject::Textures;//텍스처들을 저장함
+CMesh  SkillFrameUIObject::Mesh;//나중에 메쉬는 static으로 둬야함
+ComPtr<ID3D12DescriptorHeap> SkillFrameUIObject::SrvDescriptorHeap;//텍스처 용 힙
+
 bool SkillUIObject::CreateMesh = false;
 unordered_map<string, unique_ptr<CTexture>> SkillUIObject::Textures;//텍스처들을 저장함
 CMesh  SkillUIObject::Mesh;//나중에 메쉬는 static으로 둬야함
 ComPtr<ID3D12DescriptorHeap> SkillUIObject::SrvDescriptorHeap;//텍스처 용 힙
-
-
 //--------------------------------------------------------------------------------------
 bool BarObject::CreateMesh = false;
 unordered_map<string, unique_ptr<CTexture>> BarObject::Textures;//텍스처들을 저장함
