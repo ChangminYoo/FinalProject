@@ -353,11 +353,11 @@ void Scene::Tick(const GameTimer & gt)
 	{
 		(*b)->Tick(gt);
 
-		STC_Test stc_test;
-		stc_test.packet_size = sizeof(STC_Test);
-		stc_test.pack_type = PACKET_PROTOCOL_TYPE::TEST;
-		stc_test.player_data = Player->PlayerObject->m_player_data;
-		stc_test.time.c_time = gt.DeltaTime();
+		//STC_Test stc_test;
+		//stc_test.packet_size = sizeof(STC_Test);
+		//stc_test.pack_type = PACKET_PROTOCOL_TYPE::TEST;
+		//stc_test.player_data = Player->PlayerObject->m_player_data;
+		//stc_test.time.c_time = gt.DeltaTime();
 
 
 	}
@@ -504,6 +504,59 @@ void Scene::SET_SOBJECT_BY_SERVER_DATA(const unsigned short& id, StaticObject_In
 			}
 		}
 		break;
+	default:
+		break;
+	}
+}
+
+void Scene::SET_BULLET_BY_SERVER_DATA(BulletObject_Info & bulldata, const unsigned char & packet_type)
+{
+	switch (packet_type)
+	{
+		case BULLET_TYPE::Light:
+		{
+			if (BulletObject.size() == 0)
+			{
+				Player->CreateOtherClientBullet(device, commandlist, bulldata.endpoint, nullptr, &BulletObject, bulldata);
+			}
+			else
+			{
+				auto findBullet = false;
+				for (auto lbul : BulletObject)
+				{
+					if (bulldata.Master_ID == Player->PlayerObject->m_player_data.ID &&
+						bulldata.myID == reinterpret_cast<BulletCube*>(&lbul)->GetBulletID())
+					{
+						//불렛이 소멸됨 -> 삭제
+						if (!bulldata.alive)
+						{
+							lbul->DelObj = true;
+						}
+
+						lbul->m_bullet_data = move(bulldata);
+
+						lbul->Orient = { bulldata.Rotate_status.x, bulldata.Rotate_status.y, bulldata.Rotate_status.z, bulldata.Rotate_status.w };
+						lbul->CenterPos = { bulldata.pos.x, bulldata.pos.y, bulldata.pos.z, bulldata.pos.w };
+
+						lbul->pp->SetVelocity(bulldata.vel3f.x, bulldata.vel3f.y, bulldata.vel3f.z);
+						lbul->pp->SetPosition(lbul->CenterPos);
+
+						findBullet = true;
+						break;
+					}					
+				}
+
+				//다른 클라이언트가 생성한 불렛이 내 클라이언트가 관리하는 
+				//기존의 불렛리스트에 없다면 추가시켜줘야한다.
+				if (findBullet == false)
+				{
+					Player->CreateOtherClientBullet(device, commandlist, bulldata.endpoint, nullptr, &BulletObject, bulldata);
+				}
+			}
+		
+		}
+		break;
+
 	default:
 		break;
 	}

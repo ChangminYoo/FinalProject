@@ -111,7 +111,7 @@ void Player::Accept_Event()
 				//4.accept -> recv 순으로 해서 클라이언트로 부터 패킷을 받을 준비를 한다
 				pNewSession->RecvPacket();
 
-				g_timer_queue.AddEvent(0, RegularPacketExchangeTime, REGULAR_PACKET_EXCHANGE, true);
+				g_timer_queue.AddEvent(0, 0, REGULAR_PACKET_EXCHANGE, true);
 				
 				//delete를 해주면 메모리에러가 남. pNewSession에서 작업을 아직 안 끝냈는데 죽이려고 하기때문에
 				//delete pNewSession;
@@ -143,7 +143,7 @@ void Player::MainLogic()
 
 	m_pworkerThread.emplace_back(new thread{ [&]() { g_timer_queue.TimerThread(); } });
 	
-	//m_pworkerThread.emplace_back(new thread{ [&]() { GetCollsionCheck()->Update(); } });
+	m_pworkerThread.emplace_back(new thread{ [&]() { g_collworker.Update(); } });
 
 	f_thread.join();
 

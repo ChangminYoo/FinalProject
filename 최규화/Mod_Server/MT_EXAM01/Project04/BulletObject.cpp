@@ -1,8 +1,8 @@
 #include "BulletObject.h"
 
-BulletObject::BulletObject(const unsigned short& master_id, const unsigned short& target_id,
-						   const Position& pos, const Rotation& rot, float bulltime, const unsigned short& my_id,
-						   Vel3f& vel)
+BulletObject::BulletObject(const unsigned short& master_id, const unsigned short& my_id,
+						   const Position& pos, const Rotation& rot, float bulltime,
+						   Vel3f& vel, const unsigned char& type, const Position3D& endpt)
 {
 	pe = new PhysicalEffect();
 
@@ -19,12 +19,15 @@ BulletObject::BulletObject(const unsigned short& master_id, const unsigned short
 
 	lifetime = bulltime;
 
+	m_type = type;
+
 	m_bulldata.pos = move(pos);
 	
 	m_bulldata.Master_ID = master_id;
-	m_bulldata.LookOn_ID = target_id;
+	m_bulldata.myID = my_id;
 	
-	myID = my_id;
+	m_bulldata.endpoint = endpt;
+	//myID = my_id;
 
 	//±¤¼±Ãæµ¹ °Ë»ç¿ë À°¸éÃ¼
 	XMFLOAT3 rx(1, 0, 0);
@@ -49,7 +52,7 @@ BulletObject::BulletObject(const unsigned short& master_id, const unsigned short
 void BulletObject::AfterGravitySystem()
 {
 	if (m_bulldata.pos.y <= 0)
-		m_delobj = true;
+		m_bulldata.alive = false;
 }
 
 void BulletObject::Update(float deltatime)
@@ -72,7 +75,7 @@ void BulletObject::Collision_StaticObjects(unordered_set<StaticObject*>& sobjs, 
 				cn = pp->pAxis;
 				pp->ResolveVelocity(*sobj->GetPhysicsPoint(), cn, DeltaTime);
 				
-				m_delobj = true;
+				m_bulldata.alive = false;
 			}
 		}
 	}
@@ -102,7 +105,7 @@ void BulletObject::Collision_Players(vector<Player_Session*>& clients, float Del
 
 
 				pp->ResolveVelocity(*client->GetPhysicsPoint(), cn, DeltaTime);
-				m_delobj = true;
+				m_bulldata.alive = false;
 			}
 			
 		}

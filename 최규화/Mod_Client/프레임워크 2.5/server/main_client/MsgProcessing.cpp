@@ -96,9 +96,13 @@ switch (packet[1])
 
 	case PACKET_PROTOCOL_TYPE::PLAYER_ATTACK:
 	{
-		auto bull_data = reinterpret_cast<STC_Attack*>(packet);
-	}
+		//내가 공격키를 누르면 나한테는 불렛이 생성되지만 상대방에게는 생성되지 않는다.
+		//생성정보를 서버에서 받아와도 클라이언트에 불렛이 없으므로 해당 정보를 이용해 만들어줘야한다(처음에만)
 
+		auto mybulldata = reinterpret_cast<STC_Attack*>(packet);
+
+		scene.SET_BULLET_BY_SERVER_DATA(mybulldata->bull_data, mybulldata->bull_data.type);
+	}
 	break;
 }
 	

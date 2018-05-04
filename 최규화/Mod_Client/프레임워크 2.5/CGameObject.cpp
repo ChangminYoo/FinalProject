@@ -2,8 +2,8 @@
 
 extern UINT CbvSrvDescriptorSize;
 
-
-
+short BulletCube::myID = -1;
+list<short> BulletCube::BulletIDList = list<short>();
 
 
 CGameObject::CGameObject()
@@ -84,8 +84,6 @@ void CGameObject::UpdatePPosCenterPos()
 {
 	CenterPos = XMFloat3to4(pp->GetPosition());
 }
-
-#undef or
 void CGameObject::UpdateLookVector()
 {
 	auto wmatrix = XMMatrixIdentity();
@@ -644,7 +642,7 @@ BulletCube::BulletCube(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 		Mesh.Index = NULL;
 		Mesh.SubResource = NULL;
 
-			LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "BulletTex", L"textures/human/Male White Wizard 05 Red.dds", false);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "BulletTex", L"textures/human/Male White Wizard 05 Red.dds", false);
 		SetMesh(m_Device, commandlist);
 		SetMaterial(m_Device, commandlist);
 		CreateMesh = true;
@@ -670,6 +668,10 @@ BulletCube::BulletCube(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 	gamedata.Damage = 10;
 	gamedata.GodMode = true;
 	gamedata.Speed = 50;
+
+	++myID;
+	BulletIDList.push_back(myID);
+
 	LifeTime = 10;
 	Master = master;
 	LockOn = lockon;
@@ -688,7 +690,7 @@ BulletCube::BulletCube(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 	pp->SetBounce(false);//Æ¨±âÁö ¾Ê´Â´Ù.
 	pp->SetVelocity(Lookvector.x*gamedata.Speed, Lookvector.y*gamedata.Speed, Lookvector.z*gamedata.Speed);//·èº¤ÅÍ·Î ³¯¾Æ°¨
 
-	cout << pp->GetVelocity().x << pp->GetVelocity().y << pp->GetVelocity().z << endl;
+	//cout << pp->GetVelocity().x << pp->GetVelocity().y << pp->GetVelocity().z << endl;
 
 }
 

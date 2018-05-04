@@ -447,15 +447,11 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 	}
 }
 
-#undef or
-
 void CPlayer::CreateBullet(ID3D12Device* Device, ID3D12GraphicsCommandList* cl,XMFLOAT3 & Goal,CGameObject* lock, list<CGameObject*>* bulletlist)
 {
 	switch (SellectBulletNumber)
 	{
 	case 0://불렛큐브
-
-
 		auto v = Float3Add(Goal, XMFloat4to3(PlayerObject->CenterPos), false);
 		
 		v = Float3Normalize(v);//새로운 룩벡터(발사방향)
@@ -518,17 +514,103 @@ void CPlayer::CreateBullet(ID3D12Device* Device, ID3D12GraphicsCommandList* cl,X
 
 		bulletlist->push_back(bul);
 		
-		STC_Attack cts_attack;
+	
 
-		cts_attack.bull_data.LookOn_ID = -1;
+		STC_Attack cts_attack;
 		cts_attack.bull_data.Master_ID = PlayerObject->m_player_data.ID;
+		cts_attack.bull_data.myID = BulletCube::myID;
+	
 		cts_attack.bull_data.pos = { PlayerObject->CenterPos.x, PlayerObject->CenterPos.y, PlayerObject->CenterPos.z, PlayerObject->CenterPos.w };
 		cts_attack.bull_data.Rotate_status = { PlayerObject->Orient.x, PlayerObject->Orient.y, PlayerObject->Orient.z, PlayerObject->Orient.w };
 		cts_attack.bull_data.vel3f = { bul->pp->GetVelocity().x, bul->pp->GetVelocity().y, bul->pp->GetVelocity().z };
+		cts_attack.bull_data.type = BULLET_TYPE::Light;
+		cts_attack.bull_data.alive = true;
+		cts_attack.bull_data.endpoint = { Goal.x , Goal.y , Goal.z };
 
 		cts_attack.lifetime = 0.f;
-	
+		
 		m_async_client->SendPacket(reinterpret_cast<Packet*>(&cts_attack));
+
+
+		break;
+
+	}
+}
+
+void CPlayer::CreateOtherClientBullet(ID3D12Device * Device, ID3D12GraphicsCommandList * cl, Position3D& Goal, CGameObject * lock, list<CGameObject*>* bulletlist, BulletObject_Info server_bulldata)
+{
+	switch (SellectBulletNumber)
+	{
+	case 0://불렛큐브
+		XMFLOAT4 xmf4;
+		xmf4.x = server_bulldata.pos.x; xmf4.y = server_bulldata.pos.y; 
+		xmf4.z = server_bulldata.pos.z; xmf4.w = server_bulldata.pos.w;
+
+		XMFLOAT3 xmf3;
+		xmf3.x = Goal.x; xmf3.y = Goal.y; xmf3.z = Goal.z;
+
+		auto v = Float3Add(xmf3, XMFloat4to3(xmf4), false);
+
+		v = Float3Normalize(v);//새로운 룩벡터(발사방향)
+
+							   //기존 룩벡터와 새로운 룩벡터를 외적해서 방향축을 구한다.
+		XMFLOAT3 l{ 0,0,1 };
+		XMVECTOR ol = XMLoadFloat3(&l);
+
+		XMVECTOR nl = XMLoadFloat3(&v);
+		auto axis = XMVector3Cross(ol, nl);
+
+		//방향축을 완성.
+		axis = XMVector3Normalize(axis);
+		XMFLOAT3 Axis;
+		XMStoreFloat3(&Axis, axis);
+
+		//이제 회전각도를 구해야한다. 내적을 통해 회전각도를 구한다.
+		auto temp = XMVector3Dot(ol, nl);
+
+		float d;//기존 룩벡터와 새로운 룩벡터를 내적한 결과.
+		XMStoreFloat(&d, temp);
+		if (fabsf(d) <= 1)//반드시 이 결과는 -1~1 사이여야한다. 그래야 각도가 구해진다.
+			d = acos(d);//각도 완성. 라디안임
+
+		auto ori = QuaternionRotation(Axis, d);
+
+		//진짜 룩벡터를 구했으니 이제 진짜 Right벡터를 구한다. 진짜 Up은 진짜 룩과 진짜 라이트를 외적만하면됨.
+		//회전을 보정해준다. 회전축에서 룩벡터를 외적하면 진짜 Right벡터가 나온다.
+		//이때 오차가 있는 RightVector를 진짜 RightVector의 사잇각을 계산하고
+		//룩벡터를 회전축으로 돌려준다. 왜 회전축에 오차가 생기는가?
+		//간단하다 기존 룩벡터와 발사방향을 룩벡터의 회전축과
+		//기존 RightVector와 발사방향을 회전축을하면 서로 다르게 나온다.
+		//문제는 만약 그냥 이대로 넘어가게 되면 RightVector와 진짜 RightVector의 각도만큼 오차가 생기므로
+		//이렇게되면 나중에 Up을 구할때도 문제가 생긴다.
+		//사실 X축 Y축 Z축 순서대로 곱을하면 이러한 문제는 거의없지만, 특정축을 기반으로 회전할때 생기는 문제다.
+
+		auto wmatrix = XMMatrixIdentity();
+		auto quater = XMLoadFloat4(&ori);
+		wmatrix *= XMMatrixRotationQuaternion(quater);
+
+		auto or = XMVectorSet(1, 0, 0, 0);
+		or = XMVector4Transform(or , wmatrix);//가짜 라이트 벡터
+		or = XMVector3Normalize(or );
+		auto RealRight = XMVector3Cross(axis, nl);//진짜 라이트벡터
+		RealRight = XMVector3Normalize(RealRight);
+
+		//진짜 라이트 벡터와 가짜 라이트 벡터를 내적함.
+		temp = XMVector3Dot(RealRight, or );
+
+		XMStoreFloat(&d, temp);
+		if (fabsf(d) <= 1)//반드시 이 결과는 -1~1 사이여야한다. 그래야 각도가 구해진다.
+			d = acos(d);//각도 완성. 라디안임
+		auto ori2 = XMQuaternionRotationAxis(nl, d);//진짜 룩벡터를 회전축으로 삼고 진짜라이트와 가짜라이트의 사잇각만큼회전
+
+		auto tempori = XMLoadFloat4(&ori);
+		tempori = XMQuaternionMultiply(tempori, ori2);
+		XMStoreFloat4(&ori, tempori);//최종 회전 방향
+
+		CGameObject* bul = new BulletCube(Device, cl, PlayerObject->ParticleList, PlayerObject, ori, nullptr, xmf4);
+
+		bulletlist->push_back(bul);
+
 		break;
 
 	}

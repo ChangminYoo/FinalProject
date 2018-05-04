@@ -39,14 +39,14 @@ void PhysicalEffect::UpdateLookVector(const XMFLOAT3& offLv, const XMFLOAT3& off
 	wmatrix *= XMMatrixRotationQuaternion(quater);
 
 	//OffLookvector 와 OffRightvector는 플레이어타입(캐릭터, 불렛, 스테틱오브젝트 등에 따라 다름)
-	auto olx = XMLoadFloat3(&offLv);
-	auto orx = XMLoadFloat3(&offRv);
+	auto ol = XMLoadFloat3(&offLv);
+	auto or = XMLoadFloat3(&offRv);
 
-	olx = XMVector4Transform(olx, wmatrix);
-	orx = XMVector4Transform(orx , wmatrix);
+	ol = XMVector4Transform(ol, wmatrix);
+	or = XMVector4Transform(or , wmatrix);
 
-	XMStoreFloat3(&Lv, olx);
-	XMStoreFloat3(&Rv, orx );
+	XMStoreFloat3(&Lv, ol);
+	XMStoreFloat3(&Rv, or );
 
 	if (fabsf(Lv.x) < MMPE_EPSILON / 10)
 		Lv.x = 0;

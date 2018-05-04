@@ -48,6 +48,12 @@ enum Ani_State
 	Crying
 };
 
+enum BULLET_TYPE
+{
+	Light = 0,
+	Heavy
+};
+
 enum STATIC_OBJECT_TYPE
 {
 	Map,
@@ -92,6 +98,13 @@ struct Vel3f
 	float x{ 0.f };
 	float y{ 0.f };
 	float z{ 0.f };
+};
+
+struct Position3D
+{
+	float	x{ 0.f };
+	float	y{ 0.f };
+	float	z{ 0.f };
 };
 
 struct Position
@@ -147,9 +160,12 @@ struct BulletObject_Info
 {
 	Position					pos;					//16
 	Rotation					Rotate_status;			//16
-	Vel3f						vel3f;
+	Vel3f						vel3f;					//12
 	unsigned short				Master_ID{ 0 };			//2
-	short						LookOn_ID{ -1 };		//2
+	unsigned short				myID;					//2
+	Position3D					endpoint;				//12
+	unsigned char				type;
+	char						alive;
 };
 
 #pragma pack (push, 1)

@@ -123,8 +123,9 @@ public:
 	//ComPtr<ID3D12DescriptorHeap> SrvDescriptorHeap = nullptr;//텍스처 용 힙
 
 public:
-	Player_Data m_player_data;
-	StaticObject_Info m_sobj_data;
+	Player_Data			 m_player_data;
+	StaticObject_Info	 m_sobj_data;
+	BulletObject_Info	 m_bullet_data;
 
 	CPlayer* m_player{ nullptr };
 	
@@ -203,7 +204,8 @@ public:
 	static unordered_map<string, unique_ptr<CTexture>> Textures;//텍스처들을 저장함
 	static CMesh Mesh;//오로지 한번만 만들어짐
 	static ComPtr<ID3D12DescriptorHeap> SrvDescriptorHeap;//텍스처 용 힙
-
+	static short myID;
+	static list<short> BulletIDList;
 
 public:
 	virtual void SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist);//셋메시는 메시를 최종적으로 생성한다. 즉 메시를구성하는 정점과 삼각형을구성하는인덱스버퍼생성
@@ -212,6 +214,7 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList* commandlist, const GameTimer& gt);
 	virtual void Collision(list<CGameObject*>* collist, float DeltaTime);
 
+	short		 GetBulletID() const { return myID; }
 };
 
 

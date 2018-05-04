@@ -15,6 +15,7 @@ enum TIMER_EVENT_TYPE
 using event_type = struct Event_Type
 {
 	unsigned short id;
+	unsigned short master_id;		//bullet의 경우에만
 	float wakeup_time;
 	float curr_time;
 	char type;
@@ -34,7 +35,6 @@ class TimerWorker
 {
 private:
 	mutex t_lock;
-	Player_Session *ps;
 
 public:
 	TimerWorker();
@@ -43,7 +43,8 @@ public:
 
 	void TimerThread();
 	void ProcessPacket(event_type* et);
-	void AddEvent(const unsigned short& id, const float& sec, TIMER_EVENT_TYPE type, bool is_ai);
+	void AddEvent(const unsigned short& id, const float& sec, TIMER_EVENT_TYPE type, bool is_ai, const unsigned short& master_id);
+
 
 	priority_queue<event_type*, vector<event_type*>, waketime_cmp> t_queue;
 	~TimerWorker();

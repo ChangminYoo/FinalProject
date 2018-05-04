@@ -36,7 +36,9 @@ private:
 
 	RayCastObject				  rco;
 
-	bool				          m_delobj{ false };
+	//bool				          m_delobj{ false };
+
+	unsigned char				  m_type;
 
 public:
 	float						  prevTime{ 0.f };
@@ -44,9 +46,9 @@ public:
 
 
 public:
-	BulletObject(const unsigned short& master_id, const unsigned short& target_id,
-				 const Position& pos, const Rotation& rot, float bulltime, const unsigned short& my_id,
-				 Vel3f& vel);
+	BulletObject(const unsigned short& master_id, const unsigned short& my_id,
+				 const Position& pos, const Rotation& rot, float bulltime,
+				 Vel3f& vel, const unsigned char& type, const Position3D& endpt);
 
 	void AfterGravitySystem();
 
@@ -59,10 +61,14 @@ public:
 	void Collision_Players(vector<Player_Session*>& clients, float DeltaTime);
 
 	BulletObject_Info GetBulletInfo() const { return m_bulldata; }
-	short			  GetBulletID() const   { return myID; }
+	short			  GetBulletID() const   { return m_bulldata.myID; }
+	short			  GetBulletMasterID() const { return m_bulldata.Master_ID; }
 	PhysicsPoint*	  GetPhysicsPoint()     { return pp; }
 	void			  SetBulletNewPos(float x, float y, float z, float w) { m_bulldata.pos.x = x; m_bulldata.pos.y = y; m_bulldata.pos.z = z; m_bulldata.pos.w = w; }
 	void			  SetBulletNewPos(const XMFLOAT4& xmf4) { m_bulldata.pos.x = xmf4.x; m_bulldata.pos.y = xmf4.y; m_bulldata.pos.z = xmf4.z; m_bulldata.pos.w = xmf4.w; }
+	void			  DestroyBullet() { m_bulldata.alive = false; }
+	char			  GetBulletCurrState() { return m_bulldata.alive; }
+	
 
 	~BulletObject();
 };

@@ -39,7 +39,7 @@ void TimerWorker::TimerThread()
 	}
 }
 
-void TimerWorker::AddEvent(const unsigned short& id, const float& sec, TIMER_EVENT_TYPE type, bool is_ai)
+void TimerWorker::AddEvent(const unsigned short& id, const float& sec, TIMER_EVENT_TYPE type, bool is_ai, const unsigned short& master_id)
 {
 	event_type *event_ptr = new event_type;
 
@@ -48,6 +48,7 @@ void TimerWorker::AddEvent(const unsigned short& id, const float& sec, TIMER_EVE
 	event_ptr->type = type;
 	event_ptr->wakeup_time = (sec * 1000) + GetTickCount();		//sec으로 받아온 시간 *1000 + 현재시간 //ms
 	event_ptr->curr_time = (sec * 1000);
+	event_ptr->master_id = master_id;
 
 	t_lock.lock();
 	t_queue.push(event_ptr);
@@ -76,7 +77,7 @@ void TimerWorker::ProcessPacket(event_type * et)
 		auto prevTime = high_resolution_clock::now();
 		for (auto lbul : Player_Session::m_bullobjs)
 		{
-			if (lbul->GetBulletID() == et->id)
+			if (lbul->GetBulletID() == et->id && lbul->GetBulletMasterID() == et->master_id)
 			{
 				//auto currTime = high_resolution_clock::now();
 				//auto durTime = currTime - prevTime;
@@ -99,11 +100,16 @@ void TimerWorker::ProcessPacket(event_type * et)
 
 				//서버에서 사라질 때랑 클라에서 사라질 때 2초차이남. 서버가 2초 느림
 				if (lbul->GetBulletLifeTime() < MAX_LIGHTBULLET_LIFE_TIME )
-					AddEvent(et->id, 0.025, LIGHT_BULLET, true);
+					AddEvent(et->id, 0.025, LIGHT_BULLET, true, et->master_id);
 				else
 				{
+					//불렛이 자신의 생존시간을 넘겼을 시 = 소멸시켜준다
+					//여기서 sendpacket으로 삭제정보를 넘겨주나 주기패킷보내는 곳에서 넘겨주나?
+
 					cout << "end " << "timeL: " << lbul->GetBulletLifeTime() << endl;
 					cout << "10 Pos: " << xmf4.x << "," << xmf4.y << "," << xmf4.z << "," << xmf4.w << endl;
+
+					lbul->DestroyBullet();
 				}
 
 				break;
@@ -127,9 +133,15 @@ void TimerWorker::ProcessPacket(event_type * et)
 			{
 				client->SendPacket(reinterpret_cast<Packet*>(&stc_attack));
 			}
+
+			if (!lbul->GetBulletCurrState())
+			{
+				Player_Session::m_bullobjs.remove(lbul);
+				continue;
+			}
 		}
 
-		AddEvent(et->id, RegularPacketExchangeTime, REGULAR_PACKET_EXCHANGE, true);
+		AddEvent(0, RegularPacketExchangeTime, REGULAR_PACKET_EXCHANGE, true, 0);
 	}
 	break;
 

@@ -9,10 +9,8 @@
 
 vector<Player_Session*> Player_Session::m_clients = vector<Player_Session*>();
 list<BulletObject*> Player_Session::m_bullobjs = list <BulletObject*>();
-unsigned short Player_Session::m_bullID = 0;
+unordered_set<StaticObject*> Player_Session::m_sobjs = unordered_set<StaticObject*>();
 int Player_Session::m_tempcount = 0;
-
-bool Player_Session::g_bullEnterOnce = true;
 
 bool Player_Session::CheckPlayerInfo()
 {
@@ -243,7 +241,7 @@ void Player_Session::SendPacket(Packet* packet)
 		[=](const boost::system::error_code& error, const size_t& bytes_transferred)
 	{
 		//cout << "Packet_Size : " << packet_size << "bytes_transferred : " << bytes_transferred << endl;
-		if (!error)
+		if (error != 0)
 		{
 			if (bytes_transferred != packet_size)
 			{
@@ -468,21 +466,20 @@ void Player_Session::ProcessPacket(Packet * packet)
 
 			//공격키를 눌렀을 시, 불렛 생성.
 			//불렛을 생성한 캐릭터 ID, 유도를 대비한 타겟 ID, 불렛 초기생성위치, 불렛 초기회전값, 불렛 생성시간, 불렛아이디
-			m_bullObj = new BulletObject(n_bldata->bull_data.Master_ID, n_bldata->bull_data.LookOn_ID,
-				n_bldata->bull_data.pos, n_bldata->bull_data.Rotate_status, n_bldata->lifetime, m_bullID,
-				n_bldata->bull_data.vel3f);
+			m_bullObj = new BulletObject(n_bldata->bull_data.Master_ID, n_bldata->bull_data.myID,
+				n_bldata->bull_data.pos, n_bldata->bull_data.Rotate_status, n_bldata->lifetime,
+				n_bldata->bull_data.vel3f, n_bldata->bull_data.type, n_bldata->bull_data.endpoint);
 
 			//불렛 데이터 하나의 물리효과 적용해주기 (integrate -> aftergravity) -> set bullet start time
 			m_bullObj->GetPhysicsPoint()->SetVelocity(n_bldata->bull_data.vel3f.x, n_bldata->bull_data.vel3f.y, n_bldata->bull_data.vel3f.z);
 			m_bullObj->GetPhysicsPoint()->integrate(n_bldata->lifetime, reinterpret_cast<XMFLOAT4*>(&n_bldata->bull_data.pos));
 			m_bullObj->AfterGravitySystem();
-
 			m_bullObj->SetBulletLifeTime(n_bldata->lifetime); // 시간 0.1 ~ 0.2 추가
 
 			m_bullobjs.emplace_back(m_bullObj);
-			g_timer_queue.AddEvent(m_bullID, 0, LIGHT_BULLET, true);
 
-			++m_bullID;
+			if (n_bldata->bull_data.type == BULLET_TYPE::Light)
+				g_timer_queue.AddEvent(n_bldata->bull_data.myID, 0, LIGHT_BULLET, true, n_bldata->bull_data.Master_ID);
 
 			//불렛이 생성된 위치를 나 말고도 상대방도 알고 있어야함. 
 			//상대방 클라이언트에게 내 불렛 생성위치를 보냄
@@ -495,7 +492,7 @@ void Player_Session::ProcessPacket(Packet * packet)
 				stc_attack.bull_data = move(n_bldata->bull_data);
 				stc_attack.lifetime = n_bldata->lifetime;
 
-				//client->SendPacket(reinterpret_cast<Packet*>(&stc_attack));
+				client->SendPacket(reinterpret_cast<Packet*>(&stc_attack));
 			}
 		}
 		break;

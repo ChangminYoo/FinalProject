@@ -450,7 +450,6 @@ void FrameWork::OnMouseDown(WPARAM btnState, int x, int y)
 			if (FloatLength(Float4Add(scene->Player->PlayerObject->CenterPos, (*b)->CenterPos)) <= MAXRAYLEN)
 			{
 
-
 				if ((*b)->rco.RayCasting(RAY.RayOrgin, RAY.RayDir, XMFloat4to3((*b)->CenterPos), XMFloat4to3(scene->Player->PlayerObject->CenterPos),
 					scene->Player->PlayerObject->Lookvector, &savepoint) == true && Shot == false)//광선이 다른 오브젝트를 맞출경우
 				{
@@ -459,7 +458,6 @@ void FrameWork::OnMouseDown(WPARAM btnState, int x, int y)
 					scene->Player->CreateBullet(Device.Get(), mCommandList.Get(), savepoint, (*b), &scene->BulletObject);
 					Shot = true;
 				}
-
 
 			}
 		}
