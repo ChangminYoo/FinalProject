@@ -179,7 +179,7 @@ void CPlayer::SetPlayer(CGameObject * obj)
 //또한 항상 pp의 위치를 갱신해줘야한다.
 void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 {
-	if (PlayerObject != NULL)
+	if (PlayerObject != NULL) // && GetFocus())
 	{	
 		bool move = false;
 
@@ -509,13 +509,12 @@ void CPlayer::CreateBullet(ID3D12Device* Device, ID3D12GraphicsCommandList* cl,X
 		tempori = XMQuaternionMultiply(tempori, ori2);
 		XMStoreFloat4(&ori, tempori);//최종 회전 방향
 
+		// 내 클라이언트에서 불렛을 생성했음
 
 		CGameObject* bul = new BulletCube(Device, cl, PlayerObject->ParticleList, PlayerObject, ori, lock, PlayerObject->CenterPos);
 
 		bulletlist->push_back(bul);
 		
-	
-
 		STC_Attack cts_attack;
 		cts_attack.bull_data.Master_ID = PlayerObject->m_player_data.ID;
 		cts_attack.bull_data.myID = BulletCube::myID;
@@ -529,7 +528,7 @@ void CPlayer::CreateBullet(ID3D12Device* Device, ID3D12GraphicsCommandList* cl,X
 
 		cts_attack.lifetime = 0.f;
 		
-		//m_async_client->SendPacket(reinterpret_cast<Packet*>(&cts_attack));
+		m_async_client->SendPacket(reinterpret_cast<Packet*>(&cts_attack));
 
 
 		break;
@@ -607,7 +606,11 @@ void CPlayer::CreateOtherClientBullet(ID3D12Device * Device, ID3D12GraphicsComma
 		tempori = XMQuaternionMultiply(tempori, ori2);
 		XMStoreFloat4(&ori, tempori);//최종 회전 방향
 
+		//다른 클라이언트에서 생성한 불렛
 		CGameObject* bul = new BulletCube(Device, cl, PlayerObject->ParticleList, PlayerObject, ori, nullptr, xmf4);
+
+		bul->m_bullet_data.Master_ID = server_bulldata.Master_ID;
+		bul->m_bullet_data.myID = server_bulldata.myID;
 
 		bulletlist->push_back(bul);
 

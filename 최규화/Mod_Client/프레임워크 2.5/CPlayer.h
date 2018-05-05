@@ -31,5 +31,7 @@ public:
 	void CreateOtherClientBullet(ID3D12Device* Device, ID3D12GraphicsCommandList* cl, Position3D& Goal, CGameObject* lock, list<CGameObject*>* bulletlist, BulletObject_Info server_bulldata);
 public:
 	AsyncClient* m_async_client;
+
+
 };
 

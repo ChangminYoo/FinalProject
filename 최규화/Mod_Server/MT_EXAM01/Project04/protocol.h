@@ -13,7 +13,7 @@
 #define KEYINPUT_UP 0x0001
 #define KEYINPUT_DOWN 0x0010
 
-#define RegularPacketExchangeTime 0.05 // 1초에 20번 패킷을 교환(morpg 형식)
+#define RegularPacketExchangeTime  (1.f / 60.f) // 1초에 20번 패킷을 교환(morpg 형식)
 
 //추가
 //레벨업 보상, 마법레벨

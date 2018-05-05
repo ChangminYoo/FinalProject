@@ -138,7 +138,8 @@ void TimerWorker::ProcessPacket(event_type * et)
 			if (!lbul->GetBulletCurrState())
 			{
 				Player_Session::m_bullobjs.remove(lbul);
-				continue;
+				break;
+				//continue;
 			}
 		}
 

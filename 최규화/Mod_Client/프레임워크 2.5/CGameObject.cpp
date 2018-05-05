@@ -635,10 +635,9 @@ void LoadTexture(ID3D12Device* device, ID3D12GraphicsCommandList* commandlist,CG
 
 BulletCube::BulletCube(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist , list<CGameObject*>*Plist, CGameObject* master,XMFLOAT4& ori,CGameObject* lockon, XMFLOAT4 cp) : CGameObject(m_Device, commandlist,   Plist, cp)
 {
-
+	bool firstBullet = true;
 	if (CreateMesh == false)
 	{
-
 		Mesh.Index = NULL;
 		Mesh.SubResource = NULL;
 
@@ -646,7 +645,7 @@ BulletCube::BulletCube(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 		SetMesh(m_Device, commandlist);
 		SetMaterial(m_Device, commandlist);
 		CreateMesh = true;
-
+		firstBullet = false;
 	}
 
 	//게임오브젝트마다 룩벡터와 라이트벡터가 다르므로 초기 오프셋 설정을 해준다.
@@ -668,11 +667,16 @@ BulletCube::BulletCube(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 	gamedata.Damage = 10;
 	gamedata.GodMode = true;
 	gamedata.Speed = 50;
+	
+	if (firstBullet)
+	{
+		++myID;
+		BulletIDList.push_back(myID);
 
-	++myID;
-	BulletIDList.push_back(myID);
-
-	m_bullet_data.Master_ID = m_player_data.ID;
+		//생성된 불렛 객체가 내 클라이언트가 생성했을 때
+		m_bullet_data.myID = myID;
+		m_bullet_data.Master_ID = m_player_data.ID;
+	}
 
 	LifeTime = 10;
 	Master = master;

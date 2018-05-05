@@ -519,7 +519,9 @@ void Scene::SET_BULLET_BY_SERVER_DATA(BulletObject_Info & bulldata, const unsign
 	{
 		case BULLET_TYPE::protocol_LightBullet:
 		{
-			if (BulletObject.size() == 0)
+			//클라에서 먼저 불렛이 죽고 서버에서 죽었다는 정보를 주게되면 아래 분기문이 실행됨 -> 버그
+			//내 자신은 이걸 실행할 필요가없음
+			if (BulletObject.size() == 0 && bulldata.Master_ID != Player->PlayerObject->m_player_data.ID)
 			{
 				Player->CreateOtherClientBullet(device, commandlist, bulldata.endpoint, nullptr, &BulletObject, bulldata);
 			}
@@ -527,10 +529,9 @@ void Scene::SET_BULLET_BY_SERVER_DATA(BulletObject_Info & bulldata, const unsign
 			{
 				auto findBullet = false;
 				for (auto lbul : BulletObject)
-				{
-					
-					if (bulldata.Master_ID == Player->PlayerObject->m_player_data.ID &&
-						bulldata.myID == reinterpret_cast<BulletCube*>(&lbul)->GetBulletID())
+				{		
+					if (bulldata.Master_ID == lbul->m_bullet_data.Master_ID &&
+						bulldata.myID == lbul->m_bullet_data.myID)
 					{
 						//불렛이 소멸됨 -> 삭제
 						if (!bulldata.alive)
@@ -553,7 +554,7 @@ void Scene::SET_BULLET_BY_SERVER_DATA(BulletObject_Info & bulldata, const unsign
 
 				//다른 클라이언트가 생성한 불렛이 내 클라이언트가 관리하는 
 				//기존의 불렛리스트에 없다면 추가시켜줘야한다.
-				if (findBullet == false)
+				if (findBullet == false && bulldata.Master_ID != Player->PlayerObject->m_player_data.ID)
 				{
 					Player->CreateOtherClientBullet(device, commandlist, bulldata.endpoint, nullptr, &BulletObject, bulldata);
 				}
