@@ -672,6 +672,8 @@ BulletCube::BulletCube(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 	++myID;
 	BulletIDList.push_back(myID);
 
+	m_bullet_data.Master_ID = m_player_data.ID;
+
 	LifeTime = 10;
 	Master = master;
 	LockOn = lockon;

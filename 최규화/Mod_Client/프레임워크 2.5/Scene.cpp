@@ -420,6 +420,8 @@ void Scene::SET_PLAYER_BY_SEVER_DATA(const unsigned short& id, Player_Data& play
 					GameObject->gamedata.MAXHP = move(playerdata.UserInfo.origin_hp);
 					GameObject->gamedata.Speed = move(playerdata.UserInfo.player_status.speed);
 
+					GameObject->AirBone = playerdata.AirBone;
+
 				}
 				break;
 
@@ -434,6 +436,8 @@ void Scene::SET_PLAYER_BY_SEVER_DATA(const unsigned short& id, Player_Data& play
 					GameObject->gamedata.HP = move(playerdata.UserInfo.cur_hp);
 					GameObject->gamedata.MAXHP = move(playerdata.UserInfo.origin_hp);
 					GameObject->gamedata.Speed = move(playerdata.UserInfo.player_status.speed);
+
+					GameObject->AirBone = playerdata.AirBone;
 
 					if (GameObject->m_player_data.ID == my_ClientID)
 						Player->SetPlayer(GameObject);
@@ -513,7 +517,7 @@ void Scene::SET_BULLET_BY_SERVER_DATA(BulletObject_Info & bulldata, const unsign
 {
 	switch (packet_type)
 	{
-		case BULLET_TYPE::Light:
+		case BULLET_TYPE::protocol_LightBullet:
 		{
 			if (BulletObject.size() == 0)
 			{
@@ -524,6 +528,7 @@ void Scene::SET_BULLET_BY_SERVER_DATA(BulletObject_Info & bulldata, const unsign
 				auto findBullet = false;
 				for (auto lbul : BulletObject)
 				{
+					
 					if (bulldata.Master_ID == Player->PlayerObject->m_player_data.ID &&
 						bulldata.myID == reinterpret_cast<BulletCube*>(&lbul)->GetBulletID())
 					{

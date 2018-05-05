@@ -523,13 +523,13 @@ void CPlayer::CreateBullet(ID3D12Device* Device, ID3D12GraphicsCommandList* cl,X
 		cts_attack.bull_data.pos = { PlayerObject->CenterPos.x, PlayerObject->CenterPos.y, PlayerObject->CenterPos.z, PlayerObject->CenterPos.w };
 		cts_attack.bull_data.Rotate_status = { PlayerObject->Orient.x, PlayerObject->Orient.y, PlayerObject->Orient.z, PlayerObject->Orient.w };
 		cts_attack.bull_data.vel3f = { bul->pp->GetVelocity().x, bul->pp->GetVelocity().y, bul->pp->GetVelocity().z };
-		cts_attack.bull_data.type = BULLET_TYPE::Light;
+		cts_attack.bull_data.type = BULLET_TYPE::protocol_LightBullet;
 		cts_attack.bull_data.alive = true;
 		cts_attack.bull_data.endpoint = { Goal.x , Goal.y , Goal.z };
 
 		cts_attack.lifetime = 0.f;
 		
-		m_async_client->SendPacket(reinterpret_cast<Packet*>(&cts_attack));
+		//m_async_client->SendPacket(reinterpret_cast<Packet*>(&cts_attack));
 
 
 		break;

@@ -1,5 +1,4 @@
 #pragma once
-
 #include "TimerWorker.h"
 
 #include "CollisionCheck.h"

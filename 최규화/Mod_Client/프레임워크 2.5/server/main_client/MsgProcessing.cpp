@@ -28,6 +28,7 @@ switch (packet[1])
 		new_initdata.Is_AI = init_data->player_data.Is_AI;
 		new_initdata.Pos = move(init_data->player_data.Pos);
 		new_initdata.UserInfo = move(init_data->player_data.UserInfo);
+		new_initdata.AirBone = init_data->player_data.AirBone;
 
 
 		scene.SET_PLAYER_BY_SEVER_DATA(init_data->player_data.ID, new_initdata, packet[1]);

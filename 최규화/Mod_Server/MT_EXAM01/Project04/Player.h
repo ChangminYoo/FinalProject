@@ -1,10 +1,7 @@
 #pragma once
 #include <thread>
-#include "Player_Session.h"
 #include "StaticObject.h"
-#include "CollisionCheck.h"
 #include "ShareHeader.h"
-
 
 class Player_Session;
 

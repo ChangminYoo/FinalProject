@@ -9,24 +9,25 @@ BulletObject::BulletObject(const unsigned short& master_id, const unsigned short
 	OffLookvector = XMFLOAT3(0, 0, 1);
 	OffRightvector = XMFLOAT3(1, 0, 0);
 
-	//XMFLOAT4 xmf4 = { m_bulldata.Rotate_status.x, m_bulldata.Rotate_status.y, m_bulldata.Rotate_status.z, m_bulldata.Rotate_status.w };
-	//m_bulldata.Rotate_status = QuaternionMultiply(xmf4, )
-
+	m_bulldata.pos = move(pos);
 	m_bulldata.Rotate_status = move(rot);
 
 	pe->UpdateLookVector(OffLookvector, OffRightvector, m_bulldata.Rotate_status, Lookvector, Rightvector);
 	pe->GetUpVector(Lookvector, Rightvector, Upvector);
 
-	lifetime = bulltime;
-
-	m_type = type;
-
-	m_bulldata.pos = move(pos);
-	
 	m_bulldata.Master_ID = master_id;
 	m_bulldata.myID = my_id;
-	
+
+	lifetime = bulltime;	
+	m_bulldata.vel3f = move(vel);
+
+	m_type = type;
+	m_bulldata.type = type;
+
 	m_bulldata.endpoint = endpt;
+
+	m_bulldata.alive = true;
+
 	//myID = my_id;
 
 	//±¤¼±Ãæµ¹ °Ë»ç¿ë À°¸éÃ¼
@@ -90,7 +91,6 @@ void BulletObject::Collision_Players(vector<Player_Session*>& clients, float Del
 			bool test = pp->CollisionTest(*client->GetPhysicsPoint(),
 										  Lookvector, Rightvector, Upvector,
 										  client->GetLookVector(), client->GetRightVecotr(), client->GetUpVector());
-
 			if (test)
 			{
 				client->Damaged(Damage);

@@ -50,8 +50,8 @@ enum Ani_State
 
 enum BULLET_TYPE
 {
-	Light = 0,
-	Heavy
+	protocol_LightBullet = 0,
+	protocol_RightBullet
 };
 
 enum STATIC_OBJECT_TYPE
@@ -85,6 +85,13 @@ struct CollisionBox
 	float	z{ 0.0f };
 };
 
+struct Position3D
+{
+	float	x{ 0.f };
+	float	y{ 0.f };
+	float	z{ 0.f };
+};
+
 struct Rotation
 {
 	float		x{ 0.0f };
@@ -98,13 +105,6 @@ struct Vel3f
 	float x{ 0.f };
 	float y{ 0.f };
 	float z{ 0.f };
-};
-
-struct Position3D
-{
-	float	x{ 0.f };
-	float	y{ 0.f };
-	float	z{ 0.f };
 };
 
 struct Position
@@ -164,8 +164,8 @@ struct BulletObject_Info
 	unsigned short				Master_ID{ 0 };			//2
 	unsigned short				myID;					//2
 	Position3D					endpoint;				//12
-	unsigned char				type;
-	char						alive;
+	unsigned char				type;					//1
+	char						alive;					//1
 };
 
 #pragma pack (push, 1)
@@ -175,12 +175,13 @@ struct Player_Data
 	Player_Info		UserInfo;					//18
 	unsigned short  ID{ 0 };					//2
 	Position		Pos;						//16
+	Rotation		Rotate_status;		        //16
 	char			Is_AI{ false };				//1
 	char			Dir;						//1
 	char			Connect_Status{ false };    //1
 	char			Ani{ Ani_State::Idle };     //1
 	char			GodMode{ false };			//1
-	Rotation		Rotate_status;		        //16
+	char			AirBone{ false };			//1
 												//Player_LoginDB  LoginData;
 };
 // 18 + 16 + 2 + 1 + 1 + 1 + 1 + 16 = 58  pragma pack гр╫ц

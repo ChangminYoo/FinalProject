@@ -5,6 +5,8 @@ void Player_Session::SendStaticObjects(const unordered_set<StaticObject*>& sobju
 	//1. 각종 staticobject를 초기화하는 부분. 1000개 이상의 staticobject를 사용하지 않는다면 
 	//   굳이 한 패킷에 여러개의 데이터를 모아서 한꺼번에 보낼 필요까지는 없다
 	//   또한 여러번 오고 가야되는게 아니라 초기화 때 한번만 해줄 것이므로 . . .
+	Player_Session::m_sobjs = move(sobjudset);
+
 	STC_StaticObject stc_sobj;
 	stc_sobj.packet_size = sizeof(STC_StaticObject);
 	stc_sobj.pack_type = PACKET_PROTOCOL_TYPE::STATIC_OBJECT;

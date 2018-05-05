@@ -5,6 +5,7 @@
 
 boost::asio::io_service g_io_service;
 TimerWorker				g_timer_queue;
+CollisionCheck			g_collworker;
 
 int main()
 {

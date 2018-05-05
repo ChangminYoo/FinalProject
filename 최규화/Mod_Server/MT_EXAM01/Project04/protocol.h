@@ -50,8 +50,8 @@ enum Ani_State
 
 enum BULLET_TYPE
 {
-	Light = 0,
-	Heavy
+	protocol_LightBullet = 0,
+	protocol_RightBullet
 };
 
 enum STATIC_OBJECT_TYPE
@@ -175,12 +175,13 @@ struct Player_Data
 	Player_Info		UserInfo;					//18
 	unsigned short  ID{ 0 };					//2
 	Position		Pos;						//16
+	Rotation		Rotate_status;		        //16
 	char			Is_AI{ false };				//1
 	char			Dir;						//1
 	char			Connect_Status{ false };    //1
 	char			Ani{ Ani_State::Idle };     //1
 	char			GodMode{ false };			//1
-	Rotation		Rotate_status;		        //16
+	char			AirBone{ false };			//1
 	//Player_LoginDB  LoginData;
 };
 // 18 + 16 + 2 + 1 + 1 + 1 + 1 + 16 = 58  pragma pack гр╫ц

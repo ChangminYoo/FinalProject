@@ -1,6 +1,8 @@
 #pragma once
-#include "Player_Session.h"
-#include "StaticObject.h"
+
+class Player_Session;
+class StaticObject;
+class BulletObject;
 
 class CollisionCheck
 {

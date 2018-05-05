@@ -139,6 +139,7 @@ void Player_Session::Init_PlayerInfo()
 	m_playerData.Connect_Status = true;
 	m_playerData.Dir = 0;
 	m_playerData.GodMode = false;
+	m_playerData.AirBone = false;
 	m_playerData.ID = m_id;
 	m_playerData.Is_AI = false;
 	m_playerData.Rotate_status = { 0.0f, 0.0f, 0.0f, 0.0f };
@@ -405,8 +406,8 @@ void Player_Session::ProcessPacket(Packet * packet)
 			for (auto client : m_clients)
 			{
 				//상대가 ai / 연결끊김 / 나일 경우 보낼 필요 없음
-				if (client->m_playerData.Is_AI == true) continue;
-				if (client->m_playerData.Connect_Status == false) continue;
+				if (static_cast<bool>(client->m_playerData.Is_AI) == true) continue;
+				if (static_cast<bool>(client->m_playerData.Connect_Status) == false) continue;
 
 				//if (client->m_playerData.ID == PosMove_Data->id) continue;
 				//여기서 문제
@@ -448,8 +449,8 @@ void Player_Session::ProcessPacket(Packet * packet)
 
 			for (auto client : m_clients)
 			{
-				if (client->m_playerData.Is_AI == true) continue;
-				if (client->m_playerData.Connect_Status == false) continue;
+				if (static_cast<bool>(client->m_playerData.Is_AI) == true) continue;
+				if (static_cast<bool>(client->m_playerData.Connect_Status) == false) continue;
 				//if (client->m_playerData.ID == Rotation_Data->id) continue;
 
 				client->SendPacket(reinterpret_cast<Packet*>(&r_to_other));
@@ -478,7 +479,7 @@ void Player_Session::ProcessPacket(Packet * packet)
 
 			m_bullobjs.emplace_back(m_bullObj);
 
-			if (n_bldata->bull_data.type == BULLET_TYPE::Light)
+			if (n_bldata->bull_data.type == BULLET_TYPE::protocol_LightBullet)
 				g_timer_queue.AddEvent(n_bldata->bull_data.myID, 0, LIGHT_BULLET, true, n_bldata->bull_data.Master_ID);
 
 			//불렛이 생성된 위치를 나 말고도 상대방도 알고 있어야함. 
@@ -486,7 +487,7 @@ void Player_Session::ProcessPacket(Packet * packet)
 			for (auto client : m_clients)
 			{
 				if (client->m_id == n_bldata->bull_data.Master_ID) continue;
-				if (client->m_isAI == true || client->m_connect_state == false) continue;
+				if (static_cast<bool>(client->m_isAI) == true || static_cast<bool>(client->m_connect_state) == false) continue;
 
 				STC_Attack stc_attack;
 				stc_attack.bull_data = move(n_bldata->bull_data);
@@ -539,6 +540,7 @@ void Player_Session::Damaged(float damage)
 //1. 플레이어와 스테틱 오브젝트들의 충돌
 void Player_Session::Collision_StaticObjects(unordered_set<StaticObject*>& sobjs, float DeltaTime)
 {
+	//주인은 사람 - 충돌 대상은 스테틱오브젝트
 	for (auto iter = sobjs.begin(); iter != sobjs.end(); ++iter)
 	{
 		bool test = pp->CollisionTest(*(*iter)->GetPhysicsPoint(),
@@ -548,11 +550,16 @@ void Player_Session::Collision_StaticObjects(unordered_set<StaticObject*>& sobjs
 		if (test)
 		{
 			if (pp->pAxis.y > 0)
+			{
 				AirBone = false;
-
+				m_playerData.AirBone = false;
+			}
+				
 			if (pp->pAxis.y < 0)
+			{
 				(*iter)->SetAirBone(false);
-
+			}
+		
 			XMFLOAT3 cn;
 			if ((*iter)->GetIsStatic() == false)
 			{
@@ -586,12 +593,18 @@ void Player_Session::Collision_Players(vector<Player_Session*>& clients, float D
 			{
 				//충돌 했을때 축이 (0,1,0) 이면 Airbone을 false로 둔다. 이는 내가 위에있음을 나타낸다.
 				if (pp->pAxis.y > 0)
+				{
 					AirBone = false;
+					m_playerData.AirBone = false;
+				}
 
 				//충돌했을때  축이 (0,-1,0)이면 상대방 Airbone을 false로 둔다.  이는 상대가 내 위에있음을 나타낸다.
 				//설사 상대 위에 다른 상대가 있어도 걱정말자. 자연스러운것임.
 				if (pp->pAxis.y < 0)
+				{
+					(*iter)->m_playerData.AirBone = false;
 					(*iter)->AirBone = false;
+				}
 
 				XMFLOAT3 cn;
 				if ((*iter)->staticobject == false)

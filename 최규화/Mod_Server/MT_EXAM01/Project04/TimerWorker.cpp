@@ -122,6 +122,7 @@ void TimerWorker::ProcessPacket(event_type * et)
 	{
 		// 1초에 20번 패킷을 정기적으로 보내줘야함 
 
+		//문제 - m_bullobjs 가 없음 
 		//1. 라이트 불렛이 있다면, 이 정보를 정기적으로 클라이언트에 보내줘야함 
 		for (auto lbul : Player_Session::m_bullobjs)
 		{
