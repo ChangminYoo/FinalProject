@@ -99,7 +99,6 @@ void GS(point VertexOut gin[1], inout TriangleStream<GeoOut> triStream)
 		halfWidth = 0.5f * Scale;
 		halfHeight = 0.5f * Scale;
 		
-		
 
 		v[0].x += -halfWidth;
 		v[0].y  += -halfHeight;
@@ -171,10 +170,10 @@ void GS(point VertexOut gin[1], inout TriangleStream<GeoOut> triStream)
 	
 
 	float2 tex[4];
-	tex[0] = float2(0.0f, 1.0f);
-	tex[1] = float2(0.0f, 0.0f);
-	tex[2] = float2(1.0f, 1.0f);
-	tex[3] = float2(1.0f, 0.0f);
+	tex[0] = float2(TexClamp.x, 1.0f);
+	tex[1] = float2(TexClamp.x, 0.0f);
+	tex[2] = float2(TexClamp.y, 1.0f);
+	tex[3] = float2(TexClamp.y, 0.0f);
 
 
 	GeoOut gout;

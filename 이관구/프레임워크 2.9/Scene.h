@@ -60,6 +60,7 @@ public:
 
 	list<CGameObject*> DynamicObject;//애니메이션이 되는 오브젝트들이 여기에 모임.
 	list<CGameObject*> BulletObject;//투사체들이 모인다.
+	//list<CGameObject*> MoveStaticObject;//애니메이션은 없지만 이동하는
 	list<CGameObject*> StaticObject;//애니메이션이 없는 모든 오브젝트들이 모인다.
 	list<CGameObject*> BbObject;//빌보드가 사용되는 오브젝트들(데미지, hp바, 기타 파티클등)
 	list<CGameObject*> RigidObject;//리지드바디를 사용하는 오브젝트들.
@@ -71,6 +72,7 @@ public:
 	CGameObject* AimUI = NULL;
 	CGameObject* BackGround = NULL;
 	CGameObject* SkillUI[4] = {NULL};
+	CGameObject* SkillFrameUI[4] = { NULL };
 	CGameObject* SkillCoolBar[4] = { NULL };
 	CGameObject* SelectBar = NULL; //스킬선택
 private:

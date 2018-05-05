@@ -281,8 +281,8 @@ LRESULT FrameWork::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	case WM_ACTIVATE:
 		if (LOWORD(wParam) == WA_INACTIVE)
 		{
-			bAppPaused = true;
-			mTimer.Stop();
+		//	bAppPaused = true;
+		//	mTimer.Stop();
 		}
 		else
 		{

@@ -213,7 +213,8 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 {
 	if (scene->GetGameState() == GS_PLAY)
 	{
-		if (PlayerObject != NULL && PlayerObject->gamedata.HP > 0)
+		
+		if (PlayerObject != NULL && PlayerObject->gamedata.HP > 0 && GetFocus())
 		{
 
 

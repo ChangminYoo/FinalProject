@@ -44,6 +44,7 @@ struct ObjectData
 	//XMFLOAT4 CustomData2;
 	float PTime = 0.0f;
 	XMFLOAT3 Velocity = XMFLOAT3{ 0,0,0 };
+	XMFLOAT4 TexClamp = XMFLOAT4{ 0, 1 ,0 ,0 };
 };
 
 
@@ -84,7 +85,6 @@ public:
 	XMFLOAT4 CenterPos;//중점
 	XMFLOAT4 Orient;//방향을 나타낸다.
 	bool AirBone = false;
-
 
 	char* TextureName = NULL;
 	UINT TexOff = 0;
@@ -203,6 +203,7 @@ public:
 	~CCubeManObject();
 	BarObject* Hpbar = NULL;
 	BarFrameObject* HPFrame = NULL;
+	int select = 0;
 public:
 	static CMaterial Mat;
 	static bool CreateMesh;//최초로 false며 메쉬를 만든후 true가된다.

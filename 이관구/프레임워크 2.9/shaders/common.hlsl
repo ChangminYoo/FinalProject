@@ -61,6 +61,7 @@ cbuffer ObjectData : register(b0)
 	float4 CustomData1;
 	float PTime;
 	float3 Velocity;
+	float4 TexClamp;
 };
 
 cbuffer JointArr : register(b1)//조인트들의 배열. 현재는 65개가 최대 조인트

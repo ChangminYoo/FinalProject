@@ -104,7 +104,7 @@ void Scene::SceneState()
 {
 	if (GAMESTATE == GS_START)//시작시 생성자에서 UI등 기본적인것은 거기서 로드함.
 	{
-		if (GetAsyncKeyState(VK_SPACE) & 0x8000)
+		if (GetAsyncKeyState(VK_SPACE) & 0x8000&&GetFocus())
 		{
 			
 			SetGameState(GS_LOAD);

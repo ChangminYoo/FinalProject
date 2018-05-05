@@ -40,7 +40,9 @@ Scene::~Scene()
 		delete AimUI;
 	if (BackGround != NULL)
 		delete BackGround;
-
+	for (int i = 0; i < 4; i++)
+		if (SkillFrameUI[i] != NULL)
+			delete SkillFrameUI[i];
 	for (int i = 0; i < 4; i++)
 		if (SkillUI[i] != NULL)
 			delete SkillUI[i];
@@ -102,7 +104,7 @@ void Scene::SceneState()
 {
 	if (GAMESTATE == GS_START)//시작시 생성자에서 UI등 기본적인것은 거기서 로드함.
 	{
-		if (GetAsyncKeyState(VK_SPACE) & 0x8000)
+		if (GetAsyncKeyState(VK_SPACE) & 0x8000&&GetFocus())
 		{
 			
 			SetGameState(GS_LOAD);
@@ -111,11 +113,13 @@ void Scene::SceneState()
 	}
 	else if (GAMESTATE == GS_LOAD)
 	{
+		
 		if (FirstLoad == true)
 		{
 			CreateGameObject();
 			FirstLoad = false;
 			SetGameState(GS_PLAY);
+			ShowCursor(false);
 		}
 		else
 		{
@@ -125,6 +129,10 @@ void Scene::SceneState()
 			FirstLoad = true;
 
 		}
+	}
+	else if (GAMESTATE == GS_END)
+	{
+		PostQuitMessage(0);
 	}
 }
 
@@ -246,13 +254,13 @@ void Scene::CreateGameObject()
 	//DynamicObject.back()->pp->integrate(0.1f);//힘은 지속적으로 가해지는것이며 즉발적이려면 힘을 가한 시간을 통해 계산한다.
 	
 	//MoveCube
-	DynamicObject.push_back(new MoveCubeObject(device, commandlist, &BbObject, 125.0f, XMFLOAT4(0, 35, 125, 0)));
-	DynamicObject.push_back(new MoveCubeObject(device, commandlist, &BbObject, -120.0f, XMFLOAT4(-120, 52, 10, 0)));
-	DynamicObject.push_back(new MoveCubeObject(device, commandlist, &BbObject, 115.0f, XMFLOAT4(115, 45, 0, 0)));
-	DynamicObject.push_back(new MoveCubeObject(device, commandlist, &BbObject, -115.0f, XMFLOAT4(-115, 20, 0, 0)));
-	DynamicObject.push_back(new MoveCubeObject(device, commandlist, &BbObject, -130.0f, XMFLOAT4(0, 17, -130, 0)));
-	DynamicObject.push_back(new MoveCubeObject(device, commandlist, &BbObject, 110.0f, XMFLOAT4(110, 34, 0, 0)));
-	DynamicObject.push_back(new MoveCubeObject(device, commandlist, &BbObject, 40.0f, XMFLOAT4(40, 111, 0, 0)));
+	StaticObject.push_back(new MoveCubeObject(device, commandlist, &BbObject, 125.0f, XMFLOAT4(0, 35, 125, 0)));
+	StaticObject.push_back(new MoveCubeObject(device, commandlist, &BbObject, -120.0f, XMFLOAT4(-120, 52, 10, 0)));
+	StaticObject.push_back(new MoveCubeObject(device, commandlist, &BbObject, 115.0f, XMFLOAT4(115, 45, 0, 0)));
+	StaticObject.push_back(new MoveCubeObject(device, commandlist, &BbObject, -115.0f, XMFLOAT4(-115, 20, 0, 0)));
+	StaticObject.push_back(new MoveCubeObject(device, commandlist, &BbObject, -130.0f, XMFLOAT4(0, 17, -130, 0)));
+	StaticObject.push_back(new MoveCubeObject(device, commandlist, &BbObject, 110.0f, XMFLOAT4(110, 34, 0, 0)));
+	StaticObject.push_back(new MoveCubeObject(device, commandlist, &BbObject, 40.0f, XMFLOAT4(40, 101, 0, 0)));
 
 
 	//Cube
@@ -276,6 +284,11 @@ void Scene::CreateGameObject()
 	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(-39, 62, 31, 0)));
 	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(-55, 42, -15, 0)));
 	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(-76, 40, 12, 0)));
+
+	//building
+	StaticObject.push_back(new BuildingObject(device, commandlist, &BbObject, 0, XMFLOAT4(60, 0, 30, 0)));
+	StaticObject.push_back(new BuildingObject(device, commandlist, &BbObject, 0, XMFLOAT4(-45, 0, 10, 0)));
+	StaticObject.push_back(new BuildingObject(device, commandlist, &BbObject, 0, XMFLOAT4(0, 0, -70, 0)));
 
 
 	//BigWall
@@ -325,11 +338,6 @@ void Scene::CreateGameObject()
 	//RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, XMFLOAT4(193, 160, 40, 0)));
 
 
-	StaticObject.push_back(new BuildingObject(device, commandlist, &BbObject, 0, XMFLOAT4(60, 0, 30, 0)));
-	StaticObject.push_back(new BuildingObject(device, commandlist, &BbObject, 0, XMFLOAT4(-45, 0, 10, 0)));
-	StaticObject.push_back(new BuildingObject(device, commandlist, &BbObject, 0, XMFLOAT4(0, 0, -70, 0)));
-
-
 	//플레이어의 오브젝트 설정. 이건 나중에 바꿔야함.
 	Player->SetPlayer(DynamicObject.front());
 	Player->PlayerObject->Blending = false;
@@ -362,6 +370,7 @@ void Scene::CreateUI()
 		}
 
 		SkillCoolBar[i] = new CoolBarObject(device, commandlist, NULL,ct, Player->PlayerObject, XMFLOAT4(i*100-150,0.98*-mHeight / 2, 0, 0));
+		SkillFrameUI[i] = new SkillFrameUIObject(device, commandlist, NULL, Player->skilldata.Skills[i], XMFLOAT4(i * 100 - 150, 0.9*-mHeight / 2, 0, 0));
 		SkillUI[i] = new SkillUIObject(device, commandlist, NULL, Player->skilldata.Skills[i], XMFLOAT4(i * 100 - 150, 0.9*-mHeight / 2, 0, 0));
 	}
 
@@ -420,12 +429,14 @@ void Scene::Render(const GameTimer& gt)
 				AimUI->Render(commandlist, gt);
 
 				for (int i = 0; i < 4; i++)
+				{
 					SkillCoolBar[i]->Render(commandlist, gt);
+					SkillUI[0]->Render(commandlist, gt);//여기 나중에 수정
+				}
 
 				SelectBar->Render(commandlist, gt);
-
 				for (int i = 0; i < 4; i++)
-					SkillUI[i]->Render(commandlist, gt);
+					SkillFrameUI[i]->Render(commandlist, gt);
 
 
 			
@@ -520,6 +531,9 @@ void Scene::Tick(const GameTimer & gt)
 		for (auto b = DynamicObject.begin(); b != DynamicObject.end(); b++)
 			(*b)->Tick(gt);
 
+		for (auto b = StaticObject.begin(); b != StaticObject.end(); b++)
+			(*b)->Tick(gt);
+
 		//불렛
 		for (auto b = BulletObject.begin(); b != BulletObject.end(); b++)
 			(*b)->Tick(gt);
@@ -532,6 +546,10 @@ void Scene::Tick(const GameTimer & gt)
 		for (auto b = RigidObject.begin(); b != RigidObject.end(); b++)
 			(*b)->Tick(gt);
 
+
+		//DynamicObject가 1이면 게임 종료 상태로 만든다!!
+		if (DynamicObject.size() == 1)
+			GAMESTATE = GS_END;
 
 		Player->Tick(gt.DeltaTime());
 

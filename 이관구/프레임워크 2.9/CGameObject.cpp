@@ -87,13 +87,13 @@ void CGameObject::UpdateLookVector()
 	auto quater = XMLoadFloat4(&Orient);
 	wmatrix *= XMMatrixRotationQuaternion(quater);
 	auto ol = XMLoadFloat3(&OffLookvector);
-	auto or = XMLoadFloat3(&OffRightvector);
+	auto orr = XMLoadFloat3(&OffRightvector);
 
 	ol = XMVector4Transform(ol, wmatrix);
-	or = XMVector4Transform(or , wmatrix);
+	orr = XMVector4Transform(orr , wmatrix);
 
 	XMStoreFloat3(&Lookvector, ol);
-	XMStoreFloat3(&Rightvector, or );
+	XMStoreFloat3(&Rightvector, orr );
 
 	if (fabsf(Lookvector.x) < MMPE_EPSILON / 10)
 		Lookvector.x = 0;
@@ -264,18 +264,53 @@ CCubeManObject::CCubeManObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 	//조인트가 저장될 배열.
 	jarr = new UploadBuffer<JointArr>(m_Device, 1, true);
 
+	int num = 10;
 	if (CreateMesh == false)
 	{
-
 		Mesh.Index = NULL;
 		Mesh.SubResource = NULL;
 
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "CubeManTex", L"textures/human/Female Brown Knight 01 Black.dds", false);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Female Brown Casual",    L"textures/human/Female Brown Casual 03B.dds", false, num, 0);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Female Black Knight",    L"textures/human/Female Black Knight 04 Green.dds", false, num, 1);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Female Brown Sorceress", L"textures/human/Female Brown Sorceress 03 White.dds", false, num, 2);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Female White Knight",    L"textures/human/Female White Knight 04 Purple.dds", false, num, 3);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Female White Barbarian", L"textures/human/Female White Barbarian 05 Red.dds", false, num, 4);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Male Black Knight",      L"textures/human/Male Black Knight 07 White.dds", false, num, 5);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Male White Wizard",      L"textures/human/Male White Wizard 06 White.dds", false, num, 6);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Male Black Archer",      L"textures/human/Male Black Archer 05 Green.dds", false, num, 7);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Male Fire",              L"textures/human/Male Fire 01 Orange.dds", false, num, 8);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Male White King",        L"textures/human/Male White King 01 Red.dds", false, num, 9);
+
+
 		SetMesh(m_Device, commandlist);
 		SetMaterial(m_Device, commandlist);
 
 		CreateMesh = true;
+
 	}
+	select = rand() % num;
+	if (select == 0)
+		TextureName = "Female Brown Casual"; 
+	else if (select == 1)
+		TextureName = "Female Black Knight"; 
+	else if (select == 2)
+		TextureName = "Female Brown Sorceress"; 
+	else if (select == 3)
+		TextureName = "Female White Knight"; 
+	else if (select == 4)
+		TextureName = "Female White Barbarian"; 
+	else if (select == 5)
+		TextureName = "Male Black Knight"; 
+	else if (select == 6)
+		TextureName = "Male White Wizard"; 
+	else if (select == 7)
+		TextureName = "Male Black Archer"; 
+	else if (select == 8)
+		TextureName = "Male Fire"; 
+	else if (select == 9)
+		TextureName = "Male White King"; 
+	TexOff = select;
+
 
 	//게임오브젝트마다 룩벡터와 라이트벡터가 다르므로 초기 오프셋 설정을 해준다.
 	//실제 룩벡터 등은 모두 UpdateLookVector에서 처리된다(라이트벡터도) 따라서 Tick함수에서 반드시 호출해야한다.
@@ -288,7 +323,7 @@ CCubeManObject::CCubeManObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 	UpdateLookVector();
 	ObjData.isAnimation = true;
 	ObjData.Scale = 3;
-	ObjData.SpecularParamater = 0.3f;//스페큘러를 낮게준다.
+	ObjData.SpecularParamater = 0.0f;//스페큘러를 낮게준다.
 
 	obs = Dynamic;
 	//게임 데이터 (스텟)을 찍는다. 캐릭터는 데미지를 갖지 않고, 탄환이 데미지를 갖도록하자.
@@ -388,7 +423,10 @@ void CCubeManObject::Render(ID3D12GraphicsCommandList * commandlist, const GameT
 
 
 	if (Textures.size()>0)
-		SetTexture(commandlist, SrvDescriptorHeap, Textures["CubeManTex"].get()->Resource.Get(), false);
+		SetTexture(commandlist, SrvDescriptorHeap, Textures[TextureName].get()->Resource.Get(), false, TexOff);
+
+
+
 	UpdateConstBuffer(commandlist);
 
 	Mat.UpdateConstantBuffer(commandlist);
@@ -423,11 +461,6 @@ void CCubeManObject::Collision(list<CGameObject*>* collist, float DeltaTime)
 				{
 					pp->SetVelocity(pp->GetVelocity().x, 0, pp->GetVelocity().z);
 					AirBone = false;
-
-					if ((*i)->obs == Dynamic)
-					{
-						//pp->SetPosition((*i)->CenterPos.x, (*i)->CenterPos.y + 15, (*i)->CenterPos.z);
-					}
 
 
 				}
@@ -517,8 +550,8 @@ BulletCube::BulletCube(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 	gamedata.HP = 1;
 	gamedata.Damage = 10;
 	gamedata.GodMode = true;
-	gamedata.Speed = 100;
-	LifeTime = 7;
+	gamedata.Speed = 250;
+	LifeTime = 3.5f;
 	Master = master;
 	LockOn = lockon;
 
@@ -536,7 +569,7 @@ BulletCube::BulletCube(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 	pp->SetDamping(1);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
 	pp->SetBounce(false);//튕기지 않는다.
 	pp->SetVelocity(Lookvector.x*gamedata.Speed, Lookvector.y*gamedata.Speed, Lookvector.z*gamedata.Speed);//룩벡터로 날아감
-	pp->SetMass(1);
+	pp->SetMass(0.35f);
 
 	if (ParticleList != NULL)
 	{
@@ -704,8 +737,8 @@ HeavyBulletCube::HeavyBulletCube(ID3D12Device * m_Device, ID3D12GraphicsCommandL
 	gamedata.HP = 1;
 	gamedata.Damage = 30;
 	gamedata.GodMode = true;
-	gamedata.Speed = 70;
-	LifeTime = 7;
+	gamedata.Speed = 180;
+	LifeTime = 3.5;
 	Master = master;
 	LockOn = lockon;
 
@@ -722,7 +755,7 @@ HeavyBulletCube::HeavyBulletCube(ID3D12Device * m_Device, ID3D12GraphicsCommandL
 	pp->SetDamping(1);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
 	pp->SetBounce(false);//튕기지 않는다.
 	pp->SetVelocity(Lookvector.x*gamedata.Speed, Lookvector.y*gamedata.Speed, Lookvector.z*gamedata.Speed);//룩벡터로 날아감
-	pp->SetMass(2);
+	pp->SetMass(1);
 	if (ParticleList != NULL)
 	{
 		BulletParticles = new ParticleObject(m_Device, commandlist, ParticleList, this, 0.2f, XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, 0));
@@ -1823,10 +1856,27 @@ CubeObject::CubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 
 		SetMesh(m_Device, commandlist);
 		SetMaterial(m_Device, commandlist);
+
 		CreateMesh = true;
 
 	}
 	selectColor = rand() % 7 + 0;
+	if (selectColor == 0)
+		TextureName = "redTex";
+	else if (selectColor == 1)
+		TextureName = "orangeTex";
+	else if (selectColor == 2)
+		TextureName = "yellowTex";
+	else if (selectColor == 3)
+		TextureName = "pinkTex"; 
+	else if (selectColor == 4)
+		TextureName = "whiteTex";
+	else if (selectColor == 5)
+		TextureName = "blueTex"; 
+	else if (selectColor == 6)
+		TextureName = "greenTex";
+
+	TexOff = selectColor;
 
 	//게임오브젝트마다 룩벡터와 라이트벡터가 다르므로 초기 오프셋 설정을 해준다.
 	//실제 룩벡터 등은 모두 UpdateLookVector에서 처리된다(라이트벡터도) 따라서 Tick함수에서 반드시 호출해야한다.
@@ -1836,7 +1886,7 @@ CubeObject::CubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 	UpdateLookVector();
 	ObjData.isAnimation = 0;
 	ObjData.Scale = 10.0f;
-	ObjData.SpecularParamater = 0.0f;//스페큘러를 낮게준다.
+	ObjData.SpecularParamater = 0.46f;//스페큘러를 낮게준다.
 
 	obs = Static;
 
@@ -1890,23 +1940,8 @@ void CubeObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer
 	//텍스처를 연결하고, 월드행렬을 연결한다.
 
 	if (Textures.size() > 0)
-	{
-		if (selectColor == 0)
-			SetTexture(commandlist, SrvDescriptorHeap, Textures["redTex"].get()->Resource.Get(), false, 0);
-		else if (selectColor == 1)
-			SetTexture(commandlist, SrvDescriptorHeap, Textures["orangeTex"].get()->Resource.Get(), false, 1);
-		else if (selectColor == 2)
-			SetTexture(commandlist, SrvDescriptorHeap, Textures["yellowTex"].get()->Resource.Get(), false, 2);
-		else if (selectColor == 3)
-			SetTexture(commandlist, SrvDescriptorHeap, Textures["pinkTex"].get()->Resource.Get(), false, 3);
-		else if (selectColor == 4)
-			SetTexture(commandlist, SrvDescriptorHeap, Textures["whiteTex"].get()->Resource.Get(), false, 4);
-		else if (selectColor == 5)
-			SetTexture(commandlist, SrvDescriptorHeap, Textures["blueTex"].get()->Resource.Get(), false, 5);
-		else if (selectColor == 6)
-			SetTexture(commandlist, SrvDescriptorHeap, Textures["greenTex"].get()->Resource.Get(), false, 6);
+		SetTexture(commandlist, SrvDescriptorHeap, Textures[TextureName].get()->Resource.Get(), false, TexOff);
 
-	}
 	UpdateConstBuffer(commandlist);
 
 	//이후 그린다.
@@ -1936,6 +1971,23 @@ MoveCubeObject::MoveCubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 
 	}
 	selectColor = rand() % 7 + 0;
+	if (selectColor == 0)
+		TextureName = "redTex"; 
+	else if (selectColor == 1)
+		TextureName = "orangeTex"; 
+	else if (selectColor == 2)
+		TextureName = "yellowTex"; 
+	else if (selectColor == 3)
+		TextureName = "pinkTex"; 
+	else if (selectColor == 4)
+		TextureName = "whiteTex";
+	else if (selectColor == 5)
+		TextureName = "blueTex"; 
+	else if (selectColor == 6)
+		TextureName = "greenTex"; 
+
+	TexOff = selectColor;
+
 	Rad = rad;
 
 	n = rand() % 30;
@@ -2009,22 +2061,8 @@ void MoveCubeObject::Tick(const GameTimer & gt)
 void MoveCubeObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer & gt)
 {
 	if (Textures.size() > 0)
-	{
-		if (selectColor == 0)
-			SetTexture(commandlist, SrvDescriptorHeap, Textures["redTex"].get()->Resource.Get(), false, 0);
-		else if (selectColor == 1)
-			SetTexture(commandlist, SrvDescriptorHeap, Textures["orangeTex"].get()->Resource.Get(), false, 1);
-		else if (selectColor == 2)
-			SetTexture(commandlist, SrvDescriptorHeap, Textures["yellowTex"].get()->Resource.Get(), false, 2);
-		else if (selectColor == 3)
-			SetTexture(commandlist, SrvDescriptorHeap, Textures["pinkTex"].get()->Resource.Get(), false, 3);
-		else if (selectColor == 4)
-			SetTexture(commandlist, SrvDescriptorHeap, Textures["whiteTex"].get()->Resource.Get(), false, 4);
-		else if (selectColor == 5)
-			SetTexture(commandlist, SrvDescriptorHeap, Textures["blueTex"].get()->Resource.Get(), false, 5);
-		else if (selectColor == 6)
-			SetTexture(commandlist, SrvDescriptorHeap, Textures["greenTex"].get()->Resource.Get(), false, 6);
-	}
+		SetTexture(commandlist, SrvDescriptorHeap, Textures[TextureName].get()->Resource.Get(), false, TexOff);
+
 	UpdateConstBuffer(commandlist);
 
 	//이후 그린다.
@@ -2340,7 +2378,7 @@ void BarFrameObject::Render(ID3D12GraphicsCommandList * commandlist, const GameT
 DamageObject::DamageObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, float Damaged, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
 {
 	ObjData.isAnimation = 0;
-	ObjData.Scale = 8.0f;
+	ObjData.Scale = 15.0f;
 	ObjData.SpecularParamater = 0.0f;//스페큘러를 낮게준다.
 
 	damaged = Damaged;
@@ -2354,17 +2392,14 @@ DamageObject::DamageObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * 
 
 	obs = UI;
 
+	ObjData.TexClamp = XMFLOAT4((damaged-10)*0.01f, damaged*0.01f, 0, 0);
+
 	if (CreateMesh == false)
 	{
 		Mesh.Index = NULL;
 		Mesh.SubResource = NULL;
 
-
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "DamageTex10", L"textures/damage/damage10.dds", false,5, 0);
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "DamageTex20", L"textures/damage/damage20.dds", false, 5, 1);
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "DamageTex30", L"textures/damage/damage30.dds", false, 5, 2);
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "DamageTex40", L"textures/damage/damage40.dds", false, 5, 3);
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "DamageTex50", L"textures/damage/damage50.dds", false, 5, 4);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "DamageTex", L"textures/damage/damages.dds", false);
 
 
 		SetMesh(m_Device, commandlist);
@@ -2419,18 +2454,8 @@ void DamageObject::Tick(const GameTimer & gt)
 void DamageObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer & gt)
 {
 	if (Textures.size() > 0)
-	{
-		if (damaged == 10)
-			SetTexture(commandlist, SrvDescriptorHeap, Textures["DamageTex10"].get()->Resource.Get(), false, 0);
-		else if (damaged == 20)
-			SetTexture(commandlist, SrvDescriptorHeap, Textures["DamageTex20"].get()->Resource.Get(), false, 1);
-		else if (damaged == 30)
-			SetTexture(commandlist, SrvDescriptorHeap, Textures["DamageTex30"].get()->Resource.Get(), false, 2);
-		else if (damaged == 40)
-			SetTexture(commandlist, SrvDescriptorHeap, Textures["DamageTex40"].get()->Resource.Get(), false, 3);
-		else if (damaged == 50)
-			SetTexture(commandlist, SrvDescriptorHeap, Textures["DamageTex50"].get()->Resource.Get(), false, 4);
-	}
+		SetTexture(commandlist, SrvDescriptorHeap, Textures["DamageTex"].get()->Resource.Get(), false);
+
 	UpdateConstBuffer(commandlist);
 
 
@@ -2478,7 +2503,7 @@ RigidCubeObject::RigidCubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandL
 	UpdateLookVector();
 	ObjData.isAnimation = 0;
 	ObjData.Scale = 20.0f;
-	ObjData.SpecularParamater = 0.0f;//스페큘러를 낮게준다.
+	ObjData.SpecularParamater =-1.f;//스페큘러를 낮게준다.
 
 	obs = Rigid;
 
