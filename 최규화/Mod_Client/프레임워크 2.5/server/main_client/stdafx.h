@@ -16,7 +16,8 @@
 #include "protocol.h"
 #include <iostream>
 
-const char SERVERIP[] = "127.0.0.1";
+//const char SERVERIP[] = "127.0.0.1";
+const char SERVERIP[] = "127.30.1.11";
 const unsigned short PORT = 31400;
 
 using namespace std;

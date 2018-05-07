@@ -633,8 +633,9 @@ void LoadTexture(ID3D12Device* device, ID3D12GraphicsCommandList* commandlist,CG
 
 //------------------- 투 사 체 -----------------------//
 
-BulletCube::BulletCube(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist , list<CGameObject*>*Plist, CGameObject* master,XMFLOAT4& ori,CGameObject* lockon, XMFLOAT4 cp) : CGameObject(m_Device, commandlist,   Plist, cp)
+BulletCube::BulletCube(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist , list<CGameObject*>*Plist, CGameObject* master,XMFLOAT4& ori,CGameObject* lockon, XMFLOAT4 cp, bool IsMine) : CGameObject(m_Device, commandlist,   Plist, cp)
 {
+	//Bullet Resoucre의 경우 Bullet초기화를 한번 무조건 처음에 실행시키는데 이 때의 정보는 필요없음 - firstBullet 플래그를 이용해서 삭제유무결정
 	bool firstBullet = true;
 	if (CreateMesh == false)
 	{
@@ -670,12 +671,15 @@ BulletCube::BulletCube(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 	
 	if (firstBullet)
 	{
-		++myID;
-		BulletIDList.push_back(myID);
+		//CreateBullet 함수 호출 - 내 클라이언트에서 키를 눌러서 불렛을 생성했음 
+		if (IsMine)
+		{
+			++myID;
+			BulletIDList.push_back(myID);
 
-		//생성된 불렛 객체가 내 클라이언트가 생성했을 때
-		m_bullet_data.myID = myID;
-		m_bullet_data.Master_ID = m_player_data.ID;
+			m_bullet_data.myID = myID;
+			m_bullet_data.Master_ID = master->m_player_data.ID;
+		}
 	}
 
 	LifeTime = 10;
@@ -726,20 +730,19 @@ void BulletCube::SetMaterial(ID3D12Device * m_Device, ID3D12GraphicsCommandList 
 
 void BulletCube::Tick(const GameTimer & gt)
 {
+	//서버에서 이동시키므로 아무런 작업안해도됨 
 	//적분기. 적분기란? 매 틱마다 힘! 에의해서 변화 되는 가속도/속도/위치를 갱신한다.
 	//이때 pp의 position과 CenterPos를 일치시켜야하므로 CenterPos의 포인터를 인자로 넘겨야 한다.
-	pp->integrate(gt.DeltaTime(), &CenterPos);
-
+	//pp->integrate(gt.DeltaTime(), &CenterPos);
 	//No애니메이션!
-
 	//투사체는 생명 주기가 있어야 한다.
-	LifeTime -= gt.DeltaTime();
-	if (LifeTime <= 0)
-	{
-		DelObj = true;
-		CenterPos;
-		XMFLOAT3 t_vel = pp->GetVelocity();
-	}
+	//LifeTime -= gt.DeltaTime();
+	//if (LifeTime <= 0)
+	//{
+	//	DelObj = true;
+	//	CenterPos;
+	//	XMFLOAT3 t_vel = pp->GetVelocity();
+	//}
 
 }
 

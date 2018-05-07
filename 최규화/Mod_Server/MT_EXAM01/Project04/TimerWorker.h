@@ -36,6 +36,12 @@ class TimerWorker
 private:
 	mutex t_lock;
 
+	__int64 mPrevTime;
+	__int64 mCurrTime;
+
+	__int64 countsPerSec;
+	double mSecondsPerCount;
+
 public:
 	TimerWorker();
 	void lock() { t_lock.lock(); }

@@ -169,7 +169,7 @@ void Scene::CreateGameObject()
 	delete resource;
 	resource = new CZombieObject(device, commandlist, &BbObject, XMFLOAT4(0, -0, 0, 0));
 	delete resource;
-	resource = new BulletCube(device, commandlist,  &BbObject,NULL,XMFLOAT4(0,0,0,1),NULL, XMFLOAT4(0, -0, 0, 0));
+	resource = new BulletCube(device, commandlist,  &BbObject,NULL,XMFLOAT4(0,0,0,1),NULL, XMFLOAT4(0, -0, 0, 0), true);
 	delete resource;
 	resource = new SphereObject(device, commandlist,  &BbObject, XMFLOAT4(0, 0, 0, 0));
 	delete resource;
@@ -537,6 +537,8 @@ void Scene::SET_BULLET_BY_SERVER_DATA(BulletObject_Info & bulldata, const unsign
 						if (!bulldata.alive)
 						{
 							lbul->DelObj = true;
+							findBullet = true;
+							break;
 						}
 
 						lbul->m_bullet_data = move(bulldata);

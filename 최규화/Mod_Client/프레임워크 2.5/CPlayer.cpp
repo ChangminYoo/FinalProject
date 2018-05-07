@@ -183,7 +183,7 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 	{	
 		bool move = false;
 
-		if (GetKeyState(0x57) & 0x8000)//W키
+		if (GetKeyState(0x57) & 0x8000 && GetFocus())//W키
 		{
 			move = true;
 
@@ -238,7 +238,7 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 
 			
 		}
-		else if (GetKeyState(0x53) & 0x8000)//S키
+		else if (GetKeyState(0x53) & 0x8000 && GetFocus())//S키
 		{
 			move = true;
 
@@ -287,7 +287,7 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 			
 		}
 
-		if (GetKeyState(0x41) & 0x8000)//A키
+		if (GetKeyState(0x41) & 0x8000 && GetFocus()) //A키
 		{
 			move = true;
 
@@ -335,7 +335,7 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 			}
 		
 		}
-		else if (GetKeyState(0x44) & 0x8000)//D키
+		else if (GetKeyState(0x44) & 0x8000 && GetFocus())//D키
 		{
 			move = true;
 
@@ -384,7 +384,7 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 
 		}
 		
-		if (GetKeyState(VK_SPACE) & 0x8000 && PlayerObject->AirBone == false)
+		if (GetKeyState(VK_SPACE) & 0x8000 && PlayerObject->AirBone == false && GetFocus())
 		{
 			GeneratorJump j;
 			j.SetJumpVel(XMFLOAT3(0, 80, 0));//나중에 플레이어의 점프력만큼 추가할것
@@ -393,44 +393,42 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 		}
 
 
-		STC_ChangedPos change_pos_ani;
-		change_pos_ani.packet_size = sizeof(STC_ChangedPos);
-		change_pos_ani.pack_type = PACKET_PROTOCOL_TYPE::CHANGED_PLAYER_POSITION;
+		if (GetFocus())
+		{
+			STC_ChangedPos change_pos_ani;
+			change_pos_ani.packet_size = sizeof(STC_ChangedPos);
+			change_pos_ani.pack_type = PACKET_PROTOCOL_TYPE::CHANGED_PLAYER_POSITION;
+
+			change_pos_ani.id = PlayerObject->m_player_data.ID;
+			change_pos_ani.pos = { PlayerObject->CenterPos.x, PlayerObject->CenterPos.y, PlayerObject->CenterPos.z, PlayerObject->CenterPos.w };
+
+			if (move == true)//움직이고 있으면 움직이는 모션으로
+			{
+				if (PlayerObject->n_Animation != Ani_State::Attack)//공격모션이 아니면 다시 대기상태로
+				{
+					PlayerObject->SetAnimation(Ani_State::Run);
+
+					//
+					m_async_client->RgCkInfo.PtCheck.PositionInfo = { PlayerObject->CenterPos.x, PlayerObject->CenterPos.y, PlayerObject->CenterPos.z, PlayerObject->CenterPos.w };
+					m_async_client->RgCkInfo.PtCheck.AniState = Ani_State::Run;
+				}
+			}
+			else
+			{
+				if (PlayerObject->n_Animation != Ani_State::Attack)//공격모션이 아니면 다시 대기상태로
+				{
+					PlayerObject->SetAnimation(Ani_State::Idle);
+
+					//
+					m_async_client->RgCkInfo.PtCheck.PositionInfo = { PlayerObject->CenterPos.x, PlayerObject->CenterPos.y, PlayerObject->CenterPos.z, PlayerObject->CenterPos.w };
+					m_async_client->RgCkInfo.PtCheck.AniState = Ani_State::Idle;
+
+				}
+
+				m_async_client->RgCkInfo.PtCheck.Deltime = DeltaTime;
+			}
+		}
 		
-		change_pos_ani.id = PlayerObject->m_player_data.ID;
-		change_pos_ani.pos = { PlayerObject->CenterPos.x, PlayerObject->CenterPos.y, PlayerObject->CenterPos.z, PlayerObject->CenterPos.w };
-
-		if (move == true)//움직이고 있으면 움직이는 모션으로
-		{
-			if (PlayerObject->n_Animation != Ani_State::Attack)//공격모션이 아니면 다시 대기상태로
-			{
-				PlayerObject->SetAnimation(Ani_State::Run);
-
-				//
-				m_async_client->RgCkInfo.PtCheck.PositionInfo = { PlayerObject->CenterPos.x, PlayerObject->CenterPos.y, PlayerObject->CenterPos.z, PlayerObject->CenterPos.w };
-				m_async_client->RgCkInfo.PtCheck.AniState = Ani_State::Run;
-
-
-				//change_pos_ani.ani_state = Ani_State::Run;
-				//m_async_client->SendPacket(reinterpret_cast<Packet*>(&change_pos_ani));
-			}
-		}
-		else
-		{
-			if (PlayerObject->n_Animation != Ani_State::Attack)//공격모션이 아니면 다시 대기상태로
-			{
-				PlayerObject->SetAnimation(Ani_State::Idle);
-
-				//
-				m_async_client->RgCkInfo.PtCheck.PositionInfo = { PlayerObject->CenterPos.x, PlayerObject->CenterPos.y, PlayerObject->CenterPos.z, PlayerObject->CenterPos.w };
-				m_async_client->RgCkInfo.PtCheck.AniState = Ani_State::Idle;
-
-				//change_pos_ani.ani_state = Ani_State::Idle;
-				//m_async_client->SendPacket(reinterpret_cast<Packet*>(&change_pos_ani));
-			}
-
-			m_async_client->RgCkInfo.PtCheck.Deltime = DeltaTime;
-		}
 
 
 		//if (key_flag)
@@ -511,13 +509,12 @@ void CPlayer::CreateBullet(ID3D12Device* Device, ID3D12GraphicsCommandList* cl,X
 
 		// 내 클라이언트에서 불렛을 생성했음
 
-		CGameObject* bul = new BulletCube(Device, cl, PlayerObject->ParticleList, PlayerObject, ori, lock, PlayerObject->CenterPos);
-
+		CGameObject* bul = new BulletCube(Device, cl, PlayerObject->ParticleList, PlayerObject, ori, lock, PlayerObject->CenterPos, true);
 		bulletlist->push_back(bul);
 		
 		STC_Attack cts_attack;
-		cts_attack.bull_data.Master_ID = PlayerObject->m_player_data.ID;
-		cts_attack.bull_data.myID = BulletCube::myID;
+		cts_attack.bull_data.Master_ID = bul->m_bullet_data.Master_ID;
+		cts_attack.bull_data.myID = bul->m_bullet_data.myID;
 	
 		cts_attack.bull_data.pos = { PlayerObject->CenterPos.x, PlayerObject->CenterPos.y, PlayerObject->CenterPos.z, PlayerObject->CenterPos.w };
 		cts_attack.bull_data.Rotate_status = { PlayerObject->Orient.x, PlayerObject->Orient.y, PlayerObject->Orient.z, PlayerObject->Orient.w };
@@ -526,11 +523,9 @@ void CPlayer::CreateBullet(ID3D12Device* Device, ID3D12GraphicsCommandList* cl,X
 		cts_attack.bull_data.alive = true;
 		cts_attack.bull_data.endpoint = { Goal.x , Goal.y , Goal.z };
 
-		cts_attack.lifetime = 0.f;
-		
+		cts_attack.lifetime = 0.0;
+
 		m_async_client->SendPacket(reinterpret_cast<Packet*>(&cts_attack));
-
-
 		break;
 
 	}
@@ -607,7 +602,7 @@ void CPlayer::CreateOtherClientBullet(ID3D12Device * Device, ID3D12GraphicsComma
 		XMStoreFloat4(&ori, tempori);//최종 회전 방향
 
 		//다른 클라이언트에서 생성한 불렛
-		CGameObject* bul = new BulletCube(Device, cl, PlayerObject->ParticleList, PlayerObject, ori, nullptr, xmf4);
+		CGameObject* bul = new BulletCube(Device, cl, PlayerObject->ParticleList, PlayerObject, ori, nullptr, xmf4, false);
 
 		bul->m_bullet_data.Master_ID = server_bulldata.Master_ID;
 		bul->m_bullet_data.myID = server_bulldata.myID;

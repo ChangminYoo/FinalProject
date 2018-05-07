@@ -4,7 +4,8 @@
 
 TimerWorker::TimerWorker()
 {
-
+	countsPerSec = 3515623;
+	mSecondsPerCount = 1.0 / (double)countsPerSec;
 }
 
 void TimerWorker::TimerThread()
@@ -74,32 +75,32 @@ void TimerWorker::ProcessPacket(event_type * et)
 	case LIGHT_BULLET:
 	{
 		//ex) 0.025초 뒤에 변화되야할 값 - 불렛 라이프타임. 불렛 위치. 물리효과 후처리. (충돌 처리)
-		auto prevTime = high_resolution_clock::now();
+		
 		for (auto lbul : Player_Session::m_bullobjs)
 		{
 			if (lbul->GetBulletID() == et->id && lbul->GetBulletMasterID() == et->master_id)
 			{
-				//auto currTime = high_resolution_clock::now();
-				//auto durTime = currTime - prevTime;
-				//auto milli = duration_cast<milliseconds>(durTime).count();
-				//auto sec = duration_cast<seconds>(durTime);
-				auto durTime = high_resolution_clock::now() - prevTime;
-				auto durTime_ms = duration_cast<milliseconds>(durTime).count();
+				__int64 currTime;
+				QueryPerformanceCounter((LARGE_INTEGER*)&currTime);
+				lbul->m_currTime = currTime;
 
-				float totaltime_sec = (et->curr_time + durTime_ms) / 1000;
-				lbul->SetBulletLifeTime(totaltime_sec);
+				lbul->m_deltaTime = static_cast<float>((lbul->m_currTime - lbul->m_prevTime) * mSecondsPerCount);
+				if (lbul->m_deltaTime < 0.0) { lbul->m_deltaTime = 0.0; }
+				lbul->m_prevTime = currTime;
+
+				lbul->SetBulletLifeTime(lbul->m_deltaTime);
 
 				XMFLOAT4 xmf4 = { lbul->GetBulletInfo().pos.x, lbul->GetBulletInfo().pos.y,
 								  lbul->GetBulletInfo().pos.z, lbul->GetBulletInfo().pos.w };
 
 				//불렛 현재위치 = 0.5 * 가속도(0.5 * accel * time * time) + 속도 * 시간 + 이전 위치
-				lbul->GetPhysicsPoint()->integrate(totaltime_sec, &xmf4);
+				lbul->GetPhysicsPoint()->integrate(lbul->m_deltaTime, &xmf4);
 				lbul->AfterGravitySystem();
 
 				lbul->SetBulletNewPos(xmf4);
 
 				//서버에서 사라질 때랑 클라에서 사라질 때 2초차이남. 서버가 2초 느림
-				if (lbul->GetBulletLifeTime() < MAX_LIGHTBULLET_LIFE_TIME )
+				if (lbul->GetBulletLifeTime() < MAX_LIGHT_BULLET_TIME)
 					AddEvent(et->id, 0.025, LIGHT_BULLET, true, et->master_id);
 				else
 				{
@@ -107,7 +108,7 @@ void TimerWorker::ProcessPacket(event_type * et)
 					//여기서 sendpacket으로 삭제정보를 넘겨주나 주기패킷보내는 곳에서 넘겨주나?
 
 					cout << "end " << "timeL: " << lbul->GetBulletLifeTime() << endl;
-					cout << "10 Pos: " << xmf4.x << "," << xmf4.y << "," << xmf4.z << "," << xmf4.w << endl;
+					cout << "Pos: " << xmf4.x << "," << xmf4.y << "," << xmf4.z << "," << xmf4.w << endl;
 
 					lbul->DestroyBullet();
 				}
@@ -139,7 +140,6 @@ void TimerWorker::ProcessPacket(event_type * et)
 			{
 				Player_Session::m_bullobjs.remove(lbul);
 				break;
-				//continue;
 			}
 		}
 

@@ -15,7 +15,7 @@ struct PositionCheck
 {
 	Time t;
 	Position PositionInfo;
-	Ani_State AniState;
+	Ani_State AniState{ Ani_State::Idle };
 	float Deltime;
 };
 

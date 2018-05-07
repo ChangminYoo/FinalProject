@@ -1,7 +1,7 @@
 #include "BulletObject.h"
 
 BulletObject::BulletObject(const unsigned short& master_id, const unsigned short& my_id,
-						   const Position& pos, const Rotation& rot, float bulltime,
+						   const Position& pos, const Rotation& rot, double bulltime,
 						   Vel3f& vel, const unsigned char& type, const Position3D& endpt)
 {
 	pe = new PhysicalEffect();

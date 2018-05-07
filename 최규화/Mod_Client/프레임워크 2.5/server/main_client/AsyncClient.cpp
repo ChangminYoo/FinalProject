@@ -72,7 +72,7 @@ void AsyncClient::RecvPacket(CGameObject& obj, Scene& scene)
 	m_socket.async_read_some(boost::asio::buffer(m_recvBuf, MAX_BUFFER_SIZE),
 		[&](const boost::system::error_code& error,const size_t& bytes_transferred)
 	{
-		if (error != 0)
+		if (error)
 		{
 			//에러: 작업이 취소된 경우 
 			if (error.value() == boost::asio::error::operation_aborted)
@@ -158,7 +158,7 @@ void AsyncClient::SendPacket(Packet * packet)
 	boost::asio::async_write(m_socket, boost::asio::buffer(new_sendBuf, packet_size),
 		[=](const boost::system::error_code& error, size_t bytes_transferred)
 	{
-		if (error != 0)
+		if (!error)
 		{
 			//if (bytes_transferred != packet_size)
 			//{

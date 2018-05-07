@@ -184,8 +184,18 @@ void Player_Session::Init_PlayerInfo()
 	pp->SetDamping(0.7);
 	pp->SetBounce(false);
 	//
-	
-	
+
+	//2. 물리효과 적용
+	pp->SetPosition(m_playerData.Pos.x, m_playerData.Pos.y, m_playerData.Pos.z);
+
+	pe->GravitySystem(0.0f, pp);
+
+	XMFLOAT4 xmf4 = { m_playerData.Pos.x, m_playerData.Pos.y, m_playerData.Pos.z, m_playerData.Pos.w };
+	pp->integrate(0.0f, &xmf4);
+
+	m_playerData.Pos.x = xmf4.x;  m_playerData.Pos.y = xmf4.y;  m_playerData.Pos.z = xmf4.z;   m_playerData.Pos.w = xmf4.w;
+	pe->AfterGravitySystem(0.0f, pp, OBJECT_TYPE::PLAYER, m_playerData.Pos, AirBone);
+
 	//wcscpy(m_playerData.LoginData.name, m_loginID);
 	//wcscpy(m_playerData.LoginData.password, m_loginPW);
 }
@@ -242,7 +252,7 @@ void Player_Session::SendPacket(Packet* packet)
 		[=](const boost::system::error_code& error, const size_t& bytes_transferred)
 	{
 		//cout << "Packet_Size : " << packet_size << "bytes_transferred : " << bytes_transferred << endl;
-		if (error != 0)
+		if (!error)
 		{
 			if (bytes_transferred != packet_size)
 			{
@@ -270,7 +280,7 @@ void Player_Session::RecvPacket()
 	{	
 		//cout << "Bytes_Transferred: " << bytes_transferred << endl;
 		// error = 0 성공 , error != 0 실패
-		if (error)
+		if (error)  // !error = 에러안났을때
 		{
 			STC_Disconnected disconnect_data;
 			disconnect_data.connect = false;
@@ -369,6 +379,8 @@ void Player_Session::ProcessPacket(Packet * packet)
 
 			//1. 받아들인 데이터(키를 눌러 플레이어를 움직였음)에서 변화된 정보를 추출(물리효과 적용x)
 			auto PosMove_Data = (reinterpret_cast<STC_ChangedPos*>(packet));
+			if (PosMove_Data->deltime < 0)
+				PosMove_Data->deltime = 0.f;
 
 			if (PosMove_Data->ani_state == Ani_State::Idle)
 				m_state = PLAYER_STATE::IDLE;
@@ -477,6 +489,12 @@ void Player_Session::ProcessPacket(Packet * packet)
 			m_bullObj->AfterGravitySystem();
 			m_bullObj->SetBulletLifeTime(n_bldata->lifetime); // 시간 0.1 ~ 0.2 추가
 
+			m_bullObj->SetIsFirstCreate(true);
+
+			//불렛이 처음생성됐을 때의 시간을 저장. 이후 해당 이벤트마다 이 불렛의 생성주기시간을 더해줌
+			__int64 currTime; QueryPerformanceCounter((LARGE_INTEGER*)&currTime);
+			m_bullObj->m_prevTime = currTime;
+			
 			m_bullobjs.emplace_back(m_bullObj);
 
 			if (n_bldata->bull_data.type == BULLET_TYPE::protocol_LightBullet)
@@ -486,6 +504,7 @@ void Player_Session::ProcessPacket(Packet * packet)
 			//상대방 클라이언트에게 내 불렛 생성위치를 보냄
 			for (auto client : m_clients)
 			{
+				//불렛을 쏜 클라이언트는 자신이 불렛을 생성했으므로 따로 생성정보를 보내주지 않아도됨 
 				if (client->m_id == n_bldata->bull_data.Master_ID) continue;
 				if (static_cast<bool>(client->m_isAI) == true || static_cast<bool>(client->m_connect_state) == false) continue;
 

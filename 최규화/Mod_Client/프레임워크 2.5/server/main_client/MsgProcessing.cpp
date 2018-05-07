@@ -85,12 +85,9 @@ switch (packet[1])
 
 	case PACKET_PROTOCOL_TYPE::STATIC_OBJECT:
 	{
-		auto sobj_data = reinterpret_cast<STC_StaticObject*>(packet);
+		auto mysobjdata = reinterpret_cast<STC_StaticObject*>(packet);
 
-		StaticObject_Info new_sobjdata;
-		new_sobjdata = move(sobj_data->sobj_data);
-		
-		scene.SET_SOBJECT_BY_SERVER_DATA(new_sobjdata.ID, new_sobjdata, sobj_data->type);
+		scene.SET_SOBJECT_BY_SERVER_DATA(mysobjdata->sobj_data.ID, mysobjdata->sobj_data, mysobjdata->type);
 	}
 
 	break;
@@ -191,7 +188,7 @@ void AsyncClient::SendPacketRegular(CGameObject& gobj, const GameTimer& gt)
 			gobj.m_player_data.Pos.y != RgCkInfo.PtCheck.PositionInfo.y ||
 			gobj.m_player_data.Pos.z != RgCkInfo.PtCheck.PositionInfo.z ||
 			gobj.m_player_data.Pos.w != RgCkInfo.PtCheck.PositionInfo.w ||
-			gobj.m_player_data.Ani != RgCkInfo.PtCheck.AniState)
+			gobj.m_player_data.Ani   != RgCkInfo.PtCheck.AniState         )
 		{
 			STC_ChangedPos cts_pos;
 			cts_pos.packet_size = sizeof(STC_ChangedPos);
