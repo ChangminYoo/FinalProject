@@ -131,29 +131,28 @@ float4 PS(VertexOut pin) : SV_Target
 			//픽셀당 비치는 빛의양 (0 ~ 1)
 			lightIntensity = saturate(dot(pin.Normal, lightDir));   //-> 람베르트 코사인 법칙 
 
-			lightIntensity = round(lightIntensity * 4) / 3;
+			//lightIntensity = round(lightIntensity * 4) / 3;
 
 			// 0보다 크면 (빛을 받는 부분이면)
 			if (lightIntensity > 0.0f)
 			{
-
 				if (lightIntensity > 0.85)
 					litColor += (float4(gLights[i].DiffuseColor) * float4(1, 1, 1, 1));
 
-				else if (lightIntensity > 0.65)
+				else if (lightIntensity > 0.45)
 					litColor += (float4(gLights[i].DiffuseColor) * float4(0.7, 0.7, 0.7, 1));
-				else if (lightIntensity > 0.35)
+				else if (lightIntensity > 0.1)
 					litColor += (float4(gLights[i].DiffuseColor) * float4(0.3, 0.3, 0.3, 1));
-				else
-					litColor += (float4(gLights[i].DiffuseColor) * float4(0.1, 0.1, 0.1, 1));
 
-				//litColor += (float4(gLights[i].DiffuseColor) * lightIntensity);
+				
+				litColor += (float4(gLights[i].DiffuseColor) * lightIntensity);
 
 				litColor = saturate(litColor);
 
 				reflection = normalize(2 * lightIntensity * pin.Normal - lightDir);
 
-				specular = pow(saturate(dot(reflection, viewDirection)), 32.0f)*SpecularParamater;
+				//원래는 6.0 대신 32였음.
+				specular = pow(saturate(dot(reflection, viewDirection)), 6.0f)*SpecularParamater;
 			}
 
 			// 0이면 (빛을 안 받는 부분이면)

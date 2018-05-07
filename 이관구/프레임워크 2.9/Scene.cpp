@@ -360,7 +360,7 @@ void Scene::CreateUI()
 		switch (Player->skilldata.Skills[i])
 		{
 		case 0://라이트큐브
-			ct = 0.45f;
+			ct = 0.6f;
 			break;
 		case 1://헤비큐브
 			ct = 1.1f;
