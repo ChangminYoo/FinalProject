@@ -40,9 +40,9 @@ void CPlayer::TPSCameraSystem(int mx, int my,float DeltaTime)
 					if (dx > 10)
 						dx = 10;
 
-						ytheta += ((dx/10) * MMPE_PI* 120 / 180)*DeltaTime;
+						ytheta += ((dx/10) * MMPE_PI* 180 / 180)*DeltaTime;
 
-						playerYtheta = ((dx / 10) * MMPE_PI * 120 / 180)*DeltaTime;
+						playerYtheta = ((dx / 10) * MMPE_PI * 180 / 180)*DeltaTime;
 						ox = mx;
 						rotate = true;
 				
@@ -54,8 +54,8 @@ void CPlayer::TPSCameraSystem(int mx, int my,float DeltaTime)
 					if (dx > 10)
 						dx = 10;
 
-					ytheta += ((-dx/10) * MMPE_PI*120 / 180)*DeltaTime;
-					playerYtheta = ((-dx / 10) * MMPE_PI * 120 / 180)*DeltaTime;
+					ytheta += ((-dx/10) * MMPE_PI*180 / 180)*DeltaTime;
+					playerYtheta = ((-dx / 10) * MMPE_PI * 180 / 180)*DeltaTime;
 					ox = mx;
 					rotate = true;
 				
@@ -443,7 +443,23 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 				skilldata.SellectBulletIndex = 2;
 			else if (GetKeyState(0x34) & 0x8000)
 				skilldata.SellectBulletIndex = 3;
-
+			
+			if (GetAsyncKeyState(VK_CONTROL) & 0x8000)
+			{
+				if (MouseOn <= 1)
+				{
+					MouseOn = 2;
+					ShowCursor(true);
+				}
+			}
+			else
+			{
+				if (MouseOn > 1)
+				{
+					MouseOn = 0;
+					ShowCursor(false);
+				}
+			}
 			//키를 누를때마다 해당 스킬을 검사해서 추적오브젝트가 있어야 하는지 검사한다.
 			CheckTraceSkill();
 		}
@@ -523,14 +539,14 @@ void CPlayer::CreateBullet(ID3D12Device* Device, ID3D12GraphicsCommandList* cl,X
 		auto quater = XMLoadFloat4(&ori);
 		wmatrix *= XMMatrixRotationQuaternion(quater);
 
-		auto or = XMVectorSet(1, 0, 0, 0);
-		or = XMVector4Transform(or , wmatrix);//가짜 라이트 벡터
-		or = XMVector3Normalize(or );
+		auto orr = XMVectorSet(1, 0, 0, 0);
+		orr = XMVector4Transform(orr , wmatrix);//가짜 라이트 벡터
+		orr = XMVector3Normalize(orr );
 		auto RealRight = XMVector3Cross(axis, nl);//진짜 라이트벡터
 		RealRight = XMVector3Normalize(RealRight);
 
 		//진짜 라이트 벡터와 가짜 라이트 벡터를 내적함.
-		temp = XMVector3Dot(RealRight, or );
+		temp = XMVector3Dot(RealRight, orr );
 
 		XMStoreFloat(&d, temp);
 		if (fabsf(d) <= 1)//반드시 이 결과는 -1~1 사이여야한다. 그래야 각도가 구해진다.
@@ -584,14 +600,14 @@ void CPlayer::CreateBullet(ID3D12Device* Device, ID3D12GraphicsCommandList* cl,X
 		auto quater = XMLoadFloat4(&ori);
 		wmatrix *= XMMatrixRotationQuaternion(quater);
 
-		auto or = XMVectorSet(1, 0, 0, 0);
-		or = XMVector4Transform(or , wmatrix);//가짜 라이트 벡터
-		or = XMVector3Normalize(or );
+		auto orr = XMVectorSet(1, 0, 0, 0);
+		orr = XMVector4Transform(orr , wmatrix);//가짜 라이트 벡터
+		orr = XMVector3Normalize(orr );
 		auto RealRight = XMVector3Cross(axis, nl);//진짜 라이트벡터
 		RealRight = XMVector3Normalize(RealRight);
 
 		//진짜 라이트 벡터와 가짜 라이트 벡터를 내적함.
-		temp = XMVector3Dot(RealRight, or );
+		temp = XMVector3Dot(RealRight, orr );
 
 		XMStoreFloat(&d, temp);
 		if (fabsf(d) <= 1)//반드시 이 결과는 -1~1 사이여야한다. 그래야 각도가 구해진다.

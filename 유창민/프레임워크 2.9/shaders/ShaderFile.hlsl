@@ -19,10 +19,11 @@ struct VertexIn
 struct VertexOut
 {
 	float4 PosH  : SV_POSITION;
+	float4 PosW :WORLDPOSITION;
 	float3 Normal : NORMAL;
 	float dummy : DUMMY;
 	float2 Tex : TEXTURE;
-
+	
 };
 
 
@@ -83,7 +84,7 @@ VertexOut VS(VertexIn vin)
 
 	vin.PosL = vin.PosL * Scale;
 	vout.PosH = mul(float4(vin.PosL, 1), gWorld);
-
+	vout.PosW = vout.PosH;
 	vout.Normal = mul(vin.Normal, gWorld);
 	vout.Normal = normalize(vout.Normal);
 
@@ -101,8 +102,8 @@ float4 PS(VertexOut pin) : SV_Target
 	float3 lightDir;     //빛벡터
 	float lightIntensity; 
 	float3 reflection;   //반사광
-	float4 specular;
-	float4 litColor;
+	float4 specular=float4(0,0,0,1);
+	float4 litColor=float4(1,1,1,1);
 	float3 viewDirection;
 
 
@@ -112,11 +113,14 @@ float4 PS(VertexOut pin) : SV_Target
 	//알파 테스트
 	//clip(textureColor.a - 0.1f);
 	//
-	for (int i = 0; i < nLights; ++i)
-	{
 
-		viewDirection = gLights[i].Position - pin.PosH.xyz;
-		viewDirection = normalize(viewDirection);
+	if (SpecularParamater >= 0)
+	{
+		for (int i = 0; i < nLights; ++i)
+		{
+
+			viewDirection = gEyePos - pin.PosW.xyz;
+			viewDirection = normalize(viewDirection);
 
 			lightDir = -(gLights[i].Direction);
 			lightDir = normalize(lightDir);
@@ -127,16 +131,28 @@ float4 PS(VertexOut pin) : SV_Target
 			//픽셀당 비치는 빛의양 (0 ~ 1)
 			lightIntensity = saturate(dot(pin.Normal, lightDir));   //-> 람베르트 코사인 법칙 
 
+			//lightIntensity = round(lightIntensity * 4) / 3;
+
 			// 0보다 크면 (빛을 받는 부분이면)
 			if (lightIntensity > 0.0f)
 			{
+				if (lightIntensity > 0.85)
+					litColor += (float4(gLights[i].DiffuseColor) * float4(1, 1, 1, 1));
+
+				else if (lightIntensity > 0.45)
+					litColor += (float4(gLights[i].DiffuseColor) * float4(0.7, 0.7, 0.7, 1));
+				else if (lightIntensity > 0.1)
+					litColor += (float4(gLights[i].DiffuseColor) * float4(0.3, 0.3, 0.3, 1));
+
+				
 				litColor += (float4(gLights[i].DiffuseColor) * lightIntensity);
 
 				litColor = saturate(litColor);
 
 				reflection = normalize(2 * lightIntensity * pin.Normal - lightDir);
 
-				specular = pow(saturate(dot(reflection, viewDirection)), 32.0f)*SpecularParamater;
+				//원래는 6.0 대신 32였음.
+				specular = pow(saturate(dot(reflection, viewDirection)), 6.0f)*SpecularParamater;
 			}
 
 			// 0이면 (빛을 안 받는 부분이면)
@@ -154,11 +170,13 @@ float4 PS(VertexOut pin) : SV_Target
 
 		}
 
+	}
+		
 		litColor = litColor * textureColor;  //엠비언트 * 텍스쳐 컬러
 
 		litColor = saturate(litColor + specular); //마지막으로 스패큘러 더한다.
 		litColor.w = BlendValue;
-
+		
 		//litColor.a = textureColor.a;
 
 		if (nLights > 0)

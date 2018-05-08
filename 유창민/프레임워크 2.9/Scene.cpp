@@ -113,11 +113,13 @@ void Scene::SceneState()
 	}
 	else if (GAMESTATE == GS_LOAD)
 	{
+		
 		if (FirstLoad == true)
 		{
 			CreateGameObject();
 			FirstLoad = false;
 			SetGameState(GS_PLAY);
+			ShowCursor(false);
 		}
 		else
 		{
@@ -252,41 +254,82 @@ void Scene::CreateGameObject()
 	//DynamicObject.back()->pp->integrate(0.1f);//힘은 지속적으로 가해지는것이며 즉발적이려면 힘을 가한 시간을 통해 계산한다.
 	
 	//MoveCube
-	StaticObject.push_back(new MoveCubeObject(device, commandlist, &BbObject, 125.0f, XMFLOAT4(0, 35, 125, 0)));
-	StaticObject.push_back(new MoveCubeObject(device, commandlist, &BbObject, -120.0f, XMFLOAT4(-120, 52, 10, 0)));
-	StaticObject.push_back(new MoveCubeObject(device, commandlist, &BbObject, 115.0f, XMFLOAT4(115, 45, 0, 0)));
-	StaticObject.push_back(new MoveCubeObject(device, commandlist, &BbObject, -115.0f, XMFLOAT4(-115, 20, 0, 0)));
-	StaticObject.push_back(new MoveCubeObject(device, commandlist, &BbObject, -130.0f, XMFLOAT4(0, 17, -130, 0)));
-	StaticObject.push_back(new MoveCubeObject(device, commandlist, &BbObject, 110.0f, XMFLOAT4(110, 34, 0, 0)));
-	StaticObject.push_back(new MoveCubeObject(device, commandlist, &BbObject, 40.0f, XMFLOAT4(40, 101, 0, 0)));
+	StaticObject.push_back(new MoveCubeObject(device, commandlist, &BbObject, 155.0f, XMFLOAT4(0, 25, 155, 0)));
+	StaticObject.push_back(new MoveCubeObject(device, commandlist, &BbObject, -150.0f, XMFLOAT4(0, 52, -150, 0)));
+	StaticObject.push_back(new MoveCubeObject(device, commandlist, &BbObject, 145.0f, XMFLOAT4(145, 45, 0, 0)));
+	StaticObject.push_back(new MoveCubeObject(device, commandlist, &BbObject, -145.0f, XMFLOAT4(-145, 20, 0, 0)));
+	StaticObject.push_back(new MoveCubeObject(device, commandlist, &BbObject, -160.0f, XMFLOAT4(0, 17, -160, 0)));
+	StaticObject.push_back(new MoveCubeObject(device, commandlist, &BbObject, 140.0f, XMFLOAT4(140, 34, 0, 0)));
+	StaticObject.push_back(new MoveCubeObject(device, commandlist, &BbObject, 65.0f, XMFLOAT4(-65, 94, 0, 0)));
 
 
 	//Cube
-	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(10, 18, -40, 0)));
-	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(20, 70, -50, 0)));
-	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(5, 50, -40, 0)));
-	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(88, 58, 17, 0)));
-	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(72, 69, 51, 0)));
-	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(28, 39, 48, 0)));
-	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(35, 25, -90, 0)));
-	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(62, 61, 30, 0)));
-	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(83, 26, -25, 0)));
-	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(35, 17, -65, 0)));
-	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(52, 11, 4, 0)));
-	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(42, 53, 11, 0)));
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(40, 18, -70, 0)));
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(50, 70, -80, 0)));
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(35, 50, -70, 0)));
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(118, 58, 47, 0)));
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(102, 69, 81, 0)));
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(58, 39, 78, 0)));
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(65, 25, -110, 0)));
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(92, 61, 60, 0)));
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(103, 36, 15, 0)));
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(65, 17, -95, 0)));
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(82, 11, 34, 0)));
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(72, 53, 41, 0)));
 
-	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(-10, 10, 0, 0)));
-	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(-8, 48, -96, 0)));
-	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(-15, 30, -30, 0)));
-	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(-35, 40, -72, 0)));
-	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(-39, 62, 31, 0)));
-	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(-55, 42, -15, 0)));
-	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(-76, 40, 12, 0)));
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(24, 44, 40, 0)));
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(-20, 33, 51, 0)));
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(0, 24, 34, 0)));
+
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(-76, 53, 8, 0)));
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(-40, 10, 0, 0)));
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(-38, 48, -126, 0)));
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(-45, 30, -60, 0)));
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(-65, 40, -102, 0)));
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(-69, 62, 61, 0)));
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(-85, 42, -45, 0)));
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(-106, 40, 42, 0)));
+
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(-20, 5, 210, 0)));
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(-20, 15, 210, 0)));
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(-20, 25, 210, 0)));
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(-20, 35, 210, 0)));
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(-10, 35, 210, 0)));
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(0, 35, 210, 0)));
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(10, 35, 210, 0)));
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(10, 25, 210, 0)));
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(10, 15, 210, 0)));
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(10, 5, 210, 0)));
+
+
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(260, 5, -30, 0)));
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(260, 15, -30, 0)));
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(260, 25, -30, 0)));
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(260, 35, -30, 0)));
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(260, 35, -20, 0)));
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(260, 35, -10, 0)));
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(260, 35, 0, 0)));
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(260, 25, 0, 0)));
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(260, 15, 0, 0)));
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(260, 5, 0, 0)));
+
+
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(-20, 5,  -280, 0)));
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(-20, 15, -280, 0)));
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(-20, 25, -280, 0)));
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(-20, 35, -280, 0)));
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(-10, 35, -280, 0)));
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(0, 35,   -280, 0)));
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(10, 35,  -280, 0)));
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(10, 25,  -280, 0)));
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(10, 15,  -280, 0)));
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, XMFLOAT4(10, 5,   -280, 0)));
+
 
 	//building
-	StaticObject.push_back(new BuildingObject(device, commandlist, &BbObject, 0, XMFLOAT4(60, 0, 30, 0)));
-	StaticObject.push_back(new BuildingObject(device, commandlist, &BbObject, 0, XMFLOAT4(-45, 0, 10, 0)));
-	StaticObject.push_back(new BuildingObject(device, commandlist, &BbObject, 0, XMFLOAT4(0, 0, -70, 0)));
+	StaticObject.push_back(new BuildingObject(device, commandlist, &BbObject, 0, XMFLOAT4(90, 0, 60, 0)));
+	StaticObject.push_back(new BuildingObject(device, commandlist, &BbObject, 0, XMFLOAT4(-75, 0, 40, 0)));
+	StaticObject.push_back(new BuildingObject(device, commandlist, &BbObject, 0, XMFLOAT4(0, 0, -100, 0)));
 
 
 	//BigWall
@@ -358,7 +401,7 @@ void Scene::CreateUI()
 		switch (Player->skilldata.Skills[i])
 		{
 		case 0://라이트큐브
-			ct = 0.45f;
+			ct = 0.6f;
 			break;
 		case 1://헤비큐브
 			ct = 1.1f;
@@ -430,6 +473,7 @@ void Scene::Render(const GameTimer& gt)
 				{
 					SkillCoolBar[i]->Render(commandlist, gt);
 					SkillUI[0]->Render(commandlist, gt);//여기 나중에 수정
+					SkillUI[1]->Render(commandlist, gt);
 				}
 
 				SelectBar->Render(commandlist, gt);

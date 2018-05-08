@@ -87,13 +87,13 @@ void CGameObject::UpdateLookVector()
 	auto quater = XMLoadFloat4(&Orient);
 	wmatrix *= XMMatrixRotationQuaternion(quater);
 	auto ol = XMLoadFloat3(&OffLookvector);
-	auto or = XMLoadFloat3(&OffRightvector);
+	auto orr = XMLoadFloat3(&OffRightvector);
 
 	ol = XMVector4Transform(ol, wmatrix);
-	or = XMVector4Transform(or , wmatrix);
+	orr = XMVector4Transform(orr , wmatrix);
 
 	XMStoreFloat3(&Lookvector, ol);
-	XMStoreFloat3(&Rightvector, or );
+	XMStoreFloat3(&Rightvector, orr );
 
 	if (fabsf(Lookvector.x) < MMPE_EPSILON / 10)
 		Lookvector.x = 0;
@@ -323,7 +323,7 @@ CCubeManObject::CCubeManObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 	UpdateLookVector();
 	ObjData.isAnimation = true;
 	ObjData.Scale = 3;
-	ObjData.SpecularParamater = 0.3f;//스페큘러를 낮게준다.
+	ObjData.SpecularParamater = 0.0f;//스페큘러를 낮게준다.
 
 	obs = Dynamic;
 	//게임 데이터 (스텟)을 찍는다. 캐릭터는 데미지를 갖지 않고, 탄환이 데미지를 갖도록하자.
@@ -404,7 +404,13 @@ void CCubeManObject::Tick(const GameTimer & gt)
 	{
 
 		//애니메이션 업데이트 애니메이션은 24프레임으로 구성됨. 문제는 FPS가 24프레임이 아님. 그보다 큰 프레임. 따라서 24프레임으로 해당프레임을 나눠 보정.
-		UpdateMD5Model(commandlist, &Mesh, this, gt.DeltaTime()*60.0 / 24.0, n_Animation, animations, jarr);
+		if(n_Animation!=Attack)
+			UpdateMD5Model(commandlist, &Mesh, this, gt.DeltaTime()*60.0 / 24.0, n_Animation, animations, jarr);
+		else
+		{
+
+			UpdateMD5Model(commandlist, &Mesh, this, 2*gt.DeltaTime()*60.0 / 24.0, n_Animation, animations, jarr);
+		}
 
 	}
 
@@ -550,8 +556,8 @@ BulletCube::BulletCube(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 	gamedata.HP = 1;
 	gamedata.Damage = 10;
 	gamedata.GodMode = true;
-	gamedata.Speed = 100;
-	LifeTime = 7;
+	gamedata.Speed = 250;
+	LifeTime = 3.5f;
 	Master = master;
 	LockOn = lockon;
 
@@ -569,7 +575,7 @@ BulletCube::BulletCube(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 	pp->SetDamping(1);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
 	pp->SetBounce(false);//튕기지 않는다.
 	pp->SetVelocity(Lookvector.x*gamedata.Speed, Lookvector.y*gamedata.Speed, Lookvector.z*gamedata.Speed);//룩벡터로 날아감
-	pp->SetMass(1);
+	pp->SetMass(0.35f);
 
 	if (ParticleList != NULL)
 	{
@@ -737,8 +743,8 @@ HeavyBulletCube::HeavyBulletCube(ID3D12Device * m_Device, ID3D12GraphicsCommandL
 	gamedata.HP = 1;
 	gamedata.Damage = 30;
 	gamedata.GodMode = true;
-	gamedata.Speed = 70;
-	LifeTime = 7;
+	gamedata.Speed = 180;
+	LifeTime = 3.5;
 	Master = master;
 	LockOn = lockon;
 
@@ -755,7 +761,7 @@ HeavyBulletCube::HeavyBulletCube(ID3D12Device * m_Device, ID3D12GraphicsCommandL
 	pp->SetDamping(1);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
 	pp->SetBounce(false);//튕기지 않는다.
 	pp->SetVelocity(Lookvector.x*gamedata.Speed, Lookvector.y*gamedata.Speed, Lookvector.z*gamedata.Speed);//룩벡터로 날아감
-	pp->SetMass(2);
+	pp->SetMass(1);
 	if (ParticleList != NULL)
 	{
 		BulletParticles = new ParticleObject(m_Device, commandlist, ParticleList, this, 0.2f, XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, 0));
@@ -1886,7 +1892,7 @@ CubeObject::CubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 	UpdateLookVector();
 	ObjData.isAnimation = 0;
 	ObjData.Scale = 10.0f;
-	ObjData.SpecularParamater = 0.0f;//스페큘러를 낮게준다.
+	ObjData.SpecularParamater = 0.46f;//스페큘러를 낮게준다.
 
 	obs = Static;
 
@@ -1990,7 +1996,7 @@ MoveCubeObject::MoveCubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 
 	Rad = rad;
 
-	n = rand() % 30;
+	n = rand() % 30 - 30;
 
 	//게임오브젝트마다 룩벡터와 라이트벡터가 다르므로 초기 오프셋 설정을 해준다.
 	//실제 룩벡터 등은 모두 UpdateLookVector에서 처리된다(라이트벡터도) 따라서 Tick함수에서 반드시 호출해야한다.
@@ -2489,7 +2495,7 @@ RigidCubeObject::RigidCubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandL
 		Mesh.Index = NULL;
 		Mesh.SubResource = NULL;
 
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "CubeTex", L"textures/object/wood crate.dds", false);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "CubeTex", L"textures/object/DeepIce.dds", false);
 		SetMesh(m_Device, commandlist);
 		SetMaterial(m_Device, commandlist);
 		CreateMesh = true;
@@ -2503,7 +2509,7 @@ RigidCubeObject::RigidCubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandL
 	UpdateLookVector();
 	ObjData.isAnimation = 0;
 	ObjData.Scale = 20.0f;
-	ObjData.SpecularParamater = 0.0f;//스페큘러를 낮게준다.
+	ObjData.SpecularParamater =-1.f;//스페큘러를 낮게준다.
 
 	obs = Rigid;
 
@@ -2703,7 +2709,7 @@ SmallWallObject::SmallWallObject(ID3D12Device * m_Device, ID3D12GraphicsCommandL
 		Mesh.Index = NULL;
 		Mesh.SubResource = NULL;
 
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "SmallWall", L"textures/object/bricks2.dds", false);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "SmallWall", L"textures/object/IceWall.dds", false);
 		SetMesh(m_Device, commandlist);
 		SetMaterial(m_Device, commandlist);
 		CreateMesh = true;
@@ -2723,7 +2729,7 @@ SmallWallObject::SmallWallObject(ID3D12Device * m_Device, ID3D12GraphicsCommandL
 	UpdateLookVector();
 	ObjData.isAnimation = 0;
 	ObjData.Scale = 1.0f;
-	ObjData.SpecularParamater = 0.1f;//스페큘러를 낮게준다.
+	ObjData.SpecularParamater = 0.80f;//스페큘러를 낮게준다.
 
 	obs = Static;
 	//게임관련 데이터들

@@ -555,121 +555,127 @@ void FrameWork::OnMouseDown(WPARAM btnState, int x, int y)
 
 void FrameWork::OnMouseMove(WPARAM btnState, int x, int y)
 {
-	scene->Player->TPSCameraSystem(x, y,0.01);
-	
-	RECT rc,rc2;
-	POINT p1, p2;
-
-	GetClientRect(hwnd, &rc);
-
-	p1.x = rc.left; p1.y = rc.top; p2.x = rc.right; p2.y = rc.bottom;
-
-	ClientToScreen(hwnd, &p1);
-	ClientToScreen(hwnd, &p2);
-
-	rc2.left = p1.x; rc2.top = p1.y; rc2.right = p2.x; rc2.bottom = p2.y;
-
-	//ClipCursor(&rc);
-
-
-	SetCursorPos((rc2.left + rc2.right) / 2, (rc2.top + rc2.bottom) / 2);
-	//움직이고나서 다시 제자리로돌아오니까 까딱까딱만 되잖ㅏㅇ아아아
-	scene->Player->ox = (rc.left + rc.right) / 2;
-	scene->Player->oy = (rc.top + rc.bottom) / 2;
-	ShowCursor(false);
-
-
-
-	// 마우스가 움직일때마다 예상 도착점을 찾아야 할경우 사용됨. 단  플레이어와 땅바닥만 예상도착점을 표시한다.
-	//일반적으로 어떤 범위를 나타내거나 할때는 땅바닥정도만 포함하니까. 근데 왜 스테틱 오브젝트를 추가했냐면
-	// 큐브오브젝트는  필요하다 생각이 되서다. 벽이야 밟고 올라서도 좁은 범위니 그냥 제외시켜서 성능을 올리는게 낫지만, 큐브는 나중에
-	//2층구조를 만들때 핵심이되는 재료가 될거 같기 때문이다. 따라서 추가했음.
-
-	//즉 쉽게 말해 현재 추적점은 땅/플레이어/큐브오브젝트 이 3가지만 되며 리지드 오브젝트나 벽, 빌딩은 생성이 안됨.
-
-	if(scene->Player->PlayerObject->gamedata.HP > 0 && scene->Player->MouseTrace)
+	if (scene->Player->MouseOn <=1)
 	{
-	
-		auto RAY = MousePicking(x, y, scene->Player->Camera.CamData.EyePos, scene->Player->Camera.CamData.View, scene->Player->Camera.CamData.Proj);
-		XMFLOAT3 savepoint;
+		scene->Player->TPSCameraSystem(x, y, 0.01);
 
-		bool Shot = false;
-		//여기에 모든 오브젝트리스트들을 돌아가면서 검사를 한다.
-		for (auto b = scene->DynamicObject.begin(); b != scene->DynamicObject.end(); b++)
-		{
-			if (Shot == false)
-			{
+		RECT rc, rc2;
+		POINT p1, p2;
 
-				if ((*b) != scene->Player->PlayerObject)//플레이어가 아닐경우
-				{
-					//광선의 길이보다 가까울때
-					if (FloatLength(Float4Add(scene->Player->PlayerObject->CenterPos, (*b)->CenterPos, false)) <= MAXRAYLEN)
-					{
+		GetClientRect(hwnd, &rc);
 
+		p1.x = rc.left; p1.y = rc.top; p2.x = rc.right; p2.y = rc.bottom;
 
-						if ((*b)->rco.RayCasting(RAY.RayOrgin, RAY.RayDir, XMFloat4to3((*b)->CenterPos), XMFloat4to3(scene->Player->PlayerObject->CenterPos),
-							scene->Player->PlayerObject->Lookvector, &savepoint) == true && Shot == false)//광선이 다른 오브젝트를 맞출경우
-						{
-							scene->Player->TraceObject->CenterPos = XMFloat3to4(savepoint);
-							
-							Shot = true;
-						}
-					}
-				}
-			}
-		}
+		ClientToScreen(hwnd, &p1);
+		ClientToScreen(hwnd, &p2);
 
+		rc2.left = p1.x; rc2.top = p1.y; rc2.right = p2.x; rc2.bottom = p2.y;
 
-		for (auto b = scene->StaticObject.begin(); b != scene->StaticObject.end(); b++)
-		{
-			
-			if (Shot == false)
-			{
-				if ((*b) != scene->Player->PlayerObject)//플레이어가 아닐경우
-				{
-
-					//광선의 길이보다 가까울때
-					if (FloatLength(Float4Add(scene->Player->PlayerObject->CenterPos, (*b)->CenterPos, false)) <= MAXRAYLEN)
-					{
-						
-						
-						if ((*b)->rco.RayCasting(RAY.RayOrgin, RAY.RayDir, XMFloat4to3((*b)->CenterPos), XMFloat4to3(scene->Player->PlayerObject->CenterPos),
-							scene->Player->PlayerObject->Lookvector, &savepoint) == true && Shot == false && (*b)->obs!=Wall&& (*b)->rco.isTopPlane==true)//광선이 다른 오브젝트를 맞출경우
-						{
-							Shot = true;
-							scene->Player->TraceObject->CenterPos = XMFloat3to4(savepoint);
-						
-						}
-
-
-					}
-				}
-			}
-
-		}
+		//ClipCursor(&rc);
 		
-		if (Shot == false)//명중시킨 적이 없으면.
+
+		SetCursorPos((rc2.left + rc2.right) / 2, (rc2.top + rc2.bottom) / 2);
+		//움직이고나서 다시 제자리로돌아오니까 까딱까딱만 되잖ㅏㅇ아아아
+		scene->Player->ox = (rc.left + rc.right) / 2;
+		scene->Player->oy = (rc.top + rc.bottom) / 2;
+		
+		// 마우스가 움직일때마다 예상 도착점을 찾아야 할경우 사용됨. 단  플레이어와 땅바닥만 예상도착점을 표시한다.
+		//일반적으로 어떤 범위를 나타내거나 할때는 땅바닥정도만 포함하니까. 근데 왜 스테틱 오브젝트를 추가했냐면
+		// 큐브오브젝트는  필요하다 생각이 되서다. 벽이야 밟고 올라서도 좁은 범위니 그냥 제외시켜서 성능을 올리는게 낫지만, 큐브는 나중에
+		//2층구조를 만들때 핵심이되는 재료가 될거 같기 때문이다. 따라서 추가했음.
+
+		//즉 쉽게 말해 현재 추적점은 땅/플레이어/큐브오브젝트 이 3가지만 되며 리지드 오브젝트나 벽, 빌딩은 생성이 안됨.
+
+		if (scene->Player->PlayerObject->gamedata.HP > 0 && scene->Player->MouseTrace)
 		{
-			//땅과 검사를 해봄.
-			if (scene->Player->PlayerObject->rco.RayCastingField(RAY.RayOrgin, RAY.RayDir, XMFloat4to3(scene->Player->PlayerObject->CenterPos),
-				scene->Player->PlayerObject->Lookvector, &savepoint) == true)
+
+			auto RAY = MousePicking(x, y, scene->Player->Camera.CamData.EyePos, scene->Player->Camera.CamData.View, scene->Player->Camera.CamData.Proj);
+			XMFLOAT3 savepoint;
+
+			bool Shot = false;
+			//여기에 모든 오브젝트리스트들을 돌아가면서 검사를 한다.
+			for (auto b = scene->DynamicObject.begin(); b != scene->DynamicObject.end(); b++)
 			{
-				
-				if (scene->Player->MouseTrace)
+				if (Shot == false)
 				{
-					scene->Player->TraceObject->CenterPos = XMFloat3to4(savepoint);
-					
+
+					if ((*b) != scene->Player->PlayerObject)//플레이어가 아닐경우
+					{
+						//광선의 길이보다 가까울때
+						if (FloatLength(Float4Add(scene->Player->PlayerObject->CenterPos, (*b)->CenterPos, false)) <= MAXRAYLEN)
+						{
+
+
+							if ((*b)->rco.RayCasting(RAY.RayOrgin, RAY.RayDir, XMFloat4to3((*b)->CenterPos), XMFloat4to3(scene->Player->PlayerObject->CenterPos),
+								scene->Player->PlayerObject->Lookvector, &savepoint) == true && Shot == false)//광선이 다른 오브젝트를 맞출경우
+							{
+								scene->Player->TraceObject->CenterPos = XMFloat3to4(savepoint);
+
+								Shot = true;
+							}
+						}
+					}
+				}
+			}
+
+
+			for (auto b = scene->StaticObject.begin(); b != scene->StaticObject.end(); b++)
+			{
+
+				if (Shot == false)
+				{
+					if ((*b) != scene->Player->PlayerObject)//플레이어가 아닐경우
+					{
+
+						//광선의 길이보다 가까울때
+						if (FloatLength(Float4Add(scene->Player->PlayerObject->CenterPos, (*b)->CenterPos, false)) <= MAXRAYLEN)
+						{
+
+
+							if ((*b)->rco.RayCasting(RAY.RayOrgin, RAY.RayDir, XMFloat4to3((*b)->CenterPos), XMFloat4to3(scene->Player->PlayerObject->CenterPos),
+								scene->Player->PlayerObject->Lookvector, &savepoint) == true && Shot == false && (*b)->obs != Wall && (*b)->rco.isTopPlane == true)//광선이 다른 오브젝트를 맞출경우
+							{
+								Shot = true;
+								scene->Player->TraceObject->CenterPos = XMFloat3to4(savepoint);
+
+							}
+
+
+						}
+					}
 				}
 
-				Shot = true;
 			}
-			else//오브젝트랑 땅 모두 안맞았으면 허공에쏜다.
+
+			if (Shot == false)//명중시킨 적이 없으면.
 			{
-				savepoint = XMFLOAT3(-10000,-10000,-10000);
-				scene->Player->TraceObject->CenterPos = XMFloat3to4(savepoint);
-				
+				//땅과 검사를 해봄.
+				if (scene->Player->PlayerObject->rco.RayCastingField(RAY.RayOrgin, RAY.RayDir, XMFloat4to3(scene->Player->PlayerObject->CenterPos),
+					scene->Player->PlayerObject->Lookvector, &savepoint) == true)
+				{
+
+					if (scene->Player->MouseTrace)
+					{
+						scene->Player->TraceObject->CenterPos = XMFloat3to4(savepoint);
+
+					}
+
+					Shot = true;
+				}
+				else//오브젝트랑 땅 모두 안맞았으면 허공에쏜다.
+				{
+					savepoint = XMFLOAT3(-10000, -10000, -10000);
+					scene->Player->TraceObject->CenterPos = XMFloat3to4(savepoint);
+
+				}
 			}
 		}
+
+	}
+	else//ctrl 키 눌렸을때
+	{
+			
+		
 	}
 
 }

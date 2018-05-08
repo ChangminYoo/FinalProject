@@ -23,7 +23,7 @@ typedef struct SkillData
 class CPlayer
 {
 public:
-	
+	UINT MouseOn = 0;
 	CPlayer(HWND hwnd,ID3D12Device* Device, ID3D12GraphicsCommandList* commandlist, float asp, XMFLOAT3& e, XMFLOAT3& a, XMFLOAT3& u);
 	~CPlayer();
 	CGameObject* TraceObject=NULL;

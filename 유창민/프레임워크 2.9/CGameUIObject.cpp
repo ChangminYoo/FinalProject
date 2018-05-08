@@ -274,11 +274,23 @@ SkillUIObject::SkillUIObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList 
 		Mesh.Index = NULL;
 		Mesh.SubResource = NULL;
 
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Skill", L"textures/ui/cube1.dds", false);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Skill1", L"textures/ui/cube1.dds", false,2,0);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Skill2", L"textures/ui/cube2.dds", false,2,1);
 		SetMesh(m_Device, commandlist);
 		CreateMesh = true;
 
 	}
+
+	if (SkillNum == 0)
+		TextureName = "Skill1";
+
+	else if (SkillNum == 1)
+		TextureName = "Skill2";
+	else
+		TextureName = "Skill1"; //나중에 수정
+
+	TexOff = SkillNum;
+
 }
 
 void SkillUIObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
@@ -315,7 +327,7 @@ void SkillUIObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTi
 {
 	//텍스처가 사이즈가 0 이상이면 연결
 	if (Textures.size()>0)
-		SetTexture(commandlist, SrvDescriptorHeap, Textures["Skill"].get()->Resource.Get(), false);
+		SetTexture(commandlist, SrvDescriptorHeap, Textures[TextureName].get()->Resource.Get(), false, TexOff);
 	//월드변환 업데이트 및 연결
 	UpdateConstBuffer(commandlist);
 
