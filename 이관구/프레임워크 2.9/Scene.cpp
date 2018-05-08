@@ -242,6 +242,7 @@ void Scene::CreateGameObject()
 	delete resource;
 	resource = new Tetris3(device, commandlist, &BbObject, NULL, NULL, XMFLOAT4(0, 0, 0, 0));
 	delete resource;
+
 	//--------------------------------------------------//
 	
 	SkyObject = new SphereObject(device, commandlist,  &BbObject, XMFLOAT4(0, 0, 0, 0));
@@ -289,6 +290,9 @@ void Scene::CreateGameObject()
 	StaticObject.push_back(new BuildingObject(device, commandlist, &BbObject, 0, XMFLOAT4(60, 0, 30, 0)));
 	StaticObject.push_back(new BuildingObject(device, commandlist, &BbObject, 0, XMFLOAT4(-45, 0, 10, 0)));
 	StaticObject.push_back(new BuildingObject(device, commandlist, &BbObject, 0, XMFLOAT4(0, 0, -70, 0)));
+
+	//Rock
+	StaticObject.push_back(new Rock1Object(device, commandlist, &BbObject, 0, XMFLOAT4(0, 0, 70, 0)));
 
 
 	//BigWall

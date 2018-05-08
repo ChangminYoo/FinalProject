@@ -168,6 +168,15 @@ unordered_map<string, unique_ptr<CTexture>> BuildingObject::Textures;//텍스처들�
 CMesh BuildingObject::Mesh;//오로지 한번만 만들어짐
 ComPtr<ID3D12DescriptorHeap> BuildingObject::SrvDescriptorHeap;//텍스처 용 힙
 
+// --------------------------------------------------------------------------------------
+
+CMaterial Rock1Object::Mat;
+bool Rock1Object::CreateMesh;//최초로 false며 메쉬를 만든후 true가된다.
+unordered_map<string, unique_ptr<CTexture>> Rock1Object::Textures;//텍스처들을 저장함
+CMesh Rock1Object::Mesh;//오로지 한번만 만들어짐
+ComPtr<ID3D12DescriptorHeap> Rock1Object::SrvDescriptorHeap;//텍스처 용 힙
+
+
  //--------------------------------------------------------------------------------------
 
 bool RangeObject::CreateMesh = false;
