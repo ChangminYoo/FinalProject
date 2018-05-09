@@ -81,7 +81,7 @@ private:
 public:
 	unsigned int m_cur_packet_size{ 0 };
 	unsigned int m_prev_packet_size{ 0 };
-	
+	mutex		 m_lock;
 	
 public:
 	Player_Session(const short& count, boost::asio::ip::tcp::socket socket) : m_id(count), m_socket(move(socket))
@@ -174,6 +174,13 @@ public:
 	// 1초에 20번의 패킷을 보냄 - 모든 이동관련 작업들(캐릭이동, 불렛이동)
 
 	void RegularUpdate();
+
+
+	//-----------------------------------------------------------------
+	// [7]. lock 과 unlock
+
+	void PlayerLock() { m_lock.lock(); }
+	void PlayerUnLock() { m_lock.unlock(); }
 };
 
 

@@ -46,6 +46,7 @@ public:
 	__int64					      m_prevTime{ 0 };
 	__int64					      m_currTime{ 0 };
 	float						  m_deltaTime{ 0.f };
+	mutex						  m_lock; 
 
 public:
 	BulletObject(const unsigned short& master_id, const unsigned short& my_id,
@@ -73,6 +74,9 @@ public:
 
 	void			  SetIsFirstCreate(bool flag) { m_IsFirstCreate = flag; }
 	bool			  GetIsFirstCreate() { return m_IsFirstCreate; }
+
+	void			  BulletLock() { m_lock.lock(); }
+	void			  BulletUnLock() { m_lock.unlock(); }
 	
 
 	~BulletObject();

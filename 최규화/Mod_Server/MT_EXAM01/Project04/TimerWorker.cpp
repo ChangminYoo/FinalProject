@@ -78,7 +78,7 @@ void TimerWorker::ProcessPacket(event_type * et)
 		
 		for (auto lbul : Player_Session::m_bullobjs)
 		{
-			if (lbul->GetBulletID() == et->id && lbul->GetBulletMasterID() == et->master_id)
+			if (lbul->GetBulletID() == et->id && lbul->GetBulletMasterID() == et->master_id && (lbul->GetBulletCurrState() == true))
 			{
 				__int64 currTime;
 				QueryPerformanceCounter((LARGE_INTEGER*)&currTime);
@@ -138,6 +138,7 @@ void TimerWorker::ProcessPacket(event_type * et)
 
 			if (!lbul->GetBulletCurrState())
 			{
+				//충돌처리 다음에 삭제시켜줘야한다. 안그러면 여기서 지워진 뒤 충돌처리를 시도해 에러가 남 
 				Player_Session::m_bullobjs.remove(lbul);
 				break;
 			}

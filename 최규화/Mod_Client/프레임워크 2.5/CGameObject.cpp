@@ -84,7 +84,6 @@ void CGameObject::UpdatePPosCenterPos()
 {
 	CenterPos = XMFloat3to4(pp->GetPosition());
 }
-#undef or
 void CGameObject::UpdateLookVector()
 {
 	auto wmatrix = XMMatrixIdentity();

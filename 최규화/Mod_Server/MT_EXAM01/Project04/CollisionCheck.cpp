@@ -18,16 +18,16 @@ void CollisionCheck::Update()
 
 		auto deltaTime = duration_cast<milliseconds>(durTime).count() / 1000.0f;
 
-		for (auto client : Player_Session::m_clients)
-		{
-			client->Collision_Players(Player_Session::m_clients, deltaTime);
-			client->Collision_StaticObjects(Player_Session::m_sobjs, deltaTime);
-		}
+		//for (auto client : Player_Session::m_clients)
+		//{
+		//	client->Collision_Players(Player_Session::m_clients, deltaTime);
+		//	client->Collision_StaticObjects(Player_Session::m_sobjs, deltaTime);
+		//}
 
 		for (auto bullet : Player_Session::m_bullobjs)
 		{
 			bullet->Collision_Players(Player_Session::m_clients, deltaTime);
-			bullet->Collision_StaticObjects(Player_Session::m_sobjs, deltaTime);
+			//bullet->Collision_StaticObjects(Player_Session::m_sobjs, deltaTime);
 		}
 	}
 }

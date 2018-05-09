@@ -208,12 +208,13 @@ void Player_Session::InitData_To_Client()
 	init_player.pack_type = PACKET_PROTOCOL_TYPE::INIT_CLIENT;
 	init_player.player_data = m_playerData;
 
-	cout << "Current ID: " << m_clients[m_id]->Get_ID() << endl;
 	//cout << "socket : " << reinterpret_cast<int*>(&m_clients[m_id]->m_socket) << endl;
 
 	// 내 초기화 정보를 일단 나와 연결된 클라이언트에 보낸다.
 	m_clients[m_id]->SendPacket(reinterpret_cast<Packet*>(&init_player));
 
+	cout << "Current ID: " << m_playerData.ID << "Pos(x,y,z): " << m_playerData.Pos.x << " " << 
+		m_playerData.Pos.y << " " << m_playerData.Pos.z << " " <<  m_playerData.Pos.w << endl;
 	//------------------------------------------------------------------------------------
 	//2. 다른 클라이언트 초기화정보
 	STC_SetOtherClient init_otherplayer;

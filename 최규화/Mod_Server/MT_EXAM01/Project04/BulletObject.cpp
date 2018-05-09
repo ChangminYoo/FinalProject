@@ -84,32 +84,62 @@ void BulletObject::Collision_StaticObjects(unordered_set<StaticObject*>& sobjs, 
 
 void BulletObject::Collision_Players(vector<Player_Session*>& clients, float DeltaTime)
 {
-	for (auto client : clients)
+	// 지금의 Bullet이 살아있는 상태일때만 충돌검사
+	if (m_bulldata.alive)
 	{
-		if (client->GetPhysicsPoint() != nullptr && client->Get_ID() != m_bulldata.Master_ID )
+		for (auto client : clients)
 		{
-			bool test = pp->CollisionTest(*client->GetPhysicsPoint(),
-										  Lookvector, Rightvector, Upvector,
-										  client->GetLookVector(), client->GetRightVecotr(), client->GetUpVector());
-			if (test)
+			client->PlayerLock(); m_lock.lock();
+			if (client->GetPhysicsPoint() != nullptr && client->Get_ID() != m_bulldata.Master_ID)
 			{
-				client->Damaged(Damage);
+				bool test = pp->CollisionTest(*client->GetPhysicsPoint(),
+					Lookvector, Rightvector, Upvector,
+					client->GetLookVector(), client->GetRightVecotr(), client->GetUpVector());
 
-				XMFLOAT3 cn;
+				m_lock.unlock();
+				client->PlayerUnLock();
 
-				cn = Float3Add(pp->GetPosition(), client->GetPhysicsPoint()->GetPosition(), false);
-				cn = Float3Normalize(cn);
+				if (test)
+				{
+					XMFLOAT3 cn;
 
-				//파티클 리스트에 데미지 오브젝트를 생성해서 넣음. 파티클을 띄운다.
-				//if (ParticleList != nullptr)
+					m_lock.lock();
+					client->PlayerLock();
 
+					cn = Float3Add(pp->GetPosition(), client->GetPhysicsPoint()->GetPosition(), false);
+					cn = Float3Normalize(cn);
 
-				pp->ResolveVelocity(*client->GetPhysicsPoint(), cn, DeltaTime);
-				m_bulldata.alive = false;
+					//client->PlayerUnLock();
+					//m_lock.unlock();
+					//파티클 리스트에 데미지 오브젝트를 생성해서 넣음. 파티클을 띄운다.
+					//if (ParticleList != nullptr)
+					//client->PlayerLock();
+					//m_lock.lock();
+
+					pp->ResolveVelocity(*client->GetPhysicsPoint(), cn, DeltaTime);
+
+					m_lock.unlock();
+					client->PlayerUnLock();
+
+					client->PlayerLock();
+					client->Damaged(Damage);
+					cout << "Client ID " << client->GetPlayerData().ID << "was Damaged";
+					cout << "HP: " << client->GetPlayerData().UserInfo.cur_hp << endl;
+					client->PlayerUnLock();
+
+					m_lock.lock();
+					m_bulldata.alive = false;
+					m_lock.unlock();
+				}
+
 			}
-			
+			else
+			{
+				client->PlayerUnLock();
+			}
 		}
 	}
+	
 }
 
 BulletObject::~BulletObject()
