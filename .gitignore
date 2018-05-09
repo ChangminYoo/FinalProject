@@ -6,4 +6,4 @@
 *.ilk
 *.tlog
 *.vs/
-*packages/
+packages/

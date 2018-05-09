@@ -445,6 +445,7 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 	}
 }
 
+#undef or
 void CPlayer::CreateBullet(ID3D12Device* Device, ID3D12GraphicsCommandList* cl,XMFLOAT3 & Goal,CGameObject* lock, list<CGameObject*>* bulletlist)
 {
 	switch (SellectBulletNumber)
@@ -531,6 +532,7 @@ void CPlayer::CreateBullet(ID3D12Device* Device, ID3D12GraphicsCommandList* cl,X
 	}
 }
 
+#undef or
 void CPlayer::CreateOtherClientBullet(ID3D12Device * Device, ID3D12GraphicsCommandList * cl, Position3D& Goal, CGameObject * lock, list<CGameObject*>* bulletlist, BulletObject_Info server_bulldata)
 {
 	switch (SellectBulletNumber)

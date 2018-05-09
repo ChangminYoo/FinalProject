@@ -38,6 +38,7 @@ void PhysicalEffect::UpdateLookVector(const XMFLOAT3& offLv, const XMFLOAT3& off
 	auto quater = XMLoadFloat4(&orient_xmfloat4);
 	wmatrix *= XMMatrixRotationQuaternion(quater);
 
+#undef or
 	//OffLookvector 와 OffRightvector는 플레이어타입(캐릭터, 불렛, 스테틱오브젝트 등에 따라 다름)
 	auto ol = XMLoadFloat3(&offLv);
 	auto or = XMLoadFloat3(&offRv);
