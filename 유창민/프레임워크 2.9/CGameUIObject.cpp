@@ -274,8 +274,9 @@ SkillUIObject::SkillUIObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList 
 		Mesh.Index = NULL;
 		Mesh.SubResource = NULL;
 
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Skill1", L"textures/ui/cube1.dds", false,2,0);
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Skill2", L"textures/ui/cube2.dds", false,2,1);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Skill1", L"textures/ui/cube1.dds", false, 3, 0);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Skill2", L"textures/ui/cube2.dds", false, 3, 1);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Skill3", L"textures/ui/tetrike.dds", false, 3, 2);
 		SetMesh(m_Device, commandlist);
 		CreateMesh = true;
 
@@ -283,10 +284,11 @@ SkillUIObject::SkillUIObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList 
 
 	if (SkillNum == 0)
 		TextureName = "Skill1";
-
 	else if (SkillNum == 1)
 		TextureName = "Skill2";
-	else
+	else if (SkillNum == 2)
+		TextureName = "Skill3";
+	else 
 		TextureName = "Skill1"; //나중에 수정
 
 	TexOff = SkillNum;
