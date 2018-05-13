@@ -109,8 +109,6 @@ void TimerWorker::ProcessPacket(event_type * et)
 				lbul->AfterGravitySystem();
 				lbul->SetBulletNewPos(xmf4);
 
-				lbul->SetBulletAnimation(Ani_State::Idle);
-
 				//서버에서 사라질 때랑 클라에서 사라질 때 2초차이남. 서버가 2초 느림
 				if ((lbul->GetBulletCurrState() == true))
 					AddEvent(et->id, 0.025, LIGHT_BULLET, true, et->master_id);

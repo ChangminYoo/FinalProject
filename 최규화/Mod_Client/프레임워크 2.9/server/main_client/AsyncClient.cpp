@@ -16,26 +16,28 @@ void AsyncClient::Init(CGameObject* obj, Scene* scene)
 
 void AsyncClient::Connect(boost::asio::ip::tcp::endpoint& endpoint)
 {
-	m_cur_logindata = new CTextTest();
-	m_cur_logindata->InputLoginData("Test.txt");
+	//m_cur_logindata = new CTextTest();
+	//m_cur_logindata->InputLoginData("Test.txt");
 
 	m_socket.async_connect(
 		endpoint, [&](const boost::system::error_code& error)
 	{
 		if (!error)
 		{
-			cout << "Connected" << endl;
+			RecvPacket(*m_myObj, *m_myScene);
 
-			m_socket.send(boost::asio::buffer(m_cur_logindata->loginPacketBuf, MAX_BUFFER_SIZE));
-			m_socket.receive(boost::asio::buffer(m_cur_logindata->loginPacketBuf, MAX_BUFFER_SIZE));
-
-			if (m_cur_logindata->loginPacketBuf[0] == 1)
-			{
-				cout << "Client ID and PW send Success" << endl;
-
-				RecvPacket(*m_myObj, *m_myScene);
-				//return;
-			}
+			//cout << "Connected" << endl;
+			//
+			//m_socket.send(boost::asio::buffer(m_cur_logindata->loginPacketBuf, MAX_BUFFER_SIZE));
+			//m_socket.receive(boost::asio::buffer(m_cur_logindata->loginPacketBuf, MAX_BUFFER_SIZE));
+			//
+			//if (m_cur_logindata->loginPacketBuf[0] == 1)
+			//{
+			//	cout << "Client ID and PW send Success" << endl;
+			//
+			//	RecvPacket(*m_myObj, *m_myScene);
+			//	//return;
+			//}
 		
 			//2. 서버와 연결성공 시 유저가 메인메뉴에서 입력한 로그인 정보를 토대로
 			//데이터베이스에 저장 및 이 데이터를 서버에 전송		

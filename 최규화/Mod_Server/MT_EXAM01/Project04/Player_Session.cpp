@@ -43,30 +43,30 @@ bool Player_Session::CheckPlayerInfo()
 
 	//접속연결시 플레이어의 아이디 m_playerIndex (ai + player)
 
-	CTextTest DB;
-	Packet cur_logindata_packet[MAX_BUFFER_SIZE]{ 0 };
-	Player_LoginDB logindata;
-
-	m_socket.receive(boost::asio::buffer(cur_logindata_packet, MAX_BUFFER_SIZE));
-
-	wcscpy(m_loginID, reinterpret_cast<wchar_t*>(&cur_logindata_packet[1]));
-	wcscpy(m_loginPW, reinterpret_cast<wchar_t*>(&cur_logindata_packet[cur_logindata_packet[0] + 4]));
-
-	wcscpy(logindata.name, m_loginID); wcscpy(logindata.password, m_loginPW);
-	DB.loginDataList.emplace_back(logindata);
-
-	if ((wcscmp(L"guest", m_loginID) == 0) && (wcscmp(L"guest", m_loginPW) == 0))
-	{
-		cur_logindata_packet[0] = 1;
-		m_socket.send(boost::asio::buffer(cur_logindata_packet, MAX_BUFFER_SIZE));
-
-		m_connect_state = true;
-
-		//m_staticobject = new StaticObject();
-
-		return true;
-	}
-
+	//CTextTest DB;
+	//Packet cur_logindata_packet[MAX_BUFFER_SIZE]{ 0 };
+	//Player_LoginDB logindata;
+	//
+	//m_socket.receive(boost::asio::buffer(cur_logindata_packet, MAX_BUFFER_SIZE));
+	//
+	//wcscpy(m_loginID, reinterpret_cast<wchar_t*>(&cur_logindata_packet[1]));
+	//wcscpy(m_loginPW, reinterpret_cast<wchar_t*>(&cur_logindata_packet[cur_logindata_packet[0] + 4]));
+	//
+	//wcscpy(logindata.name, m_loginID); wcscpy(logindata.password, m_loginPW);
+	//DB.loginDataList.emplace_back(logindata);
+	//
+	//if ((wcscmp(L"guest", m_loginID) == 0) && (wcscmp(L"guest", m_loginPW) == 0))
+	//{
+	//	cur_logindata_packet[0] = 1;
+	//	m_socket.send(boost::asio::buffer(cur_logindata_packet, MAX_BUFFER_SIZE));
+	//
+	//	m_connect_state = true;
+	//
+	//	//m_staticobject = new StaticObject();
+	//
+	//	return true;
+	//}
+	return true;
 }
 
 
@@ -156,7 +156,7 @@ void Player_Session::Init_PlayerInfo()
 	if (m_playerData.ID == 0)
 		m_playerData.Pos = { -100.0f , -1000.0f, 0.0f };
 	else if (m_playerData.ID == 1)
-		m_playerData.Pos = { 100.0f, -1000.0f, 0.0f };
+		m_playerData.Pos = { 300.0f, -1000.0f, 0.0f };
 	//
 
 
@@ -403,8 +403,8 @@ void Player_Session::ProcessPacket(Packet * packet)
 			m_clients[PosMove_Data->id]->m_playerData.Pos = move(PosMove_Data->pos);
 			m_clients[PosMove_Data->id]->m_playerData.Ani = PosMove_Data->ani_state;
 
-			//cout << "ID: " << PosMove_Data->id << " 변화된 위치값: " << "[x:" << PosMove_Data->pos.x << "\t" << "y:" << PosMove_Data->pos.y
-			//	<< "\t" << "z:" << PosMove_Data->pos.z << "]" << "\t" << "w:" << PosMove_Data->pos.w << endl;
+			cout << "ID: " << PosMove_Data->id << " 변화된 위치값: " << "[x:" << PosMove_Data->pos.x << "\t" << "y:" << PosMove_Data->pos.y
+				<< "\t" << "z:" << PosMove_Data->pos.z << "]" << "\t" << "w:" << PosMove_Data->pos.w << endl;
 
 			//4. 변화된 내 (포지션, 애니메이션) 정보를 다른 클라에 전달 - 반드시 이렇게 다시 만들어줘야함
 			//PosMove_Data를 바로 sendpacket에 packet으로 형변화하여 보내면 size error가 난다
@@ -449,8 +449,8 @@ void Player_Session::ProcessPacket(Packet * packet)
 			pe->UpdateLookVector(OffLookvector, OffRightvector, Rotation_Data->rotate_status, Lookvector, Rightvector);
 			pe->GetUpVector(Lookvector, Rightvector, Upvector);
 
-			//cout << "ID: " << Rotation_Data->id << " 변화된 회전값: " << "[ x, y, z, w ]: "
-			//	<< Rotation_Data->rotate_status.x << ", " << Rotation_Data->rotate_status.y << ", " << Rotation_Data->rotate_status.z << ", " << Rotation_Data->rotate_status.w << endl;
+			cout << "ID: " << Rotation_Data->id << " 변화된 회전값: " << "[ x, y, z, w ]: "
+				<< Rotation_Data->rotate_status.x << ", " << Rotation_Data->rotate_status.y << ", " << Rotation_Data->rotate_status.z << ", " << Rotation_Data->rotate_status.w << endl;
 
 			// 3. 다른 클라에게 보낸다.
 			STC_Rotation r_to_other;

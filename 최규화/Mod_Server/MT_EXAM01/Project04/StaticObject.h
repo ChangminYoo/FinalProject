@@ -2,11 +2,12 @@
 #include "PhysicalEffect.h"
 #include <unordered_map>
 #include <unordered_set>
+#include <map>
 
 class StaticObject 
 {
 private:
-	unordered_map<int, Position> m_boxPos;
+    map<int, StaticObjectBasicInfo> m_SobjPos;
 
 	XMFLOAT3 OffLookvector;
 	XMFLOAT3 OffRightvector;
@@ -27,16 +28,34 @@ private:
 
 	CollisionBox			m_halfBox;
 
-	bool					m_airbone{ false };					
+	bool					m_airbone{ false };		
+
+	RayCastObject rco;
 	
+private:
+	//여기다 물체 배치에 대한 상수들 넣는다.
+	float BigWall_X1 = 300 * sinf(0.4f * MMPE_PI);
+	float BigWall_Z1 = (600 * cosf(0.4f * MMPE_PI) + 600) / 2;
+
+	float BigWall_X2 = ((600 * sinf(0.4f * MMPE_PI)) + (600 * sinf(0.8f * MMPE_PI))) / 2;
+	float BigWall_Z2 = ((600 * cosf(0.4f * MMPE_PI)) + (-600 * cosf(0.2f * MMPE_PI))) / 2;
+
+	float BigWall_Z3 = -600 * cosf(0.2f * MMPE_PI);
+
+	float BigWall_Rad1 = MMPE_PI / 5; //36degree
+
 public:
 	StaticObject(){};
 	~StaticObject();
 
 	void							CycleStaticObjects();
 	
-	void							SetPosOfBox();
+	void							SetBasicInfoOfSObj();
 	void							InitBoxObjects();
+	void							InitSmallWallObjects();
+	void							InitBigWallObjects();
+	void							InitBuildingObjects();
+	
 
 	void							UpdatePPosCenterPos(XMFLOAT3& xmf3);
 	void							AfterGravitySystem();

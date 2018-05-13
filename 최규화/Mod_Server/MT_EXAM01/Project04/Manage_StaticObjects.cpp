@@ -8,15 +8,11 @@ void Player_Session::SendStaticObjects(const unordered_set<StaticObject*>& sobju
 	Player_Session::m_sobjs = move(sobjudset);
 
 	STC_StaticObject stc_sobj;
-	stc_sobj.packet_size = sizeof(STC_StaticObject);
-	stc_sobj.pack_type = PACKET_PROTOCOL_TYPE::STATIC_OBJECT;
 
 	//1. 상자에 대한 데이터를 보냄
 	for (auto iter = sobjudset.begin(); iter != sobjudset.end(); ++iter)
-	{
-		stc_sobj.sobj_data = move((*iter)->GetInfoOfSObj());
-		stc_sobj.type = STATIC_OBJECT_TYPE::Box;
-
+	{	
+	    stc_sobj.sobj_data = move((*iter)->GetInfoOfSObj());	
 		m_clients[m_id]->SendPacket(reinterpret_cast<Packet*>(&stc_sobj));
 	}
 

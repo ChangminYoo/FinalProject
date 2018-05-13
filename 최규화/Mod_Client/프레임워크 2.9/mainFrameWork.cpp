@@ -16,6 +16,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE prevInstance,
 		if (!theApp.Initialize())
 			return 0;
 
+		thread f_thread([]() {g_io_service.run(); });
+
+
 		return theApp.Run();
 	}
 	catch (DxException& e)
@@ -41,8 +44,6 @@ bool MainFrameWork::Initialize()
 
 	scene->Player->m_async_client = new AsyncClient();
 	scene->Player->m_async_client->Init(scene->Player->PlayerObject, scene);
-
-
 	return true;
 }
 
@@ -209,6 +210,7 @@ void MainFrameWork::FrameAdvance(const GameTimer& gt)
 
 	if (scene->Player->PlayerObject != nullptr)
 		scene->Player->m_async_client->SendPacketRegular(*scene->Player->PlayerObject, gt);
+	
 	Draw(gt);
 
 	//여기까지 왔으면 PSO에 모든게 다 연결되어 있고, 다 그려져있는것이다.

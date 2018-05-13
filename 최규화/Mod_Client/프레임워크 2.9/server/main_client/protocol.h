@@ -59,7 +59,10 @@ enum BULLET_TYPE
 enum STATIC_OBJECT_TYPE
 {
 	Map,
-	Box
+	Box,
+	SmallWall,
+	BigWall,
+	Building
 };
 
 enum OBJECT_TYPE
@@ -118,6 +121,13 @@ struct Position
 };
 //16
 
+struct StaticObjectBasicInfo
+{
+	Position pos;
+	double    degree;
+	STATIC_OBJECT_TYPE type;
+};
+
 struct Player_Status
 {
 	unsigned short			attack{ 50 };       //2
@@ -147,15 +157,11 @@ struct Player_Info
 struct StaticObject_Info
 {
 	Position					Pos;					//16
-	Rotation				    Rotate_status;			//16
-	unsigned short				origin_hp{ 100 };		//2
-	unsigned short   			cur_hp{ 100 };			//2
-	Player_Status				player_status;			//6
+	Rotation				    Rotate_status{ 0.f,0.f,0.f,1.0f };			//16
+	double						degree{ 0 };					//4
 	unsigned short				ID{ 0 };				//2
-	char						GodMode{ false };		//1
-	char						Ani{ Ani_State::Idle }; //1
-	char						Fixed{ true };
-
+	char						Fixed{ true };			//1
+	unsigned char				type;
 };
 
 struct BulletObject_Info
@@ -251,10 +257,9 @@ typedef struct Server_To_Client_Player_Rotate
 
 typedef struct Server_To_Client_Static_Object
 {
-	unsigned char packet_size = sizeof(Player_Data) + sizeof(unsigned char) + sizeof(unsigned char) + sizeof(unsigned char);
+	unsigned char packet_size = sizeof(StaticObject_Info) + sizeof(unsigned char) + sizeof(unsigned char);
 	unsigned char pack_type = PACKET_PROTOCOL_TYPE::STATIC_OBJECT;
 	StaticObject_Info sobj_data;
-	unsigned char type;
 
 }STC_StaticObject;
 
@@ -273,7 +278,6 @@ typedef struct Server_To_Client_CharAnimation
 	unsigned char pack_type = PACKET_PROTOCOL_TYPE::PLAYER_ANIMATION;
 	unsigned short id;
 	unsigned char char_animation;
-
 
 }STC_CharAnimation;
 

@@ -30,6 +30,7 @@ switch (packet[1])
 		new_initdata.UserInfo = move(init_data->player_data.UserInfo);
 		new_initdata.AirBone = init_data->player_data.AirBone;
 
+		RgCkInfo.PtCheck.PositionInfo = move(init_data->player_data.Pos);
 
 		scene.SET_PLAYER_BY_SEVER_DATA(init_data->player_data.ID, new_initdata, packet[1]);
 	}
@@ -87,7 +88,7 @@ switch (packet[1])
 	{
 		auto mysobjdata = reinterpret_cast<STC_StaticObject*>(packet);
 
-		scene.SET_SOBJECT_BY_SERVER_DATA(mysobjdata->sobj_data.ID, mysobjdata->sobj_data, mysobjdata->type);
+		scene.SET_SOBJECT_BY_SERVER_DATA(mysobjdata->sobj_data.ID, mysobjdata->sobj_data, mysobjdata->sobj_data.type);
 	}
 
 	break;

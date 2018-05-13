@@ -213,11 +213,9 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 {
 	if (scene->GetGameState() == GS_PLAY)
 	{
-		
+		//if (PlayerObject != NULL && GetFocus())
 		if (PlayerObject != NULL && PlayerObject->gamedata.HP > 0 && GetFocus())
 		{
-
-
 			bool move = false;
 			if (GetKeyState(0x57) & 0x8000)//W키
 			{
@@ -424,15 +422,40 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 				PlayerObject->AirBone = true;//공중상태를 true로
 			}
 
-			if (move == true)//움직이고 있으면 움직이는 모션으로
+			if (GetFocus())
 			{
-				if (PlayerObject->n_Animation != Ani_State::Attack)//공격모션이 아니면 다시 대기상태로
-					PlayerObject->SetAnimation(Ani_State::Run);
-			}
-			else
-			{
-				if (PlayerObject->n_Animation != Ani_State::Attack)//공격모션이 아니면 다시 대기상태로
-					PlayerObject->SetAnimation(Ani_State::Idle);
+				STC_ChangedPos change_pos_ani;
+				change_pos_ani.packet_size = sizeof(STC_ChangedPos);
+				change_pos_ani.pack_type = PACKET_PROTOCOL_TYPE::CHANGED_PLAYER_POSITION;
+
+				change_pos_ani.id = PlayerObject->m_player_data.ID;
+				change_pos_ani.pos = { PlayerObject->CenterPos.x, PlayerObject->CenterPos.y, PlayerObject->CenterPos.z, PlayerObject->CenterPos.w };
+
+				if (move == true)//움직이고 있으면 움직이는 모션으로
+				{
+					if (PlayerObject->n_Animation != Ani_State::Attack)//공격모션이 아니면 다시 대기상태로
+					{
+						PlayerObject->SetAnimation(Ani_State::Run);
+
+						//
+						m_async_client->RgCkInfo.PtCheck.PositionInfo = { PlayerObject->CenterPos.x, PlayerObject->CenterPos.y, PlayerObject->CenterPos.z, PlayerObject->CenterPos.w };
+						m_async_client->RgCkInfo.PtCheck.AniState = Ani_State::Run;
+					}
+				}
+				else
+				{
+					if (PlayerObject->n_Animation != Ani_State::Attack)//공격모션이 아니면 다시 대기상태로
+					{
+						PlayerObject->SetAnimation(Ani_State::Idle);
+
+						//
+						m_async_client->RgCkInfo.PtCheck.PositionInfo = { PlayerObject->CenterPos.x, PlayerObject->CenterPos.y, PlayerObject->CenterPos.z, PlayerObject->CenterPos.w };
+						m_async_client->RgCkInfo.PtCheck.AniState = Ani_State::Idle;
+
+					}
+
+					m_async_client->RgCkInfo.PtCheck.Deltime = DeltaTime;
+				}
 			}
 
 			if (GetKeyState(0x31) & 0x8000)
