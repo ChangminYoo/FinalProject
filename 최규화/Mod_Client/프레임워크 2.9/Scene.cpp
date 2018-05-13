@@ -606,7 +606,7 @@ void Scene::Tick(const GameTimer & gt)
 			{
 				delete *i;//실제 게임오브젝트의 메모리 해제
 				i = BulletObject.erase(i);//리스트상에서 해당 요소를 지움
-
+			
 			}
 			else
 				i++;

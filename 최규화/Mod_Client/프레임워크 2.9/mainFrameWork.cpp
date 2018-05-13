@@ -57,13 +57,14 @@ bool MainFrameWork::Initialize()
 //중요한점은 충돌해소후에 반드시! UpdatePPosCenterPos함수를 호출해서 PP의 중점으로 게임오브젝트의 중점을 갱신해야한다.
 void MainFrameWork::CollisionSystem(const GameTimer& gt)
 {
+
 	for (auto i = scene->RigidObject.begin(); i != scene->RigidObject.end(); i++)
 	{
 		(*i)->Collision(&scene->RigidObject, gt.DeltaTime());
 		(*i)->Collision(&scene->DynamicObject, gt.DeltaTime());
 		(*i)->Collision(&scene->StaticObject, gt.DeltaTime());
-		(*i)->Collision(&scene->BulletObject, gt.DeltaTime());
-
+		//(*i)->Collision(&scene->BulletObject, gt.DeltaTime());
+	
 	}
 
 	//반드시 투사체가 가장먼저 상대를 검사한다.

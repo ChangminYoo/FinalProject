@@ -403,8 +403,8 @@ void Player_Session::ProcessPacket(Packet * packet)
 			m_clients[PosMove_Data->id]->m_playerData.Pos = move(PosMove_Data->pos);
 			m_clients[PosMove_Data->id]->m_playerData.Ani = PosMove_Data->ani_state;
 
-			cout << "ID: " << PosMove_Data->id << " 변화된 위치값: " << "[x:" << PosMove_Data->pos.x << "\t" << "y:" << PosMove_Data->pos.y
-				<< "\t" << "z:" << PosMove_Data->pos.z << "]" << "\t" << "w:" << PosMove_Data->pos.w << endl;
+			//cout << "ID: " << PosMove_Data->id << " 변화된 위치값: " << "[x:" << PosMove_Data->pos.x << "\t" << "y:" << PosMove_Data->pos.y
+			//	<< "\t" << "z:" << PosMove_Data->pos.z << "]" << "\t" << "w:" << PosMove_Data->pos.w << endl;
 
 			//4. 변화된 내 (포지션, 애니메이션) 정보를 다른 클라에 전달 - 반드시 이렇게 다시 만들어줘야함
 			//PosMove_Data를 바로 sendpacket에 packet으로 형변화하여 보내면 size error가 난다
@@ -449,8 +449,8 @@ void Player_Session::ProcessPacket(Packet * packet)
 			pe->UpdateLookVector(OffLookvector, OffRightvector, Rotation_Data->rotate_status, Lookvector, Rightvector);
 			pe->GetUpVector(Lookvector, Rightvector, Upvector);
 
-			cout << "ID: " << Rotation_Data->id << " 변화된 회전값: " << "[ x, y, z, w ]: "
-				<< Rotation_Data->rotate_status.x << ", " << Rotation_Data->rotate_status.y << ", " << Rotation_Data->rotate_status.z << ", " << Rotation_Data->rotate_status.w << endl;
+			//cout << "ID: " << Rotation_Data->id << " 변화된 회전값: " << "[ x, y, z, w ]: "
+			//	<< Rotation_Data->rotate_status.x << ", " << Rotation_Data->rotate_status.y << ", " << Rotation_Data->rotate_status.z << ", " << Rotation_Data->rotate_status.w << endl;
 
 			// 3. 다른 클라에게 보낸다.
 			STC_Rotation r_to_other;
@@ -516,8 +516,6 @@ void Player_Session::ProcessPacket(Packet * packet)
 				client->SendPacket(reinterpret_cast<Packet*>(&stc_charani));
 				client->SendPacket(reinterpret_cast<Packet*>(&stc_attack));
 			}
-
-
 
 			if (n_bldata->bull_data.type == BULLET_TYPE::protocol_LightBullet)
 				g_timer_queue.AddEvent(n_bldata->bull_data.myID, 0, LIGHT_BULLET, true, n_bldata->bull_data.Master_ID);

@@ -174,6 +174,14 @@ void BulletObject::Collision_Players(vector<Player_Session*>& clients, float Del
 	}
 }
 
+void BulletObject::SetBulletRotatevalue(const XMFLOAT4 & xmf4)
+{
+	m_bulldata.Rotate_status.x = xmf4.x;
+	m_bulldata.Rotate_status.y = xmf4.y;
+	m_bulldata.Rotate_status.z = xmf4.z;
+	m_bulldata.Rotate_status.w = xmf4.w;
+}
+
 BulletObject::~BulletObject()
 {
 	delete rb;

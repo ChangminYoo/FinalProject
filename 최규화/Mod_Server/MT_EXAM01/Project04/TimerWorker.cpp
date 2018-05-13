@@ -101,6 +101,16 @@ void TimerWorker::ProcessPacket(event_type * et)
 					break;
 				}
 
+				XMFLOAT4 xmf4_rot;
+				xmf4_rot.x = lbul->GetBulletInfo().Rotate_status.x;
+				xmf4_rot.y = lbul->GetBulletInfo().Rotate_status.y;
+				xmf4_rot.z = lbul->GetBulletInfo().Rotate_status.z;
+				xmf4_rot.w = lbul->GetBulletInfo().Rotate_status.w;
+
+				XMFLOAT4 xmf_rot = QuaternionMultiply(xmf4_rot, QuaternionRotation(lbul->GetLookvector(), MMPE_PI * lbul->m_deltaTime));
+
+				lbul->SetBulletRotatevalue(xmf_rot);
+
 				XMFLOAT4 xmf4 = { lbul->GetBulletInfo().pos.x, lbul->GetBulletInfo().pos.y,
 								  lbul->GetBulletInfo().pos.z, lbul->GetBulletInfo().pos.w };
 
@@ -135,7 +145,7 @@ void TimerWorker::ProcessPacket(event_type * et)
 		
 		//외부에서 삭제하게 되면 문제가 발생이 될 수 있음.
 		//1. 시간이 다했을 때 여기서 삭제 2. 총알이 캐릭터에 맞아 삭제될 때 여기서 삭제
-		list<BulletObject*> t_bullet = Player_Session::m_bullobjs;
+		/*list<BulletObject*> t_bullet = Player_Session::m_bullobjs;
 
 		for (auto bullet = t_bullet.begin(); bullet != t_bullet.end();)
 		{
@@ -158,8 +168,9 @@ void TimerWorker::ProcessPacket(event_type * et)
 				++bullet;
 			}
 		}
+		*/
 
-		/*for (auto bullet = Player_Session::m_bullobjs.begin(); bullet != Player_Session::m_bullobjs.end();)
+		for (auto bullet = Player_Session::m_bullobjs.begin(); bullet != Player_Session::m_bullobjs.end();)
 		{
 			STC_Attack stc_attack;
 			stc_attack.bull_data = move((*bullet)->GetBulletInfo());
@@ -189,7 +200,7 @@ void TimerWorker::ProcessPacket(event_type * et)
 			}
 			
 		}
-		*/
+		
 
 		AddEvent(0, RegularPacketExchangeTime, REGULAR_PACKET_EXCHANGE, true, 0);
 	

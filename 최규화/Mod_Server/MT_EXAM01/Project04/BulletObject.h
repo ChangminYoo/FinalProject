@@ -63,7 +63,7 @@ public:
 	void Collision_StaticObjects(unordered_set<StaticObject*>& sobjs, float DeltaTime);
 	void Collision_Players(vector<Player_Session*>& clients, float DeltaTime);
 
-	BulletObject_Info GetBulletInfo() const { return m_bulldata; }
+	BulletObject_Info GetBulletInfo()  { return m_bulldata; }
 	short			  GetBulletID() const   { return m_bulldata.myID; }
 	short			  GetBulletMasterID() const { return m_bulldata.Master_ID; }
 	PhysicsPoint*	  GetPhysicsPoint()     { return pp; }
@@ -78,6 +78,8 @@ public:
 	void			  BulletLock() { m_lock.lock(); }
 	void			  BulletUnLock() { m_lock.unlock(); }
 
+	XMFLOAT3		  GetLookvector() const { return Lookvector; }
+	void			  SetBulletRotatevalue(const XMFLOAT4& xmf4);
 
 	~BulletObject();
 };

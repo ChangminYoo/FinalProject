@@ -562,7 +562,7 @@ BulletCube::BulletCube(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 	gamedata.HP = 1;
 	gamedata.Damage = 10;
 	gamedata.GodMode = true;
-	gamedata.Speed = 250;
+	gamedata.Speed = 150;
 
 	if (firstBullet)
 	{
@@ -643,15 +643,15 @@ void BulletCube::Tick(const GameTimer & gt)
 
 
 	//수정 및 삭제
-	pp->integrate(gt.DeltaTime(), &CenterPos);
+	//pp->integrate(gt.DeltaTime(), &CenterPos);
 
-	Orient = QuaternionMultiply(Orient, QuaternionRotation(Lookvector, MMPE_PI * gt.DeltaTime()));
+	//Orient = QuaternionMultiply(Orient, QuaternionRotation(Lookvector, MMPE_PI * gt.DeltaTime()));
 
 	//투사체는 생명 주기가 있어야 한다.
-	LifeTime -= gt.DeltaTime();
+	//LifeTime -= gt.DeltaTime();
 
-	if (LifeTime <= 0)
-		DelObj = true;
+	//if (LifeTime <= 0)
+	//	DelObj = true;
 
 }
 
