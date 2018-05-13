@@ -84,6 +84,11 @@ protected:
 	UploadBuffer<ObjectData>* ConstBuffer=NULL;	//월드행렬과 커스텀데이터를 저장하기위한 버퍼
 
 public:
+	//서버용
+	static short myID;
+	static list<short> BulletIDList;
+
+public:
 
 	//위치와 회전정보
 	XMFLOAT4 CenterPos;//중점
@@ -258,10 +263,6 @@ public:
 	static CMesh Mesh;//오로지 한번만 만들어짐
 	static ComPtr<ID3D12DescriptorHeap> SrvDescriptorHeap;//텍스처 용 힙
 
-	//서버용
-	static short myID;
-	static list<short> BulletIDList;
-
 public:
 	virtual void SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist);//셋메시는 메시를 최종적으로 생성한다. 즉 메시를구성하는 정점과 삼각형을구성하는인덱스버퍼생성
 	virtual void SetMaterial(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist); //머테리얼 생성
@@ -277,7 +278,7 @@ public:
 class HeavyBulletCube : public CGameObject
 {
 public:
-	HeavyBulletCube(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, CGameObject* master, XMFLOAT4& ori, CGameObject* lockon = NULL, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
+	HeavyBulletCube(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, CGameObject* master, XMFLOAT4& ori, CGameObject* lockon = NULL, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0), bool IsMine = true);
 	~HeavyBulletCube();
 	CGameObject* Master = NULL;//소유자
 	CGameObject* LockOn = NULL;//유도시사용됨

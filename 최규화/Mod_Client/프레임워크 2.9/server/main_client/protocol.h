@@ -53,7 +53,7 @@ enum Ani_State
 enum BULLET_TYPE
 {
 	protocol_LightBullet = 0,
-	protocol_RightBullet
+	protocol_HeavyBullet
 };
 
 enum STATIC_OBJECT_TYPE

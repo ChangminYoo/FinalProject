@@ -96,7 +96,7 @@ void TimerWorker::ProcessPacket(event_type * et)
 					//총알의 생명주기가 다했을 때 -> m_bulldata.alive = false로 
 					lbul->DestroyBullet();
 
-					cout << "end " << "timeL: " << lbul->GetBulletLifeTime() << endl;
+					cout << "Light end " << "timeL: " << lbul->GetBulletLifeTime() << endl;
 					//cout << "Pos: " << xmf4.x << "," << xmf4.y << "," << xmf4.z << "," << xmf4.w << endl;
 					break;
 				}
@@ -122,6 +122,59 @@ void TimerWorker::ProcessPacket(event_type * et)
 				//서버에서 사라질 때랑 클라에서 사라질 때 2초차이남. 서버가 2초 느림
 				if ((lbul->GetBulletCurrState() == true))
 					AddEvent(et->id, 0.025, LIGHT_BULLET, true, et->master_id);
+			}
+		}
+	}
+	break;
+
+	case HEAVY_BULLET:
+	{
+		for (auto& lbul : Player_Session::m_bullobjs)
+		{
+			if (lbul->GetBulletID() == et->id && lbul->GetBulletMasterID() == et->master_id &&
+				(lbul->GetBulletCurrState() == true))
+			{
+				__int64 currTime;
+				QueryPerformanceCounter((LARGE_INTEGER*)&currTime);
+				lbul->m_currTime = currTime;
+
+				lbul->m_deltaTime = static_cast<float>((lbul->m_currTime - lbul->m_prevTime) * mSecondsPerCount);
+				if (lbul->m_deltaTime < 0.0) { lbul->m_deltaTime = 0.0; }
+
+				lbul->m_prevTime = currTime;
+				lbul->SetBulletLifeTime(lbul->m_deltaTime);
+
+				if (lbul->GetBulletLifeTime() >= MAX_LIGHT_BULLET_TIME)
+				{
+					//총알의 생명주기가 다했을 때 -> m_bulldata.alive = false로 
+					lbul->DestroyBullet();
+
+					cout << "Heavy end " << "timeL: " << lbul->GetBulletLifeTime() << endl;
+					//cout << "Pos: " << xmf4.x << "," << xmf4.y << "," << xmf4.z << "," << xmf4.w << endl;
+					break;
+				}
+
+				XMFLOAT4 xmf4_rot;
+				xmf4_rot.x = lbul->GetBulletInfo().Rotate_status.x;
+				xmf4_rot.y = lbul->GetBulletInfo().Rotate_status.y;
+				xmf4_rot.z = lbul->GetBulletInfo().Rotate_status.z;
+				xmf4_rot.w = lbul->GetBulletInfo().Rotate_status.w;
+
+				XMFLOAT4 xmf_rot = QuaternionMultiply(xmf4_rot, QuaternionRotation(lbul->GetLookvector(), MMPE_PI / 6 * lbul->m_deltaTime));
+
+				lbul->SetBulletRotatevalue(xmf_rot);
+
+				XMFLOAT4 xmf4 = { lbul->GetBulletInfo().pos.x, lbul->GetBulletInfo().pos.y,
+					lbul->GetBulletInfo().pos.z, lbul->GetBulletInfo().pos.w };
+
+				//불렛 현재위치 = 0.5 * 가속도(0.5 * accel * time * time) + 속도 * 시간 + 이전 위치
+				lbul->GetPhysicsPoint()->integrate(lbul->m_deltaTime, &xmf4);
+				lbul->AfterGravitySystem();
+				lbul->SetBulletNewPos(xmf4);
+
+				//서버에서 사라질 때랑 클라에서 사라질 때 2초차이남. 서버가 2초 느림
+				if ((lbul->GetBulletCurrState() == true))
+					AddEvent(et->id, 0.025, HEAVY_BULLET, true, et->master_id);
 			}
 		}
 	}

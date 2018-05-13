@@ -2,8 +2,8 @@
 
 extern UINT CbvSrvDescriptorSize;
 
-short BulletCube::myID = -1;
-list<short> BulletCube::BulletIDList = list<short>();
+short CGameObject::myID = -1;
+list<short> CGameObject::BulletIDList = list<short>();
 
 CGameObject::CGameObject()
 {
@@ -728,9 +728,10 @@ void BulletCube::Collision(list<CGameObject*>* collist, float DeltaTime)
 
 
 
-HeavyBulletCube::HeavyBulletCube(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, CGameObject* master, XMFLOAT4& ori, CGameObject* lockon, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
+HeavyBulletCube::HeavyBulletCube(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, CGameObject* master, XMFLOAT4& ori, CGameObject* lockon, XMFLOAT4 cp, bool IsMine) : CGameObject(m_Device, commandlist, Plist, cp)
 {
-
+	//Bullet Resoucre의 경우 Bullet초기화를 한번 무조건 처음에 실행시키는데 이 때의 정보는 필요없음 - firstBullet 플래그를 이용해서 삭제유무결정
+	bool firstBullet = true;
 	if (CreateMesh == false)
 	{
 
@@ -741,7 +742,7 @@ HeavyBulletCube::HeavyBulletCube(ID3D12Device * m_Device, ID3D12GraphicsCommandL
 		SetMesh(m_Device, commandlist);
 		SetMaterial(m_Device, commandlist);
 		CreateMesh = true;
-
+		firstBullet = false;
 	}
 
 	//게임오브젝트마다 룩벡터와 라이트벡터가 다르므로 초기 오프셋 설정을 해준다.
@@ -765,6 +766,20 @@ HeavyBulletCube::HeavyBulletCube(ID3D12Device * m_Device, ID3D12GraphicsCommandL
 	gamedata.Damage = 30;
 	gamedata.GodMode = true;
 	gamedata.Speed = 180;
+
+	if (firstBullet)
+	{
+		//CreateBullet 함수 호출 - 내 클라이언트에서 키를 눌러서 불렛을 생성했음 
+		if (IsMine)
+		{
+			++myID;
+			BulletIDList.push_back(myID);
+
+			m_bullet_data.myID = myID;
+			m_bullet_data.Master_ID = master->m_player_data.ID;
+		}
+	}
+
 	LifeTime = 3.5;
 	Master = master;
 	LockOn = lockon;
@@ -783,6 +798,7 @@ HeavyBulletCube::HeavyBulletCube(ID3D12Device * m_Device, ID3D12GraphicsCommandL
 	pp->SetBounce(false);//튕기지 않는다.
 	pp->SetVelocity(Lookvector.x*gamedata.Speed, Lookvector.y*gamedata.Speed, Lookvector.z*gamedata.Speed);//룩벡터로 날아감
 	pp->SetMass(1);
+
 	if (ParticleList != NULL)
 	{
 		BulletParticles = new ParticleObject(m_Device, commandlist, ParticleList, this, 0.2f, XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, 0));
@@ -829,17 +845,17 @@ void HeavyBulletCube::Tick(const GameTimer & gt)
 	//적분기. 적분기란? 매 틱마다 힘! 에의해서 변화 되는 가속도/속도/위치를 갱신한다.
 	//이때 pp의 position과 CenterPos를 일치시켜야하므로 CenterPos의 포인터를 인자로 넘겨야 한다.
 
-	pp->integrate(gt.DeltaTime(), &CenterPos);
-
-	//No애니메이션!
-
-	//투사체는 생명 주기가 있어야 한다.
-	LifeTime -= gt.DeltaTime();
-
-	Orient = QuaternionMultiply(Orient, QuaternionRotation(Lookvector, MMPE_PI / 6 * gt.DeltaTime()));
-
-	if (LifeTime <= 0)
-		DelObj = true;
+	//pp->integrate(gt.DeltaTime(), &CenterPos);
+	//
+	////No애니메이션!
+	//
+	////투사체는 생명 주기가 있어야 한다.
+	//LifeTime -= gt.DeltaTime();
+	//
+	//Orient = QuaternionMultiply(Orient, QuaternionRotation(Lookvector, MMPE_PI / 6 * gt.DeltaTime()));
+	//
+	//if (LifeTime <= 0)
+	//	DelObj = true;
 
 }
 

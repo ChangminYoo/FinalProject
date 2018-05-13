@@ -820,6 +820,7 @@ void Scene::SET_BULLET_BY_SERVER_DATA(BulletObject_Info & bulldata, const unsign
 	switch (packet_type)
 	{
 		case BULLET_TYPE::protocol_LightBullet:
+		case BULLET_TYPE::protocol_HeavyBullet:
 		{
 			//클라에서 먼저 불렛이 죽고 서버에서 죽었다는 정보를 주게되면 아래 분기문이 실행됨 -> 버그
 			//내 자신은 이걸 실행할 필요가없음

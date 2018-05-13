@@ -519,7 +519,8 @@ void Player_Session::ProcessPacket(Packet * packet)
 
 			if (n_bldata->bull_data.type == BULLET_TYPE::protocol_LightBullet)
 				g_timer_queue.AddEvent(n_bldata->bull_data.myID, 0, LIGHT_BULLET, true, n_bldata->bull_data.Master_ID);
-
+			else if (n_bldata->bull_data.type == BULLET_TYPE::protocol_HeavyBullet)
+				g_timer_queue.AddEvent(n_bldata->bull_data.myID, 0, HEAVY_BULLET, true, n_bldata->bull_data.Master_ID);
 		}
 		break;
 
