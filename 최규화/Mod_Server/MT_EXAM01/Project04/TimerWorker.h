@@ -51,6 +51,10 @@ public:
 	void ProcessPacket(event_type* et);
 	void AddEvent(const unsigned short& id, const float& sec, TIMER_EVENT_TYPE type, bool is_ai, const unsigned short& master_id);
 
+	int m_tempcnt{ 0 };
+
+	float m_sumprevtime{ 0.f };
+	float m_sumtime{ 0.f };
 
 	priority_queue<event_type*, vector<event_type*>, waketime_cmp> t_queue;
 	~TimerWorker();

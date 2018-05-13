@@ -34,7 +34,8 @@ enum PACKET_PROTOCOL_TYPE
 	PLAYER_DISCONNECT,		//연결끊어짐
 	PLAYER_ROTATE,			//플레이어 회전
 	PLAYER_ATTACK,		    //플레이어 공격
-	STATIC_OBJECT,			//고정된 물체
+	STATIC_OBJECT,			//고정된 물체,
+	PLAYER_ANIMATION,
 	TEST					//테스트용 패킷
 };
 
@@ -44,6 +45,7 @@ enum Ani_State
 	Idle = 0,
 	Run,
 	Attack,
+	Dead,
 	Victory,
 	Crying
 };
@@ -265,6 +267,15 @@ typedef struct Server_To_Client_Attack_Info
 
 }STC_Attack;
 
+typedef struct Server_To_Client_CharAnimation
+{
+	unsigned char pack_size = sizeof(unsigned char) + sizeof(unsigned char) + sizeof(unsigned char) + sizeof(unsigned short);;
+	unsigned char pack_type = PACKET_PROTOCOL_TYPE::PLAYER_ANIMATION;
+	unsigned short id;
+	unsigned char char_animation;
+
+
+}STC_CharAnimation;
 
 typedef struct Server_To_Client_Player_Test
 {

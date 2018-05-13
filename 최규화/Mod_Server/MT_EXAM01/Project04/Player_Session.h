@@ -82,7 +82,7 @@ public:
 	unsigned int m_cur_packet_size{ 0 };
 	unsigned int m_prev_packet_size{ 0 };
 	mutex		 m_lock;
-	
+
 public:
 	Player_Session(const short& count, boost::asio::ip::tcp::socket socket) : m_id(count), m_socket(move(socket))
 	{};
@@ -124,6 +124,7 @@ public:
 	// ---------------------------------------------------------------------------------------
 	// [4].기타 GET - SET 함수
 	Player_Data GetPlayerData() { return m_playerData; } const
+	void SetPlayerData(Player_Data& pdata) { m_playerData = move(pdata); }
 
 	int		Get_ID() const { return m_id; }
 

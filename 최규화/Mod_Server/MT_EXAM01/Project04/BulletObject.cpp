@@ -63,20 +63,32 @@ void BulletObject::Update(float deltatime)
 
 void BulletObject::Collision_StaticObjects(unordered_set<StaticObject*>& sobjs, float DeltaTime)
 {
-	for (auto sobj : sobjs)
+	if (m_bulldata.alive)
 	{
-		if (sobj->GetPhysicsPoint() != nullptr)
+		for (auto sobj : sobjs)
 		{
-			bool test = pp->CollisionTest(*sobj->GetPhysicsPoint(),
-										  Lookvector, Rightvector, Upvector,
-										  sobj->GetLookVector(), sobj->GetRightVector(), sobj->GetUpVector());
-			if (test)
+			if (sobj->GetPhysicsPoint() != nullptr)
 			{
-				XMFLOAT3 cn;
-				cn = pp->pAxis;
-				pp->ResolveVelocity(*sobj->GetPhysicsPoint(), cn, DeltaTime);
+				m_lock.lock();
+
+				bool test = pp->CollisionTest(*sobj->GetPhysicsPoint(),
+					Lookvector, Rightvector, Upvector,
+					sobj->GetLookVector(), sobj->GetRightVector(), sobj->GetUpVector());
 				
-				m_bulldata.alive = false;
+				m_lock.unlock();
+
+				if (test)
+				{
+					XMFLOAT3 cn;
+
+					m_lock.lock();
+					cn = pp->pAxis;
+					pp->ResolveVelocity(*sobj->GetPhysicsPoint(), cn, DeltaTime);
+
+					m_bulldata.alive = false;
+
+					m_lock.unlock();
+				}
 			}
 		}
 	}
@@ -85,13 +97,19 @@ void BulletObject::Collision_StaticObjects(unordered_set<StaticObject*>& sobjs, 
 void BulletObject::Collision_Players(vector<Player_Session*>& clients, float DeltaTime)
 {
 	// 지금의 Bullet이 살아있는 상태일때만 충돌검사
+	//m_lock.lock();
+	
+	m_lock.lock();
 	if (m_bulldata.alive)
 	{
+		m_lock.unlock();
 		for (auto client : clients)
 		{
-			client->PlayerLock(); m_lock.lock();
+			client->PlayerLock();
+			m_lock.lock();
 			if (client->GetPhysicsPoint() != nullptr && client->Get_ID() != m_bulldata.Master_ID)
 			{
+				//충돌 유무를 파악 = 지역변수에 저장 
 				bool test = pp->CollisionTest(*client->GetPhysicsPoint(),
 					Lookvector, Rightvector, Upvector,
 					client->GetLookVector(), client->GetRightVecotr(), client->GetUpVector());
@@ -99,6 +117,7 @@ void BulletObject::Collision_Players(vector<Player_Session*>& clients, float Del
 				m_lock.unlock();
 				client->PlayerUnLock();
 
+				//충돌이 일어났을 때만 일어남
 				if (test)
 				{
 					XMFLOAT3 cn;
@@ -118,30 +137,46 @@ void BulletObject::Collision_Players(vector<Player_Session*>& clients, float Del
 
 					pp->ResolveVelocity(*client->GetPhysicsPoint(), cn, DeltaTime);
 
-					m_lock.unlock();
 					client->PlayerUnLock();
+					
+					m_bulldata.alive = false;
+
+					m_lock.unlock();
+
+					//m_lock.lock();
+					//m_bulldata.alive = false;
+					//m_lock.unlock();
 
 					client->PlayerLock();
 					client->Damaged(Damage);
 					cout << "Client ID " << client->GetPlayerData().ID << "was Damaged";
 					cout << "HP: " << client->GetPlayerData().UserInfo.cur_hp << endl;
 					client->PlayerUnLock();
-
-					m_lock.lock();
-					m_bulldata.alive = false;
-					m_lock.unlock();
 				}
-
 			}
 			else
 			{
+				m_lock.unlock();
 				client->PlayerUnLock();
 			}
 		}
 	}
-	
+	else
+	{
+		m_lock.unlock();
+		cout << "불렛 시간이 지나 죽음 " << endl;
+
+		//m_lock.lock();
+		//auto remove_data = remove(Player_Session::m_bullobjs.begin(), Player_Session::m_bullobjs.end(), this);
+		///Player_Session::m_bullobjs.erase(remove_data);
+		//m_lock.unlock();
+
+	}
 }
 
 BulletObject::~BulletObject()
 {
+	delete rb;
+	delete pp;
+	delete pe;
 }

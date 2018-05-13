@@ -489,8 +489,7 @@ void Player_Session::ProcessPacket(Packet * packet)
 			m_bullObj->GetPhysicsPoint()->integrate(n_bldata->lifetime, reinterpret_cast<XMFLOAT4*>(&n_bldata->bull_data.pos));
 			m_bullObj->AfterGravitySystem();
 			m_bullObj->SetBulletLifeTime(n_bldata->lifetime); // 시간 0.1 ~ 0.2 추가
-
-			m_bullObj->SetIsFirstCreate(true);
+			//m_bullObj->SetIsFirstCreate(true);
 
 			//불렛이 처음생성됐을 때의 시간을 저장. 이후 해당 이벤트마다 이 불렛의 생성주기시간을 더해줌
 			__int64 currTime; QueryPerformanceCounter((LARGE_INTEGER*)&currTime);
@@ -498,23 +497,31 @@ void Player_Session::ProcessPacket(Packet * packet)
 			
 			m_bullobjs.emplace_back(m_bullObj);
 
-			if (n_bldata->bull_data.type == BULLET_TYPE::protocol_LightBullet)
-				g_timer_queue.AddEvent(n_bldata->bull_data.myID, 0, LIGHT_BULLET, true, n_bldata->bull_data.Master_ID);
+			STC_Attack stc_attack;
+			stc_attack.bull_data = move(m_bullObj->GetBulletInfo());
+			stc_attack.lifetime = m_bullObj->GetBulletLifeTime();
 
-			//불렛이 생성된 위치를 나 말고도 상대방도 알고 있어야함. 
-			//상대방 클라이언트에게 내 불렛 생성위치를 보냄
+			//불렛을 쏜 캐릭터의 공격애니메이션을 다른 클라이언트에게도 보내준다
+			STC_CharAnimation stc_charani;
+			stc_charani.id = m_bullObj->GetBulletMasterID();
+			stc_charani.char_animation = Ani_State::Attack;
+
+			//불렛이 생성된 위치를 나 말고도 상대방도 알고 있어야함. //상대방 클라이언트에게 내 불렛 생성위치를 보냄
 			for (auto client : m_clients)
 			{
 				//불렛을 쏜 클라이언트는 자신이 불렛을 생성했으므로 따로 생성정보를 보내주지 않아도됨 
-				if (client->m_id == n_bldata->bull_data.Master_ID) continue;
+				//if (client->m_id == n_bldata->bull_data.Master_ID) continue;
 				if (static_cast<bool>(client->m_isAI) == true || static_cast<bool>(client->m_connect_state) == false) continue;
 
-				STC_Attack stc_attack;
-				stc_attack.bull_data = move(n_bldata->bull_data);
-				stc_attack.lifetime = n_bldata->lifetime;
-
+				client->SendPacket(reinterpret_cast<Packet*>(&stc_charani));
 				client->SendPacket(reinterpret_cast<Packet*>(&stc_attack));
 			}
+
+
+
+			if (n_bldata->bull_data.type == BULLET_TYPE::protocol_LightBullet)
+				g_timer_queue.AddEvent(n_bldata->bull_data.myID, 0, LIGHT_BULLET, true, n_bldata->bull_data.Master_ID);
+
 		}
 		break;
 

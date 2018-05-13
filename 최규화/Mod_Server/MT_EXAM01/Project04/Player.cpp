@@ -99,7 +99,11 @@ void Player::Accept_Event()
 				//1. Client 정보 초기화 및 Client 정보를 담은 벡터에 데이터 추가
 				pNewSession->Init_PlayerInfo();
 				pNewSession->m_clients.emplace_back(pNewSession);
+				//pNewSession->m_clients[0]->m_clients[0]->m_lock.lock();
 
+				//Player_Data pdata;
+				//pdata.Connect_Status = false;
+				//Player_Session::m_clients[0]->SetPlayerData(pdata);
 				//2. Static Object 초기화 
 				pNewSession->SendStaticObjects(GetPSObject()->GetSObjUdSet());
 
