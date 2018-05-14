@@ -334,6 +334,7 @@ CCubeManObject::CCubeManObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 	gamedata.MAXHP = 100;
 	gamedata.HP = 100;
 	gamedata.Speed = 50;
+	gamedata.GodMode = true;
 
 	//광선충돌 검사용 육면체
 	XMFLOAT3 rx(3, 0, 0);

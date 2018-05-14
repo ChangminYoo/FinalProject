@@ -16,10 +16,16 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE prevInstance,
 		if (!theApp.Initialize())
 			return 0;
 
-		thread f_thread([]() {g_io_service.run(); });
+		//thread f_thread([]() {g_io_service.run(); });
+		thread* f_thread = new thread([]() {g_io_service.run(); });
+		
+		srand((unsigned)time(nullptr));
+		
+		auto a = theApp.Run();
+		f_thread->join();
+		delete f_thread;
 
-
-		return theApp.Run();
+		return a;
 	}
 	catch (DxException& e)
 	{
@@ -63,7 +69,7 @@ void MainFrameWork::CollisionSystem(const GameTimer& gt)
 		(*i)->Collision(&scene->RigidObject, gt.DeltaTime());
 		(*i)->Collision(&scene->DynamicObject, gt.DeltaTime());
 		(*i)->Collision(&scene->StaticObject, gt.DeltaTime());
-		//(*i)->Collision(&scene->BulletObject, gt.DeltaTime());
+		(*i)->Collision(&scene->BulletObject, gt.DeltaTime());
 	
 	}
 
@@ -75,7 +81,7 @@ void MainFrameWork::CollisionSystem(const GameTimer& gt)
 		//이 목록을 가지고 충돌검사를 하도록함.
 
 		//투사체끼리는 검사 X 투사체는 반드시 다이나믹오브젝트 들을 검사해야함.
-		//(*i)->Collision(&scene->DynamicObject, gt.DeltaTime());
+		(*i)->Collision(&scene->DynamicObject, gt.DeltaTime());
 		(*i)->Collision(&scene->StaticObject, gt.DeltaTime());
 	}
 

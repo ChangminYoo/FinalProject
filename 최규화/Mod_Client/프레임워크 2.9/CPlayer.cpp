@@ -417,7 +417,7 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 			if (GetKeyState(VK_SPACE) & 0x8000 && PlayerObject->AirBone == false)
 			{
 				GeneratorJump j;
-				j.SetJumpVel(XMFLOAT3(0, 80, 0));//나중에 플레이어의 점프력만큼 추가할것
+				j.SetJumpVel(XMFLOAT3(0, 100, 0));//나중에 플레이어의 점프력만큼 추가할것
 				j.Update(DeltaTime, *PlayerObject->pp);
 				PlayerObject->AirBone = true;//공중상태를 true로
 			}
