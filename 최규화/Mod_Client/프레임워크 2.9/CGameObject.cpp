@@ -325,11 +325,15 @@ CCubeManObject::CCubeManObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 	auto q2 = QuaternionRotation(axis, MMPE_PI);
 	Orient = QuaternionMultiply(Orient, q2);
 	UpdateLookVector();
+
+	// no no
 	ObjData.isAnimation = true;
 	ObjData.Scale = 3;
 	ObjData.SpecularParamater = 0.0f;//스페큘러를 낮게준다.
 
 	obs = Dynamic;
+	// no no
+	
 	//게임 데이터 (스텟)을 찍는다. 캐릭터는 데미지를 갖지 않고, 탄환이 데미지를 갖도록하자.
 	gamedata.MAXHP = 100;
 	gamedata.HP = 100;
@@ -337,10 +341,12 @@ CCubeManObject::CCubeManObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 	gamedata.GodMode = true;
 
 	//광선충돌 검사용 육면체
+	// no no
 	XMFLOAT3 rx(3, 0, 0);
 	XMFLOAT3 ry(0, 10, 0);
 	XMFLOAT3 rz(0, 0, 3);
 	rco.SetPlane(rx, ry, rz);
+	// no no
 
 	//질점오브젝트 사용시 필요한 데이터들 설정
 	pp = new PhysicsPoint();

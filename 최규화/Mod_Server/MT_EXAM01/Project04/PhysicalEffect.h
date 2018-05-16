@@ -2,6 +2,22 @@
 #include "PhysicsEngine\MyMiniPysicsEngine.h"
 #include "stdafx.h"
 
+struct HollowFLOAT3
+{
+	float x{ 0.f };
+	float y{ 0.f };
+	float z{ 0.f };
+};
+
+struct HollowFLOAT4
+{
+	float x{ 0.f };
+	float y{ 0.f };
+	float z{ 0.f };
+	float w{ 0.f };
+};
+
+
 class PhysicalEffect
 {
 public:
@@ -15,8 +31,9 @@ public:
 
 	void GravitySystem(float time, PhysicsPoint *pp);
 
-	void AfterGravitySystem(float time, PhysicsPoint *pp, OBJECT_TYPE type, Position& pos, bool& airbone);
+	void AfterGravitySystem(float time, PhysicsPoint *pp, OBJECT_TYPE type, Position& pos, char& airbone);
 
 	~PhysicalEffect();
 };
+
 

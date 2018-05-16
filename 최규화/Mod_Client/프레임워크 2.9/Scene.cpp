@@ -701,7 +701,7 @@ Player_Data * Scene::Get_MonsterServerData(const unsigned int & id)
 	return nullptr;
 }
 
-void Scene::SET_PLAYER_BY_SEVER_DATA(const unsigned short & id, Player_Data & playerdata, const unsigned char & packet_type)
+void Scene::SET_PLAYER_BY_SEVER_DATA(const unsigned short & id,const Player_Data & playerdata, const unsigned char & packet_type)
 {
 	for (auto GameObject : DynamicObject)
 	{
@@ -713,9 +713,9 @@ void Scene::SET_PLAYER_BY_SEVER_DATA(const unsigned short & id, Player_Data & pl
 			{
 				GameObject->m_player_data = move(playerdata);
 
-				//GameObject->Orient = { playerdata.Rotate_status.x , playerdata.Rotate_status.y, playerdata.Rotate_status.z, playerdata.Rotate_status.w };
+				GameObject->Orient = { playerdata.Rotate_status.x , playerdata.Rotate_status.y, playerdata.Rotate_status.z, playerdata.Rotate_status.w };
 				GameObject->CenterPos = { playerdata.Pos.x , playerdata.Pos.y , playerdata.Pos.z , playerdata.Pos.w };
-
+	
 				GameObject->gamedata.Damage = move(playerdata.UserInfo.player_status.attack);
 				GameObject->gamedata.HP = move(playerdata.UserInfo.cur_hp);
 				GameObject->gamedata.MAXHP = move(playerdata.UserInfo.origin_hp);

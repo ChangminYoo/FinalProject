@@ -82,7 +82,7 @@ public:
 	Player_Data* Get_MonsterServerData(const unsigned int& id);
 	int my_ClientID{ 0 };
 
-	void SET_PLAYER_BY_SEVER_DATA(const unsigned short& id, Player_Data& playerdata, const unsigned char& packet_type);
+	void SET_PLAYER_BY_SEVER_DATA(const unsigned short& id,const Player_Data& playerdata, const unsigned char& packet_type);
 	void SET_SOBJECT_BY_SERVER_DATA(const unsigned short& id, StaticObject_Info& sobjdata, const unsigned char& type);
 	void SET_BULLET_BY_SERVER_DATA(BulletObject_Info& bulldata, const unsigned char& packet_type);
 	void SET_PLAYER_ANIMATION_BY_SERVER_DATA(const unsigned short& id, const unsigned char& ani);

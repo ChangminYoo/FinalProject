@@ -83,13 +83,6 @@ struct Time
 	float t_time{ 0.f };
 };
 
-struct CollisionBox
-{
-	float	x{ 0.0f };
-	float	y{ 0.0f };
-	float	z{ 0.0f };
-};
-
 struct Position3D
 {
 	float	x{ 0.f };
@@ -128,14 +121,6 @@ struct StaticObjectBasicInfo
 	STATIC_OBJECT_TYPE type;
 };
 
-struct Player_Status
-{
-	unsigned short			attack{ 50 };       //2
-	unsigned short			defend{ 50 };       //2
-	unsigned short			speed{ 100 };        //2
-};
-//6
-
 struct Player_LoginDB
 {
 	wchar_t name[MAX_BUFFER_SIZE / 4]{ L"Guest" };
@@ -143,14 +128,15 @@ struct Player_LoginDB
 };
 // MAX_BUFFER_SIZE = 255 -> 총 크기: 252바이트
 
-struct Player_Info
+struct PlayerStatus
 {
-	//PLAYER_CLASS player_class;
-	Player_Status				player_status;    //6
-	unsigned short				origin_hp{ 300 }; //2
-	unsigned short   			cur_hp{ 300 };    //2
-	unsigned short				exp{ 0 };         //2
-	unsigned char				level{ 1 };		  //1 
+	unsigned short			attack{ 50 };       //2
+	unsigned short			defend{ 50 };       //2
+	unsigned short			speed{ 50 };        //2
+	unsigned short			origin_hp{ 100 }; //2
+	unsigned short   		cur_hp{ 100 };    //2
+	unsigned short			exp{ 0 };         //2
+	unsigned char			level{ 1 };		  //1 
 };
 // 12 + 1 = 13
 
@@ -180,16 +166,16 @@ struct BulletObject_Info
 
 struct Player_Data
 {
-	Player_Info		UserInfo;					//18
-	unsigned short  ID{ 0 };					//2
-	Position		Pos;						//16
-	Rotation		Rotate_status;		        //16
-	char			Is_AI{ false };				//1
-	char			Dir;						//1
-	char			Connect_Status{ false };    //1
-	char			Ani{ Ani_State::Idle };     //1
-	char			GodMode{ false };			//1
-	char			AirBone{ false };			//1
+	PlayerStatus    status;					//18
+	unsigned short  id{ 0 };					//2
+	Position		pos;						//16
+	Rotation		rot;		                //16
+	char			ai{ false };				//1
+	char			dir;						//1
+	char			connect{ false };    //1
+	char			ani{ Ani_State::Idle };     //1
+	char			godmode{ false };			//1
+	char			airbone{ false };			//1
 												//Player_LoginDB  LoginData;
 };
 // 18 + 16 + 2 + 1 + 1 + 1 + 1 + 16 = 58  pragma pack 할시

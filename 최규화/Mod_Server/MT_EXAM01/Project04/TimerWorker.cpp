@@ -95,8 +95,8 @@ void TimerWorker::ProcessPacket(event_type * et)
 				{
 					//총알의 생명주기가 다했을 때 -> m_bulldata.alive = false로 
 					lbul->DestroyBullet();
-
-					cout << "Light end " << "timeL: " << lbul->GetBulletLifeTime() << endl;
+					AddEvent(et->id, 0, REGULAR_PACKET_EXCHANGE, true, et->master_id);
+					//cout << "Light end " << "timeL: " << lbul->GetBulletLifeTime() << endl;
 					//cout << "Pos: " << xmf4.x << "," << xmf4.y << "," << xmf4.z << "," << xmf4.w << endl;
 					break;
 				}
@@ -119,7 +119,6 @@ void TimerWorker::ProcessPacket(event_type * et)
 				lbul->AfterGravitySystem();
 				lbul->SetBulletNewPos(xmf4);
 
-				//서버에서 사라질 때랑 클라에서 사라질 때 2초차이남. 서버가 2초 느림
 				if ((lbul->GetBulletCurrState() == true))
 					AddEvent(et->id, 0.025, LIGHT_BULLET, true, et->master_id);
 			}
@@ -148,8 +147,9 @@ void TimerWorker::ProcessPacket(event_type * et)
 				{
 					//총알의 생명주기가 다했을 때 -> m_bulldata.alive = false로 
 					lbul->DestroyBullet();
+					AddEvent(et->id, 0, REGULAR_PACKET_EXCHANGE, true, et->master_id);
 
-					cout << "Heavy end " << "timeL: " << lbul->GetBulletLifeTime() << endl;
+					//cout << "Heavy end " << "timeL: " << lbul->GetBulletLifeTime() << endl;
 					//cout << "Pos: " << xmf4.x << "," << xmf4.y << "," << xmf4.z << "," << xmf4.w << endl;
 					break;
 				}
@@ -183,7 +183,10 @@ void TimerWorker::ProcessPacket(event_type * et)
 	case REGULAR_PACKET_EXCHANGE:
 	{
 		// 1초에 20번 패킷을 정기적으로 보내줘야함 
+		for (auto client : Player_Session::m_clients)
+		{
 
+		}
 		//문제 - m_bullobjs 가 없음 
 		//1. 라이트 불렛이 있다면, 이 정보를 정기적으로 클라이언트에 보내줘야함 
 		//2. 불렛 삭제관리 -> 불렛의 생명주기가 다하거나, 충돌하거나, y값이 0보다 작을 때 m_bulldata.alive = false로 된 상태를

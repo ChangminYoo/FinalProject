@@ -84,7 +84,7 @@ void PhysicalEffect::GravitySystem(float time, PhysicsPoint *pp)
 	gg.Update(time, *pp);
 }
 
-void PhysicalEffect::AfterGravitySystem(float time, PhysicsPoint *pp, OBJECT_TYPE type, Position& pos, bool& airbone)
+void PhysicalEffect::AfterGravitySystem(float time, PhysicsPoint *pp, OBJECT_TYPE type, Position& pos, char& airbone)
 {
 	switch (type)
 	{

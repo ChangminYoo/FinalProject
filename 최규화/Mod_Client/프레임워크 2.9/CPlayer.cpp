@@ -677,8 +677,6 @@ void CPlayer::CreateBullet(ID3D12Device* Device, ID3D12GraphicsCommandList* cl,X
 		cts_attack.lifetime = 0.0;
 
 		m_async_client->SendPacket(reinterpret_cast<Packet*>(&cts_attack));
-
-
 		
 		break;
 

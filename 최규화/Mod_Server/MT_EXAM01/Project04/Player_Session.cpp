@@ -15,7 +15,7 @@ int Player_Session::m_tempcount = 0;
 bool Player_Session::CheckPlayerInfo()
 {
 	/*
-	CTextTest* m_playerData = new CTextTest();
+	CTextTest* m_pdata = new CTextTest();
 
 	if (m_ploginData->FileOpen("Test.txt"))
 		return true;
@@ -96,143 +96,129 @@ void Player_Session::Init_MonsterInfo()
 		break;
 	}
 
-	m_isAI = true;
-
-	m_playerData.Is_AI = true;
-	m_playerData.ID = m_id;
-	m_playerData.Dir = 0;
+	m_pdata.ai = true;
+	m_pdata.id = m_id;
+	m_pdata.dir = 0;
 
 
 	//몬스터의 원래 위치에서 임의로 움직여야한다.
 	//몬스터 정보 추후 수정 - lua사용해야됨
-	m_playerData.Pos = { static_cast<float>(rand_x), 0.0f, static_cast<float>(rand_z) , 0.0f};
+	m_pdata.pos = { static_cast<float>(rand_x), 0.0f, static_cast<float>(rand_z) , 0.0f};
 
-	m_playerData.UserInfo.origin_hp = 100;
-	m_playerData.UserInfo.cur_hp = m_playerData.UserInfo.origin_hp;
+	m_pdata.status.origin_hp = 100;
+	m_pdata.status.cur_hp = m_pdata.status.origin_hp;
 	
-	m_playerData.UserInfo.exp = 200;
-	m_playerData.UserInfo.level = 1;
-	m_playerData.UserInfo.player_status.attack = 20;
-	m_playerData.UserInfo.player_status.defend = 10;
-	m_playerData.UserInfo.player_status.speed = 20;
+	m_pdata.status.exp = 200;
+	m_pdata.status.level = 1;
+	m_pdata.status.attack = 20;
+	m_pdata.status.defend = 10;
+	m_pdata.status.speed = 20;
 	//
 
 	m_state = PLAYER_STATE::IDLE;
-	m_playerType = PLAYERS::NO_PLAYER;
 }
 
 void Player_Session::Init_PlayerInfo()
 {
 	//플레이어 정보 초기화 
-	default_random_engine generator(time(0));
-	uniform_int_distribution<int> export_x(-RAND_CREATE_X_POS, RAND_CREATE_X_POS);
-	uniform_int_distribution<int> export_z(-RAND_CREATE_Z_POS, RAND_CREATE_Z_POS);
-	auto rand_x = export_x(generator);
-	auto rand_z = export_z(generator);
+	//default_random_engine generator(time(0));
+	//uniform_int_distribution<int> export_x(-RAND_CREATE_X_POS, RAND_CREATE_X_POS);
+	//uniform_int_distribution<int> export_z(-RAND_CREATE_Z_POS, RAND_CREATE_Z_POS);
+	//auto rand_x = export_x(generator);
+	//auto rand_z = export_z(generator);
+	m_state = IDLE;
 
-	m_state = PLAYER_STATE::IDLE;
-	m_playerType = PLAYERS::LUNA;
-	//m_myObjType = PLAYER_OBJECT_TYPE::PLAYER_OBJECT;
-	m_isAI = false;
+	m_pdata.ani = Ani_State::Idle;
+	m_pdata.connect = true;
+	m_pdata.dir = 0;
+	m_pdata.airbone = false;
+	m_pdata.id = m_id;
+	m_pdata.ai = false;
+	m_pdata.rot = { 0.0f, 0.0f, 0.0f, 0.0f };
+	m_pdata.godmode = false;
 
-	m_playerData.Ani = Ani_State::Idle;
-	m_playerData.Connect_Status = true;
-	m_playerData.Dir = 0;
-	m_playerData.GodMode = false;
-	m_playerData.AirBone = false;
-	m_playerData.ID = m_id;
-	m_playerData.Is_AI = false;
-	m_playerData.Rotate_status = { 0.0f, 0.0f, 0.0f, 0.0f };
-
-	m_playerData.UserInfo.player_status.attack = 50;
-	m_playerData.UserInfo.player_status.defend = 50;
-	m_playerData.UserInfo.player_status.speed = 100;
-
-	m_playerData.UserInfo.cur_hp = 300;
-	m_playerData.UserInfo.origin_hp = 300;
-	m_playerData.UserInfo.exp = 0;
-	m_playerData.UserInfo.level = 1;
-
-	if (m_playerData.ID == 0)
-		m_playerData.Pos = { -100.0f , -1000.0f, 0.0f };
-	else if (m_playerData.ID == 1)
-		m_playerData.Pos = { 300.0f, -1000.0f, 0.0f };
+	m_pdata.status.attack = 50;
+	m_pdata.status.defend = 50;
+	m_pdata.status.speed = 50;
+	m_pdata.status.cur_hp = 100;
+	m_pdata.status.origin_hp = 100;
+	m_pdata.status.exp = 0;
+	m_pdata.status.level = 1;
+	
+	if (m_pdata.id == 0)
+		m_pdata.pos = { -100.0f , -1000.0f, 0.0f };
+	else if (m_pdata.id == 1)
+		m_pdata.pos = { 300.0f, -1000.0f, 0.0f };
 	//
-
 
 	//Lookvector, Rightvector, Upvector 설정 - PhysicalEffect 클래스 함수이용
 	pe = new PhysicalEffect();
 
 	OffLookvector = XMFLOAT3(0, 0, -1);
 	OffRightvector = XMFLOAT3(-1, 0, 0);	
-	
-	pe->UpdateLookVector(OffLookvector, OffRightvector, m_playerData.Rotate_status, Lookvector, Rightvector);
-	pe->GetUpVector(Lookvector, Rightvector, Upvector);
-	//
 
-	//평면과의 레이캐스팅
-	XMFLOAT3 rx(3, 0, 0);
-	XMFLOAT3 ry(0, 10, 0);
-	XMFLOAT3 rz(0, 0, 3);
-	rco.SetPlane(rx, ry, rz);
+	XMFLOAT4 xmf4{ m_pdata.rot.x, m_pdata.rot.y, m_pdata.rot.z, m_pdata.rot.w };
+	auto q = XMLoadFloat4(&xmf4);
+	XMFLOAT3 axis{ 0,1,0 };
+	auto q2 = QuaternionRotation(axis, MMPE_PI);
+	xmf4 = QuaternionMultiply(xmf4, q2);
+	m_pdata.rot.x = xmf4.x; m_pdata.rot.y = xmf4.y; m_pdata.rot.z = xmf4.z; m_pdata.rot.w = xmf4.w;
+	
+	pe->UpdateLookVector(OffLookvector, OffRightvector, m_pdata.rot, Lookvector, Rightvector);
+	pe->GetUpVector(Lookvector, Rightvector, Upvector);
 	//
 
 	//물리효과 및 충돌처리를 위한 PhysicsPoint 클래스
 	pp = new PhysicsPoint();
-	pp->SetPosition(m_playerData.Pos.x, m_playerData.Pos.y, m_playerData.Pos.z);
+	pp->SetPosition(m_pdata.pos.x, m_pdata.pos.y, m_pdata.pos.z);
 	pp->SetHalfBox(3, 10, 3);
 	pp->SetDamping(0.7);
 	pp->SetBounce(false);
 	//
 
 	//2. 물리효과 적용
-	pp->SetPosition(m_playerData.Pos.x, m_playerData.Pos.y, m_playerData.Pos.z);
-
 	pe->GravitySystem(0.0f, pp);
 
-	XMFLOAT4 xmf4 = { m_playerData.Pos.x, m_playerData.Pos.y, m_playerData.Pos.z, m_playerData.Pos.w };
+	XMFLOAT4 xmf4{ m_pdata.pos.x, m_pdata.pos.y, m_pdata.pos.z, m_pdata.pos.w };
 	pp->integrate(0.0f, &xmf4);
+	m_pdata.pos.x = xmf4.x;  m_pdata.pos.y = xmf4.y;  m_pdata.pos.z = xmf4.z;   m_pdata.pos.w = xmf4.w;
+	
+	pe->AfterGravitySystem(0.0f, pp, OBJECT_TYPE::PLAYER, m_pdata.pos, m_pdata.airbone);
 
-	m_playerData.Pos.x = xmf4.x;  m_playerData.Pos.y = xmf4.y;  m_playerData.Pos.z = xmf4.z;   m_playerData.Pos.w = xmf4.w;
-	pe->AfterGravitySystem(0.0f, pp, OBJECT_TYPE::PLAYER, m_playerData.Pos, AirBone);
-
-	//wcscpy(m_playerData.LoginData.name, m_loginID);
-	//wcscpy(m_playerData.LoginData.password, m_loginPW);
+	//wcscpy(m_pdata.LoginData.name, m_loginID);
+	//wcscpy(m_pdata.LoginData.password, m_loginPW);
 }
 
 void Player_Session::InitData_To_Client()
 {
 	//1. 내 초기화정보
 	STC_SetMyClient init_player;
-	init_player.pack_size = sizeof(STC_SetMyClient);
-	init_player.pack_type = PACKET_PROTOCOL_TYPE::INIT_CLIENT;
-	init_player.player_data = m_playerData;
-
-	//cout << "socket : " << reinterpret_cast<int*>(&m_clients[m_id]->m_socket) << endl;
+	init_player.player_data = move(m_pdata);
 
 	// 내 초기화 정보를 일단 나와 연결된 클라이언트에 보낸다.
 	m_clients[m_id]->SendPacket(reinterpret_cast<Packet*>(&init_player));
 
-	cout << "Current ID: " << m_playerData.ID << "Pos(x,y,z): " << m_playerData.Pos.x << " " << 
-		m_playerData.Pos.y << " " << m_playerData.Pos.z << " " <<  m_playerData.Pos.w << endl;
+	cout << "Current ID: " << m_pdata.id << "Pos(x,y,z): " << m_pdata.pos.x << " " <<
+		m_pdata.pos.y << " " << m_pdata.pos.z << " " <<  m_pdata.pos.w << endl;
 	//------------------------------------------------------------------------------------
+	
 	//2. 다른 클라이언트 초기화정보
 	STC_SetOtherClient init_otherplayer;
-	init_otherplayer.pack_size = sizeof(STC_SetOtherClient);
-	init_otherplayer.pack_type = PACKET_PROTOCOL_TYPE::INIT_OTHER_CLIENT;
 
 	//2. 내 정보를 다른 클라이언트에게 넘겨준다
 	for (auto i = 0; i < m_clients.size(); ++i)
 	{
-		if (m_clients[i]->Get_ID() == m_id) continue;
-		if (m_clients[i]->Get_Connect_State() != false || m_clients[i]->Get_IsAI() != true)
+		if (m_clients[i]->m_pdata.id == m_id) continue;
+		if (m_clients[i]->m_pdata.connect != false || m_clients[i]->m_pdata.ai != true)
 		{
 			// 1. 다른 클라이언트 정보를 내 클라이언트에게 보낸다
 			init_otherplayer.player_data = move(m_clients[i]->GetPlayerData());
 			m_clients[m_id]->SendPacket(reinterpret_cast<Packet*>(&init_otherplayer));
 
+			ZeroMemory(&init_otherplayer, sizeof(init_otherplayer));
+
 			// 2. 내 정보를 다른 클라이언트에게 보낸다
-			init_otherplayer.player_data = move(m_playerData);
+			init_otherplayer.player_data = move(init_player.player_data);
 			m_clients[i]->SendPacket(reinterpret_cast<Packet*>(&init_otherplayer));
 
 		}
@@ -306,8 +292,8 @@ void Player_Session::RecvPacket()
 
 			// 자신의 연결상태 - 끊음
 			Set_State(-1);
-			m_connect_state = false;
 
+			m_connect_state = false;
 			// shutdown_both - 주고 받는 쪽 모두를 중단
 			m_socket.shutdown(m_socket.shutdown_both);
 			m_socket.close();
@@ -375,33 +361,33 @@ void Player_Session::ProcessPacket(Packet * packet)
 	
 	case PACKET_PROTOCOL_TYPE::CHANGED_PLAYER_POSITION:
 		{
-			if (m_state == PLAYER_STATE::DEAD)
+			if (m_state == DEAD)
 				break;
 
 			//1. 받아들인 데이터(키를 눌러 플레이어를 움직였음)에서 변화된 정보를 추출(물리효과 적용x)
-			auto PosMove_Data = (reinterpret_cast<STC_ChangedPos*>(packet));
+			auto PosMove_Data = reinterpret_cast<STC_ChangedPos*>(packet);
+
 			if (PosMove_Data->deltime < 0)
 				PosMove_Data->deltime = 0.f;
 
 			if (PosMove_Data->ani_state == Ani_State::Idle)
-				m_state = PLAYER_STATE::IDLE;
+				m_state = IDLE;
 			else if (PosMove_Data->ani_state == Ani_State::Run)
-				m_state = PLAYER_STATE::MOVE;
+				m_state = MOVE;
 
 			//2. 물리효과 적용
 			pp->SetPosition(PosMove_Data->pos.x, PosMove_Data->pos.y, PosMove_Data->pos.z);
-
 			pe->GravitySystem(PosMove_Data->deltime, pp);
 
-			XMFLOAT4 xmf4 = { PosMove_Data->pos.x, PosMove_Data->pos.y, PosMove_Data->pos.z, PosMove_Data->pos.w };
+			XMFLOAT4 xmf4{ PosMove_Data->pos.x, PosMove_Data->pos.y, PosMove_Data->pos.z, PosMove_Data->pos.w };
 			pp->integrate(PosMove_Data->deltime, &xmf4);
 			PosMove_Data->pos.x = xmf4.x; PosMove_Data->pos.y = xmf4.y;  PosMove_Data->pos.z = xmf4.z;  PosMove_Data->pos.w = xmf4.w;
 
-			pe->AfterGravitySystem(PosMove_Data->deltime, pp, OBJECT_TYPE::PLAYER, PosMove_Data->pos, AirBone);
+			pe->AfterGravitySystem(PosMove_Data->deltime, pp, OBJECT_TYPE::PLAYER, PosMove_Data->pos, m_pdata.airbone);
 
 			//3. 이동 - (애니메이션, 위치 변경) 변경된 데이터를 서버에서관리하는 내 클라이언트에 저장
-			m_clients[PosMove_Data->id]->m_playerData.Pos = move(PosMove_Data->pos);
-			m_clients[PosMove_Data->id]->m_playerData.Ani = PosMove_Data->ani_state;
+			m_clients[PosMove_Data->id]->m_pdata.pos = move(PosMove_Data->pos);
+			m_clients[PosMove_Data->id]->m_pdata.ani = PosMove_Data->ani_state;
 
 			//cout << "ID: " << PosMove_Data->id << " 변화된 위치값: " << "[x:" << PosMove_Data->pos.x << "\t" << "y:" << PosMove_Data->pos.y
 			//	<< "\t" << "z:" << PosMove_Data->pos.z << "]" << "\t" << "w:" << PosMove_Data->pos.w << endl;
@@ -409,20 +395,18 @@ void Player_Session::ProcessPacket(Packet * packet)
 			//4. 변화된 내 (포지션, 애니메이션) 정보를 다른 클라에 전달 - 반드시 이렇게 다시 만들어줘야함
 			//PosMove_Data를 바로 sendpacket에 packet으로 형변화하여 보내면 size error가 난다
 			STC_ChangedPos c_to_other;
-			c_to_other.packet_size = sizeof(STC_ChangedPos);
-			c_to_other.pack_type = PACKET_PROTOCOL_TYPE::CHANGED_PLAYER_POSITION;
-	
+			
 			c_to_other.id = PosMove_Data->id;
-			c_to_other.ani_state = m_playerData.Ani;
-			c_to_other.pos = move(m_playerData.Pos);
+			c_to_other.ani_state = m_pdata.ani;
+			c_to_other.pos = move(m_pdata.pos);
 		
 			for (auto client : m_clients)
 			{
 				//상대가 ai / 연결끊김 / 나일 경우 보낼 필요 없음
-				if (static_cast<bool>(client->m_playerData.Is_AI) == true) continue;
-				if (static_cast<bool>(client->m_playerData.Connect_Status) == false) continue;
+				if (client->m_pdata.ai == true) continue;
+				if (client->m_pdata.connect == false) continue;
 
-				//if (client->m_playerData.ID == PosMove_Data->id) continue;
+				//if (client->m_pdata.ID == PosMove_Data->id) continue;
 				//여기서 문제
 
 				//갱신된 나의 데이터를 상대방에게 전달
@@ -434,15 +418,15 @@ void Player_Session::ProcessPacket(Packet * packet)
 
 	case PACKET_PROTOCOL_TYPE::PLAYER_ROTATE:
 		{
-			if (m_state == PLAYER_STATE::DEAD)
+			if (m_state == DEAD)
 				break;
 
-			m_state = PLAYER_STATE::ROTATE;
+			m_state = ROTATE;
 
 			auto Rotation_Data = reinterpret_cast<STC_Rotation*>(packet);	
 
 			// 1. 받은 정보를 내 클라이언트에 넣어주고
-			m_clients[Rotation_Data->id]->m_playerData.Rotate_status = move(Rotation_Data->rotate_status);
+			m_clients[Rotation_Data->id]->m_pdata.rot = move(Rotation_Data->rotate_status);
 
 			// 2. 받은 정보를 토대로 lookvector와 rightvector를 업데이트
 			//m_clients[Rotation_Data->id]->UpdateLookVector(); //이거넣으면 20byte -> 21byte씩 다시보내게됨
@@ -454,17 +438,14 @@ void Player_Session::ProcessPacket(Packet * packet)
 
 			// 3. 다른 클라에게 보낸다.
 			STC_Rotation r_to_other;
-			r_to_other.packet_size = sizeof(STC_Rotation);
-			r_to_other.pack_type = PACKET_PROTOCOL_TYPE::PLAYER_ROTATE;
-
 			r_to_other.id = Rotation_Data->id;
 			r_to_other.rotate_status = move(Rotation_Data->rotate_status);
 
 			for (auto client : m_clients)
 			{
-				if (static_cast<bool>(client->m_playerData.Is_AI) == true) continue;
-				if (static_cast<bool>(client->m_playerData.Connect_Status) == false) continue;
-				//if (client->m_playerData.ID == Rotation_Data->id) continue;
+				if (static_cast<bool>(client->m_pdata.ai) == true) continue;
+				if (static_cast<bool>(client->m_pdata.connect) == false) continue;
+				//if (client->m_pdata.ID == Rotation_Data->id) continue;
 
 				client->SendPacket(reinterpret_cast<Packet*>(&r_to_other));
 			}
@@ -510,8 +491,8 @@ void Player_Session::ProcessPacket(Packet * packet)
 			for (auto client : m_clients)
 			{
 				//불렛을 쏜 클라이언트는 자신이 불렛을 생성했으므로 따로 생성정보를 보내주지 않아도됨 
-				//if (client->m_id == n_bldata->bull_data.Master_ID) continue;
-				if (static_cast<bool>(client->m_isAI) == true || static_cast<bool>(client->m_connect_state) == false) continue;
+				if (client->m_id == n_bldata->bull_data.Master_ID) continue;
+				if (static_cast<bool>(client->m_pdata.ai) == true || static_cast<bool>(client->m_connect_state) == false) continue;
 
 				client->SendPacket(reinterpret_cast<Packet*>(&stc_charani));
 				client->SendPacket(reinterpret_cast<Packet*>(&stc_attack));
@@ -519,7 +500,8 @@ void Player_Session::ProcessPacket(Packet * packet)
 
 			if (n_bldata->bull_data.type == BULLET_TYPE::protocol_LightBullet)
 				g_timer_queue.AddEvent(n_bldata->bull_data.myID, 0, LIGHT_BULLET, true, n_bldata->bull_data.Master_ID);
-			else if (n_bldata->bull_data.type == BULLET_TYPE::protocol_HeavyBullet)
+			 
+			if (n_bldata->bull_data.type == BULLET_TYPE::protocol_HeavyBullet)
 				g_timer_queue.AddEvent(n_bldata->bull_data.myID, 0, HEAVY_BULLET, true, n_bldata->bull_data.Master_ID);
 		}
 		break;
@@ -531,7 +513,7 @@ void Player_Session::ProcessPacket(Packet * packet)
 
 			auto test_data = reinterpret_cast<STC_Test*>(packet);
 		
-			cout << "ID: " << test_data->player_data.ID << "ElaspedTime: " << test_data->time.t_time << "------"
+			cout << "ID: " << test_data->player_data.id << "ElaspedTime: " << test_data->time.t_time << "------"
 				"PrevTime: " << test_data->time.p_time << endl;
 
 		}
@@ -548,19 +530,18 @@ void Player_Session::Set_State(int state)
 
 void Player_Session::Damaged(float damage)
 {
-	if (m_playerData.GodMode == false && m_playerData.UserInfo.cur_hp > 0)
+	if (m_pdata.godmode == false && m_pdata.status.cur_hp > 0)
 	{
-		m_playerData.UserInfo.cur_hp -= damage;
+		m_pdata.status.cur_hp -= damage;
 	}
 
-	if (m_playerData.UserInfo.cur_hp <= 0)
+	if (m_pdata.status.cur_hp <= 0)
 	{
 		delobj = true;
 
 		//리스폰 후처리 - timer_queue
 	}
-
-		
+	
 }
 
 //1. 플레이어와 스테틱 오브젝트들의 충돌
@@ -578,7 +559,7 @@ void Player_Session::Collision_StaticObjects(unordered_set<StaticObject*>& sobjs
 			if (pp->pAxis.y > 0)
 			{
 				AirBone = false;
-				m_playerData.AirBone = false;
+				m_pdata.airbone = false;
 			}
 				
 			if (pp->pAxis.y < 0)
@@ -598,7 +579,7 @@ void Player_Session::Collision_StaticObjects(unordered_set<StaticObject*>& sobjs
 			}
 
 			pp->CollisionResolve(*(*iter)->GetPhysicsPoint(), cn, DeltaTime);
-			pe->UpdatePPosCenterPos(pp->GetPosition(), m_playerData.Pos);
+			pe->UpdatePPosCenterPos(pp->GetPosition(), m_pdata.pos);
 			(*iter)->UpdatePPosCenterPos((*iter)->GetPhysicsPoint()->GetPosition());
 			
 		}
@@ -621,14 +602,14 @@ void Player_Session::Collision_Players(vector<Player_Session*>& clients, float D
 				if (pp->pAxis.y > 0)
 				{
 					AirBone = false;
-					m_playerData.AirBone = false;
+					m_pdata.airbone = false;
 				}
 
 				//충돌했을때  축이 (0,-1,0)이면 상대방 Airbone을 false로 둔다.  이는 상대가 내 위에있음을 나타낸다.
 				//설사 상대 위에 다른 상대가 있어도 걱정말자. 자연스러운것임.
 				if (pp->pAxis.y < 0)
 				{
-					(*iter)->m_playerData.AirBone = false;
+					(*iter)->m_pdata.airbone = false;
 					(*iter)->AirBone = false;
 				}
 
@@ -645,8 +626,8 @@ void Player_Session::Collision_Players(vector<Player_Session*>& clients, float D
 
 				//충돌해소 호출. 충돌해소 이후에 반드시 변경된 질점의 위치로 오브젝트위치를 일치시켜야한다.
 				pp->CollisionResolve(*(*iter)->pp, cn, DeltaTime);
-				pe->UpdatePPosCenterPos(pp->GetPosition(), m_playerData.Pos);
-				(*iter)->pe->UpdatePPosCenterPos((*iter)->pp->GetPosition(), (*iter)->m_playerData.Pos);
+				pe->UpdatePPosCenterPos(pp->GetPosition(), m_pdata.pos);
+				(*iter)->pe->UpdatePPosCenterPos((*iter)->pp->GetPosition(), (*iter)->m_pdata.pos);
 					
 			}
 		}

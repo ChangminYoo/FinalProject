@@ -27,15 +27,15 @@ private:
 	unsigned short				 m_id{ 0 };
 	char						 m_connect_state{ false };
 	char					     m_state{ -1 };
-	char						 m_isAI{ false };
+	//char						 m_isAI{ false };
 
 	wchar_t						 m_loginID[MAX_BUFFER_SIZE / 4]{ L"Guest" };
 	wchar_t						 m_loginPW[MAX_BUFFER_SIZE / 4]{ L"Guest" };
 
-
-	Player_Data                  m_playerData;	 // 지금 이 클라이언트 객체가 관리하는 플레이어 정보(패킷으로 주고받는)
-	PLAYERS                      m_playerType;
-	//PLAYER_OBJECT_TYPE			 m_myObjType;
+	//1-1. 통신정보 
+	Player_Data                  m_pdata;	 // 지금 이 클라이언트 객체가 관리하는 플레이어 정보(패킷으로 주고받는)
+	//PLAYERS                      m_playerType;
+	//PLAYER_OBJECT_TYPE		   m_myObjType;
 
 
 	//2. 해당 클라이언트의 패킷 데이터(recv할 때 사용 )
@@ -123,27 +123,25 @@ public:
 
 	// ---------------------------------------------------------------------------------------
 	// [4].기타 GET - SET 함수
-	Player_Data GetPlayerData() { return m_playerData; } const
-	void SetPlayerData(Player_Data& pdata) { m_playerData = move(pdata); }
+	Player_Data GetPlayerData() { return m_pdata; } const
+	void SetPlayerData(Player_Data& pdata) { m_pdata = move(pdata); }
 
 	int		Get_ID() const { return m_id; }
 
 	void    Set_State(int state);
 	int		Get_State() const { return m_state; }
 
-	void	Set_Connect_State(bool flag) { m_connect_state = flag; }
-	bool	Get_Connect_State() const { return m_connect_state; }
+	void	Set_Connect_State(bool flag) { m_pdata.connect = flag; }
+	bool	Get_Connect_State() const { return m_pdata.connect; }
 
 	void    Set_DataBuf(Packet* buf) { memcpy(m_dataBuf, buf, sizeof(buf)); }
 
 	Packet* Get_DataBuf() { return m_dataBuf; }
 	Packet* Get_RecvBuf() { return m_recvBuf; }
 
-	bool	Get_IsAI() const { return m_isAI; } 
-
-	vector<Player_Session*>* GetPlayerSession() { return &m_clients; }
-
 	void	Damaged(float damage);
+
+	bool    Get_IsAI() const { m_pdata.ai; }
 	// ---------------------------------------------------------------------------------------
 	// [5]. 물리효과 함수
 
@@ -159,6 +157,8 @@ public:
 	static vector<Player_Session*>      m_clients;
 	static list<BulletObject*>          m_bullobjs;
 	static unordered_set<StaticObject*> m_sobjs;
+
+	vector<Player_Session*>* GetPlayerSession() { return &m_clients; }
 
 	static int m_tempcount;
 	int t_cnt{ 0 };
