@@ -447,7 +447,7 @@ void Scene::CreateGameObject()
 	int player_num = 0;
 	for (auto obj : DynamicObject)
 	{
-		obj->m_player_data.ID = player_num;
+		obj->m_player_data.id = player_num;
 		++player_num;
 	}
 
@@ -686,7 +686,7 @@ Player_Data * Scene::Get_PlayerServerData(const unsigned int & id)
 {
 	for (auto GameObject : DynamicObject)
 	{
-		if (GameObject->m_player_data.ID == id)
+		if (GameObject->m_player_data.id == id)
 		{
 			Get_GameObject = GameObject;
 			return &(GameObject->m_player_data);
@@ -705,7 +705,7 @@ void Scene::SET_PLAYER_BY_SEVER_DATA(const unsigned short & id,const Player_Data
 {
 	for (auto GameObject : DynamicObject)
 	{
-		if (GameObject->m_player_data.ID == id)
+		if (GameObject->m_player_data.id == id)
 		{
 			switch (packet_type)
 			{
@@ -713,15 +713,15 @@ void Scene::SET_PLAYER_BY_SEVER_DATA(const unsigned short & id,const Player_Data
 			{
 				GameObject->m_player_data = move(playerdata);
 
-				GameObject->Orient = { playerdata.Rotate_status.x , playerdata.Rotate_status.y, playerdata.Rotate_status.z, playerdata.Rotate_status.w };
-				GameObject->CenterPos = { playerdata.Pos.x , playerdata.Pos.y , playerdata.Pos.z , playerdata.Pos.w };
+				GameObject->Orient = { playerdata.rot.x , playerdata.rot.y, playerdata.rot.z, playerdata.rot.w };
+				GameObject->CenterPos = { playerdata.pos.x , playerdata.pos.y , playerdata.pos.z , playerdata.pos.w };
 	
-				GameObject->gamedata.Damage = move(playerdata.UserInfo.player_status.attack);
-				GameObject->gamedata.HP = move(playerdata.UserInfo.cur_hp);
-				GameObject->gamedata.MAXHP = move(playerdata.UserInfo.origin_hp);
-				GameObject->gamedata.Speed = move(playerdata.UserInfo.player_status.speed);
+				GameObject->gamedata.Damage = move(playerdata.status.attack);
+				GameObject->gamedata.HP = move(playerdata.status.cur_hp);
+				GameObject->gamedata.MAXHP = move(playerdata.status.origin_hp);
+				GameObject->gamedata.Speed = move(playerdata.status.speed);
 
-				GameObject->AirBone = playerdata.AirBone;
+				GameObject->AirBone = playerdata.airbone;
 
 			}
 			break;
@@ -731,27 +731,27 @@ void Scene::SET_PLAYER_BY_SEVER_DATA(const unsigned short & id,const Player_Data
 				GameObject->m_player_data = move(playerdata);
 
 				//GameObject->Orient = { playerdata.Rotate_status.x , playerdata.Rotate_status.y, playerdata.Rotate_status.z, playerdata.Rotate_status.w };
-				GameObject->CenterPos = { playerdata.Pos.x , playerdata.Pos.y , playerdata.Pos.z , playerdata.Pos.w };
+				GameObject->CenterPos = { playerdata.pos.x , playerdata.pos.y , playerdata.pos.z , playerdata.pos.w };
 
-				GameObject->gamedata.Damage = move(playerdata.UserInfo.player_status.attack);
-				GameObject->gamedata.HP = move(playerdata.UserInfo.cur_hp);
-				GameObject->gamedata.MAXHP = move(playerdata.UserInfo.origin_hp);
-				GameObject->gamedata.Speed = move(playerdata.UserInfo.player_status.speed);
+				GameObject->gamedata.Damage = move(playerdata.status.attack);
+				GameObject->gamedata.HP = move(playerdata.status.cur_hp);
+				GameObject->gamedata.MAXHP = move(playerdata.status.origin_hp);
+				GameObject->gamedata.Speed = move(playerdata.status.speed);
 
-				GameObject->AirBone = playerdata.AirBone;
+				GameObject->AirBone = playerdata.airbone;
 
-				if (GameObject->m_player_data.ID == my_ClientID)
+				if (GameObject->m_player_data.id == my_ClientID)
 					Player->SetPlayer(GameObject);
 			}
 			break;
 
 			case PACKET_PROTOCOL_TYPE::CHANGED_PLAYER_POSITION:
 			{
-				GameObject->m_player_data.Pos = move(playerdata.Pos);
-				GameObject->m_player_data.Ani = move(playerdata.Ani);
+				GameObject->m_player_data.pos = move(playerdata.pos);
+				GameObject->m_player_data.ani = move(playerdata.ani);
 
-				GameObject->CenterPos = { playerdata.Pos.x , playerdata.Pos.y , playerdata.Pos.z , playerdata.Pos.w };
-				GameObject->n_Animation = playerdata.Ani;
+				GameObject->CenterPos = { playerdata.pos.x , playerdata.pos.y , playerdata.pos.z , playerdata.pos.w };
+				GameObject->n_Animation = playerdata.ani;
 
 			}
 			break;
@@ -764,9 +764,9 @@ void Scene::SET_PLAYER_BY_SEVER_DATA(const unsigned short & id,const Player_Data
 
 			case PACKET_PROTOCOL_TYPE::PLAYER_ROTATE:
 			{
-				GameObject->m_player_data.Rotate_status = move(playerdata.Rotate_status);
+				GameObject->m_player_data.rot = move(playerdata.rot);
 
-				GameObject->Orient = { playerdata.Rotate_status.x , playerdata.Rotate_status.y, playerdata.Rotate_status.z, playerdata.Rotate_status.w };
+				GameObject->Orient = { playerdata.rot.x , playerdata.rot.y, playerdata.rot.z, playerdata.rot.w };
 			}
 			break;
 
@@ -824,7 +824,7 @@ void Scene::SET_BULLET_BY_SERVER_DATA(BulletObject_Info & bulldata, const unsign
 		{
 			//클라에서 먼저 불렛이 죽고 서버에서 죽었다는 정보를 주게되면 아래 분기문이 실행됨 -> 버그
 			//내 자신은 이걸 실행할 필요가없음
-			if (BulletObject.size() == 0 && bulldata.Master_ID != Player->PlayerObject->m_player_data.ID)
+			if (BulletObject.size() == 0 && bulldata.Master_ID != Player->PlayerObject->m_player_data.id)
 			{
 				Player->CreateOtherClientBullet(device, commandlist, bulldata.endpoint, nullptr, &BulletObject, bulldata);
 			}
@@ -859,7 +859,7 @@ void Scene::SET_BULLET_BY_SERVER_DATA(BulletObject_Info & bulldata, const unsign
 
 				//다른 클라이언트가 생성한 불렛이 내 클라이언트가 관리하는 
 				//기존의 불렛리스트에 없다면 추가시켜줘야한다.
-				if (findBullet == false && bulldata.Master_ID != Player->PlayerObject->m_player_data.ID)
+				if (findBullet == false && bulldata.Master_ID != Player->PlayerObject->m_player_data.id)
 				{
 					Player->CreateOtherClientBullet(device, commandlist, bulldata.endpoint, nullptr, &BulletObject, bulldata);
 				}
@@ -877,9 +877,9 @@ void Scene::SET_PLAYER_ANIMATION_BY_SERVER_DATA(const unsigned short & id, const
 {
 	for (auto GameObject : DynamicObject)
 	{
-		if (GameObject->m_player_data.ID == id)
+		if (GameObject->m_player_data.id == id)
 		{
-			GameObject->m_player_data.Ani = ani;
+			GameObject->m_player_data.ani = ani;
 			GameObject->n_Animation = ani;
 			break;
 		}
@@ -890,7 +890,7 @@ void Scene::Set_RemovePlayerData(const unsigned int & id, Player_Data & playerda
 {
 	for (auto GameObject : DynamicObject)
 	{
-		if (GameObject->m_player_data.ID == id)
+		if (GameObject->m_player_data.id == id)
 		{
 			delete GameObject;
 		}

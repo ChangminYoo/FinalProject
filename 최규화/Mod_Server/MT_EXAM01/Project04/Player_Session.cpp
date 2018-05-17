@@ -157,12 +157,12 @@ void Player_Session::Init_PlayerInfo()
 	OffLookvector = XMFLOAT3(0, 0, -1);
 	OffRightvector = XMFLOAT3(-1, 0, 0);	
 
-	XMFLOAT4 xmf4{ m_pdata.rot.x, m_pdata.rot.y, m_pdata.rot.z, m_pdata.rot.w };
-	auto q = XMLoadFloat4(&xmf4);
+	XMFLOAT4 xmf4_rot{ m_pdata.rot.x, m_pdata.rot.y, m_pdata.rot.z, m_pdata.rot.w };
+	auto q = XMLoadFloat4(&xmf4_rot);
 	XMFLOAT3 axis{ 0,1,0 };
 	auto q2 = QuaternionRotation(axis, MMPE_PI);
-	xmf4 = QuaternionMultiply(xmf4, q2);
-	m_pdata.rot.x = xmf4.x; m_pdata.rot.y = xmf4.y; m_pdata.rot.z = xmf4.z; m_pdata.rot.w = xmf4.w;
+	xmf4_rot = QuaternionMultiply(xmf4_rot, q2);
+	m_pdata.rot.x = xmf4_rot.x; m_pdata.rot.y = xmf4_rot.y; m_pdata.rot.z = xmf4_rot.z; m_pdata.rot.w = xmf4_rot.w;
 	
 	pe->UpdateLookVector(OffLookvector, OffRightvector, m_pdata.rot, Lookvector, Rightvector);
 	pe->GetUpVector(Lookvector, Rightvector, Upvector);
@@ -179,9 +179,9 @@ void Player_Session::Init_PlayerInfo()
 	//2. 물리효과 적용
 	pe->GravitySystem(0.0f, pp);
 
-	XMFLOAT4 xmf4{ m_pdata.pos.x, m_pdata.pos.y, m_pdata.pos.z, m_pdata.pos.w };
-	pp->integrate(0.0f, &xmf4);
-	m_pdata.pos.x = xmf4.x;  m_pdata.pos.y = xmf4.y;  m_pdata.pos.z = xmf4.z;   m_pdata.pos.w = xmf4.w;
+	XMFLOAT4 xmf4_pos{ m_pdata.pos.x, m_pdata.pos.y, m_pdata.pos.z, m_pdata.pos.w };
+	pp->integrate(0.0f, &xmf4_pos);
+	m_pdata.pos.x = xmf4_pos.x;  m_pdata.pos.y = xmf4_pos.y;  m_pdata.pos.z = xmf4_pos.z;   m_pdata.pos.w = xmf4_pos.w;
 	
 	pe->AfterGravitySystem(0.0f, pp, OBJECT_TYPE::PLAYER, m_pdata.pos, m_pdata.airbone);
 
@@ -506,9 +506,26 @@ void Player_Session::ProcessPacket(Packet * packet)
 		}
 		break;
 
+	case PACKET_PROTOCOL_TYPE::PLAYER_JUMP:
+		{
+			if (m_state == DEAD) break;
+
+			auto jump_data = reinterpret_cast<STC_CharJump*>(packet);
+
+			GeneratorJump j;
+			j.SetJumpVel(XMFLOAT3(0, 100, 0));
+			//j.Update(0.f, *pp);
+			j.Update(0.f, *m_clients[jump_data->id]->GetPhysicsPoint());
+			m_clients[jump_data->id]->m_pdata.airbone = true;
+			//m_clients[jump_data->id]->AirBone = true;
+			//m_pdata.airbone = true;
+			//m_pdata.ani = jump_data.ani_state;
+		}
+		break;
+
 	case PACKET_PROTOCOL_TYPE::TEST:
 		{
-			if (m_state == PLAYER_STATE::DEAD)
+			if (m_state == DEAD)
 				break;
 
 			auto test_data = reinterpret_cast<STC_Test*>(packet);

@@ -409,7 +409,8 @@ void CCubeManObject::Tick(const GameTimer & gt)
 {
 	//적분기. 적분기란? 매 틱마다 힘! 에의해서 변화 되는 가속도/속도/위치를 갱신한다.
 	//이때 pp의 position과 CenterPos를 일치시켜야하므로 CenterPos의 포인터를 인자로 넘겨야 한다.
-	pp->integrate(gt.DeltaTime(), &CenterPos);
+
+	//pp->integrate(gt.DeltaTime(), &CenterPos);
 
 	if (ObjData.isAnimation == true)
 	{
@@ -580,7 +581,7 @@ BulletCube::BulletCube(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 			BulletIDList.push_back(myID);
 
 			m_bullet_data.myID = myID;
-			m_bullet_data.Master_ID = master->m_player_data.ID;
+			m_bullet_data.Master_ID = master->m_player_data.id;
 		}
 	}
 
@@ -783,7 +784,7 @@ HeavyBulletCube::HeavyBulletCube(ID3D12Device * m_Device, ID3D12GraphicsCommandL
 			BulletIDList.push_back(myID);
 
 			m_bullet_data.myID = myID;
-			m_bullet_data.Master_ID = master->m_player_data.ID;
+			m_bullet_data.Master_ID = master->m_player_data.id;
 		}
 	}
 

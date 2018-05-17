@@ -33,7 +33,7 @@ private:
 	wchar_t						 m_loginPW[MAX_BUFFER_SIZE / 4]{ L"Guest" };
 
 	//1-1. 통신정보 
-	Player_Data                  m_pdata;	 // 지금 이 클라이언트 객체가 관리하는 플레이어 정보(패킷으로 주고받는)
+	//Player_Data                  m_pdata;	 // 지금 이 클라이언트 객체가 관리하는 플레이어 정보(패킷으로 주고받는)
 	//PLAYERS                      m_playerType;
 	//PLAYER_OBJECT_TYPE		   m_myObjType;
 
@@ -83,6 +83,7 @@ public:
 	unsigned int m_prev_packet_size{ 0 };
 	mutex		 m_lock;
 
+	Player_Data                  m_pdata;
 public:
 	Player_Session(const short& count, boost::asio::ip::tcp::socket socket) : m_id(count), m_socket(move(socket))
 	{};
@@ -94,7 +95,7 @@ public:
 	// [1]. 서버 통신 관련 함수
 
 	// 1. 해당 객체로 연결된 클라이언트와 통신하는 서버 소켓정보를 넘겨줌
-	boost::asio::ip::tcp::socket& Socket() { return m_socket;}
+	boost::asio::ip::tcp::socket& Socket() { return m_socket; }
 
 	// 2. 클라이언트로 패킷을 보낼 때 사용하는 사용자정의 Send함수  - async_write 사용
 	void SendPacket(Packet* packet);
@@ -124,7 +125,7 @@ public:
 	// ---------------------------------------------------------------------------------------
 	// [4].기타 GET - SET 함수
 	Player_Data GetPlayerData() { return m_pdata; } const
-	void SetPlayerData(Player_Data& pdata) { m_pdata = move(pdata); }
+		void SetPlayerData(Player_Data& pdata) { m_pdata = move(pdata); }
 
 	int		Get_ID() const { return m_id; }
 
@@ -141,7 +142,12 @@ public:
 
 	void	Damaged(float damage);
 
-	bool    Get_IsAI() const { m_pdata.ai; }
+	bool    Get_IsAI() const { return m_pdata.ai; }
+
+	void    SetPlayerData_Airbone(char airbone) { m_pdata.airbone = airbone; }
+	void	SetPlayerData_Pos(const XMFLOAT4& xmf4) { m_pdata.pos.x = xmf4.x; m_pdata.pos.y = xmf4.y; m_pdata.pos.z = xmf4.z; m_pdata.pos.w = xmf4.w; }
+	void    SetPlayerData_Pos(const float& x, const float& y, const float& z, const float& w) { m_pdata.pos.x = x; m_pdata.pos.y = y; m_pdata.pos.z = z; m_pdata.pos.w = w; }
+
 	// ---------------------------------------------------------------------------------------
 	// [5]. 물리효과 함수
 
@@ -150,7 +156,7 @@ public:
 	XMFLOAT3				GetUpVector()	 const { return Upvector;    }
 
 	PhysicsPoint*			GetPhysicsPoint() { return pp; }
-	
+	PhysicalEffect*         GetPhysicsEffect() { return pe; }
 
 	// ---------------------------------------------------------------------------------------
 	// 서버에서 관리하는 클라이언트 객체들의 집합(vector 사용 - 나중에 멀쓰때 맞는 자료구조로 바꿀것)

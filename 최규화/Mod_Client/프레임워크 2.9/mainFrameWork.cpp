@@ -109,11 +109,11 @@ void MainFrameWork::GravitySystem(const GameTimer & gt)
 	GeneratorGravity gg;
 	gg.SetGravityAccel(XMFLOAT3(0, -100, 0));
 	//고정된 물체를 제외한 모든오브젝트에 중력을 가한다. 단 투사체는 제외한다.
-	for (auto i = scene->DynamicObject.begin(); i != scene->DynamicObject.end(); i++)
-	{
-		if((*i)->staticobject==false)
-		gg.Update(gt.DeltaTime(), *(*i)->pp);
-	}
+	//for (auto i = scene->DynamicObject.begin(); i != scene->DynamicObject.end(); i++)
+	//{
+	//	if((*i)->staticobject==false)
+	//	gg.Update(gt.DeltaTime(), *(*i)->pp);
+	//}
 	for (auto i = scene->RigidObject.begin(); i != scene->RigidObject.end(); i++)
 	{
 
@@ -126,25 +126,25 @@ void MainFrameWork::GravitySystem(const GameTimer & gt)
 void MainFrameWork::AfterGravitySystem(const GameTimer & gt)
 {
 
-	for (auto i = scene->DynamicObject.begin(); i != scene->DynamicObject.end(); i++)
-	{
-		//왜 실제 중점이 아닌 pp의 중점으로 처리하냐면 실제중점을 움직인후 pp의 중점을 움직이나
-		//pp의중점을 움직이고 실제중점을 움직이나 같지만, UpdatePPosCenterPos를 쓰기위해
-		//pp를 움직이고 cp를 pp로 맞춘다.
-		float ppy = (*i)->pp->GetPosition().y;
-		float hby = (*i)->pp->GetHalfBox().y;
-		if (ppy - hby < 0)//pp의 중점y-하프박스의 y값을 한결과가 0보다 작으면 땅아래에 묻힌셈
-		{
-			XMFLOAT3 gp = (*i)->pp->GetPosition();
-			gp.y += hby - ppy;//그러면 반대로 하프박스y값-중점y만큼 올리면 된다.
-			(*i)->pp->SetPosition(gp);
-			(*i)->UpdatePPosCenterPos();
-			auto v = (*i)->pp->GetVelocity();
-			v.y = 0;//중력에 의한 속도를 0으로 만듬
-			(*i)->pp->SetVelocity(v);
-			(*i)->AirBone = false;
-		}
-	}
+	//for (auto i = scene->DynamicObject.begin(); i != scene->DynamicObject.end(); i++)
+	//{
+	//	//왜 실제 중점이 아닌 pp의 중점으로 처리하냐면 실제중점을 움직인후 pp의 중점을 움직이나
+	//	//pp의중점을 움직이고 실제중점을 움직이나 같지만, UpdatePPosCenterPos를 쓰기위해
+	//	//pp를 움직이고 cp를 pp로 맞춘다.
+	//	float ppy = (*i)->pp->GetPosition().y;
+	//	float hby = (*i)->pp->GetHalfBox().y;
+	//	if (ppy - hby < 0)//pp의 중점y-하프박스의 y값을 한결과가 0보다 작으면 땅아래에 묻힌셈
+	//	{
+	//		XMFLOAT3 gp = (*i)->pp->GetPosition();
+	//		gp.y += hby - ppy;//그러면 반대로 하프박스y값-중점y만큼 올리면 된다.
+	//		(*i)->pp->SetPosition(gp);
+	//		(*i)->UpdatePPosCenterPos();
+	//		auto v = (*i)->pp->GetVelocity();
+	//		v.y = 0;//중력에 의한 속도를 0으로 만듬
+	//		(*i)->pp->SetVelocity(v);
+	//		(*i)->AirBone = false;
+	//	}
+	//}
 
 	//투사체는 y가 0보다 작으면 제거된다.
 	for (auto i = scene->BulletObject.begin(); i != scene->BulletObject.end(); i++)

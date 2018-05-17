@@ -33,6 +33,7 @@ enum PACKET_PROTOCOL_TYPE
 
 	PLAYER_DISCONNECT,		//연결끊어짐
 	PLAYER_ROTATE,			//플레이어 회전
+	PLAYER_JUMP,
 	PLAYER_ATTACK,		    //플레이어 공격
 	STATIC_OBJECT,			//고정된 물체,
 	PLAYER_ANIMATION,
@@ -266,6 +267,15 @@ typedef struct Server_To_Client_CharAnimation
 	unsigned char char_animation;
 
 }STC_CharAnimation;
+
+typedef struct Server_To_Client_CharJump
+{
+	unsigned char packet_size = sizeof(unsigned char) + sizeof(unsigned char) + sizeof(unsigned char) + sizeof(unsigned short);
+	unsigned char packet_type = PACKET_PROTOCOL_TYPE::PLAYER_JUMP;
+	unsigned char ani_state;
+	unsigned short id;
+
+}STC_CharJump;
 
 typedef struct Server_To_Client_Player_Test
 {

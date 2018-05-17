@@ -183,10 +183,30 @@ void TimerWorker::ProcessPacket(event_type * et)
 	case REGULAR_PACKET_EXCHANGE:
 	{
 		// 1초에 20번 패킷을 정기적으로 보내줘야함 
+		QueryPerformanceCounter((LARGE_INTEGER*)&mRegularCurrTime);
+		mRegularDelTime = (mRegularCurrTime - mRegularPrevTime) * mSecondsPerCount;
+		
+		STC_ChangedPos stc_pos;
+		
 		for (auto client : Player_Session::m_clients)
 		{
+			client->GetPhysicsEffect()->GravitySystem(mRegularDelTime, client->GetPhysicsPoint());
+		
+			XMFLOAT4 xmf4{ client->m_pdata.pos.x,client->m_pdata.pos.y, client->m_pdata.pos.z, client->m_pdata.pos.w };
+			client->GetPhysicsPoint()->integrate(mRegularDelTime, &xmf4);
+			client->SetPlayerData_Pos(xmf4);
 
+			client->GetPhysicsEffect()->AfterGravitySystem(mRegularDelTime, client->GetPhysicsPoint(), OBJECT_TYPE::PLAYER,
+													       client->m_pdata.pos, client->m_pdata.airbone);
+		
+			stc_pos.id = client->m_pdata.id;
+			stc_pos.ani_state = client->m_pdata.ani;
+			stc_pos.pos = client->m_pdata.pos;
+
+			client->SendPacket(reinterpret_cast<Packet*>(&stc_pos));
 		}
+
+		QueryPerformanceCounter((LARGE_INTEGER*)&mRegularPrevTime);
 		//문제 - m_bullobjs 가 없음 
 		//1. 라이트 불렛이 있다면, 이 정보를 정기적으로 클라이언트에 보내줘야함 
 		//2. 불렛 삭제관리 -> 불렛의 생명주기가 다하거나, 충돌하거나, y값이 0보다 작을 때 m_bulldata.alive = false로 된 상태를

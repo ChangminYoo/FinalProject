@@ -420,6 +420,12 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 				j.SetJumpVel(XMFLOAT3(0, 100, 0));//나중에 플레이어의 점프력만큼 추가할것
 				j.Update(DeltaTime, *PlayerObject->pp);
 				PlayerObject->AirBone = true;//공중상태를 true로
+
+				STC_CharJump cts_charjump;
+				cts_charjump.id = PlayerObject->m_player_data.id;
+				//cts_charjump.ani_state;  //나중에 점프 애니메이션 추가되면 설정해줄것임
+
+				m_async_client->SendPacket(reinterpret_cast<Packet*>(&cts_charjump));
 			}
 
 			if (GetFocus())
@@ -428,7 +434,7 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 				change_pos_ani.packet_size = sizeof(STC_ChangedPos);
 				change_pos_ani.pack_type = PACKET_PROTOCOL_TYPE::CHANGED_PLAYER_POSITION;
 
-				change_pos_ani.id = PlayerObject->m_player_data.ID;
+				change_pos_ani.id = PlayerObject->m_player_data.id;
 				change_pos_ani.pos = { PlayerObject->CenterPos.x, PlayerObject->CenterPos.y, PlayerObject->CenterPos.z, PlayerObject->CenterPos.w };
 
 				if (move == true)//움직이고 있으면 움직이는 모션으로

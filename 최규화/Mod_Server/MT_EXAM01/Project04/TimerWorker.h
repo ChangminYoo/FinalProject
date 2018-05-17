@@ -37,11 +37,13 @@ class TimerWorker
 private:
 	mutex t_lock;
 
-	__int64 mPrevTime;
-	__int64 mCurrTime;
+	__int64 mRegularPrevTime{ 0 };
+	__int64 mRegularCurrTime{ 0 };
 
 	__int64 countsPerSec;
 	double mSecondsPerCount;
+
+	double mRegularDelTime;
 
 public:
 	TimerWorker();

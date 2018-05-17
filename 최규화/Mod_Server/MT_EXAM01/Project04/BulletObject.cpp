@@ -149,8 +149,8 @@ void BulletObject::Collision_Players(vector<Player_Session*>& clients, float Del
 
 					client->PlayerLock();
 					client->Damaged(Damage);
-					cout << "Client ID " << client->GetPlayerData().ID << "was Damaged";
-					cout << "HP: " << client->GetPlayerData().UserInfo.cur_hp << endl;
+					cout << "Client ID " << client->m_pdata.id << "was Damaged";
+					cout << "HP: " << client->m_pdata.status.cur_hp << endl;
 					client->PlayerUnLock();
 				}
 			}

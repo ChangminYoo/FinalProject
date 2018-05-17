@@ -26,8 +26,6 @@ private:
 	PhysicsPoint		   *pp{ nullptr };
 	PhysicalEffect		   *pe{ nullptr };
 
-	CollisionBox			m_halfBox;
-
 	bool					m_airbone{ false };		
 
 	RayCastObject rco;
