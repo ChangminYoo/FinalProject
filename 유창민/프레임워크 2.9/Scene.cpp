@@ -25,7 +25,10 @@ Scene::Scene(HWND hwnd,ID3D12Device * m_Device, ID3D12GraphicsCommandList * m_DC
 	light = new CLight(m_Device, m_DC);
 	CreateUI();
 
-
+	Sound = new CSound;
+	Sound->Init();
+	
+	Sound->GetInstance().ContinueSound(CSound::TITLE);
 }
 
 
@@ -97,6 +100,9 @@ Scene::~Scene()
 		delete Player;
 	if (light != NULL)
 		delete light;
+
+	if (Sound != NULL)
+		delete Sound;
 }
 
 
