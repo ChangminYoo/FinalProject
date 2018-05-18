@@ -217,10 +217,10 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 		if (PlayerObject != NULL && PlayerObject->gamedata.HP > 0 && GetFocus())
 		{
 
-
 			bool move = false;
 			if (GetKeyState(0x57) & 0x8000)//W키
 			{
+
 				move = true;
 				//룩벡터의 +방향으로 움직인다.
 				auto l = XMLoadFloat3(&PlayerObject->Lookvector);
@@ -493,6 +493,7 @@ void CPlayer::CreateBullet(ID3D12Device* Device, ID3D12GraphicsCommandList* cl,X
 	{
 	case 0://불렛큐브(라이트 큐브)
 	{
+
 		//먼저 해당스킬의 쿨타임을 넣어주자.
 		skilldata.SkillsCoolTime[skilldata.SellectBulletIndex] = 0.45f;
 		skilldata.isSkillOn[skilldata.SellectBulletIndex] = false;
@@ -556,7 +557,7 @@ void CPlayer::CreateBullet(ID3D12Device* Device, ID3D12GraphicsCommandList* cl,X
 		tempori = XMQuaternionMultiply(tempori, ori2);
 		XMStoreFloat4(&ori, tempori);//최종 회전 방향
 
-
+		
 	 
 
 		bulletlist->push_back(new BulletCube(Device, cl, PlayerObject->ParticleList, PlayerObject, ori, lock, PlayerObject->CenterPos));
@@ -564,6 +565,7 @@ void CPlayer::CreateBullet(ID3D12Device* Device, ID3D12GraphicsCommandList* cl,X
 	}
 	case 1://불렛큐브(헤비 큐브)
 	{
+
 		//먼저 해당스킬의 쿨타임을 넣어주자.
 		skilldata.SkillsCoolTime[skilldata.SellectBulletIndex] = 1.1f;
 		skilldata.isSkillOn[skilldata.SellectBulletIndex] = false;

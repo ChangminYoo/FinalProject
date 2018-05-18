@@ -456,7 +456,19 @@ void FrameWork::OnMouseDown(WPARAM btnState, int x, int y)
 	
 	//레이를 쏜다. 단 플레이어 오브젝트가 살아있고, 해당 스킬이 쏠수있는 true상태라면!
 	if (scene->Player->PlayerObject->gamedata.HP > 0 && scene->Player->skilldata.isSkillOn[scene->Player->skilldata.SellectBulletIndex])
-	{//공격 애니메이션으로 전환
+	{
+		if (scene->Player->skilldata.SellectBulletIndex == 0)
+		{
+			scene->Sound->PlaySoundEffect(CSound::SoundType::SKILL1);
+			scene->Sound->SetVolume(CSound::SoundType::SKILL1, 0.8f);
+		}
+		else if (scene->Player->skilldata.SellectBulletIndex == 1)
+		{
+			scene->Sound->PlaySoundEffect(CSound::SoundType::SKILL2);
+			scene->Sound->SetVolume(CSound::SoundType::SKILL2, 0.8f);
+		}
+		
+		//공격 애니메이션으로 전환
 		scene->Player->PlayerObject->SetAnimation(2);
 		auto RAY = MousePicking(x, y, scene->Player->Camera.CamData.EyePos, scene->Player->Camera.CamData.View, scene->Player->Camera.CamData.Proj);
 		XMFLOAT3 savepoint;

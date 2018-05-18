@@ -41,7 +41,6 @@ public:
 	float ytheta = 0;
 
 	SkillData skilldata;
-	
 
 	void Tick(float DeltaTime);
 	void CreateBullet(ID3D12Device* Device,ID3D12GraphicsCommandList* cl, XMFLOAT3& Goal, CGameObject* lock, list<CGameObject*>* bulletlist);
