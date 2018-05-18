@@ -274,7 +274,7 @@ CCubeManObject::CCubeManObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Female Black Knight",    L"textures/human/Female Black Knight 04 Green.dds", false, num, 1);
 		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Female Brown Sorceress", L"textures/human/Female Brown Sorceress 03 White.dds", false, num, 2);
 		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Female White Knight",    L"textures/human/Female White Knight 04 Purple.dds", false, num, 3);
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Female White Barbarian", L"textures/human/Female White Barbarian 05 Red.dds", false, num, 4);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Female White Casual", L"textures/human/Female White Casual 08C.dds", false, num, 4);
 		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Male Black Knight",      L"textures/human/Male Black Knight 07 White.dds", false, num, 5);
 		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Male White Wizard",      L"textures/human/Male White Wizard 06 White.dds", false, num, 6);
 		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Male Black Archer",      L"textures/human/Male Black Archer 05 Green.dds", false, num, 7);
@@ -298,7 +298,7 @@ CCubeManObject::CCubeManObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 	else if (select == 3)
 		TextureName = "Female White Knight"; 
 	else if (select == 4)
-		TextureName = "Female White Barbarian"; 
+		TextureName = "Female White Casual"; 
 	else if (select == 5)
 		TextureName = "Male Black Knight"; 
 	else if (select == 6)

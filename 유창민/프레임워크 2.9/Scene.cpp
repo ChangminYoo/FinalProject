@@ -28,7 +28,6 @@ Scene::Scene(HWND hwnd,ID3D12Device * m_Device, ID3D12GraphicsCommandList * m_DC
 	Sound = new CSound;
 	Sound->Init();
 	
-	Sound->GetInstance().ContinueSound(CSound::TITLE);
 }
 
 
@@ -101,8 +100,7 @@ Scene::~Scene()
 	if (light != NULL)
 		delete light;
 
-	if (Sound != NULL)
-		delete Sound;
+	Sound->DeleteSound();
 }
 
 
@@ -126,6 +124,10 @@ void Scene::SceneState()
 			FirstLoad = false;
 			SetGameState(GS_PLAY);
 			ShowCursor(false);
+
+			Sound->PlaySoundEffect(CSound::SoundType::TITLE);
+			Sound->SetVolume(CSound::SoundType::TITLE, 0.5f);
+			
 		}
 		else
 		{

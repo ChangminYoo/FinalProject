@@ -271,7 +271,6 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 
 				}
 
-
 			}
 			else if (GetKeyState(0x53) & 0x8000)//SŰ
 			{

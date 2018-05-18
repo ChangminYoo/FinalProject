@@ -11,8 +11,17 @@ void ErrorCheck(FMOD_RESULT &result)
 
 CSound::CSound()
 {
+	system = NULL;
+	sound[COUNT] = NULL;
+	channel[COUNT] = NULL;
+
 }
 CSound::~CSound()
+{
+}
+
+
+void CSound::DeleteSound()
 {
 	for (int i = 0; i < SoundType::COUNT; ++i)
 	{
@@ -22,7 +31,6 @@ CSound::~CSound()
 	system->close();
 	system->release();
 }
-
 
 void CSound::PlaySoundEffect(SoundType id)
 {
@@ -42,4 +50,9 @@ void CSound::PauseAllGameSounds()
 	{
 		channel[i]->setPaused(true);
 	}
+}
+
+void CSound::SetVolume(SoundType id, float vol)
+{
+	channel[id]->setVolume(vol);
 }

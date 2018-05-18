@@ -5,6 +5,7 @@
 #include"CTexture.h"
 #include"CMaterial.h"
 #include"MakeGeometry.h"
+#include"Sound.h"
 #include"MMPE\MyMiniPysicsEngine.h"
 
 #define CUBEMAN_HALFWIDTH 3

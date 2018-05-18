@@ -96,6 +96,9 @@
     <ClCompile Include="MakeGeometry.cpp">
       <Filter>소스파일\게임오브젝트관련</Filter>
     </ClCompile>
+    <ClCompile Include="Sound.cpp">
+      <Filter>소스파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="d3dUtil.h">
@@ -157,6 +160,9 @@
     </ClInclude>
     <ClInclude Include="MakeGeometry.h">
       <Filter>헤더파일\게임오브젝트관련</Filter>
+    </ClInclude>
+    <ClInclude Include="Sound.h">
+      <Filter>헤더파일</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
