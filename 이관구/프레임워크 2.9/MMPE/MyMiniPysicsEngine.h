@@ -19,11 +19,11 @@ namespace MiniPhysicsEngineG9
 	public:
 		PhysicsPoint();
 		~PhysicsPoint();
-
+		XMFLOAT4* CenterPos = NULL;//중점
 	protected:
 		float InverseMass;//무게의 역수. a=1/m * F 이므로 이렇게함. 무게보다 가속도가 더 중요하니까. 이때 m이 무한이면 0이다.
 		XMFLOAT3 Velocity;//속도
-		XMFLOAT3 CenterPos;//중점
+		
 		float damping;//제동용 값. 마찰력 대용으로도 사용
 		XMFLOAT3 TotalForce;//최종적으로 가해진 모든 힘
 		XMFLOAT3 Accel;//가속도
@@ -35,7 +35,7 @@ namespace MiniPhysicsEngineG9
 		float rad = 0;
 
 	public:
-		void integrate(float DeltaTime, XMFLOAT4* ObjPos = NULL, XMFLOAT3* ObjVel = NULL);//적분기. 속도와 가속도로 위치를 구하고 가속도를 이용해 속도를 갱신함.
+		void integrate(float DeltaTime);//적분기. 속도와 가속도로 위치를 구하고 가속도를 이용해 속도를 갱신함.
 		void SetMass(float M);//무게의 역을 쉽게 저장하기 위한 함수. M을 넣으면 역수로 저장해줌
 		float GetMass(bool Inverse = true);//기본적으로 무게의 역을 구함. 다만 false로 두면 그대로 나온다.
 		void SetDamping(float D);//댐핑지수를 설정함.
@@ -43,10 +43,10 @@ namespace MiniPhysicsEngineG9
 
 		float GetRad();
 		void SetBounce(bool bounce);
-		void SetPosition(XMFLOAT3& pos);//중점 위치 설정
-		void SetPosition(XMFLOAT4& pos);//중점 위치 설정
-		void SetPosition(float x, float y, float z);//중점 위치 설정
-		XMFLOAT3 GetPosition();//중점 얻기
+		
+		void SetPosition(XMFLOAT4* pos);//중점 위치 설정
+		
+		XMFLOAT4 GetPosition();//중점 얻기
 
 		void SetVelocity(XMFLOAT3& V);//속도설정. 이는 초기속도이며, 대부분의 속도는 적분기에서 계산되야한다.
 		void SetVelocity(float x, float y, float z);

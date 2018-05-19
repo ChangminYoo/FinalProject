@@ -163,7 +163,6 @@ PhysicsPoint::PhysicsPoint()
 {
 	InverseMass = 1;
 	Velocity = XMFLOAT3(0, 0, 0);
-	CenterPos = XMFLOAT3(0, 0, 0);
 	damping = 0.99;
 	TotalForce = XMFLOAT3(0, 0, 0);
 	Accel = XMFLOAT3(0, 0, 0);
@@ -175,7 +174,7 @@ PhysicsPoint::~PhysicsPoint()
 {
 }
 
-void PhysicsPoint::integrate(float DeltaTime, XMFLOAT4* ObjPos, XMFLOAT3* ObjVel)
+void PhysicsPoint::integrate(float DeltaTime)
 {
 
 	if (InverseMass <= 0.0f)
@@ -183,7 +182,7 @@ void PhysicsPoint::integrate(float DeltaTime, XMFLOAT4* ObjPos, XMFLOAT3* ObjVel
 
 	assert(DeltaTime > 0.0);
 
-	XMVECTOR centerpos = XMLoadFloat3(&CenterPos);
+	XMVECTOR centerpos = XMLoadFloat4(CenterPos);
 	//중력에 의해 속도가 너무 빨라질경우를 대비한 if문이다.
 	//-40보다 더 늦게 떨어지면 그대로 가되, -40이상의 속도면 -40으로 고정한다.
 	//tempV를 이용한 이유는 실제 속도를 -40으로 변경해버리면 댐핑이후에 속도가 이전보다 느려지기 때문이다.
@@ -224,7 +223,7 @@ void PhysicsPoint::integrate(float DeltaTime, XMFLOAT4* ObjPos, XMFLOAT3* ObjVel
 	if (e <= MMPE_EPSILON)
 		velocity = XMVectorZero();
 	//결과 물을 저장한다.
-	XMStoreFloat3(&CenterPos, centerpos);
+	XMStoreFloat4(CenterPos, centerpos);
 	XMStoreFloat3(&Velocity, velocity);
 	XMStoreFloat3(&Accel, accel);
 
@@ -234,10 +233,6 @@ void PhysicsPoint::integrate(float DeltaTime, XMFLOAT4* ObjPos, XMFLOAT3* ObjVel
 
 	//계산된 결과의 중점과 속도 정보를 PhysicsPoint를 가지고있는 오브젝트가 직접가지고 있어야 한다면
 
-	if (ObjPos != NULL)//만약 게임오브젝트가 따로 가지고 있는 중점 변수가 있으면
-		*ObjPos = XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, ObjPos->w);
-	if (ObjVel != NULL)//만약 게임오브젝트가 따로 가지고 있는 속도 변수가 있으면
-		*ObjVel = Velocity;
 }
 
 void PhysicsPoint::SetMass(float M)
@@ -274,22 +269,15 @@ void MiniPhysicsEngineG9::PhysicsPoint::SetBounce(bool bounce)
 	Bounce = bounce;
 }
 
-void PhysicsPoint::SetPosition(XMFLOAT3 & pos)
+void PhysicsPoint::SetPosition(XMFLOAT4* pos)
 {
 	CenterPos = pos;
 }
-void PhysicsPoint::SetPosition(XMFLOAT4 & pos)
-{
-	CenterPos = XMFLOAT3(pos.x, pos.y, pos.z);
-}
-void PhysicsPoint::SetPosition(float x, float y, float z)
-{
-	CenterPos = XMFLOAT3(x, y, z);
-}
 
-XMFLOAT3 PhysicsPoint::GetPosition()
+
+XMFLOAT4 PhysicsPoint::GetPosition()
 {
-	return CenterPos;
+	return *CenterPos;
 }
 
 void PhysicsPoint::SetVelocity(XMFLOAT3 & V)
@@ -366,7 +354,7 @@ XMFLOAT3 MiniPhysicsEngineG9::PhysicsPoint::GetHalfBox()
 bool MiniPhysicsEngineG9::PhysicsPoint::CollisionTest(PhysicsPoint & p2, XMFLOAT3 & l1, XMFLOAT3 & r1, XMFLOAT3 & u1, XMFLOAT3 & l2, XMFLOAT3 & r2, XMFLOAT3 & u2)
 {
 	//먼저 구 오브젝트로 검사한다.
-	float L = FloatLength(Float3Add(CenterPos, p2.CenterPos, false));
+	float L = FloatLength(Float4Add(*CenterPos, *p2.CenterPos, false));
 	if (GetRad() + p2.GetRad() > L)
 	{
 		//15번 검사를 해야하며, 각 축의 정보는 다음과같다.
@@ -555,15 +543,15 @@ void MiniPhysicsEngineG9::PhysicsPoint::ResolvePenetration(PhysicsPoint & p2, fl
 
 	XMFLOAT3 m1(movevector.x*GetMass(), movevector.y*GetMass(), movevector.z*GetMass());
 	auto p1 = GetPosition();
-	auto result1 = Float3Add(p1, m1);
+	auto result1 = Float4Add(p1, XMFloat3to4(m1));
 
-	SetPosition(result1);//자신을 옮긴다.
+	*CenterPos = result1;//자신을 옮긴다.
 
 
 	XMFLOAT3 m2(-movevector.x*p2.GetMass(), -movevector.y*p2.GetMass(), -movevector.z*p2.GetMass());
 	auto pp2 = p2.GetPosition();
-	auto result2 = Float3Add(pp2, m2);
-	p2.SetPosition(result2);//겹쳐진 대상을 옮긴다.
+	auto result2 = Float4Add(pp2, XMFloat3to4(m2));
+	*p2.CenterPos=result2;//겹쳐진 대상을 옮긴다.
 
 
 
@@ -946,7 +934,7 @@ void MiniPhysicsEngineG9::GeneratorAnchor::SetAnchorSpring(XMFLOAT3 & a, float k
 
 void MiniPhysicsEngineG9::GeneratorAnchor::Update(float DeltaTime, PhysicsPoint & pp)
 {
-	XMVECTOR objpos = XMLoadFloat3(&pp.GetPosition());
+	XMVECTOR objpos = XMLoadFloat4(&pp.GetPosition());
 	XMVECTOR ancpos = XMLoadFloat3(&AnchorPos);
 
 	XMVECTOR obj_anc = objpos - ancpos;

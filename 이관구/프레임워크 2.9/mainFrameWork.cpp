@@ -124,10 +124,10 @@ void MainFrameWork::AfterGravitySystem(const GameTimer & gt)
 		float hby = (*i)->pp->GetHalfBox().y;
 		if (ppy - hby < 0)//pp의 중점y-하프박스의 y값을 한결과가 0보다 작으면 땅아래에 묻힌셈
 		{
-			XMFLOAT3 gp = (*i)->pp->GetPosition();
+			XMFLOAT4 gp = (*i)->pp->GetPosition();
 			gp.y += hby - ppy;//그러면 반대로 하프박스y값-중점y만큼 올리면 된다.
-			(*i)->pp->SetPosition(gp);
-			(*i)->UpdatePPosCenterPos();
+			*(*i)->pp->CenterPos=gp;
+			
 			auto v = (*i)->pp->GetVelocity();
 			v.y = 0;//중력에 의한 속도를 0으로 만듬
 			(*i)->pp->SetVelocity(v);
@@ -153,10 +153,10 @@ void MainFrameWork::AfterGravitySystem(const GameTimer & gt)
 		float hby = (*i)->pp->GetHalfBox().y;
 		if (ppy - hby < 0)//pp의 중점y-하프박스의 y값을 한결과가 0보다 작으면 땅아래에 묻힌셈
 		{
-			XMFLOAT3 gp = (*i)->pp->GetPosition();
+			XMFLOAT4 gp = (*i)->pp->GetPosition();
 			gp.y += hby - ppy;//그러면 반대로 하프박스y값-중점y만큼 올리면 된다.
-			(*i)->pp->SetPosition(gp);
-			(*i)->UpdatePPosCenterPos();
+			*(*i)->pp->CenterPos = gp;
+			
 			auto v = (*i)->pp->GetVelocity();
 			v.y = 0;//중력에 의한 속도를 0으로 만듬
 			(*i)->pp->SetVelocity(v);

@@ -77,10 +77,7 @@ void CGameObject::ToDead()
 	DelObj = true;
 }
 
-void CGameObject::UpdatePPosCenterPos()
-{
-	CenterPos = XMFloat3to4(pp->GetPosition());
-}
+
 void CGameObject::UpdateLookVector()
 {
 	auto wmatrix = XMMatrixIdentity();
@@ -155,8 +152,7 @@ void CGameObject::UpdateConstBuffer(ID3D12GraphicsCommandList * commandlist)
 {
 	//항상 호출할것. 룩벡터와 라이트벡터를 업데이트해준다.
 	UpdateLookVector();
-	if (pp != NULL && rb == NULL)
-		UpdatePPosCenterPos();//질점의 중점으로 센터포즈를 변경함. 반드시 충돌하거나 하면 처리해야함
+	
 	SetWorldMatrix();//현재 포지션과 로테이션정보로 월드행렬을 만든다.
 
 	XMMATRIX world = XMLoadFloat4x4(&ObjData.WorldMatrix);
@@ -339,7 +335,7 @@ CCubeManObject::CCubeManObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 
 	//질점오브젝트 사용시 필요한 데이터들 설정
 	pp = new PhysicsPoint();
-	pp->SetPosition(CenterPos);//이 값은 항상 갱신되야한다.
+	pp->SetPosition(&CenterPos);//이 값은 항상 갱신되야한다.
 	pp->SetHalfBox(3, 10, 3);//충돌 박스의 x,y,z 크기
 	pp->SetDamping(0.45);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
 	pp->SetBounce(false);//튕기지 않는다.
@@ -398,7 +394,7 @@ void CCubeManObject::Tick(const GameTimer & gt)
 {
 	//적분기. 적분기란? 매 틱마다 힘! 에의해서 변화 되는 가속도/속도/위치를 갱신한다.
 	//이때 pp의 position과 CenterPos를 일치시켜야하므로 CenterPos의 포인터를 인자로 넘겨야 한다.
-	pp->integrate(gt.DeltaTime(), &CenterPos);
+	pp->integrate(gt.DeltaTime());
 
 	if (ObjData.isAnimation == true)
 	{
@@ -483,7 +479,7 @@ void CCubeManObject::Collision(list<CGameObject*>* collist, float DeltaTime)
 				if ((*i)->staticobject == false)
 				{
 					//상대속도 방향을 구한다. A-B
-					cn = Float3Add(pp->GetPosition(), (*(*i)->pp).GetPosition(), false);
+					cn = XMFloat4to3(Float4Add(pp->GetPosition(), (*(*i)->pp).GetPosition(), false));
 					cn = Float3Normalize(cn);
 
 				}
@@ -494,8 +490,7 @@ void CCubeManObject::Collision(list<CGameObject*>* collist, float DeltaTime)
 
 				//충돌해소 호출. 충돌해소 이후에 반드시 변경된 질점의 위치로 오브젝트위치를 일치시켜야한다.
 				pp->CollisionResolve(*(*i)->pp, cn, DeltaTime);//좀비는 튕기지 않는다.
-				UpdatePPosCenterPos();
-				(*i)->UpdatePPosCenterPos();
+				
 			}
 		}
 	}
@@ -570,7 +565,7 @@ BulletCube::BulletCube(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 
 	//질점오브젝트 사용시 필요한 데이터들 설정
 	pp = new PhysicsPoint();
-	pp->SetPosition(CenterPos);//이 값은 항상 갱신되야한다.
+	pp->SetPosition(&CenterPos);//이 값은 항상 갱신되야한다.
 	pp->SetHalfBox(1, 1, 1);//충돌 박스의 x,y,z 크기
 	pp->SetDamping(1);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
 	pp->SetBounce(false);//튕기지 않는다.
@@ -622,7 +617,7 @@ void BulletCube::Tick(const GameTimer & gt)
 	//적분기. 적분기란? 매 틱마다 힘! 에의해서 변화 되는 가속도/속도/위치를 갱신한다.
 	//이때 pp의 position과 CenterPos를 일치시켜야하므로 CenterPos의 포인터를 인자로 넘겨야 한다.
 
-	pp->integrate(gt.DeltaTime(), &CenterPos);
+	pp->integrate(gt.DeltaTime());
 
 	Orient = QuaternionMultiply(Orient, QuaternionRotation(Lookvector, MMPE_PI * gt.DeltaTime()));
 
@@ -675,7 +670,7 @@ void BulletCube::Collision(list<CGameObject*>* collist, float DeltaTime)
 				if ((*i)->staticobject == false)
 				{
 					//상대속도 방향을 구한다. A-B
-					cn = Float3Add(pp->GetPosition(), (*(*i)->pp).GetPosition(), false);
+					cn = XMFloat4to3(Float4Add(pp->GetPosition(), (*(*i)->pp).GetPosition(), false));
 					cn = Float3Normalize(cn);
 
 					// 파티클리스트에 데미지 오브젝트를 생성해서 넣음. 파티클을 띄운다.
@@ -756,7 +751,7 @@ HeavyBulletCube::HeavyBulletCube(ID3D12Device * m_Device, ID3D12GraphicsCommandL
 
 	//질점오브젝트 사용시 필요한 데이터들 설정
 	pp = new PhysicsPoint();
-	pp->SetPosition(CenterPos);//이 값은 항상 갱신되야한다.
+	pp->SetPosition(&CenterPos);//이 값은 항상 갱신되야한다.
 	pp->SetHalfBox(2, 2, 2);//충돌 박스의 x,y,z 크기
 	pp->SetDamping(1);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
 	pp->SetBounce(false);//튕기지 않는다.
@@ -808,7 +803,7 @@ void HeavyBulletCube::Tick(const GameTimer & gt)
 	//적분기. 적분기란? 매 틱마다 힘! 에의해서 변화 되는 가속도/속도/위치를 갱신한다.
 	//이때 pp의 position과 CenterPos를 일치시켜야하므로 CenterPos의 포인터를 인자로 넘겨야 한다.
 
-	pp->integrate(gt.DeltaTime(), &CenterPos);
+	pp->integrate(gt.DeltaTime());
 
 	//No애니메이션!
 
@@ -863,7 +858,7 @@ void HeavyBulletCube::Collision(list<CGameObject*>* collist, float DeltaTime)
 				if ((*i)->staticobject == false)
 				{
 					//상대속도 방향을 구한다. A-B
-					cn = Float3Add(pp->GetPosition(), (*(*i)->pp).GetPosition(), false);
+					cn = XMFloat4to3(Float4Add(pp->GetPosition(), (*(*i)->pp).GetPosition(), false));
 					cn = Float3Normalize(cn);
 
 					// 파티클리스트에 데미지 오브젝트를 생성해서 넣음. 파티클을 띄운다.
@@ -942,7 +937,7 @@ Tetris1::Tetris1(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlis
 
 	//질점오브젝트 사용시 필요한 데이터들 설정
 	pp = new PhysicsPoint();
-	pp->SetPosition(CenterPos);//이 값은 항상 갱신되야한다.
+	pp->SetPosition(&CenterPos);//이 값은 항상 갱신되야한다.
 	pp->SetHalfBox(4, 4, 4);//충돌 박스의 x,y,z 크기
 	pp->SetDamping(1);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
 	pp->SetBounce(false);//튕기지 않는다.
@@ -989,7 +984,7 @@ void Tetris1::Tick(const GameTimer & gt)
 	//적분기. 적분기란? 매 틱마다 힘! 에의해서 변화 되는 가속도/속도/위치를 갱신한다.
 	//이때 pp의 position과 CenterPos를 일치시켜야하므로 CenterPos의 포인터를 인자로 넘겨야 한다.
 	pp->AddForce(0, -300, 0);
-	pp->integrate(gt.DeltaTime(), &CenterPos);
+	pp->integrate(gt.DeltaTime());
 
 	//No애니메이션!
 
@@ -1043,7 +1038,7 @@ void Tetris1::Collision(list<CGameObject*>* collist, float DeltaTime)
 				if ((*i)->staticobject == false)
 				{
 					//상대속도 방향을 구한다. A-B
-					cn = Float3Add(pp->GetPosition(), (*(*i)->pp).GetPosition(), false);
+					cn = XMFloat4to3(Float4Add(pp->GetPosition(), (*(*i)->pp).GetPosition(), false));
 					cn = Float3Normalize(cn);
 
 					// 파티클리스트에 데미지 오브젝트를 생성해서 넣음. 파티클을 띄운다.
@@ -1118,7 +1113,7 @@ Tetris2::Tetris2(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlis
 
 	//질점오브젝트 사용시 필요한 데이터들 설정
 	pp = new PhysicsPoint();
-	pp->SetPosition(CenterPos);//이 값은 항상 갱신되야한다.
+	pp->SetPosition(&CenterPos);//이 값은 항상 갱신되야한다.
 	pp->SetHalfBox(3, 9, 3);//충돌 박스의 x,y,z 크기
 	pp->SetDamping(1);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
 	pp->SetBounce(false);//튕기지 않는다.
@@ -1164,7 +1159,7 @@ void Tetris2::Tick(const GameTimer & gt)
 	//적분기. 적분기란? 매 틱마다 힘! 에의해서 변화 되는 가속도/속도/위치를 갱신한다.
 	//이때 pp의 position과 CenterPos를 일치시켜야하므로 CenterPos의 포인터를 인자로 넘겨야 한다.
 	pp->AddForce(0, -100, 0);
-	pp->integrate(gt.DeltaTime(), &CenterPos);
+	pp->integrate(gt.DeltaTime());
 
 	//No애니메이션!
 
@@ -1218,7 +1213,7 @@ void Tetris2::Collision(list<CGameObject*>* collist, float DeltaTime)
 				if ((*i)->staticobject == false)
 				{
 					//상대속도 방향을 구한다. A-B
-					cn = Float3Add(pp->GetPosition(), (*(*i)->pp).GetPosition(), false);
+					cn = XMFloat4to3(Float4Add(pp->GetPosition(), (*(*i)->pp).GetPosition(), false));
 					cn = Float3Normalize(cn);
 
 					// 파티클리스트에 데미지 오브젝트를 생성해서 넣음. 파티클을 띄운다.
@@ -1293,7 +1288,7 @@ Tetris3::Tetris3(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlis
 
 	//질점오브젝트 사용시 필요한 데이터들 설정
 	pp = new PhysicsPoint();
-	pp->SetPosition(CenterPos);//이 값은 항상 갱신되야한다.
+	pp->SetPosition(&CenterPos);//이 값은 항상 갱신되야한다.
 	pp->SetHalfBox(4, 8, 2);//충돌 박스의 x,y,z 크기
 	pp->SetDamping(1);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
 	pp->SetBounce(false);//튕기지 않는다.
@@ -1339,7 +1334,7 @@ void Tetris3::Tick(const GameTimer & gt)
 	//적분기. 적분기란? 매 틱마다 힘! 에의해서 변화 되는 가속도/속도/위치를 갱신한다.
 	//이때 pp의 position과 CenterPos를 일치시켜야하므로 CenterPos의 포인터를 인자로 넘겨야 한다.
 	pp->AddForce(0, -180, 0);
-	pp->integrate(gt.DeltaTime(), &CenterPos);
+	pp->integrate(gt.DeltaTime());
 
 	//No애니메이션!
 
@@ -1393,7 +1388,7 @@ void Tetris3::Collision(list<CGameObject*>* collist, float DeltaTime)
 				if ((*i)->staticobject == false)
 				{
 					//상대속도 방향을 구한다. A-B
-					cn = Float3Add(pp->GetPosition(), (*(*i)->pp).GetPosition(), false);
+					cn = XMFloat4to3(Float4Add(pp->GetPosition(), (*(*i)->pp).GetPosition(), false));
 					cn = Float3Normalize(cn);
 
 					// 파티클리스트에 데미지 오브젝트를 생성해서 넣음. 파티클을 띄운다.
@@ -1467,7 +1462,7 @@ Tetris4::Tetris4(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlis
 
 	//질점오브젝트 사용시 필요한 데이터들 설정
 	pp = new PhysicsPoint();
-	pp->SetPosition(CenterPos);//이 값은 항상 갱신되야한다.
+	pp->SetPosition(&CenterPos);//이 값은 항상 갱신되야한다.
 	pp->SetHalfBox(4, 8, 2);//충돌 박스의 x,y,z 크기
 	pp->SetDamping(1);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
 	pp->SetBounce(false);//튕기지 않는다.
@@ -1512,7 +1507,7 @@ void Tetris4::Tick(const GameTimer & gt)
 	//적분기. 적분기란? 매 틱마다 힘! 에의해서 변화 되는 가속도/속도/위치를 갱신한다.
 	//이때 pp의 position과 CenterPos를 일치시켜야하므로 CenterPos의 포인터를 인자로 넘겨야 한다.
 	pp->AddForce(0, -150, 0);
-	pp->integrate(gt.DeltaTime(), &CenterPos);
+	pp->integrate(gt.DeltaTime());
 
 	//No애니메이션!
 
@@ -1566,7 +1561,7 @@ void Tetris4::Collision(list<CGameObject*>* collist, float DeltaTime)
 				if ((*i)->staticobject == false)
 				{
 					//상대속도 방향을 구한다. A-B
-					cn = Float3Add(pp->GetPosition(), (*(*i)->pp).GetPosition(), false);
+					cn = XMFloat4to3(Float4Add(pp->GetPosition(), (*(*i)->pp).GetPosition(), false));
 					cn = Float3Normalize(cn);
 
 					// 파티클리스트에 데미지 오브젝트를 생성해서 넣음. 파티클을 띄운다.
@@ -1912,7 +1907,7 @@ CubeObject::CubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 
 	//질점오브젝트 사용시 필요한 데이터들 설정
 	pp = new PhysicsPoint();
-	pp->SetPosition(CenterPos);//이 값은 항상 갱신되야한다.
+	pp->SetPosition(&CenterPos);//이 값은 항상 갱신되야한다.
 	pp->SetHalfBox(5, 5, 5);//충돌 박스의 x,y,z 크기
 	pp->SetDamping(0.5f);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
 	pp->SetBounce(false);//튕기지 않는다.
@@ -2025,7 +2020,7 @@ MoveCubeObject::MoveCubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 
 	//질점오브젝트 사용시 필요한 데이터들 설정
 	pp = new PhysicsPoint();
-	pp->SetPosition(CenterPos);//이 값은 항상 갱신되야한다.
+	pp->SetPosition(&CenterPos);//이 값은 항상 갱신되야한다.
 	pp->SetHalfBox(10, 5, 10);//충돌 박스의 x,y,z 크기
 	pp->SetDamping(0.5f);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
 	pp->SetBounce(false);//튕기지 않는다.
@@ -2060,7 +2055,7 @@ void MoveCubeObject::Tick(const GameTimer & gt)
 	CenterPos.x = Rad * cosf(MMPE_PI * n * 0.1f);
 	CenterPos.z = Rad * sinf(MMPE_PI * n * 0.1f);
 
-	pp->SetPosition(CenterPos);
+	
 
 }
 
@@ -2110,7 +2105,7 @@ void MoveCubeObject::Collision(list<CGameObject*>* collist, float DeltaTime)
 				if ((*i)->staticobject == false)
 				{
 					//상대속도 방향을 구한다. A-B
-					cn = Float3Add(pp->GetPosition(), (*(*i)->pp).GetPosition(), false);
+					cn = XMFloat4to3(Float4Add(pp->GetPosition(), (*(*i)->pp).GetPosition(), false));
 					cn = Float3Normalize(cn);
 
 				}
@@ -2121,8 +2116,7 @@ void MoveCubeObject::Collision(list<CGameObject*>* collist, float DeltaTime)
 
 				//충돌해소 호출. 충돌해소 이후에 반드시 변경된 질점의 위치로 오브젝트위치를 일치시켜야한다.
 				pp->CollisionResolve(*(*i)->pp, cn, DeltaTime);//좀비는 튕기지 않는다.
-				UpdatePPosCenterPos();
-				(*i)->UpdatePPosCenterPos();
+				
 			}
 		}
 	}
@@ -2671,9 +2665,9 @@ void RigidCubeObject::Collision(list<CGameObject*>* collist, float DeltaTime)
 							rb->CollisionResolve(ppConvertrb, XMFLOAT3(0, 0, 0), DeltaTime, 6000, 1400, 1.5);
 
 							(*i)->pp->SetVelocity(ppConvertrb.GetVelocity());
-							(*i)->pp->SetPosition(ppConvertrb.GetPosition());
+							*(*i)->pp->CenterPos=ppConvertrb.GetPosition();
 							(*i)->pp->SetAccel(ppConvertrb.GetAccel());
-							(*i)->UpdatePPosCenterPos();
+							
 						}
 						else
 						{
@@ -2682,9 +2676,9 @@ void RigidCubeObject::Collision(list<CGameObject*>* collist, float DeltaTime)
 							rb->AmendTime = 0;
 							rb->ResolvePenetration(ppConvertrb, DeltaTime);
 							(*i)->pp->SetVelocity(ppConvertrb.GetVelocity());
-							(*i)->pp->SetPosition(ppConvertrb.GetPosition());
+							*(*i)->pp->CenterPos=ppConvertrb.GetPosition();
 							(*i)->pp->SetAccel(ppConvertrb.GetAccel());
-							(*i)->UpdatePPosCenterPos();
+							
 						}
 						
 
@@ -2761,7 +2755,7 @@ SmallWallObject::SmallWallObject(ID3D12Device * m_Device, ID3D12GraphicsCommandL
 
 	//질점오브젝트 사용시 필요한 데이터들 설정
 	pp = new PhysicsPoint();
-	pp->SetPosition(CenterPos);//이 값은 항상 갱신되야한다.
+	pp->SetPosition(&CenterPos);//이 값은 항상 갱신되야한다.
 	pp->SetHalfBox(20, 10, 5);//충돌 박스의 x,y,z 크기
 	pp->SetDamping(0.5f);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
 	pp->SetBounce(false);//튕기지 않는다.
@@ -2872,7 +2866,7 @@ BigWallObject::BigWallObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList 
 
 	//질점오브젝트 사용시 필요한 데이터들 설정
 	pp = new PhysicsPoint();
-	pp->SetPosition(CenterPos);//이 값은 항상 갱신되야한다.
+	pp->SetPosition(&CenterPos);//이 값은 항상 갱신되야한다.
 	pp->SetHalfBox(350, 50, 5);//충돌 박스의 x,y,z 크기
 	pp->SetDamping(0.5f);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
 	pp->SetBounce(false);//튕기지 않는다.
@@ -2967,7 +2961,7 @@ BuildingObject::BuildingObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 
 	//질점오브젝트 사용시 필요한 데이터들 설정
 	pp = new PhysicsPoint();
-	pp->SetPosition(CenterPos);//이 값은 항상 갱신되야한다.
+	pp->SetPosition(&CenterPos);//이 값은 항상 갱신되야한다.
 	pp->SetHalfBox(15, 45, 15);//충돌 박스의 x,y,z 크기
 	pp->SetDamping(0.5f);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
 	pp->SetBounce(false);//튕기지 않는다.
@@ -3062,7 +3056,7 @@ Rock1Object::Rock1Object(ID3D12Device * m_Device, ID3D12GraphicsCommandList * co
 
 	//질점오브젝트 사용시 필요한 데이터들 설정
 	pp = new PhysicsPoint();
-	pp->SetPosition(CenterPos);//이 값은 항상 갱신되야한다.
+	pp->SetPosition(&CenterPos);//이 값은 항상 갱신되야한다.
 	pp->SetHalfBox(5.5, 2, 5);//충돌 박스의 x,y,z 크기
 	pp->SetDamping(0.5f);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
 	pp->SetBounce(false);//튕기지 않는다.

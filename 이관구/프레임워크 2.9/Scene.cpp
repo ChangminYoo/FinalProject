@@ -292,7 +292,7 @@ void Scene::CreateGameObject()
 	StaticObject.push_back(new BuildingObject(device, commandlist, &BbObject, 0, XMFLOAT4(0, 0, -70, 0)));
 
 	//Rock
-	StaticObject.push_back(new Rock1Object(device, commandlist, &BbObject, 0, XMFLOAT4(0, 0, 70, 0)));
+//	StaticObject.push_back(new Rock1Object(device, commandlist, &BbObject, 0, XMFLOAT4(0, 0, 70, 0)));
 
 
 	//BigWall

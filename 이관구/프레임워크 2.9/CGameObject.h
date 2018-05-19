@@ -131,7 +131,7 @@ public:
 	virtual void ToDamage(float Damage);
 	virtual void ToDead();
 	
-	void UpdatePPosCenterPos();//질점의 중점으로 센터포즈를 변경함. 반드시 충돌하거나 하면 처리해야함.
+	
 	void UpdateLookVector();//항상호출해줄것.
 	
 	void SetAnimation(int n_Ani);//몇번째 애니메이션을 쓸건가?

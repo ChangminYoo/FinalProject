@@ -231,7 +231,7 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 
 
 				XMStoreFloat4(&PlayerObject->CenterPos, p);
-				PlayerObject->pp->SetPosition(PlayerObject->CenterPos);
+				
 
 
 				//충돌리스트의 목록을 전부 검사한다.
@@ -246,7 +246,7 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 							//기존에 W키를 눌러서 움직인만큼 되돌려보내야함.
 
 							XMStoreFloat4(&PlayerObject->CenterPos, tempP);
-							PlayerObject->pp->SetPosition(PlayerObject->CenterPos);
+							
 
 						}
 				}
@@ -261,7 +261,7 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 							//기존에 W키를 눌러서 움직인만큼 되돌려보내야함.
 
 							XMStoreFloat4(&PlayerObject->CenterPos, tempP);
-							PlayerObject->pp->SetPosition(PlayerObject->CenterPos);
+							
 
 						}
 				}
@@ -284,7 +284,7 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 				p -= l;
 
 				XMStoreFloat4(&PlayerObject->CenterPos, p);
-				PlayerObject->pp->SetPosition(PlayerObject->CenterPos);
+				
 
 
 				//충돌리스트의 목록을 전부 검사한다.
@@ -299,7 +299,7 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 							//기존에 W키를 눌러서 움직인만큼 되돌려보내야함.
 
 							XMStoreFloat4(&PlayerObject->CenterPos, tempP);
-							PlayerObject->pp->SetPosition(PlayerObject->CenterPos);
+							
 
 						}
 				}
@@ -314,7 +314,7 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 							//기존에 W키를 눌러서 움직인만큼 되돌려보내야함.
 
 							XMStoreFloat4(&PlayerObject->CenterPos, tempP);
-							PlayerObject->pp->SetPosition(PlayerObject->CenterPos);
+							
 
 						}
 				}
@@ -332,7 +332,7 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 				p -= r;
 
 				XMStoreFloat4(&PlayerObject->CenterPos, p);
-				PlayerObject->pp->SetPosition(PlayerObject->CenterPos);
+				
 
 
 				//충돌리스트의 목록을 전부 검사한다.
@@ -347,7 +347,7 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 							//기존에 W키를 눌러서 움직인만큼 되돌려보내야함.
 
 							XMStoreFloat4(&PlayerObject->CenterPos, tempP);
-							PlayerObject->pp->SetPosition(PlayerObject->CenterPos);
+							
 
 						}
 				}
@@ -362,7 +362,7 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 							//기존에 W키를 눌러서 움직인만큼 되돌려보내야함.
 
 							XMStoreFloat4(&PlayerObject->CenterPos, tempP);
-							PlayerObject->pp->SetPosition(PlayerObject->CenterPos);
+							
 
 						}
 				}
@@ -380,7 +380,7 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 
 
 				XMStoreFloat4(&PlayerObject->CenterPos, p);
-				PlayerObject->pp->SetPosition(PlayerObject->CenterPos);
+				
 
 				//충돌리스트의 목록을 전부 검사한다.
 				//다이나믹오브젝트,고정오브젝트 등을 검사해야함.
@@ -394,7 +394,7 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 							//기존에 W키를 눌러서 움직인만큼 되돌려보내야함.
 
 							XMStoreFloat4(&PlayerObject->CenterPos, tempP);
-							PlayerObject->pp->SetPosition(PlayerObject->CenterPos);
+							
 
 						}
 				}
@@ -409,7 +409,7 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 							//기존에 W키를 눌러서 움직인만큼 되돌려보내야함.
 
 							XMStoreFloat4(&PlayerObject->CenterPos, tempP);
-							PlayerObject->pp->SetPosition(PlayerObject->CenterPos);
+						
 
 						}
 				}
