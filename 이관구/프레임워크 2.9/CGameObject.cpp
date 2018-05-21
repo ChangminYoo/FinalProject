@@ -1,5 +1,5 @@
 #include "CGameObject.h"
-
+#include"FSM.h"
 extern UINT CbvSrvDescriptorSize;
 
 
@@ -351,6 +351,8 @@ CCubeManObject::CCubeManObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 		ParticleList->push_back(Hpbar);
 	}
 
+	
+
 }
 
 CCubeManObject::~CCubeManObject()
@@ -410,12 +412,17 @@ void CCubeManObject::Tick(const GameTimer & gt)
 
 	}
 
+	if (fsm != NULL)
+	{
+		fsm->Update(gt.DeltaTime());
+	}
 
 }
 
 void CCubeManObject::ToDead()
 {
 	SetAnimation(Ani_State::Dead);
+	
 }
 
 void CCubeManObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer& gt)

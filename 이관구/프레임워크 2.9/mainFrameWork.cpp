@@ -434,7 +434,7 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 				XMFLOAT3 mAxis = XMFloat4to3(Float4Cross(sV1, sV2));
 				mAxis = Float3Normalize(mAxis);
 				//보정을 시킨다.
-				AmendObject(mAxis, theta, obj);
+				AmendObject(mAxis, stheta, obj);
 
 				//그리고 재귀 시킨다. 왜냐하면 보정이되었으면 allpoint,tempcollisionpoint,contactpoint , penetration 모두 다 바뀌어야 하기 때문이다.
 				//재귀 후 아마 2가지 경우의수가 있다. 충돌이 일어나거나, 아니면 살짝 떠있거나.. 어쨌든 잘 해결 된다.

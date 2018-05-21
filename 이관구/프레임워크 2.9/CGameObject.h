@@ -11,6 +11,8 @@
 #define CUBEMAN_HALFEIGHT 10
 #define BULLET_SIZE 1
 
+class FSM;
+
 enum Obj_State
 {
 	Dynamic=0,
@@ -204,6 +206,9 @@ public:
 	BarObject* Hpbar = NULL;
 	BarFrameObject* HPFrame = NULL;
 	int select = 0;
+
+	FSM* fsm = NULL;
+	
 public:
 	static CMaterial Mat;
 	static bool CreateMesh;//최초로 false며 메쉬를 만든후 true가된다.

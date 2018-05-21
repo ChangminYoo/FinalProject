@@ -10,9 +10,12 @@ struct AIdata
 {
 	//현재 선택된 타겟
 	CGameObject* Target = NULL;
-	XMFLOAT4* LastPosition = NULL;//타겟을 발견했던 마지막 위치.
+	XMFLOAT4 LastPosition;//타겟을 발견했던 마지막 위치.
 	float VisionLength = 150;
-	float FireLength = 100;
+	float FireLength = 30;
+	bool FireOn = true;
+	float cooltime = 0;
+	float damagetime = 0;//0.2초후 데미지를 입히도록 하기 위한용
 };
 
 class state
@@ -43,6 +46,17 @@ public:
 	virtual state* Execute(float DeltaTime, CGameObject* master, AIdata& adata);
 
 };
+
+class state_trace : public state
+{
+	static state* instance;
+	state_trace() {}
+public:
+	static state* Instance();
+	virtual state* Execute(float DeltaTime, CGameObject* master, AIdata& adata);
+
+};
+
 
 class state_global: public state
 {
@@ -86,7 +100,6 @@ public:
 	FSM(CGameObject* master,list<CGameObject*>* dobj);
 	~FSM()
 	{
-		if (aidata.LastPosition != NULL)
-			delete aidata.LastPosition;
+
 	}
 };

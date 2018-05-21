@@ -1,5 +1,5 @@
 #include "Scene.h"
-
+#include"FSM.h"
 
 Scene::Scene(HWND hwnd,ID3D12Device * m_Device, ID3D12GraphicsCommandList * m_DC, float cw, float ch)
 {
@@ -249,6 +249,7 @@ void Scene::CreateGameObject()
 	LandObject.push_back(new GridObject(device, commandlist, &BbObject, XMFLOAT4(0, -0.2, 0, 0)));
 
 	DynamicObject.push_back(new CCubeManObject(device, commandlist,&BbObject, XMFLOAT4(0, 0, 220, 0)));
+	//DynamicObject.push_back(new CCubeManObject(device, commandlist, &BbObject, XMFLOAT4(90, 0, 110, 0)));
 	DynamicObject.push_back(new CCubeManObject(device, commandlist,&BbObject, XMFLOAT4(100, 0, 110, 0)));
 	//DynamicObject.back()->pp->SetBounce(true);
 	//DynamicObject.back()->pp->AddForce(-600, 0, 600);
@@ -344,6 +345,7 @@ void Scene::CreateGameObject()
 
 	//플레이어의 오브젝트 설정. 이건 나중에 바꿔야함.
 	Player->SetPlayer(DynamicObject.front());
+	((CCubeManObject*)DynamicObject.back())->fsm = new FSM(DynamicObject.back(), &DynamicObject);
 	Player->PlayerObject->Blending = false;
 
 }
