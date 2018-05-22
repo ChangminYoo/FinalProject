@@ -13,21 +13,31 @@ void FSM::Update(float DeltaTime)
 {
 	if (Master->gamedata.HP > 0)
 	{
+		//타겟 검색 
 		CheckTarget(DeltaTime);
-		ChangeState(GlobalState->Execute(DeltaTime, Master, aidata));
-		ChangeState(CurrentState->Execute(DeltaTime, Master, aidata));
+		ChangeState(GlobalState->Execute(DeltaTime, Master, aidata));//공격상태로 전환 가능한지 따진다.
+		ChangeState(CurrentState->Execute(DeltaTime, Master, aidata));//현재 상태를 처리함.
 
+		//공격을 할수없는 경우
 		if (aidata.FireOn == false)
 		{
+			//쿨타임을 줄이자
 			aidata.cooltime -= DeltaTime;
 			if (aidata.cooltime <= 0)
 			{
+				//공격가능해진 타이밍이면 데미지를 입힐 수있는 지연타임을 0초로 초기화하고 쿨타임도 0으로초기화하고 공격가능으로 바꿈.
+				aidata.damagetime = 0;
 				aidata.cooltime = 0;
 				aidata.FireOn = true;
 			}
 
 		}
 
+		//매 프레임마다, 몬스터가 플레이어를 볼 수 있으면 보는 방향으로 회전해야함.
+		//룩벡터와 플레이어-몬스터 의 노멀라이즈 한 벡터의 사잇각만큼 회전필요
+		//사잇각은 코사인하면되는데 알다시피 각도가 음수든 양수든 같은 결과를 가지므로 즉, 절댓값 각을 가지므로
+		//회전축을 알아야함. 회전축은 외적으로 구함.
+		//이두가지를 이용해 회전용 쿼터니언을 구하고 이를 곱하면 끝
 		
 			auto l1 = Master->Lookvector;
 			auto l2 = Float3Add(XMFloat4to3(aidata.LastPosition), XMFloat4to3(Master->CenterPos), false);
@@ -178,7 +188,7 @@ state * state_attack::Execute(float DeltaTime, CGameObject * master, AIdata & ad
 			adata.Target->ToDamage(0.20);
 
 		adata.FireOn = false;
-		adata.damagetime = 0;
+		
 		adata.cooltime = 0.7f;
 		
 		
