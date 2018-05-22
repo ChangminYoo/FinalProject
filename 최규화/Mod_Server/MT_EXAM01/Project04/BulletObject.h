@@ -6,7 +6,6 @@
 class StaticObject;
 class Player_Session;
 
-#define MAX_LIGHTBULLET_LIFE_TIME 10
 #define MAX_LIGHT_BULLET_TIME 3.5
 
 class BulletObject
