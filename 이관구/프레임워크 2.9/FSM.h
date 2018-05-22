@@ -16,6 +16,7 @@ struct AIdata
 	bool FireOn = true;
 	float cooltime = 0;
 	float damagetime = 0;//0.2초후 데미지를 입히도록 하기 위한용
+	
 };
 
 class state

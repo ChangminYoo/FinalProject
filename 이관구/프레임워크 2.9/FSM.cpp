@@ -168,19 +168,28 @@ state * state_attack::Instance()
 
 state * state_attack::Execute(float DeltaTime, CGameObject * master, AIdata & adata)
 {
-	if (adata.damagetime >= 0.2f)
+	if (adata.FireOn)
+		master->SetAnimation(Ani_State::Attack);
+
+	if (adata.damagetime >= 0.2f && adata.FireOn==true)
 	{
+		
 		if (adata.Target != NULL)
-			adata.Target->ToDamage(20);
+			adata.Target->ToDamage(0.20);
 
 		adata.FireOn = false;
 		adata.damagetime = 0;
-		adata.cooltime = 1.2;
-		return state_idle::Instance();
+		adata.cooltime = 0.7f;
+		
+		
 	}
 	else
 		adata.damagetime += DeltaTime;
+	
+	//공격 모션이 끝나면 아이들 애니메이션일테므로 아이들 상태로 변경가능
 
+	if (master->n_Animation == Ani_State::Idle)
+		return state_idle::Instance();
 	
 	return nullptr;
 }
@@ -197,16 +206,20 @@ state * state_trace::Instance()
 
 state * state_trace::Execute(float DeltaTime, CGameObject * master, AIdata & adata)
 {
-
+	master->SetAnimation(Ani_State::Run);
 	auto v = XMFloat4to3(Float4Add(adata.LastPosition, master->CenterPos, false));
+	v.y = 0;
 	auto d = FloatLength(v);
+	auto v2 = Float4Add(XMFLOAT4(100, 0, 110, 0), master->CenterPos,false);
+	v2.y = 0;
 	v = Float3Normalize(v);
-	if (fabs(d) <= 12 && adata.Target == NULL)
+	v = Float3Float(v, DeltaTime);
+	if (fabs(d) <= 20 && adata.Target == NULL)
 		adata.LastPosition = XMFLOAT4(100, 0, 110, 0);//현재는 테스트중이니까 이렇게했고, 골렘은 고유위치 즉 원래위치를 기억해둬야함.
 
-	if(fabs(d) > 12)
-		master->pp->SetVelocity(Float3Float(v, 20));
-	if (FloatLength(Float4Add(XMFLOAT4(100, 0, 110, 0), master->CenterPos)) <= 12 && adata.Target == NULL)
+	if(fabs(d) > adata.FireLength)
+		master->CenterPos=Float4Add(master->CenterPos, XMFloat3to4(Float3Float(v, 20)));
+	if (FloatLength(v2) <= 20 && adata.Target == NULL) 
 		return state_idle::Instance();
 
 

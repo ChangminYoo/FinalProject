@@ -265,7 +265,7 @@ CCubeManObject::CCubeManObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 	{
 		Mesh.Index = NULL;
 		Mesh.SubResource = NULL;
-
+		//LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Female Brown Casual",    L"textures/imp.dds", false, num, 0);
 		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Female Brown Casual",    L"textures/human/Female Brown Casual 03B.dds", false, num, 0);
 		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Female Black Knight",    L"textures/human/Female Black Knight 04 Green.dds", false, num, 1);
 		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Female Brown Sorceress", L"textures/human/Female Brown Sorceress 03 White.dds", false, num, 2);
@@ -285,6 +285,7 @@ CCubeManObject::CCubeManObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 
 	}
 	select = rand() % num;
+	//select = 0;
 	if (select == 0)
 		TextureName = "Female Brown Casual"; 
 	else if (select == 1)
@@ -336,7 +337,7 @@ CCubeManObject::CCubeManObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 	//질점오브젝트 사용시 필요한 데이터들 설정
 	pp = new PhysicsPoint();
 	pp->SetPosition(&CenterPos);//이 값은 항상 갱신되야한다.
-	pp->SetHalfBox(3, 10, 3);//충돌 박스의 x,y,z 크기
+	pp->SetHalfBox(3,10, 3);//충돌 박스의 x,y,z 크기
 	pp->SetDamping(0.45);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
 	pp->SetBounce(false);//튕기지 않는다.
 
@@ -370,12 +371,17 @@ void CCubeManObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList*
 
 	//모델 로드
 	LoadMD5Model(L".\\플레이어메쉬들\\cIdle.MD5MESH", &Mesh, 0, 1);
+	//LoadMD5Model(L".\\플레이어메쉬들\\monster\\idle.MD5MESH", &Mesh, 0, 1);
 	Mesh.SetNormal(true);
 	Mesh.CreateVertexBuffer(m_Device, commandlist);
 	Mesh.CreateIndexBuffer(m_Device, commandlist);
 
 	//애니메이션 로드
-	LoadMD5Anim(m_Device, L".\\플레이어메쉬들\\cIdle.MD5ANIM", &Mesh, this, animations);//0
+	//LoadMD5Anim(m_Device, L".\\플레이어메쉬들\\monster\\idle.MD5ANIM", &Mesh, this, animations);//0
+	//LoadMD5Anim(m_Device, L".\\플레이어메쉬들\\monster\\run.MD5ANIM", &Mesh, this, animations);//0
+	//LoadMD5Anim(m_Device, L".\\플레이어메쉬들\\monster\\attack1.MD5ANIM", &Mesh, this, animations);//0
+	//LoadMD5Anim(m_Device, L".\\플레이어메쉬들\\monster\\death.MD5ANIM", &Mesh, this, animations);//0
+	LoadMD5Anim(m_Device, L".\\플레이어메쉬들\\cidle.MD5ANIM", &Mesh, this, animations);//1
 	LoadMD5Anim(m_Device, L".\\플레이어메쉬들\\cRunning.MD5ANIM", &Mesh, this, animations);//1
 	LoadMD5Anim(m_Device, L".\\플레이어메쉬들\\cAttack.MD5ANIM", &Mesh, this, animations);//2
 	LoadMD5Anim(m_Device, L".\\플레이어메쉬들\\cDeath.MD5ANIM", &Mesh, this, animations);//2
