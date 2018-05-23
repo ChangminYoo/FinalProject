@@ -161,8 +161,9 @@ void LoadTexture(ID3D12Device* device, ID3D12GraphicsCommandList* commandlist, C
 class BarObject : public CGameObject
 {
 public:
-	BarObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, CGameObject* master, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
+	BarObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, CGameObject* master, float size, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
 	CGameObject* Master = NULL;//소유자
+	float YPos;
 public:
 	static bool CreateMesh;//최초로 false며 메쉬를 만든후 true가된다.
 	static unordered_map<string, unique_ptr<CTexture>> Textures;//텍스처들을 저장함
@@ -181,8 +182,9 @@ public:
 class BarFrameObject : public CGameObject
 {
 public:
-	BarFrameObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, CGameObject* master, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
+	BarFrameObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, CGameObject* master, float size, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
 	CGameObject* Master = NULL;//소유자
+	float YPos;
 public:
 	static bool CreateMesh;//최초로 false며 메쉬를 만든후 true가된다.
 	static unordered_map<string, unique_ptr<CTexture>> Textures;//텍스처들을 저장함

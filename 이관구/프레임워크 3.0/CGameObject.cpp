@@ -345,8 +345,8 @@ CCubeManObject::CCubeManObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 						 //머리위에 HP바 띄움
 	if (ParticleList != NULL)
 	{
-		Hpbar = new BarObject(m_Device, commandlist, ParticleList, this, XMFLOAT4(CenterPos.x, CenterPos.y + 25, CenterPos.z, 0));
-		HPFrame = new BarFrameObject(m_Device, commandlist, ParticleList, this, XMFLOAT4(CenterPos.x, CenterPos.y + 25, CenterPos.z, 0));
+		Hpbar = new BarObject(m_Device, commandlist, ParticleList, this, 10, XMFLOAT4(CenterPos.x, 10, CenterPos.z, 0));
+		HPFrame = new BarFrameObject(m_Device, commandlist, ParticleList, this, 10, XMFLOAT4(CenterPos.x, 10, CenterPos.z, 0));
 
 		ParticleList->push_back(HPFrame);
 		ParticleList->push_back(Hpbar);
@@ -2268,15 +2268,16 @@ void GridObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer
 ///////////////////////////////////
 
 //HPBar오브젝트
-BarObject::BarObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, CGameObject* master, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
+BarObject::BarObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, CGameObject* master, float size, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
 {
 	ObjData.isAnimation = 0;
-	ObjData.Scale = 10.0f;
+	ObjData.Scale = size;
 	ObjData.SpecularParamater = 0.0f;//스페큘러를 낮게준다.
 	ObjData.CustomData1.x = 1;
 
 	Master = master;
 	ObjData.CustomData1.y = Master->gamedata.HP;
+	YPos = CenterPos.y;
 
 	obs = UI;
 	//게임관련 데이터들
@@ -2334,7 +2335,7 @@ void BarObject::Tick(const GameTimer & gt)
 		Master->gamedata.HP = 0;
 
 	ObjData.CustomData1.y = Master->gamedata.HP / Master->gamedata.MAXHP;
-	CenterPos.x = Master->CenterPos.x; CenterPos.y = Master->CenterPos.y + 10; CenterPos.z = Master->CenterPos.z;
+	CenterPos.x = Master->CenterPos.x; CenterPos.y = Master->CenterPos.y + YPos; CenterPos.z = Master->CenterPos.z;
 }
 
 void BarObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer & gt)
@@ -2366,15 +2367,15 @@ void BarObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer 
 
 
 //HPbar 틀
-BarFrameObject::BarFrameObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, CGameObject * master, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
+BarFrameObject::BarFrameObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, CGameObject * master, float size, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
 {
 	ObjData.isAnimation = 0;
-	ObjData.Scale = 10.0f;
+	ObjData.Scale = size;
 	ObjData.SpecularParamater = 0.5f;//스페큘러를 낮게준다.
 	ObjData.CustomData1.x = 4;
 
 	Master = master;
-
+	YPos = CenterPos.y;
 	//게임관련 데이터들
 	gamedata.HP = Master->gamedata.HP;
 	gamedata.GodMode = true;
@@ -2425,7 +2426,7 @@ void BarFrameObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList 
 
 void BarFrameObject::Tick(const GameTimer & gt)
 {
-	CenterPos.x = Master->CenterPos.x; CenterPos.y = Master->CenterPos.y + 10; CenterPos.z = Master->CenterPos.z;
+	CenterPos.x = Master->CenterPos.x; CenterPos.y = Master->CenterPos.y + YPos; CenterPos.z = Master->CenterPos.z;
 }
 
 void BarFrameObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer & gt)
@@ -3454,8 +3455,8 @@ ImpObject::ImpObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comman
 	//머리위에 HP바 띄움
 	if (ParticleList != NULL)
 	{
-		Hpbar = new BarObject(m_Device, commandlist, ParticleList, this, XMFLOAT4(CenterPos.x+25, CenterPos.y + 205, CenterPos.z, 0));
-		HPFrame = new BarFrameObject(m_Device, commandlist, ParticleList, this, XMFLOAT4(CenterPos.x+25, CenterPos.y + 205, CenterPos.z, 0));
+		Hpbar = new BarObject(m_Device, commandlist, ParticleList, this, 20, XMFLOAT4(CenterPos.x, 20, CenterPos.z, 0));
+		HPFrame = new BarFrameObject(m_Device, commandlist, ParticleList, this,20, XMFLOAT4(CenterPos.x, 20, CenterPos.z, 0));
 
 		ParticleList->push_back(HPFrame);
 		ParticleList->push_back(Hpbar);
