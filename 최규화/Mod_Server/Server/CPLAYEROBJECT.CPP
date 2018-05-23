@@ -355,6 +355,8 @@ void CPlayerObject::ProcessPacket(Packet * packet)
 
 		//3. 이동 - (애니메이션, 위치 변경) 변경된 데이터를 서버에서관리하는 내 클라이언트에 저장
 		g_clients[PosMove_Data->id]->m_ani = PosMove_Data->ani_state;
+		SetChangedPlayerState();
+
 		g_clients[PosMove_Data->id]->m_pos4f;
 
 		cout << "ID: " << PosMove_Data->id << " 변화된 위치값: " << "[x:" << PosMove_Data->pos.x << "\t" << "y:" << PosMove_Data->pos.y
@@ -456,7 +458,7 @@ void CPlayerObject::ProcessPacket(Packet * packet)
 		//불렛을 쏜 캐릭터의 공격애니메이션을 다른 클라이언트에게도 보내준다
 		STC_CharAnimation stc_charani;
 		stc_charani.id = g_bullobj->GetBulletMasterID();
-		stc_charani.char_animation = Ani_State::Attack;
+		stc_charani.ani_state = Ani_State::Attack;
 
 		//불렛이 생성된 위치를 나 말고도 상대방도 알고 있어야함. //상대방 클라이언트에게 내 불렛 생성위치를 보냄
 		for (auto client : g_clients)
@@ -539,7 +541,7 @@ void CPlayerObject::Tick(float deltime, Position& pos4f)
 
 	m_pos4f.x = xmf4.x;
 	m_pos4f.y = xmf4.y;
-	m_pos4f.y = xmf4.y;
+	m_pos4f.z = xmf4.z;
 	m_pos4f.w = xmf4.w;
 }
 

@@ -13,7 +13,7 @@
 #define KEYINPUT_UP 0x0001
 #define KEYINPUT_DOWN 0x0010
 
-#define RegularPacketExchangeTime  (1.f / 1.f) // 1초에 20번 패킷을 교환(morpg 형식)
+#define RegularPacketExchangeTime  (1.f / 20.f) // 1초에 20번 패킷을 교환(morpg 형식)
 
 //추가
 //레벨업 보상, 마법레벨
@@ -167,7 +167,7 @@ struct Player_Data
 	char			ai{ false };				//1
 	char			dir;						//1
 	char			connect{ false };			//1
-	unsigned char	ani{ Ani_State::Idle };     //1
+	char			ani{ Ani_State::Idle };     //1
 	char			godmode{ false };			//1
 	char			airbone{ false };			//1
 												//Player_LoginDB  LoginData;

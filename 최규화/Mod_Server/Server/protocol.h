@@ -13,7 +13,7 @@
 #define KEYINPUT_UP 0x0001
 #define KEYINPUT_DOWN 0x0010
 
-#define RegularPacketExchangeTime  (1.f / 1.f) // 1초에 20번 패킷을 교환(morpg 형식)
+#define RegularPacketExchangeTime  (1.f / 20.f) // 1초에 20번 패킷을 교환(morpg 형식)
 
 //추가
 //레벨업 보상, 마법레벨
@@ -258,7 +258,7 @@ typedef struct Server_To_Client_CharAnimation
 	unsigned char pack_size = sizeof(unsigned char) + sizeof(unsigned char) + sizeof(unsigned char) + sizeof(unsigned short);;
 	unsigned char pack_type = PACKET_PROTOCOL_TYPE::PLAYER_ANIMATION;
 	unsigned short id;
-	unsigned char char_animation;
+	unsigned char ani_state;
 
 }STC_CharAnimation;
 
