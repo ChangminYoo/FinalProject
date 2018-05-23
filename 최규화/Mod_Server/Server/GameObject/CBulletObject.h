@@ -6,7 +6,7 @@
 class CBulletObject : public CMonoObject
 {
 private: 
-	double m_lifetime{ 0 };
+	float m_lifetime{ 0 };
 	
 	short m_id{ -1 };
 	unsigned short m_masterID;
@@ -16,20 +16,20 @@ private:
 public:
 	__int64					      m_prevTime{ 0 };
 	__int64					      m_currTime{ 0 };
-	double						  m_deltaTime{ 0.f };
+	float						  m_deltaTime{ 0.f };
 	BulletObject_Info			  m_bulldata;
 
 public:
 	CBulletObject(const unsigned short& master_id, const unsigned short& my_id,
-		const Position& pos, const Rotation& rot, double bulltime,
+		const Position& pos, const Rotation& rot, float bulltime,
 		Vel3f& vel, const unsigned char& type, const Position3D& endpt);
 
-	virtual void AfterGravitySystem(double deltime);
-	virtual void Tick(double deltime);
-	virtual void Update(double deltime);
+	virtual void AfterGravitySystem(float deltime);
+	virtual void Tick(float deltime);
+	virtual void Update(float deltime);
 
-	double GetBulletLifeTime() const { return m_lifetime; }
-	void   SetBulletLifeTime(double time) { m_lifetime += time; }
+	float GetBulletLifeTime() const { return m_lifetime; }
+	void   SetBulletLifeTime(float time) { m_lifetime += time; }
 
 	BulletObject_Info GetBulletInfo() { return m_bulldata; }
 	Position		  GetBulletOldPos() const { return m_pos4f; }

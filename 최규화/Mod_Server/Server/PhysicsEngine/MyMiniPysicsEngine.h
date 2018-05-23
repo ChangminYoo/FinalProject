@@ -35,7 +35,7 @@ namespace MiniPhysicsEngineG9
 		float rad = 0;
 
 	public:
-		void integrate(double DeltaTime, XMFLOAT4* ObjPos = NULL, XMFLOAT3* ObjVel = NULL);//적분기. 속도와 가속도로 위치를 구하고 가속도를 이용해 속도를 갱신함.
+		void integrate(float DeltaTime, XMFLOAT4* ObjPos = NULL, XMFLOAT3* ObjVel = NULL);//적분기. 속도와 가속도로 위치를 구하고 가속도를 이용해 속도를 갱신함.
 		void SetMass(float M);//무게의 역을 쉽게 저장하기 위한 함수. M을 넣으면 역수로 저장해줌
 		float GetMass(bool Inverse = true);//기본적으로 무게의 역을 구함. 다만 false로 두면 그대로 나온다.
 		void SetDamping(float D);//댐핑지수를 설정함.
@@ -125,7 +125,7 @@ namespace MiniPhysicsEngineG9
 		float MaxImpurse = 400;
 
 	public:
-		void integrate(double DeltaTime);//적분기. 속도와 가속도로 위치를 구하고 가속도를 이용해 속도를 갱신함.
+		void integrate(float DeltaTime);//적분기. 속도와 가속도로 위치를 구하고 가속도를 이용해 속도를 갱신함.
 		void SetMass(float M);//무게의 역을 쉽게 저장하기 위한 함수. M을 넣으면 역수로 저장해줌
 		float GetMass(bool Inverse = true);//기본적으로 무게의 역을 구함. 다만 false로 두면 그대로 나온다.
 		float AmendTime = 0;//보정이 일어날 수 있는 시간은 0초가 되었을때.즉 그전에는 안정적인 충돌을 보장.
@@ -245,8 +245,8 @@ namespace MiniPhysicsEngineG9
 	public:
 		void SetGravityAccel(XMFLOAT3& ga);
 		XMFLOAT3 GetGravityAccel();
-		void Update(double DeltaTime, PhysicsPoint& pp);
-		void Update(double DeltaTime, RigidBody& rb);
+		void Update(float DeltaTime, PhysicsPoint& pp);
+		void Update(float DeltaTime, RigidBody& rb);
 
 	};
 
@@ -258,7 +258,7 @@ namespace MiniPhysicsEngineG9
 		float DefaultLength;//기본길이.△x=( DefaultLength - 현재길이 );
 	public:
 		void SetAnchorSpring(XMFLOAT3& a, float k, float l);//힘계산할때 -k할거니까 그냥 k를 넣을것!!!
-		void Update(double DeltaTime, PhysicsPoint& pp);
+		void Update(float DeltaTime, PhysicsPoint& pp);
 	};
 
 	//3. 점프 힘 생성기
@@ -266,7 +266,7 @@ namespace MiniPhysicsEngineG9
 	{
 		XMFLOAT3 JumpVel;
 	public:
-		void Update(double DeltaTime, PhysicsPoint& pp);
+		void Update(float DeltaTime, PhysicsPoint& pp);
 		void SetJumpVel(XMFLOAT3& Jump);
 	};
 
@@ -294,7 +294,7 @@ namespace MiniPhysicsEngineG9
 	XMFLOAT3 Float3Float(XMFLOAT3& v, float v2);
 	XMFLOAT4 Float4Float(XMFLOAT4& v, float v2);
 
-	XMFLOAT4 QuaternionRotation(XMFLOAT3& Axis, double radian);
+	XMFLOAT4 QuaternionRotation(XMFLOAT3& Axis, float radian);
 	XMFLOAT4 QuaternionMultiply(XMFLOAT4& q1, XMFLOAT4& q2);
 
 

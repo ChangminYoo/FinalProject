@@ -128,7 +128,7 @@ XMFLOAT4 MiniPhysicsEngineG9::Float4Float(XMFLOAT4 & v, float v2)
 }
 
 //회전축과 각도를 주면 그 축으로 회전하는 쿼터니언을 반환
-XMFLOAT4 MiniPhysicsEngineG9::QuaternionRotation(XMFLOAT3 & Axis, double radian)
+XMFLOAT4 MiniPhysicsEngineG9::QuaternionRotation(XMFLOAT3 & Axis, float radian)
 {
 
 
@@ -174,13 +174,13 @@ PhysicsPoint::~PhysicsPoint()
 {
 }
 
-void PhysicsPoint::integrate(double DeltaTime, XMFLOAT4* ObjPos, XMFLOAT3* ObjVel)
+void PhysicsPoint::integrate(float DeltaTime, XMFLOAT4* ObjPos, XMFLOAT3* ObjVel)
 {
 
 	if (InverseMass <= 0.0f)
 		return;
 
-	assert(DeltaTime > 0.0);
+	assert(DeltaTime >= 0.0);
 
 	XMFLOAT3 temp_objPos;
 	temp_objPos.x = ObjPos->x; temp_objPos.y = ObjPos->y; temp_objPos.z = ObjPos->z;
@@ -918,7 +918,7 @@ XMFLOAT3 MiniPhysicsEngineG9::GeneratorGravity::GetGravityAccel()
 	return GravityAccel;
 }
 
-void MiniPhysicsEngineG9::GeneratorGravity::Update(double DeltaTime, PhysicsPoint & pp)
+void MiniPhysicsEngineG9::GeneratorGravity::Update(float DeltaTime, PhysicsPoint & pp)
 {
 	XMVECTOR ga = XMLoadFloat3(&GravityAccel);
 	ga *= pp.GetMass(false);//중력 = 중력가속도 * 질량
@@ -927,7 +927,7 @@ void MiniPhysicsEngineG9::GeneratorGravity::Update(double DeltaTime, PhysicsPoin
 
 	pp.AddForce(gravityForce);
 }
-void MiniPhysicsEngineG9::GeneratorGravity::Update(double DeltaTime, RigidBody & rb)
+void MiniPhysicsEngineG9::GeneratorGravity::Update(float DeltaTime, RigidBody & rb)
 {
 	XMVECTOR ga = XMLoadFloat3(&GravityAccel);
 	ga *= rb.GetMass(false);//중력 = 중력가속도 * 질량
@@ -945,7 +945,7 @@ void MiniPhysicsEngineG9::GeneratorAnchor::SetAnchorSpring(XMFLOAT3 & a, float k
 	DefaultLength = l;
 }
 
-void MiniPhysicsEngineG9::GeneratorAnchor::Update(double DeltaTime, PhysicsPoint & pp)
+void MiniPhysicsEngineG9::GeneratorAnchor::Update(float DeltaTime, PhysicsPoint & pp)
 {
 	XMVECTOR objpos = XMLoadFloat3(&pp.GetPosition());
 	XMVECTOR ancpos = XMLoadFloat3(&AnchorPos);
@@ -967,7 +967,7 @@ void MiniPhysicsEngineG9::GeneratorAnchor::Update(double DeltaTime, PhysicsPoint
 
 }
 
-void MiniPhysicsEngineG9::GeneratorJump::Update(double DeltaTime, PhysicsPoint & pp)
+void MiniPhysicsEngineG9::GeneratorJump::Update(float DeltaTime, PhysicsPoint & pp)
 {
 	//점프는 힘을 가하기보단 속도를 직접 가한다. 왜냐하면 힘을 가할경우 힘이 정말 무지막지하게 필요하다.
 	//왜냐하면 힘은 지속적으로 가해져야 쓸만하지, 스페이스바 눌렀을때 딱한번 발동되게 하려면 10000이상 줘야한다.
@@ -1000,7 +1000,7 @@ MiniPhysicsEngineG9::RigidBody::~RigidBody()
 {
 }
 
-void MiniPhysicsEngineG9::RigidBody::integrate(double DeltaTime)
+void MiniPhysicsEngineG9::RigidBody::integrate(float DeltaTime)
 {
 	//질량이 0 이하면 벽같은 것이므로 움직일 필요가 없다.
 	if (InverseMass <= 0.0f)

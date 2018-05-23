@@ -39,7 +39,7 @@ void CTimerWorker::TimerThread()
 	}
 }
 
-void CTimerWorker::AddEvent(const unsigned short & id, const double & sec, TIMER_EVENT_TYPE type, bool is_ai, const unsigned short & master_id)
+void CTimerWorker::AddEvent(const unsigned short & id, const float & sec, TIMER_EVENT_TYPE type, bool is_ai, const unsigned short & master_id)
 {
 	event_type *event_ptr = new event_type;
 
@@ -53,6 +53,16 @@ void CTimerWorker::AddEvent(const unsigned short & id, const double & sec, TIMER
 	t_lock.lock();
 	t_queue.push(event_ptr);
 	t_lock.unlock();
+}
+
+void CTimerWorker::SetRegularCurrTime()
+{
+	QueryPerformanceCounter((LARGE_INTEGER*)&mRegularCurrTime);
+}
+
+void CTimerWorker::SetRegularPrevTime()
+{
+	QueryPerformanceCounter((LARGE_INTEGER*)&mRegularPrevTime);
 }
 
 void CTimerWorker::ProcessPacket(event_type * et)
@@ -178,6 +188,9 @@ void CTimerWorker::ProcessPacket(event_type * et)
 				stc_pos.id = client->m_pdata.id;
 				stc_pos.ani_state = client->m_pdata.ani;
 				stc_pos.pos = client->m_pdata.pos;
+
+				cout << "ID: " << stc_pos.id << " " << "Pos: " << stc_pos.pos.x << " "
+					<< stc_pos.pos.y << " " << stc_pos.pos.z << " " << stc_pos.pos.w << "  //  " << "Ani: " << stc_pos.ani_state << endl;
 
 				client->SendPacket(reinterpret_cast<Packet*>(&stc_pos));
 			}

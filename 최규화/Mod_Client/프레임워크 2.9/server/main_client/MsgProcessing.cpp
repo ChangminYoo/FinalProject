@@ -59,7 +59,9 @@ switch (packet[1])
 
 		new_movedata.pos = move_data->pos;
 		new_movedata.ani = move_data->ani_state;
-		//new_movedata.Rotate_status = move(move_data->rotate);
+
+		RgCkInfo.PtCheck.PositionInfo = move(move_data->pos);
+		RgCkInfo.PtCheck.AniState = static_cast<Ani_State>(move_data->ani_state);
 
 		scene.SET_PLAYER_BY_SEVER_DATA(move_data->id, new_movedata, packet[1]);
 	}
@@ -114,7 +116,7 @@ switch (packet[1])
 	{
 		auto mycharani = reinterpret_cast<STC_CharAnimation*>(packet);
 		
-		scene.SET_PLAYER_ANIMATION_BY_SERVER_DATA(mycharani->id, mycharani->char_animation);
+		scene.SET_PLAYER_ANIMATION_BY_SERVER_DATA(mycharani->id, mycharani->ani_state);
 	}
 	break;
 }

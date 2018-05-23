@@ -14,8 +14,8 @@ using event_type = struct Event_Type
 {
 	unsigned short id;
 	unsigned short master_id;		//bullet의 경우에만
-	double wakeup_time;
-	double curr_time;
+	float wakeup_time;
+	float curr_time;
 	char type;
 	bool ai{ false };
 };
@@ -40,7 +40,7 @@ private:
 	__int64 countsPerSec;
 	double mSecondsPerCount;
 
-	double mRegularDelTime;
+	float mRegularDelTime;
 
 public:
 	CTimerWorker();
@@ -50,8 +50,9 @@ public:
 	void TimerThread();
 
 	void ProcessPacket(event_type* et);
-	void AddEvent(const unsigned short& id, const double& sec, TIMER_EVENT_TYPE type, bool is_ai, const unsigned short& master_id);
-
+	void AddEvent(const unsigned short& id, const float& sec, TIMER_EVENT_TYPE type, bool is_ai, const unsigned short& master_id);
+	void SetRegularCurrTime();
+	void SetRegularPrevTime();
 	priority_queue<event_type*, vector<event_type*>, waketime_cmp> t_queue;
 	~CTimerWorker();
 };

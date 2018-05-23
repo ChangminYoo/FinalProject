@@ -43,17 +43,17 @@ protected:
 
 	__int64				m_prevtime{ 0 };
 	__int64				m_currtime{ 0 };
-	double				m_deltime{ 0 };
+	float				m_deltime{ 0 };
 
 
 public:
 	CMonoObject();
 	virtual void Initialize();
-	virtual void Update(double deltime);
+	virtual void Update(float deltime);
 	virtual void Collision();
-	virtual void AfterGravitySystem(double deltime);
-	virtual void GravitySystem(double deltime);
-	virtual void Tick(double deltime);
+	virtual void AfterGravitySystem(float deltime);
+	virtual void GravitySystem(float deltime);
+	virtual void Tick(float deltime);
 	void UpdateUpvector();
 	void UpdateLookvector();
 	void UpdatePPosCenterPos();

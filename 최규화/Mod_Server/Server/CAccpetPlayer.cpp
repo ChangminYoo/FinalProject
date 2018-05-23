@@ -14,6 +14,7 @@ CAccpetPlayer::CAccpetPlayer() : m_acceptor(g_io_service,
 
 	//3. 스테틱오브젝트 초기화
 	g_staticobj = new CStaticObject();
+	g_staticobj->StaticObjectLoop();
 
 	//4. 초기화 and 몬스터 초기화는 게임판마다 실행되어야함
 	//Monster_Init();		
@@ -46,7 +47,7 @@ void CAccpetPlayer::CheckMyCPUCore()
 {
 	SYSTEM_INFO sysinfo;
 	GetSystemInfo(&sysinfo);
-	int numCPU = sysinfo.dwNumberOfProcessors;
+	unsigned int numCPU = sysinfo.dwNumberOfProcessors;
 	m_myCPUCoreCnt = numCPU;
 
 	cout << "My CPU Core = " << m_myCPUCoreCnt << endl;
@@ -90,7 +91,13 @@ void CAccpetPlayer::AcceptEvent()
 				cout << "클라이언트 [ " << m_playerIndex << " ] 데이터할당 완료. " << endl;
 				++m_playerIndex;
 
-				g_timer_queue.AddEvent(0, 0, REGULAR_PACKET_EXCHANGE, true, 0);
+				if (m_start_timer)
+				{
+					g_timer_queue.SetRegularPrevTime();
+					g_timer_queue.AddEvent(0, 0, REGULAR_PACKET_EXCHANGE, true, 0);
+					m_start_timer = false;
+
+				}
 			}
 			else
 			{

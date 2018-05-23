@@ -104,11 +104,7 @@ void AsyncClient::RecvPacket(CGameObject& obj, Scene& scene)
 			//clients[m_id]->Set_Connect_State(CONNECT_STATE::DISCONNECT);
 			//clients[m_id]->SendPacket(reinterpret_cast<Packet*>(&dis_msg));	
 		}
-
-		
-		//ProcessPacket(Get_RecvBuf);
-		//RecvPacket();
-		
+	
 		int cur_data_proc = static_cast<int>(bytes_transferred);
 		Packet* temp_buf = m_recvBuf;
 

@@ -332,7 +332,7 @@ void CPlayerObject::ProcessPacket(Packet * packet)
 		//1. 받아들인 데이터(키를 눌러 플레이어를 움직였음)에서 변화된 정보를 추출(물리효과 적용x)
 		auto PosMove_Data = reinterpret_cast<STC_ChangedPos*>(packet);
 
-		if (PosMove_Data->deltime < 0)
+		if (PosMove_Data->deltime <= 0)
 			PosMove_Data->deltime = 0.f;
 
 		if (PosMove_Data->ani_state == Ani_State::Idle)
@@ -357,9 +357,8 @@ void CPlayerObject::ProcessPacket(Packet * packet)
 		g_clients[PosMove_Data->id]->m_ani = PosMove_Data->ani_state;
 		g_clients[PosMove_Data->id]->m_pos4f;
 
-
-		//cout << "ID: " << PosMove_Data->id << " 변화된 위치값: " << "[x:" << PosMove_Data->pos.x << "\t" << "y:" << PosMove_Data->pos.y
-		//	<< "\t" << "z:" << PosMove_Data->pos.z << "]" << "\t" << "w:" << PosMove_Data->pos.w << endl;
+		cout << "ID: " << PosMove_Data->id << " 변화된 위치값: " << "[x:" << PosMove_Data->pos.x << "\t" << "y:" << PosMove_Data->pos.y
+			<< "\t" << "z:" << PosMove_Data->pos.z << "]" << "\t" << "w:" << PosMove_Data->pos.w << endl;
 
 		//4. 변화된 내 (포지션, 애니메이션) 정보를 다른 클라에 전달 - 반드시 이렇게 다시 만들어줘야함
 		//PosMove_Data를 바로 sendpacket에 packet으로 형변화하여 보내면 size error가 난다
@@ -511,7 +510,7 @@ void CPlayerObject::ProcessPacket(Packet * packet)
 	}
 }
 
-void CPlayerObject::GravitySystem(double deltime)
+void CPlayerObject::GravitySystem(float deltime)
 {
 	GeneratorGravity gg;
 	gg.SetGravityAccel(XMFLOAT3(0, -100, 0));
@@ -522,7 +521,7 @@ void CPlayerObject::GravitySystem(double deltime)
 	}
 }
 
-void CPlayerObject::Tick(double deltime)
+void CPlayerObject::Tick(float deltime)
 {
 	XMFLOAT4 xmf4_pos{ m_pos4f.x, m_pos4f.y, m_pos4f.z, m_pos4f.w };
 	pp->integrate(deltime, &xmf4_pos);
@@ -533,7 +532,7 @@ void CPlayerObject::Tick(double deltime)
 	m_pos4f.w = xmf4_pos.w;
 }
 
-void CPlayerObject::Tick(double deltime, Position& pos4f)
+void CPlayerObject::Tick(float deltime, Position& pos4f)
 {
 	XMFLOAT4 xmf4{ pos4f.x, pos4f.y, pos4f.z, pos4f.w };
 	pp->integrate(deltime, &xmf4);
@@ -544,7 +543,7 @@ void CPlayerObject::Tick(double deltime, Position& pos4f)
 	m_pos4f.w = xmf4.w;
 }
 
-void CPlayerObject::AfterGravitySystem(double deltime)
+void CPlayerObject::AfterGravitySystem(float deltime)
 {
 	float ppy = pp->GetPosition().y;
 	float hby = pp->GetHalfBox().y;

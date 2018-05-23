@@ -715,7 +715,8 @@ void Scene::SET_PLAYER_BY_SEVER_DATA(const unsigned short & id,const Player_Data
 
 				GameObject->Orient = { playerdata.rot.x , playerdata.rot.y, playerdata.rot.z, playerdata.rot.w };
 				GameObject->CenterPos = { playerdata.pos.x , playerdata.pos.y , playerdata.pos.z , playerdata.pos.w };
-	
+				GameObject->pp->SetPosition(GameObject->CenterPos);
+
 				GameObject->gamedata.Damage = move(playerdata.status.attack);
 				GameObject->gamedata.HP = move(playerdata.status.cur_hp);
 				GameObject->gamedata.MAXHP = move(playerdata.status.origin_hp);
@@ -732,6 +733,7 @@ void Scene::SET_PLAYER_BY_SEVER_DATA(const unsigned short & id,const Player_Data
 
 				//GameObject->Orient = { playerdata.Rotate_status.x , playerdata.Rotate_status.y, playerdata.Rotate_status.z, playerdata.Rotate_status.w };
 				GameObject->CenterPos = { playerdata.pos.x , playerdata.pos.y , playerdata.pos.z , playerdata.pos.w };
+				GameObject->pp->SetPosition(GameObject->CenterPos);
 
 				GameObject->gamedata.Damage = move(playerdata.status.attack);
 				GameObject->gamedata.HP = move(playerdata.status.cur_hp);
@@ -739,6 +741,8 @@ void Scene::SET_PLAYER_BY_SEVER_DATA(const unsigned short & id,const Player_Data
 				GameObject->gamedata.Speed = move(playerdata.status.speed);
 
 				GameObject->AirBone = playerdata.airbone;
+
+
 
 				if (GameObject->m_player_data.id == my_ClientID)
 					Player->SetPlayer(GameObject);
@@ -751,6 +755,8 @@ void Scene::SET_PLAYER_BY_SEVER_DATA(const unsigned short & id,const Player_Data
 				GameObject->m_player_data.ani = move(playerdata.ani);
 
 				GameObject->CenterPos = { playerdata.pos.x , playerdata.pos.y , playerdata.pos.z , playerdata.pos.w };
+				GameObject->pp->SetPosition(GameObject->CenterPos);
+
 				GameObject->n_Animation = playerdata.ani;
 
 			}
@@ -786,24 +792,24 @@ void Scene::SET_SOBJECT_BY_SERVER_DATA(const unsigned short & id, StaticObject_I
 		case STATIC_OBJECT_TYPE::Box:
 		case STATIC_OBJECT_TYPE::SmallWall:
 		case STATIC_OBJECT_TYPE::BigWall:
-		case STATIC_OBJECT_TYPE::Building:
+		case STATIC_OBJECT_TYPE::NormalBuilding:
 		{
 			//클라는 0 ~ 77까지의 스테틱오브젝트가 순서대로 ID가 저장된 상태
 			//서버에서 오는 데이터는 뒤죽박죽 섞인 ID를 갖는 스테틱오브젝트정보
-			for (auto box : StaticObject)
+			for (auto sobj : StaticObject)
 			{
-				if (box->m_sobj_data.ID == sobjdata.ID)
+				if (sobj->m_sobj_data.ID == sobjdata.ID)
 				{
-					box->m_sobj_data = move(sobjdata);
+					sobj->m_sobj_data = move(sobjdata);
 
-					box->Orient = { sobjdata.Rotate_status.x , sobjdata.Rotate_status.y , sobjdata.Rotate_status.z, sobjdata.Rotate_status.w };
-					box->CenterPos = { sobjdata.Pos.x ,sobjdata.Pos.y , sobjdata.Pos.z, sobjdata.Pos.w };
+					sobj->Orient = { sobjdata.Rotate_status.x , sobjdata.Rotate_status.y , sobjdata.Rotate_status.z, sobjdata.Rotate_status.w };
+					sobj->CenterPos = { sobjdata.Pos.x ,sobjdata.Pos.y , sobjdata.Pos.z, sobjdata.Pos.w };
 
-					box->m_sobj_data.degree = sobjdata.degree;
-					box->m_sobj_data.Fixed = sobjdata.Fixed;
-					box->m_sobj_data.type = sobjdata.type;
+					sobj->m_sobj_data.degree = sobjdata.degree;
+					sobj->m_sobj_data.Fixed = sobjdata.Fixed;
+					sobj->m_sobj_data.type = sobjdata.type;
 
-					box->pp->SetPosition(box->CenterPos);
+					sobj->pp->SetPosition(sobj->CenterPos);
 
 					break;
 				}

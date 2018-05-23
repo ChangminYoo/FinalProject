@@ -430,12 +430,12 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 
 			if (GetFocus())
 			{
-				STC_ChangedPos change_pos_ani;
-				change_pos_ani.packet_size = sizeof(STC_ChangedPos);
-				change_pos_ani.pack_type = PACKET_PROTOCOL_TYPE::CHANGED_PLAYER_POSITION;
+				//STC_ChangedPos change_pos_ani;
+				//change_pos_ani.packet_size = sizeof(STC_ChangedPos);
+				//change_pos_ani.pack_type = PACKET_PROTOCOL_TYPE::CHANGED_PLAYER_POSITION;
 
-				change_pos_ani.id = PlayerObject->m_player_data.id;
-				change_pos_ani.pos = { PlayerObject->CenterPos.x, PlayerObject->CenterPos.y, PlayerObject->CenterPos.z, PlayerObject->CenterPos.w };
+				//change_pos_ani.id = PlayerObject->m_player_data.id;
+				//change_pos_ani.pos = { PlayerObject->CenterPos.x, PlayerObject->CenterPos.y, PlayerObject->CenterPos.z, PlayerObject->CenterPos.w };
 
 				if (move == true)//움직이고 있으면 움직이는 모션으로
 				{

@@ -42,20 +42,20 @@ void CMonoObject::Initialize()
 
 }
 
-void CMonoObject::Update(double deltime)
+void CMonoObject::Update(float deltime)
 {
 }
 
 // 물리효과 순서 1.중력 2.가속도 및 중력 적용 3.중력 후처리 4.충돌
-void CMonoObject::GravitySystem(double deltime)
+void CMonoObject::GravitySystem(float deltime)
 {
 }
 
-void CMonoObject::Tick(double deltime)
+void CMonoObject::Tick(float deltime)
 {
 }
 
-void CMonoObject::AfterGravitySystem(double deltime)
+void CMonoObject::AfterGravitySystem(float deltime)
 {
 }
 

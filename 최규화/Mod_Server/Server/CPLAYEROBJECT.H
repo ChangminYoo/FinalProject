@@ -34,8 +34,8 @@ private:
 	Packet				m_databuf[MAX_BUFFER_SIZE]{ 0 };
 
 	//CBulletObject		*m_bullObj;
-	double				m_prevtime{ 0 };
-	double				m_elaspedtime{ 0 };
+	float				m_prevtime{ 0 };
+	float				m_elaspedtime{ 0 };
 
 public:
 	unsigned int		m_curr_packet_size{ 0 };
@@ -64,10 +64,10 @@ public:
 	void ProcessPacket(Packet* packet);
 
 	// ---------------------------------------------------------------------------------------
-	virtual void GravitySystem(double deltime);
-	virtual void Tick(double deltime);
-	virtual void Tick(double deltime, Position& pos4f);
-	virtual void AfterGravitySystem(double deltime);
+	virtual void GravitySystem(float deltime);
+	virtual void Tick(float deltime);
+	virtual void Tick(float deltime, Position& pos4f);
+	virtual void AfterGravitySystem(float deltime);
 
 	// ---------------------------------------------------------------------------------------
 	// [2]. DB관련 함수

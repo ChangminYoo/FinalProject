@@ -1,7 +1,7 @@
 //#include "CBulletObject.h"
 #include "../stdafx.h"
 
-CBulletObject::CBulletObject(const unsigned short & master_id, const unsigned short & my_id, const Position & pos, const Rotation & rot, double bulltime, Vel3f & vel, const unsigned char & type, const Position3D & endpt)
+CBulletObject::CBulletObject(const unsigned short & master_id, const unsigned short & my_id, const Position & pos, const Rotation & rot, float bulltime, Vel3f & vel, const unsigned char & type, const Position3D & endpt)
 {
 	pp = new PhysicsPoint();
 
@@ -47,13 +47,13 @@ CBulletObject::CBulletObject(const unsigned short & master_id, const unsigned sh
 	//--------------------------------------------------------------------------------------------
 }
 
-void CBulletObject::AfterGravitySystem(double deltime)
+void CBulletObject::AfterGravitySystem(float deltime)
 {
 	if (m_pos4f.y <= 0)
 		m_alive = false;
 }
 
-void CBulletObject::Tick(double deltime)
+void CBulletObject::Tick(float deltime)
 {
 	XMFLOAT4 xmf4_rot{ m_rot4f.x, m_rot4f.y, m_rot4f.z, m_rot4f.w };
 	XMFLOAT4 xmf4_pos{ m_pos4f.x, m_pos4f.y, m_pos4f.z, m_pos4f.w };
@@ -63,7 +63,7 @@ void CBulletObject::Tick(double deltime)
 
 }
 
-void CBulletObject::Update(double deltime)
+void CBulletObject::Update(float deltime)
 {
 }
 

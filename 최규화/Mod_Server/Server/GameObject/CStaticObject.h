@@ -14,7 +14,7 @@ class CStaticObject : public CMonoObject
 {
 protected:
 	double		        m_degree{ 0 };
-	map<int, BasicInfo> m_sobj_bdata;
+	static map<int, BasicInfo> m_sobj_bdata;
 
 public:
 	StaticObject_Info m_stc_sobjdata;
@@ -23,7 +23,8 @@ public:
 	CStaticObject();
 	void MakeStaticObjectBasicData();
 	void CreateGameObject();
-	virtual void AfterGravitySystem(double deltime);
+	void StaticObjectLoop();
+	virtual void AfterGravitySystem(float deltime);		//static object´Â gravitysystem x // tick x
 	virtual void Collision();
 	~CStaticObject();
 };

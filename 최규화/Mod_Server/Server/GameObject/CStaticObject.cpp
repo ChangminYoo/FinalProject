@@ -1,10 +1,10 @@
 //#include "CStaticObject.h"
 #include "../stdafx.h"
 
+map<int, BasicInfo> CStaticObject::m_sobj_bdata;
+
 CStaticObject::CStaticObject()
 {
-	MakeStaticObjectBasicData();
-	CreateGameObject();
 }
 
 void CStaticObject::MakeStaticObjectBasicData()
@@ -100,7 +100,6 @@ void CStaticObject::MakeStaticObjectBasicData()
 		{ 75,{ { -75.f, 0.f, 40.f, 0.f },{ 0 },{ NormalBuilding } } },
 		{ 76,{ { 0.f, 0.f, -100.f, 0.f },{ 0 },{ NormalBuilding } } }
 	};
-
 }
 
 void CStaticObject::CreateGameObject()
@@ -121,12 +120,16 @@ void CStaticObject::CreateGameObject()
 		g_staticobjs.insert(new Building(i));
 	
 	for (auto sobj : g_staticobjs)
-	{
 		sobj->AfterGravitySystem(0);
-	}
 }
 
-void CStaticObject::AfterGravitySystem(double deltime)
+void CStaticObject::StaticObjectLoop()
+{
+	MakeStaticObjectBasicData();
+	CreateGameObject();
+}
+
+void CStaticObject::AfterGravitySystem(float deltime)
 {
 	float ppy = pp->GetPosition().y;
 	float hby = pp->GetHalfBox().y;

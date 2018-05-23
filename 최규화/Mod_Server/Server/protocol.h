@@ -13,7 +13,7 @@
 #define KEYINPUT_UP 0x0001
 #define KEYINPUT_DOWN 0x0010
 
-#define RegularPacketExchangeTime  (1.f / 20.f) // 1초에 20번 패킷을 교환(morpg 형식)
+#define RegularPacketExchangeTime  (1.f / 1.f) // 1초에 20번 패킷을 교환(morpg 형식)
 
 //추가
 //레벨업 보상, 마법레벨
@@ -115,12 +115,6 @@ struct Position
 };
 //16
 
-//struct StaticObjectBasicInfo
-//{
-//	Position pos;
-//	double    degree;
-//	STATIC_OBJECT_TYPE type;
-//};
 
 struct Player_LoginDB
 {
@@ -255,7 +249,7 @@ typedef struct Server_To_Client_Attack_Info
 	unsigned char pack_size = sizeof(BulletObject_Info) + sizeof(unsigned char) + sizeof(unsigned char) + sizeof(float);
 	unsigned char pack_type = PACKET_PROTOCOL_TYPE::PLAYER_ATTACK;
 	BulletObject_Info bull_data;
-	double			  lifetime;
+	float			  lifetime;
 
 }STC_Attack;
 

@@ -13,7 +13,7 @@
 #define KEYINPUT_UP 0x0001
 #define KEYINPUT_DOWN 0x0010
 
-#define RegularPacketExchangeTime  (1.f / 20.f) // 1초에 20번 패킷을 교환(morpg 형식)
+#define RegularPacketExchangeTime  (1.f / 1.f) // 1초에 20번 패킷을 교환(morpg 형식)
 
 //추가
 //레벨업 보상, 마법레벨
@@ -59,11 +59,12 @@ enum BULLET_TYPE
 
 enum STATIC_OBJECT_TYPE
 {
+	BasicObject,
 	Map,
 	Box,
 	SmallWall,
 	BigWall,
-	Building
+	NormalBuilding
 };
 
 enum OBJECT_TYPE
@@ -73,7 +74,6 @@ enum OBJECT_TYPE
 	BULLET
 };
 
-enum CONNECT_STATE { DISCONNECT = -1, CONNECT = 1 };
 enum MONSTERS { NO_MONSTER, MONSTER01, MONSTER02, MONSTER03 };
 enum PLAYERS { NO_PLAYER, LUNA, CMETRA, RONDO, DONALD };
 
@@ -115,12 +115,6 @@ struct Position
 };
 //16
 
-struct StaticObjectBasicInfo
-{
-	Position pos;
-	double    degree;
-	STATIC_OBJECT_TYPE type;
-};
 
 struct Player_LoginDB
 {
@@ -132,12 +126,11 @@ struct Player_LoginDB
 struct PlayerStatus
 {
 	unsigned short			attack{ 50 };       //2
-	unsigned short			defend{ 50 };       //2
 	unsigned short			speed{ 50 };        //2
-	unsigned short			origin_hp{ 100 }; //2
-	unsigned short   		cur_hp{ 100 };    //2
-	unsigned short			exp{ 0 };         //2
-	unsigned char			level{ 1 };		  //1 
+	unsigned short			origin_hp{ 100 };   //2
+	unsigned short   		cur_hp{ 100 };      //2
+	unsigned short			exp{ 0 };           //2
+	unsigned char			level{ 1 };		    //1 
 };
 // 12 + 1 = 13
 
@@ -167,14 +160,14 @@ struct BulletObject_Info
 
 struct Player_Data
 {
-	PlayerStatus    status;					//18
-	unsigned short  id{ 0 };					//2
 	Position		pos;						//16
 	Rotation		rot;		                //16
+	PlayerStatus    status;					    //11
+	unsigned short  id{ 0 };					//2
 	char			ai{ false };				//1
 	char			dir;						//1
-	char			connect{ false };    //1
-	char			ani{ Ani_State::Idle };     //1
+	char			connect{ false };			//1
+	unsigned char	ani{ Ani_State::Idle };     //1
 	char			godmode{ false };			//1
 	char			airbone{ false };			//1
 												//Player_LoginDB  LoginData;
@@ -185,6 +178,7 @@ struct Player_Data
 
 #pragma pack (push, 1)		//push 시작부터 1바이트씩 데이터를 잘라 캐시에 저장한다(캐시라인 문제 때문에) - pop에서 멈춘다
 
+//캐릭터 상태 초기화 및 업데이트에 사용한다
 typedef struct Server_To_Client_Player_Info
 {
 	unsigned char pack_size = sizeof(Player_Data) + sizeof(unsigned char) + sizeof(unsigned char);
@@ -264,7 +258,7 @@ typedef struct Server_To_Client_CharAnimation
 	unsigned char pack_size = sizeof(unsigned char) + sizeof(unsigned char) + sizeof(unsigned char) + sizeof(unsigned short);;
 	unsigned char pack_type = PACKET_PROTOCOL_TYPE::PLAYER_ANIMATION;
 	unsigned short id;
-	unsigned char char_animation;
+	unsigned char ani_state;
 
 }STC_CharAnimation;
 

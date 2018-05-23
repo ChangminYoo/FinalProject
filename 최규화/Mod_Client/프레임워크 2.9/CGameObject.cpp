@@ -81,6 +81,7 @@ void CGameObject::ToDead()
 
 void CGameObject::UpdatePPosCenterPos()
 {
+	//여기서 centerpos 값은 -100 10 0 인데 pp값을 안바꿔줘서 -100 0 0이 되버림
 	CenterPos = XMFloat3to4(pp->GetPosition());
 }
 
