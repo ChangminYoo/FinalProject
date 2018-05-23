@@ -3448,9 +3448,9 @@ ImpObject::ImpObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comman
 	pp = new PhysicsPoint();
 	pp->SetPosition(&CenterPos);//이 값은 항상 갱신되야한다.
 	pp->SetHalfBox(10, 20, 10);//충돌 박스의 x,y,z 크기
-	pp->SetDamping(0.45);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
+	pp->SetDamping(0.25);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
 	pp->SetBounce(false);//튕기지 않는다.
-
+	pp->SetMass(5);
 
 	//머리위에 HP바 띄움
 	if (ParticleList != NULL)

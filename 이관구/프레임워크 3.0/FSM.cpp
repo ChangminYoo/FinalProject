@@ -23,7 +23,7 @@ void FSM::Update(float DeltaTime)
 		{
 			//쿨타임을 줄이자
 			aidata.cooltime -= DeltaTime;
-			if (aidata.cooltime <= 0)
+			if (aidata.cooltime <= 0 && Master->n_Animation!=Ani_State::Attack)
 			{
 				//공격가능해진 타이밍이면 데미지를 입힐 수있는 지연타임을 0초로 초기화하고 쿨타임도 0으로초기화하고 공격가능으로 바꿈.
 				aidata.damagetime = 0;
@@ -79,6 +79,7 @@ void FSM::CheckTarget(float DeltaTime)
 			continue;
 
 		auto v1 = Float4Add((*i)->CenterPos, Master->CenterPos, false);
+		v1.y = 0;
 		auto nv1 = Float4Normalize(v1);
 		float nv1dotLook = nv1.x*Master->Lookvector.x + nv1.y*Master->Lookvector.y + nv1.z*Master->Lookvector.z;
 		auto l = FloatLength(v1);
@@ -158,8 +159,14 @@ state * state_global::Execute(float DeltaTime, CGameObject * master, AIdata& ada
 	if (master != NULL)
 	{
 		float l;
-		if(adata.Target!=NULL)
-		  l = FloatLength(Float4Add(adata.Target->CenterPos, master->CenterPos, false));
+		XMFLOAT4 v1;
+		
+		if (adata.Target != NULL)
+		{
+			v1 = Float4Add(adata.Target->CenterPos, master->CenterPos, false);
+			v1.y = 0;
+			l = FloatLength(v1);
+		}
 		//타겟이 존재하고, 해당 타겟이 사거리 안에 있으면 공격 상태로 전환한다.
 		if (adata.Target != NULL &&l <= adata.FireLength && adata.FireOn)
 			return state_attack::Instance();
@@ -188,7 +195,7 @@ state * state_attack::Execute(float DeltaTime, CGameObject * master, AIdata & ad
 	{
 		
 		if (adata.Target != NULL)
-			adata.Target->ToDamage(0.20);
+			adata.Target->ToDamage(20);
 
 		adata.FireOn = false;
 		
@@ -227,12 +234,17 @@ state * state_trace::Execute(float DeltaTime, CGameObject * master, AIdata & ada
 	v2.y = 0;
 	v = Float3Normalize(v);
 	v = Float3Float(v, DeltaTime);
-	if (fabs(d) <= adata.FireLength && adata.Target == NULL)
+	if (fabs(d) <=adata.FireLength && adata.Target == NULL)
 		adata.LastPosition = master->OrgPos;//고유 초창기 위치로 ㄱㄱ
 
-	if(fabs(d) > adata.FireLength-5)
-		master->CenterPos=Float4Add(master->CenterPos, XMFloat3to4(Float3Float(v,master->gamedata.Speed)));
-	if (FloatLength(v2) <= adata.FireLength-5 && adata.Target == NULL) 
+	if (adata.Target != NULL)
+	{
+		if(fabs(d) > adata.FireLength)//타겟이 존재하면 타겟을 공격할 수 있는 사정거리까지만 간다.
+			master->CenterPos = Float4Add(master->CenterPos, XMFloat3to4(Float3Float(v, master->gamedata.Speed)));
+	}
+	else//아니라면 그냥 해당 위치로 계속감.
+		master->CenterPos = Float4Add(master->CenterPos, XMFloat3to4(Float3Float(v, master->gamedata.Speed)));
+	if (FloatLength(v2) <= 20 && adata.Target == NULL) 
 		return state_idle::Instance();
 
 	
