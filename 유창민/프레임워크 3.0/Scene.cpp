@@ -92,7 +92,7 @@ Scene::~Scene()
 		LandObject.pop_back();
 	}
 
-
+	Sound->DeleteSound();
 
 	if (Player != NULL)
 		delete Player;

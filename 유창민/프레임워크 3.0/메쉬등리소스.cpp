@@ -53,7 +53,12 @@ unordered_map<string, unique_ptr<CTexture>> Tetrike::Textures;//ÅØ½ºÃ³µéÀ» ÀúÀåÇ
 CMesh  Tetrike::Mesh;//³ªÁß¿¡ ¸Ş½¬´Â staticÀ¸·Î µÖ¾ßÇÔ
 ComPtr<ID3D12DescriptorHeap> Tetrike::SrvDescriptorHeap;//ÅØ½ºÃ³ ¿ë Èü
 CMaterial Tetrike::Mat;
-
+//--------------------------------------------------------------------------------------
+bool DiceStrike::CreateMesh = false;
+unordered_map<string, unique_ptr<CTexture>> DiceStrike::Textures;//ÅØ½ºÃ³µéÀ» ÀúÀåÇÔ
+CMesh  DiceStrike::Mesh;//³ªÁß¿¡ ¸Ş½¬´Â staticÀ¸·Î µÖ¾ßÇÔ
+ComPtr<ID3D12DescriptorHeap> DiceStrike::SrvDescriptorHeap;//ÅØ½ºÃ³ ¿ë Èü
+CMaterial DiceStrike::Mat;
 //--------------------------------------------------------------------------------------
 bool SphereObject::CreateMesh = false;
 unordered_map<string, unique_ptr<CTexture>> SphereObject::Textures;//ÅØ½ºÃ³µéÀ» ÀúÀåÇÔ
