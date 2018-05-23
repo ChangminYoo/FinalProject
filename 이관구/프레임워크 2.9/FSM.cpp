@@ -224,14 +224,15 @@ state * state_trace::Execute(float DeltaTime, CGameObject * master, AIdata & ada
 	v2.y = 0;
 	v = Float3Normalize(v);
 	v = Float3Float(v, DeltaTime);
-	if (fabs(d) <= 20 && adata.Target == NULL)
+	if (fabs(d) <= adata.FireLength && adata.Target == NULL)
 		adata.LastPosition = XMFLOAT4(100, 0, 110, 0);//현재는 테스트중이니까 이렇게했고, 골렘은 고유위치 즉 원래위치를 기억해둬야함.
 
 	if(fabs(d) > adata.FireLength)
 		master->CenterPos=Float4Add(master->CenterPos, XMFloat3to4(Float3Float(v, 20)));
-	if (FloatLength(v2) <= 20 && adata.Target == NULL) 
+	if (FloatLength(v2) <= adata.FireLength && adata.Target == NULL) 
 		return state_idle::Instance();
 
+	
 
 	return nullptr;
 }

@@ -122,8 +122,8 @@ void Scene::SceneState()
 			SetGameState(GS_PLAY);
 			ShowCursor(false);
 
-			Sound->PlaySoundEffect(CSound::SoundType::TITLE);
-			Sound->SetVolume(CSound::SoundType::TITLE, 0.5f);
+			//Sound->PlaySoundEffect(CSound::SoundType::TITLE);
+			//Sound->SetVolume(CSound::SoundType::TITLE, 0.5f);
 		}
 		else
 		{
