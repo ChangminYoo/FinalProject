@@ -140,6 +140,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="CAccpetPlayer.cpp" />
+    <ClCompile Include="CPhysicEngineWorker.cpp" />
     <ClCompile Include="CPlayerObject.cpp" />
     <ClCompile Include="CScene.cpp" />
     <ClCompile Include="GameObject\CBulletObject.cpp" />
@@ -152,6 +153,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CAccpetPlayer.h" />
+    <ClInclude Include="CPhysicEngineWorker.h" />
     <ClInclude Include="CPlayerObject.h" />
     <ClInclude Include="CScene.h" />
     <ClInclude Include="GameObject\CBulletObject.h" />

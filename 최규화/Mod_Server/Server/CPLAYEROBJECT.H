@@ -113,7 +113,7 @@ public:
 	// [5]. 물리효과 함수
 
 	XMFLOAT3				GetLookVector()  const { return m_Lookvector; }
-	XMFLOAT3				GetRightVecotr() const { return m_Rightvector; }
+	XMFLOAT3				GetRightVector() const { return m_Rightvector; }
 	XMFLOAT3				GetUpVector()	 const { return m_Upvector; }
 
 	PhysicsPoint*			GetPhysicsPoint() { return pp; }

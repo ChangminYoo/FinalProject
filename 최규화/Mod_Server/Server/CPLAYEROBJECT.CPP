@@ -323,6 +323,81 @@ void CPlayerObject::ProcessPacket(Packet * packet)
 
 	switch (packet[1])
 	{
+	case PACKET_PROTOCOL_TYPE::PLAYER_MOVE:
+	{
+		if (m_state == PLAYER_STATE::DEAD)
+			break;
+
+		auto mdata = reinterpret_cast<STC_CharMove*>(packet);
+
+		switch (mdata->dir)
+		{
+			case CHAR_MOVE::FRONT_MOVE:
+			{
+				auto l = XMLoadFloat3(&g_clients[m_id]->m_Lookvector);
+				l *= g_clients[m_id]->m_ability.speed * mdata->deltime;
+
+				XMFLOAT4 xmf4{ g_clients[m_id]->m_pos4f.x, g_clients[m_id]->m_pos4f.y, 
+						       g_clients[m_id]->m_pos4f.z, g_clients[m_id]->m_pos4f.w };
+				auto p = XMLoadFloat4(&xmf4);
+				p += l;
+				XMStoreFloat4(&xmf4, p);
+				g_clients[m_id]->pp->SetPosition(xmf4);
+
+				m_pos4f.x = xmf4.x; m_pos4f.y = xmf4.y; m_pos4f.z = xmf4.z; m_pos4f.w = xmf4.w;
+				break;
+			}
+			case CHAR_MOVE::BACK_MOVE:
+			{
+				auto l = XMLoadFloat3(&g_clients[m_id]->m_Lookvector);
+				l *= g_clients[m_id]->m_ability.speed * mdata->deltime;
+
+				XMFLOAT4 xmf4{ g_clients[m_id]->m_pos4f.x, g_clients[m_id]->m_pos4f.y,
+							   g_clients[m_id]->m_pos4f.z, g_clients[m_id]->m_pos4f.w };
+				auto p = XMLoadFloat4(&xmf4);
+				p -= l;
+				XMStoreFloat4(&xmf4, p);
+				g_clients[m_id]->pp->SetPosition(xmf4);
+
+				m_pos4f.x = xmf4.x; m_pos4f.y = xmf4.y; m_pos4f.z = xmf4.z; m_pos4f.w = xmf4.w;
+				break;
+			}
+			case CHAR_MOVE::LEFT_MOVE:
+			{
+				auto r = XMLoadFloat3(&g_clients[m_id]->m_Rightvector);
+				r *= g_clients[m_id]->m_ability.speed * mdata->deltime;
+
+				XMFLOAT4 xmf4{ g_clients[m_id]->m_pos4f.x, g_clients[m_id]->m_pos4f.y,
+							   g_clients[m_id]->m_pos4f.z, g_clients[m_id]->m_pos4f.w };
+				auto p = XMLoadFloat4(&xmf4);
+				p -= r;
+				XMStoreFloat4(&xmf4, p);
+				g_clients[m_id]->pp->SetPosition(xmf4);
+
+				m_pos4f.x = xmf4.x; m_pos4f.y = xmf4.y; m_pos4f.z = xmf4.z; m_pos4f.w = xmf4.w;
+				break;
+			}
+			case CHAR_MOVE::RIGHT_MOVE:
+			{
+				auto r = XMLoadFloat3(&g_clients[m_id]->m_Rightvector);
+				r *= g_clients[m_id]->m_ability.speed * mdata->deltime;
+
+				XMFLOAT4 xmf4{ g_clients[m_id]->m_pos4f.x, g_clients[m_id]->m_pos4f.y,
+							   g_clients[m_id]->m_pos4f.z, g_clients[m_id]->m_pos4f.w };
+				auto p = XMLoadFloat4(&xmf4);
+				p += r;
+				XMStoreFloat4(&xmf4, p);
+				g_clients[m_id]->pp->SetPosition(xmf4);
+
+				m_pos4f.x = xmf4.x; m_pos4f.y = xmf4.y; m_pos4f.z = xmf4.z; m_pos4f.w = xmf4.w;
+				break;
+			}
+		default:
+			break;
+		}
+
+	}
+	break;
 
 	case PACKET_PROTOCOL_TYPE::CHANGED_PLAYER_POSITION:
 	{

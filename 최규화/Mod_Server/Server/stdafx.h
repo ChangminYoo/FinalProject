@@ -33,8 +33,10 @@ using namespace chrono;
 #include "GameObject\CBulletObject.h"
 #include "Timer\CTimerWorker.h"
 #include "CAccpetPlayer.h"
+#include "CPhysicEngineWorker.h"
 
 extern CTimerWorker g_timer_queue;
+extern CPhysicEngineWorker g_physics_worker;
 
 extern vector<CPlayerObject*> g_clients;
 

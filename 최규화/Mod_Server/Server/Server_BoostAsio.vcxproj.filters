@@ -57,6 +57,9 @@
     <ClCompile Include="CAccpetPlayer.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="CPhysicEngineWorker.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Timer\CTimerWorker.h">
@@ -93,6 +96,9 @@
       <Filter>소스 파일\GameObject</Filter>
     </ClInclude>
     <ClInclude Include="CAccpetPlayer.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="CPhysicEngineWorker.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>

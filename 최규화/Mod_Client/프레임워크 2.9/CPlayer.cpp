@@ -213,14 +213,19 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 {
 	if (scene->GetGameState() == GS_PLAY)
 	{
-		//if (PlayerObject != NULL && GetFocus())
 		if (PlayerObject != NULL && PlayerObject->gamedata.HP > 0 && GetFocus())
 		{
+			char playerdir = 0;
 			bool move = false;
+
 			if (GetKeyState(0x57) & 0x8000)//W키
 			{
+				playerdir = 1;
+
 				move = true;
+
 				//룩벡터의 +방향으로 움직인다.
+				/*
 				auto l = XMLoadFloat3(&PlayerObject->Lookvector);
 				l *= PlayerObject->gamedata.Speed*DeltaTime;
 				auto p = XMLoadFloat4(&PlayerObject->CenterPos);
@@ -230,7 +235,8 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 
 				XMStoreFloat4(&PlayerObject->CenterPos, p);
 				PlayerObject->pp->SetPosition(PlayerObject->CenterPos);
-
+				//
+				
 
 				//충돌리스트의 목록을 전부 검사한다.
 			//다이나믹오브젝트,고정오브젝트 등을 검사해야함.
@@ -268,13 +274,16 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 				{
 
 				}
-
+				*/
 
 			}
 			else if (GetKeyState(0x53) & 0x8000)//S키
 			{
+				playerdir = 2;
+
 				move = true;
 				//룩벡터의 -방향으로 움직인다.
+				/*
 				auto l = XMLoadFloat3(&PlayerObject->Lookvector);
 				l *= PlayerObject->gamedata.Speed*DeltaTime;
 				auto p = XMLoadFloat4(&PlayerObject->CenterPos);
@@ -316,13 +325,17 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 
 						}
 				}
+				*/
 
 			}
 
 			if (GetKeyState(0x41) & 0x8000)//A키
 			{
+				playerdir = 3;
+
 				move = true;
 				//라이트벡터의 -방향으로 움직인다.
+				/*
 				auto r = XMLoadFloat3(&PlayerObject->Rightvector);
 				r *= PlayerObject->gamedata.Speed*DeltaTime;
 				auto p = XMLoadFloat4(&PlayerObject->CenterPos);
@@ -364,12 +377,16 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 
 						}
 				}
+				*/
 
 			}
 			else if (GetKeyState(0x44) & 0x8000)//D키
 			{
+				playerdir = 4;
+
 				move = true;
 				//라이트벡터의 +방향으로 움직인다.
+				/*
 				auto r = XMLoadFloat3(&PlayerObject->Rightvector);
 				r *= PlayerObject->gamedata.Speed*DeltaTime;
 				auto p = XMLoadFloat4(&PlayerObject->CenterPos);
@@ -411,58 +428,71 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 
 						}
 				}
+				*/
 
+			}
+
+			STC_CharMove cts_move;
+
+			if (move == true)//움직이고 있으면 움직이는 모션으로
+			{
+				if (PlayerObject->n_Animation != Ani_State::Attack)//공격모션이 아니면 다시 대기상태로
+				{
+					PlayerObject->SetAnimation(Ani_State::Run);
+					//m_async_client->RgCkInfo.PtCheck.PositionInfo = { PlayerObject->CenterPos.x, PlayerObject->CenterPos.y, PlayerObject->CenterPos.z, PlayerObject->CenterPos.w };
+					//m_async_client->RgCkInfo.PtCheck.AniState = Ani_State::Run;
+					//2018-05-24 수정
+					cts_move.dir = playerdir;
+					cts_move.ani = Ani_State::Run;
+					cts_move.deltime = DeltaTime;
+
+					m_async_client->SendPacket(reinterpret_cast<Packet*>(&cts_move));
+				}
+			}
+			else
+			{
+				if (PlayerObject->n_Animation != Ani_State::Attack)//공격모션이 아니면 다시 대기상태로
+				{
+					PlayerObject->SetAnimation(Ani_State::Idle);			
+					//m_async_client->RgCkInfo.PtCheck.PositionInfo = { PlayerObject->CenterPos.x, PlayerObject->CenterPos.y, PlayerObject->CenterPos.z, PlayerObject->CenterPos.w };
+					//m_async_client->RgCkInfo.PtCheck.AniState = Ani_State::Idle;
+					//2018-05-24 수정
+					cts_move.dir = playerdir;
+					cts_move.ani = Ani_State::Idle;
+					cts_move.deltime = DeltaTime;
+
+					m_async_client->SendPacket(reinterpret_cast<Packet*>(&cts_move));
+
+				}
+
+				m_async_client->RgCkInfo.PtCheck.Deltime = DeltaTime;
 			}
 
 			if (GetKeyState(VK_SPACE) & 0x8000 && PlayerObject->AirBone == false)
 			{
+				playerdir = 5;
+
 				GeneratorJump j;
 				j.SetJumpVel(XMFLOAT3(0, 100, 0));//나중에 플레이어의 점프력만큼 추가할것
 				j.Update(DeltaTime, *PlayerObject->pp);
 				PlayerObject->AirBone = true;//공중상태를 true로
 
-				STC_CharJump cts_charjump;
-				cts_charjump.id = PlayerObject->m_player_data.id;
+				cts_move.dir = playerdir;
+				cts_move.dir = Ani_State::Idle;
+				cts_move.deltime = DeltaTime;
+				//cts_move.dir = Ani_State::Jump;
+
+				m_async_client->SendPacket(reinterpret_cast<Packet*>(&cts_move));
+
+				//STC_CharJump cts_charjump;
+				//cts_charjump.id = PlayerObject->m_player_data.id;
 				//cts_charjump.ani_state;  //나중에 점프 애니메이션 추가되면 설정해줄것임
-
-				m_async_client->SendPacket(reinterpret_cast<Packet*>(&cts_charjump));
+				//m_async_client->SendPacket(reinterpret_cast<Packet*>(&cts_charjump));
 			}
 
-			if (GetFocus())
-			{
-				//STC_ChangedPos change_pos_ani;
-				//change_pos_ani.packet_size = sizeof(STC_ChangedPos);
-				//change_pos_ani.pack_type = PACKET_PROTOCOL_TYPE::CHANGED_PLAYER_POSITION;
-
-				//change_pos_ani.id = PlayerObject->m_player_data.id;
-				//change_pos_ani.pos = { PlayerObject->CenterPos.x, PlayerObject->CenterPos.y, PlayerObject->CenterPos.z, PlayerObject->CenterPos.w };
-
-				if (move == true)//움직이고 있으면 움직이는 모션으로
-				{
-					if (PlayerObject->n_Animation != Ani_State::Attack)//공격모션이 아니면 다시 대기상태로
-					{
-						PlayerObject->SetAnimation(Ani_State::Run);
-
-						//
-						m_async_client->RgCkInfo.PtCheck.PositionInfo = { PlayerObject->CenterPos.x, PlayerObject->CenterPos.y, PlayerObject->CenterPos.z, PlayerObject->CenterPos.w };
-						m_async_client->RgCkInfo.PtCheck.AniState = Ani_State::Run;
-					}
-				}
-				else
-				{
-					if (PlayerObject->n_Animation != Ani_State::Attack)//공격모션이 아니면 다시 대기상태로
-					{
-						PlayerObject->SetAnimation(Ani_State::Idle);
-
-						//
-						m_async_client->RgCkInfo.PtCheck.PositionInfo = { PlayerObject->CenterPos.x, PlayerObject->CenterPos.y, PlayerObject->CenterPos.z, PlayerObject->CenterPos.w };
-						m_async_client->RgCkInfo.PtCheck.AniState = Ani_State::Idle;
-
-					}
-
-					m_async_client->RgCkInfo.PtCheck.Deltime = DeltaTime;
-				}
-			}
+			
+		
+			
 
 			if (GetKeyState(0x31) & 0x8000)
 				skilldata.SellectBulletIndex = 0;

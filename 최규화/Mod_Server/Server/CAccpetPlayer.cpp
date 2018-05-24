@@ -117,15 +117,23 @@ void CAccpetPlayer::AcceptEvent()
 void CAccpetPlayer::MainLogic()
 {
 	//g_io_service.run();
+
+	//1. 패킷 송수신을 담당하는 Worker_Thread
 	thread f_thread([]()
 	{
 		auto work = make_shared<boost::asio::io_service::work>(g_io_service);
 		g_io_service.run();
 	});
 
-	m_pWorkerThread.emplace_back(new thread{ [&]() { g_timer_queue.TimerThread(); } });
+	//2. 물리효과와 충돌처리를 하는 물리엔진관련 작업을 하는 Physics_Thread
+	m_pWorkerThread.emplace_back(new thread{ [&]()
+	{ 
+		g_physics_worker.CheckPrevTime();
+		g_physics_worker.Update();   
+	} });
 
-	//m_pworkerThread.emplace_back(new thread{ [&]() { g_collworker.Update(); } });
+	//3. 주기적으로 작업이 필요한 것들을 처리하는 Timer_Thread 
+	m_pWorkerThread.emplace_back(new thread{ [&]() { g_timer_queue.TimerThread(); } });
 
 	f_thread.join();
 

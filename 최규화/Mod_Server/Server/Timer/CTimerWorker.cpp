@@ -166,9 +166,9 @@ void CTimerWorker::ProcessPacket(event_type * et)
 			// 1초에 20번 패킷을 정기적으로 보내줘야함 
 			QueryPerformanceCounter((LARGE_INTEGER*)&mRegularCurrTime);
 			mRegularDelTime = (mRegularCurrTime - mRegularPrevTime) * mSecondsPerCount;
+			mRegularPrevTime = mRegularCurrTime;
 
 			STC_ChangedPos stc_pos;
-
 			for (auto client : g_clients)
 			{
 				client->GravitySystem(mRegularDelTime);
@@ -194,9 +194,6 @@ void CTimerWorker::ProcessPacket(event_type * et)
 
 				client->SendPacket(reinterpret_cast<Packet*>(&stc_pos));
 			}
-
-			QueryPerformanceCounter((LARGE_INTEGER*)&mRegularPrevTime);
-		
 
 			for (auto bull = g_bullets.begin(); bull != g_bullets.end();)
 			{

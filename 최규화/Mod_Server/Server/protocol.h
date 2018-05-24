@@ -28,6 +28,7 @@ enum PACKET_PROTOCOL_TYPE
 	INIT_OTHER_CLIENT,
 
 	// 캐릭터 좌표 및 방향전환
+	PLAYER_MOVE,
 	CHANGED_PLAYER_POSITION,
 	CHANGED_PLAYER_DIRECTION,
 
@@ -40,6 +41,7 @@ enum PACKET_PROTOCOL_TYPE
 	TEST					//테스트용 패킷
 };
 
+enum CHAR_MOVE { FRONT_MOVE = 1, BACK_MOVE, LEFT_MOVE, RIGHT_MOVE, JUMP };
 
 enum Ani_State
 {
@@ -270,6 +272,17 @@ typedef struct Server_To_Client_CharJump
 	unsigned short id;
 
 }STC_CharJump;
+
+typedef struct Server_To_Client_CharMove
+{
+	unsigned char packet_size = sizeof(unsigned char) + sizeof(unsigned char) + sizeof(char) + sizeof(unsigned char) + sizeof(float);
+	unsigned char packet_type = PACKET_PROTOCOL_TYPE::PLAYER_MOVE;
+	char		  dir;
+	unsigned char ani;
+	float		  deltime;
+
+}STC_CharMove;
+
 
 typedef struct Server_To_Client_Player_Test
 {

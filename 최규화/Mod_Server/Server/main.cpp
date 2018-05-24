@@ -3,6 +3,7 @@
 boost::asio::io_service g_io_service;
 
 CTimerWorker			g_timer_queue;
+CPhysicEngineWorker     g_physics_worker;
 
 vector<CPlayerObject*>	g_clients;
 
