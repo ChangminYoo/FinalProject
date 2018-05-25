@@ -432,8 +432,10 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 
 			}
 
+
 			STC_CharMove cts_move;
 
+			//캐릭터가 이동을 할 때, 즉 키를 누를때 눌렀다는 정보를 서버로 보냄		
 			if (move == true)//움직이고 있으면 움직이는 모션으로
 			{
 				if (PlayerObject->n_Animation != Ani_State::Attack)//공격모션이 아니면 다시 대기상태로
@@ -443,7 +445,7 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 					//m_async_client->RgCkInfo.PtCheck.AniState = Ani_State::Run;
 					//2018-05-24 수정
 					cts_move.dir = playerdir;
-					cts_move.ani = Ani_State::Run;
+					cts_move.ani_state = Ani_State::Run;
 					cts_move.deltime = DeltaTime;
 
 					m_async_client->SendPacket(reinterpret_cast<Packet*>(&cts_move));
@@ -458,7 +460,7 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 					//m_async_client->RgCkInfo.PtCheck.AniState = Ani_State::Idle;
 					//2018-05-24 수정
 					cts_move.dir = playerdir;
-					cts_move.ani = Ani_State::Idle;
+					cts_move.ani_state = Ani_State::Idle;
 					cts_move.deltime = DeltaTime;
 
 					m_async_client->SendPacket(reinterpret_cast<Packet*>(&cts_move));
@@ -472,10 +474,10 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 			{
 				playerdir = 5;
 
-				GeneratorJump j;
-				j.SetJumpVel(XMFLOAT3(0, 100, 0));//나중에 플레이어의 점프력만큼 추가할것
-				j.Update(DeltaTime, *PlayerObject->pp);
-				PlayerObject->AirBone = true;//공중상태를 true로
+				//GeneratorJump j;
+				//j.SetJumpVel(XMFLOAT3(0, 100, 0));//나중에 플레이어의 점프력만큼 추가할것
+				//j.Update(DeltaTime, *PlayerObject->pp);
+				//PlayerObject->AirBone = true;//공중상태를 true로
 
 				cts_move.dir = playerdir;
 				cts_move.dir = Ani_State::Idle;
@@ -490,9 +492,22 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 				//m_async_client->SendPacket(reinterpret_cast<Packet*>(&cts_charjump));
 			}
 
-			
-		
-			
+
+			//캐릭터가 이동을 멈추고, 즉 누르던 키를 땠을 때 땠다는 정보를 서버로 보냄
+			if ((GetKeyState(0x57) & 0x0001) || (GetKeyState(0x53) & 0x0001) ||
+				(GetKeyState(0x41) & 0x0001) || (GetKeyState(0x44) & 0x0001) ||
+				(GetKeyState(VK_SPACE) & 0x0001))//W키 S키 A키 D키
+			{
+				move = false;
+
+				playerdir = 0;
+
+				cts_move.dir = playerdir;
+				cts_move.deltime = DeltaTime;
+				cts_move.ani_state = Ani_State::Idle;
+
+				m_async_client->SendPacket(reinterpret_cast<Packet*>(&cts_move));
+			}
 
 			if (GetKeyState(0x31) & 0x8000)
 				skilldata.SellectBulletIndex = 0;

@@ -38,6 +38,7 @@ enum PACKET_PROTOCOL_TYPE
 	PLAYER_ATTACK,		    //플레이어 공격
 	STATIC_OBJECT,			//고정된 물체,
 	PLAYER_ANIMATION,
+	PLAYER_CURR_STATE,	//플레이어의 현재 상태(모든 정보 저장)
 	TEST					//테스트용 패킷
 };
 
@@ -169,7 +170,7 @@ struct Player_Data
 	char			ai{ false };				//1
 	char			dir;						//1
 	char			connect{ false };			//1
-	char			ani{ Ani_State::Idle };     //1
+	unsigned char	ani{ Ani_State::Idle };     //1
 	char			godmode{ false };			//1
 	char			airbone{ false };			//1
 												//Player_LoginDB  LoginData;
@@ -278,11 +279,18 @@ typedef struct Server_To_Client_CharMove
 	unsigned char packet_size = sizeof(unsigned char) + sizeof(unsigned char) + sizeof(char) + sizeof(unsigned char) + sizeof(float);
 	unsigned char packet_type = PACKET_PROTOCOL_TYPE::PLAYER_MOVE;
 	char		  dir;
-	unsigned char ani;
+	unsigned char ani_state;
 	float		  deltime;
 
 }STC_CharMove;
 
+typedef struct Server_To_Client_Curr_PlayerState
+{
+	unsigned char packet_size = sizeof(Player_Data) + sizeof(unsigned char) + sizeof(unsigned char);
+	unsigned char packet_type = PACKET_PROTOCOL_TYPE::PLAYER_CURR_STATE;
+	Player_Data   player_data;
+
+}STC_CharCurrState;
 
 typedef struct Server_To_Client_Player_Test
 {

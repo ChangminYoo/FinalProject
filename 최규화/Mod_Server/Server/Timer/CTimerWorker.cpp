@@ -168,31 +168,32 @@ void CTimerWorker::ProcessPacket(event_type * et)
 			mRegularDelTime = (mRegularCurrTime - mRegularPrevTime) * mSecondsPerCount;
 			mRegularPrevTime = mRegularCurrTime;
 
-			STC_ChangedPos stc_pos;
+			//1. 1초에 20번씩 서버에서 업데이트된 클라이언트의 모든정보를 보냄
+			STC_CharCurrState stc_char_state;
 			for (auto client : g_clients)
 			{
-				client->GravitySystem(mRegularDelTime);
+				//client->GravitySystem(mRegularDelTime);
 				//client->GetPhysicsPoint()->GravitySystem(mRegularDelTime, client->GetPhysicsPoint());
-
-				client->Tick(mRegularDelTime);
+				//client->Tick(mRegularDelTime);
 				//XMFLOAT4 xmf4{ client->m_pdata.pos.x,client->m_pdata.pos.y, client->m_pdata.pos.z, client->m_pdata.pos.w };
 				//client->GetPhysicsPoint()->integrate(mRegularDelTime, &xmf4);
 				//client->SetPlayerData_Pos(xmf4);
-				client->AfterGravitySystem(mRegularDelTime);
-
+				//client->AfterGravitySystem(mRegularDelTime);
 				//client->GetPhysicsEffect()->AfterGravitySystem(mRegularDelTime, client->GetPhysicsPoint(), OBJECT_TYPE::PLAYER,
 				//	client->m_pdata.pos, client->m_pdata.airbone);
 
 				client->SetChangedPlayerState();
 
-				stc_pos.id = client->m_pdata.id;
-				stc_pos.ani_state = client->m_pdata.ani;
-				stc_pos.pos = client->m_pdata.pos;
+				if (client->GetIsAI() == true || client->GetConnectState() == false) continue;
 
-				cout << "ID: " << stc_pos.id << " " << "Pos: " << stc_pos.pos.x << " "
-					<< stc_pos.pos.y << " " << stc_pos.pos.z << " " << stc_pos.pos.w << "  //  " << "Ani: " << stc_pos.ani_state << endl;
+				stc_char_state.player_data = move(client->m_pdata);
 
-				client->SendPacket(reinterpret_cast<Packet*>(&stc_pos));
+				cout << "ID: " << stc_char_state.player_data.id << " " << "Pos: " << stc_char_state.player_data.pos.x << " "
+					<< stc_char_state.player_data.pos.y << " " << stc_char_state.player_data.pos.z << " " << stc_char_state.player_data.pos.w 
+					<< "  //  " << "Ani: " << stc_char_state.player_data.ani << endl;
+
+				client->SendPacket(reinterpret_cast<Packet*>(&stc_char_state));
+
 			}
 
 			for (auto bull = g_bullets.begin(); bull != g_bullets.end();)

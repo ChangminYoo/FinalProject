@@ -330,77 +330,20 @@ void CPlayerObject::ProcessPacket(Packet * packet)
 
 		auto mdata = reinterpret_cast<STC_CharMove*>(packet);
 
-		switch (mdata->dir)
-		{
-			case CHAR_MOVE::FRONT_MOVE:
-			{
-				auto l = XMLoadFloat3(&g_clients[m_id]->m_Lookvector);
-				l *= g_clients[m_id]->m_ability.speed * mdata->deltime;
+		if (mdata->ani_state == Ani_State::Idle)
+			m_state = PLAYER_STATE::IDLE;
+		else if (mdata->ani_state == Ani_State::Run)
+			m_state = PLAYER_STATE::MOVE;
 
-				XMFLOAT4 xmf4{ g_clients[m_id]->m_pos4f.x, g_clients[m_id]->m_pos4f.y, 
-						       g_clients[m_id]->m_pos4f.z, g_clients[m_id]->m_pos4f.w };
-				auto p = XMLoadFloat4(&xmf4);
-				p += l;
-				XMStoreFloat4(&xmf4, p);
-				g_clients[m_id]->pp->SetPosition(xmf4);
-
-				m_pos4f.x = xmf4.x; m_pos4f.y = xmf4.y; m_pos4f.z = xmf4.z; m_pos4f.w = xmf4.w;
-				break;
-			}
-			case CHAR_MOVE::BACK_MOVE:
-			{
-				auto l = XMLoadFloat3(&g_clients[m_id]->m_Lookvector);
-				l *= g_clients[m_id]->m_ability.speed * mdata->deltime;
-
-				XMFLOAT4 xmf4{ g_clients[m_id]->m_pos4f.x, g_clients[m_id]->m_pos4f.y,
-							   g_clients[m_id]->m_pos4f.z, g_clients[m_id]->m_pos4f.w };
-				auto p = XMLoadFloat4(&xmf4);
-				p -= l;
-				XMStoreFloat4(&xmf4, p);
-				g_clients[m_id]->pp->SetPosition(xmf4);
-
-				m_pos4f.x = xmf4.x; m_pos4f.y = xmf4.y; m_pos4f.z = xmf4.z; m_pos4f.w = xmf4.w;
-				break;
-			}
-			case CHAR_MOVE::LEFT_MOVE:
-			{
-				auto r = XMLoadFloat3(&g_clients[m_id]->m_Rightvector);
-				r *= g_clients[m_id]->m_ability.speed * mdata->deltime;
-
-				XMFLOAT4 xmf4{ g_clients[m_id]->m_pos4f.x, g_clients[m_id]->m_pos4f.y,
-							   g_clients[m_id]->m_pos4f.z, g_clients[m_id]->m_pos4f.w };
-				auto p = XMLoadFloat4(&xmf4);
-				p -= r;
-				XMStoreFloat4(&xmf4, p);
-				g_clients[m_id]->pp->SetPosition(xmf4);
-
-				m_pos4f.x = xmf4.x; m_pos4f.y = xmf4.y; m_pos4f.z = xmf4.z; m_pos4f.w = xmf4.w;
-				break;
-			}
-			case CHAR_MOVE::RIGHT_MOVE:
-			{
-				auto r = XMLoadFloat3(&g_clients[m_id]->m_Rightvector);
-				r *= g_clients[m_id]->m_ability.speed * mdata->deltime;
-
-				XMFLOAT4 xmf4{ g_clients[m_id]->m_pos4f.x, g_clients[m_id]->m_pos4f.y,
-							   g_clients[m_id]->m_pos4f.z, g_clients[m_id]->m_pos4f.w };
-				auto p = XMLoadFloat4(&xmf4);
-				p += r;
-				XMStoreFloat4(&xmf4, p);
-				g_clients[m_id]->pp->SetPosition(xmf4);
-
-				m_pos4f.x = xmf4.x; m_pos4f.y = xmf4.y; m_pos4f.z = xmf4.z; m_pos4f.w = xmf4.w;
-				break;
-			}
-		default:
-			break;
-		}
+		g_clients[m_id]->m_dir = mdata->dir;
+		g_clients[m_id]->m_ani = mdata->ani_state;
 
 	}
 	break;
 
 	case PACKET_PROTOCOL_TYPE::CHANGED_PLAYER_POSITION:
 	{
+		/*
 		if (m_state == PLAYER_STATE::DEAD)
 			break;
 
@@ -433,12 +376,14 @@ void CPlayerObject::ProcessPacket(Packet * packet)
 		SetChangedPlayerState();
 
 		g_clients[PosMove_Data->id]->m_pos4f;
+		*/
 
-		cout << "ID: " << PosMove_Data->id << " 변화된 위치값: " << "[x:" << PosMove_Data->pos.x << "\t" << "y:" << PosMove_Data->pos.y
-			<< "\t" << "z:" << PosMove_Data->pos.z << "]" << "\t" << "w:" << PosMove_Data->pos.w << endl;
+		//cout << "ID: " << PosMove_Data->id << " 변화된 위치값: " << "[x:" << PosMove_Data->pos.x << "\t" << "y:" << PosMove_Data->pos.y
+		//	<< "\t" << "z:" << PosMove_Data->pos.z << "]" << "\t" << "w:" << PosMove_Data->pos.w << endl;
 
 		//4. 변화된 내 (포지션, 애니메이션) 정보를 다른 클라에 전달 - 반드시 이렇게 다시 만들어줘야함
 		//PosMove_Data를 바로 sendpacket에 packet으로 형변화하여 보내면 size error가 난다
+		/*
 		STC_ChangedPos stc_other_pos;
 
 		stc_other_pos.id = PosMove_Data->id;
@@ -457,7 +402,7 @@ void CPlayerObject::ProcessPacket(Packet * packet)
 			//갱신된 나의 데이터를 상대방에게 전달
 			client->SendPacket(reinterpret_cast<Packet*>(&stc_other_pos));
 		}
-
+		*/
 	}
 	break;
 
@@ -506,6 +451,8 @@ void CPlayerObject::ProcessPacket(Packet * packet)
 		if (m_state == PLAYER_STATE::DEAD)		
 			break;
 
+		m_state = PLAYER_STATE::ATTACK;
+
 		auto n_bldata = reinterpret_cast<STC_Attack*>(packet);
 
 		//공격키를 눌렀을 시, 불렛 생성.
@@ -514,21 +461,29 @@ void CPlayerObject::ProcessPacket(Packet * packet)
 			n_bldata->bull_data.pos, n_bldata->bull_data.Rotate_status, n_bldata->lifetime,
 			n_bldata->bull_data.vel3f, n_bldata->bull_data.type, n_bldata->bull_data.endpoint);
 
-		//불렛 데이터 하나의 물리효과 적용해주기 (integrate -> aftergravity) -> set bullet start time
-		g_bullobj->GetPhysicsPoint()->SetVelocity(n_bldata->bull_data.vel3f.x, n_bldata->bull_data.vel3f.y, n_bldata->bull_data.vel3f.z);
-		g_bullobj->GetPhysicsPoint()->integrate(n_bldata->lifetime, reinterpret_cast<XMFLOAT4*>(&n_bldata->bull_data.pos));
-		g_bullobj->AfterGravitySystem(n_bldata->lifetime);
-		g_bullobj->SetBulletLifeTime(n_bldata->lifetime); // 시간 0.1 ~ 0.2 추가
-														  //m_bullObj->SetIsFirstCreate(true);
-														  //불렛이 처음생성됐을 때의 시간을 저장. 이후 해당 이벤트마다 이 불렛의 생성주기시간을 더해줌
-		__int64 currTime; QueryPerformanceCounter((LARGE_INTEGER*)&currTime);
-		g_bullobj->m_prevTime = currTime;
-
-		g_bullets.emplace_back(g_bullobj);
-
 		STC_Attack stc_attack;
 		stc_attack.bull_data = move(g_bullobj->GetBulletInfo());
 		stc_attack.lifetime = g_bullobj->GetBulletLifeTime();
+
+		for (auto client : g_clients)
+		{
+			if (client->m_id == n_bldata->bull_data.Master_ID) continue;
+			if (client->GetIsAI() == true || client->GetConnectState() == false) continue;
+
+			client->SendPacket(reinterpret_cast<Packet*>(&stc_attack));
+		}
+
+		g_bullets.emplace_back(g_bullobj);
+
+		//불렛 데이터 하나의 물리효과 적용해주기 (integrate -> aftergravity) -> set bullet start time
+		//g_bullobj->GetPhysicsPoint()->SetVelocity(n_bldata->bull_data.vel3f.x, n_bldata->bull_data.vel3f.y, n_bldata->bull_data.vel3f.z);
+		//g_bullobj->GetPhysicsPoint()->integrate(n_bldata->lifetime, reinterpret_cast<XMFLOAT4*>(&n_bldata->bull_data.pos));
+		//g_bullobj->AfterGravitySystem(n_bldata->lifetime);
+		//g_bullobj->SetBulletLifeTime(n_bldata->lifetime); // 시간 0.1 ~ 0.2 추가
+														  //m_bullObj->SetIsFirstCreate(true);
+														  //불렛이 처음생성됐을 때의 시간을 저장. 이후 해당 이벤트마다 이 불렛의 생성주기시간을 더해줌
+		//__int64 currTime; QueryPerformanceCounter((LARGE_INTEGER*)&currTime);
+		//g_bullobj->m_prevTime = currTime;
 
 		//불렛을 쏜 캐릭터의 공격애니메이션을 다른 클라이언트에게도 보내준다
 		STC_CharAnimation stc_charani;
@@ -540,34 +495,16 @@ void CPlayerObject::ProcessPacket(Packet * packet)
 		{
 			//불렛을 쏜 클라이언트는 자신이 불렛을 생성했으므로 따로 생성정보를 보내주지 않아도됨 
 			if (client->m_id == n_bldata->bull_data.Master_ID) continue;
-			if (static_cast<bool>(client->m_ai) == true || static_cast<bool>(client->m_connect) == false) continue;
+			if (client->GetIsAI() == true || client->GetConnectState() == false) continue;
 
 			client->SendPacket(reinterpret_cast<Packet*>(&stc_charani));
-			client->SendPacket(reinterpret_cast<Packet*>(&stc_attack));
+
 		}
 
-		if (n_bldata->bull_data.type == BULLET_TYPE::protocol_LightBullet)
-			g_timer_queue.AddEvent(n_bldata->bull_data.myID, 0, LIGHT_BULLET, true, n_bldata->bull_data.Master_ID);
-
-		if (n_bldata->bull_data.type == BULLET_TYPE::protocol_HeavyBullet)
-			g_timer_queue.AddEvent(n_bldata->bull_data.myID, 0, HEAVY_BULLET, true, n_bldata->bull_data.Master_ID);
-	}
-	break;
-
-	case PACKET_PROTOCOL_TYPE::PLAYER_JUMP:
-	{
-		if (m_state == DEAD) break;
-
-		auto jump_data = reinterpret_cast<STC_CharJump*>(packet);
-
-		GeneratorJump j;
-		j.SetJumpVel(XMFLOAT3(0, 100, 0));
-		//j.Update(0.f, *pp);
-		j.Update(0.f, *g_clients[jump_data->id]->GetPhysicsPoint());
-		g_clients[jump_data->id]->m_airbone = true;
-		//m_clients[jump_data->id]->AirBone = true;
-		//m_pdata.airbone = true;
-		//m_pdata.ani = jump_data.ani_state;
+		//if (n_bldata->bull_data.type == BULLET_TYPE::protocol_LightBullet)
+		//	g_timer_queue.AddEvent(n_bldata->bull_data.myID, 0, LIGHT_BULLET, true, n_bldata->bull_data.Master_ID);
+		//if (n_bldata->bull_data.type == BULLET_TYPE::protocol_HeavyBullet)
+		//	g_timer_queue.AddEvent(n_bldata->bull_data.myID, 0, HEAVY_BULLET, true, n_bldata->bull_data.Master_ID);
 	}
 	break;
 
@@ -670,4 +607,82 @@ void CPlayerObject::SetChangedPlayerState()
 	m_pdata.status.level = m_ability.level;
 	m_pdata.status.origin_hp = m_ability.orignHP;
 	m_pdata.status.speed = m_ability.speed;
+}
+
+void CPlayerObject::PlayerInput(char dir, float deltime)
+{
+	switch (dir)
+	{
+		case CHAR_MOVE::FRONT_MOVE:
+		{
+			auto l = XMLoadFloat3(&g_clients[m_id]->m_Lookvector);
+			l *= g_clients[m_id]->m_ability.speed * deltime;
+
+			XMFLOAT4 xmf4{ g_clients[m_id]->m_pos4f.x, g_clients[m_id]->m_pos4f.y,
+				g_clients[m_id]->m_pos4f.z, g_clients[m_id]->m_pos4f.w };
+			auto p = XMLoadFloat4(&xmf4);
+			p += l;
+			XMStoreFloat4(&xmf4, p);
+			g_clients[m_id]->pp->SetPosition(xmf4);
+
+			m_pos4f.x = xmf4.x; m_pos4f.y = xmf4.y; m_pos4f.z = xmf4.z; m_pos4f.w = xmf4.w;
+			break;
+		}
+		case CHAR_MOVE::BACK_MOVE:
+		{
+			auto l = XMLoadFloat3(&g_clients[m_id]->m_Lookvector);
+			l *= g_clients[m_id]->m_ability.speed * deltime;
+
+			XMFLOAT4 xmf4{ g_clients[m_id]->m_pos4f.x, g_clients[m_id]->m_pos4f.y,
+				g_clients[m_id]->m_pos4f.z, g_clients[m_id]->m_pos4f.w };
+			auto p = XMLoadFloat4(&xmf4);
+			p -= l;
+			XMStoreFloat4(&xmf4, p);
+			g_clients[m_id]->pp->SetPosition(xmf4);
+
+			m_pos4f.x = xmf4.x; m_pos4f.y = xmf4.y; m_pos4f.z = xmf4.z; m_pos4f.w = xmf4.w;
+			break;
+		}
+		case CHAR_MOVE::LEFT_MOVE:
+		{
+			auto r = XMLoadFloat3(&g_clients[m_id]->m_Rightvector);
+			r *= g_clients[m_id]->m_ability.speed * deltime;
+
+			XMFLOAT4 xmf4{ g_clients[m_id]->m_pos4f.x, g_clients[m_id]->m_pos4f.y,
+				g_clients[m_id]->m_pos4f.z, g_clients[m_id]->m_pos4f.w };
+			auto p = XMLoadFloat4(&xmf4);
+			p -= r;
+			XMStoreFloat4(&xmf4, p);
+			g_clients[m_id]->pp->SetPosition(xmf4);
+
+			m_pos4f.x = xmf4.x; m_pos4f.y = xmf4.y; m_pos4f.z = xmf4.z; m_pos4f.w = xmf4.w;
+			break;
+		}
+		case CHAR_MOVE::RIGHT_MOVE:
+		{
+			auto r = XMLoadFloat3(&g_clients[m_id]->m_Rightvector);
+			r *= g_clients[m_id]->m_ability.speed * deltime;
+
+			XMFLOAT4 xmf4{ g_clients[m_id]->m_pos4f.x, g_clients[m_id]->m_pos4f.y,
+				g_clients[m_id]->m_pos4f.z, g_clients[m_id]->m_pos4f.w };
+			auto p = XMLoadFloat4(&xmf4);
+			p += r;
+			XMStoreFloat4(&xmf4, p);
+			g_clients[m_id]->pp->SetPosition(xmf4);
+
+			m_pos4f.x = xmf4.x; m_pos4f.y = xmf4.y; m_pos4f.z = xmf4.z; m_pos4f.w = xmf4.w;
+			break;
+		}
+		case CHAR_MOVE::JUMP:
+		{
+			GeneratorJump j;
+			j.SetJumpVel(XMFLOAT3(0, 100, 0));
+			j.Update(deltime, *pp);
+			m_airbone = true;
+
+			break;
+		}
+	default:
+		break;
+	}
 }

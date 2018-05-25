@@ -19,22 +19,8 @@ switch (packet[1])
 		
 		scene.my_ClientID = init_data->player_data.id;
 
-		//new_initdata = move(init_data->player_data);
-
-		//new_initdata.Ani = init_data->player_data.Ani;
-		//new_initdata.Connect_Status = init_data->player_data.Connect_Status;
-		//new_initdata.Dir = init_data->player_data.Dir;
-		//new_initdata.ID = init_data->player_data.ID;
-		//new_initdata.Is_AI = init_data->player_data.Is_AI;
-		//new_initdata.Pos = move(init_data->player_data.Pos);
-		//new_initdata.UserInfo = move(init_data->player_data.UserInfo);
-		//new_initdata.AirBone = init_data->player_data.AirBone;
-
-
 		RgCkInfo.RtCheck.RotationInfo = move(init_data->player_data.rot);
 		RgCkInfo.PtCheck.PositionInfo = move(init_data->player_data.pos);
-
-		//scene.SET_PLAYER_BY_SEVER_DATA(init_data->player_data.ID, new_initdata, packet[1]);
 
 		scene.SET_PLAYER_BY_SEVER_DATA(init_data->player_data.id, init_data->player_data, packet[1]);
 	}
@@ -44,14 +30,10 @@ switch (packet[1])
 	{
 		auto init_otherdata = reinterpret_cast<STC_SetOtherClient*>(packet);
 
-		//Player_Data new_initdata_other;
-		//new_initdata_other = move(init_otherdata->player_data);
-
-		//scene.SET_PLAYER_BY_SEVER_DATA(init_otherdata->player_data.ID, new_initdata_other, packet[1]);
 		scene.SET_PLAYER_BY_SEVER_DATA(init_otherdata->player_data.id, init_otherdata->player_data, packet[1]);
 	}
 	break;
-
+	
 	case PACKET_PROTOCOL_TYPE::CHANGED_PLAYER_POSITION:
 	{
 		auto move_data = reinterpret_cast<STC_ChangedPos*>(packet);
@@ -116,7 +98,19 @@ switch (packet[1])
 	{
 		auto mycharani = reinterpret_cast<STC_CharAnimation*>(packet);
 		
-		scene.SET_PLAYER_ANIMATION_BY_SERVER_DATA(mycharani->id, mycharani->ani_state);
+		Player_Data new_anidata;
+		new_anidata.ani = mycharani->ani_state;
+	
+
+		scene.SET_PLAYER_BY_SEVER_DATA(mycharani->id, new_anidata, packet[1]);
+	}
+	break;
+
+	case PACKET_PROTOCOL_TYPE::PLAYER_CURR_STATE:
+	{
+		auto my_curr_state = reinterpret_cast<STC_CharCurrState*>(packet);
+
+		scene.SET_PLAYER_BY_SEVER_DATA(my_curr_state->player_data.id, my_curr_state->player_data, packet[1]);
 	}
 	break;
 }

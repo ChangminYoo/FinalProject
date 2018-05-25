@@ -21,11 +21,22 @@ void CPhysicEngineWorker::Update()
 
 		for (auto client : g_clients)
 		{
+			client->PlayerInput(client->GetPlayerDirection(), m_deltime);
 			client->GravitySystem(m_deltime);
 			client->Tick(m_deltime);
 			client->AfterGravitySystem(m_deltime);
 
 			//client->Collision(m_deltime);
+
+			//юс╫ц
+			//client->SetPlayerDirection(0);
+			//client->SetPlayerAnimation(Ani_State::Idle);
+		}
+
+		for (auto bullet : g_bullets)
+		{
+			bullet->Tick(m_deltime);
+			bullet->AfterGravitySystem(m_deltime);
 		}
 
 	}

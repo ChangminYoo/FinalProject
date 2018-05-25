@@ -25,7 +25,7 @@ private:
 	unsigned short		m_id;
 	char				m_connect{ false };
 	char				m_state{ IDLE };
-	char				m_ani;
+	unsigned char		m_ani;
 
 	wchar_t				m_loginID[MAX_BUFFER_SIZE / 4]{ L"Guest" };
 	wchar_t				m_loginPW[MAX_BUFFER_SIZE / 4]{ L"Guest" };
@@ -83,6 +83,7 @@ public:
 	void Init_PlayerInfo();
 	void InitData_To_Client();
 	void RegularUpdate();
+	void PlayerInput(char dir, float deltime);
 	
 	// ---------------------------------------------------------------------------------------
 	// [4].기타 GET - SET 함수
@@ -94,21 +95,26 @@ public:
 	void    SetState(int state) { m_state = state; }
 	int		GetState() const { return m_state; }
 
-	void	SetConnectState(bool flag) { m_connect = flag; }
-	bool	GetConnectState() const { return m_connect; }
+	void	SetConnectState(char flag) { m_connect = flag; }
+	bool	GetConnectState() const { return static_cast<bool>(m_connect); }
 
 	Packet* Get_DataBuf() { return m_databuf; }
 	Packet* Get_RecvBuf() { return m_recvbuf; }
 
 	void	Damaged(float damage);
 
-	bool    GetIsAI() const { return m_ai; }
+	void    SetIsAI(char ai) { m_ai = ai; }
+	bool    GetIsAI() const { return static_cast<bool>(m_ai); }
 
 	void    SetPlayerData_Airbone(char airbone) { m_airbone = airbone; }
 	void	SetPlayerData_Pos(const XMFLOAT4& xmf4) { m_pos4f.x = xmf4.x; m_pos4f.y = xmf4.y; m_pos4f.z = xmf4.z; m_pos4f.w = xmf4.w; }
 	void    SetPlayerData_Pos(const float& x, const float& y, const float& z, const float& w) { m_pos4f.x = x; m_pos4f.y = y; m_pos4f.z = z; m_pos4f.w = w; }
 
 	void    SetChangedPlayerState();
+	void    SetPlayerDirection(char dir) { m_dir = dir; }
+	char	GetPlayerDirection() const   { return m_dir; }
+	void	SetPlayerAnimation(unsigned char ani) { m_ani = ani; }
+	unsigned char GetPlayerAnimation() const { return m_ani; }
 	// ---------------------------------------------------------------------------------------
 	// [5]. 물리효과 함수
 

@@ -28,8 +28,8 @@ public:
 	virtual void Tick(float deltime);
 	virtual void Update(float deltime);
 
-	float GetBulletLifeTime() const { return m_lifetime; }
-	void   SetBulletLifeTime(float time) { m_lifetime += time; }
+	float			  GetBulletLifeTime() const { return m_lifetime; }
+	void			  SetBulletLifeTime(float time) { m_lifetime += time; }
 
 	BulletObject_Info GetBulletInfo() { return m_bulldata; }
 	Position		  GetBulletOldPos() const { return m_pos4f; }

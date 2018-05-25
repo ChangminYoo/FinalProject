@@ -731,7 +731,7 @@ void Scene::SET_PLAYER_BY_SEVER_DATA(const unsigned short & id,const Player_Data
 			{
 				GameObject->m_player_data = move(playerdata);
 
-				//GameObject->Orient = { playerdata.Rotate_status.x , playerdata.Rotate_status.y, playerdata.Rotate_status.z, playerdata.Rotate_status.w };
+				GameObject->Orient = { playerdata.rot.x , playerdata.rot.y, playerdata.rot.z, playerdata.rot.w };
 				GameObject->CenterPos = { playerdata.pos.x , playerdata.pos.y , playerdata.pos.z , playerdata.pos.w };
 				GameObject->pp->SetPosition(GameObject->CenterPos);
 
@@ -742,22 +742,27 @@ void Scene::SET_PLAYER_BY_SEVER_DATA(const unsigned short & id,const Player_Data
 
 				GameObject->AirBone = playerdata.airbone;
 
-
-
 				if (GameObject->m_player_data.id == my_ClientID)
 					Player->SetPlayer(GameObject);
 			}
 			break;
 
-			case PACKET_PROTOCOL_TYPE::CHANGED_PLAYER_POSITION:
+			case PACKET_PROTOCOL_TYPE::PLAYER_CURR_STATE:
 			{
-				GameObject->m_player_data.pos = move(playerdata.pos);
-				GameObject->m_player_data.ani = move(playerdata.ani);
+				GameObject->m_player_data = move(playerdata);
 
+				GameObject->Orient = { playerdata.rot.x , playerdata.rot.y, playerdata.rot.z, playerdata.rot.w };
 				GameObject->CenterPos = { playerdata.pos.x , playerdata.pos.y , playerdata.pos.z , playerdata.pos.w };
 				GameObject->pp->SetPosition(GameObject->CenterPos);
 
-				GameObject->n_Animation = playerdata.ani;
+				GameObject->gamedata.Damage = move(playerdata.status.attack);
+				GameObject->gamedata.HP = move(playerdata.status.cur_hp);
+				GameObject->gamedata.MAXHP = move(playerdata.status.origin_hp);
+				GameObject->gamedata.Speed = move(playerdata.status.speed);
+
+				GameObject->AirBone = playerdata.airbone;
+				
+				GameObject->n_Animation = static_cast<int>(playerdata.ani);
 
 			}
 			break;
@@ -775,10 +780,19 @@ void Scene::SET_PLAYER_BY_SEVER_DATA(const unsigned short & id,const Player_Data
 				GameObject->Orient = { playerdata.rot.x , playerdata.rot.y, playerdata.rot.z, playerdata.rot.w };
 			}
 			break;
+			
+			case PACKET_PROTOCOL_TYPE::PLAYER_ANIMATION:
+			{
+				//GameObject->ObjData.isAnimation = true;
+
+				GameObject->m_player_data.ani = playerdata.ani;
+
+				GameObject->n_Animation = static_cast<int>(playerdata.ani);
+			}
 
 			default:
 				break;
-				//break; //이거문제
+
 			}
 
 		}
@@ -885,8 +899,9 @@ void Scene::SET_PLAYER_ANIMATION_BY_SERVER_DATA(const unsigned short & id, const
 	{
 		if (GameObject->m_player_data.id == id)
 		{
+			GameObject->ObjData.isAnimation = true;
 			GameObject->m_player_data.ani = ani;
-			GameObject->n_Animation = ani;
+			GameObject->n_Animation = static_cast<int>(ani);
 			break;
 		}
 	}

@@ -160,20 +160,24 @@ NormalBoxObject::NormalBoxObject(unsigned short id)
 	pp = new PhysicsPoint();
 	
 	m_id = id;
+	m_fixed = true;
+	m_alive = true;
 	m_pos4f = m_sobj_bdata[m_id].pos;
 	m_rot4f = { 0.f, 0.f, 0.f, 1.f };
-	m_fixed = true;
-	m_degree = m_sobj_bdata[m_id].degree;
+	m_dir = 0;
+	m_ai = true;
+	m_godmode = true;
+	m_airbone = false;
 	m_type = STATIC_OBJECT_TYPE::Box;
 
 	m_ability.curHP = 100;
 	m_ability.orignHP = 100;
 	m_ability.attack = 0;
-	m_godmode = true;
 	m_ability.speed = 0;
-
 	m_ability.level = 1;
 	m_ability.exp = 0;
+
+	m_degree = m_sobj_bdata[m_id].degree;
 
 	m_OffLookvector = XMFLOAT3(0, 0, 1);
 	m_OffRightvector = XMFLOAT3(1, 0, 0);
@@ -202,20 +206,24 @@ SmallWallObject::SmallWallObject(unsigned short id)
 	pp = new PhysicsPoint();
 
 	m_id = id;
+	m_fixed = true;
+	m_alive = true;
 	m_pos4f = m_sobj_bdata[m_id].pos;
 	m_rot4f = { 0.f, 0.f, 0.f, 1.f };
-	m_fixed = true;
-	m_degree = m_sobj_bdata[m_id].degree;
+	m_dir = 0;
+	m_ai = true;
+	m_godmode = true;
+	m_airbone = false;
 	m_type = STATIC_OBJECT_TYPE::SmallWall;
 
 	m_ability.curHP = 100;
 	m_ability.orignHP = 100;
 	m_ability.attack = 0;
-	m_godmode = true;
 	m_ability.speed = 0;
-
 	m_ability.level = 1;
 	m_ability.exp = 0;
+
+	m_degree = m_sobj_bdata[m_id].degree;
 
 	m_OffLookvector = XMFLOAT3(0, 0, 1);
 	m_OffRightvector = XMFLOAT3(1, 0, 0);
@@ -253,20 +261,23 @@ BigWallObject::BigWallObject(unsigned short id)
 	pp = new PhysicsPoint();
 
 	m_id = id;
+	m_fixed = true;
+	m_alive = true;
 	m_pos4f = m_sobj_bdata[m_id].pos;
 	m_rot4f = { 0.f, 0.f, 0.f, 1.f };
-	m_fixed = true;
-	m_degree = m_sobj_bdata[m_id].degree;
+	m_dir = 0;
+	m_ai = true;
+	m_godmode = true;
 	m_type = STATIC_OBJECT_TYPE::BigWall;
 
 	m_ability.curHP = 100;
 	m_ability.orignHP = 100;
 	m_ability.attack = 0;
-	m_godmode = true;
 	m_ability.speed = 0;
-
 	m_ability.level = 1;
 	m_ability.exp = 0;
+
+	m_degree = m_sobj_bdata[m_id].degree;
 
 	m_OffLookvector = XMFLOAT3(0, 0, 1);
 	m_OffRightvector = XMFLOAT3(1, 0, 0);
@@ -304,20 +315,23 @@ Building::Building(unsigned short id)
 	pp = new PhysicsPoint();
 
 	m_id = id;
+	m_fixed = true;
+	m_alive = true;
 	m_pos4f = m_sobj_bdata[m_id].pos;
 	m_rot4f = { 0.f, 0.f, 0.f, 1.f };
-	m_fixed = true;
-	m_degree = m_sobj_bdata[m_id].degree;
+	m_dir = 0;
+	m_ai = true;
+	m_godmode = true;
 	m_type = STATIC_OBJECT_TYPE::NormalBuilding;
 
 	m_ability.curHP = 100;
 	m_ability.orignHP = 100;
 	m_ability.attack = 0;
-	m_godmode = true;
 	m_ability.speed = 0;
-
 	m_ability.level = 1;
 	m_ability.exp = 0;
+
+	m_degree = m_sobj_bdata[m_id].degree;
 
 	m_OffLookvector = XMFLOAT3(0, 0, 1);
 	m_OffRightvector = XMFLOAT3(1, 0, 0);

@@ -443,6 +443,10 @@ LRESULT FrameWork::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		}
 		else if ((int)wParam == VK_F2)
 			Set4xMsaaState(!m4xMsaaState);
+		else if (wParam == (VK_LEFT || VK_RIGHT || VK_UP || VK_DOWN))
+		{
+
+		}
 
 		return 0;
 	}

@@ -420,10 +420,7 @@ void CCubeManObject::Tick(const GameTimer & gt)
 		if(n_Animation!=Attack)
 			UpdateMD5Model(commandlist, &Mesh, this, gt.DeltaTime()*60.0 / 24.0, n_Animation, animations, jarr);
 		else
-		{
-
 			UpdateMD5Model(commandlist, &Mesh, this, 2*gt.DeltaTime()*60.0 / 24.0, n_Animation, animations, jarr);
-		}
 
 	}
 
