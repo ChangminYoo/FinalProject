@@ -665,11 +665,17 @@ void BulletCube::Collision(list<CGameObject*>* collist, float DeltaTime)
 				//1. 먼저 데미지를 준다.
 				(*i)->ToDamage(gamedata.Damage);
 
+				//2. 보스몬스터면 총알방햐을 보도록함.
+				if ((*i)->gamedata.MAXHP > 1000)//보스몬스터면 총알 방향으로 오도록해야함.
+					((ImpObject*)*i)->fsm->aidata.LastPosition = this->CenterPos;
 
 				XMFLOAT3 cn;
 				//고정된 물체가 아니면
 				if ((*i)->staticobject == false)
 				{
+
+					
+
 					//상대속도 방향을 구한다. A-B
 					cn = XMFloat4to3(Float4Add(pp->GetPosition(), (*(*i)->pp).GetPosition(), false));
 					cn = Float3Normalize(cn);
@@ -852,8 +858,8 @@ void HeavyBulletCube::Collision(list<CGameObject*>* collist, float DeltaTime)
 			{
 				//1. 먼저 데미지를 준다.
 				(*i)->ToDamage(gamedata.Damage);
-
-
+				if ((*i)->gamedata.MAXHP > 1000)//보스몬스터면
+					((ImpObject*)*i)->fsm->aidata.LastPosition = this->CenterPos;
 				XMFLOAT3 cn;
 				//고정된 물체가 아니면
 				if ((*i)->staticobject == false)

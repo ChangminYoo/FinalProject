@@ -136,13 +136,10 @@ float4 PS(VertexOut pin) : SV_Target
 			// 0보다 크면 (빛을 받는 부분이면)
 			if (lightIntensity > 0.0f)
 			{
-				if (lightIntensity > 0.85)
-					litColor += (float4(gLights[i].DiffuseColor) * float4(1, 1, 1, 1));
+				
+					litColor += (float4(gLights[i].DiffuseColor) * float4(0.37, 0.37, 0.37, 1));
 
-				else if (lightIntensity > 0.45)
-					litColor += (float4(gLights[i].DiffuseColor) * float4(0.7, 0.7, 0.7, 1));
-				else if (lightIntensity > 0.1)
-					litColor += (float4(gLights[i].DiffuseColor) * float4(0.3, 0.3, 0.3, 1));
+				
 
 				
 				litColor += (float4(gLights[i].DiffuseColor) * lightIntensity);
@@ -159,7 +156,7 @@ float4 PS(VertexOut pin) : SV_Target
 			else if (lightIntensity <= 0.0f)
 			{
 
-				litColor += (float4(gLights[i].DiffuseColor) * float4(0.35f, 0.35f, 0.35f, 1.0f)); //여기 부분을 조정하면 빛을 안받는 부분의 음영을 조정할 수 있습니다.
+				litColor += (float4(gLights[i].DiffuseColor) * float4(0.472f, 0.472f, 0.472f, 1.0f)); //여기 부분을 조정하면 빛을 안받는 부분의 음영을 조정할 수 있습니다.
 
 				litColor = saturate(litColor);
 
