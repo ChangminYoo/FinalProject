@@ -24,7 +24,8 @@ Scene::Scene(HWND hwnd,ID3D12Device * m_Device, ID3D12GraphicsCommandList * m_DC
 	Shaders->player = Player;//이제 플레이어도 설정되야 한다.
 	light = new CLight(m_Device, m_DC);
 	CreateUI();
-	Sound = new CSound;
+
+	Sound = new CSound();
 	Sound->Init();
 
 }
@@ -92,7 +93,8 @@ Scene::~Scene()
 		LandObject.pop_back();
 	}
 
-	Sound->DeleteSound();
+	if (Sound != NULL)
+		Sound->DeleteSound();
 
 	if (Player != NULL)
 		delete Player;
@@ -122,8 +124,8 @@ void Scene::SceneState()
 			SetGameState(GS_PLAY);
 			ShowCursor(false);
 
-			//Sound->PlaySoundEffect(CSound::SoundType::TITLE);
-			//Sound->SetVolume(CSound::SoundType::TITLE, 0.5f);
+			Sound->PlaySoundEffect(CSound::SoundType::TITLE);
+			Sound->SetVolume(CSound::SoundType::TITLE, 0.5f);
 		}
 		else
 		{
@@ -245,6 +247,8 @@ void Scene::CreateGameObject()
 	resource = new Tetris2(device, commandlist, &BbObject, NULL, NULL, XMFLOAT4(0, 0, 0, 0));
 	delete resource;
 	resource = new Tetris3(device, commandlist, &BbObject, NULL, NULL, XMFLOAT4(0, 0, 0, 0));
+	delete resource;
+	resource = new DiceStrike(device, commandlist, &BbObject, NULL, XMFLOAT4(0, 0, 0, 1), 0, NULL, XMFLOAT4(0, 0, 0, 0));
 	delete resource;
 
 	//--------------------------------------------------//
@@ -407,13 +411,17 @@ void Scene::CreateUI()
 		switch (Player->skilldata.Skills[i])
 		{
 		case 0://라이트큐브
-			ct = 0.6f;
+			ct = Player->skilldata.SkillsMaxCoolTime[i];
 			break;
 		case 1://헤비큐브
-			ct = 1.1f;
+			ct = Player->skilldata.SkillsMaxCoolTime[i];
 			break;
 		case 2://테트라이크
-			ct = 25.0f;
+			ct = Player->skilldata.SkillsMaxCoolTime[i];
+			break;
+		case 3:
+			ct = Player->skilldata.SkillsMaxCoolTime[i];
+			break;
 		}
 
 		SkillCoolBar[i] = new CoolBarObject(device, commandlist, NULL,ct, Player->PlayerObject, XMFLOAT4(i*100-150,0.98*-mHeight / 2, 0, 0));
@@ -601,6 +609,7 @@ void Scene::Tick(const GameTimer & gt)
 			GAMESTATE = GS_END;
 
 		Player->Tick(gt.DeltaTime());
+
 
 		UITick(gt);
 		//카메라 리 로케이트 

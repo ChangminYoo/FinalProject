@@ -15,6 +15,8 @@ typedef struct SkillData
 	//각 스킬별로 쿨타임.
 	float SkillsCoolTime[4] = { 0.0f };
 
+	float SkillsMaxCoolTime[4] = { 0.6f, 1.1f, 25.0f, 5.0f };
+
 	//스킬별 사용가능 여부
 	bool isSkillOn[4] = { true };
 
@@ -42,7 +44,7 @@ public:
 
 	SkillData skilldata;
 	
-
+	bool DiceReady = false;
 	void Tick(float DeltaTime);
 	void CreateBullet(ID3D12Device* Device,ID3D12GraphicsCommandList* cl, XMFLOAT3& Goal, CGameObject* lock, list<CGameObject*>* bulletlist);
 	void CheckTraceSkill();//현재 선택한 스킬넘버링이 추적데이터가 존재해야하는지 검사하고, 검사한 결과를 MouseTrace에 입힌다. 

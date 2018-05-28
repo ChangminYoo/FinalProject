@@ -42,7 +42,7 @@ public:
 	void PauseAllGameSounds();
 	void SetVolume(SoundType id, float vol);
 
-	FMOD::System* system;
+	FMOD::System* system = NULL;
 	FMOD::Sound* sound[COUNT];
 	FMOD::Channel* channel[COUNT];
 
@@ -52,7 +52,7 @@ public:
 		FMOD::System_Create(&system);
 		system->init(32, FMOD_INIT_NORMAL, nullptr);
 
-		system->createSound("sound/title2.wav", FMOD_CREATESAMPLE | FMOD_LOOP_NORMAL, 0, &sound[TITLE]);
+		system->createSound("sound/title2.ogg", FMOD_CREATESAMPLE | FMOD_LOOP_NORMAL, 0, &sound[TITLE]);
 		system->createSound("sound/step.ogg", FMOD_DEFAULT , 0, &sound[STEP]);
 		system->createSound("sound/hit1.ogg",  FMOD_DEFAULT , 0, &sound[HIT]);
 		system->createSound("sound/skill1.ogg", FMOD_DEFAULT , 0, &sound[SKILL1]);

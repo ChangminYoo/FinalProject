@@ -32,7 +32,7 @@ public:
 	HWND hWnd;
 	ComPtr<ID3D12RootSignature> rootsg;//루트시그니처
 	array<const CD3DX12_STATIC_SAMPLER_DESC, 6> GetStaticSamplers();
-	CSound* Sound = NULL;
+	CSound *Sound= NULL;
 public:
 
 	//주의 할점. 이 두가지는 프레임워크에서 생성해둔것을 가져다가만 쓰므로 멋대로 릴리즈 하면 안된다.

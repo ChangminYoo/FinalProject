@@ -55,7 +55,10 @@ struct GameData //게임캐릭터의 정보 흔히 알고있는 체력, 데미지, 스피드가 있다.
 	float Damage=0;
 	float Speed=0;
 	bool GodMode = false;
+	
 };
+
+
 
 class CGameObject//이 클래스를 기본으로 상속받아 다른 오브젝트를 만듬. ex) 검사오브젝트, 좀비오브젝트 등
 {
@@ -107,9 +110,10 @@ public:
 	//기타 공용 데이터들
 	bool DelObj = false;//이게 참이면 실제로 제거된다.
 	bool Blending = false;
+	int Dicedata = 0;
+
 	//벽들에 굳이 마우스를 움직일때마다 체크할 필요는 없으므로 추가함. 또 벽은 또 벽대로 뭔가 처리할게 있을것같음.
 	Obj_State obs = Dynamic;
-
 
 	GameData gamedata;
 	RayCastObject rco;//레이캐스트 오브젝트
@@ -159,8 +163,9 @@ void LoadTexture(ID3D12Device* device, ID3D12GraphicsCommandList* commandlist, C
 class BarObject : public CGameObject
 {
 public:
-	BarObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, CGameObject* master, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
+	BarObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, CGameObject* master, float size, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
 	CGameObject* Master = NULL;//소유자
+	float YPos;
 public:
 	static bool CreateMesh;//최초로 false며 메쉬를 만든후 true가된다.
 	static unordered_map<string, unique_ptr<CTexture>> Textures;//텍스처들을 저장함
@@ -179,8 +184,9 @@ public:
 class BarFrameObject : public CGameObject
 {
 public:
-	BarFrameObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, CGameObject* master, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
+	BarFrameObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, CGameObject* master, float size, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
 	CGameObject* Master = NULL;//소유자
+	float YPos;
 public:
 	static bool CreateMesh;//최초로 false며 메쉬를 만든후 true가된다.
 	static unordered_map<string, unique_ptr<CTexture>> Textures;//텍스처들을 저장함
@@ -195,6 +201,31 @@ public:
 	virtual void Collision(list<CGameObject*>* collist, float DeltaTime) {}
 
 };
+
+class DiceObject : public CGameObject
+{
+public:
+	DiceObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, CGameObject* master, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
+	CGameObject* Master = NULL;//소유자
+	int dTime = 0;
+	float LifeTime = 3.0f;
+	int TexStart = 0;
+	float YPos;
+
+public:
+	static bool CreateMesh;//최초로 false며 메쉬를 만든후 true가된다.
+	static unordered_map<string, unique_ptr<CTexture>> Textures;//텍스처들을 저장함
+	static CMesh Mesh;//오로지 한번만 만들어짐
+	static ComPtr<ID3D12DescriptorHeap> SrvDescriptorHeap;//텍스처 용 힙
+public:
+	virtual void SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist);//셋메시는 메시를 최종적으로 생성한다. 즉 메시를구성하는 정점과 삼각형을구성하는인덱스버퍼생성
+	virtual void Tick(const GameTimer& gt);
+	virtual void Render(ID3D12GraphicsCommandList* commandlist, const GameTimer& gt);
+	virtual void Collision(list<CGameObject*>* collist, float DeltaTime) {};
+
+
+};
+
 //============ 캐릭터 ==========//
 class CCubeManObject : public CGameObject
 {
@@ -203,6 +234,8 @@ public:
 	~CCubeManObject();
 	BarObject* Hpbar = NULL;
 	BarFrameObject* HPFrame = NULL;
+	DiceObject* DiceEffect = NULL;
+
 	int select = 0;
 public:
 	static CMaterial Mat;
@@ -432,13 +465,16 @@ public:
 
 class DiceStrike : public CGameObject
 {
-	DiceStrike(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, list<CGameObject*>*Bulletlist, CGameObject* master, CGameObject* lockon = NULL, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
+public:
+	DiceStrike(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, CGameObject* master, XMFLOAT4& ori, float degree, CGameObject* lockon = NULL, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
+	~DiceStrike();
 	CGameObject* Master = NULL;//소유자
 	CGameObject* LockOn = NULL;//유도시사용됨
-	float LifeTime = 10;//생존시간. 10초 후 제거됨
-	float ShotTime = 0;//0.25초마다 발동
-	list<CGameObject*>* Blist = NULL;
 
+	float LifeTime = 10;
+
+	ParticleObject* BulletParticles = NULL;
+	ParticleObject* BulletParticles2 = NULL;
 public:
 	static CMaterial Mat;
 	static bool CreateMesh;//최초로 false며 메쉬를 만든후 true가된다.
@@ -451,7 +487,7 @@ public:
 	virtual void SetMaterial(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist); //머테리얼 생성
 	virtual void Tick(const GameTimer& gt);
 	virtual void Render(ID3D12GraphicsCommandList* commandlist, const GameTimer& gt);
-	virtual void Collision(list<CGameObject*>* collist, float DeltaTime) {}
+	virtual void Collision(list<CGameObject*>* collist, float DeltaTime);
 
 
 };
@@ -606,7 +642,6 @@ public:
 	virtual void Collision(list<CGameObject*>* collist, float DeltaTime) {}
 
 };
-
 
 class BuildingObject : public CGameObject
 {

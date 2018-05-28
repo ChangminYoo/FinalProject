@@ -265,49 +265,49 @@ CCubeManObject::CCubeManObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 	{
 		Mesh.Index = NULL;
 		Mesh.SubResource = NULL;
-
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Female Brown Casual",    L"textures/human/Female Brown Casual 03B.dds", false, num, 0);
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Female Black Knight",    L"textures/human/Female Black Knight 04 Green.dds", false, num, 1);
+	
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Female Brown Casual", L"textures/human/Female Brown Casual 03B.dds", false, num, 0);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Female Black Knight", L"textures/human/Female Black Knight 04 Green.dds", false, num, 1);
 		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Female Brown Sorceress", L"textures/human/Female Brown Sorceress 03 White.dds", false, num, 2);
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Female White Knight",    L"textures/human/Female White Knight 04 Purple.dds", false, num, 3);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Female White Knight", L"textures/human/Female White Knight 04 Purple.dds", false, num, 3);
 		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Female White Barbarian", L"textures/human/Female White Barbarian 05 Red.dds", false, num, 4);
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Male Black Knight",      L"textures/human/Male Black Knight 07 White.dds", false, num, 5);
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Male White Wizard",      L"textures/human/Male White Wizard 06 White.dds", false, num, 6);
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Male Black Archer",      L"textures/human/Male Black Archer 05 Green.dds", false, num, 7);
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Male Fire",              L"textures/human/Male Fire 01 Orange.dds", false, num, 8);
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Male White King",        L"textures/human/Male White King 01 Red.dds", false, num, 9);
-
-
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Male Black Knight", L"textures/human/Male Black Knight 07 White.dds", false, num, 5);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Male White Wizard", L"textures/human/Male White Wizard 06 White.dds", false, num, 6);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Male Black Archer", L"textures/human/Male Black Archer 05 Green.dds", false, num, 7);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Male Fire", L"textures/human/Male Fire 01 Orange.dds", false, num, 8);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Male White King", L"textures/human/Male White King 01 Red.dds", false, num, 9);
+	
+	
 		SetMesh(m_Device, commandlist);
 		SetMaterial(m_Device, commandlist);
-
+	
 		CreateMesh = true;
-
+	
 	}
-	select = 4;//rand() % num;
+	select = rand() % num;
 	if (select == 0)
-		TextureName = "Female Brown Casual"; 
+	TextureName = "Female Brown Casual";
 	else if (select == 1)
-		TextureName = "Female Black Knight"; 
+	TextureName = "Female Black Knight";
 	else if (select == 2)
-		TextureName = "Female Brown Sorceress"; 
+	TextureName = "Female Brown Sorceress";
 	else if (select == 3)
-		TextureName = "Female White Knight"; 
+	TextureName = "Female White Knight";
 	else if (select == 4)
-		TextureName = "Female White Barbarian"; 
+	TextureName = "Female White Barbarian";
 	else if (select == 5)
-		TextureName = "Male Black Knight"; 
+	TextureName = "Male Black Knight";
 	else if (select == 6)
-		TextureName = "Male White Wizard"; 
+	TextureName = "Male White Wizard";
 	else if (select == 7)
-		TextureName = "Male Black Archer"; 
+	TextureName = "Male Black Archer";
 	else if (select == 8)
-		TextureName = "Male Fire"; 
+	TextureName = "Male Fire";
 	else if (select == 9)
-		TextureName = "Male White King"; 
+	TextureName = "Male White King";
 	TexOff = select;
-
-
+	
+	
 	//게임오브젝트마다 룩벡터와 라이트벡터가 다르므로 초기 오프셋 설정을 해준다.
 	//실제 룩벡터 등은 모두 UpdateLookVector에서 처리된다(라이트벡터도) 따라서 Tick함수에서 반드시 호출해야한다.
 	OffLookvector = XMFLOAT3(0, 0, -1);
@@ -320,46 +320,56 @@ CCubeManObject::CCubeManObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 	ObjData.isAnimation = true;
 	ObjData.Scale = 3;
 	ObjData.SpecularParamater = 0.0f;//스페큘러를 낮게준다.
-
+	
 	obs = Dynamic;
 	//게임 데이터 (스텟)을 찍는다. 캐릭터는 데미지를 갖지 않고, 탄환이 데미지를 갖도록하자.
 	gamedata.MAXHP = 100;
 	gamedata.HP = 100;
 	gamedata.Speed = 50;
-
+	
 	//광선충돌 검사용 육면체
 	XMFLOAT3 rx(3, 0, 0);
 	XMFLOAT3 ry(0, 10, 0);
 	XMFLOAT3 rz(0, 0, 3);
 	rco.SetPlane(rx, ry, rz);
-
+	
 	//질점오브젝트 사용시 필요한 데이터들 설정
 	pp = new PhysicsPoint();
 	pp->SetPosition(&CenterPos);//이 값은 항상 갱신되야한다.
 	pp->SetHalfBox(3, 10, 3);//충돌 박스의 x,y,z 크기
 	pp->SetDamping(0.45);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
 	pp->SetBounce(false);//튕기지 않는다.
-
-
-						 //머리위에 HP바 띄움
+	
+	
+	//머리위에 HP바 띄움
 	if (ParticleList != NULL)
 	{
-		Hpbar = new BarObject(m_Device, commandlist, ParticleList, this, XMFLOAT4(CenterPos.x, CenterPos.y + 25, CenterPos.z, 0));
-		HPFrame = new BarFrameObject(m_Device, commandlist, ParticleList, this, XMFLOAT4(CenterPos.x, CenterPos.y + 25, CenterPos.z, 0));
-
+		Hpbar = new BarObject(m_Device, commandlist, ParticleList, this, 10, XMFLOAT4(CenterPos.x, 10, CenterPos.z, 0));
+		HPFrame = new BarFrameObject(m_Device, commandlist, ParticleList, this, 10, XMFLOAT4(CenterPos.x, 10, CenterPos.z, 0));
+	
+		//DiceEffect = new DiceObject(m_Device, commandlist, ParticleList, this, XMFLOAT4(CenterPos.x, 35, CenterPos.z, 0));
+		//ParticleList->push_back(DiceEffect);
+	
 		ParticleList->push_back(HPFrame);
 		ParticleList->push_back(Hpbar);
+	
 	}
 
 }
 
 CCubeManObject::~CCubeManObject()
 {
-	if (Hpbar != NULL)
-		Hpbar->DelObj = true;
-	if (HPFrame != NULL)
-		HPFrame->DelObj = true;
+	for (auto i = ParticleList->cbegin(); i != ParticleList->cend(); ++i)
+	{
+		(*i)->DelObj = true;
+	}
 
+	//if (Hpbar != NULL)
+	//	Hpbar->DelObj = true;
+	//if (HPFrame != NULL)
+	//	HPFrame->DelObj = true;
+	//if (DiceEffect != NULL)
+	//	DiceEffect->DelObj = true;
 }
 
 
@@ -1764,7 +1774,7 @@ void Tetrike::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer& g
 }
 
 
-DiceStrike::DiceStrike(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, list<CGameObject*>* Bulletlist, CGameObject * master, CGameObject * lockon, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
+DiceStrike::DiceStrike(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, CGameObject * master, XMFLOAT4& ori, float degree, CGameObject * lockon, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
 {
 	if (CreateMesh == false)
 	{
@@ -1772,42 +1782,81 @@ DiceStrike::DiceStrike(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 		Mesh.Index = NULL;
 		Mesh.SubResource = NULL;
 
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Tetrike", L"textures/object/Portal.dds", false);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "DiceStrike", L"textures/effect/fire.dds", false);
 		SetMesh(m_Device, commandlist);
 		SetMaterial(m_Device, commandlist);
 		CreateMesh = true;
 
 	}
+	
+
 
 	//게임오브젝트마다 룩벡터와 라이트벡터가 다르므로 초기 오프셋 설정을 해준다.
 	//실제 룩벡터 등은 모두 UpdateLookVector에서 처리된다(라이트벡터도) 따라서 Tick함수에서 반드시 호출해야한다.
 	OffLookvector = XMFLOAT3(0, 0, 1);
 	OffRightvector = XMFLOAT3(1, 0, 0);
+	//인자로 발사방향으로 룩벡터가 될정도로 회전한 ori값을 받고, 현재 방향(아직은 0,0,0,1)과 곱해준다.
+	Orient = QuaternionMultiply(Orient, ori);
+	XMFLOAT3 axis{ 0,1,0 };
+	auto q2 = QuaternionRotation(axis, degree);
+	Orient = QuaternionMultiply(Orient, q2);
 
-	CenterPos.y += 150;
+	UpdateLookVector();
 
-	Blist = Bulletlist;
-	ParticleList = Plist;
+	obs = Bullet;
 
 	ObjData.isAnimation = 0;
-	ObjData.Scale = 1.0;
-	ObjData.SpecularParamater = 0.0f;//스페큘러를 낮게준다.
-	obs = Bullet;
-	//게임관련 데이터들
+	ObjData.Scale = 2.0;
+	ObjData.SpecularParamater = 0.2f;//스페큘러를 낮게준다.
+
+									 //게임관련 데이터들
+	gamedata.MAXHP = 1;
+	gamedata.HP = 1;
+	gamedata.Damage = 20;
 	gamedata.GodMode = true;
-
-
+	gamedata.Speed = 50;
+	LifeTime = 3.5f;
 	Master = master;
 	LockOn = lockon;
-	pp = NULL;
 
+
+	//광선충돌 검사용 육면체
+	XMFLOAT3 rx(2, 0, 0);
+	XMFLOAT3 ry(0, 2, 0);
+	XMFLOAT3 rz(0, 0, 2);
+	rco.SetPlane(rx, ry, rz);
+
+	//질점오브젝트 사용시 필요한 데이터들 설정
+	pp = new PhysicsPoint();
+	pp->SetPosition(&CenterPos);//이 값은 항상 갱신되야한다.
+	pp->SetHalfBox(2, 2, 2);//충돌 박스의 x,y,z 크기
+	pp->SetDamping(1);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
+	pp->SetBounce(false);//튕기지 않는다.
+	pp->SetVelocity(Lookvector.x*gamedata.Speed, Lookvector.y*gamedata.Speed, Lookvector.z*gamedata.Speed);//룩벡터로 날아감
+	pp->SetMass(0.35f);
+
+	if (ParticleList != NULL)
+	{
+		BulletParticles = new ParticleObject(m_Device, commandlist, ParticleList, this, 0.2f, XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, 0));
+		ParticleList->push_back(BulletParticles);
+		BulletParticles2 = new ParticleObject(m_Device, commandlist, ParticleList, this, 0.3f, XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, 0));
+		ParticleList->push_back(BulletParticles2);
+	}
 
 
 }
 
+DiceStrike::~DiceStrike()
+{
+	if (BulletParticles != NULL)
+		BulletParticles->DelObj = true;
+	if (BulletParticles2 != NULL)
+		BulletParticles2->DelObj = true;
+}
+
 void DiceStrike::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
 {
-	CreateCube(&Mesh, 120, 0.01, 120);
+	CreateCube(&Mesh, 2, 2, 2);
 
 	Mesh.SetNormal(false);
 	Mesh.CreateVertexBuffer(m_Device, commandlist);
@@ -1819,13 +1868,21 @@ void DiceStrike::SetMaterial(ID3D12Device * m_Device, ID3D12GraphicsCommandList 
 	if (Mat.ConstBuffer == NULL)
 		Mat.ConstBuffer = new UploadBuffer<MaterialData>(m_Device, 1, true);
 
-	Mat.MatData.Emissive = XMFLOAT4{ 0.62f, 0.63f, 0.63f, 0.7f };
-	Mat.MatData.Roughness = 0.3f;
+	Mat.MatData.Emissive = XMFLOAT4{ 0.72f, 0.73f, 0.73f, 0.7f };
+	Mat.MatData.Roughness = 0.2f;
 }
 
 void DiceStrike::Tick(const GameTimer & gt)
 {
+	pp->integrate(gt.DeltaTime());
 
+	Orient = QuaternionMultiply(Orient, QuaternionRotation(Lookvector, MMPE_PI * gt.DeltaTime()));
+
+	//투사체는 생명 주기가 있어야 한다.
+	LifeTime -= gt.DeltaTime();
+
+	if (LifeTime <= 0)
+		DelObj = true;
 }
 
 void DiceStrike::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer & gt)
@@ -1834,7 +1891,7 @@ void DiceStrike::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer
 	//텍스처를 연결하고, 월드행렬을 연결한다.
 
 	if (Textures.size()>0)
-		SetTexture(commandlist, SrvDescriptorHeap, Textures["Tetrike"].get()->Resource.Get(), false);
+		SetTexture(commandlist, SrvDescriptorHeap, Textures["DiceStrike"].get()->Resource.Get(), false);
 	UpdateConstBuffer(commandlist);
 
 	Mat.UpdateConstantBuffer(commandlist);
@@ -1842,6 +1899,59 @@ void DiceStrike::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer
 	//이후 그린다.
 
 	Mesh.Render(commandlist);
+}
+
+void DiceStrike::Collision(list<CGameObject*>* collist, float DeltaTime)
+{
+	CollisionList = collist;
+	//충돌리스트의 모든 요소와 충돌검사를 실시한다.
+	for (auto i = CollisionList->begin(); i != CollisionList->end(); i++)
+	{
+
+		if (*i != this && *i != Master && (*i)->pp != NULL) // pp가 NULL이 아니면 질점 오브젝트이다.
+		{
+
+			bool test = pp->CollisionTest(*(*i)->pp, Lookvector, Rightvector, GetUpvector(), (*i)->Lookvector, (*i)->Rightvector, (*i)->GetUpvector());
+
+			if (test)//충돌했으면 pp의 경우는 그냥 데미지를 주고 자신을 없애면 됨. 
+			{
+				//1. 먼저 데미지를 준다.
+				(*i)->ToDamage(gamedata.Damage);
+
+
+				XMFLOAT3 cn;
+				//고정된 물체가 아니면
+				if ((*i)->staticobject == false)
+				{
+					//상대속도 방향을 구한다. A-B
+					cn = XMFloat4to3(Float4Add(pp->GetPosition(), (*(*i)->pp).GetPosition(), false));
+					cn = Float3Normalize(cn);
+
+					// 파티클리스트에 데미지 오브젝트를 생성해서 넣음. 파티클을 띄운다.
+					if (ParticleList != NULL)
+					{
+						ParticleList->push_back(new DamageObject(device, commandlist, ParticleList, gamedata.Damage, XMFLOAT4((*i)->CenterPos.x, (*i)->CenterPos.y + 11, (*i)->CenterPos.z, 0)));
+					}
+					//고정된 물체가아니면 잠깐 바운스를 풀어둔다. 그래야 튕기니까.
+					(*i)->pp->SetBounce(true);
+
+				}
+				else//고정된 물체면 충돌한 평면의 노멀방향으로 cn을 설정할것.
+				{
+					cn = pp->pAxis;
+				}
+
+				//충돌후 속도를 계산함.
+
+				pp->ResolveVelocity(*(*i)->pp, cn, DeltaTime);
+				(*i)->pp->SetBounce(false);
+				//겹치는 부분을 제거할필요가 없는게 투사체는 어처피 사라지니까.
+				DelObj = true;
+
+
+			}
+		}
+	}
 }
 
 
@@ -2267,15 +2377,16 @@ void GridObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer
 ///////////////////////////////////
 
 //HPBar오브젝트
-BarObject::BarObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, CGameObject* master, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
+BarObject::BarObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, CGameObject* master, float size, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
 {
 	ObjData.isAnimation = 0;
-	ObjData.Scale = 10.0f;
+	ObjData.Scale = size;
 	ObjData.SpecularParamater = 0.0f;//스페큘러를 낮게준다.
 	ObjData.CustomData1.x = 1;
 
 	Master = master;
 	ObjData.CustomData1.y = Master->gamedata.HP;
+	YPos = CenterPos.y;
 
 	obs = UI;
 	//게임관련 데이터들
@@ -2333,7 +2444,7 @@ void BarObject::Tick(const GameTimer & gt)
 		Master->gamedata.HP = 0;
 
 	ObjData.CustomData1.y = Master->gamedata.HP / Master->gamedata.MAXHP;
-	CenterPos.x = Master->CenterPos.x; CenterPos.y = Master->CenterPos.y + 10; CenterPos.z = Master->CenterPos.z;
+	CenterPos.x = Master->CenterPos.x; CenterPos.y = Master->CenterPos.y + YPos; CenterPos.z = Master->CenterPos.z;
 }
 
 void BarObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer & gt)
@@ -2365,14 +2476,15 @@ void BarObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer 
 
 
 //HPbar 틀
-BarFrameObject::BarFrameObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, CGameObject * master, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
+BarFrameObject::BarFrameObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, CGameObject * master, float size, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
 {
 	ObjData.isAnimation = 0;
-	ObjData.Scale = 10.0f;
+	ObjData.Scale = size;
 	ObjData.SpecularParamater = 0.5f;//스페큘러를 낮게준다.
 	ObjData.CustomData1.x = 4;
 
 	Master = master;
+	YPos = CenterPos.y;
 
 	//게임관련 데이터들
 	gamedata.HP = Master->gamedata.HP;
@@ -2424,13 +2536,123 @@ void BarFrameObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList 
 
 void BarFrameObject::Tick(const GameTimer & gt)
 {
-	CenterPos.x = Master->CenterPos.x; CenterPos.y = Master->CenterPos.y + 10; CenterPos.z = Master->CenterPos.z;
+	CenterPos.x = Master->CenterPos.x; CenterPos.y = Master->CenterPos.y + YPos; CenterPos.z = Master->CenterPos.z;
 }
 
 void BarFrameObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer & gt)
 {
 	if (Textures.size()>0)
 		SetTexture(commandlist, SrvDescriptorHeap, Textures["HPFrameTex"].get()->Resource.Get(), false);
+	UpdateConstBuffer(commandlist);
+
+
+	D3D12_VERTEX_BUFFER_VIEW vbv;
+
+	vbv.BufferLocation = Mesh.VertexBuffer->GetGPUVirtualAddress();
+	vbv.StrideInBytes = Mesh.nStride;
+	vbv.SizeInBytes = Mesh.nStride *  Mesh.nVertex;
+
+	commandlist->IASetVertexBuffers(0, 1, &vbv);
+
+	D3D12_INDEX_BUFFER_VIEW ibv;
+	ibv.BufferLocation = Mesh.IndexBuffer->GetGPUVirtualAddress();
+	ibv.Format = DXGI_FORMAT_R16_UINT;
+	ibv.SizeInBytes = Mesh.nisize *  Mesh.nindex;
+
+	commandlist->IASetIndexBuffer(&ibv);
+	commandlist->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
+
+
+	commandlist->DrawIndexedInstanced(Mesh.nindex, 1, Mesh.nioffset, Mesh.nOffset, 0);
+}
+
+DiceObject::DiceObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, CGameObject * master, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
+{
+	ObjData.isAnimation = 0;
+	ObjData.Scale = 5.0f;
+	ObjData.SpecularParamater = 0.5f;//스페큘러를 낮게준다.
+	ObjData.CustomData1.x = 0;
+	LifeTime = 3.0f;
+
+
+	Master = master;
+	YPos = CenterPos.y;
+	
+	//게임관련 데이터들
+	gamedata.GodMode = true;
+	staticobject = true;
+	obs = UI;
+
+	TexStart = rand() % 5;
+
+	ObjData.TexClamp = XMFLOAT4(0.0f + (0.2f*TexStart), 0.2f + (0.2f*TexStart), 0, 0);
+
+	if (TexStart == 0)
+		Master->Dicedata = 1;
+	else if (TexStart == 1)
+		Master->Dicedata = 4;
+	else if (TexStart == 2)
+		Master->Dicedata = 2;
+	else if (TexStart == 3)
+		Master->Dicedata = 5;
+	else if (TexStart == 4)
+		Master->Dicedata = 3;
+
+	if (CreateMesh == false)
+	{
+		Mesh.Index = NULL;
+		Mesh.SubResource = NULL;
+
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "DiceTex", L"textures/effect/dice.dds", false);
+
+		SetMesh(m_Device, commandlist);
+		CreateMesh = true;
+
+	}
+}
+
+void DiceObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
+{
+	UINT numOfitem = 1;
+
+	Mesh.SubResource = new CVertex;
+	Mesh.nVertex = numOfitem;
+	Mesh.nStride = sizeof(CVertex);
+	Mesh.nOffset = 0;
+
+
+	Mesh.Index = new UINT;
+	Mesh.nindex = numOfitem;
+	Mesh.nioffset = 0;
+	Mesh.nisize = sizeof(UINT);
+
+
+	//여기서 좌표를 일괄적으로 설정 할 수 있다
+	for (int i = 0; i < numOfitem; ++i)
+	{
+		Mesh.SubResource[i].V = XMFLOAT3(0, 0, 0);
+		Mesh.Index[i] = i;
+	}
+
+	Mesh.CreateVertexBuffer(m_Device, commandlist);
+	Mesh.CreateIndexBuffer(m_Device, commandlist);
+}
+
+void DiceObject::Tick(const GameTimer & gt)
+{
+	LifeTime -= gt.DeltaTime();
+	if (LifeTime <= 0)
+		DelObj = true;
+
+
+	CenterPos.x = Master->CenterPos.x; CenterPos.y = Master->CenterPos.y + YPos; CenterPos.z = Master->CenterPos.z;
+}
+
+void DiceObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer & gt)
+{
+	if (Textures.size()>0)
+		SetTexture(commandlist, SrvDescriptorHeap, Textures["DiceTex"].get()->Resource.Get(), false);
+
 	UpdateConstBuffer(commandlist);
 
 
@@ -3025,7 +3247,7 @@ BuildingObject::BuildingObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 
 
 
-									 //게임관련 데이터들
+	//게임관련 데이터들
 	gamedata.MAXHP = 100;
 	gamedata.HP = 100;
 	gamedata.Damage = 0;

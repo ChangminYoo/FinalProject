@@ -148,8 +148,13 @@ unordered_map<string, unique_ptr<CTexture>> CoolBarObject::Textures;//텍스처들을
 CMesh  CoolBarObject::Mesh;//나중에 메쉬는 static으로 둬야함
 ComPtr<ID3D12DescriptorHeap> CoolBarObject::SrvDescriptorHeap;//텍스처 용 힙
 
+//--------------------------------------------------------------------------------------
+bool DiceObject::CreateMesh = false;
+unordered_map<string, unique_ptr<CTexture>> DiceObject::Textures;//텍스처들을 저장함
+CMesh  DiceObject::Mesh;//나중에 메쉬는 static으로 둬야함
+ComPtr<ID3D12DescriptorHeap> DiceObject::SrvDescriptorHeap;//텍스처 용 힙
 
- // --------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------
 
 CMaterial SmallWallObject::Mat;
 bool SmallWallObject::CreateMesh;//최초로 false며 메쉬를 만든후 true가된다.

@@ -11,6 +11,7 @@ CPlayer::CPlayer(HWND hWnd,ID3D12Device* Device, ID3D12GraphicsCommandList* comm
 	skilldata.Skills[0] = 0;
 	skilldata.Skills[1] = 1;
 	skilldata.Skills[2] = 2;
+	skilldata.Skills[3] = 3;
 }
 
 
@@ -442,8 +443,17 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 			else if (GetKeyState(0x33) & 0x8000)
 				skilldata.SellectBulletIndex = 2;
 			else if (GetKeyState(0x34) & 0x8000)
+			{
 				skilldata.SellectBulletIndex = 3;
-			
+				if (DiceReady == true && skilldata.isSkillOn[3] == true)
+				{
+					PlayerObject->ParticleList->push_back(new DiceObject(PlayerObject->device, PlayerObject->commandlist, PlayerObject->ParticleList, PlayerObject, XMFLOAT4(PlayerObject->CenterPos.x, 35, PlayerObject->CenterPos.z, 0)));
+					DiceReady = false;
+
+				}
+			}
+
+
 			if (GetAsyncKeyState(VK_CONTROL) & 0x8000)
 			{
 				if (MouseOn <= 1)
@@ -484,6 +494,9 @@ void CPlayer::Tick(float DeltaTime)
 		}
 	}
 
+	if (skilldata.SkillsCoolTime[3] <= 0 && DiceReady == false)
+		DiceReady = true;
+
 }
 
 void CPlayer::CreateBullet(ID3D12Device* Device, ID3D12GraphicsCommandList* cl,XMFLOAT3 & Goal,CGameObject* lock, list<CGameObject*>* bulletlist)
@@ -492,10 +505,11 @@ void CPlayer::CreateBullet(ID3D12Device* Device, ID3D12GraphicsCommandList* cl,X
 
 	switch (skilldata.Skills[skilldata.SellectBulletIndex])
 	{
+
 	case 0://불렛큐브(라이트 큐브)
 	{
 		//먼저 해당스킬의 쿨타임을 넣어주자.
-		skilldata.SkillsCoolTime[skilldata.SellectBulletIndex] = 0.45f;
+		skilldata.SkillsCoolTime[skilldata.SellectBulletIndex] = skilldata.SkillsMaxCoolTime[skilldata.SellectBulletIndex];
 		skilldata.isSkillOn[skilldata.SellectBulletIndex] = false;
 
 
@@ -556,17 +570,16 @@ void CPlayer::CreateBullet(ID3D12Device* Device, ID3D12GraphicsCommandList* cl,X
 		auto tempori = XMLoadFloat4(&ori);
 		tempori = XMQuaternionMultiply(tempori, ori2);
 		XMStoreFloat4(&ori, tempori);//최종 회전 방향
-
-
-	 
+ 
 
 		bulletlist->push_back(new BulletCube(Device, cl, PlayerObject->ParticleList, PlayerObject, ori, lock, PlayerObject->CenterPos));
 		break;
 	}
+
 	case 1://불렛큐브(헤비 큐브)
 	{
 		//먼저 해당스킬의 쿨타임을 넣어주자.
-		skilldata.SkillsCoolTime[skilldata.SellectBulletIndex] = 1.1f;
+		skilldata.SkillsCoolTime[skilldata.SellectBulletIndex] = skilldata.SkillsMaxCoolTime[skilldata.SellectBulletIndex];
 		skilldata.isSkillOn[skilldata.SellectBulletIndex] = false;
 
 
@@ -627,7 +640,7 @@ void CPlayer::CreateBullet(ID3D12Device* Device, ID3D12GraphicsCommandList* cl,X
 	case 2://테트라이크
 	{
 		//먼저 해당스킬의 쿨타임을 넣어주자.
-		skilldata.SkillsCoolTime[skilldata.SellectBulletIndex] = 25.0f;
+		skilldata.SkillsCoolTime[skilldata.SellectBulletIndex] = skilldata.SkillsMaxCoolTime[skilldata.SellectBulletIndex];
 		skilldata.isSkillOn[skilldata.SellectBulletIndex] = false;
 
 		
@@ -635,9 +648,104 @@ void CPlayer::CreateBullet(ID3D12Device* Device, ID3D12GraphicsCommandList* cl,X
 		break;
 
 	}
+	case 3://다이스트라이크
+	{
 
+		skilldata.SkillsCoolTime[skilldata.SellectBulletIndex] = skilldata.SkillsMaxCoolTime[skilldata.SellectBulletIndex];
+		skilldata.isSkillOn[skilldata.SellectBulletIndex] = false;
 
+		auto v = Float3Add(Goal, XMFloat4to3(PlayerObject->CenterPos), false);
+
+		v = Float3Normalize(v);//새로운 룩벡터(발사방향)
+							   //여기서 룩벡터라 함은, 플레이어가 아니라, 총알의 룩벡터다. 모든 오브젝트는 보통 룩벡터는 0,0,1 또는 0,0,-1 인데, 날아가는 방향을 바라보도록  
+							   //해야하므로 새로운 룩벡터를 필요로 하는것이다.  
+
+							   //기존 룩벡터와 새로운 룩벡터를 외적해서 방향축을 구한다.
+		XMFLOAT3 l{ 0,0,1 };
+		XMVECTOR ol = XMLoadFloat3(&l);
+		XMVECTOR nl = XMLoadFloat3(&v);
+		auto axis = XMVector3Cross(ol, nl);
+		//방향축을 완성.
+		axis = XMVector3Normalize(axis);
+		XMFLOAT3 Axis;
+		XMStoreFloat3(&Axis, axis);
+		//이제 회전각도를 구해야한다. 내적을 통해 회전각도를 구한다.
+
+		auto temp = XMVector3Dot(ol, nl);
+
+		float d;//기존 룩벡터와 새로운 룩벡터를 내적한 결과.
+		XMStoreFloat(&d, temp);
+		if (fabsf(d) <= 1)//반드시 이 결과는 -1~1 사이여야한다. 그래야 각도가 구해진다.
+			d = acos(d);//각도 완성. 라디안임
+
+		auto ori = QuaternionRotation(Axis, d);
+
+		//진짜 룩벡터를 구했으니 이제 진짜 Right벡터를 구한다. 진짜 Up은 진짜 룩과 진짜 라이트를 외적만하면됨.
+		//회전을 보정해준다. 회전축에서 룩벡터를 외적하면 진짜 Right벡터가 나온다.
+		//이때 오차가 있는 RightVector를 진짜 RightVector의 사잇각을 계산하고
+		//룩벡터를 회전축으로 돌려준다. 왜 회전축에 오차가 생기는가?
+		//간단하다 기존 룩벡터와 발사방향을 룩벡터의 회전축과
+		//기존 RightVector와 발사방향을 회전축을하면 서로 다르게 나온다.
+		//문제는 만약 그냥 이대로 넘어가게 되면 RightVector와 진짜 RightVector의 각도만큼 오차가 생기므로
+		//이렇게되면 나중에 Up을 구할때도 문제가 생긴다.
+		//사실 X축 Y축 Z축 순서대로 곱을하면 이러한 문제는 거의없지만, 특정축을 기반으로 회전할때 생기는 문제다.
+
+		auto wmatrix = XMMatrixIdentity();
+		auto quater = XMLoadFloat4(&ori);
+		wmatrix *= XMMatrixRotationQuaternion(quater);
+
+		auto orr = XMVectorSet(1, 0, 0, 0);
+		orr = XMVector4Transform(orr, wmatrix);//가짜 라이트 벡터
+		orr = XMVector3Normalize(orr);
+		auto RealRight = XMVector3Cross(axis, nl);//진짜 라이트벡터
+		RealRight = XMVector3Normalize(RealRight);
+
+		//진짜 라이트 벡터와 가짜 라이트 벡터를 내적함.
+		temp = XMVector3Dot(RealRight, orr);
+
+		XMStoreFloat(&d, temp);
+		if (fabsf(d) <= 1)//반드시 이 결과는 -1~1 사이여야한다. 그래야 각도가 구해진다.
+			d = acos(d);//각도 완성. 라디안임
+		auto ori2 = XMQuaternionRotationAxis(nl, d);//진짜 룩벡터를 회전축으로 삼고 진짜라이트와 가짜라이트의 사잇각만큼회전
+
+		auto tempori = XMLoadFloat4(&ori);
+		tempori = XMQuaternionMultiply(tempori, ori2);
+		XMStoreFloat4(&ori, tempori);//최종 회전 방향
+
+		if (PlayerObject->Dicedata == 1)
+			bulletlist->push_back(new DiceStrike(Device, cl, PlayerObject->ParticleList, PlayerObject, ori, 0, lock, PlayerObject->CenterPos));
+
+		else if (PlayerObject->Dicedata == 2)
+		{
+			bulletlist->push_back(new DiceStrike(Device, cl, PlayerObject->ParticleList, PlayerObject, ori, MMPE_PI / 9, lock, PlayerObject->CenterPos));
+			bulletlist->push_back(new DiceStrike(Device, cl, PlayerObject->ParticleList, PlayerObject, ori, -MMPE_PI / 9, lock, PlayerObject->CenterPos));
+		}
+		else if (PlayerObject->Dicedata == 3)
+		{
+			bulletlist->push_back(new DiceStrike(Device, cl, PlayerObject->ParticleList, PlayerObject, ori, 0, lock, PlayerObject->CenterPos));
+			bulletlist->push_back(new DiceStrike(Device, cl, PlayerObject->ParticleList, PlayerObject, ori, MMPE_PI / 6, lock, PlayerObject->CenterPos));
+			bulletlist->push_back(new DiceStrike(Device, cl, PlayerObject->ParticleList, PlayerObject, ori, -MMPE_PI / 6, lock, PlayerObject->CenterPos));
+		}
+		else if (PlayerObject->Dicedata == 4)
+		{
+			bulletlist->push_back(new DiceStrike(Device, cl, PlayerObject->ParticleList, PlayerObject, ori, MMPE_PI / 9, lock, PlayerObject->CenterPos));
+			bulletlist->push_back(new DiceStrike(Device, cl, PlayerObject->ParticleList, PlayerObject, ori, -MMPE_PI / 9, lock, PlayerObject->CenterPos));
+			bulletlist->push_back(new DiceStrike(Device, cl, PlayerObject->ParticleList, PlayerObject, ori, MMPE_PI / 6, lock, PlayerObject->CenterPos));
+			bulletlist->push_back(new DiceStrike(Device, cl, PlayerObject->ParticleList, PlayerObject, ori, -MMPE_PI / 6, lock, PlayerObject->CenterPos));
+		}
+		else if (PlayerObject->Dicedata == 5)
+		{
+			bulletlist->push_back(new DiceStrike(Device, cl, PlayerObject->ParticleList, PlayerObject, ori, 0, lock, PlayerObject->CenterPos));
+			bulletlist->push_back(new DiceStrike(Device, cl, PlayerObject->ParticleList, PlayerObject, ori, MMPE_PI / 9, lock, PlayerObject->CenterPos));
+			bulletlist->push_back(new DiceStrike(Device, cl, PlayerObject->ParticleList, PlayerObject, ori, -MMPE_PI / 9, lock, PlayerObject->CenterPos));
+			bulletlist->push_back(new DiceStrike(Device, cl, PlayerObject->ParticleList, PlayerObject, ori, MMPE_PI / 6, lock, PlayerObject->CenterPos));
+			bulletlist->push_back(new DiceStrike(Device, cl, PlayerObject->ParticleList, PlayerObject, ori, -MMPE_PI / 6, lock, PlayerObject->CenterPos));
+		}
+
+		break;
 	}
+	}
+
 }
 
 void CPlayer::CheckTraceSkill()
