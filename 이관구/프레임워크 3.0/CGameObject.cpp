@@ -3556,6 +3556,7 @@ void ImpObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer 
 
 void ImpObject::Collision(list<CGameObject*>* collist, float DeltaTime)
 {
+	fsm->aidata.collisionmove = XMFLOAT3(0, 0, 0);
 	CollisionList = collist;
 	//충돌리스트의 모든 요소와 충돌검사를 실시한다.
 	for (auto i = CollisionList->begin(); i != CollisionList->end(); i++)
@@ -3597,6 +3598,41 @@ void ImpObject::Collision(list<CGameObject*>* collist, float DeltaTime)
 				else//고정된 물체면 충돌한 평면의 노멀방향으로 cn을 설정할것.
 				{
 					cn = pp->pAxis;
+				}
+
+				if (((*i)->obs == Obj_State::Static || (*i)->obs == Obj_State::Rigid) && fsm->aidata.curstateEnum== s_Trace)//추적상태고, 충돌대상이 큐브들이면
+				{
+					auto v = XMFloat4to3(Float4Add(fsm->aidata.LastPosition, CenterPos, false));
+					v.y = 0;
+					auto d = FloatLength(v);//속도의크기
+					v = Float3Normalize(v);//기존 속도 방향
+					
+					auto p = XMFloat4to3(Float4Add(CenterPos, (*i)->CenterPos, false));
+					p.y = 0;
+					p = Float3Normalize(p);
+
+					if (Float3Cross(v, p).y > 0)//-80도정도로 p를 회전시켜야함.
+					{
+						auto r=QuaternionRotation(XMFLOAT3(0, 1, 0), -MMPE_PI / 2.5);
+						auto m = XMMatrixRotationQuaternion(XMLoadFloat4(&r));
+
+						XMVECTOR pv = XMLoadFloat3(&p);
+						pv = XMVector3Transform(pv, m);
+						XMStoreFloat3(&fsm->aidata.collisionmove, pv);
+
+					}
+					else//80도정도 회전
+					{
+						auto r = QuaternionRotation(XMFLOAT3(0, -1, 0), -MMPE_PI / 2.5);
+						auto m = XMMatrixRotationQuaternion(XMLoadFloat4(&r));
+
+						XMVECTOR pv = XMLoadFloat3(&p);
+						pv = XMVector3Transform(pv, m);
+						XMStoreFloat3(&fsm->aidata.collisionmove, pv);
+
+					}
+
+
 				}
 
 				//충돌해소 호출. 충돌해소 이후에 반드시 변경된 질점의 위치로 오브젝트위치를 일치시켜야한다.

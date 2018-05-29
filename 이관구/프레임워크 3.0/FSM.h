@@ -6,17 +6,24 @@
 */
 #include"CGameObject.h"
 
+enum curState_State
+{
+	s_Idle, s_Attack, s_Trace
+};
+
 struct AIdata
 {
 	//현재 선택된 타겟
 	CGameObject* Target = NULL;
 	XMFLOAT4 LastPosition;//타겟을 발견했던 마지막 위치.
 	float VisionLength = 150;
-	float FireLength = 30;
+	float FireLength = 35;
 	bool FireOn = true;
 	float cooltime = 0;
 	float damagetime = 0;//0.2초후 데미지를 입히도록 하기 위한용
 	float timeout = 0.0f;
+	curState_State curstateEnum = s_Idle;
+	XMFLOAT3 collisionmove=XMFLOAT3(0,0,0);
 };
 
 class state
@@ -89,6 +96,8 @@ public:
 	CGameObject * Master = NULL;
 	//타겟이 될 수 있는 오브젝트들.
 	list<CGameObject*>* DynamicObj = NULL;
+	list<CGameObject*>* StaticObj = NULL;
+	
 	AIdata aidata;
 private:
 	state * GlobalState = NULL;//모든 상태에서 바뀔 수 있는 상태. 대표적으로 공격상태가 있음. 추적상태든 대기상태든 공격을 해야할땐 바로 바뀌어야하니까.
@@ -98,7 +107,7 @@ public:
 	void ChangeState(state* st);//'현재 상태' 를 바꿈
 	void CheckTarget(float DeltaTime);
 
-	FSM(CGameObject* master,list<CGameObject*>* dobj);
+	FSM(CGameObject* master,list<CGameObject*>* dobj,list<CGameObject*>* sobj);
 	~FSM()
 	{
 

@@ -255,7 +255,7 @@ void Scene::CreateGameObject()
 	DynamicObject.push_back(new CCubeManObject(device, commandlist,&BbObject, XMFLOAT4(0, 0, 220, 0)));
 	DynamicObject.push_back(new CCubeManObject(device, commandlist,&BbObject, XMFLOAT4(100, 0, 110, 0)));
 	CGameObject* imp = new ImpObject(device, commandlist, &BbObject, XMFLOAT4(-100, 0, 220, 0));
-	((ImpObject*)imp)->fsm = new FSM(imp, &DynamicObject);
+	((ImpObject*)imp)->fsm = new FSM(imp, &DynamicObject,&StaticObject);
 	DynamicObject.push_back(imp);
 	//DynamicObject.back()->pp->SetBounce(true);
 	//DynamicObject.back()->pp->AddForce(-600, 0, 600);

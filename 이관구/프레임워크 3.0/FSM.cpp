@@ -84,12 +84,28 @@ void FSM::CheckTarget(float DeltaTime)
 		float nv1dotLook = nv1.x*Master->Lookvector.x + nv1.y*Master->Lookvector.y + nv1.z*Master->Lookvector.z;
 		auto l = FloatLength(v1);
 		
+		bool blind = false;
 		if (aidata.VisionLength >= l && nv1dotLook>0.5)
 		{
-			//현재는 장애물을 이용하지 못한다. 이후에 추가할것
+			////현재는 장애물을 이용하지 못한다. 이후에 추가할것
+			//for (auto s : *StaticObj)
+			//{
+			//	auto v2 = XMFloat4to3(Float4Add(s->CenterPos, Master->CenterPos, false));
+			//	float l2 = FloatLength(v2);
+			//	v2 = Float3Normalize(v2);
 
+			//	float b = v2.x*nv1.x + v2.y*nv1.y + v2.z*nv1.z;
 
+			//	float a = nv1.x*nv1.x + nv1.y*nv1.y + nv1.z*nv1.z;
 
+			//	float c = v2.x*v2.x + v2.y*v2.y + v2.z*v2.z - s->pp->GetRad()/2*s->pp->GetRad()/2;
+
+			//	if (b*b - a * c >= 0 && l2<=l && b>0.8f)
+			//		blind = true;
+			//}
+
+			//if (blind)
+			//	continue;
 			//만약 장애물에 가려지지 않았다면. 즉 여기까지 오면 장애물에 안가려진것.
 			if (aidata.Target == NULL)
 			{
@@ -110,10 +126,11 @@ void FSM::CheckTarget(float DeltaTime)
 
 }
 
-FSM::FSM(CGameObject* master, list<CGameObject*>* dobj)
+FSM::FSM(CGameObject* master, list<CGameObject*>* dobj,list<CGameObject*>* sobj)
 {
 	Master = master;
 	DynamicObj = dobj;
+	StaticObj = sobj;
 	GlobalState = state_global::Instance();
 	CurrentState = state_idle::Instance();
 	aidata.LastPosition = master->CenterPos;
@@ -122,6 +139,7 @@ FSM::FSM(CGameObject* master, list<CGameObject*>* dobj)
 
 state * state_idle::Instance()
 {
+	
 	if (instance == NULL)
 	{
 		instance = new state_idle;
@@ -132,12 +150,20 @@ state * state_idle::Instance()
 
 state * state_idle::Execute(float DeltaTime, CGameObject* master, AIdata& adata)
 {
+	adata.curstateEnum = s_Idle;
 	//현재는 따로 처리할게없음. 그냥 해당 위치를 사수하면서 애니메이션이 아이들이면 된다.
 	if (master != NULL)
 	{
 		if (adata.Target != NULL)
 			return state_trace::Instance();
+		else
+		{
+			auto v2 = Float4Add(master->OrgPos, master->CenterPos, false);
+			v2.y = 0;
 
+			if (FloatLength(v2) > 20)
+				return state_trace::Instance();
+		}
 		master->SetAnimation(Ani_State::Idle);
 	}
 	return NULL;
@@ -188,6 +214,7 @@ state * state_attack::Instance()
 
 state * state_attack::Execute(float DeltaTime, CGameObject * master, AIdata & adata)
 {
+	adata.curstateEnum = s_Attack;
 	if (adata.FireOn)
 		master->SetAnimation(Ani_State::Attack);
 
@@ -226,12 +253,15 @@ state * state_trace::Instance()
 
 state * state_trace::Execute(float DeltaTime, CGameObject * master, AIdata & adata)
 {
+	adata.curstateEnum = s_Trace;
 	master->SetAnimation(Ani_State::Run);
 	auto v = XMFloat4to3(Float4Add(adata.LastPosition, master->CenterPos, false));
 	v.y = 0;
 	auto d = FloatLength(v);
 	auto v2 = Float4Add(master->OrgPos, master->CenterPos,false);
 	v2.y = 0;
+	v = Float3Normalize(v);
+	v = Float3Add(v, adata.collisionmove);
 	v = Float3Normalize(v);
 	v = Float3Float(v, DeltaTime);
 	if (fabs(d) <=adata.FireLength && adata.Target == NULL)
