@@ -16,7 +16,7 @@ struct AIdata
 	//현재 선택된 타겟
 	CGameObject* Target = NULL;
 	XMFLOAT4 LastPosition;//타겟을 발견했던 마지막 위치.
-	float VisionLength = 150;
+	float VisionLength = 250;
 	float FireLength = 35;
 	bool FireOn = true;
 	float cooltime = 0;

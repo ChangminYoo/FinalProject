@@ -3442,7 +3442,7 @@ ImpObject::ImpObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comman
 	//게임 데이터 (스텟)을 찍는다. 캐릭터는 데미지를 갖지 않고, 탄환이 데미지를 갖도록하자.
 	gamedata.MAXHP = 5000;
 	gamedata.HP = 5000;
-	gamedata.Speed = 35;
+	gamedata.Speed = 40;
 
 	//광선충돌 검사용 육면체
 	XMFLOAT3 rx(10, 0, 0);
@@ -3456,7 +3456,7 @@ ImpObject::ImpObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comman
 	pp->SetHalfBox(10, 20, 10);//충돌 박스의 x,y,z 크기
 	pp->SetDamping(0.25);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
 	pp->SetBounce(false);//튕기지 않는다.
-	pp->SetMass(5);
+	pp->SetMass(500);
 
 	//머리위에 HP바 띄움
 	if (ParticleList != NULL)

@@ -161,8 +161,8 @@ state * state_idle::Execute(float DeltaTime, CGameObject* master, AIdata& adata)
 			auto v2 = Float4Add(master->OrgPos, master->CenterPos, false);
 			v2.y = 0;
 
-			if (FloatLength(v2) > 20)
-				return state_trace::Instance();
+			if (FloatLength(v2) > 50)
+				 return state_trace::Instance();
 		}
 		master->SetAnimation(Ani_State::Idle);
 	}
