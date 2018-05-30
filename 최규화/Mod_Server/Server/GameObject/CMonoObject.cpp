@@ -22,7 +22,7 @@ void CMonoObject::Initialize()
 	m_type = STATIC_OBJECT_TYPE::BasicObject;
 
 	m_ability.attack = 10;
-	m_ability.speed = 50;
+	m_ability.speed = 0.005;
 	m_ability.exp = 0;
 	m_ability.level = 1;
 	m_ability.orignHP = 100;

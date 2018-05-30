@@ -2,8 +2,7 @@
 class CPhysicEngineWorker
 {
 private:
-	__int64	m_currtime;
-	__int64 m_prevtime;
+	high_resolution_clock::time_point	m_currtime, m_prevtime;
 
 	__int64 countsPerSec;
 	double mSecondsPerCount;

@@ -182,6 +182,10 @@ void CTimerWorker::ProcessPacket(event_type * et)
 
 					g_clients[j]->SendPacket(reinterpret_cast<Packet*>(&stc_char_state));
 				}
+
+				cout << "ID: " << g_clients[i]->m_pdata.id << " À§Ä¡°ª: " << "[ x, y, z, w ]: "
+						<< g_clients[i]->m_pdata.pos.x << ", " << g_clients[i]->m_pdata.pos.y << ", " << g_clients[i]->m_pdata.pos.z << ", " <<  endl;
+
 			}
 
 

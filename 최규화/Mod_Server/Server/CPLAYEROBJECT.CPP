@@ -67,7 +67,7 @@ void CPlayerObject::Init_PlayerInfo()
 	m_ability.orignHP = 100;
 	m_ability.exp = 0;
 	m_ability.level = 1;
-	m_ability.speed = 50;
+	m_ability.speed = 0.005;
 
 	if (m_id == 0)
 		m_pos4f = { -100.f, -1000.f, 0.f, 0.f };
@@ -425,8 +425,8 @@ void CPlayerObject::ProcessPacket(Packet * packet)
 		UpdateUpvector();
 		//g_clients[rot_data->id]->UpdateUpvector();
 
-		cout << "ID: " << rot_data->id << " 변화된 회전값: " << "[ x, y, z, w ]: "
-			<< rot_data->rotate_status.x << ", " << rot_data->rotate_status.y << ", " << rot_data->rotate_status.z << ", " << rot_data->rotate_status.w << endl;
+	//	cout << "ID: " << rot_data->id << " 변화된 회전값: " << "[ x, y, z, w ]: "
+	//		<< rot_data->rotate_status.x << ", " << rot_data->rotate_status.y << ", " << rot_data->rotate_status.z << ", " << rot_data->rotate_status.w << endl;
 
 		// 3. 다른 클라에게 보낸다.
 		STC_Rotation stc_to_rot;

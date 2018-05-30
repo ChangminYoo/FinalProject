@@ -5,7 +5,7 @@
 struct ObjectStatus
 {
 	unsigned short attack{ 10 };
-	unsigned char speed{ 50 };
+	float speed;
 	unsigned short orignHP{ 100 };
 	unsigned short curHP{ 100 };
 	unsigned short exp{ 0 };

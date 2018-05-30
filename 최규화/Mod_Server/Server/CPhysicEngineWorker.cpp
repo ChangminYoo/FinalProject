@@ -1,5 +1,8 @@
 #include "stdafx.h"
 
+#include <chrono>
+using namespace chrono;
+
 CPhysicEngineWorker::CPhysicEngineWorker()
 {
 	countsPerSec = 3515623;
@@ -15,8 +18,8 @@ void CPhysicEngineWorker::Update()
 	// 4. Collision() - 충돌 처리 
 	while (true)
 	{
-		QueryPerformanceCounter((LARGE_INTEGER*)&m_currtime);
-		m_deltime = (m_currtime - m_prevtime) * mSecondsPerCount;
+		m_currtime = high_resolution_clock::now();
+		m_deltime = duration_cast<microseconds>((m_currtime - m_prevtime)).count();
 		m_prevtime = m_currtime;
 
 		//for (auto client : g_clients)
@@ -37,10 +40,10 @@ void CPhysicEngineWorker::Update()
 		{
 			//g_clients[i]->m_mtx.lock();
 			//g_clients[i]->m_dir
-			g_clients[i]->PlayerInput(g_clients[i]->GetPlayerDirection(), RegularPhysicsTime);
-			g_clients[i]->GravitySystem(RegularPhysicsTime);
-			g_clients[i]->Tick(RegularPhysicsTime);
-			g_clients[i]->AfterGravitySystem(RegularPhysicsTime);
+			g_clients[i]->PlayerInput(g_clients[i]->GetPlayerDirection(), m_deltime);
+			g_clients[i]->GravitySystem(m_deltime);
+			g_clients[i]->Tick(m_deltime);
+			g_clients[i]->AfterGravitySystem(m_deltime);
 
 			g_clients[i]->SetChangedPlayerState();
 			//g_clients[i]->SetPlayerDirection(0);
@@ -49,8 +52,8 @@ void CPhysicEngineWorker::Update()
 
 		for (auto bullet : g_bullets)
 		{
-			bullet->Tick(RegularPhysicsTime);
-			bullet->AfterGravitySystem(RegularPhysicsTime);
+			bullet->Tick(m_deltime);
+			bullet->AfterGravitySystem(m_deltime);
 		}
 
 	}
