@@ -414,7 +414,6 @@ void CCubeManObject::Tick(const GameTimer & gt)
 			UpdateMD5Model(commandlist, &Mesh, this, gt.DeltaTime()*60.0 / 24.0, n_Animation, animations, jarr);
 		else
 		{
-
 			UpdateMD5Model(commandlist, &Mesh, this, 2*gt.DeltaTime()*60.0 / 24.0, n_Animation, animations, jarr);
 		}
 
@@ -2642,7 +2641,27 @@ void DiceObject::Tick(const GameTimer & gt)
 {
 	LifeTime -= gt.DeltaTime();
 	if (LifeTime <= 0)
+	{
+		//if (TexStart == 0)
+		//	Master->Dicedata = 1;
+		//else if (TexStart == 1)
+		//	Master->Dicedata = 4;
+		//else if (TexStart == 2)
+		//	Master->Dicedata = 2;
+		//else if (TexStart == 3)
+		//	Master->Dicedata = 5;
+		//else if (TexStart == 4)
+		//	Master->Dicedata = 3;
+		
 		DelObj = true;
+	}
+
+	//dTime++;
+	//
+	//ObjData.TexClamp = XMFLOAT4(0.0f + (0.2f*TexStart), 0.2f + (0.2f*TexStart), 0, 0);
+	//
+	//if (dTime % 10 == 0 && LifeTime >= 1.0f)
+	//	TexStart++;
 
 
 	CenterPos.x = Master->CenterPos.x; CenterPos.y = Master->CenterPos.y + YPos; CenterPos.z = Master->CenterPos.z;

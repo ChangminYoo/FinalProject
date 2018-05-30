@@ -436,20 +436,20 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 					PlayerObject->SetAnimation(Ani_State::Idle);
 			}
 
+
 			if (GetKeyState(0x31) & 0x8000)
 				skilldata.SellectBulletIndex = 0;
 			else if (GetKeyState(0x32) & 0x8000)
 				skilldata.SellectBulletIndex = 1;
 			else if (GetKeyState(0x33) & 0x8000)
 				skilldata.SellectBulletIndex = 2;
-			else if (GetKeyState(0x34) & 0x8000)
+			else if (GetAsyncKeyState(0x34) & 0x0001)
 			{
 				skilldata.SellectBulletIndex = 3;
-				if (DiceReady == true && skilldata.isSkillOn[3] == true)
+				if (DiceReady)
 				{
 					PlayerObject->ParticleList->push_back(new DiceObject(PlayerObject->device, PlayerObject->commandlist, PlayerObject->ParticleList, PlayerObject, XMFLOAT4(PlayerObject->CenterPos.x, 35, PlayerObject->CenterPos.z, 0)));
 					DiceReady = false;
-
 				}
 			}
 
@@ -494,9 +494,8 @@ void CPlayer::Tick(float DeltaTime)
 		}
 	}
 
-	if (skilldata.SkillsCoolTime[3] <= 0 && DiceReady == false)
+	if (skilldata.SkillsCoolTime[3] <= 0)
 		DiceReady = true;
-
 }
 
 void CPlayer::CreateBullet(ID3D12Device* Device, ID3D12GraphicsCommandList* cl,XMFLOAT3 & Goal,CGameObject* lock, list<CGameObject*>* bulletlist)
