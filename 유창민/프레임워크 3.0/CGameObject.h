@@ -111,6 +111,7 @@ public:
 	bool DelObj = false;//이게 참이면 실제로 제거된다.
 	bool Blending = false;
 	int Dicedata = 0;
+	bool PrevCool = false;
 
 	//벽들에 굳이 마우스를 움직일때마다 체크할 필요는 없으므로 추가함. 또 벽은 또 벽대로 뭔가 처리할게 있을것같음.
 	Obj_State obs = Dynamic;
@@ -205,8 +206,14 @@ public:
 class DiceObject : public CGameObject
 {
 public:
-	DiceObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, CGameObject* master, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
+	DiceObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, CGameObject* master, list<CGameObject*>* bulletlist, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
 	CGameObject* Master = NULL;//소유자
+	list<CGameObject*>* Bulletlist;
+	ID3D12Device* Device;
+	ID3D12GraphicsCommandList* Commandlist;
+	list<CGameObject*>* plist;
+
+
 	int dTime = 0;
 	float LifeTime = 3.0f;
 	int TexStart = 0;

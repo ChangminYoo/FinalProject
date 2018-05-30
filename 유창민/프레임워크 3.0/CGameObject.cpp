@@ -2565,7 +2565,7 @@ void BarFrameObject::Render(ID3D12GraphicsCommandList * commandlist, const GameT
 	commandlist->DrawIndexedInstanced(Mesh.nindex, 1, Mesh.nioffset, Mesh.nOffset, 0);
 }
 
-DiceObject::DiceObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, CGameObject * master, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
+DiceObject::DiceObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, CGameObject * master, list<CGameObject*>* bulletlist, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
 {
 	ObjData.isAnimation = 0;
 	ObjData.Scale = 5.0f;
@@ -2573,29 +2573,17 @@ DiceObject::DiceObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 	ObjData.CustomData1.x = 0;
 	LifeTime = 3.0f;
 
-
+	Device = m_Device;
+	Commandlist = commandlist;
+	plist = Plist;
 	Master = master;
+	Bulletlist = bulletlist;
 	YPos = CenterPos.y;
 	
 	//게임관련 데이터들
 	gamedata.GodMode = true;
 	staticobject = true;
 	obs = UI;
-
-	TexStart = rand() % 5;
-
-	ObjData.TexClamp = XMFLOAT4(0.0f + (0.2f*TexStart), 0.2f + (0.2f*TexStart), 0, 0);
-
-	if (TexStart == 0)
-		Master->Dicedata = 1;
-	else if (TexStart == 1)
-		Master->Dicedata = 4;
-	else if (TexStart == 2)
-		Master->Dicedata = 2;
-	else if (TexStart == 3)
-		Master->Dicedata = 5;
-	else if (TexStart == 4)
-		Master->Dicedata = 3;
 
 	if (CreateMesh == false)
 	{
@@ -2641,30 +2629,113 @@ void DiceObject::Tick(const GameTimer & gt)
 {
 	LifeTime -= gt.DeltaTime();
 	if (LifeTime <= 0)
-	{
-		//if (TexStart == 0)
-		//	Master->Dicedata = 1;
-		//else if (TexStart == 1)
-		//	Master->Dicedata = 4;
-		//else if (TexStart == 2)
-		//	Master->Dicedata = 2;
-		//else if (TexStart == 3)
-		//	Master->Dicedata = 5;
-		//else if (TexStart == 4)
-		//	Master->Dicedata = 3;
-		
+	{		
 		DelObj = true;
 	}
 
-	//dTime++;
-	//
-	//ObjData.TexClamp = XMFLOAT4(0.0f + (0.2f*TexStart), 0.2f + (0.2f*TexStart), 0, 0);
-	//
-	//if (dTime % 10 == 0 && LifeTime >= 1.0f)
-	//	TexStart++;
+	dTime++;	
+	ObjData.TexClamp = XMFLOAT4(0.0f + (0.2f*TexStart), 0.2f + (0.2f*TexStart), 0, 0);	
+	if (dTime % 10 == 0 && LifeTime >= 1.0f)
+		TexStart++;
+
+	CenterPos.x = Master->CenterPos.x; CenterPos.y = 44; CenterPos.z = Master->CenterPos.z;
 
 
-	CenterPos.x = Master->CenterPos.x; CenterPos.y = Master->CenterPos.y + YPos; CenterPos.z = Master->CenterPos.z;
+	if (LifeTime < 1.0f)
+	{
+		if (TexStart == 0)
+			Master->Dicedata = 1;
+		else if (TexStart == 1)
+			Master->Dicedata = 4;
+		else if (TexStart == 2)
+			Master->Dicedata = 2;
+		else if (TexStart == 3)
+			Master->Dicedata = 5;
+		else if (TexStart == 4)
+			Master->Dicedata = 3;
+
+		XMFLOAT3 l{ 0,0,1 };
+		XMVECTOR ol = XMLoadFloat3(&l);
+		XMVECTOR nl = XMLoadFloat3(&Master->Lookvector);
+		auto axis = XMVector3Cross(ol, nl);
+		//방향축을 완성.
+		axis = XMVector3Normalize(axis);
+		XMFLOAT3 Axis;
+		XMStoreFloat3(&Axis, axis);
+		//이제 회전각도를 구해야한다. 내적을 통해 회전각도를 구한다.
+
+		auto temp = XMVector3Dot(ol, nl);
+
+		float d;//기존 룩벡터와 새로운 룩벡터를 내적한 결과.
+		XMStoreFloat(&d, temp);
+		if (fabsf(d) <= 1)//반드시 이 결과는 -1~1 사이여야한다. 그래야 각도가 구해진다.
+			d = acos(d);//각도 완성. 라디안임
+
+		auto ori = QuaternionRotation(Axis, d);
+
+		//진짜 룩벡터를 구했으니 이제 진짜 Right벡터를 구한다. 진짜 Up은 진짜 룩과 진짜 라이트를 외적만하면됨.
+		//회전을 보정해준다. 회전축에서 룩벡터를 외적하면 진짜 Right벡터가 나온다.
+		//이때 오차가 있는 RightVector를 진짜 RightVector의 사잇각을 계산하고
+		//룩벡터를 회전축으로 돌려준다. 왜 회전축에 오차가 생기는가?
+		//간단하다 기존 룩벡터와 발사방향을 룩벡터의 회전축과
+		//기존 RightVector와 발사방향을 회전축을하면 서로 다르게 나온다.
+		//문제는 만약 그냥 이대로 넘어가게 되면 RightVector와 진짜 RightVector의 각도만큼 오차가 생기므로
+		//이렇게되면 나중에 Up을 구할때도 문제가 생긴다.
+		//사실 X축 Y축 Z축 순서대로 곱을하면 이러한 문제는 거의없지만, 특정축을 기반으로 회전할때 생기는 문제다.
+
+		auto wmatrix = XMMatrixIdentity();
+		auto quater = XMLoadFloat4(&ori);
+		wmatrix *= XMMatrixRotationQuaternion(quater);
+
+		auto orr = XMVectorSet(1, 0, 0, 0);
+		orr = XMVector4Transform(orr, wmatrix);//가짜 라이트 벡터
+		orr = XMVector3Normalize(orr);
+		auto RealRight = XMVector3Cross(axis, nl);//진짜 라이트벡터
+		RealRight = XMVector3Normalize(RealRight);
+
+		//진짜 라이트 벡터와 가짜 라이트 벡터를 내적함.
+		temp = XMVector3Dot(RealRight, orr);
+
+		XMStoreFloat(&d, temp);
+		if (fabsf(d) <= 1)//반드시 이 결과는 -1~1 사이여야한다. 그래야 각도가 구해진다.
+			d = acos(d);//각도 완성. 라디안임
+		auto ori2 = XMQuaternionRotationAxis(nl, d);//진짜 룩벡터를 회전축으로 삼고 진짜라이트와 가짜라이트의 사잇각만큼회전
+
+		auto tempori = XMLoadFloat4(&ori);
+		tempori = XMQuaternionMultiply(tempori, ori2);
+		XMStoreFloat4(&ori, tempori);//최종 회전 방향
+
+		if (Dicedata == 1)
+			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist, Master, ori, 0, NULL, Master->CenterPos));
+
+		else if (Dicedata == 2)
+		{
+			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist, Master, ori, MMPE_PI / 9, NULL, Master->CenterPos));
+			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist, Master, ori, -MMPE_PI / 9, NULL, Master->CenterPos));
+		}
+		else if (Dicedata == 3)
+		{
+			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist, Master, ori, 0, NULL, Master->CenterPos));
+			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist, Master, ori, MMPE_PI / 6, NULL, Master->CenterPos));
+			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist, Master, ori, -MMPE_PI / 6, NULL, Master->CenterPos));
+		}
+		else if (Dicedata == 4)
+		{
+			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist, Master, ori, MMPE_PI / 9, NULL, Master->CenterPos));
+			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist, Master, ori, -MMPE_PI / 9, NULL, Master->CenterPos));
+			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist, Master, ori, MMPE_PI / 6, NULL, Master->CenterPos));
+			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist, Master, ori, -MMPE_PI / 6, NULL, Master->CenterPos));
+		}
+		else if (Dicedata == 5)
+		{
+			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist, Master, ori, 0, NULL, Master->CenterPos));
+			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist, Master, ori, MMPE_PI / 9, NULL, Master->CenterPos));
+			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist, Master, ori, -MMPE_PI / 9, NULL, Master->CenterPos));
+			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist, Master, ori, MMPE_PI / 6, NULL, Master->CenterPos));
+			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist, Master, ori, -MMPE_PI / 6, NULL, Master->CenterPos));
+		}
+
+	}
 }
 
 void DiceObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer & gt)
