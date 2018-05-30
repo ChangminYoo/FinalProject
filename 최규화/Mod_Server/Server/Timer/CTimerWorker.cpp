@@ -170,8 +170,23 @@ void CTimerWorker::ProcessPacket(event_type * et)
 
 			//1. 1초에 20번씩 서버에서 업데이트된 클라이언트의 모든정보를 보냄
 			STC_CharCurrState stc_char_state;
-			for (auto client : g_clients)
+			for (int i = 0; i < g_clients.size(); ++i)
 			{
+				//g_clients[i]->SetChangedPlayerState();
+	
+				if (g_clients[i]->GetIsAI() == true || g_clients[i]->GetConnectState() == false) continue;
+
+				for (int j = 0; j < g_clients.size(); ++j)
+				{
+					stc_char_state.player_data = move(g_clients[i]->m_pdata);
+
+					g_clients[j]->SendPacket(reinterpret_cast<Packet*>(&stc_char_state));
+				}
+			}
+
+
+			//for (auto client : g_clients)
+			//{
 				//client->GravitySystem(mRegularDelTime);
 				//client->GetPhysicsPoint()->GravitySystem(mRegularDelTime, client->GetPhysicsPoint());
 				//client->Tick(mRegularDelTime);
@@ -182,19 +197,23 @@ void CTimerWorker::ProcessPacket(event_type * et)
 				//client->GetPhysicsEffect()->AfterGravitySystem(mRegularDelTime, client->GetPhysicsPoint(), OBJECT_TYPE::PLAYER,
 				//	client->m_pdata.pos, client->m_pdata.airbone);
 
-				client->SetChangedPlayerState();
+				//client->SetChangedPlayerState();
 
-				if (client->GetIsAI() == true || client->GetConnectState() == false) continue;
+				//if (client->GetIsAI() == true || client->GetConnectState() == false) continue;
 
-				stc_char_state.player_data = move(client->m_pdata);
+				//stc_char_state.player_data = move(client->m_pdata);
 
-				cout << "ID: " << stc_char_state.player_data.id << " " << "Pos: " << stc_char_state.player_data.pos.x << " "
-					<< stc_char_state.player_data.pos.y << " " << stc_char_state.player_data.pos.z << " " << stc_char_state.player_data.pos.w 
-					<< "  //  " << "Ani: " << stc_char_state.player_data.ani << endl;
+				//cout << "ID: " << stc_char_state.player_data.id << " " << "Pos: " << stc_char_state.player_data.pos.x << " "
+				//	<< stc_char_state.player_data.pos.y << " " << stc_char_state.player_data.pos.z << " " << stc_char_state.player_data.pos.w 
+				//	<< "  //  " << "Ani: " << stc_char_state.player_data.ani << endl;
 
-				client->SendPacket(reinterpret_cast<Packet*>(&stc_char_state));
 
-			}
+				//cout << "Timer ID: " << stc_char_state.player_data.id << " 변화된 회전값: " << "[ x, y, z, w ]: "
+				//	<< stc_char_state.player_data.rot.x << ", " << stc_char_state.player_data.rot.y << ", " << stc_char_state.player_data.rot.z << ", " << stc_char_state.player_data.rot.w << endl;
+
+				//client->SendPacket(reinterpret_cast<Packet*>(&stc_char_state));
+
+			//}
 
 			for (auto bull = g_bullets.begin(); bull != g_bullets.end();)
 			{

@@ -42,6 +42,10 @@ public:
 	unsigned int		m_prev_packet_size{ 0 };
 
 	Player_Data			m_pdata;
+	mutex				m_mtx;
+
+	//void				Lock() { m_mtx.lock(); }
+	//void				UnLock() { m_mtx.unlock(); }
 
 public:
 	CPlayerObject(const unsigned short& count, boost::asio::ip::tcp::socket socket) : m_id(count), m_socket(move(socket)) {};

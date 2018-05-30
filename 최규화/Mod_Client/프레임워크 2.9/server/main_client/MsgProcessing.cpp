@@ -19,8 +19,10 @@ switch (packet[1])
 		
 		scene.my_ClientID = init_data->player_data.id;
 
-		RgCkInfo.RtCheck.RotationInfo = move(init_data->player_data.rot);
-		RgCkInfo.PtCheck.PositionInfo = move(init_data->player_data.pos);
+		//RgCkInfo.RtCheck.RotationInfo = move(init_data->player_data.rot);
+		//RgCkInfo.PtCheck.PositionInfo = move(init_data->player_data.pos);
+
+		RgCkInfo.AniCheck.AniState = static_cast<Ani_State>(init_data->player_data.ani);
 
 		scene.SET_PLAYER_BY_SEVER_DATA(init_data->player_data.id, init_data->player_data, packet[1]);
 	}
@@ -34,20 +36,20 @@ switch (packet[1])
 	}
 	break;
 	
-	case PACKET_PROTOCOL_TYPE::CHANGED_PLAYER_POSITION:
-	{
-		auto move_data = reinterpret_cast<STC_ChangedPos*>(packet);
-		Player_Data new_movedata;
-
-		new_movedata.pos = move_data->pos;
-		new_movedata.ani = move_data->ani_state;
-
-		RgCkInfo.PtCheck.PositionInfo = move(move_data->pos);
-		RgCkInfo.PtCheck.AniState = static_cast<Ani_State>(move_data->ani_state);
-
-		scene.SET_PLAYER_BY_SEVER_DATA(move_data->id, new_movedata, packet[1]);
-	}
-	break;
+	//case PACKET_PROTOCOL_TYPE::CHANGED_PLAYER_POSITION:
+	//{
+	//	auto move_data = reinterpret_cast<STC_ChangedPos*>(packet);
+	//	Player_Data new_movedata;
+	//
+	//	new_movedata.pos = move_data->pos;
+	//	new_movedata.ani = move_data->ani_state;
+	//
+	//	RgCkInfo.PtCheck.PositionInfo = move(move_data->pos);
+	//	RgCkInfo.PtCheck.AniState = static_cast<Ani_State>(move_data->ani_state);
+	//
+	//	scene.SET_PLAYER_BY_SEVER_DATA(move_data->id, new_movedata, packet[1]);
+	//}
+	//break;
 
 	case PACKET_PROTOCOL_TYPE::PLAYER_DISCONNECT:
 	{
@@ -101,6 +103,7 @@ switch (packet[1])
 		Player_Data new_anidata;
 		new_anidata.ani = mycharani->ani_state;
 	
+		RgCkInfo.AniCheck.AniState = static_cast<Ani_State>(mycharani->ani_state);
 
 		scene.SET_PLAYER_BY_SEVER_DATA(mycharani->id, new_anidata, packet[1]);
 	}
@@ -124,6 +127,29 @@ void AsyncClient::SendPacketRegular(CGameObject& gobj, const GameTimer& gt)
 	m_totalTime += gt.DeltaTime();
 
 	// 1.서버에서 담고있는 캐릭터회전정보를 주기적으로 0.2초마다 검사 및 패킷송신
+	RgCkInfo.AniCheck.t.t_time += gt.DeltaTime();
+
+	if (RgCkInfo.AniCheck.t.t_time > RegularPacketExchangeTime)
+	{
+		RgCkInfo.AniCheck.t.p_time = RgCkInfo.AniCheck.t.t_time - RegularPacketExchangeTime;
+
+		RgCkInfo.AniCheck.t.t_time = 0.f;
+		RgCkInfo.AniCheck.t.t_time += RgCkInfo.AniCheck.t.p_time;
+
+		RgCkInfo.AniCheck.t.p_time = 0.f;
+
+		if (RgCkInfo.AniCheck.AniState != gobj.m_player_data.ani)
+		{
+			STC_CharAnimation cts_c_ani;
+
+			cts_c_ani.id = gobj.m_player_data.id;
+			cts_c_ani.ani_state = RgCkInfo.AniCheck.AniState;
+
+			SendPacket(reinterpret_cast<Packet*>(&cts_c_ani));
+		}
+
+	}
+	
 	RgCkInfo.RtCheck.t.t_time += gt.DeltaTime();
 	if (RgCkInfo.RtCheck.t.t_time > RegularPacketExchangeTime)
 	{
@@ -156,9 +182,11 @@ void AsyncClient::SendPacketRegular(CGameObject& gobj, const GameTimer& gt)
 			cts_rot.pack_type = PACKET_PROTOCOL_TYPE::PLAYER_ROTATE;
 
 			cts_rot.id = gobj.m_player_data.id;
+		
 			cts_rot.rotate_status = { RgCkInfo.RtCheck.RotationInfo.x,  RgCkInfo.RtCheck.RotationInfo.y,
 									  RgCkInfo.RtCheck.RotationInfo.z, RgCkInfo.RtCheck.RotationInfo.w };
 
+			gobj.m_player_data.rot = RgCkInfo.RtCheck.RotationInfo;
 			//cts_test.player_data.ID = cts_rot.id;
 			//cts_test.player_data.Rotate_status = cts_rot.rotate_status;
 
@@ -201,22 +229,22 @@ void AsyncClient::SendPacketRegular(CGameObject& gobj, const GameTimer& gt)
 			gobj.m_player_data.pos.w != RgCkInfo.PtCheck.PositionInfo.w ||
 			gobj.m_player_data.ani   != RgCkInfo.PtCheck.AniState         )
 		{
-			STC_ChangedPos cts_pos;
-			cts_pos.packet_size = sizeof(STC_ChangedPos);
-			cts_pos.pack_type = PACKET_PROTOCOL_TYPE::CHANGED_PLAYER_POSITION;
-
-			cts_pos.id = gobj.m_player_data.id;
-			cts_pos.pos = { RgCkInfo.PtCheck.PositionInfo.x, RgCkInfo.PtCheck.PositionInfo.y,
-							RgCkInfo.PtCheck.PositionInfo.z, RgCkInfo.PtCheck.PositionInfo.w };
-			cts_pos.ani_state = RgCkInfo.PtCheck.AniState;
-			cts_pos.deltime = RgCkInfo.PtCheck.Deltime;
+			//STC_ChangedPos cts_pos;
+			//cts_pos.packet_size = sizeof(STC_ChangedPos);
+			//cts_pos.pack_type = PACKET_PROTOCOL_TYPE::CHANGED_PLAYER_POSITION;
+			//
+			//cts_pos.id = gobj.m_player_data.id;
+			//cts_pos.pos = { RgCkInfo.PtCheck.PositionInfo.x, RgCkInfo.PtCheck.PositionInfo.y,
+			//				RgCkInfo.PtCheck.PositionInfo.z, RgCkInfo.PtCheck.PositionInfo.w };
+			//cts_pos.ani_state = RgCkInfo.PtCheck.AniState;
+			//cts_pos.deltime = RgCkInfo.PtCheck.Deltime;
 
 			//
 			//cts_test.player_data.ID = cts_pos.id;
 			//cts_test.player_data.Pos = cts_pos.pos;
 			//SendPacket(reinterpret_cast<Packet*>(&cts_test));
 
-			SendPacket(reinterpret_cast<Packet*>(&cts_pos));
+			//SendPacket(reinterpret_cast<Packet*>(&cts_pos));
 
 
 		}

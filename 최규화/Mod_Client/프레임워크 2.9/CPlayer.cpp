@@ -218,6 +218,8 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 			char playerdir = 0;
 			bool move = false;
 
+			m_async_client->RgCkInfo.PtCheck.Deltime = DeltaTime;
+
 			if (GetKeyState(0x57) & 0x8000)//W키
 			{
 				playerdir = 1;
@@ -441,11 +443,11 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 				if (PlayerObject->n_Animation != Ani_State::Attack)//공격모션이 아니면 다시 대기상태로
 				{
 					PlayerObject->SetAnimation(Ani_State::Run);
+					
+					m_async_client->RgCkInfo.AniCheck.AniState = Run;
 					//m_async_client->RgCkInfo.PtCheck.PositionInfo = { PlayerObject->CenterPos.x, PlayerObject->CenterPos.y, PlayerObject->CenterPos.z, PlayerObject->CenterPos.w };
-					//m_async_client->RgCkInfo.PtCheck.AniState = Ani_State::Run;
 					//2018-05-24 수정
 					cts_move.dir = playerdir;
-					cts_move.ani_state = Ani_State::Run;
 					cts_move.deltime = DeltaTime;
 
 					m_async_client->SendPacket(reinterpret_cast<Packet*>(&cts_move));
@@ -455,19 +457,17 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 			{
 				if (PlayerObject->n_Animation != Ani_State::Attack)//공격모션이 아니면 다시 대기상태로
 				{
-					PlayerObject->SetAnimation(Ani_State::Idle);			
+					PlayerObject->SetAnimation(Ani_State::Idle);	
+					
+					m_async_client->RgCkInfo.AniCheck.AniState = Idle;
 					//m_async_client->RgCkInfo.PtCheck.PositionInfo = { PlayerObject->CenterPos.x, PlayerObject->CenterPos.y, PlayerObject->CenterPos.z, PlayerObject->CenterPos.w };
-					//m_async_client->RgCkInfo.PtCheck.AniState = Ani_State::Idle;
 					//2018-05-24 수정
 					cts_move.dir = playerdir;
-					cts_move.ani_state = Ani_State::Idle;
 					cts_move.deltime = DeltaTime;
 
 					m_async_client->SendPacket(reinterpret_cast<Packet*>(&cts_move));
 
 				}
-
-				m_async_client->RgCkInfo.PtCheck.Deltime = DeltaTime;
 			}
 
 			if (GetKeyState(VK_SPACE) & 0x8000 && PlayerObject->AirBone == false)
@@ -480,10 +480,9 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 				//PlayerObject->AirBone = true;//공중상태를 true로
 
 				cts_move.dir = playerdir;
-				cts_move.dir = Ani_State::Idle;
 				cts_move.deltime = DeltaTime;
-				//cts_move.dir = Ani_State::Jump;
 
+				m_async_client->RgCkInfo.AniCheck.AniState = Idle;
 				m_async_client->SendPacket(reinterpret_cast<Packet*>(&cts_move));
 
 				//STC_CharJump cts_charjump;
@@ -491,7 +490,6 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 				//cts_charjump.ani_state;  //나중에 점프 애니메이션 추가되면 설정해줄것임
 				//m_async_client->SendPacket(reinterpret_cast<Packet*>(&cts_charjump));
 			}
-
 
 			//캐릭터가 이동을 멈추고, 즉 누르던 키를 땠을 때 땠다는 정보를 서버로 보냄
 			if ((GetKeyState(0x57) & 0x0001) || (GetKeyState(0x53) & 0x0001) ||
@@ -504,10 +502,13 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 
 				cts_move.dir = playerdir;
 				cts_move.deltime = DeltaTime;
-				cts_move.ani_state = Ani_State::Idle;
-
+				
 				m_async_client->SendPacket(reinterpret_cast<Packet*>(&cts_move));
+
 			}
+
+
+
 
 			if (GetKeyState(0x31) & 0x8000)
 				skilldata.SellectBulletIndex = 0;

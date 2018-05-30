@@ -462,6 +462,9 @@ void FrameWork::OnMouseDown(WPARAM btnState, int x, int y)
 	if (scene->Player->PlayerObject->gamedata.HP > 0 && scene->Player->skilldata.isSkillOn[scene->Player->skilldata.SellectBulletIndex])
 	{//공격 애니메이션으로 전환
 		scene->Player->PlayerObject->SetAnimation(2);
+
+		scene->Player->m_async_client->RgCkInfo.AniCheck.AniState = Attack;
+
 		auto RAY = MousePicking(x, y, scene->Player->Camera.CamData.EyePos, scene->Player->Camera.CamData.View, scene->Player->Camera.CamData.Proj);
 		XMFLOAT3 savepoint;
 
@@ -554,6 +557,7 @@ void FrameWork::OnMouseDown(WPARAM btnState, int x, int y)
 				scene->Player->CreateBullet(Device.Get(), mCommandList.Get(), savepoint, NULL, &scene->BulletObject);
 			}
 		}
+
 	}
 }
 

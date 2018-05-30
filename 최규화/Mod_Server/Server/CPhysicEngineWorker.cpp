@@ -19,24 +19,38 @@ void CPhysicEngineWorker::Update()
 		m_deltime = (m_currtime - m_prevtime) * mSecondsPerCount;
 		m_prevtime = m_currtime;
 
-		for (auto client : g_clients)
+		//for (auto client : g_clients)
+		//{
+		//	client->PlayerInput(client->GetPlayerDirection(), m_deltime);
+		//	client->GravitySystem(m_deltime);
+		//	client->Tick(m_deltime);
+		//	client->AfterGravitySystem(m_deltime);
+		//
+		//	//client->Collision(m_deltime);
+		//
+		//	//임시
+		//	//client->SetPlayerDirection(0);
+		//	//client->SetPlayerAnimation(Ani_State::Idle);
+		//}
+
+		for (int i = 0; i < g_clients.size(); ++i)
 		{
-			client->PlayerInput(client->GetPlayerDirection(), m_deltime);
-			client->GravitySystem(m_deltime);
-			client->Tick(m_deltime);
-			client->AfterGravitySystem(m_deltime);
+			//g_clients[i]->m_mtx.lock();
+			//g_clients[i]->m_dir
+			g_clients[i]->PlayerInput(g_clients[i]->GetPlayerDirection(), RegularPhysicsTime);
+			g_clients[i]->GravitySystem(RegularPhysicsTime);
+			g_clients[i]->Tick(RegularPhysicsTime);
+			g_clients[i]->AfterGravitySystem(RegularPhysicsTime);
 
-			//client->Collision(m_deltime);
-
-			//임시
-			//client->SetPlayerDirection(0);
-			//client->SetPlayerAnimation(Ani_State::Idle);
+			g_clients[i]->SetChangedPlayerState();
+			//g_clients[i]->SetPlayerDirection(0);
+			//g_clients[i]->m_mtx.unlock();
 		}
 
 		for (auto bullet : g_bullets)
 		{
-			bullet->Tick(m_deltime);
-			bullet->AfterGravitySystem(m_deltime);
+			bullet->Tick(RegularPhysicsTime);
+			bullet->AfterGravitySystem(RegularPhysicsTime);
 		}
 
 	}

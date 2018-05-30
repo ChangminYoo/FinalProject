@@ -730,7 +730,7 @@ void Scene::SET_PLAYER_BY_SEVER_DATA(const unsigned short & id,const Player_Data
 			case PACKET_PROTOCOL_TYPE::INIT_CLIENT:
 			{
 				GameObject->m_player_data = move(playerdata);
-
+	
 				GameObject->Orient = { playerdata.rot.x , playerdata.rot.y, playerdata.rot.z, playerdata.rot.w };
 				GameObject->CenterPos = { playerdata.pos.x , playerdata.pos.y , playerdata.pos.z , playerdata.pos.w };
 				GameObject->pp->SetPosition(GameObject->CenterPos);
@@ -749,9 +749,15 @@ void Scene::SET_PLAYER_BY_SEVER_DATA(const unsigned short & id,const Player_Data
 
 			case PACKET_PROTOCOL_TYPE::PLAYER_CURR_STATE:
 			{
-				GameObject->m_player_data = move(playerdata);
+				GameObject->m_player_data.ai = playerdata.ai;
+				GameObject->m_player_data.airbone = playerdata.airbone;
+				GameObject->m_player_data.connect = playerdata.connect;
+				GameObject->m_player_data.dir = playerdata.dir;
+				GameObject->m_player_data.godmode = playerdata.godmode;
+				GameObject->m_player_data.id = playerdata.id;
+				GameObject->m_player_data.pos = playerdata.pos;
+				GameObject->m_player_data.status = playerdata.status;
 
-				GameObject->Orient = { playerdata.rot.x , playerdata.rot.y, playerdata.rot.z, playerdata.rot.w };
 				GameObject->CenterPos = { playerdata.pos.x , playerdata.pos.y , playerdata.pos.z , playerdata.pos.w };
 				GameObject->pp->SetPosition(GameObject->CenterPos);
 
@@ -761,12 +767,9 @@ void Scene::SET_PLAYER_BY_SEVER_DATA(const unsigned short & id,const Player_Data
 				GameObject->gamedata.Speed = move(playerdata.status.speed);
 
 				GameObject->AirBone = playerdata.airbone;
-				
-				GameObject->n_Animation = static_cast<int>(playerdata.ani);
-
 			}
 			break;
-
+			
 			case PACKET_PROTOCOL_TYPE::PLAYER_DISCONNECT:
 			{
 				//client ³» flag¸¦ false·Î
@@ -915,6 +918,31 @@ void Scene::Set_RemovePlayerData(const unsigned int & id, Player_Data & playerda
 		{
 			delete GameObject;
 		}
+	}
+}
+
+void Scene::SET_PLAYER_STATE_BY_SERVER_DATA(const Player_Data & playerdata)
+{
+	for (auto GameObject : DynamicObject)
+	{
+		GameObject->m_player_data.ai = playerdata.ai;
+		GameObject->m_player_data.airbone = playerdata.airbone;
+		GameObject->m_player_data.connect = playerdata.connect;
+		GameObject->m_player_data.dir = playerdata.dir;
+		GameObject->m_player_data.godmode = playerdata.godmode;
+		GameObject->m_player_data.id = playerdata.id;
+		GameObject->m_player_data.pos = playerdata.pos;
+		GameObject->m_player_data.status = playerdata.status;
+
+		GameObject->CenterPos = { playerdata.pos.x , playerdata.pos.y , playerdata.pos.z , playerdata.pos.w };
+		GameObject->pp->SetPosition(GameObject->CenterPos);
+
+		GameObject->gamedata.Damage = move(playerdata.status.attack);
+		GameObject->gamedata.HP = move(playerdata.status.cur_hp);
+		GameObject->gamedata.MAXHP = move(playerdata.status.origin_hp);
+		GameObject->gamedata.Speed = move(playerdata.status.speed);
+
+		GameObject->AirBone = playerdata.airbone;
 	}
 }
 

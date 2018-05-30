@@ -330,13 +330,11 @@ void CPlayerObject::ProcessPacket(Packet * packet)
 
 		auto mdata = reinterpret_cast<STC_CharMove*>(packet);
 
-		if (mdata->ani_state == Ani_State::Idle)
-			m_state = PLAYER_STATE::IDLE;
-		else if (mdata->ani_state == Ani_State::Run)
-			m_state = PLAYER_STATE::MOVE;
 
+		//g_clients[m_id]->m_mtx.lock();
 		g_clients[m_id]->m_dir = mdata->dir;
-		g_clients[m_id]->m_ani = mdata->ani_state;
+	
+		//g_clients[m_id]->m_mtx.unlock();
 
 	}
 	break;
@@ -417,6 +415,7 @@ void CPlayerObject::ProcessPacket(Packet * packet)
 
 		// 1. 받은 정보를 내 클라이언트에 넣어주고
 		g_clients[rot_data->id]->m_rot4f = move(rot_data->rotate_status);
+		g_clients[rot_data->id]->m_pdata.rot = move(rot_data->rotate_status);
 
 		// 2. 받은 정보를 토대로 lookvector와 rightvector를 업데이트
 		//m_clients[Rotation_Data->id]->UpdateLookVector(); //이거넣으면 20byte -> 21byte씩 다시보내게됨
@@ -426,8 +425,8 @@ void CPlayerObject::ProcessPacket(Packet * packet)
 		UpdateUpvector();
 		//g_clients[rot_data->id]->UpdateUpvector();
 
-		//cout << "ID: " << Rotation_Data->id << " 변화된 회전값: " << "[ x, y, z, w ]: "
-		//	<< Rotation_Data->rotate_status.x << ", " << Rotation_Data->rotate_status.y << ", " << Rotation_Data->rotate_status.z << ", " << Rotation_Data->rotate_status.w << endl;
+		cout << "ID: " << rot_data->id << " 변화된 회전값: " << "[ x, y, z, w ]: "
+			<< rot_data->rotate_status.x << ", " << rot_data->rotate_status.y << ", " << rot_data->rotate_status.z << ", " << rot_data->rotate_status.w << endl;
 
 		// 3. 다른 클라에게 보낸다.
 		STC_Rotation stc_to_rot;
@@ -436,9 +435,8 @@ void CPlayerObject::ProcessPacket(Packet * packet)
 
 		for (auto client : g_clients)
 		{
-			if (static_cast<bool>(client->m_pdata.ai) == true) continue;
-			if (static_cast<bool>(client->m_pdata.connect) == false) continue;
-			//if (client->m_pdata.ID == Rotation_Data->id) continue;
+			if (client->GetIsAI() == true || client->GetConnectState() == false) continue;
+			if (client->m_id == rot_data->id) continue;
 
 			client->SendPacket(reinterpret_cast<Packet*>(&stc_to_rot));
 		}
@@ -500,7 +498,6 @@ void CPlayerObject::ProcessPacket(Packet * packet)
 			client->SendPacket(reinterpret_cast<Packet*>(&stc_charani));
 
 		}
-
 		//if (n_bldata->bull_data.type == BULLET_TYPE::protocol_LightBullet)
 		//	g_timer_queue.AddEvent(n_bldata->bull_data.myID, 0, LIGHT_BULLET, true, n_bldata->bull_data.Master_ID);
 		//if (n_bldata->bull_data.type == BULLET_TYPE::protocol_HeavyBullet)
@@ -518,6 +515,39 @@ void CPlayerObject::ProcessPacket(Packet * packet)
 		cout << "ID: " << test_data->player_data.id << "ElaspedTime: " << test_data->time.t_time << "------"
 			"PrevTime: " << test_data->time.p_time << endl;
 
+	}
+	break;
+
+	case PACKET_PROTOCOL_TYPE::PLAYER_ANIMATION:
+	{
+		if (m_state == DEAD)
+			break;
+
+		auto ani = reinterpret_cast<STC_CharAnimation*>(packet);
+
+		if (ani->ani_state == Ani_State::Idle)
+			m_state = Ani_State::Idle;
+		else if (ani->ani_state == Ani_State::Run)
+			m_state = Ani_State::Run;
+		else if (ani->ani_state == Ani_State::Attack)
+			m_state = Ani_State::Attack;
+		else if (ani->ani_state == Ani_State::Dead)
+			m_state = Ani_State::Dead;
+
+		g_clients[ani->id]->m_ani = ani->ani_state;
+		g_clients[ani->id]->m_pdata.ani = ani->ani_state;
+
+		STC_CharAnimation stc_c_ani;
+		stc_c_ani.ani_state = ani->ani_state;
+		stc_c_ani.id = ani->id;
+
+		for (auto client : g_clients)
+		{
+			if (client->m_id == ani->id) continue;
+			if (client->GetIsAI() == true || client->GetConnectState() == false) continue;
+
+			client->SendPacket(reinterpret_cast<Packet*>(&stc_c_ani));
+		}
 	}
 	break;
 
@@ -542,7 +572,7 @@ void CPlayerObject::Tick(float deltime)
 
 	m_pos4f.x = xmf4_pos.x;
 	m_pos4f.y = xmf4_pos.y;
-	m_pos4f.y = xmf4_pos.y;
+	m_pos4f.z = xmf4_pos.z;
 	m_pos4f.w = xmf4_pos.w;
 }
 
@@ -593,13 +623,13 @@ void CPlayerObject::SetChangedPlayerState()
 {
 	m_pdata.ai = m_ai;
 	m_pdata.airbone = m_airbone;
-	m_pdata.ani = m_ani;
+	//m_pdata.ani = m_ani;		//애니메이션은 패킷받자마자 처리
 	m_pdata.connect = m_connect;
 	m_pdata.dir = m_dir;
 	m_pdata.godmode = m_godmode;
 	m_pdata.id = m_id;
 	m_pdata.pos = m_pos4f;
-	m_pdata.rot = m_rot4f;
+	//m_pdata.rot = m_rot4f;	//회전은 패킷받자마자 처리
 
 	m_pdata.status.attack = m_ability.attack;
 	m_pdata.status.cur_hp = m_ability.curHP;
@@ -607,6 +637,8 @@ void CPlayerObject::SetChangedPlayerState()
 	m_pdata.status.level = m_ability.level;
 	m_pdata.status.origin_hp = m_ability.orignHP;
 	m_pdata.status.speed = m_ability.speed;
+
+	pp->SetPosition(m_pos4f.x, m_pos4f.y, m_pos4f.z);
 }
 
 void CPlayerObject::PlayerInput(char dir, float deltime)

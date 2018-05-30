@@ -14,6 +14,7 @@
 #define KEYINPUT_DOWN 0x0010
 
 #define RegularPacketExchangeTime  (1.f / 20.f) // 1초에 20번 패킷을 교환(morpg 형식)
+#define RegularPhysicsTime (1.f / 60.f)
 
 //추가
 //레벨업 보상, 마법레벨
@@ -269,7 +270,6 @@ typedef struct Server_To_Client_CharJump
 {
 	unsigned char packet_size = sizeof(unsigned char) + sizeof(unsigned char) + sizeof(unsigned char) + sizeof(unsigned short);
 	unsigned char packet_type = PACKET_PROTOCOL_TYPE::PLAYER_JUMP;
-	unsigned char ani_state;
 	unsigned short id;
 
 }STC_CharJump;
@@ -279,7 +279,6 @@ typedef struct Server_To_Client_CharMove
 	unsigned char packet_size = sizeof(unsigned char) + sizeof(unsigned char) + sizeof(char) + sizeof(unsigned char) + sizeof(float);
 	unsigned char packet_type = PACKET_PROTOCOL_TYPE::PLAYER_MOVE;
 	char		  dir;
-	unsigned char ani_state;
 	float		  deltime;
 
 }STC_CharMove;

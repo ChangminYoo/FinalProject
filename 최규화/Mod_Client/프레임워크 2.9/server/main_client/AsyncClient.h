@@ -5,6 +5,12 @@
 
 class Scene;
 
+struct AnimationCheck
+{
+	Time t;
+	Ani_State AniState{ Ani_State::Idle };
+};
+
 struct RotateCheck
 {
 	Time t;
@@ -23,6 +29,7 @@ struct RegularCheckInfo
 {
 	RotateCheck RtCheck;
 	PositionCheck PtCheck;
+	AnimationCheck AniCheck;
 };
 
 class AsyncClient

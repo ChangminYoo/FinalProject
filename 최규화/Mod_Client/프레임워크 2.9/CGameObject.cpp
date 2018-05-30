@@ -122,8 +122,10 @@ void CGameObject::UpdateLookVector()
 
 void CGameObject::SetAnimation(int n_Ani)
 {
+
 	if (n_Ani != n_Animation)
 	{
+			
 		currAnimTime = 0;
 	}
 	n_Animation = n_Ani;
