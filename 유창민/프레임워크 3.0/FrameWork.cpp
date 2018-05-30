@@ -470,7 +470,7 @@ void FrameWork::OnMouseDown(WPARAM btnState, int x, int y)
 		
 		
 		//공격 애니메이션으로 전환
-		scene->Player->PlayerObject->SetAnimation(2);
+		//scene->Player->PlayerObject->SetAnimation(2);
 		auto RAY = MousePicking(x, y, scene->Player->Camera.CamData.EyePos, scene->Player->Camera.CamData.View, scene->Player->Camera.CamData.Proj);
 		XMFLOAT3 savepoint;
 

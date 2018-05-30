@@ -2630,29 +2630,18 @@ void DiceObject::Tick(const GameTimer & gt)
 	LifeTime -= gt.DeltaTime();
 	if (LifeTime <= 0)
 	{		
-		DelObj = true;
-	}
-
-	dTime++;	
-	ObjData.TexClamp = XMFLOAT4(0.0f + (0.2f*TexStart), 0.2f + (0.2f*TexStart), 0, 0);	
-	if (dTime % 10 == 0 && LifeTime >= 1.0f)
-		TexStart++;
-
-	CenterPos.x = Master->CenterPos.x; CenterPos.y = 44; CenterPos.z = Master->CenterPos.z;
-
-
-	if (LifeTime < 1.0f)
-	{
 		if (TexStart == 0)
-			Master->Dicedata = 1;
+			Dicedata = 1;
 		else if (TexStart == 1)
-			Master->Dicedata = 4;
+			Dicedata = 4;
 		else if (TexStart == 2)
-			Master->Dicedata = 2;
+			Dicedata = 2;
 		else if (TexStart == 3)
-			Master->Dicedata = 5;
+			Dicedata = 5;
 		else if (TexStart == 4)
-			Master->Dicedata = 3;
+			Dicedata = 3;
+
+		Master->SetAnimation(2);
 
 		XMFLOAT3 l{ 0,0,1 };
 		XMVECTOR ol = XMLoadFloat3(&l);
@@ -2735,7 +2724,18 @@ void DiceObject::Tick(const GameTimer & gt)
 			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist, Master, ori, -MMPE_PI / 6, NULL, Master->CenterPos));
 		}
 
+		DelObj = true;
 	}
+
+	dTime = rand()%11;	
+	ObjData.TexClamp = XMFLOAT4(0.0f + (0.2f*TexStart), 0.2f + (0.2f*TexStart), 0, 0);	
+	CenterPos.x = Master->CenterPos.x; CenterPos.y = 44; CenterPos.z = Master->CenterPos.z;
+	
+	if (dTime % 3 == 0 && LifeTime >= 1.0f)
+		TexStart++;
+	
+	if (TexStart > 4)
+		TexStart = 0;
 }
 
 void DiceObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer & gt)

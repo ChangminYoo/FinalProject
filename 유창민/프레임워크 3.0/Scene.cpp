@@ -250,6 +250,8 @@ void Scene::CreateGameObject()
 	delete resource;
 	resource = new DiceStrike(device, commandlist, &BbObject, NULL, XMFLOAT4(0, 0, 0, 1), 0, NULL, XMFLOAT4(0, 0, 0, 0));
 	delete resource;
+	resource = new DiceObject(device, commandlist, &BbObject, NULL, NULL, XMFLOAT4(0, 0, 0, 0));
+	delete resource;
 
 	//--------------------------------------------------//
 	

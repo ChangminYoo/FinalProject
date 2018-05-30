@@ -499,6 +499,7 @@ void CPlayer::CreateBullet(ID3D12Device* Device, ID3D12GraphicsCommandList* cl,X
 
 	case 0://불렛큐브(라이트 큐브)
 	{
+		PlayerObject->SetAnimation(2);
 		//먼저 해당스킬의 쿨타임을 넣어주자.
 		skilldata.SkillsCoolTime[skilldata.SellectBulletIndex] = skilldata.SkillsMaxCoolTime[skilldata.SellectBulletIndex];
 		skilldata.isSkillOn[skilldata.SellectBulletIndex] = false;
@@ -569,6 +570,8 @@ void CPlayer::CreateBullet(ID3D12Device* Device, ID3D12GraphicsCommandList* cl,X
 
 	case 1://불렛큐브(헤비 큐브)
 	{
+		PlayerObject->SetAnimation(2);
+
 		//먼저 해당스킬의 쿨타임을 넣어주자.
 		skilldata.SkillsCoolTime[skilldata.SellectBulletIndex] = skilldata.SkillsMaxCoolTime[skilldata.SellectBulletIndex];
 		skilldata.isSkillOn[skilldata.SellectBulletIndex] = false;
@@ -630,6 +633,7 @@ void CPlayer::CreateBullet(ID3D12Device* Device, ID3D12GraphicsCommandList* cl,X
 	}
 	case 2://테트라이크
 	{
+		PlayerObject->SetAnimation(2);
 		//먼저 해당스킬의 쿨타임을 넣어주자.
 		skilldata.SkillsCoolTime[skilldata.SellectBulletIndex] = skilldata.SkillsMaxCoolTime[skilldata.SellectBulletIndex];
 		skilldata.isSkillOn[skilldata.SellectBulletIndex] = false;
