@@ -346,13 +346,11 @@ CCubeManObject::CCubeManObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 	{
 		Hpbar = new BarObject(m_Device, commandlist, ParticleList, this, 10, XMFLOAT4(CenterPos.x, 10, CenterPos.z, 0));
 		HPFrame = new BarFrameObject(m_Device, commandlist, ParticleList, this, 10, XMFLOAT4(CenterPos.x, 10, CenterPos.z, 0));
-	
-		//DiceEffect = new DiceObject(m_Device, commandlist, ParticleList, this, XMFLOAT4(CenterPos.x, 35, CenterPos.z, 0));
-		//ParticleList->push_back(DiceEffect);
+		ShieldEffect = new ShieldAmor(m_Device, commandlist, ParticleList, this, XMFLOAT4(CenterPos.x, CenterPos.y+10, CenterPos.z, 0));
 	
 		ParticleList->push_back(HPFrame);
 		ParticleList->push_back(Hpbar);
-	
+		ParticleList->push_back(ShieldEffect);
 	}
 
 }
@@ -2244,8 +2242,6 @@ void MoveCubeObject::Tick(const GameTimer & gt)
 	CenterPos.x = Rad * cosf(MMPE_PI * n * 0.1f);
 	CenterPos.z = Rad * sinf(MMPE_PI * n * 0.1f);
 
-	
-
 }
 
 void MoveCubeObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer & gt)
@@ -3543,9 +3539,6 @@ void RangeObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * c
 {
 	CreateCube(&Mesh, 60, 0.01, 60);
 
-	//모델 로드
-	//LoadMD5Model(L".\\플레이어메쉬들\\Cube.MD5MESH", &Mesh, 0, 1);
-	//
 	Mesh.SetNormal(false);
 	Mesh.CreateVertexBuffer(m_Device, commandlist);
 	Mesh.CreateIndexBuffer(m_Device, commandlist);
@@ -3680,6 +3673,112 @@ void ParticleObject::Render(ID3D12GraphicsCommandList * commandlist, const GameT
 {
 	if (Textures.size()>0)
 		SetTexture(commandlist, SrvDescriptorHeap, Textures["sparkTex"].get()->Resource.Get(), false);
+	UpdateConstBuffer(commandlist);
+
+
+	D3D12_VERTEX_BUFFER_VIEW vbv;
+
+	vbv.BufferLocation = Mesh.VertexBuffer->GetGPUVirtualAddress();
+	vbv.StrideInBytes = Mesh.nStride;
+	vbv.SizeInBytes = Mesh.nStride *  Mesh.nVertex;
+
+	commandlist->IASetVertexBuffers(0, 1, &vbv);
+
+	D3D12_INDEX_BUFFER_VIEW ibv;
+	ibv.BufferLocation = Mesh.IndexBuffer->GetGPUVirtualAddress();
+	ibv.Format = DXGI_FORMAT_R16_UINT;
+	ibv.SizeInBytes = Mesh.nisize *  Mesh.nindex;
+
+	commandlist->IASetIndexBuffer(&ibv);
+	commandlist->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
+
+
+	commandlist->DrawIndexedInstanced(Mesh.nindex, 1, Mesh.nioffset, Mesh.nOffset, 0);
+}
+
+
+
+ShieldAmor::ShieldAmor(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, CGameObject * master, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
+{
+	ObjData.isAnimation = 0;
+	ObjData.Scale = 15.0f;
+	ObjData.SpecularParamater = 0.3f;//스페큘러를 낮게준다.
+	ObjData.CustomData1.x = 2;
+	Master = master;
+
+	//게임관련 데이터들
+	gamedata.MAXHP = 0;
+	gamedata.HP = 0;
+	gamedata.Damage = 0;
+	gamedata.GodMode = true;
+	gamedata.Speed = 10;
+	staticobject = true;
+	obs = UI;
+	ObjData.Velocity = { 10,10,10 };
+
+	Master->isShieldOn = true;
+
+	if (CreateMesh == false)
+	{
+		Mesh.Index = NULL;
+		Mesh.SubResource = NULL;
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "ShieldTex", L"textures/effect/shield.dds", false);
+		SetMesh(m_Device, commandlist);
+		CreateMesh = true;
+
+	}
+
+}
+
+void ShieldAmor::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
+{
+	UINT numOfitem = 1;
+
+	Mesh.SubResource = new CVertex;
+	Mesh.nVertex = numOfitem;
+	Mesh.nStride = sizeof(CVertex);
+	Mesh.nOffset = 0;
+
+
+	Mesh.Index = new UINT;
+	Mesh.nindex = numOfitem;
+	Mesh.nioffset = 0;
+	Mesh.nisize = sizeof(UINT);
+
+
+	//여기서 좌표를 일괄적으로 설정 할 수 있다
+	for (int i = 0; i < numOfitem; ++i)
+	{
+		Mesh.SubResource[i].V = XMFLOAT3(0, 0, 0);
+		Mesh.Index[i] = i;
+	}
+
+	Mesh.CreateVertexBuffer(m_Device, commandlist);
+	Mesh.CreateIndexBuffer(m_Device, commandlist);
+}
+
+
+void ShieldAmor::Tick(const GameTimer & gt)
+{
+	//LifeTime -= gt.DeltaTime();
+	if (LifeTime <= 0)
+	{
+		Master->isShieldOn = false;
+		DelObj = true;
+	}
+	ObjData.PTime = gt.DeltaTime();
+
+	CenterPos = Master->CenterPos;
+	//CenterPos.x = CenterPos.x * cosf(MMPE_PI * gt.DeltaTime()*0.01f);
+	//CenterPos.y = CenterPos.y;
+	//CenterPos.z = CenterPos.z * sinf(MMPE_PI * gt.DeltaTime()*0.01f);
+	
+}
+
+void ShieldAmor::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer & gt)
+{
+	if (Textures.size()>0)
+		SetTexture(commandlist, SrvDescriptorHeap, Textures["ShieldTex"].get()->Resource.Get(), false);
 	UpdateConstBuffer(commandlist);
 
 

@@ -60,11 +60,16 @@ CMesh  DiceStrike::Mesh;//나중에 메쉬는 static으로 둬야함
 ComPtr<ID3D12DescriptorHeap> DiceStrike::SrvDescriptorHeap;//텍스처 용 힙
 CMaterial DiceStrike::Mat;
 //--------------------------------------------------------------------------------------
+bool ShieldAmor::CreateMesh = false;
+unordered_map<string, unique_ptr<CTexture>> ShieldAmor::Textures;//텍스처들을 저장함
+CMesh ShieldAmor::Mesh;//나중에 메쉬는 static으로 둬야함
+ComPtr<ID3D12DescriptorHeap> ShieldAmor::SrvDescriptorHeap;//텍스처 용 힙
+CMaterial ShieldAmor::Mat;
+//--------------------------------------------------------------------------------------
 bool SphereObject::CreateMesh = false;
 unordered_map<string, unique_ptr<CTexture>> SphereObject::Textures;//텍스처들을 저장함
 CMesh  SphereObject::Mesh;//나중에 메쉬는 static으로 둬야함
 ComPtr<ID3D12DescriptorHeap> SphereObject::SrvDescriptorHeap;//텍스처 용 힙
-
 //--------------------------------------------------------------------------------------
 bool CubeObject::CreateMesh = false;
 unordered_map<string, unique_ptr<CTexture>> CubeObject::Textures;//텍스처들을 저장함
@@ -83,39 +88,33 @@ unordered_map<string, unique_ptr<CTexture>> GridObject::Textures;//텍스처들을 저
 CMesh  GridObject::Mesh;//나중에 메쉬는 static으로 둬야함
 ComPtr<ID3D12DescriptorHeap> GridObject::SrvDescriptorHeap;//텍스처 용 힙
 CMaterial GridObject::Mat;
-
 //--------------------------------------------------------------------------------------
 bool ParticleObject::CreateMesh = false;
 unordered_map<string, unique_ptr<CTexture>> ParticleObject::Textures;//텍스처들을 저장함
 CMesh  ParticleObject::Mesh;//나중에 메쉬는 static으로 둬야함
 ComPtr<ID3D12DescriptorHeap> ParticleObject::SrvDescriptorHeap;//텍스처 용 힙
-
 //--------------------------------------------------------------------------------------
 bool DamageObject::CreateMesh = false;
 unordered_map<string, unique_ptr<CTexture>> DamageObject::Textures;//텍스처들을 저장함
 CMesh  DamageObject::Mesh;//나중에 메쉬는 static으로 둬야함
 ComPtr<ID3D12DescriptorHeap> DamageObject::SrvDescriptorHeap;//텍스처 용 힙
-
 //--------------------------------------------------------------------------------------
 bool RigidCubeObject::CreateMesh = false;
 unordered_map<string, unique_ptr<CTexture>> RigidCubeObject::Textures;//텍스처들을 저장함
 CMesh  RigidCubeObject::Mesh;//나중에 메쉬는 static으로 둬야함
 ComPtr<ID3D12DescriptorHeap> RigidCubeObject::SrvDescriptorHeap;//텍스처 용 힙
 CMaterial RigidCubeObject::Mat;
-
 //--------------------------------------------------------------------------------------
 bool AimObject::CreateMesh = false;
 unordered_map<string, unique_ptr<CTexture>> AimObject::Textures;//텍스처들을 저장함
 CMesh  AimObject::Mesh;//나중에 메쉬는 static으로 둬야함
 ComPtr<ID3D12DescriptorHeap> AimObject::SrvDescriptorHeap;//텍스처 용 힙
-
  //--------------------------------------------------------------------------------------
-
 bool BackGroundObject::CreateMesh = false;
 unordered_map<string, unique_ptr<CTexture>> BackGroundObject::Textures;//텍스처들을 저장함
 CMesh  BackGroundObject::Mesh;//나중에 메쉬는 static으로 둬야함
 ComPtr<ID3D12DescriptorHeap> BackGroundObject::SrvDescriptorHeap;//텍스처 용 힙
-
+//--------------------------------------------------------------------------------------
 bool SkillFrameUIObject::CreateMesh = false;
 unordered_map<string, unique_ptr<CTexture>> SkillFrameUIObject::Textures;//텍스처들을 저장함
 CMesh  SkillFrameUIObject::Mesh;//나중에 메쉬는 static으로 둬야함
@@ -130,7 +129,7 @@ bool BarObject::CreateMesh = false;
 unordered_map<string, unique_ptr<CTexture>> BarObject::Textures;//텍스처들을 저장함
 CMesh  BarObject::Mesh;//나중에 메쉬는 static으로 둬야함
 ComPtr<ID3D12DescriptorHeap> BarObject::SrvDescriptorHeap;//텍스처 용 힙
-
+//--------------------------------------------------------------------------------------
 bool BarFrameObject::CreateMesh = false;
 unordered_map<string, unique_ptr<CTexture>> BarFrameObject::Textures;//텍스처들을 저장함
 CMesh  BarFrameObject::Mesh;//나중에 메쉬는 static으로 둬야함

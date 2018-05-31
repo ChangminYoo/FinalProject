@@ -110,9 +110,8 @@ public:
 	//기타 공용 데이터들
 	bool DelObj = false;//이게 참이면 실제로 제거된다.
 	bool Blending = false;
-	int Dicedata = 0;
 	bool PrevCool = false;
-
+	bool isShieldOn = false;
 	//벽들에 굳이 마우스를 움직일때마다 체크할 필요는 없으므로 추가함. 또 벽은 또 벽대로 뭔가 처리할게 있을것같음.
 	Obj_State obs = Dynamic;
 
@@ -218,7 +217,7 @@ public:
 	float LifeTime = 3.0f;
 	int TexStart = 0;
 	float YPos;
-
+	int Dicedata = 0;
 public:
 	static bool CreateMesh;//최초로 false며 메쉬를 만든후 true가된다.
 	static unordered_map<string, unique_ptr<CTexture>> Textures;//텍스처들을 저장함
@@ -233,6 +232,8 @@ public:
 
 };
 
+class ShieldAmor;
+
 //============ 캐릭터 ==========//
 class CCubeManObject : public CGameObject
 {
@@ -241,7 +242,7 @@ public:
 	~CCubeManObject();
 	BarObject* Hpbar = NULL;
 	BarFrameObject* HPFrame = NULL;
-	DiceObject* DiceEffect = NULL;
+	ShieldAmor* ShieldEffect = NULL;
 
 	int select = 0;
 public:
@@ -476,7 +477,6 @@ public:
 	DiceStrike(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, CGameObject* master, XMFLOAT4& ori, float degree, CGameObject* lockon = NULL, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
 	~DiceStrike();
 	CGameObject* Master = NULL;//소유자
-	CGameObject* LockOn = NULL;//유도시사용됨
 
 	float LifeTime = 10;
 
@@ -498,6 +498,32 @@ public:
 
 
 };
+
+class ShieldAmor : public CGameObject
+{
+public:
+	ShieldAmor(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, CGameObject* master, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
+	CGameObject* Master = NULL;//소유자
+
+	float InitX;
+	float InitZ;
+	float LifeTime = 5;
+
+public:
+	static CMaterial Mat;
+	static bool CreateMesh;//최초로 false며 메쉬를 만든후 true가된다.
+	static unordered_map<string, unique_ptr<CTexture>> Textures;//텍스처들을 저장함
+	static CMesh Mesh;//오로지 한번만 만들어짐
+	static ComPtr<ID3D12DescriptorHeap> SrvDescriptorHeap;//텍스처 용 힙
+
+public:
+	virtual void SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist);//셋메시는 메시를 최종적으로 생성한다. 즉 메시를구성하는 정점과 삼각형을구성하는인덱스버퍼생성
+	virtual void Tick(const GameTimer& gt);
+	virtual void Render(ID3D12GraphicsCommandList* commandlist, const GameTimer& gt);
+	virtual void Collision(list<CGameObject*>* collist, float DeltaTime) {}
+
+};
+
 
 //================= 스태틱 오브젝트 ===============//
 
