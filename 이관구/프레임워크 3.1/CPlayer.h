@@ -3,6 +3,8 @@
 #include"Camera.h"
 
 class Scene;
+//발사 스킬은 마우스다운에서 처리되고(크리에이트 불릿)
+//생존기는 플레이어인풋에서 처리된다.
 typedef struct SkillData
 {
 
@@ -12,10 +14,19 @@ typedef struct SkillData
 	//스킬들 총 4개까지 있음. 내부의 값이 의미하는것은 생성할때 사용될 스킬넘버링
 	int Skills[4] = { 0,0,0,0 };
 
-	//각 스킬별로 쿨타임.
+	//각 스킬별로 쿨타임. 0~3의 값을 가짐.
 	float SkillsCoolTime[4] = { 0.0f };
 
-	float SkillsMaxCoolTime[4] = { 0.6f, 1.1f, 25.0f, 5.0f };
+	//모든 스킬들의 쿨타임들을 정의함. 스킬갯수가 늘어날 수록, 배열도 커져야한다.
+	/*
+	스킬넘버링 0 : 라이트 큐브
+	스킬넘버링 1 : 헤비 큐브
+	스킬넘버링 2 : 테트라이크
+	스킬넘버링 3 : 다이스트라이크
+	스킬넘버링 4 : 파동파
+	*/
+	float SkillsMaxCoolTime[5] = { 0.6f, 1.1f, 25.0f, 5.0f,20.0f };
+
 
 	//스킬별 사용가능 여부
 	bool isSkillOn[4] = { true };

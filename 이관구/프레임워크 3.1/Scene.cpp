@@ -413,20 +413,23 @@ void Scene::CreateUI()
 	for (int i = 0; i < 4; i++)
 	{
 		float ct = 0;
-		switch (Player->skilldata.Skills[i])
+		switch (Player->skilldata.Skills[i])//스킬넘버링
 		{
 		case 0://라이트큐브
-			ct = Player->skilldata.SkillsMaxCoolTime[i];
+			ct = Player->skilldata.SkillsMaxCoolTime[Player->skilldata.Skills[i]];
 			break;
 		case 1://헤비큐브
-			ct = Player->skilldata.SkillsMaxCoolTime[i];
+			ct = Player->skilldata.SkillsMaxCoolTime[Player->skilldata.Skills[i]];
 			break;
 		case 2://테트라이크
-			ct = Player->skilldata.SkillsMaxCoolTime[i];
+			ct = Player->skilldata.SkillsMaxCoolTime[Player->skilldata.Skills[i]];
 			break;
-		case 3:
-			ct = Player->skilldata.SkillsMaxCoolTime[i];
+		case 3://다이스트라이크
+			ct = Player->skilldata.SkillsMaxCoolTime[Player->skilldata.Skills[i]];
 			break;
+
+		case 4: // 파동파
+			ct = ct = Player->skilldata.SkillsMaxCoolTime[Player->skilldata.Skills[i]];
 		}
 
 		SkillCoolBar[i] = new CoolBarObject(device, commandlist, NULL,ct, Player->PlayerObject, XMFLOAT4(i*100-150,0.98*-mHeight / 2, 0, 0));

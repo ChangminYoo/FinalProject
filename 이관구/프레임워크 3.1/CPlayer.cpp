@@ -9,7 +9,7 @@ CPlayer::CPlayer(HWND hWnd,ID3D12Device* Device, ID3D12GraphicsCommandList* comm
 
 
 	skilldata.Skills[0] = 0;
-	skilldata.Skills[1] = 1;
+	skilldata.Skills[1] = 4;
 	skilldata.Skills[2] = 2;
 	skilldata.Skills[3] = 3;
 }
@@ -436,16 +436,61 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 					PlayerObject->SetAnimation(Ani_State::Idle);
 			}
 
-
-			if (GetKeyState(0x31) & 0x8000)
+			if (GetAsyncKeyState(0x31) & 0x0001)
 				skilldata.SellectBulletIndex = 0;
-			else if (GetKeyState(0x32) & 0x8000)
+			else if (GetAsyncKeyState(0x32) & 0x0001)
 				skilldata.SellectBulletIndex = 1;
-			else if (GetKeyState(0x33) & 0x8000)
+			else if (GetAsyncKeyState(0x33) & 0x0001)
 				skilldata.SellectBulletIndex = 2;
 			else if (GetAsyncKeyState(0x34) & 0x0001)
 				skilldata.SellectBulletIndex = 3;
 
+
+			
+			//위의 버튼을 눌렀을때 생존기 스킬인 넘버링 4와 5인 경우(4는 파동파 , 5는 방어력증가(?))
+			if (skilldata.Skills[skilldata.SellectBulletIndex] == 4 && skilldata.isSkillOn[skilldata.SellectBulletIndex])//파동파인경우
+			{
+
+				skilldata.SkillsCoolTime[skilldata.SellectBulletIndex] = skilldata.SkillsMaxCoolTime[skilldata.Skills[skilldata.SellectBulletIndex]];
+				skilldata.isSkillOn[skilldata.SellectBulletIndex] = false;
+				skilldata.SellectBulletIndex = 0;//스킬 시전후 가장 첫번째 스킬로 변경함
+
+				XMFLOAT4 파동파위치 = PlayerObject->CenterPos;
+				파동파위치.y += -PlayerObject->pp->GetHalfBox().y;
+				float impurse = 20000;
+				float rad = 150.f;//범위
+				//다이나믹 오브젝트와 리지드오브젝트를 날려버린다.
+				for (auto l : scene->DynamicObject)
+				{
+					if (l != PlayerObject)
+					{
+						auto l2 = Float3Add(XMFloat4to3(l->CenterPos), XMFloat4to3(파동파위치), false);
+						
+						if (FloatLength(l2) <= rad)//범위 안에적이있으면
+						{
+							l2 = Float3Normalize(l2);
+							l2 = Float3Float(l2, impurse*(1-FloatLength(l2)/rad));
+							l->pp->AddForce(l2);
+							l->pp->integrate(0.01f);
+						}
+
+					}
+				}
+				for (auto l : scene->RigidObject)
+				{
+					auto l2 = Float3Add(XMFloat4to3(l->CenterPos), XMFloat4to3(파동파위치), false);
+
+					if (FloatLength(l2) <= rad)//범위 안에적이있으면
+					{
+						l2 = Float3Normalize(l2);
+						l2 = Float3Float(l2, impurse*(1 - FloatLength(l2) / rad));
+						l->rb->AddForce(l2);
+						l->rb->integrate(0.01f);
+					}
+
+				}
+				
+			}
 
 
 			if (GetAsyncKeyState(VK_CONTROL) & 0x8000)
@@ -501,7 +546,7 @@ void CPlayer::CreateBullet(ID3D12Device* Device, ID3D12GraphicsCommandList* cl,X
 	{
 		PlayerObject->SetAnimation(2);
 		//먼저 해당스킬의 쿨타임을 넣어주자.
-		skilldata.SkillsCoolTime[skilldata.SellectBulletIndex] = skilldata.SkillsMaxCoolTime[skilldata.SellectBulletIndex];
+		skilldata.SkillsCoolTime[skilldata.SellectBulletIndex] = skilldata.SkillsMaxCoolTime[skilldata.Skills[skilldata.SellectBulletIndex]];
 		skilldata.isSkillOn[skilldata.SellectBulletIndex] = false;
 
 
@@ -573,7 +618,7 @@ void CPlayer::CreateBullet(ID3D12Device* Device, ID3D12GraphicsCommandList* cl,X
 		PlayerObject->SetAnimation(2);
 
 		//먼저 해당스킬의 쿨타임을 넣어주자.
-		skilldata.SkillsCoolTime[skilldata.SellectBulletIndex] = skilldata.SkillsMaxCoolTime[skilldata.SellectBulletIndex];
+		skilldata.SkillsCoolTime[skilldata.SellectBulletIndex] = skilldata.SkillsMaxCoolTime[skilldata.Skills[skilldata.SellectBulletIndex]];
 		skilldata.isSkillOn[skilldata.SellectBulletIndex] = false;
 
 
@@ -635,7 +680,7 @@ void CPlayer::CreateBullet(ID3D12Device* Device, ID3D12GraphicsCommandList* cl,X
 	{
 		PlayerObject->SetAnimation(2);
 		//먼저 해당스킬의 쿨타임을 넣어주자.
-		skilldata.SkillsCoolTime[skilldata.SellectBulletIndex] = skilldata.SkillsMaxCoolTime[skilldata.SellectBulletIndex];
+		skilldata.SkillsCoolTime[skilldata.SellectBulletIndex] = skilldata.SkillsMaxCoolTime[skilldata.Skills[skilldata.SellectBulletIndex]];
 		skilldata.isSkillOn[skilldata.SellectBulletIndex] = false;
 
 		
@@ -646,7 +691,7 @@ void CPlayer::CreateBullet(ID3D12Device* Device, ID3D12GraphicsCommandList* cl,X
 	case 3://다이스트라이크
 	{
 
-		skilldata.SkillsCoolTime[skilldata.SellectBulletIndex] = skilldata.SkillsMaxCoolTime[skilldata.SellectBulletIndex];
+		skilldata.SkillsCoolTime[skilldata.SellectBulletIndex] = skilldata.SkillsMaxCoolTime[skilldata.Skills[skilldata.SellectBulletIndex]];
 		skilldata.isSkillOn[skilldata.SellectBulletIndex] = false;
 
 		PlayerObject->ParticleList->push_back(new DiceObject(Device, cl, PlayerObject->ParticleList, PlayerObject, bulletlist ,XMFLOAT4(PlayerObject->CenterPos.x, 35, PlayerObject->CenterPos.z, 0)));
@@ -662,7 +707,7 @@ void CPlayer::CheckTraceSkill()
 	switch (skilldata.Skills[ skilldata.SellectBulletIndex])
 	{
 
-	case 2://2번스킬일때 일단 테스트용으로 라이트큐브일때는 추적기를 켜야한다고 설정한다.
+	case 2://넘버링이 2인 (테트라이크) 스킬일 경우.
 		MouseTrace = true;
 		break;
 
