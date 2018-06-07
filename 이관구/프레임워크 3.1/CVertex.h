@@ -23,6 +23,7 @@ public:
 	XMFLOAT4 WeightPos3;//마지막은 바이어스
 	XMFLOAT4 WeightPos4;//마지막은 바이어스
 
+	XMFLOAT3 Tangent;//탄젠트
 
 	CVertex(void);
 	CVertex(XMFLOAT3 v)

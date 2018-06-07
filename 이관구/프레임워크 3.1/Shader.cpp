@@ -500,7 +500,7 @@ bool Shader::ishalfalphaRender(CGameObject * obj)
 
 D3D12_INPUT_LAYOUT_DESC Shader::CreateInputLayout()
 {
-	UINT nInputElementDescs = 10;
+	UINT nInputElementDescs = 11;
 	D3D12_INPUT_ELEMENT_DESC *pd3dInputElementDescs = new D3D12_INPUT_ELEMENT_DESC[nInputElementDescs];
 	pd3dInputElementDescs[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,
 		D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
@@ -521,6 +521,8 @@ D3D12_INPUT_LAYOUT_DESC Shader::CreateInputLayout()
 	pd3dInputElementDescs[8] = { "WEIGHTPOS", 2, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 92,
 		D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
 	pd3dInputElementDescs[9] = { "WEIGHTPOS", 3, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 108,
+		D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+	pd3dInputElementDescs[10] = { "Tangent", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 124,
 		D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
 
 

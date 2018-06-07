@@ -12,6 +12,7 @@ struct VertexIn
 	float4 WeightPos2 : WEIGHTPOS1;
 	float4 WeightPos3 : WEIGHTPOS2;
 	float4 WeightPos4 : WEIGHTPOS3;
+	float3 Tangent : TANGENT;//탄젠트
 
 
 };
@@ -23,7 +24,8 @@ struct VertexOut
 	float3 Normal : NORMAL;
 	float dummy : DUMMY;
 	float2 Tex : TEXTURE;
-	
+	float2 dummy2 : Dummy2;//대소문자 관계없으므로 Dummy하면 에러난다
+	float3 Tangent : TANGENT;
 };
 
 
@@ -87,7 +89,7 @@ VertexOut VS(VertexIn vin)
 	vout.PosW = vout.PosH;
 	vout.Normal = mul(vin.Normal, gWorld);
 	vout.Normal = normalize(vout.Normal);
-
+	vout.Tangent = mul(vin.Tangent, gWorld);
 	vout.PosH = mul(vout.PosH, gViewProj);
 
 	vout.Tex = vin.Tex;
