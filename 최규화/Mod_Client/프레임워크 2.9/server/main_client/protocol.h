@@ -13,8 +13,7 @@
 #define KEYINPUT_UP 0x0001
 #define KEYINPUT_DOWN 0x0010
 
-#define RegularPacketExchangeTime  (1.f / 20.f) // 1초에 20번 패킷을 교환(morpg 형식)
-#define RegularPhysicsTime (1.f / 60.f)
+#define RegularPacketExchangeTime  (1.f / 30.f) // 1초에 20번 패킷을 교환(morpg 형식)
 
 //추가
 //레벨업 보상, 마법레벨
@@ -148,16 +147,27 @@ struct StaticObject_Info
 	unsigned char				type;
 };
 
-struct BulletObject_Info
+struct CTS_BulletObject_Info
 {
-	Position					pos;					//16
-	Rotation					Rotate_status;			//16
+	Position					pos4f;					//16
+	Rotation					rot4f;			//16
 	Vel3f						vel3f;					//12
-	unsigned short				Master_ID{ 0 };			//2
-	unsigned short				myID;					//2
+	unsigned short				master_id{ 0 };			//2
+	unsigned short				my_id;					//2
 	Position3D					endpoint;				//12
 	unsigned char				type;					//1
 	char						alive;					//1
+};
+
+struct STC_BulletObject_Info
+{
+	Position					pos4f;
+	Rotation					rot4f;
+	Position3D					endpoint;
+	unsigned short				master_id;
+	unsigned short				my_id;
+	unsigned char				type;
+	char						alive;
 };
 
 #pragma pack (push, 1)
@@ -248,12 +258,20 @@ typedef struct Server_To_Client_Static_Object
 
 }STC_StaticObject;
 
+typedef struct Client_To_Server_Attack_Info
+{
+	unsigned char pack_size = sizeof(CTS_BulletObject_Info) + sizeof(unsigned char) + sizeof(unsigned char) + sizeof(float);
+	unsigned char pack_type = PACKET_PROTOCOL_TYPE::PLAYER_ATTACK;
+	CTS_BulletObject_Info bull_data;
+	float			      lifetime;
+
+}CTS_Attack;
+
 typedef struct Server_To_Client_Attack_Info
 {
-	unsigned char pack_size = sizeof(BulletObject_Info) + sizeof(unsigned char) + sizeof(unsigned char) + sizeof(float);
+	unsigned char pack_size = sizeof(STC_BulletObject_Info) + sizeof(unsigned char) + sizeof(unsigned char);
 	unsigned char pack_type = PACKET_PROTOCOL_TYPE::PLAYER_ATTACK;
-	BulletObject_Info bull_data;
-	float			  lifetime;
+	STC_BulletObject_Info bull_data;
 
 }STC_Attack;
 
@@ -279,7 +297,6 @@ typedef struct Server_To_Client_CharMove
 	unsigned char packet_size = sizeof(unsigned char) + sizeof(unsigned char) + sizeof(char) + sizeof(unsigned char) + sizeof(float);
 	unsigned char packet_type = PACKET_PROTOCOL_TYPE::PLAYER_MOVE;
 	char		  dir;
-	float		  deltime;
 
 }STC_CharMove;
 

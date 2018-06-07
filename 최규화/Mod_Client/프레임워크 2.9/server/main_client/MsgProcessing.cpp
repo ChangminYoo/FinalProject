@@ -91,6 +91,7 @@ switch (packet[1])
 
 		auto mybulldata = reinterpret_cast<STC_Attack*>(packet);
 
+
 		scene.SET_BULLET_BY_SERVER_DATA(mybulldata->bull_data, mybulldata->bull_data.type);
 	}
 	break;

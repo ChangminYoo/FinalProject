@@ -13,6 +13,8 @@ CBulletObject			*g_bullobj;
 unordered_set<CStaticObject*> g_staticobjs;
 CStaticObject				 *g_staticobj;
 
+queue<char>					g_pdir_queue;
+
 int main()
 {
 	try

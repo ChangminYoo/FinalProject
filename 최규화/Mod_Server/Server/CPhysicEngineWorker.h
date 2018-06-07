@@ -4,15 +4,17 @@ class CPhysicEngineWorker
 private:
 	high_resolution_clock::time_point	m_currtime, m_prevtime;
 
-	__int64 countsPerSec;
-	double mSecondsPerCount;
 	 
 	float m_deltime;
+
+	high_resolution_clock::time_point tt;
+
 public:
 	CPhysicEngineWorker();
-	void CheckCurrTime() { QueryPerformanceCounter((LARGE_INTEGER*)&m_currtime); }
-	void CheckPrevTime() { QueryPerformanceCounter((LARGE_INTEGER*)&m_prevtime); }
+	void CheckCurrTime() { m_currtime = high_resolution_clock::now(); }
+	void CheckPrevTime() { m_prevtime = high_resolution_clock::now(); }
 	void Update();
+	void CollisionSystem(float deltime);
 	~CPhysicEngineWorker();
 };
 

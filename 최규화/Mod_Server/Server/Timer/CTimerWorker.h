@@ -34,14 +34,20 @@ class CTimerWorker
 private:
 	mutex t_lock;
 
+	high_resolution_clock::time_point m_currtime, m_prevtime;
+
 	__int64 mRegularPrevTime{ 0 };
 	__int64 mRegularCurrTime{ 0 };
 
 	__int64 countsPerSec;
 	double mSecondsPerCount;
 
-	float mRegularDelTime;
+	float m_deltime;
 
+	int m_tcnt{ 0 };
+	float m_tdeltime;
+
+	bool m_flag{ true };
 public:
 	CTimerWorker();
 	void lock() { t_lock.lock(); }
@@ -54,6 +60,9 @@ public:
 	void SetRegularCurrTime();
 	void SetRegularPrevTime();
 	priority_queue<event_type*, vector<event_type*>, waketime_cmp> t_queue;
+
+	void CheckCurrTime() { m_currtime = high_resolution_clock::now(); }
+	void CheckPrevTime() { m_prevtime = high_resolution_clock::now(); }
 	~CTimerWorker();
 };
 

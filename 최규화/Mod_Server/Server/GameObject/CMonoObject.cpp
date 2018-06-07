@@ -6,42 +6,6 @@ CMonoObject::CMonoObject()
 {
 }
 
-void CMonoObject::Initialize()
-{
-	pp = new PhysicsPoint();
-
-	m_id = 0;
-	m_fixed = true;
-	m_alive = true;
-	m_pos4f = { 0.f,0.f,0.f,0.f };
-	m_rot4f = { 0.f,0.f,0.f,0.f };
-	m_dir = 0;
-	m_ai = true;
-	m_godmode = false;
-	m_airbone = false;
-	m_type = STATIC_OBJECT_TYPE::BasicObject;
-
-	m_ability.attack = 10;
-	m_ability.speed = 0.005;
-	m_ability.exp = 0;
-	m_ability.level = 1;
-	m_ability.orignHP = 100;
-	m_ability.curHP = 100;
-
-	m_OffLookvector = XMFLOAT3(0, 0, 1);
-	m_OffRightvector = XMFLOAT3(1, 0, 0);
-
-	UpdateLookvector();
-	UpdateUpvector();
-
-	pp->SetPosition(m_pos4f.x, m_pos4f.y, m_pos4f.z);
-	pp->SetHalfBox(5, 5, 5);
-	pp->SetDamping(0.5f);
-	pp->SetBounce(false);
-	pp->SetMass(INFINITY);
-
-}
-
 void CMonoObject::Update(float deltime)
 {
 }
@@ -59,10 +23,6 @@ void CMonoObject::AfterGravitySystem(float deltime)
 {
 }
 
-void CMonoObject::Collision()
-{
-}
-//
 
 void CMonoObject::UpdateUpvector()
 {

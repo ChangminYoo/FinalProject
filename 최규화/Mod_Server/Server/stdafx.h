@@ -4,6 +4,7 @@
 
 #include <iostream>
 #include <unordered_map>
+#include <unordered_set>
 
 // boost asio 관련 헤더
 #include <boost/asio.hpp>
@@ -35,6 +36,9 @@ using namespace chrono;
 #include "CAccpetPlayer.h"
 #include "CPhysicEngineWorker.h"
 
+#define RegularPhysicsTime (1.f / 120.f)
+
+
 extern CTimerWorker g_timer_queue;
 extern CPhysicEngineWorker g_physics_worker;
 
@@ -46,8 +50,12 @@ extern CBulletObject		*g_bullobj;
 extern unordered_set<CStaticObject*> g_staticobjs;
 extern CStaticObject				*g_staticobj;
 
+
+extern queue<char>					g_pdir_queue;
 //io_service는 IO와 통신을 위해서사용 - 전역 하나만 있어도 된다
 extern boost::asio::io_service g_io_service;
+
+
 
 
 

@@ -67,7 +67,7 @@ void CPlayerObject::Init_PlayerInfo()
 	m_ability.orignHP = 100;
 	m_ability.exp = 0;
 	m_ability.level = 1;
-	m_ability.speed = 0.005;
+	m_ability.speed = 10.0f;	
 
 	if (m_id == 0)
 		m_pos4f = { -100.f, -1000.f, 0.f, 0.f };
@@ -89,6 +89,7 @@ void CPlayerObject::Init_PlayerInfo()
 
 	//물리효과 및 충돌처리를 위한 PhysicsPoint 클래스
 	pp = new PhysicsPoint();
+
 	pp->SetPosition(m_pos4f.x, m_pos4f.y, m_pos4f.z);
 	pp->SetHalfBox(3, 10, 3);
 	pp->SetDamping(0.7);
@@ -329,23 +330,19 @@ void CPlayerObject::ProcessPacket(Packet * packet)
 			break;
 
 		auto mdata = reinterpret_cast<STC_CharMove*>(packet);
-
-
-		//g_clients[m_id]->m_mtx.lock();
-		g_clients[m_id]->m_dir = mdata->dir;
-	
-		//g_clients[m_id]->m_mtx.unlock();
+		m_dir = mdata->dir;
 
 	}
 	break;
 
+	/*
 	case PACKET_PROTOCOL_TYPE::CHANGED_PLAYER_POSITION:
 	{
-		/*
+		
 		if (m_state == PLAYER_STATE::DEAD)
 			break;
 
-		//1. 받아들인 데이터(키를 눌러 플레이어를 움직였음)에서 변화된 정보를 추출(물리효과 적용x)
+		1. 받아들인 데이터(키를 눌러 플레이어를 움직였음)에서 변화된 정보를 추출(물리효과 적용x)
 		auto PosMove_Data = reinterpret_cast<STC_ChangedPos*>(packet);
 
 		if (PosMove_Data->deltime <= 0)
@@ -356,32 +353,32 @@ void CPlayerObject::ProcessPacket(Packet * packet)
 		else if (PosMove_Data->ani_state == Ani_State::Run)
 			m_state = PLAYER_STATE::MOVE;
 
-		//2. 물리효과 적용
+		2. 물리효과 적용
 		GravitySystem(PosMove_Data->deltime);
-		//g_clients[PosMove_Data->id]->GravitySystem(PosMove_Data->deltime);
+		g_clients[PosMove_Data->id]->GravitySystem(PosMove_Data->deltime);
 
 		Tick(PosMove_Data->deltime,PosMove_Data->pos);
-		//g_clients[PosMove_Data->id]->Tick(PosMove_Data->deltime, PosMove_Data->pos);
+		g_clients[PosMove_Data->id]->Tick(PosMove_Data->deltime, PosMove_Data->pos);
 
 		pp->SetPosition(m_pos4f.x, m_pos4f.y, m_pos4f.z);
-		//g_clients[PosMove_Data->id]->pp->SetPosition(m_pos4f.x, m_pos4f.y, m_pos4f.z);
+		g_clients[PosMove_Data->id]->pp->SetPosition(m_pos4f.x, m_pos4f.y, m_pos4f.z);
 
 		AfterGravitySystem(PosMove_Data->deltime);
-		//g_clients[PosMove_Data->id]->AfterGravitySystem(PosMove_Data->deltime);
+		g_clients[PosMove_Data->id]->AfterGravitySystem(PosMove_Data->deltime);
 
-		//3. 이동 - (애니메이션, 위치 변경) 변경된 데이터를 서버에서관리하는 내 클라이언트에 저장
+		3. 이동 - (애니메이션, 위치 변경) 변경된 데이터를 서버에서관리하는 내 클라이언트에 저장
 		g_clients[PosMove_Data->id]->m_ani = PosMove_Data->ani_state;
 		SetChangedPlayerState();
 
 		g_clients[PosMove_Data->id]->m_pos4f;
-		*/
+		
 
-		//cout << "ID: " << PosMove_Data->id << " 변화된 위치값: " << "[x:" << PosMove_Data->pos.x << "\t" << "y:" << PosMove_Data->pos.y
-		//	<< "\t" << "z:" << PosMove_Data->pos.z << "]" << "\t" << "w:" << PosMove_Data->pos.w << endl;
+		cout << "ID: " << PosMove_Data->id << " 변화된 위치값: " << "[x:" << PosMove_Data->pos.x << "\t" << "y:" << PosMove_Data->pos.y
+			<< "\t" << "z:" << PosMove_Data->pos.z << "]" << "\t" << "w:" << PosMove_Data->pos.w << endl;
 
-		//4. 변화된 내 (포지션, 애니메이션) 정보를 다른 클라에 전달 - 반드시 이렇게 다시 만들어줘야함
-		//PosMove_Data를 바로 sendpacket에 packet으로 형변화하여 보내면 size error가 난다
-		/*
+		4. 변화된 내 (포지션, 애니메이션) 정보를 다른 클라에 전달 - 반드시 이렇게 다시 만들어줘야함
+		PosMove_Data를 바로 sendpacket에 packet으로 형변화하여 보내면 size error가 난다
+		
 		STC_ChangedPos stc_other_pos;
 
 		stc_other_pos.id = PosMove_Data->id;
@@ -400,9 +397,10 @@ void CPlayerObject::ProcessPacket(Packet * packet)
 			//갱신된 나의 데이터를 상대방에게 전달
 			client->SendPacket(reinterpret_cast<Packet*>(&stc_other_pos));
 		}
-		*/
+		
 	}
 	break;
+	*/
 
 	case PACKET_PROTOCOL_TYPE::PLAYER_ROTATE:
 	{
@@ -414,24 +412,20 @@ void CPlayerObject::ProcessPacket(Packet * packet)
 		auto rot_data = reinterpret_cast<STC_Rotation*>(packet);
 
 		// 1. 받은 정보를 내 클라이언트에 넣어주고
-		g_clients[rot_data->id]->m_rot4f = move(rot_data->rotate_status);
-		g_clients[rot_data->id]->m_pdata.rot = move(rot_data->rotate_status);
-
+		m_rot4f = move(rot_data->rotate_status);
+		m_pdata.rot = move(rot_data->rotate_status);
+		
 		// 2. 받은 정보를 토대로 lookvector와 rightvector를 업데이트
-		//m_clients[Rotation_Data->id]->UpdateLookVector(); //이거넣으면 20byte -> 21byte씩 다시보내게됨
 		UpdateLookvector();
-		//g_clients[rot_data->id]->UpdateLookvector();
-			
 		UpdateUpvector();
-		//g_clients[rot_data->id]->UpdateUpvector();
 
-	//	cout << "ID: " << rot_data->id << " 변화된 회전값: " << "[ x, y, z, w ]: "
-	//		<< rot_data->rotate_status.x << ", " << rot_data->rotate_status.y << ", " << rot_data->rotate_status.z << ", " << rot_data->rotate_status.w << endl;
+		//cout << "ID: " << rot_data->id << " 변화된 회전값: " << "[ x, y, z, w ]: "
+		//	<< rot_data->rotate_status.x << ", " << rot_data->rotate_status.y << ", " << rot_data->rotate_status.z << ", " << rot_data->rotate_status.w << endl;
 
 		// 3. 다른 클라에게 보낸다.
 		STC_Rotation stc_to_rot;
 		stc_to_rot.id = rot_data->id;
-		stc_to_rot.rotate_status = move(g_clients[rot_data->id]->m_rot4f);
+		stc_to_rot.rotate_status = move(m_rot4f);
 
 		for (auto client : g_clients)
 		{
@@ -451,37 +445,32 @@ void CPlayerObject::ProcessPacket(Packet * packet)
 
 		m_state = PLAYER_STATE::ATTACK;
 
-		auto n_bldata = reinterpret_cast<STC_Attack*>(packet);
+		auto n_bldata = reinterpret_cast<CTS_Attack*>(packet);
 
 		//공격키를 눌렀을 시, 불렛 생성.
 		//불렛을 생성한 캐릭터 ID, 유도를 대비한 타겟 ID, 불렛 초기생성위치, 불렛 초기회전값, 불렛 생성시간, 불렛아이디
-		g_bullobj = new CBulletObject(n_bldata->bull_data.Master_ID, n_bldata->bull_data.myID,
-			n_bldata->bull_data.pos, n_bldata->bull_data.Rotate_status, n_bldata->lifetime,
+		g_bullobj = new CBulletObject(n_bldata->bull_data.master_id, n_bldata->bull_data.my_id,
+			n_bldata->bull_data.pos4f, n_bldata->bull_data.rot4f, n_bldata->lifetime,
 			n_bldata->bull_data.vel3f, n_bldata->bull_data.type, n_bldata->bull_data.endpoint);
 
 		STC_Attack stc_attack;
-		stc_attack.bull_data = move(g_bullobj->GetBulletInfo());
-		stc_attack.lifetime = g_bullobj->GetBulletLifeTime();
+		stc_attack.bull_data.pos4f = move(n_bldata->bull_data.pos4f);
+		stc_attack.bull_data.rot4f = move(n_bldata->bull_data.rot4f);
+		stc_attack.bull_data.master_id = n_bldata->bull_data.master_id;
+		stc_attack.bull_data.my_id = n_bldata->bull_data.my_id;
+		stc_attack.bull_data.type = n_bldata->bull_data.type;
+		stc_attack.bull_data.alive = n_bldata->bull_data.alive;
+		stc_attack.bull_data.endpoint = move(n_bldata->bull_data.endpoint);
 
 		for (auto client : g_clients)
 		{
-			if (client->m_id == n_bldata->bull_data.Master_ID) continue;
+			if (client->m_id == n_bldata->bull_data.master_id) continue;
 			if (client->GetIsAI() == true || client->GetConnectState() == false) continue;
 
 			client->SendPacket(reinterpret_cast<Packet*>(&stc_attack));
 		}
 
 		g_bullets.emplace_back(g_bullobj);
-
-		//불렛 데이터 하나의 물리효과 적용해주기 (integrate -> aftergravity) -> set bullet start time
-		//g_bullobj->GetPhysicsPoint()->SetVelocity(n_bldata->bull_data.vel3f.x, n_bldata->bull_data.vel3f.y, n_bldata->bull_data.vel3f.z);
-		//g_bullobj->GetPhysicsPoint()->integrate(n_bldata->lifetime, reinterpret_cast<XMFLOAT4*>(&n_bldata->bull_data.pos));
-		//g_bullobj->AfterGravitySystem(n_bldata->lifetime);
-		//g_bullobj->SetBulletLifeTime(n_bldata->lifetime); // 시간 0.1 ~ 0.2 추가
-														  //m_bullObj->SetIsFirstCreate(true);
-														  //불렛이 처음생성됐을 때의 시간을 저장. 이후 해당 이벤트마다 이 불렛의 생성주기시간을 더해줌
-		//__int64 currTime; QueryPerformanceCounter((LARGE_INTEGER*)&currTime);
-		//g_bullobj->m_prevTime = currTime;
 
 		//불렛을 쏜 캐릭터의 공격애니메이션을 다른 클라이언트에게도 보내준다
 		STC_CharAnimation stc_charani;
@@ -492,7 +481,7 @@ void CPlayerObject::ProcessPacket(Packet * packet)
 		for (auto client : g_clients)
 		{
 			//불렛을 쏜 클라이언트는 자신이 불렛을 생성했으므로 따로 생성정보를 보내주지 않아도됨 
-			if (client->m_id == n_bldata->bull_data.Master_ID) continue;
+			if (client->m_id == n_bldata->bull_data.master_id) continue;
 			if (client->GetIsAI() == true || client->GetConnectState() == false) continue;
 
 			client->SendPacket(reinterpret_cast<Packet*>(&stc_charani));
@@ -604,6 +593,87 @@ void CPlayerObject::AfterGravitySystem(float deltime)
 	}
 }
 
+void CPlayerObject::Collision(vector<CPlayerObject*>* clients, float deltime)
+{
+	
+	for (auto iter = clients->begin(); iter != clients->end(); ++iter)
+	{
+		if (*iter != this)
+		{
+			bool test = pp->CollisionTest(*(*iter)->pp,
+				m_Lookvector, m_Rightvector, m_Upvector,
+				(*iter)->m_Lookvector, (*iter)->m_Rightvector, (*iter)->m_Upvector);
+
+			if (test)//충돌했으면 충돌해소를 해야한다.
+			{
+				//충돌 했을때 축이 (0,1,0) 이면 Airbone을 false로 둔다. 이는 내가 위에있음을 나타낸다.
+				if (pp->pAxis.y > 0)
+				{
+					m_airbone = false;
+				}
+
+				//충돌했을때  축이 (0,-1,0)이면 상대방 Airbone을 false로 둔다.  이는 상대가 내 위에있음을 나타낸다.
+				//설사 상대 위에 다른 상대가 있어도 걱정말자. 자연스러운것임.
+				if (pp->pAxis.y < 0)
+				{
+					(*iter)->pp->SetVelocity((*iter)->pp->GetVelocity().x, 0, (*iter)->pp->GetVelocity().z);
+					(*iter)->m_airbone = false;
+				}
+
+				XMFLOAT3 cn;
+				cn = Float3Add(pp->GetPosition(), (*(*iter)->pp).GetPosition(), false);
+				cn = Float3Normalize(cn);
+
+				//충돌해소 호출. 충돌해소 이후에 반드시 변경된 질점의 위치로 오브젝트위치를 일치시켜야한다.
+				pp->CollisionResolve(*(*iter)->pp, cn, deltime);
+				UpdatePPosCenterPos();
+				(*iter)->UpdatePPosCenterPos();
+
+				cout << "사람과 충돌" << endl;
+
+			}
+		}
+	}
+	
+}
+
+void CPlayerObject::Collision(unordered_set<CStaticObject*>* sobjs, float deltime)
+{
+	//주인은 사람 - 충돌 대상은 스테틱오브젝트
+	
+	for (auto iter = sobjs->begin(); iter != sobjs->end(); ++iter)
+	{
+		bool test = pp->CollisionTest(*(*iter)->GetPhysicsPoint(), m_Lookvector, m_Rightvector, m_Upvector,
+			(*iter)->GetLookVector(), (*iter)->GetRightVector(), (*iter)->GetUpVector());
+
+		if (test)
+		{
+			if (pp->pAxis.y > 0)
+			{
+				pp->SetVelocity(pp->GetVelocity().x, 0, pp->GetVelocity().z);
+				m_airbone = false;
+			}
+
+			if (pp->pAxis.y < 0)
+			{
+				(*iter)->GetPhysicsPoint()->SetVelocity((*iter)->GetPhysicsPoint()->GetVelocity().x, 0, (*iter)->GetPhysicsPoint()->GetVelocity().z);
+				(*iter)->SetAirbone(false);
+			}
+
+			XMFLOAT3 cn;
+			cn = pp->pAxis;
+			
+			pp->CollisionResolve(*(*iter)->GetPhysicsPoint(), cn, deltime);
+			UpdatePPosCenterPos();
+			(*iter)->UpdatePPosCenterPos();
+
+			cout << "스테틱 오브젝트와 충돌 " << endl;
+
+		}
+	}
+	
+}
+
 void CPlayerObject::Damaged(float damage)
 {
 	if (m_godmode == false && m_ability.curHP > 0)
@@ -625,7 +695,7 @@ void CPlayerObject::SetChangedPlayerState()
 	m_pdata.airbone = m_airbone;
 	//m_pdata.ani = m_ani;		//애니메이션은 패킷받자마자 처리
 	m_pdata.connect = m_connect;
-	m_pdata.dir = m_dir;
+	//m_pdata.dir = m_dir;
 	m_pdata.godmode = m_godmode;
 	m_pdata.id = m_id;
 	m_pdata.pos = m_pos4f;
@@ -641,80 +711,114 @@ void CPlayerObject::SetChangedPlayerState()
 	pp->SetPosition(m_pos4f.x, m_pos4f.y, m_pos4f.z);
 }
 
-void CPlayerObject::PlayerInput(char dir, float deltime)
+void CPlayerObject::PlayerInput(float deltime)
 {
-	switch (dir)
+	//if (m_dir !=0)
+		//cout << "Direction: " << static_cast<int>(m_dir) << endl;
+
+	switch (m_dir)
 	{
 		case CHAR_MOVE::FRONT_MOVE:
 		{
-			auto l = XMLoadFloat3(&g_clients[m_id]->m_Lookvector);
-			l *= g_clients[m_id]->m_ability.speed * deltime;
+			auto l = XMLoadFloat3(&m_Lookvector);
+			l *= m_ability.speed * deltime;
 
-			XMFLOAT4 xmf4{ g_clients[m_id]->m_pos4f.x, g_clients[m_id]->m_pos4f.y,
-				g_clients[m_id]->m_pos4f.z, g_clients[m_id]->m_pos4f.w };
+			XMFLOAT4 xmf4{ m_pos4f.x, m_pos4f.y, m_pos4f.z, m_pos4f.w };
 			auto p = XMLoadFloat4(&xmf4);
 			p += l;
 			XMStoreFloat4(&xmf4, p);
-			g_clients[m_id]->pp->SetPosition(xmf4);
+			pp->SetPosition(xmf4);
 
 			m_pos4f.x = xmf4.x; m_pos4f.y = xmf4.y; m_pos4f.z = xmf4.z; m_pos4f.w = xmf4.w;
-			break;
+			
+			m_dir = 0;
+
+			//cout << "Front Move Pos[x, y, z, w]: " << m_pos4f.x << " , " << m_pos4f.y << " , " << m_pos4f.z << " , " << m_pos4f.w << endl;
+			//cout << "Front Move!!" << endl;
 		}
+		break;
+
 		case CHAR_MOVE::BACK_MOVE:
 		{
-			auto l = XMLoadFloat3(&g_clients[m_id]->m_Lookvector);
-			l *= g_clients[m_id]->m_ability.speed * deltime;
+			auto l = XMLoadFloat3(&m_Lookvector);
+			l *= m_ability.speed * deltime;
 
-			XMFLOAT4 xmf4{ g_clients[m_id]->m_pos4f.x, g_clients[m_id]->m_pos4f.y,
-				g_clients[m_id]->m_pos4f.z, g_clients[m_id]->m_pos4f.w };
+			XMFLOAT4 xmf4{ m_pos4f.x, m_pos4f.y,m_pos4f.z,m_pos4f.w };
 			auto p = XMLoadFloat4(&xmf4);
 			p -= l;
 			XMStoreFloat4(&xmf4, p);
-			g_clients[m_id]->pp->SetPosition(xmf4);
+			pp->SetPosition(xmf4);
 
 			m_pos4f.x = xmf4.x; m_pos4f.y = xmf4.y; m_pos4f.z = xmf4.z; m_pos4f.w = xmf4.w;
-			break;
+			
+			m_dir = 0;
+
+			//cout << "Back Move Pos[x, y, z, w]: " << m_pos4f.x << " , " << m_pos4f.y << " , " << m_pos4f.z << " , " << m_pos4f.w << endl;
+			//cout << "Back Move!!" << endl;
 		}
+		break;
+
 		case CHAR_MOVE::LEFT_MOVE:
 		{
-			auto r = XMLoadFloat3(&g_clients[m_id]->m_Rightvector);
-			r *= g_clients[m_id]->m_ability.speed * deltime;
+			printf("Deltime : %f", deltime);
 
-			XMFLOAT4 xmf4{ g_clients[m_id]->m_pos4f.x, g_clients[m_id]->m_pos4f.y,
-				g_clients[m_id]->m_pos4f.z, g_clients[m_id]->m_pos4f.w };
+			auto r = XMLoadFloat3(&m_Rightvector);
+			r *= m_ability.speed * deltime;
+			
+			XMFLOAT4 xmf4{ m_pos4f.x, m_pos4f.y, m_pos4f.z, m_pos4f.w };
+
+			//cout << "Before Left Move Pos[x, y, z, w]: " << xmf4.x << ", " << xmf4.y << ", " << xmf4.z << ", " << xmf4.w << endl;
+
 			auto p = XMLoadFloat4(&xmf4);
 			p -= r;
 			XMStoreFloat4(&xmf4, p);
-			g_clients[m_id]->pp->SetPosition(xmf4);
+			pp->SetPosition(xmf4);
 
 			m_pos4f.x = xmf4.x; m_pos4f.y = xmf4.y; m_pos4f.z = xmf4.z; m_pos4f.w = xmf4.w;
-			break;
+			
+			m_dir = 0;
+
+			//cout << "Left Move Pos[x, y, z, w]: " << m_pos4f.x << " , " << m_pos4f.y << " , " << m_pos4f.z << " , " << m_pos4f.w << endl;
+			//cout << "Left Move!!" << endl;
 		}
+		break;
+
 		case CHAR_MOVE::RIGHT_MOVE:
 		{
-			auto r = XMLoadFloat3(&g_clients[m_id]->m_Rightvector);
-			r *= g_clients[m_id]->m_ability.speed * deltime;
+			auto r = XMLoadFloat3(&m_Rightvector);
+			r *= m_ability.speed * deltime;
 
-			XMFLOAT4 xmf4{ g_clients[m_id]->m_pos4f.x, g_clients[m_id]->m_pos4f.y,
-				g_clients[m_id]->m_pos4f.z, g_clients[m_id]->m_pos4f.w };
+			XMFLOAT4 xmf4{ m_pos4f.x, m_pos4f.y, m_pos4f.z, m_pos4f.w };
 			auto p = XMLoadFloat4(&xmf4);
 			p += r;
 			XMStoreFloat4(&xmf4, p);
-			g_clients[m_id]->pp->SetPosition(xmf4);
+			pp->SetPosition(xmf4);
 
 			m_pos4f.x = xmf4.x; m_pos4f.y = xmf4.y; m_pos4f.z = xmf4.z; m_pos4f.w = xmf4.w;
-			break;
+			
+			m_dir = 0;
+
+			//cout << "Right Move Pos[x, y, z, w]: " << m_pos4f.x << " , " << m_pos4f.y << " , " << m_pos4f.z << " , " << m_pos4f.w << endl;
+			//cout << "Right Move!!" << endl;
 		}
+		break;
+
 		case CHAR_MOVE::JUMP:
 		{
+			/*
 			GeneratorJump j;
 			j.SetJumpVel(XMFLOAT3(0, 100, 0));
 			j.Update(deltime, *pp);
-			m_airbone = true;
+			m_airbone = true;	
+			*/
+			//cout << "Jump!!" << endl;
 
-			break;
+			m_dir = 0;
 		}
+		break;
+
 	default:
 		break;
 	}
+
 }

@@ -81,8 +81,8 @@ void MainFrameWork::CollisionSystem(const GameTimer& gt)
 		//이 목록을 가지고 충돌검사를 하도록함.
 
 		//투사체끼리는 검사 X 투사체는 반드시 다이나믹오브젝트 들을 검사해야함.
-		(*i)->Collision(&scene->DynamicObject, gt.DeltaTime());
-		(*i)->Collision(&scene->StaticObject, gt.DeltaTime());
+		//(*i)->Collision(&scene->DynamicObject, gt.DeltaTime());
+		//(*i)->Collision(&scene->StaticObject, gt.DeltaTime());
 	}
 
 	//고정된 객체를 제외한 모든 오브젝트를 충돌검사를 하도록 함.
@@ -92,8 +92,8 @@ void MainFrameWork::CollisionSystem(const GameTimer& gt)
 		//해당 객체가 충돌처리 검사를 할 목록을 저장함.
 		//이 목록을 가지고 충돌검사를 하도록함.
 
-		(*i)->Collision(&scene->DynamicObject, gt.DeltaTime());
-		(*i)->Collision(&scene->StaticObject, gt.DeltaTime());
+		//(*i)->Collision(&scene->DynamicObject, gt.DeltaTime());
+		//(*i)->Collision(&scene->StaticObject, gt.DeltaTime());
 
 	}
 
@@ -147,14 +147,15 @@ void MainFrameWork::AfterGravitySystem(const GameTimer & gt)
 	//}
 
 	//투사체는 y가 0보다 작으면 제거된다.
-	for (auto i = scene->BulletObject.begin(); i != scene->BulletObject.end(); i++)
-	{
-		if ((*i)->CenterPos.y <= 0)
-			(*i)->DelObj = true;
-	}
+	//for (auto i = scene->BulletObject.begin(); i != scene->BulletObject.end(); i++)
+	//{
+	//	if ((*i)->CenterPos.y <= 0)
+	//		(*i)->DelObj = true;
+	//}
 
 
-	for (auto i = scene->StaticObject.begin(); i != scene->StaticObject.end(); i++)
+	/*
+		for (auto i = scene->StaticObject.begin(); i != scene->StaticObject.end(); i++)
 	{
 
 		//왜 실제 중점이 아닌 pp의 중점으로 처리하냐면 실제중점을 움직인후 pp의 중점을 움직이나
@@ -174,6 +175,7 @@ void MainFrameWork::AfterGravitySystem(const GameTimer & gt)
 			(*i)->AirBone = false;
 		}
 	}
+	*/
 	for (auto i = scene->RigidObject.begin(); i != scene->RigidObject.end(); i++)
 	{
 		RigidBodyCollisionPlane(XMFLOAT3(0, 1, 0), 0, *i);

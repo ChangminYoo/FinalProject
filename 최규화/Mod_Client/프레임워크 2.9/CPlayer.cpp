@@ -223,7 +223,6 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 			if (GetKeyState(0x57) & 0x8000)//W키
 			{
 				playerdir = 1;
-
 				move = true;
 
 				//룩벡터의 +방향으로 움직인다.
@@ -282,8 +281,8 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 			else if (GetKeyState(0x53) & 0x8000)//S키
 			{
 				playerdir = 2;
-
 				move = true;
+
 				//룩벡터의 -방향으로 움직인다.
 				/*
 				auto l = XMLoadFloat3(&PlayerObject->Lookvector);
@@ -334,8 +333,8 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 			if (GetKeyState(0x41) & 0x8000)//A키
 			{
 				playerdir = 3;
-
 				move = true;
+
 				//라이트벡터의 -방향으로 움직인다.
 				/*
 				auto r = XMLoadFloat3(&PlayerObject->Rightvector);
@@ -385,8 +384,8 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 			else if (GetKeyState(0x44) & 0x8000)//D키
 			{
 				playerdir = 4;
-
 				move = true;
+
 				//라이트벡터의 +방향으로 움직인다.
 				/*
 				auto r = XMLoadFloat3(&PlayerObject->Rightvector);
@@ -448,9 +447,11 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 					//m_async_client->RgCkInfo.PtCheck.PositionInfo = { PlayerObject->CenterPos.x, PlayerObject->CenterPos.y, PlayerObject->CenterPos.z, PlayerObject->CenterPos.w };
 					//2018-05-24 수정
 					cts_move.dir = playerdir;
-					cts_move.deltime = DeltaTime;
-
+			
 					m_async_client->SendPacket(reinterpret_cast<Packet*>(&cts_move));
+
+					//cout << "Run Current Direction : " << static_cast<int>(playerdir) << endl;
+
 				}
 			}
 			else
@@ -462,10 +463,13 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 					m_async_client->RgCkInfo.AniCheck.AniState = Idle;
 					//m_async_client->RgCkInfo.PtCheck.PositionInfo = { PlayerObject->CenterPos.x, PlayerObject->CenterPos.y, PlayerObject->CenterPos.z, PlayerObject->CenterPos.w };
 					//2018-05-24 수정
-					cts_move.dir = playerdir;
-					cts_move.deltime = DeltaTime;
+					//cts_move.dir = playerdir;
+					//cts_move.deltime = DeltaTime;
 
-					m_async_client->SendPacket(reinterpret_cast<Packet*>(&cts_move));
+					//m_async_client->SendPacket(reinterpret_cast<Packet*>(&cts_move));
+
+					//cout << "Idle Current Direction : " << static_cast<int>(playerdir) << endl;
+
 
 				}
 			}
@@ -480,10 +484,12 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 				//PlayerObject->AirBone = true;//공중상태를 true로
 
 				cts_move.dir = playerdir;
-				cts_move.deltime = DeltaTime;
 
 				m_async_client->RgCkInfo.AniCheck.AniState = Idle;
 				m_async_client->SendPacket(reinterpret_cast<Packet*>(&cts_move));
+
+				//cout << "Jump Current Direction : " << static_cast<int>(playerdir) << endl;
+
 
 				//STC_CharJump cts_charjump;
 				//cts_charjump.id = PlayerObject->m_player_data.id;
@@ -491,23 +497,32 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 				//m_async_client->SendPacket(reinterpret_cast<Packet*>(&cts_charjump));
 			}
 
+			//(move == true) &&
 			//캐릭터가 이동을 멈추고, 즉 누르던 키를 땠을 때 땠다는 정보를 서버로 보냄
-			if ((GetKeyState(0x57) & 0x0001) || (GetKeyState(0x53) & 0x0001) ||
+			if ((move == true) && ((GetKeyState(0x57) & 0x0001) || (GetKeyState(0x53) & 0x0001) ||
 				(GetKeyState(0x41) & 0x0001) || (GetKeyState(0x44) & 0x0001) ||
-				(GetKeyState(VK_SPACE) & 0x0001))//W키 S키 A키 D키
+				(GetKeyState(VK_SPACE) & 0x0001)))//W키 S키 A키 D키
 			{
 				move = false;
-
 				playerdir = 0;
 
 				cts_move.dir = playerdir;
-				cts_move.deltime = DeltaTime;
-				
 				m_async_client->SendPacket(reinterpret_cast<Packet*>(&cts_move));
 
+				//cout << "KeyUp Current Direction : " << static_cast<int>(playerdir) << endl;
+
+				m_trigger = true;
 			}
 
+			if ((m_trigger == true) && ((GetKeyState(0x57) & 0x0000) || (GetKeyState(0x53) & 0x0000) ||
+				(GetKeyState(0x41) & 0x0000) || (GetKeyState(0x44) & 0x0000) ||
+				(GetKeyState(VK_SPACE) & 0x0000)))//W키 S키 A키 D키
+			{
 
+				m_trigger = false;
+
+				cout << "Trigger True to False\n";
+			}
 
 
 			if (GetKeyState(0x31) & 0x8000)
@@ -519,7 +534,7 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 			else if (GetKeyState(0x34) & 0x8000)
 				skilldata.SellectBulletIndex = 3;
 			
-			if (GetAsyncKeyState(VK_CONTROL) & 0x8000)
+			if (GetKeyState(VK_CONTROL) & 0x8000)
 			{
 				if (MouseOn <= 1)
 				{
@@ -636,12 +651,12 @@ void CPlayer::CreateBullet(ID3D12Device* Device, ID3D12GraphicsCommandList* cl,X
 		bulletlist->push_back(bul);
 		
 		//서버용
-		STC_Attack cts_attack;
-		cts_attack.bull_data.Master_ID = bul->m_bullet_data.Master_ID;
-		cts_attack.bull_data.myID = bul->m_bullet_data.myID;
+		CTS_Attack cts_attack;
+		cts_attack.bull_data.master_id = bul->m_bullet_data.Master_ID;
+		cts_attack.bull_data.my_id = bul->m_bullet_data.myID;
 
-		cts_attack.bull_data.pos = { PlayerObject->CenterPos.x, PlayerObject->CenterPos.y, PlayerObject->CenterPos.z, PlayerObject->CenterPos.w };
-		cts_attack.bull_data.Rotate_status = { PlayerObject->Orient.x, PlayerObject->Orient.y, PlayerObject->Orient.z, PlayerObject->Orient.w };
+		cts_attack.bull_data.pos4f = { PlayerObject->CenterPos.x, PlayerObject->CenterPos.y, PlayerObject->CenterPos.z, PlayerObject->CenterPos.w };
+		cts_attack.bull_data.rot4f = { PlayerObject->Orient.x, PlayerObject->Orient.y, PlayerObject->Orient.z, PlayerObject->Orient.w };
 		cts_attack.bull_data.vel3f = { bul->pp->GetVelocity().x, bul->pp->GetVelocity().y, bul->pp->GetVelocity().z };
 		cts_attack.bull_data.type = BULLET_TYPE::protocol_LightBullet;
 		cts_attack.bull_data.alive = true;
@@ -715,12 +730,12 @@ void CPlayer::CreateBullet(ID3D12Device* Device, ID3D12GraphicsCommandList* cl,X
 		bulletlist->push_back(bul);
 		
 		//서버용
-		STC_Attack cts_attack;
-		cts_attack.bull_data.Master_ID = bul->m_bullet_data.Master_ID;
-		cts_attack.bull_data.myID = bul->m_bullet_data.myID;
+		CTS_Attack cts_attack;
+		cts_attack.bull_data.master_id = bul->m_bullet_data.Master_ID;
+		cts_attack.bull_data.my_id = bul->m_bullet_data.myID;
 
-		cts_attack.bull_data.pos = { PlayerObject->CenterPos.x, PlayerObject->CenterPos.y, PlayerObject->CenterPos.z, PlayerObject->CenterPos.w };
-		cts_attack.bull_data.Rotate_status = { PlayerObject->Orient.x, PlayerObject->Orient.y, PlayerObject->Orient.z, PlayerObject->Orient.w };
+		cts_attack.bull_data.pos4f = { PlayerObject->CenterPos.x, PlayerObject->CenterPos.y, PlayerObject->CenterPos.z, PlayerObject->CenterPos.w };
+		cts_attack.bull_data.rot4f = { PlayerObject->Orient.x, PlayerObject->Orient.y, PlayerObject->Orient.z, PlayerObject->Orient.w };
 		cts_attack.bull_data.vel3f = { bul->pp->GetVelocity().x, bul->pp->GetVelocity().y, bul->pp->GetVelocity().z };
 		cts_attack.bull_data.type = BULLET_TYPE::protocol_HeavyBullet;
 		cts_attack.bull_data.alive = true;
@@ -766,15 +781,15 @@ void CPlayer::CheckTraceSkill()
 
 }
 
-void CPlayer::CreateOtherClientBullet(ID3D12Device * Device, ID3D12GraphicsCommandList * cl, Position3D & Goal, CGameObject * lock, list<CGameObject*>* bulletlist, BulletObject_Info server_bulldata)
+void CPlayer::CreateOtherClientBullet(ID3D12Device * Device, ID3D12GraphicsCommandList * cl, Position3D & Goal, CGameObject * lock, list<CGameObject*>* bulletlist, STC_BulletObject_Info server_bulldata)
 {
 	switch (server_bulldata.type)
 	{
 	    case protocol_LightBullet:
 		{
 			XMFLOAT4 xmf4;
-			xmf4.x = server_bulldata.pos.x; xmf4.y = server_bulldata.pos.y;
-			xmf4.z = server_bulldata.pos.z; xmf4.w = server_bulldata.pos.w;
+			xmf4.x = server_bulldata.pos4f.x; xmf4.y = server_bulldata.pos4f.y;
+			xmf4.z = server_bulldata.pos4f.z; xmf4.w = server_bulldata.pos4f.w;
 
 			XMFLOAT3 xmf3;
 			xmf3.x = Goal.x; xmf3.y = Goal.y; xmf3.z = Goal.z;
@@ -841,8 +856,8 @@ void CPlayer::CreateOtherClientBullet(ID3D12Device * Device, ID3D12GraphicsComma
 			
 			CGameObject *bul = new BulletCube(Device, cl, PlayerObject->ParticleList, PlayerObject, ori, lock, PlayerObject->CenterPos, true);
 			
-			bul->m_bullet_data.Master_ID = server_bulldata.Master_ID;
-			bul->m_bullet_data.myID = server_bulldata.myID;
+			bul->m_bullet_data.Master_ID = server_bulldata.master_id;
+			bul->m_bullet_data.myID = server_bulldata.my_id;
 
 			bulletlist->push_back(bul);
 			
@@ -852,8 +867,8 @@ void CPlayer::CreateOtherClientBullet(ID3D12Device * Device, ID3D12GraphicsComma
 		case protocol_HeavyBullet:
 		{
 			XMFLOAT4 xmf4;
-			xmf4.x = server_bulldata.pos.x; xmf4.y = server_bulldata.pos.y;
-			xmf4.z = server_bulldata.pos.z; xmf4.w = server_bulldata.pos.w;
+			xmf4.x = server_bulldata.pos4f.x; xmf4.y = server_bulldata.pos4f.y;
+			xmf4.z = server_bulldata.pos4f.z; xmf4.w = server_bulldata.pos4f.w;
 
 			XMFLOAT3 xmf3;
 			xmf3.x = Goal.x; xmf3.y = Goal.y; xmf3.z = Goal.z;
@@ -920,8 +935,8 @@ void CPlayer::CreateOtherClientBullet(ID3D12Device * Device, ID3D12GraphicsComma
 
 			CGameObject *bul = new HeavyBulletCube(Device, cl, PlayerObject->ParticleList, PlayerObject, ori, lock, PlayerObject->CenterPos, true);
 
-			bul->m_bullet_data.Master_ID = server_bulldata.Master_ID;
-			bul->m_bullet_data.myID = server_bulldata.myID;
+			bul->m_bullet_data.Master_ID = server_bulldata.master_id;
+			bul->m_bullet_data.myID = server_bulldata.my_id;
 
 			bulletlist->push_back(bul);
 		}

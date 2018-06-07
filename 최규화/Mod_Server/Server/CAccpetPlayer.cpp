@@ -133,7 +133,13 @@ void CAccpetPlayer::MainLogic()
 	} });
 
 	//3. 주기적으로 작업이 필요한 것들을 처리하는 Timer_Thread 
-	m_pWorkerThread.emplace_back(new thread{ [&]() { g_timer_queue.TimerThread(); } });
+	m_pWorkerThread.emplace_back(new thread{ [&]()
+	{ 
+		g_timer_queue.CheckPrevTime();
+		g_timer_queue.TimerThread(); 
+		g_timer_queue.AddEvent(0,0,REGULAR_PACKET_EXCHANGE, true,0);
+
+	} });
 
 	f_thread.join();
 

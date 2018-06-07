@@ -1,12 +1,8 @@
 #include "stdafx.h"
 
-#include <chrono>
-using namespace chrono;
-
 CPhysicEngineWorker::CPhysicEngineWorker()
 {
-	countsPerSec = 3515623;
-	mSecondsPerCount = 1.0 / (double)countsPerSec;
+
 }
 
 void CPhysicEngineWorker::Update()
@@ -16,12 +12,16 @@ void CPhysicEngineWorker::Update()
 	// 2. Tick() - Integrate 처리 (가속도 및 중력적용)
 	// 3. AfterGravity() - 중력 후처리 (y값이 0보다 작으면 그 위로 올려준다)
 	// 4. Collision() - 충돌 처리 
+
 	while (true)
 	{
 		m_currtime = high_resolution_clock::now();
-		m_deltime = duration_cast<microseconds>((m_currtime - m_prevtime)).count();
+		m_deltime = duration_cast<microseconds>(m_currtime - m_prevtime).count() / 1000.0f;
 		m_prevtime = m_currtime;
 
+		//cout << "Time : " << m_deltime << endl;
+		//cout << "Delta time: " << duration_cast<microseconds>(m_currtime - m_prevtime).count() << endl;
+		
 		//for (auto client : g_clients)
 		//{
 		//	client->PlayerInput(client->GetPlayerDirection(), m_deltime);
@@ -38,16 +38,22 @@ void CPhysicEngineWorker::Update()
 
 		for (int i = 0; i < g_clients.size(); ++i)
 		{
-			//g_clients[i]->m_mtx.lock();
-			//g_clients[i]->m_dir
-			g_clients[i]->PlayerInput(g_clients[i]->GetPlayerDirection(), m_deltime);
+			//cout << "Time : " << m_deltime << endl;
+			//if (static_cast<int>(g_clients[i]->GetPlayerDirection()) != 0)
+			g_clients[i]->PlayerInput(m_deltime);
+
+			//cout << "PlayerInput Time: " << duration_cast<milliseconds>(high_resolution_clock::now() - m_prevtime).count() / 1000.f << endl;
 			g_clients[i]->GravitySystem(m_deltime);
+
+			//cout << "GravitySystem Time: " << duration_cast<milliseconds>(high_resolution_clock::now() - m_prevtime).count() / 1000.f << endl;
 			g_clients[i]->Tick(m_deltime);
+
+			//cout << "Tick Time: " << duration_cast<milliseconds>(high_resolution_clock::now() - m_prevtime).count() / 1000.f << endl;
 			g_clients[i]->AfterGravitySystem(m_deltime);
 
+			//cout << "AfterGravitySystem Time: " << duration_cast<milliseconds>(high_resolution_clock::now() - m_prevtime).count() / 1000.f << endl;
+
 			g_clients[i]->SetChangedPlayerState();
-			//g_clients[i]->SetPlayerDirection(0);
-			//g_clients[i]->m_mtx.unlock();
 		}
 
 		for (auto bullet : g_bullets)
@@ -56,6 +62,22 @@ void CPhysicEngineWorker::Update()
 			bullet->AfterGravitySystem(m_deltime);
 		}
 
+		CollisionSystem(m_deltime);
+
+		//for (auto client : g_clients)
+		//{
+		//	client->SetChangedPlayerState();
+		//}
+
+	}
+}
+
+void CPhysicEngineWorker::CollisionSystem(float deltime)
+{
+	for (auto client : g_clients)
+	{
+		client->Collision(&g_clients, deltime);
+		client->Collision(&g_staticobjs, deltime);
 	}
 }
 

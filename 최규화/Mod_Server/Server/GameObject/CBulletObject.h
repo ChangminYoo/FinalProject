@@ -17,7 +17,7 @@ public:
 	__int64					      m_prevTime{ 0 };
 	__int64					      m_currTime{ 0 };
 	float						  m_deltaTime{ 0.f };
-	BulletObject_Info			  m_bulldata;
+	CTS_BulletObject_Info         m_bulldata;
 
 public:
 	CBulletObject(const unsigned short& master_id, const unsigned short& my_id,
@@ -27,11 +27,13 @@ public:
 	virtual void AfterGravitySystem(float deltime);
 	virtual void Tick(float deltime);
 	virtual void Update(float deltime);
+	void Collision(vector<CPlayerObject*>* clients, float deltime);
+	void Collision(unordered_set<CStaticObject*>* sobjs, float deltime);
 
 	float			  GetBulletLifeTime() const { return m_lifetime; }
 	void			  SetBulletLifeTime(float time) { m_lifetime += time; }
 
-	BulletObject_Info GetBulletInfo() { return m_bulldata; }
+	CTS_BulletObject_Info GetBulletInfo() { return m_bulldata; }
 	Position		  GetBulletOldPos() const { return m_pos4f; }
 	short			  GetBulletID() const { return m_id; }
 	unsigned short    GetBulletMasterID() const { return m_masterID; }

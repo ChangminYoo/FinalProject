@@ -838,7 +838,7 @@ void Scene::SET_SOBJECT_BY_SERVER_DATA(const unsigned short & id, StaticObject_I
 	}
 }
 
-void Scene::SET_BULLET_BY_SERVER_DATA(BulletObject_Info & bulldata, const unsigned char & packet_type)
+void Scene::SET_BULLET_BY_SERVER_DATA(STC_BulletObject_Info & bulldata, const unsigned char & packet_type)
 {
 	switch (packet_type)
 	{
@@ -847,7 +847,7 @@ void Scene::SET_BULLET_BY_SERVER_DATA(BulletObject_Info & bulldata, const unsign
 		{
 			//클라에서 먼저 불렛이 죽고 서버에서 죽었다는 정보를 주게되면 아래 분기문이 실행됨 -> 버그
 			//내 자신은 이걸 실행할 필요가없음
-			if (BulletObject.size() == 0 && bulldata.Master_ID != Player->PlayerObject->m_player_data.id)
+			if (BulletObject.size() == 0 && bulldata.master_id != Player->PlayerObject->m_player_data.id)
 			{
 				Player->CreateOtherClientBullet(device, commandlist, bulldata.endpoint, nullptr, &BulletObject, bulldata);
 			}
@@ -856,8 +856,7 @@ void Scene::SET_BULLET_BY_SERVER_DATA(BulletObject_Info & bulldata, const unsign
 				auto findBullet = false;
 				for (auto lbul : BulletObject)
 				{
-					if (bulldata.Master_ID == lbul->m_bullet_data.Master_ID &&
-						bulldata.myID == lbul->m_bullet_data.myID)
+					if (bulldata.master_id == lbul->m_bullet_data.Master_ID && bulldata.my_id == lbul->m_bullet_data.myID)
 					{
 						//불렛이 소멸됨 -> 삭제
 						if (!bulldata.alive)
@@ -869,10 +868,10 @@ void Scene::SET_BULLET_BY_SERVER_DATA(BulletObject_Info & bulldata, const unsign
 
 						lbul->m_bullet_data = move(bulldata);
 
-						lbul->Orient = { bulldata.Rotate_status.x, bulldata.Rotate_status.y, bulldata.Rotate_status.z, bulldata.Rotate_status.w };
-						lbul->CenterPos = { bulldata.pos.x, bulldata.pos.y, bulldata.pos.z, bulldata.pos.w };
+						lbul->Orient = { bulldata.rot4f.x, bulldata.rot4f.y, bulldata.rot4f.z, bulldata.rot4f.w };
+						lbul->CenterPos = { bulldata.pos4f.x, bulldata.pos4f.y, bulldata.pos4f.z, bulldata.pos4f.w };
 
-						lbul->pp->SetVelocity(bulldata.vel3f.x, bulldata.vel3f.y, bulldata.vel3f.z);
+						//lbul->pp->SetVelocity(bulldata.vel3f.x, bulldata.vel3f.y, bulldata.vel3f.z);
 						lbul->pp->SetPosition(lbul->CenterPos);
 
 						findBullet = true;
@@ -882,7 +881,7 @@ void Scene::SET_BULLET_BY_SERVER_DATA(BulletObject_Info & bulldata, const unsign
 
 				//다른 클라이언트가 생성한 불렛이 내 클라이언트가 관리하는 
 				//기존의 불렛리스트에 없다면 추가시켜줘야한다.
-				if (findBullet == false && bulldata.Master_ID != Player->PlayerObject->m_player_data.id)
+				if (findBullet == false && bulldata.master_id != Player->PlayerObject->m_player_data.id)
 				{
 					Player->CreateOtherClientBullet(device, commandlist, bulldata.endpoint, nullptr, &BulletObject, bulldata);
 				}

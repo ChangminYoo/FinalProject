@@ -36,10 +36,10 @@ CBulletObject::CBulletObject(const unsigned short & master_id, const unsigned sh
 	
 	m_bulldata.alive = m_alive;				
 	m_bulldata.endpoint = m_savept;				//고정
-	m_bulldata.Master_ID = m_masterID;			//고정
-	m_bulldata.myID = m_id;						//고정
-	m_bulldata.pos = m_pos4f;
-	m_bulldata.Rotate_status = m_rot4f;			
+	m_bulldata.master_id = m_masterID;			//고정
+	m_bulldata.my_id = m_id;						//고정
+	m_bulldata.pos4f = m_pos4f;
+	m_bulldata.rot4f = m_rot4f;			
 	m_bulldata.type = m_type;					//고정
 	m_bulldata.vel3f = m_vel3f;					//고정
 
@@ -48,8 +48,12 @@ CBulletObject::CBulletObject(const unsigned short & master_id, const unsigned sh
 
 void CBulletObject::AfterGravitySystem(float deltime)
 {
-	if (m_pos4f.y <= 0)
+	if (m_pos4f.y <= 0 && m_alive == true)
+	{
 		m_alive = false;
+		m_bulldata.alive = false;
+	}
+		
 }
 
 void CBulletObject::Tick(float deltime)
@@ -66,12 +70,33 @@ void CBulletObject::Tick(float deltime)
 	if (m_lifetime >= MAX_LIGHT_BULLET_TIME)
 		m_alive = false;
 
-	m_bulldata.pos = { xmf4_pos.x, xmf4_pos.y, xmf4_pos.z, xmf4_pos.w };
-	m_bulldata.Rotate_status = { xmf4_rot.x, xmf4_rot.y, xmf4_rot.z, xmf4_rot.w };
+	m_bulldata.pos4f = { xmf4_pos.x, xmf4_pos.y, xmf4_pos.z, xmf4_pos.w };
+	m_bulldata.rot4f = { xmf4_rot.x, xmf4_rot.y, xmf4_rot.z, xmf4_rot.w };
 	m_bulldata.alive = m_alive;
 }
 
 void CBulletObject::Update(float deltime)
+{
+}
+
+void CBulletObject::Collision(vector<CPlayerObject*>* clients, float deltime)
+{
+	for (auto iter = clients->begin(); iter != clients->end(); ++iter)
+	{
+		if (*iter != this && (*iter)->pp != nullptr)
+		{
+			bool test = pp->CollisionTest(*(*iter)->pp, m_Lookvector, m_Rightvector, m_Upvector,
+				(*iter)->GetLookVector(), (*iter)->GetRightVector(), (*iter)->GetUpVector);
+
+			if (test)
+			{
+
+			}
+		}
+	}
+}
+
+void CBulletObject::Collision(unordered_set<CStaticObject*>* sobjs, float deltime)
 {
 }
 
@@ -89,10 +114,10 @@ void CBulletObject::SetChangedBulletState()
 {
 	m_bulldata.alive = m_alive;
 	m_bulldata.endpoint = m_savept;
-	m_bulldata.Master_ID = m_masterID;
-	m_bulldata.myID = m_id;
-	m_bulldata.pos = m_pos4f;
-	m_bulldata.Rotate_status = m_rot4f;
+	m_bulldata.master_id = m_masterID;
+	m_bulldata.my_id = m_id;
+	m_bulldata.pos4f = m_pos4f;
+	m_bulldata.rot4f = m_rot4f;
 	m_bulldata.type = m_type;
 	m_bulldata.vel3f = m_vel3f;
 }

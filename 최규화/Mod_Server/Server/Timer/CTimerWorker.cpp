@@ -81,6 +81,8 @@ void CTimerWorker::ProcessPacket(event_type * et)
 		}
 		break;
 
+		
+		/*
 		case LIGHT_BULLET:
 		{
 			for (auto& bull : g_bullets)
@@ -160,65 +162,142 @@ void CTimerWorker::ProcessPacket(event_type * et)
 			}
 		}
 		break;
+		*/
 
 		case REGULAR_PACKET_EXCHANGE:
 		{
 			// 1초에 20번 패킷을 정기적으로 보내줘야함 
-			QueryPerformanceCounter((LARGE_INTEGER*)&mRegularCurrTime);
-			mRegularDelTime = (mRegularCurrTime - mRegularPrevTime) * mSecondsPerCount;
-			mRegularPrevTime = mRegularCurrTime;
+			m_deltime += duration_cast<milliseconds>(high_resolution_clock::now() - m_prevtime).count() / 1000.f;
+			m_currtime = m_prevtime;
 
 			//1. 1초에 20번씩 서버에서 업데이트된 클라이언트의 모든정보를 보냄
 			STC_CharCurrState stc_char_state;
-			for (int i = 0; i < g_clients.size(); ++i)
+			for(auto client : g_clients)
 			{
-				//g_clients[i]->SetChangedPlayerState();
-	
-				if (g_clients[i]->GetIsAI() == true || g_clients[i]->GetConnectState() == false) continue;
-
-				for (int j = 0; j < g_clients.size(); ++j)
+				if (client->GetIsAI() == true || client->GetConnectState() == false) continue;
+				
+				for (auto client : g_clients)
 				{
-					stc_char_state.player_data = move(g_clients[i]->m_pdata);
+					stc_char_state.player_data = move(client->m_pdata);		
+					client->SendPacket(reinterpret_cast<Packet*>(&stc_char_state));
+				}
+				
+				//cout << "Timer // ID : " << g_clients[i]->GetID() << "Pos[x, y, z, w]: " << g_clients[i]->m_pdata.pos.x << " , " << g_clients[i]->m_pdata.pos.y << " , " << g_clients[i]->m_pdata.pos.z << " , " << g_clients[i]->m_pdata.pos.w << endl;
 
-					g_clients[j]->SendPacket(reinterpret_cast<Packet*>(&stc_char_state));
+				/*
+				for (auto i = 0; i < 100000000; ++i)
+				{
+					int sum = 0;
+					 sum += i;
 				}
 
-				cout << "ID: " << g_clients[i]->m_pdata.id << " 위치값: " << "[ x, y, z, w ]: "
-						<< g_clients[i]->m_pdata.pos.x << ", " << g_clients[i]->m_pdata.pos.y << ", " << g_clients[i]->m_pdata.pos.z << ", " <<  endl;
+				cout << "ID : " << g_clients[i]->GetID() << "Pos[x, y, z, w]: " << g_clients[i]->m_pdata.pos.x << " , " << g_clients[i]->m_pdata.pos.y << " , " << g_clients[i]->m_pdata.pos.z << " , " << g_clients[i]->m_pdata.pos.w << endl;
+				++m_tcnt;
 
+				m_currtime = high_resolution_clock::now();
+				if (m_flag)
+				{
+					m_prevtime = m_currtime;
+					m_flag = false;
+				}
+
+				m_tdeltime += (duration_cast<milliseconds>(m_currtime - m_prevtime).count()) / 1000.f;
+				m_prevtime = m_currtime;
+
+				cout << "카운트 : " << m_tcnt << "시간: " << m_tdeltime << "카운트_어나더: " << o_tcnt << endl;
+
+				if (m_tdeltime >= 1.0f)
+				{
+					cout << "카운트 : " << m_tcnt << "시간: " << m_tdeltime << endl;
+					system("pause");
+				}
+				*/
 			}
 
+			//2. 불렛 데이터도 1초에 20번씩 클라이언트로 보냄 
+			STC_Attack stc_attack;
+			for (auto bullet : g_bullets)
+			{
+				stc_attack.bull_data.pos4f = bullet->m_bulldata.pos4f;
+				stc_attack.bull_data.rot4f = bullet->m_bulldata.rot4f;
+				stc_attack.bull_data.endpoint = bullet->m_bulldata.endpoint;
+				stc_attack.bull_data.master_id = bullet->m_bulldata.master_id;
+				stc_attack.bull_data.my_id = bullet->m_bulldata.my_id;
+				stc_attack.bull_data.type = bullet->m_bulldata.type;
+				stc_attack.bull_data.alive = bullet->m_bulldata.alive;
 
-			//for (auto client : g_clients)
+				for (auto client : g_clients)
+				{
+					client->SendPacket(reinterpret_cast<Packet*>(&stc_attack));
+				}
+			}
+
+			AddEvent(0, RegularPacketExchangeTime , REGULAR_PACKET_EXCHANGE, true, 0);
+
+			//cout << "실행\n" << endl;
+
+			//if (m_deltime >= 1.0f)
 			//{
-				//client->GravitySystem(mRegularDelTime);
-				//client->GetPhysicsPoint()->GravitySystem(mRegularDelTime, client->GetPhysicsPoint());
-				//client->Tick(mRegularDelTime);
-				//XMFLOAT4 xmf4{ client->m_pdata.pos.x,client->m_pdata.pos.y, client->m_pdata.pos.z, client->m_pdata.pos.w };
-				//client->GetPhysicsPoint()->integrate(mRegularDelTime, &xmf4);
-				//client->SetPlayerData_Pos(xmf4);
-				//client->AfterGravitySystem(mRegularDelTime);
-				//client->GetPhysicsEffect()->AfterGravitySystem(mRegularDelTime, client->GetPhysicsPoint(), OBJECT_TYPE::PLAYER,
-				//	client->m_pdata.pos, client->m_pdata.airbone);
-
-				//client->SetChangedPlayerState();
-
-				//if (client->GetIsAI() == true || client->GetConnectState() == false) continue;
-
-				//stc_char_state.player_data = move(client->m_pdata);
-
-				//cout << "ID: " << stc_char_state.player_data.id << " " << "Pos: " << stc_char_state.player_data.pos.x << " "
-				//	<< stc_char_state.player_data.pos.y << " " << stc_char_state.player_data.pos.z << " " << stc_char_state.player_data.pos.w 
-				//	<< "  //  " << "Ani: " << stc_char_state.player_data.ani << endl;
-
-
-				//cout << "Timer ID: " << stc_char_state.player_data.id << " 변화된 회전값: " << "[ x, y, z, w ]: "
-				//	<< stc_char_state.player_data.rot.x << ", " << stc_char_state.player_data.rot.y << ", " << stc_char_state.player_data.rot.z << ", " << stc_char_state.player_data.rot.w << endl;
-
-				//client->SendPacket(reinterpret_cast<Packet*>(&stc_char_state));
-
+			//	cout << "루프\n" << endl;
+			//	m_deltime = 0.f;
 			//}
+	
 
+			/*
+			if (g_clients.size() > 0)
+			{
+				if (m_deltime >= RegularPacketExchangeTime)
+				{
+					cout << "Time :" << m_tcnt << "number: " << m_deltime << endl;
+
+					m_tdeltime += m_deltime;
+					if (m_tdeltime >= 1)
+					{
+						cout << "1초동안 카운트 횟수: " << m_tcnt << endl;
+						system("pause");
+					}
+
+					m_deltime -= RegularPacketExchangeTime;
+					AddEvent(0, 0, REGULAR_PACKET_EXCHANGE, true, 0);
+
+				}
+			}
+			*/
+
+
+			/*
+			for (auto client : g_clients)
+			{
+				client->GravitySystem(mRegularDelTime);
+				client->GetPhysicsPoint()->GravitySystem(mRegularDelTime, client->GetPhysicsPoint());
+				client->Tick(mRegularDelTime);
+				XMFLOAT4 xmf4{ client->m_pdata.pos.x,client->m_pdata.pos.y, client->m_pdata.pos.z, client->m_pdata.pos.w };
+				client->GetPhysicsPoint()->integrate(mRegularDelTime, &xmf4);
+				client->SetPlayerData_Pos(xmf4);
+				client->AfterGravitySystem(mRegularDelTime);
+				client->GetPhysicsEffect()->AfterGravitySystem(mRegularDelTime, client->GetPhysicsPoint(), OBJECT_TYPE::PLAYER,
+					client->m_pdata.pos, client->m_pdata.airbone);
+
+				client->SetChangedPlayerState();
+
+				if (client->GetIsAI() == true || client->GetConnectState() == false) continue;
+
+				stc_char_state.player_data = move(client->m_pdata);
+
+				cout << "ID: " << stc_char_state.player_data.id << " " << "Pos: " << stc_char_state.player_data.pos.x << " "
+					<< stc_char_state.player_data.pos.y << " " << stc_char_state.player_data.pos.z << " " << stc_char_state.player_data.pos.w 
+					<< "  //  " << "Ani: " << stc_char_state.player_data.ani << endl;
+
+
+				cout << "Timer ID: " << stc_char_state.player_data.id << " 변화된 회전값: " << "[ x, y, z, w ]: "
+					<< stc_char_state.player_data.rot.x << ", " << stc_char_state.player_data.rot.y << ", " << stc_char_state.player_data.rot.z << ", " << stc_char_state.player_data.rot.w << endl;
+
+				client->SendPacket(reinterpret_cast<Packet*>(&stc_char_state));
+
+			}
+			*/
+
+			/*
 			for (auto bull = g_bullets.begin(); bull != g_bullets.end();)
 			{
 				STC_Attack stc_attack;
@@ -248,10 +327,10 @@ void CTimerWorker::ProcessPacket(event_type * et)
 					++bull;
 				}
 
-			}
+			}*/
 
 
-			AddEvent(0, RegularPacketExchangeTime, REGULAR_PACKET_EXCHANGE, true, 0);
+			//AddEvent(0, RegularPacketExchangeTime, REGULAR_PACKET_EXCHANGE, true, 0);
 		
 		}
 		break;

@@ -126,6 +126,7 @@ int FrameWork::Run()
 		else
 		{
 			mTimer.Tick();
+			//cout << "Seconds Per Frame : " << mTimer.DeltaTime() << endl;
 
 			if (!bAppPaused)
 			{

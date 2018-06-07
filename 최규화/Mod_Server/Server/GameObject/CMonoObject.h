@@ -48,12 +48,17 @@ protected:
 
 public:
 	CMonoObject();
-	virtual void Initialize();
 	virtual void Update(float deltime);
-	virtual void Collision();
 	virtual void AfterGravitySystem(float deltime);
 	virtual void GravitySystem(float deltime);
 	virtual void Tick(float deltime);
+	XMFLOAT3 GetRightVector() const { return m_Rightvector; }
+	XMFLOAT3 GetLookVector() const { return m_Lookvector; }
+	XMFLOAT3 GetUpVector() const { return m_Upvector; }
+	bool	GetAirbone() const { return m_airbone; }
+	void	SetAirbone(bool flag) { m_airbone = flag; }
+	PhysicsPoint* GetPhysicsPoint() { return pp; }
+
 	void UpdateUpvector();
 	void UpdateLookvector();
 	void UpdatePPosCenterPos();

@@ -84,7 +84,7 @@ public:
 
 	void SET_PLAYER_BY_SEVER_DATA(const unsigned short& id,const Player_Data& playerdata, const unsigned char& packet_type);
 	void SET_SOBJECT_BY_SERVER_DATA(const unsigned short& id, StaticObject_Info& sobjdata, const unsigned char& type);
-	void SET_BULLET_BY_SERVER_DATA(BulletObject_Info& bulldata, const unsigned char& packet_type);
+	void SET_BULLET_BY_SERVER_DATA(STC_BulletObject_Info& bulldata, const unsigned char& packet_type);
 	void SET_PLAYER_ANIMATION_BY_SERVER_DATA(const unsigned short& id, const unsigned char& ani);
 	void Set_RemovePlayerData(const unsigned int& id, Player_Data& playerdata);
 	void SET_PLAYER_STATE_BY_SERVER_DATA(const Player_Data& playerdata);

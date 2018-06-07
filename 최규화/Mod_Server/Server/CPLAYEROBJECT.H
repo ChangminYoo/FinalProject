@@ -72,13 +72,15 @@ public:
 	virtual void Tick(float deltime);
 	virtual void Tick(float deltime, Position& pos4f);
 	virtual void AfterGravitySystem(float deltime);
+	void Collision(vector<CPlayerObject*>* clients, float deltime);
+	void Collision(unordered_set<CStaticObject*>* sobjs, float deltime);
 
 	// ---------------------------------------------------------------------------------------
 	// [2]. DB관련 함수
 
 	// 1. DB 로그인정보 체크
 	bool CheckPlayerInfo();
-
+	int m_ttcnt{ 0 };
 	// ---------------------------------------------------------------------------------------
 
 	// [3]. 서버에서 클라이언트의 정보를 처리할 때 사용하는 함수들
@@ -87,7 +89,7 @@ public:
 	void Init_PlayerInfo();
 	void InitData_To_Client();
 	void RegularUpdate();
-	void PlayerInput(char dir, float deltime);
+	void PlayerInput(float deltime);
 	
 	// ---------------------------------------------------------------------------------------
 	// [4].기타 GET - SET 함수
