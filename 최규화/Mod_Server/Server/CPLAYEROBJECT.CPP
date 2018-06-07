@@ -162,8 +162,10 @@ void CPlayerObject::InitData_To_Client()
 
 }
 
+/*
 void CPlayerObject::RegularUpdate()
 {
+	
 	auto local_prevTime = high_resolution_clock::now();
 	while (true)
 	{
@@ -188,7 +190,9 @@ void CPlayerObject::RegularUpdate()
 			m_prevtime = m_elaspedtime - RegularPacketExchangeTime;
 		}
 	}
+	
 }
+*/
 
 void CPlayerObject::SendPacket(Packet * packet)
 {
@@ -674,7 +678,7 @@ void CPlayerObject::Collision(unordered_set<CStaticObject*>* sobjs, float deltim
 	
 }
 
-void CPlayerObject::Damaged(float damage)
+void CPlayerObject::GetDamaged(int damage)
 {
 	if (m_godmode == false && m_ability.curHP > 0)
 	{

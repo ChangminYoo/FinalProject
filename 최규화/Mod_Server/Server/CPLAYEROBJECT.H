@@ -88,7 +88,7 @@ public:
 	void Init_MonsterInfo();
 	void Init_PlayerInfo();
 	void InitData_To_Client();
-	void RegularUpdate();
+	//void RegularUpdate();
 	void PlayerInput(float deltime);
 	
 	// ---------------------------------------------------------------------------------------
@@ -107,7 +107,7 @@ public:
 	Packet* Get_DataBuf() { return m_databuf; }
 	Packet* Get_RecvBuf() { return m_recvbuf; }
 
-	void	Damaged(float damage);
+	void	GetDamaged(int damage);
 
 	void    SetIsAI(char ai) { m_ai = ai; }
 	bool    GetIsAI() const { return static_cast<bool>(m_ai); }
@@ -124,11 +124,11 @@ public:
 	// ---------------------------------------------------------------------------------------
 	// [5]. 물리효과 함수
 
-	XMFLOAT3				GetLookVector()  const { return m_Lookvector; }
-	XMFLOAT3				GetRightVector() const { return m_Rightvector; }
-	XMFLOAT3				GetUpVector()	 const { return m_Upvector; }
+	//XMFLOAT3				GetLookVector()  const { return m_Lookvector; }
+	//XMFLOAT3				GetRightVector() const { return m_Rightvector; }
+	//XMFLOAT3				GetUpVector()	 const { return m_Upvector; }
 
-	PhysicsPoint*			GetPhysicsPoint() { return pp; }
+	//PhysicsPoint*			GetPhysicsPoint() { return pp; }
 	//PhysicalEffect*       GetPhysicsEffect() { return pe; }
 
 	// ---------------------------------------------------------------------------------------

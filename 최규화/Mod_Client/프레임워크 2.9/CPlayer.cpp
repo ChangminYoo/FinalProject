@@ -652,8 +652,8 @@ void CPlayer::CreateBullet(ID3D12Device* Device, ID3D12GraphicsCommandList* cl,X
 		
 		//서버용
 		CTS_Attack cts_attack;
-		cts_attack.bull_data.master_id = bul->m_bullet_data.Master_ID;
-		cts_attack.bull_data.my_id = bul->m_bullet_data.myID;
+		cts_attack.bull_data.master_id = bul->m_bullet_data.master_id;
+		cts_attack.bull_data.my_id = bul->m_bullet_data.my_id;
 
 		cts_attack.bull_data.pos4f = { PlayerObject->CenterPos.x, PlayerObject->CenterPos.y, PlayerObject->CenterPos.z, PlayerObject->CenterPos.w };
 		cts_attack.bull_data.rot4f = { PlayerObject->Orient.x, PlayerObject->Orient.y, PlayerObject->Orient.z, PlayerObject->Orient.w };
@@ -731,8 +731,8 @@ void CPlayer::CreateBullet(ID3D12Device* Device, ID3D12GraphicsCommandList* cl,X
 		
 		//서버용
 		CTS_Attack cts_attack;
-		cts_attack.bull_data.master_id = bul->m_bullet_data.Master_ID;
-		cts_attack.bull_data.my_id = bul->m_bullet_data.myID;
+		cts_attack.bull_data.master_id = bul->m_bullet_data.master_id;
+		cts_attack.bull_data.my_id = bul->m_bullet_data.my_id;
 
 		cts_attack.bull_data.pos4f = { PlayerObject->CenterPos.x, PlayerObject->CenterPos.y, PlayerObject->CenterPos.z, PlayerObject->CenterPos.w };
 		cts_attack.bull_data.rot4f = { PlayerObject->Orient.x, PlayerObject->Orient.y, PlayerObject->Orient.z, PlayerObject->Orient.w };
@@ -856,8 +856,8 @@ void CPlayer::CreateOtherClientBullet(ID3D12Device * Device, ID3D12GraphicsComma
 			
 			CGameObject *bul = new BulletCube(Device, cl, PlayerObject->ParticleList, PlayerObject, ori, lock, PlayerObject->CenterPos, true);
 			
-			bul->m_bullet_data.Master_ID = server_bulldata.master_id;
-			bul->m_bullet_data.myID = server_bulldata.my_id;
+			bul->m_bullet_data.master_id = server_bulldata.master_id;
+			bul->m_bullet_data.my_id = server_bulldata.my_id;
 
 			bulletlist->push_back(bul);
 			
@@ -935,8 +935,8 @@ void CPlayer::CreateOtherClientBullet(ID3D12Device * Device, ID3D12GraphicsComma
 
 			CGameObject *bul = new HeavyBulletCube(Device, cl, PlayerObject->ParticleList, PlayerObject, ori, lock, PlayerObject->CenterPos, true);
 
-			bul->m_bullet_data.Master_ID = server_bulldata.master_id;
-			bul->m_bullet_data.myID = server_bulldata.my_id;
+			bul->m_bullet_data.master_id = server_bulldata.master_id;
+			bul->m_bullet_data.my_id = server_bulldata.my_id;
 
 			bulletlist->push_back(bul);
 		}

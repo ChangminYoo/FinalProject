@@ -156,7 +156,7 @@ public:
 	//¼­¹ö¿ë
 	Player_Data			 m_player_data;
 	StaticObject_Info	 m_sobj_data;
-	BulletObject_Info	 m_bullet_data;
+	STC_BulletObject_Info	 m_bullet_data;
 
 	CPlayer* m_player{ nullptr };
 	

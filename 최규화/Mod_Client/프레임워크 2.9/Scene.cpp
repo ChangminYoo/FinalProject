@@ -856,7 +856,7 @@ void Scene::SET_BULLET_BY_SERVER_DATA(STC_BulletObject_Info & bulldata, const un
 				auto findBullet = false;
 				for (auto lbul : BulletObject)
 				{
-					if (bulldata.master_id == lbul->m_bullet_data.Master_ID && bulldata.my_id == lbul->m_bullet_data.myID)
+					if (bulldata.master_id == lbul->m_bullet_data.master_id && bulldata.my_id == lbul->m_bullet_data.my_id)
 					{
 						//∫“∑ø¿Ã º“∏Íµ  -> ªË¡¶
 						if (!bulldata.alive)

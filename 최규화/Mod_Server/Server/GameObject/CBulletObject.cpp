@@ -31,6 +31,19 @@ CBulletObject::CBulletObject(const unsigned short & master_id, const unsigned sh
 	pp->SetHalfBox(1, 1, 1);
 	pp->SetDamping(1);
 	pp->SetBounce(false);
+
+	m_ability.curHP = 0;
+	m_ability.exp = 0;
+	m_ability.level = 0;
+	m_ability.orignHP = 0;
+	m_ability.speed = 0;
+
+	if (BULLET_TYPE::protocol_LightBullet == static_cast<int>(type)){
+		m_ability.attack = 10;
+	}
+	else if (BULLET_TYPE::protocol_HeavyBullet == static_cast<int>(type)) {
+		m_ability.attack = 30;
+	}
 	
 	//--------------------------------------------------------------------------------------------
 	
@@ -83,14 +96,27 @@ void CBulletObject::Collision(vector<CPlayerObject*>* clients, float deltime)
 {
 	for (auto iter = clients->begin(); iter != clients->end(); ++iter)
 	{
-		if (*iter != this && (*iter)->pp != nullptr)
+		if ( (*iter)->GetPhysicsPoint() != nullptr)
 		{
-			bool test = pp->CollisionTest(*(*iter)->pp, m_Lookvector, m_Rightvector, m_Upvector,
+			bool test = pp->CollisionTest(*(*iter)->GetPhysicsPoint(), m_Lookvector, m_Rightvector, m_Upvector,
 				(*iter)->GetLookVector(), (*iter)->GetRightVector(), (*iter)->GetUpVector);
 
 			if (test)
 			{
+				(*iter)->GetDamaged(m_ability.attack);
 
+				//고정된 물체가 아니면
+				XMFLOAT3 cn;
+				cn = Float3Add(pp->GetPosition(), (*(*iter)->GetPhysicsPoint()).GetPosition(), false);
+				cn = Float3Normalize(cn);
+
+				(*iter)->GetPhysicsPoint()->SetBounce(true);
+
+				pp->ResolveVelocity(*(*iter)->GetPhysicsPoint(), cn, deltime);
+				(*iter)->GetPhysicsPoint()->SetBounce(false);
+				
+				m_alive = false;
+				m_bulldata.alive = false;
 			}
 		}
 	}
@@ -98,6 +124,26 @@ void CBulletObject::Collision(vector<CPlayerObject*>* clients, float deltime)
 
 void CBulletObject::Collision(unordered_set<CStaticObject*>* sobjs, float deltime)
 {
+	for (auto iter = sobjs->begin(); iter != sobjs->end(); ++iter)
+	{
+		if ((*iter)->GetPhysicsPoint() != nullptr)
+		{
+			bool test = pp->CollisionTest(*(*iter)->GetPhysicsPoint(), m_Lookvector, m_Rightvector, m_Upvector,
+				(*iter)->GetLookVector(), (*iter)->GetRightVector(), (*iter)->GetUpVector);
+
+			if (test)
+			{
+				//고정된 물체면
+				XMFLOAT3 cn;
+				cn = pp->pAxis;		
+
+				pp->ResolveVelocity(*(*iter)->GetPhysicsPoint(), cn, deltime);
+				(*iter)->GetPhysicsPoint()->SetBounce(false);
+				m_alive = false;
+				m_bulldata.alive = false;
+			}			
+		}
+	}
 }
 
 void CBulletObject::SetBulletRotatevalue(const XMFLOAT4 & xmf4)

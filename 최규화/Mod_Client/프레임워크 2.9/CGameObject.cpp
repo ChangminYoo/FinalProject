@@ -580,8 +580,8 @@ BulletCube::BulletCube(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 			++myID;
 			BulletIDList.push_back(myID);
 
-			m_bullet_data.myID = myID;
-			m_bullet_data.Master_ID = master->m_player_data.id;
+			m_bullet_data.my_id = myID;
+			m_bullet_data.master_id = master->m_player_data.id;
 		}
 	}
 
@@ -783,8 +783,8 @@ HeavyBulletCube::HeavyBulletCube(ID3D12Device * m_Device, ID3D12GraphicsCommandL
 			++myID;
 			BulletIDList.push_back(myID);
 
-			m_bullet_data.myID = myID;
-			m_bullet_data.Master_ID = master->m_player_data.id;
+			m_bullet_data.my_id = myID;
+			m_bullet_data.master_id = master->m_player_data.id;
 		}
 	}
 

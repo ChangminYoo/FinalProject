@@ -74,11 +74,18 @@ void CPhysicEngineWorker::Update()
 
 void CPhysicEngineWorker::CollisionSystem(float deltime)
 {
+	for (auto bullet : g_bullets)
+	{
+		bullet->Collision(&g_clients, deltime);
+		bullet->Collision(&g_staticobjs, deltime);
+	}
+
 	for (auto client : g_clients)
 	{
 		client->Collision(&g_clients, deltime);
 		client->Collision(&g_staticobjs, deltime);
 	}
+
 }
 
 
