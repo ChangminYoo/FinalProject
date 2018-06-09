@@ -2111,9 +2111,26 @@ bool MiniPhysicsEngineG9::RigidBody::CollisionTest(RigidBody & rb2, XMFLOAT3 & l
 						CollisionPointVector.push_back(newPoint);
 
 					}
-					else//점3개이상이면 중점5로
+					else if(lastPoints.size()>=3)//점3개이상이면 중점5로
 					{
 						CollisionPointVector.push_back(ColPoint2[4]);
+					}
+					else//최종적으로 못찾은 경우
+					{
+						//면과 면 충돌인데 뒤집어서 검사해도 없다면, 두번째 오브젝트의 중점에 가장 가까운 첫번째 오브젝트의 충돌점을 선택한다.
+						float MinLn = 10000;
+						int index = 0;
+						for (int g = 0; g < 5; g++)
+						{
+							auto vl = Float4Add(ColPoint2[4].Pos, ColPoint[g].Pos, false);
+							auto ml = FloatLength(vl);
+							if (MinLn > ml)
+							{
+								MinLn = ml;
+								index = g;
+							}
+						}
+						CollisionPointVector.push_back(ColPoint[index]);
 					}
 
 
