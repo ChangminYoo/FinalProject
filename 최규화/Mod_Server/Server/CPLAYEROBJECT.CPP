@@ -682,15 +682,16 @@ void CPlayerObject::GetDamaged(int damage)
 {
 	if (m_godmode == false && m_ability.curHP > 0)
 	{
+		//캐릭터 hp를 감소
 		m_ability.curHP -= damage;
 	}
 
 	if (m_pdata.status.cur_hp <= 0)
 	{
+		//캐릭터 m_alive를 false 로 바꿔준다
 		m_alive = false;
-
-		//리스폰 후처리 - timer_queue
 	}
+
 }
 
 void CPlayerObject::SetChangedPlayerState()

@@ -16,9 +16,10 @@ void CPhysicEngineWorker::Update()
 	while (true)
 	{
 		m_currtime = high_resolution_clock::now();
-		m_deltime = duration_cast<microseconds>(m_currtime - m_prevtime).count() / 1000.0f;
+		m_deltime = duration_cast<milliseconds>(m_currtime - m_prevtime).count() / 1000.0f;
 		m_prevtime = m_currtime;
 
+		cout << "Time : " << m_deltime << endl;
 		//cout << "Time : " << m_deltime << endl;
 		//cout << "Delta time: " << duration_cast<microseconds>(m_currtime - m_prevtime).count() << endl;
 		
@@ -36,24 +37,23 @@ void CPhysicEngineWorker::Update()
 		//	//client->SetPlayerAnimation(Ani_State::Idle);
 		//}
 
-		for (int i = 0; i < g_clients.size(); ++i)
+		for (auto client : g_clients)
 		{
 			//cout << "Time : " << m_deltime << endl;
 			//if (static_cast<int>(g_clients[i]->GetPlayerDirection()) != 0)
-			g_clients[i]->PlayerInput(m_deltime);
+			client->PlayerInput(m_deltime);
 
 			//cout << "PlayerInput Time: " << duration_cast<milliseconds>(high_resolution_clock::now() - m_prevtime).count() / 1000.f << endl;
-			g_clients[i]->GravitySystem(m_deltime);
+			client->GravitySystem(m_deltime);
 
 			//cout << "GravitySystem Time: " << duration_cast<milliseconds>(high_resolution_clock::now() - m_prevtime).count() / 1000.f << endl;
-			g_clients[i]->Tick(m_deltime);
+			client->Tick(m_deltime);
 
 			//cout << "Tick Time: " << duration_cast<milliseconds>(high_resolution_clock::now() - m_prevtime).count() / 1000.f << endl;
-			g_clients[i]->AfterGravitySystem(m_deltime);
+			client->AfterGravitySystem(m_deltime);
 
 			//cout << "AfterGravitySystem Time: " << duration_cast<milliseconds>(high_resolution_clock::now() - m_prevtime).count() / 1000.f << endl;
-
-			g_clients[i]->SetChangedPlayerState();
+			client->SetChangedPlayerState();
 		}
 
 		for (auto bullet : g_bullets)
@@ -64,10 +64,8 @@ void CPhysicEngineWorker::Update()
 
 		CollisionSystem(m_deltime);
 
-		//for (auto client : g_clients)
-		//{
-		//	client->SetChangedPlayerState();
-		//}
+		
+		// alive 가 false인 오브젝트들 지워주기 
 
 	}
 }
@@ -76,14 +74,20 @@ void CPhysicEngineWorker::CollisionSystem(float deltime)
 {
 	for (auto bullet : g_bullets)
 	{
-		bullet->Collision(&g_clients, deltime);
-		bullet->Collision(&g_staticobjs, deltime);
+		if (bullet->GetBulletIsAlive() == true)
+		{
+			bullet->Collision(&g_clients, deltime);
+			bullet->Collision(&g_staticobjs, deltime);
+		}
 	}
 
 	for (auto client : g_clients)
 	{
-		client->Collision(&g_clients, deltime);
-		client->Collision(&g_staticobjs, deltime);
+		if (client->GetPlayerIsAlive() == true)
+		{
+			client->Collision(&g_clients, deltime);
+			client->Collision(&g_staticobjs, deltime);
+		}
 	}
 
 }

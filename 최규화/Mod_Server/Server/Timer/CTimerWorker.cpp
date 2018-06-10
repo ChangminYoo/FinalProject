@@ -218,17 +218,20 @@ void CTimerWorker::ProcessPacket(event_type * et)
 			STC_Attack stc_attack;
 			for (auto bullet : g_bullets)
 			{
-				stc_attack.bull_data.pos4f = bullet->m_bulldata.pos4f;
-				stc_attack.bull_data.rot4f = bullet->m_bulldata.rot4f;
-				stc_attack.bull_data.endpoint = bullet->m_bulldata.endpoint;
-				stc_attack.bull_data.master_id = bullet->m_bulldata.master_id;
-				stc_attack.bull_data.my_id = bullet->m_bulldata.my_id;
-				stc_attack.bull_data.type = bullet->m_bulldata.type;
-				stc_attack.bull_data.alive = bullet->m_bulldata.alive;
-
-				for (auto client : g_clients)
+				if (bullet->GetBulletIsAlive() == true)
 				{
-					client->SendPacket(reinterpret_cast<Packet*>(&stc_attack));
+					stc_attack.bull_data.pos4f = bullet->m_bulldata.pos4f;
+					stc_attack.bull_data.rot4f = bullet->m_bulldata.rot4f;
+					stc_attack.bull_data.endpoint = bullet->m_bulldata.endpoint;
+					stc_attack.bull_data.master_id = bullet->m_bulldata.master_id;
+					stc_attack.bull_data.my_id = bullet->m_bulldata.my_id;
+					stc_attack.bull_data.type = bullet->m_bulldata.type;
+					stc_attack.bull_data.alive = bullet->m_bulldata.alive;
+
+					for (auto client : g_clients)
+					{
+						client->SendPacket(reinterpret_cast<Packet*>(&stc_attack));
+					}
 				}
 			}
 

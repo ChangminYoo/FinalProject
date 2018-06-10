@@ -37,11 +37,10 @@ public:
 	Position		  GetBulletOldPos() const { return m_pos4f; }
 	short			  GetBulletID() const { return m_id; }
 	unsigned short    GetBulletMasterID() const { return m_masterID; }
-	PhysicsPoint*	  GetPhysicsPoint() { return pp; }
 	void			  SetBulletNewPos(float x, float y, float z, float w) { m_pos4f.x = x; m_pos4f.y = y; m_pos4f.z = z; m_pos4f.w = w; }
 	void			  SetBulletNewPos(const XMFLOAT4& xmf4) { m_pos4f.x = xmf4.x; m_pos4f.y = xmf4.y; m_pos4f.z = xmf4.z; m_pos4f.w = xmf4.w; }
 	void			  DestroyBullet() { m_alive = false; }
-	char			  GetBulletCurrState() { return m_alive; }
+	char			  GetBulletIsAlive() { return static_cast<bool>(m_alive); }
 
 	XMFLOAT3		  GetLookvector() const { return m_Lookvector; }
 	Rotation		  GetBulletOldRot() const { return m_rot4f; }

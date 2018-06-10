@@ -80,7 +80,9 @@ void CBulletObject::Tick(float deltime)
 	
 	m_lifetime += deltime;
 	
-	if (m_lifetime >= MAX_LIGHT_BULLET_TIME)
+	if (m_lifetime >= MAX_LIGHT_BULLET_TIME && BULLET_TYPE::protocol_LightBullet == static_cast<int>(m_type))
+		m_alive = false;
+	else if (m_lifetime >= MAX_HEAVY_BULLET_TIME && BULLET_TYPE::protocol_HeavyBullet == static_cast<int>(m_type))
 		m_alive = false;
 
 	m_bulldata.pos4f = { xmf4_pos.x, xmf4_pos.y, xmf4_pos.z, xmf4_pos.w };
@@ -94,12 +96,13 @@ void CBulletObject::Update(float deltime)
 
 void CBulletObject::Collision(vector<CPlayerObject*>* clients, float deltime)
 {
+
 	for (auto iter = clients->begin(); iter != clients->end(); ++iter)
 	{
-		if ( (*iter)->GetPhysicsPoint() != nullptr)
+		if ((*iter)->GetPhysicsPoint() != nullptr)
 		{
 			bool test = pp->CollisionTest(*(*iter)->GetPhysicsPoint(), m_Lookvector, m_Rightvector, m_Upvector,
-				(*iter)->GetLookVector(), (*iter)->GetRightVector(), (*iter)->GetUpVector);
+				(*iter)->GetLookVector(), (*iter)->GetRightVector(), (*iter)->GetUpVector());
 
 			if (test)
 			{
@@ -114,36 +117,39 @@ void CBulletObject::Collision(vector<CPlayerObject*>* clients, float deltime)
 
 				pp->ResolveVelocity(*(*iter)->GetPhysicsPoint(), cn, deltime);
 				(*iter)->GetPhysicsPoint()->SetBounce(false);
-				
+
 				m_alive = false;
 				m_bulldata.alive = false;
 			}
 		}
 	}
+	
 }
 
 void CBulletObject::Collision(unordered_set<CStaticObject*>* sobjs, float deltime)
 {
+
 	for (auto iter = sobjs->begin(); iter != sobjs->end(); ++iter)
 	{
 		if ((*iter)->GetPhysicsPoint() != nullptr)
 		{
 			bool test = pp->CollisionTest(*(*iter)->GetPhysicsPoint(), m_Lookvector, m_Rightvector, m_Upvector,
-				(*iter)->GetLookVector(), (*iter)->GetRightVector(), (*iter)->GetUpVector);
+				(*iter)->GetLookVector(), (*iter)->GetRightVector(), (*iter)->GetUpVector());
 
 			if (test)
 			{
 				//고정된 물체면
 				XMFLOAT3 cn;
-				cn = pp->pAxis;		
+				cn = pp->pAxis;
 
 				pp->ResolveVelocity(*(*iter)->GetPhysicsPoint(), cn, deltime);
 				(*iter)->GetPhysicsPoint()->SetBounce(false);
 				m_alive = false;
 				m_bulldata.alive = false;
-			}			
+			}
 		}
 	}
+	
 }
 
 void CBulletObject::SetBulletRotatevalue(const XMFLOAT4 & xmf4)

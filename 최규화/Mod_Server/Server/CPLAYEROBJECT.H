@@ -108,6 +108,8 @@ public:
 	Packet* Get_RecvBuf() { return m_recvbuf; }
 
 	void	GetDamaged(int damage);
+	bool    GetPlayerIsAlive() { return static_cast<bool>(m_alive); }
+	void    SetPlayerIsAlive(char flag) { m_alive = flag; }
 
 	void    SetIsAI(char ai) { m_ai = ai; }
 	bool    GetIsAI() const { return static_cast<bool>(m_ai); }
