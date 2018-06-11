@@ -49,6 +49,6 @@ public:
 	void CreateVertexBuffer(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist);
 	void CreateIndexBuffer(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist);
 	void SetNormal(bool PlayerMesh=false,bool particle = false);//≥Î∏÷¿ª ∞ËªÍ«—¥Ÿ.
-	//void SetFieldTangent();//≈∫¡®∆Æ∏¶ ∞ËªÍ«‘
+	void SetTangent();//≈∫¡®∆Æ∏¶ ∞ËªÍ«‘
 };
 

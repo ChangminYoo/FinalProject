@@ -90,6 +90,7 @@ VertexOut VS(VertexIn vin)
 	vout.Normal = mul(vin.Normal, gWorld);
 	vout.Normal = normalize(vout.Normal);
 	vout.Tangent = mul(vin.Tangent, gWorld);
+	vout.Tangent = normalize(vout.Tangent);
 	vout.PosH = mul(vout.PosH, gViewProj);
 
 	vout.Tex = vin.Tex;
@@ -108,6 +109,7 @@ float4 specular = float4(0,0,0,1);
 float4 litColor = float4(1,1,1,1);
 float3 viewDirection;
 
+float3 NormalVector = pin.Normal;
 
 //텍스쳐의 기본 색상 - 샘플러를 사용하여 값 추출
 textureColor = gDiffuseMap.Sample(gsamAnisotropicWrap, pin.Tex);
@@ -116,6 +118,12 @@ textureColor = gDiffuseMap.Sample(gsamAnisotropicWrap, pin.Tex);
 //clip(textureColor.a - 0.1f);
 //
 
+//CustomData1의 w가 1234 이면 노멀매핑을 쓰는것.
+if (CustomData1.w == 1234)
+{
+	//노멀매핑 처리.
+	//NormalVector;
+}
 if (SpecularParamater >= 0)
 {
 	for (int i = 0; i < nLights; ++i)
@@ -131,7 +139,7 @@ if (SpecularParamater >= 0)
 		specular = float4(0.0f, 0.0f, 0.0f, 0.0f);
 
 		//픽셀당 비치는 빛의양 (0 ~ 1)
-		lightIntensity = saturate(dot(pin.Normal, lightDir));   //-> 람베르트 코사인 법칙 
+		lightIntensity = saturate(dot(NormalVector, lightDir));   //-> 람베르트 코사인 법칙 
 
 																//lightIntensity = round(lightIntensity * 4) / 3;
 
@@ -148,7 +156,7 @@ if (SpecularParamater >= 0)
 
 			litColor = saturate(litColor);
 
-			reflection = normalize(2 * lightIntensity * pin.Normal - lightDir);
+			reflection = normalize(2 * lightIntensity * NormalVector - lightDir);
 
 			//원래는 6.0 대신 32였음.
 			specular = pow(saturate(dot(reflection, viewDirection)), 6.0f)*SpecularParamater;
@@ -177,6 +185,7 @@ litColor = saturate(litColor + specular); //마지막으로 스패큘러 더한다.
 litColor.w = BlendValue;
 
 //litColor.a = textureColor.a;
+
 
 if (nLights > 0)
 return litColor;

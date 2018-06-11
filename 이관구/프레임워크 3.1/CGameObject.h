@@ -40,6 +40,8 @@ struct ObjectData
 	float SpecularParamater=1;
 	int isAnimation = 0;
 	float BlendValue = 1.0f;//최종 블렌딩값
+	
+							//CustomData1의 w가 1234 이면 노멀매핑을 쓰는것.
 	XMFLOAT4 CustomData1 = XMFLOAT4{ 0,0,0,0 };//오브젝트별 특화 데이터.
 	//XMFLOAT4 CustomData2;
 	float PTime = 0.0f;

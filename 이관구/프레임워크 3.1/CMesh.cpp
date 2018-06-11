@@ -89,9 +89,7 @@ void CMesh::SetNormal(bool PlayerMesh,bool particle)//이녀석은 반드시 정점과 인�
 		CVertex v1 = SubResource[i1];
 		CVertex v2 = SubResource[i2];
 
-		if (v0.V.z < -2.2)
-			int a = 3;
-
+		
 
 		XMVECTOR V0 = XMLoadFloat3(&v0.V);
 		XMVECTOR V1 = XMLoadFloat3(&v1.V);
@@ -146,27 +144,94 @@ void CMesh::SetNormal(bool PlayerMesh,bool particle)//이녀석은 반드시 정점과 인�
 			SubResource[i].N.w = ((float)(rand() % 1000 + 1)) / 1000;
 		}
 	}
+
+	if (!particle)
+	{
+		SetTangent();
+	}
+
 }
 
-/*
-void CMesh::SetFieldTangent()
+
+void CMesh::SetTangent()
 {
-	XMFLOAT3 d = SubResource[0].N;
-	XMFLOAT3 tn(0, 1, 0);
-	D3DXVec3Cross(&tn, &d, &tn);
-	D3DXVec3Normalize(&tn, &tn);
-
-	if (tn.x == 0 && tn.y == 0 && tn.z <= 0)
-		tn = XMFLOAT3{ 1,0,0 };
-
-	if (tn.x < 0 || tn.y < 0 || tn.z < 0)
-		tn = -tn;
-
-	D3DXVec3Normalize(&tn, &tn);
+	for (int i = 0; i<(nindex / 3); i++)
+	{
+		int i0 = Index[i * 3 + 0];
+		int i1 = Index[i * 3 + 1];
+		int i2 = Index[i * 3 + 2];
 
 
-	for (int i = 0; i < 4; ++i)
-		SubResource[i].Tangent = tn;
+
+
+		CVertex v0 = SubResource[i0];
+		CVertex v1 = SubResource[i1];
+		CVertex v2 = SubResource[i2];
+
+
+
+		XMVECTOR V0 = XMLoadFloat3(&v0.V);
+		XMVECTOR V1 = XMLoadFloat3(&v1.V);
+		XMVECTOR V2 = XMLoadFloat3(&v2.V);
+
+		XMVECTOR T0 = XMLoadFloat3(&v0.Tangent);
+		XMVECTOR T1 = XMLoadFloat3(&v1.Tangent);
+		XMVECTOR T2 = XMLoadFloat3(&v2.Tangent);
+
+
+
+		XMVECTOR vec0 = V1 - V0;
+		XMVECTOR vec1 = V2 - V0;
+
+		XMFLOAT3 vector0;
+		XMFLOAT3 vector1;
+
+		XMStoreFloat3(&vector0, vec0);
+		XMStoreFloat3(&vector1, vec1);
+
+
+		XMFLOAT2 tuVector;//X축
+		XMFLOAT2 tvVector;//Y축
+
+		//tuVector의 x는 v1-v0의 x값 y 는 v2-v0의 x값.
+		//tvVector의 x는 v1-v0의 y값 y 는 v2-v0의 y값.
+
+		tuVector.x = v1.Tex.x - v0.Tex.x; 
+		tvVector.x = v1.Tex.y - v0.Tex.y;
+		
+		tuVector.y = v2.Tex.x - v0.Tex.x;
+		tvVector.y = v2.Tex.y - v0.Tex.y;
+
+		float den = 1.0f / (tuVector.x * tvVector.x - tuVector.y * tvVector.y);
+
+		XMFLOAT3 tangent;
+		tangent.x = (tvVector.y * vector0.x - tvVector.x * vector1.x) * den;
+		tangent.y = (tvVector.y * vector0.y - tvVector.x * vector1.y) * den;
+		tangent.z = (tvVector.y * vector0.z - tvVector.x * vector1.z) * den;
+
+
+		
+
+	
+		XMStoreFloat3(&SubResource[i0].Tangent, XMLoadFloat3(&tangent));
+		XMStoreFloat3(&SubResource[i1].Tangent, XMLoadFloat3(&tangent));
+		XMStoreFloat3(&SubResource[i2].Tangent, XMLoadFloat3(&tangent));
+
+		
+
+	}
+
+	//이후 각정점의 탄젠트를 단위화 하면됨.
+
+	for (int i = 0; i<nVertex; i++)
+	{
+
+		XMVECTOR T = XMLoadFloat3(&SubResource[i].Tangent);
+		T = XMVector3Normalize(T);
+
+		XMStoreFloat3(&SubResource[i].Tangent, T);
+		
+		auto v=SubResource[i];
+	}
 
 }
-*/

@@ -461,6 +461,11 @@ void Scene::UITick(const GameTimer & gt)
 
 void Scene::Render(const GameTimer& gt)
 {
+	/*
+		렌더하려면 루트시그니처/PSO/카메라와 샘플러 광원 과 같은 공유 리소스 / 메쉬/월드행렬/텍스처 를 연결하면 된다.
+		루트시그니처의 경우 리소스를 연결하기 전에 반드시 연결할것. 보통 첫 시작에서 이걸 연결하면 편함.
+	*/
+
 
 	//나중에 카메라에 뷰포트와 씨저렉트를 갖도록하고 여기에서 연결하도록하자
 
@@ -487,6 +492,9 @@ void Scene::Render(const GameTimer& gt)
 				Shaders->Render(commandlist, gt);
 
 				//UI를 여기서 그린다. UI는 따로 리스트등이 없음.
+
+				//먼저 루트시그니처는 그대로 사용해도 되고 카메라의 경우 UI는 직교투영을 써야하므로 기존 카메라행렬이 아닌
+				//직교투영용 카메라 행렬을 연결한다. 이후 빌보드용 PSO를 연결한다. 루트/pso/공유리소스 까지 다 되었으니 월드행렬과 메쉬를 연결한다.
 				Player->Camera.UpdateConstantBufferOrtho(commandlist);
 				Shaders->SetBillboardShader(commandlist);
 				AimUI->Render(commandlist, gt);

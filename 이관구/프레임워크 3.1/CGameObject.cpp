@@ -2077,6 +2077,7 @@ CubeObject::CubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 	ObjData.isAnimation = 0;
 	ObjData.Scale = 10.0f;
 	ObjData.SpecularParamater = 0.46f;//스페큘러를 낮게준다.
+	ObjData.CustomData1.w = 1234;//CustomData1의 w가 1234 이면 노멀매핑을 쓰는것.
 
 	obs = Static;
 
