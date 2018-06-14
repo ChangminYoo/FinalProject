@@ -155,11 +155,11 @@ void CMesh::SetNormal(bool PlayerMesh,bool particle)//이녀석은 반드시 정점과 인�
 
 void CMesh::SetTangent()
 {
-	for (int i = 0; i<(nindex / 3); i++)
+	for (int i = 0; i<(nVertex / 4); i++)
 	{
-		int i0 = Index[i * 3 + 0];
-		int i1 = Index[i * 3 + 1];
-		int i2 = Index[i * 3 + 2];
+		int i0 = 4*i+0;
+		int i1 = 4*i+1;
+		int i2 = 4*i+2;
 
 
 
@@ -216,6 +216,7 @@ void CMesh::SetTangent()
 		XMStoreFloat3(&SubResource[i0].Tangent, XMLoadFloat3(&tangent));
 		XMStoreFloat3(&SubResource[i1].Tangent, XMLoadFloat3(&tangent));
 		XMStoreFloat3(&SubResource[i2].Tangent, XMLoadFloat3(&tangent));
+		XMStoreFloat3(&SubResource[i2+1].Tangent, XMLoadFloat3(&tangent));
 
 		
 
