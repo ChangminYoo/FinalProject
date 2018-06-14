@@ -67,7 +67,7 @@ void CPlayerObject::Init_PlayerInfo()
 	m_ability.orignHP = 100;
 	m_ability.exp = 0;
 	m_ability.level = 1;
-	m_ability.speed = 10.0f;	
+	m_ability.speed = 10000.0f;	
 
 	if (m_id == 0)
 		m_pos4f = { -100.f, -1000.f, 0.f, 0.f };
