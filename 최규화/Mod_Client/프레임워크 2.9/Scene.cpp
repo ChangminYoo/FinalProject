@@ -863,6 +863,11 @@ void Scene::SET_BULLET_BY_SERVER_DATA(STC_BulletObject_Info & bulldata, const un
 						{
 							lbul->DelObj = true;
 							findBullet = true;
+
+							cout << "Bullet ID: " << bulldata.my_id << "Bullet MID: " << bulldata.master_id <<
+								"Position: " << bulldata.pos4f.x << ", " << bulldata.pos4f.y << ", " << bulldata.pos4f.z << ", " << bulldata.pos4f.w <<
+								"IsAlive: " << static_cast<bool>(bulldata.alive) << endl;
+						
 							break;
 						}
 

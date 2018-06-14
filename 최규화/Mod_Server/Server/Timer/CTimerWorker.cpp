@@ -172,14 +172,14 @@ void CTimerWorker::ProcessPacket(event_type * et)
 
 			//1. 1초에 20번씩 서버에서 업데이트된 클라이언트의 모든정보를 보냄
 			STC_CharCurrState stc_char_state;
-			for(auto client : g_clients)
+			for(auto myclient : g_clients)
 			{
-				if (client->GetIsAI() == true || client->GetConnectState() == false) continue;
+				if (myclient->GetIsAI() == true || myclient->GetConnectState() == false) continue;
 				
-				for (auto client : g_clients)
+				for (auto otherclient : g_clients)
 				{
-					stc_char_state.player_data = move(client->m_pdata);		
-					client->SendPacket(reinterpret_cast<Packet*>(&stc_char_state));
+					stc_char_state.player_data = move(otherclient->m_pdata);
+					myclient->SendPacket(reinterpret_cast<Packet*>(&stc_char_state));
 				}
 				
 				//cout << "Timer // ID : " << g_clients[i]->GetID() << "Pos[x, y, z, w]: " << g_clients[i]->m_pdata.pos.x << " , " << g_clients[i]->m_pdata.pos.y << " , " << g_clients[i]->m_pdata.pos.z << " , " << g_clients[i]->m_pdata.pos.w << endl;
@@ -218,6 +218,10 @@ void CTimerWorker::ProcessPacket(event_type * et)
 			STC_Attack stc_attack;
 			for (auto bullet : g_bullets)
 			{
+				cout << "Bullet ID: " << bullet->GetBulletID() << "Bullet MID: " << bullet->GetBulletMasterID() <<
+					"Position: " << bullet->m_bulldata.pos4f.x << ", " << bullet->m_bulldata.pos4f.y << ", " << bullet->m_bulldata.pos4f.z <<
+					"LifeTime: " << bullet->GetBulletLifeTime() <<" " << "IsAlive:" << static_cast<int>(bullet->GetBulletIsAlive()) << endl;
+
 				if (bullet->GetBulletIsAlive() == true)
 				{
 					stc_attack.bull_data.pos4f = bullet->m_bulldata.pos4f;

@@ -81,13 +81,21 @@ void CBulletObject::Tick(float deltime)
 	m_lifetime += deltime;
 	
 	if (m_lifetime >= MAX_LIGHT_BULLET_TIME && BULLET_TYPE::protocol_LightBullet == static_cast<int>(m_type))
+	{
 		m_alive = false;
+		cout << "불렛 타임 초과" << endl;
+	}
 	else if (m_lifetime >= MAX_HEAVY_BULLET_TIME && BULLET_TYPE::protocol_HeavyBullet == static_cast<int>(m_type))
 		m_alive = false;
+
+	m_pos4f = { xmf4_pos.x , xmf4_pos.y, xmf4_pos.z, xmf4_pos.w };
+	m_rot4f = { xmf4_rot.x, xmf4_rot.y, xmf4_rot.z, xmf4_rot.w };
 
 	m_bulldata.pos4f = { xmf4_pos.x, xmf4_pos.y, xmf4_pos.z, xmf4_pos.w };
 	m_bulldata.rot4f = { xmf4_rot.x, xmf4_rot.y, xmf4_rot.z, xmf4_rot.w };
 	m_bulldata.alive = m_alive;
+
+	cout << "IsAlive: " << static_cast<int>(m_bulldata.alive) << endl;
 }
 
 void CBulletObject::Update(float deltime)
@@ -99,7 +107,7 @@ void CBulletObject::Collision(vector<CPlayerObject*>* clients, float deltime)
 
 	for (auto iter = clients->begin(); iter != clients->end(); ++iter)
 	{
-		if ((*iter)->GetPhysicsPoint() != nullptr)
+		if ((*iter)->GetPhysicsPoint() != nullptr && (*iter)->GetID() != m_masterID)
 		{
 			bool test = pp->CollisionTest(*(*iter)->GetPhysicsPoint(), m_Lookvector, m_Rightvector, m_Upvector,
 				(*iter)->GetLookVector(), (*iter)->GetRightVector(), (*iter)->GetUpVector());

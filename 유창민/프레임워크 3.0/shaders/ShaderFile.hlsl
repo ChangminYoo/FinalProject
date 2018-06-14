@@ -85,6 +85,8 @@ VertexOut VS(VertexIn vin)
 	vin.PosL = vin.PosL * Scale;
 	vout.PosH = mul(float4(vin.PosL, 1), gWorld);
 	vout.PosW = vout.PosH;
+	
+
 	vout.Normal = mul(vin.Normal, gWorld);
 	vout.Normal = normalize(vout.Normal);
 
