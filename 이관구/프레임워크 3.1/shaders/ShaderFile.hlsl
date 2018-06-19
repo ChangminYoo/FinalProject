@@ -121,6 +121,11 @@ textureColor = gDiffuseMap.Sample(gsamAnisotropicWrap, pin.Tex);
 //CustomData1의 w가 1234 이면 노멀매핑을 쓰는것.
 if (CustomData1.w == 1234)
 {
+	//노멀매핑할때 텍스처를 절반으로 나눠야함. 0~0.5까지는 일반텍스처고 0.5~1.0 까진 노멀맵
+	float2 ptex = pin.Tex;
+	ptex.x /= 2;
+	textureColor = gDiffuseMap.Sample(gsamAnisotropicWrap, ptex);
+
 	//노멀매핑 처리.
 	//NormalVector;
 }
