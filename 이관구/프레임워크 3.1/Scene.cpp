@@ -237,6 +237,8 @@ void Scene::CreateGameObject()
 	delete resource;
 	resource = new RigidCubeObject(device, commandlist, &BbObject, XMFLOAT4(0, 0, 0, 0));
 	delete resource;
+	resource = new RingObject(device, commandlist, &BbObject, XMFLOAT4(0, 0, 0, 0));
+	delete resource;
 
 	resource = new RangeObject(device, commandlist, &BbObject, XMFLOAT4(0, 0, 0, 0));
 	delete resource;

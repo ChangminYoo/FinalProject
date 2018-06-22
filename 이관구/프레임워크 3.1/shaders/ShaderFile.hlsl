@@ -109,7 +109,6 @@ float4 specular = float4(0,0,0,1);
 float4 litColor = float4(1,1,1,1);
 float3 viewDirection;
 
-float3 NormalVector = pin.Normal;
 
 //텍스쳐의 기본 색상 - 샘플러를 사용하여 값 추출
 textureColor = gDiffuseMap.Sample(gsamAnisotropicWrap, pin.Tex);
@@ -121,14 +120,13 @@ textureColor = gDiffuseMap.Sample(gsamAnisotropicWrap, pin.Tex);
 //CustomData1의 w가 1234 이면 노멀매핑을 쓰는것.
 if (CustomData1.w == 1234)
 {
-	//노멀매핑할때 텍스처를 절반으로 나눠야함. 0~0.5까지는 일반텍스처고 0.5~1.0 까진 노멀맵
-	float2 ptex = pin.Tex;
-	ptex.x /= 2;
-	textureColor = gDiffuseMap.Sample(gsamAnisotropicWrap, ptex);
+	
 
-	//노멀매핑 처리.
-	//NormalVector;
+	
 }
+
+float3 NormalVector = pin.Normal;
+
 if (SpecularParamater >= 0)
 {
 	for (int i = 0; i < nLights; ++i)
@@ -191,7 +189,8 @@ litColor.w = BlendValue;
 
 //litColor.a = textureColor.a;
 
-
+//노멀매핑이 되었는지 확인. 줄무늬가 있으면 노멀매핑때문에 그 줄무늬쪽이 노멀이 0 이되므로 적용된것!
+//litColor = float4(pin.Normal,1);
 if (nLights > 0)
 return litColor;
 else

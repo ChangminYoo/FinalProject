@@ -2036,7 +2036,7 @@ CubeObject::CubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 		Mesh.Index = NULL;
 		Mesh.SubResource = NULL;
 
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "redTex", L"textures/object/red.dds", false, 7, 0);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "redTex", L"textures/object/Red.dds", false, 7, 0);
 		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "orangeTex", L"textures/object/orange.dds", false, 7, 1);
 		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "yellowTex", L"textures/object/yellow.dds", false, 7, 2);
 		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "pinkTex", L"textures/object/pink.dds", false, 7, 3);
@@ -2077,7 +2077,7 @@ CubeObject::CubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 	ObjData.isAnimation = 0;
 	ObjData.Scale = 10.0f;
 	ObjData.SpecularParamater = 0.46f;//스페큘러를 낮게준다.
-	ObjData.CustomData1.w = 1234;//CustomData1의 w가 1234 이면 노멀매핑을 쓰는것.
+	//ObjData.CustomData1.w = 1234;//CustomData1의 w가 1234 이면 노멀매핑을 쓰는것.
 
 	obs = Static;
 
@@ -2109,7 +2109,7 @@ CubeObject::CubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 void CubeObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
 {
 	CreateCube(&Mesh, 1, 1, 1);
-
+	//LoadMD5Model(L".\\플레이어메쉬들\\ring.MD5MESH", &Mesh, 0, 1);
 	Mesh.SetNormal(false);
 	Mesh.CreateVertexBuffer(m_Device, commandlist);
 	Mesh.CreateIndexBuffer(m_Device, commandlist);
@@ -2129,7 +2129,7 @@ void CubeObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer
 {
 	//게임오브젝트의 렌더링은 간단하다. 
 	//텍스처를 연결하고, 월드행렬을 연결한다.
-
+	
 	if (Textures.size() > 0)
 		SetTexture(commandlist, SrvDescriptorHeap, Textures[TextureName].get()->Resource.Get(), false, TexOff);
 
@@ -2329,7 +2329,7 @@ GridObject::GridObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 	ObjData.isAnimation = 0;
 	ObjData.Scale = 1.0f;
 	ObjData.SpecularParamater = 0.3f;//스페큘러를 낮게준다.
-
+	
 	obs = Static;
 	//게임관련 데이터들
 	gamedata.MAXHP = 1;
@@ -2344,7 +2344,7 @@ GridObject::GridObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 void GridObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
 {
 	CreatePentagon(&Mesh, 1200.0f);
-
+	
 	Mesh.CreateVertexBuffer(m_Device, commandlist);
 	Mesh.CreateIndexBuffer(m_Device, commandlist);
 }
@@ -4064,5 +4064,122 @@ void ImpObject::EndAnimation(int nAni)
 	}
 }
 
+RingObject::RingObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, XMFLOAT4 cp):CGameObject(m_Device,commandlist,Plist,cp)
+{
+	if (CreateMesh == false)
+	{
+
+		Mesh.Index = NULL;
+		Mesh.SubResource = NULL;
+
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "redTex", L"textures/object/Red.dds", false, 7, 0);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "orangeTex", L"textures/object/orange.dds", false, 7, 1);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "yellowTex", L"textures/object/yellow.dds", false, 7, 2);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "pinkTex", L"textures/object/pink.dds", false, 7, 3);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "whiteTex", L"textures/object/white.dds", false, 7, 4);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "blueTex", L"textures/object/blue.dds", false, 7, 5);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "greenTex", L"textures/object/green.dds", false, 7, 6);
+
+		SetMesh(m_Device, commandlist);
+		SetMaterial(m_Device, commandlist);
+
+		CreateMesh = true;
+
+	}
+	selectColor = rand() % 7 + 0;
+	if (selectColor == 0)
+		TextureName = "redTex";
+	else if (selectColor == 1)
+		TextureName = "orangeTex";
+	else if (selectColor == 2)
+		TextureName = "yellowTex";
+	else if (selectColor == 3)
+		TextureName = "pinkTex";
+	else if (selectColor == 4)
+		TextureName = "whiteTex";
+	else if (selectColor == 5)
+		TextureName = "blueTex";
+	else if (selectColor == 6)
+		TextureName = "greenTex";
+	
+	TexOff = selectColor;
+	Blending = true;
+	ObjData.BlendValue = 0.45;
+
+	//게임오브젝트마다 룩벡터와 라이트벡터가 다르므로 초기 오프셋 설정을 해준다.
+	//실제 룩벡터 등은 모두 UpdateLookVector에서 처리된다(라이트벡터도) 따라서 Tick함수에서 반드시 호출해야한다.
+	OffLookvector = XMFLOAT3(0, 0, 1);
+	OffRightvector = XMFLOAT3(1, 0, 0);
+
+	UpdateLookVector();
+	ObjData.isAnimation = 0;
+	ObjData.Scale = 10.0f;
+	ObjData.SpecularParamater = 0.46f;//스페큘러를 낮게준다.
+									  //ObjData.CustomData1.w = 1234;//CustomData1의 w가 1234 이면 노멀매핑을 쓰는것.
+
+	obs = Static;
+	DummyPos = XMFLOAT4(0, 100000, 0, 0);//충돌검사를 피하기위해서 일부로 이상한위치를 pp의 중점으로 둔다.
+	//게임관련 데이터들
+	gamedata.MAXHP = 100;
+	gamedata.HP = 100;
+	gamedata.Damage = 0;
+	gamedata.GodMode = true;
+	gamedata.Speed = 0;
+	staticobject = true;
+
+	//광선충돌 검사용 육면체
+	XMFLOAT3 rx(0, 0, 0);
+	XMFLOAT3 ry(0, 0, 0);
+	XMFLOAT3 rz(0, 0, 0);
+	rco.SetPlane(rx, ry, rz);
+
+	//질점오브젝트 사용시 필요한 데이터들 설정
+	pp = new PhysicsPoint();
+	pp->SetPosition(&DummyPos);//이 값은 항상 갱신되야한다.
+	pp->SetHalfBox(0, 0, 0);//충돌 박스의 x,y,z 크기
+	pp->SetDamping(0);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
+	pp->SetBounce(false);//튕기지 않는다.
+	pp->SetMass(INFINITY);//고정된 물체는 무게가 무한이다.
+}
+
+void RingObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
+{
+
+	LoadMD5Model(L".\\플레이어메쉬들\\ring.MD5MESH", &Mesh, 0, 1);
+	Mesh.SetNormal(false);
+	Mesh.CreateVertexBuffer(m_Device, commandlist);
+	Mesh.CreateIndexBuffer(m_Device, commandlist);
+
+}
+
+void RingObject::SetMaterial(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
+{
+	if (Mat.ConstBuffer == NULL)
+		Mat.ConstBuffer = new UploadBuffer<MaterialData>(m_Device, 1, true);
 
 
+	Mat.MatData.Roughness = 0.2f;
+}
+
+void RingObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer & gt)
+{
+	if (times >= 0.125f)
+	{
+		DelObj = true;
+	}
+	else
+
+	{
+		times += gt.DeltaTime();
+		ObjData.Scale += gt.DeltaTime() *1000;
+	}
+
+	if (Textures.size() > 0)
+		SetTexture(commandlist, SrvDescriptorHeap, Textures[TextureName].get()->Resource.Get(), false, TexOff);
+
+	UpdateConstBuffer(commandlist);
+
+	//이후 그린다.
+
+	Mesh.Render(commandlist);
+}

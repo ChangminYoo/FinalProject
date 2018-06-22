@@ -229,7 +229,7 @@ void CMesh::SetTangent()
 
 		XMVECTOR T = XMLoadFloat3(&SubResource[i].Tangent);
 		T = XMVector3Normalize(T);
-
+		T = XMVectorSet(1, 0, 0, 0);
 		XMStoreFloat3(&SubResource[i].Tangent, T);
 		
 		auto v=SubResource[i];
