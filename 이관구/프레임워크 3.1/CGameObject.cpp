@@ -64,6 +64,8 @@ void CGameObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTime
 
 void CGameObject::ToDamage(float Damage)
 {
+	if (Damage >= 100)
+		Damage = 1;
 	if (gamedata.GodMode == false)
 	{
 		gamedata.HP -= fabsf(Damage);
@@ -340,17 +342,16 @@ CCubeManObject::CCubeManObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 	pp->SetDamping(0.45);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
 	pp->SetBounce(false);//튕기지 않는다.
 	
+	isShieldOn = false;
 	
 	//머리위에 HP바 띄움
 	if (ParticleList != NULL)
 	{
 		Hpbar = new BarObject(m_Device, commandlist, ParticleList, this, 10, XMFLOAT4(CenterPos.x, 10, CenterPos.z, 0));
 		HPFrame = new BarFrameObject(m_Device, commandlist, ParticleList, this, 10, XMFLOAT4(CenterPos.x, 10, CenterPos.z, 0));
-		//ShieldEffect = new ShieldAmor(m_Device, commandlist, ParticleList, this, XMFLOAT4(CenterPos.x, CenterPos.y+10, CenterPos.z, 0));
-	
 		ParticleList->push_back(HPFrame);
 		ParticleList->push_back(Hpbar);
-		//ParticleList->push_back(ShieldEffect);
+
 	}
 
 }
@@ -358,7 +359,6 @@ CCubeManObject::CCubeManObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 CCubeManObject::~CCubeManObject()
 {
 	
-
 	if (Hpbar != NULL)
 		Hpbar->DelObj = true;
 	if (HPFrame != NULL)
@@ -527,7 +527,7 @@ BulletCube::BulletCube(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 		Mesh.Index = NULL;
 		Mesh.SubResource = NULL;
 
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "BulletTex", L"textures/effect/fire.dds", false);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "BulletTex", L"textures/effect/sparktex.dds", false);
 		SetMesh(m_Device, commandlist);
 		SetMaterial(m_Device, commandlist);
 		CreateMesh = true;
@@ -554,8 +554,8 @@ BulletCube::BulletCube(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 	gamedata.HP = 1;
 	gamedata.Damage = 10;
 	gamedata.GodMode = true;
-	gamedata.Speed = 250;
-	LifeTime = 3.5f;
+	gamedata.Speed = 200;
+	LifeTime = 5.5f;
 	Master = master;
 	LockOn = lockon;
 
@@ -579,8 +579,8 @@ BulletCube::BulletCube(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 	{
 		BulletParticles = new ParticleObject(m_Device, commandlist, ParticleList, this, 0.2f, XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, 0));
 		ParticleList->push_back(BulletParticles);
-		BulletParticles2 = new ParticleObject(m_Device, commandlist, ParticleList, this, 0.3f, XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, 0));
-		ParticleList->push_back(BulletParticles2);
+		//BulletParticles2 = new ParticleObject(m_Device, commandlist, ParticleList, this, 0.3f, XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, 0));
+		//ParticleList->push_back(BulletParticles2);
 	}
 
 }
@@ -664,6 +664,9 @@ void BulletCube::Collision(list<CGameObject*>* collist, float DeltaTime)
 
 			if (test)//충돌했으면 pp의 경우는 그냥 데미지를 주고 자신을 없애면 됨. 
 			{
+				if ((*i)->isShieldOn) //상대가 실드 on 상태면
+					gamedata.Damage = 100; //100 이지만 1만뜸 텍스쳐 stride때문에 100이라고 설정하고 ToDamage에서 1로 설정
+
 				//1. 먼저 데미지를 준다.
 				(*i)->ToDamage(gamedata.Damage);
 
@@ -675,8 +678,6 @@ void BulletCube::Collision(list<CGameObject*>* collist, float DeltaTime)
 				//고정된 물체가 아니면
 				if ((*i)->staticobject == false)
 				{
-
-
 
 					//상대속도 방향을 구한다. A-B
 					cn = XMFloat4to3(Float4Add(pp->GetPosition(), (*(*i)->pp).GetPosition(), false));
@@ -770,8 +771,8 @@ HeavyBulletCube::HeavyBulletCube(ID3D12Device * m_Device, ID3D12GraphicsCommandL
 	{
 		BulletParticles = new ParticleObject(m_Device, commandlist, ParticleList, this, 0.2f, XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, 0));
 		ParticleList->push_back(BulletParticles);
-		BulletParticles2 = new ParticleObject(m_Device, commandlist, ParticleList, this, 0.3f, XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, 0));
-		ParticleList->push_back(BulletParticles2);
+		//BulletParticles2 = new ParticleObject(m_Device, commandlist, ParticleList, this, 0.3f, XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, 0));
+		//ParticleList->push_back(BulletParticles2);
 	}
 
 }
@@ -858,6 +859,9 @@ void HeavyBulletCube::Collision(list<CGameObject*>* collist, float DeltaTime)
 
 			if (test)//충돌했으면 pp의 경우는 그냥 데미지를 주고 자신을 없애면 됨. 
 			{
+				if ((*i)->isShieldOn) //상대가 실드 on 상태면
+					gamedata.Damage = 100; //100 이지만 1만뜸 텍스쳐 stride때문에 100이라고 설정하고 ToDamage에서 1로 설정
+
 				//1. 먼저 데미지를 준다.
 				(*i)->ToDamage(gamedata.Damage);
 				if ((*i)->gamedata.MAXHP > 1000)//보스몬스터면
@@ -1038,6 +1042,8 @@ void Tetris1::Collision(list<CGameObject*>* collist, float DeltaTime)
 
 			if (test)//충돌했으면 pp의 경우는 그냥 데미지를 주고 자신을 없애면 됨. 
 			{
+				if ((*i)->isShieldOn) //상대가 실드 on 상태면
+					gamedata.Damage = 100; //100 이지만 1만뜸 텍스쳐 stride때문에 100이라고 설정하고 ToDamage에서 1로 설정
 				//1. 먼저 데미지를 준다.
 				(*i)->ToDamage(gamedata.Damage);
 
@@ -1213,6 +1219,8 @@ void Tetris2::Collision(list<CGameObject*>* collist, float DeltaTime)
 
 			if (test)//충돌했으면 pp의 경우는 그냥 데미지를 주고 자신을 없애면 됨. 
 			{
+				if ((*i)->isShieldOn) //상대가 실드 on 상태면
+					gamedata.Damage = 100; //100 이지만 1만뜸 텍스쳐 stride때문에 100이라고 설정하고 ToDamage에서 1로 설정
 				//1. 먼저 데미지를 준다.
 				(*i)->ToDamage(gamedata.Damage);
 
@@ -1385,7 +1393,9 @@ void Tetris3::Collision(list<CGameObject*>* collist, float DeltaTime)
 		{
 
 			bool test = pp->CollisionTest(*(*i)->pp, Lookvector, Rightvector, GetUpvector(), (*i)->Lookvector, (*i)->Rightvector, (*i)->GetUpvector());
-
+			
+			if ((*i)->isShieldOn) //상대가 실드 on 상태면
+				gamedata.Damage = 100; //100 이지만 1만뜸 텍스쳐 stride때문에 100이라고 설정하고 ToDamage에서 1로 설정
 			if (test)//충돌했으면 pp의 경우는 그냥 데미지를 주고 자신을 없애면 됨. 
 			{
 				//1. 먼저 데미지를 준다.
@@ -1559,6 +1569,8 @@ void Tetris4::Collision(list<CGameObject*>* collist, float DeltaTime)
 
 			bool test = pp->CollisionTest(*(*i)->pp, Lookvector, Rightvector, GetUpvector(), (*i)->Lookvector, (*i)->Rightvector, (*i)->GetUpvector());
 
+			if ((*i)->isShieldOn) //상대가 실드 on 상태면
+				gamedata.Damage = 100; //100 이지만 1만뜸 텍스쳐 stride때문에 100이라고 설정하고 ToDamage에서 1로 설정
 			if (test)//충돌했으면 pp의 경우는 그냥 데미지를 주고 자신을 없애면 됨. 
 			{
 				//1. 먼저 데미지를 준다.
@@ -3574,7 +3586,28 @@ void RangeObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTime
 
 
 ////////////////////
+/*
+	현재 구현한 파티클 갯수 : 1
 
+	이름 : ParticleObject
+	설명 : 꼬리에 불붙은것 처럼 약간 퍼져서 원뿔 모양으로 날아감. 투사체에 적용하기 위함.
+	구현방법 : 일단 투사체의 룩벡터의 반대방향으로 향하는게 기본뼈대 방향으로 삼아야한다.
+	이후 독자적인 각 정점마다 날아갈 방향을 정해줘야한다.
+	이를위해 나는 버텍스의 노멀값에다가 날아갈 속도를 넣어줬음. 즉 이름만 노멀일뿐 실은 날아갈 속도임.
+	xyz는 cos과 sin, 랜덤값을 이용해 각각 날아갈 방향으로 지정해줬으며
+	w의 경우 시작되는 지점을 정해줌. 뭔소리냐면 파티클의 각 위치는 정해준 속도 * 흘러간 시간으로 위치를 바꾼다.
+	문제는 흘러간 시간을 0부터 시작하게되면 일괄적으로 같은위치에 존재하므로 뭔가 어색하게 된다. 또한 허공에 빈칸도 늘어나고...
+	그래서 흘러간시간에다가 랜덤한 시작점을 넣어줌. 그리고 흘러간시간에 frac를 취해서 0~1사이의 범위를 갖게함.
+	이로서 각 파티클은 0~1사이의 시작 시간을 갖게되고, 그 시간이 서로 다르므로 어떤것은 0의 위치에 있고, 어떤것은 중간위치에 있고 하게
+	되므로 좀더 자연스러운 파티클 표현이 됨.
+
+	또 파티클은 라이프타임이 따로 필요없음. 왜냐하면 PTime에 frac을 해놔서 알아서 0~1범위로 갱신이된다.
+	다만 매 프레임마다 마스터 즉 총알은 움직이므로, 그 총알의 위치를 쫓아가도록 CenterPos를 갱신만 해준다.
+
+*/
+
+
+////////////////////
 ParticleObject::ParticleObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, CGameObject* master, float LifeTime, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
 {
 
@@ -3589,7 +3622,7 @@ ParticleObject::ParticleObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 	gamedata.HP = 0;
 	gamedata.Damage = 0;
 	gamedata.GodMode = true;
-	gamedata.Speed = 10;
+	gamedata.Speed =20;
 	staticobject = true;
 	obs = UI;
 
@@ -3597,7 +3630,7 @@ ParticleObject::ParticleObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 	{
 		Mesh.Index = NULL;
 		Mesh.SubResource = NULL;
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "sparkTex", L"textures/effect/sparkTex.dds", false);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "sparkTex", L"textures/effect/fire.dds", false);
 		SetMesh(m_Device, commandlist);
 		CreateMesh = true;
 
@@ -3607,7 +3640,7 @@ ParticleObject::ParticleObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 	Lookvector = Float3Normalize(Lookvector);
 
 	XMFLOAT3 Vel = XMFLOAT3(Lookvector.x * gamedata.Speed, Lookvector.y * gamedata.Speed, Lookvector.z * gamedata.Speed);
-	ParticleTime = LifeTime;
+	ParticleTime = 0;
 	ObjData.Velocity = Vel;
 
 	auto q = XMLoadFloat4(&Orient);
@@ -3625,7 +3658,7 @@ ParticleObject::ParticleObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 
 void ParticleObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
 {
-	UINT numOfParticle = 40;
+	UINT numOfParticle = 200;
 
 	Mesh.SubResource = new CVertex[numOfParticle];
 	Mesh.nVertex = numOfParticle;
@@ -3638,17 +3671,21 @@ void ParticleObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList 
 	Mesh.nioffset = 0;
 	Mesh.nisize = sizeof(UINT);
 
-	float n = 0.1;
+	
 	//여기서 좌표를 일괄적으로 설정 할 수 있다
 	for (int i = 0; i < numOfParticle; ++i)
 	{
 
-		Mesh.SubResource[i].V.x = CenterPos.x * Lookvector.x + (cosf(MMPE_PI * n));
-		Mesh.SubResource[i].V.y = CenterPos.y * Lookvector.y + (sinf(MMPE_PI * n));
-		Mesh.SubResource[i].V.z = CenterPos.z * Lookvector.z;
-
+		Mesh.SubResource[i].V.x = 0;
+		Mesh.SubResource[i].V.y = 0;
+		Mesh.SubResource[i].V.z = 0;
+		
+		Mesh.SubResource[i].N.x =0 + (cosf(MMPE_PI/180 * i*(float)(rand()%10000)));
+		Mesh.SubResource[i].N.y =0 + (sinf(MMPE_PI/180 * i*(float)(rand() % 10000)));
+		Mesh.SubResource[i].N.z = (cosf(MMPE_PI / 180 * i*(float)(rand() % 10000)));
+		Mesh.SubResource[i].N.w =  (float)(rand() % 100);
 		Mesh.Index[i] = i;
-		n += 0.1;
+		
 	}
 
 	Mesh.CreateVertexBuffer(m_Device, commandlist);
@@ -3658,17 +3695,11 @@ void ParticleObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList 
 
 void ParticleObject::Tick(const GameTimer & gt)
 {
-	LifeTime -= gt.DeltaTime();
-
-	if (LifeTime <= 0.0f)
-	{
-		CenterPos = Master->CenterPos;
-		LifeTime = ParticleTime;
-	}
-
-
-	ObjData.CustomData1.w = rand() % RAND_MAX;
-	ObjData.PTime = gt.DeltaTime();
+	//매프레임마다 마스터의 위치를 따라감.
+	
+	CenterPos = Master->CenterPos;
+	//현재 기본파티클오브젝트는 PTime에 의해 위치가 변경됨.
+	ObjData.PTime += gt.DeltaTime();
 
 }
 
@@ -3701,25 +3732,8 @@ void ParticleObject::Render(ID3D12GraphicsCommandList * commandlist, const GameT
 
 
 
-ShieldAmor::ShieldAmor(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, CGameObject * master, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
+ShieldArmor::ShieldArmor(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, CGameObject * master, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
 {
-	ObjData.isAnimation = 0;
-	ObjData.Scale = 15.0f;
-	ObjData.SpecularParamater = 0.3f;//스페큘러를 낮게준다.
-	ObjData.CustomData1.x = 2;
-	Master = master;
-
-	//게임관련 데이터들
-	gamedata.MAXHP = 0;
-	gamedata.HP = 0;
-	gamedata.Damage = 0;
-	gamedata.GodMode = true;
-	gamedata.Speed = 10;
-	staticobject = true;
-	obs = UI;
-	ObjData.Velocity = { 10,10,10 };
-
-	Master->isShieldOn = true;
 
 	if (CreateMesh == false)
 	{
@@ -3730,80 +3744,78 @@ ShieldAmor::ShieldAmor(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 		CreateMesh = true;
 
 	}
+	OffLookvector = XMFLOAT3(0, 0, 1);
+	OffRightvector = XMFLOAT3(1, 0, 0);
 
+	UpdateLookVector();
+
+	ObjData.isAnimation = 0;
+	ObjData.Scale = 1.0f;
+	ObjData.SpecularParamater = 0.3f;//스페큘러를 낮게준다.
+	Blending = true;
+	ObjData.BlendValue = 0.3;
+	Master = master;
+
+	//게임관련 데이터들
+	gamedata.MAXHP = 100;
+	gamedata.HP = 100;
+	gamedata.Damage = 0;
+	gamedata.GodMode = true;
+	gamedata.Speed = 0;
+	staticobject = true;
+	obs = Static;
+
+	//광선충돌 검사용 육면체
+	XMFLOAT3 rx(10, 0, 0);
+	XMFLOAT3 ry(0, 10, 0);
+	XMFLOAT3 rz(0, 0, 10);
+	rco.SetPlane(rx, ry, rz);
+
+	//질점오브젝트 사용시 필요한 데이터들 설정
+	pp = new PhysicsPoint();
+	pp->SetPosition(&CenterPos);//이 값은 항상 갱신되야한다.
+	pp->SetHalfBox(10, 10, 10);//충돌 박스의 x,y,z 크기
+	pp->SetDamping(0.5f);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
+	pp->SetBounce(false);//튕기지 않는다.
+	pp->SetMass(INFINITY);//고정된 물체는 무게가 무한이다.
+
+	if(Master!=NULL)
+		Master->isShieldOn = true;
 }
 
-void ShieldAmor::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
+void ShieldArmor::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
 {
-	UINT numOfitem = 1;
+	CreateCube(&Mesh, 20, 20, 20);
 
-	Mesh.SubResource = new CVertex;
-	Mesh.nVertex = numOfitem;
-	Mesh.nStride = sizeof(CVertex);
-	Mesh.nOffset = 0;
-
-
-	Mesh.Index = new UINT;
-	Mesh.nindex = numOfitem;
-	Mesh.nioffset = 0;
-	Mesh.nisize = sizeof(UINT);
-
-
-	//여기서 좌표를 일괄적으로 설정 할 수 있다
-	for (int i = 0; i < numOfitem; ++i)
-	{
-		Mesh.SubResource[i].V = XMFLOAT3(0, 0, 0);
-		Mesh.Index[i] = i;
-	}
-
+	Mesh.SetNormal(false);
 	Mesh.CreateVertexBuffer(m_Device, commandlist);
 	Mesh.CreateIndexBuffer(m_Device, commandlist);
 }
 
 
-void ShieldAmor::Tick(const GameTimer & gt)
+void ShieldArmor::Tick(const GameTimer & gt)
 {
-	//LifeTime -= gt.DeltaTime();
+	LifeTime -= gt.DeltaTime();
 	if (LifeTime <= 0)
 	{
 		Master->isShieldOn = false;
 		DelObj = true;
 	}
-	ObjData.PTime = gt.DeltaTime();
 
+	Orient = QuaternionMultiply(Orient, QuaternionRotation(XMFLOAT3(0,1,0), MMPE_PI * gt.DeltaTime()));
 	CenterPos = Master->CenterPos;
-	//CenterPos.x = CenterPos.x * cosf(MMPE_PI * gt.DeltaTime()*0.01f);
-	//CenterPos.y = CenterPos.y;
-	//CenterPos.z = CenterPos.z * sinf(MMPE_PI * gt.DeltaTime()*0.01f);
-	
 }
 
-void ShieldAmor::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer & gt)
+void ShieldArmor::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer & gt)
 {
 	if (Textures.size()>0)
 		SetTexture(commandlist, SrvDescriptorHeap, Textures["ShieldTex"].get()->Resource.Get(), false);
+
 	UpdateConstBuffer(commandlist);
 
-
-	D3D12_VERTEX_BUFFER_VIEW vbv;
-
-	vbv.BufferLocation = Mesh.VertexBuffer->GetGPUVirtualAddress();
-	vbv.StrideInBytes = Mesh.nStride;
-	vbv.SizeInBytes = Mesh.nStride *  Mesh.nVertex;
-
-	commandlist->IASetVertexBuffers(0, 1, &vbv);
-
-	D3D12_INDEX_BUFFER_VIEW ibv;
-	ibv.BufferLocation = Mesh.IndexBuffer->GetGPUVirtualAddress();
-	ibv.Format = DXGI_FORMAT_R16_UINT;
-	ibv.SizeInBytes = Mesh.nisize *  Mesh.nindex;
-
-	commandlist->IASetIndexBuffer(&ibv);
-	commandlist->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
-
-
-	commandlist->DrawIndexedInstanced(Mesh.nindex, 1, Mesh.nioffset, Mesh.nOffset, 0);
+	Mesh.Render(commandlist);
 }
+
 ImpObject::ImpObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
 {
 	//게임오브젝트 생성자에서 기본적인것을 처리했으므로 여기서는

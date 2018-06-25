@@ -3,12 +3,14 @@
 struct VertexIn
 {
 	float3 Pos : POSITION;
-
+	
+	float4 Normal : NORMAL;
 };
 
 struct VertexOut
 {
 	float4 Pos : POSITION;
+	float3 Normal : NORMAL;
 };
 
 struct PSOUT
@@ -29,17 +31,28 @@ struct GeoOut
 
 VertexOut VS(VertexIn vin)
 {
+	const float CDX2 = 20;
 	VertexOut vout;
 
 	vout.Pos = mul(float4(vin.Pos,1), gWorld);
-	vout.Pos = mul(vout.Pos, gView);
-
-
+	//반드시 월드변환 이후에 해야함. 
 	if (CustomData1.x == 2)//총알 파티클
 	{
-		vout.Pos.x += cos(Velocity.x * PTime * 3.141592);
-		vout.Pos.z += sin(Velocity.z * PTime * 3.141592);
+	//	vout.Pos.x += cos(20*Velocity.x * PTime * 3.141592/180 )*5;
+	//	vout.Pos.z += cos(20 * Velocity.z * PTime * 3.141592 ) * 5;
+	//	vout.Pos.y += sin(20 * Velocity.y * PTime * 3.141592/180 ) * 5;
+		//여기서 Normal은 진짜 노멀이 아니라, 버텍스마다 다른속도를 갖게하기 위한 '속도' 이다.
+		float3 NV = float3(0, 0, 0);
+		NV.x = (Velocity.x + vin.Normal.x);
+		NV.y = (Velocity.y + vin.Normal.y);
+		NV.z = (Velocity.z + vin.Normal.z);
+		NV = normalize(NV)*CDX2;
+		vout.Pos.y +=NV.y* frac(PTime*vin.Normal.w/100)*8;
+		vout.Pos.z +=NV.z* frac(PTime*vin.Normal.w/100)*8;
+		vout.Pos.x +=NV.x* frac(PTime*vin.Normal.w/100)*8;
 	}
+
+	vout.Pos = mul(vout.Pos, gView);
 
 
 	return vout;

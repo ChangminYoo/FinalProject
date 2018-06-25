@@ -80,6 +80,11 @@ Scene::~Scene()
 		delete StaticObject.front();
 		StaticObject.pop_front();
 	}
+	while (NoCollObject.size())
+	{
+		delete NoCollObject.front();
+		NoCollObject.pop_front();
+	}
 	if(SkyObject!=NULL)
 		delete SkyObject;
 	while (BbObject.size())
@@ -211,6 +216,7 @@ void Scene::CreateShaderObject()
 		Shaders->RigidObject = &RigidObject;
 		Shaders->BulletObject = &BulletObject;
 		Shaders->StaticObject = &StaticObject;
+		Shaders->NoCollObject = &NoCollObject;
 		Shaders->BbObject = &BbObject;
 		Shaders->LandObject = &LandObject;
 	}
@@ -239,6 +245,9 @@ void Scene::CreateGameObject()
 	delete resource;
 	resource = new RingObject(device, commandlist, &BbObject, XMFLOAT4(0, 0, 0, 0));
 	delete resource;
+	resource = new ShieldArmor(device, commandlist, &BbObject,NULL, XMFLOAT4(0, 0, 0, 0));
+	delete resource;
+
 
 	resource = new RangeObject(device, commandlist, &BbObject, XMFLOAT4(0, 0, 0, 0));
 	delete resource;
@@ -262,6 +271,9 @@ void Scene::CreateGameObject()
 
 	DynamicObject.push_back(new CCubeManObject(device, commandlist,&BbObject, XMFLOAT4(0, 0, 220, 0)));
 	DynamicObject.push_back(new CCubeManObject(device, commandlist,&BbObject, XMFLOAT4(100, 0, 110, 0)));
+
+	NoCollObject.push_back(new ShieldArmor(device, commandlist, &BbObject, DynamicObject.back(), DynamicObject.back()->CenterPos));
+
 	CGameObject* imp = new ImpObject(device, commandlist, &BbObject, XMFLOAT4(-100, 0, 220, 0));
 	((ImpObject*)imp)->fsm = new FSM(imp, &DynamicObject, &StaticObject);
 	DynamicObject.push_back(imp);
@@ -432,6 +444,9 @@ void Scene::CreateUI()
 
 		case 4: // 파동파
 			ct = ct = Player->skilldata.SkillsMaxCoolTime[Player->skilldata.Skills[i]];
+
+		case 5: //실드
+			ct = Player->skilldata.SkillsMaxCoolTime[Player->skilldata.Skills[i]];
 		}
 
 		SkillCoolBar[i] = new CoolBarObject(device, commandlist, NULL,ct, Player->PlayerObject, XMFLOAT4(i*100-150,0.98*-mHeight / 2, 0, 0));
@@ -598,6 +613,17 @@ void Scene::Tick(const GameTimer & gt)
 			else
 				i++;
 		}
+		for (auto i = NoCollObject.begin(); i != NoCollObject.end();)
+		{
+
+			if ((*i)->DelObj == true)
+			{
+				delete *i;//실제 게임오브젝트의 메모리 해제
+				i = NoCollObject.erase(i);//리스트상에서 해당 요소를 지움
+			}
+			else
+				i++;
+		}
 
 
 		//--------------------------------------------------------------
@@ -620,7 +646,8 @@ void Scene::Tick(const GameTimer & gt)
 		//리지드 바디
 		for (auto b = RigidObject.begin(); b != RigidObject.end(); b++)
 			(*b)->Tick(gt);
-
+		for (auto b = NoCollObject.begin(); b != NoCollObject.end(); b++)
+			(*b)->Tick(gt);
 
 		//DynamicObject가 1이면 게임 종료 상태로 만든다!!
 		if (DynamicObject.size() == 1)

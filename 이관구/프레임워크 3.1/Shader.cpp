@@ -382,10 +382,28 @@ void Shader::Render(ID3D12GraphicsCommandList * CommandList, const GameTimer& gt
 						NoBlendingVector.push_back(*b);
 					else
 						HalfBlendingVector.push_back(*b);
-
 				}
+			}		
+	}
+
+	for (auto b = NoCollObject->cbegin(); b != NoCollObject->cend(); b++)
+	{
+
+		if ((*b)->Blending)
+		{
+			BlendingVector.push_back(*b);
+		}
+		else//블랜딩 안씀
+		{
+			if (isRender(*b) == true)
+			{
+
+				if (ishalfalphaRender(*b) == false)
+					NoBlendingVector.push_back(*b);
+				else
+					HalfBlendingVector.push_back(*b);
 			}
-		
+		}
 	}
 
 	//블랜딩이 안되는 오브젝트.
@@ -534,10 +552,11 @@ D3D12_INPUT_LAYOUT_DESC Shader::CreateInputLayout()
 
 D3D12_INPUT_LAYOUT_DESC Shader::CreateInputLayout_GS()
 {
-	UINT nInputElementDescs = 1;
+	UINT nInputElementDescs = 2;
 	D3D12_INPUT_ELEMENT_DESC *pd3dInputElementDescs = new D3D12_INPUT_ELEMENT_DESC[nInputElementDescs];
 	pd3dInputElementDescs[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
-
+	pd3dInputElementDescs[1] = { "NORMAL", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12,
+		D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
 	D3D12_INPUT_LAYOUT_DESC d3dInputLayoutDesc;
 	d3dInputLayoutDesc.pInputElementDescs = pd3dInputElementDescs;
 	d3dInputLayoutDesc.NumElements = nInputElementDescs;

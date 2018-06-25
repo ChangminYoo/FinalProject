@@ -9,8 +9,8 @@ CPlayer::CPlayer(HWND hWnd,ID3D12Device* Device, ID3D12GraphicsCommandList* comm
 
 
 	skilldata.Skills[0] = 0;
-	skilldata.Skills[1] = 4;
-	skilldata.Skills[2] = 2;
+	skilldata.Skills[1] = 4; //1
+	skilldata.Skills[2] = 5; //2
 	skilldata.Skills[3] = 3;
 }
 
@@ -491,6 +491,14 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 
 				}
 				
+			}
+			else if (skilldata.Skills[skilldata.SellectBulletIndex] == 5 && skilldata.isSkillOn[skilldata.SellectBulletIndex])//실드
+			{
+				//실드 생성
+				scene->NoCollObject.push_back(new ShieldArmor(scene->device, scene->commandlist, &scene->BbObject, PlayerObject, PlayerObject->CenterPos));
+				skilldata.SkillsCoolTime[skilldata.SellectBulletIndex] = skilldata.SkillsMaxCoolTime[skilldata.Skills[skilldata.SellectBulletIndex]];
+				skilldata.isSkillOn[skilldata.SellectBulletIndex] = false;
+				skilldata.SellectBulletIndex = 0;
 			}
 
 

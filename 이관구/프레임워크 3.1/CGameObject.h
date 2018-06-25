@@ -235,7 +235,7 @@ public:
 
 };
 
-class ShieldAmor;
+class ShieldArmor;
 
 //============ 캐릭터 ==========//
 class CCubeManObject : public CGameObject
@@ -245,9 +245,9 @@ public:
 	~CCubeManObject();
 	BarObject* Hpbar = NULL;
 	BarFrameObject* HPFrame = NULL;
-	ShieldAmor* ShieldEffect = NULL;
 
 	int select = 0;
+	float reviveTime = 5.0f;
 public:
 	static CMaterial Mat;
 	static bool CreateMesh;//최초로 false며 메쉬를 만든후 true가된다.
@@ -266,8 +266,6 @@ public:
 	virtual void EndAnimation(int nAni);
 
 };
-
-
 
 //---------------------- 투 사 체 -----------------------------//
 class ParticleObject;
@@ -502,15 +500,13 @@ public:
 
 };
 
-class ShieldAmor : public CGameObject
+class ShieldArmor : public CGameObject
 {
 public:
-	ShieldAmor(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, CGameObject* master, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
+	ShieldArmor(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, CGameObject* master, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
 	CGameObject* Master = NULL;//소유자
 
-	float InitX;
-	float InitZ;
-	float LifeTime = 5;
+	float LifeTime = 15;
 
 public:
 	static CMaterial Mat;

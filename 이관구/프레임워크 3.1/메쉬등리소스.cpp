@@ -60,11 +60,11 @@ CMesh  DiceStrike::Mesh;//나중에 메쉬는 static으로 둬야함
 ComPtr<ID3D12DescriptorHeap> DiceStrike::SrvDescriptorHeap;//텍스처 용 힙
 CMaterial DiceStrike::Mat;
 //--------------------------------------------------------------------------------------
-bool ShieldAmor::CreateMesh = false;
-unordered_map<string, unique_ptr<CTexture>> ShieldAmor::Textures;//텍스처들을 저장함
-CMesh ShieldAmor::Mesh;//나중에 메쉬는 static으로 둬야함
-ComPtr<ID3D12DescriptorHeap> ShieldAmor::SrvDescriptorHeap;//텍스처 용 힙
-CMaterial ShieldAmor::Mat;
+bool ShieldArmor::CreateMesh = false;
+unordered_map<string, unique_ptr<CTexture>> ShieldArmor::Textures;//텍스처들을 저장함
+CMesh ShieldArmor::Mesh;//나중에 메쉬는 static으로 둬야함
+ComPtr<ID3D12DescriptorHeap> ShieldArmor::SrvDescriptorHeap;//텍스처 용 힙
+CMaterial ShieldArmor::Mat;
 //--------------------------------------------------------------------------------------
 bool SphereObject::CreateMesh = false;
 unordered_map<string, unique_ptr<CTexture>> SphereObject::Textures;//텍스처들을 저장함

@@ -24,12 +24,13 @@ typedef struct SkillData
 	스킬넘버링 2 : 테트라이크
 	스킬넘버링 3 : 다이스트라이크
 	스킬넘버링 4 : 파동파
+	스킬넘버링 5 : 실드
 	*/
-	float SkillsMaxCoolTime[5] = { 0.6f, 1.1f, 25.0f, 5.0f,20.0f };
+	float SkillsMaxCoolTime[6] = { 0.6f, 1.1f, 25.0f, 5.0f,20.0f, 20.0f };
 
 
 	//스킬별 사용가능 여부
-	bool isSkillOn[4] = { true };
+	bool isSkillOn[6] = { true };
 
 	
 };
