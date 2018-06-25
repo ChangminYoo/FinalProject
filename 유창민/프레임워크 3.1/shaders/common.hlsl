@@ -44,6 +44,7 @@ struct Light
 	float4 DiffuseColor;
 	float4 Direction;
 	float3 Position;
+	float4x4 gShadowTransform;
 	float SpecularPower;
 };
 

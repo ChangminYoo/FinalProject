@@ -236,7 +236,7 @@ void MainFrameWork::Update(const GameTimer& gt)
 		System(gt);
 		//씬클래스의 업데이트를 호출한다.
 		scene->Tick(gt);
-
+		
 		//중력 후처리 시스템은 틱함수 이후에 처리해야함
 
 		AfterGravitySystem(gt);

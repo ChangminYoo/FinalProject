@@ -268,3 +268,20 @@ float4 PS2(VertexOut pin) : SV_Target
 	
 	
 }
+
+//VertexOut ShadowVS(VertexIn vin)
+//{
+//	vin.PosL = vin.PosL * Scale;
+//	vout.PosH = mul(float4(vin.PosL, 1), gWorld);
+//	vout.PosW = vout.PosH;
+//	vout.PosH = mul(vout.PosH, gViewProj);
+//	vout.Tex = vin.Tex;
+//	
+//	return vout;
+//}
+//
+//void ShadowPS(VertexOut pin)
+//{
+//	flaot4 diffuseColor = gDiffuseMap.Sample(gsamAnisotropicWrap, pin.Tex);
+//
+//}

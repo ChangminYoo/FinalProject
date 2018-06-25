@@ -76,6 +76,27 @@ D3D12_DEPTH_STENCIL_DESC Shader::CreateDepthStencilState(bool isBlend)
 
 }
 
+D3D12_DEPTH_STENCIL_DESC Shader::ShadowDepthStencilState()
+{
+	D3D12_DEPTH_STENCIL_DESC d3dDepthStencilDesc;
+	::ZeroMemory(&d3dDepthStencilDesc, sizeof(D3D12_DEPTH_STENCIL_DESC));
+	d3dDepthStencilDesc.DepthEnable = true;
+	d3dDepthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
+	d3dDepthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS;
+	d3dDepthStencilDesc.StencilEnable = true;
+	d3dDepthStencilDesc.StencilReadMask = 0xff;
+	d3dDepthStencilDesc.StencilWriteMask = 0xff;
+	d3dDepthStencilDesc.FrontFace.StencilFailOp = D3D12_STENCIL_OP_KEEP;
+	d3dDepthStencilDesc.FrontFace.StencilDepthFailOp = D3D12_STENCIL_OP_KEEP;
+	d3dDepthStencilDesc.FrontFace.StencilPassOp = D3D12_STENCIL_OP_INCR;
+	d3dDepthStencilDesc.FrontFace.StencilFunc = D3D12_COMPARISON_FUNC_EQUAL;
+	d3dDepthStencilDesc.BackFace.StencilFailOp = D3D12_STENCIL_OP_KEEP;
+	d3dDepthStencilDesc.BackFace.StencilDepthFailOp = D3D12_STENCIL_OP_KEEP;
+	d3dDepthStencilDesc.BackFace.StencilPassOp = D3D12_STENCIL_OP_INCR;
+	d3dDepthStencilDesc.BackFace.StencilFunc = D3D12_COMPARISON_FUNC_EQUAL;
+	return(d3dDepthStencilDesc);
+}
+
 D3D12_BLEND_DESC Shader::CreateBlendState(bool isBlend)
 {
 	if (isBlend == false)
@@ -223,6 +244,12 @@ void Shader::CreateShader(ID3D12Device * Device, ID3D12RootSignature * GraphicsR
 	particlePsoDesc.RasterizerState.CullMode = D3D12_CULL_MODE_NONE;
 	Device->CreateGraphicsPipelineState(&particlePsoDesc, IID_PPV_ARGS(&ParticlePSO));
 
+	//그림자용
+	D3D12_GRAPHICS_PIPELINE_STATE_DESC shadowPsoDesc = d3dPipelineStateDesc;
+	shadowPsoDesc.DepthStencilState = ShadowDepthStencilState();
+	Device->CreateGraphicsPipelineState(&particlePsoDesc, IID_PPV_ARGS(&ShadowPSO));
+
+
 
 	if (d3dPipelineStateDesc.InputLayout.pInputElementDescs)
 		delete[] d3dPipelineStateDesc.InputLayout.pInputElementDescs;
@@ -256,6 +283,12 @@ void Shader::SetBillboardShader(ID3D12GraphicsCommandList * commandlist)
 void Shader::SetParticleShader(ID3D12GraphicsCommandList * commandlist)
 {
 	commandlist->SetPipelineState(ParticlePSO.Get());
+}
+
+void Shader::SetShadowShader(ID3D12GraphicsCommandList * commandlist)
+{
+	commandlist->OMSetStencilRef(0);
+	commandlist->SetPipelineState(ShadowPSO.Get());
 }
 
 
@@ -442,7 +475,10 @@ void Shader::Render(ID3D12GraphicsCommandList * CommandList, const GameTimer& gt
 		(*b)->Render(CommandList, gt);
 	}
 
-
+	//그림자
+	SetShadowShader(CommandList);
+	for (auto b = Shadow->cbegin(); b != Shadow->cend(); b++)
+		(*b)->Render(CommandList, gt); 
 
 	//플레이어의 추적오브젝트.
 	SetShader(CommandList, true);

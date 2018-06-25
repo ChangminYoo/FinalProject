@@ -13,6 +13,8 @@ struct Light
 	XMFLOAT4 Direction = { 0.0f, -1.0f, 0.0f,1 };                 
 	//À§Ä¡
 	XMFLOAT3 Position = { 0.0f, 0.0f, 0.0f };  
+
+	XMFLOAT4X4 ShadowTransform = MathHelper::Identity4x4();
 	float SpecularPower = 64.0f;
 };
 

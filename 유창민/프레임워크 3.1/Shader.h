@@ -19,6 +19,7 @@ public:
 	virtual D3D12_RASTERIZER_DESC CreateRasterizerState();//레스터라이저생성
 	virtual D3D12_BLEND_DESC CreateBlendState(bool isBlend=false);//블랜더상태생성
 	virtual D3D12_DEPTH_STENCIL_DESC CreateDepthStencilState(bool isBlend=false);//깊이상태생성
+	virtual D3D12_DEPTH_STENCIL_DESC ShadowDepthStencilState();//그림자용깊이상태생성
 	virtual D3D12_SHADER_BYTECODE CreateVertexShader(WCHAR *shaderfile, LPCSTR SName,LPCSTR Profile);//버텍스쉐이더생성
 	virtual D3D12_SHADER_BYTECODE CreatePixelShader(WCHAR *shaderfile, LPCSTR SName, LPCSTR Profile);//픽셀쉐이더생성
 	virtual D3D12_SHADER_BYTECODE CreateGeometryShader(WCHAR *shaderfile, LPCSTR SName, LPCSTR Profile);
@@ -32,6 +33,8 @@ public:
 	virtual void SetSkyShader(ID3D12GraphicsCommandList* commandlist);
 	virtual void SetBillboardShader(ID3D12GraphicsCommandList* commandlist);
 	virtual void SetParticleShader(ID3D12GraphicsCommandList* commandlist);
+	virtual void SetShadowShader(ID3D12GraphicsCommandList* commandlist);
+
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList,const GameTimer& gt);
 	virtual bool isRender(CGameObject* obj);
 	//카메라와 플레이어 사이에있는 오브젝트는 반투명하게 그린다.
@@ -48,7 +51,7 @@ protected:
 	ComPtr<ID3D12PipelineState> SkyPSO = nullptr;
 	ComPtr<ID3D12PipelineState> BillboardPSO = nullptr;
 	ComPtr<ID3D12PipelineState> ParticlePSO = nullptr;
-
+	ComPtr<ID3D12PipelineState> ShadowPSO = nullptr;
 public:
 	list<CGameObject*>* DynamicObject=NULL;//애니메이션이 되는 오브젝트들이 여기에 모임.Scene클래스가 가진거를 공유만.
 	list<CGameObject*>* BulletObject = NULL;//투사체들이 여기에 모임.Scene클래스가 가진거를 공유만.
@@ -58,6 +61,7 @@ public:
 	list<CGameObject*>* NoCollObject = NULL; //스태틱인데 충돌이 안일어나는 오브젝트
 
 	vector<CGameObject*>* LandObject = NULL;
+	vector<CGameObject*>* Shadow = NULL;
 
 	CGameObject** SkyObject = NULL;//다른오브젝트와 달리 하나만 있으면 됨
 	

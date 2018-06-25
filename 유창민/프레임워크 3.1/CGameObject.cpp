@@ -390,7 +390,7 @@ void CCubeManObject::SetMaterial(ID3D12Device * m_Device, ID3D12GraphicsCommandL
 	if (Mat.ConstBuffer == NULL)
 		Mat.ConstBuffer = new UploadBuffer<MaterialData>(m_Device, 1, true);
 
-
+	
 	Mat.MatData.Roughness = 0.3f;
 }
 
@@ -2740,7 +2740,7 @@ void DiceObject::Tick(const GameTimer & gt)
 
 	dTime = rand()%11;	
 	ObjData.TexClamp = XMFLOAT4(0.0f + (0.2f*TexStart), 0.2f + (0.2f*TexStart), 0, 0);	
-	CenterPos.x = Master->CenterPos.x; CenterPos.y = 44; CenterPos.z = Master->CenterPos.z;
+	CenterPos.x = Master->CenterPos.x; CenterPos.y = Master->CenterPos.y+20; CenterPos.z = Master->CenterPos.z;
 	
 	if (dTime % 3 == 0 && LifeTime >= 1.0f)
 		TexStart++;
@@ -4175,4 +4175,29 @@ void RingObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer
 	//이후 그린다.
 
 	Mesh.Render(commandlist);
+}
+
+ShadowObject::ShadowObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, CGameObject * master, XMFLOAT4 cp)
+{
+}
+
+void ShadowObject::SetMaterial(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
+{
+	if (Mat.ConstBuffer == NULL)
+		Mat.ConstBuffer = new UploadBuffer<MaterialData>(m_Device, 1, true);
+
+
+	Mat.MatData.Roughness = 0.0f;
+}
+
+void ShadowObject::Tick(const GameTimer & gt)
+{
+
+	//XMStoreFloat4x4(&)
+}
+
+void ShadowObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer & gt)
+{
+	Mat.UpdateConstantBuffer(commandlist);
+
 }

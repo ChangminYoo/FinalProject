@@ -222,7 +222,12 @@ state * state_attack::Execute(float DeltaTime, CGameObject * master, AIdata & ad
 	{
 		
 		if (adata.Target != NULL)
-			adata.Target->ToDamage(20);
+		{
+			if (adata.Target->isShieldOn)
+				adata.Target->ToDamage(100);
+			else
+				adata.Target->ToDamage(20);
+		}
 
 		adata.FireOn = false;
 		
