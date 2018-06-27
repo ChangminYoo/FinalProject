@@ -219,6 +219,8 @@ void Scene::CreateShaderObject()
 		Shaders->NoCollObject = &NoCollObject;
 		Shaders->BbObject = &BbObject;
 		Shaders->LandObject = &LandObject;
+		Shaders->Shadows = &Shadows;
+
 	}
 	
 }
@@ -264,15 +266,17 @@ void Scene::CreateGameObject()
 	resource = new DiceObject(device, commandlist, &BbObject, NULL, NULL, XMFLOAT4(0, 0, 0, 0));
 	delete resource;
 
+	resource = new ShadowObject(device, commandlist, &BbObject, NULL, XMFLOAT4(0, 0, 0, 0));
+	delete resource;
 	//--------------------------------------------------//
 	
 	SkyObject = new SphereObject(device, commandlist,  &BbObject, XMFLOAT4(0, 0, 0, 0));
-	LandObject.push_back(new GridObject(device, commandlist, &BbObject, XMFLOAT4(0, -0.2, 0, 0)));
+	LandObject.push_back(new GridObject(device, commandlist, &BbObject, XMFLOAT4(0, 0, 0, 0)));
 
-	DynamicObject.push_back(new CCubeManObject(device, commandlist,&BbObject, XMFLOAT4(0, 0, 220, 0)));
+	DynamicObject.push_back(new CCubeManObject(device, commandlist,&BbObject, XMFLOAT4(0, 0, -240, 0)));
 	DynamicObject.push_back(new CCubeManObject(device, commandlist,&BbObject, XMFLOAT4(100, 0, 110, 0)));
-
-	NoCollObject.push_back(new ShieldArmor(device, commandlist, &BbObject, DynamicObject.back(), DynamicObject.back()->CenterPos));
+	Shadows.push_back(new ShadowObject(device, commandlist, &BbObject, DynamicObject.front(), XMFLOAT4(0, 0, 0, 0)));
+	//NoCollObject.push_back(new ShieldArmor(device, commandlist, &BbObject, DynamicObject.back(), DynamicObject.back()->CenterPos));
 
 	CGameObject* imp = new ImpObject(device, commandlist, &BbObject, XMFLOAT4(-100, 0, 220, 0));
 	((ImpObject*)imp)->fsm = new FSM(imp, &DynamicObject, &StaticObject);
@@ -411,7 +415,6 @@ void Scene::CreateGameObject()
 	//플레이어의 오브젝트 설정. 이건 나중에 바꿔야함.
 	Player->SetPlayer(DynamicObject.front());
 	Player->PlayerObject->Blending = false;
-
 }
 
 void Scene::CreateUI()
@@ -625,7 +628,17 @@ void Scene::Tick(const GameTimer & gt)
 				i++;
 		}
 
+		for (auto i = Shadows.begin(); i != Shadows.end();)
+		{
 
+			if ((*i)->DelObj == true)
+			{
+				delete *i;//실제 게임오브젝트의 메모리 해제
+				i = Shadows.erase(i);//리스트상에서 해당 요소를 지움
+			}
+			else
+				i++;
+		}
 		//--------------------------------------------------------------
 		//오브젝트 틱함수 처리
 		//--------------------------------------------------------------
@@ -646,7 +659,12 @@ void Scene::Tick(const GameTimer & gt)
 		//리지드 바디
 		for (auto b = RigidObject.begin(); b != RigidObject.end(); b++)
 			(*b)->Tick(gt);
+		
+		
 		for (auto b = NoCollObject.begin(); b != NoCollObject.end(); b++)
+			(*b)->Tick(gt);
+
+		for (auto b = Shadows.begin(); b != Shadows.end(); b++)
 			(*b)->Tick(gt);
 
 		//DynamicObject가 1이면 게임 종료 상태로 만든다!!

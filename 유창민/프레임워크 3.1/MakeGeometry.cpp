@@ -108,7 +108,7 @@ void CreateCube(CMesh * Mesh, float sizex, float sizey, float sizez)
 void CreatePentagon(CMesh* Mesh, float size, float sizey)
 {
 	float half = 0.5 * size;
-	float y = 0.0f;
+	float y = -0.5f;
 
 	float s1 = half * sinf(0.4f * MMPE_PI);
 	float s2 = half * sinf(0.8f * MMPE_PI);

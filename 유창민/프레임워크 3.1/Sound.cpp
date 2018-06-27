@@ -28,8 +28,8 @@ void CSound::DeleteSound()
 		sound[i]->release();
 	}
 
-	system->close();
-	system->release();
+	//system->close();
+	//system->release();
 }
 
 void CSound::PlaySoundEffect(SoundType id)

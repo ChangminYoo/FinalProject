@@ -125,7 +125,7 @@ D3D12_BLEND_DESC Shader::CreateBlendState(bool isBlend)
 		d3dBlendDesc.AlphaToCoverageEnable = FALSE;
 		d3dBlendDesc.IndependentBlendEnable = FALSE;
 		d3dBlendDesc.RenderTarget[0].BlendEnable = true;
-		d3dBlendDesc.RenderTarget[0].LogicOpEnable = FALSE;
+		d3dBlendDesc.RenderTarget[0].LogicOpEnable = false;
 		d3dBlendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;
 		d3dBlendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
 		d3dBlendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
@@ -138,6 +138,7 @@ D3D12_BLEND_DESC Shader::CreateBlendState(bool isBlend)
 
 	}
 }
+
 
 D3D12_SHADER_BYTECODE Shader::CompileShaderFromFile(WCHAR *pszFileName, LPCSTR
 	pszShaderName, LPCSTR pszShaderProfile, ID3DBlob **blob)
@@ -246,8 +247,9 @@ void Shader::CreateShader(ID3D12Device * Device, ID3D12RootSignature * GraphicsR
 
 	//그림자용
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC shadowPsoDesc = d3dPipelineStateDesc;
+	shadowPsoDesc.BlendState = CreateBlendState(true);
 	shadowPsoDesc.DepthStencilState = ShadowDepthStencilState();
-	Device->CreateGraphicsPipelineState(&particlePsoDesc, IID_PPV_ARGS(&ShadowPSO));
+	Device->CreateGraphicsPipelineState(&shadowPsoDesc, IID_PPV_ARGS(&ShadowPSO));
 
 
 
@@ -295,6 +297,7 @@ void Shader::SetShadowShader(ID3D12GraphicsCommandList * commandlist)
 
 void Shader::Render(ID3D12GraphicsCommandList * CommandList, const GameTimer& gt)
 {
+
 	//이제 이렇게 그릴때 마다 그리기전에 옳바른 PSO를 연결하고, 오브젝트들을 그린다.
 	//순서는 상관없을 수도 있지만, 배경을 먼저 그리는게 좋다고 판단되서 스카이 오브젝트만 먼저그림
 	SetSkyShader(CommandList);
@@ -370,7 +373,6 @@ void Shader::Render(ID3D12GraphicsCommandList * CommandList, const GameTimer& gt
 			}
 		}
 	}
-
 
 	//============ 스태틱오브젝트와 리지드바디 오브젝트는 블렌딩이 일어나므로, 노블랜딩 -> 블랜딩 오브젝트 순으로 그려야한다. ==================//
 	vector<CGameObject*> NoBlendingVector;//블랜딩안씀
@@ -453,6 +455,8 @@ void Shader::Render(ID3D12GraphicsCommandList * CommandList, const GameTimer& gt
 		(*b)->Render(CommandList, gt);
 	}
 
+
+
 	//하프블랜딩 쓰는 오브젝트.
 	SetShader(CommandList, true);
 	for (auto b = HalfBlendingVector.cbegin(); b != HalfBlendingVector.cend(); b++)
@@ -468,21 +472,23 @@ void Shader::Render(ID3D12GraphicsCommandList * CommandList, const GameTimer& gt
 		(*b)->ObjData.BlendValue = tempblend;
 	}
 
+	//그림자
+	SetShadowShader(CommandList);
+	for (auto b = Shadows->cbegin(); b != Shadows->cend(); b++)
+		(*b)->Render(CommandList, gt);
+
 	// ========================= 파티클 ======================================//
 	SetParticleShader(CommandList);
 	for (auto b = BbObject->cbegin(); b != BbObject->cend(); b++)
 	{
 		(*b)->Render(CommandList, gt);
 	}
-
-	//그림자
-	SetShadowShader(CommandList);
-	for (auto b = Shadow->cbegin(); b != Shadow->cend(); b++)
-		(*b)->Render(CommandList, gt); 
+	
 
 	//플레이어의 추적오브젝트.
 	SetShader(CommandList, true);
 	player->TraceObject->Render(CommandList, gt);
+
 
 }
 

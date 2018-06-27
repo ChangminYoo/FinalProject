@@ -62,7 +62,7 @@ void AimObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer 
 	if (Textures.size()>0)
 		SetTexture(commandlist, SrvDescriptorHeap, Textures["AimTex"].get()->Resource.Get(), false);
 	//월드변환 업데이트 및 연결
-	UpdateConstBuffer(commandlist);
+	UpdateConstBuffer(commandlist, false);
 
 	//애니메이션이 있으면 애니메이션또한 연결
 
@@ -149,7 +149,7 @@ void CoolBarObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTi
 {
 	if (Textures.size()>0)
 		SetTexture(commandlist, SrvDescriptorHeap, Textures["CoolBarTex"].get()->Resource.Get(), false);
-	UpdateConstBuffer(commandlist);
+	UpdateConstBuffer(commandlist, false);
 
 
 	D3D12_VERTEX_BUFFER_VIEW vbv;
@@ -233,7 +233,7 @@ void SkillFrameUIObject::Render(ID3D12GraphicsCommandList * commandlist, const G
 	if (Textures.size()>0)
 		SetTexture(commandlist, SrvDescriptorHeap, Textures["SkillBG"].get()->Resource.Get(), false);
 	//월드변환 업데이트 및 연결
-	UpdateConstBuffer(commandlist);
+	UpdateConstBuffer(commandlist, false);
 
 	//애니메이션이 있으면 애니메이션또한 연결
 
@@ -330,7 +330,7 @@ void SkillUIObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTi
 	if (Textures.size()>0)
 		SetTexture(commandlist, SrvDescriptorHeap, Textures[TextureName].get()->Resource.Get(), false, TexOff);
 	//월드변환 업데이트 및 연결
-	UpdateConstBuffer(commandlist);
+	UpdateConstBuffer(commandlist, false);
 
 	//애니메이션이 있으면 애니메이션또한 연결
 
@@ -415,7 +415,7 @@ void SelectBarObject::Render(ID3D12GraphicsCommandList * commandlist, const Game
 {
 	if (Textures.size()>0)
 		SetTexture(commandlist, SrvDescriptorHeap, Textures["SelectTex"].get()->Resource.Get(), false);
-	UpdateConstBuffer(commandlist);
+	UpdateConstBuffer(commandlist, false);
 
 
 	D3D12_VERTEX_BUFFER_VIEW vbv;
@@ -504,7 +504,7 @@ void BackGroundObject::Render(ID3D12GraphicsCommandList * commandlist, const Gam
 	if (Textures.size()>0)
 		SetTexture(commandlist, SrvDescriptorHeap, Textures[TextureName].get()->Resource.Get(), false,TexOff);
 	//월드변환 업데이트 및 연결
-	UpdateConstBuffer(commandlist);
+	UpdateConstBuffer(commandlist, false);
 
 	//애니메이션이 있으면 애니메이션또한 연결
 

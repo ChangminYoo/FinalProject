@@ -69,7 +69,7 @@ public:
 	CGameObject* SkyObject = NULL;//스카이박스용 객체를 다룬다. 스카이박스는 하나면 됨.
 
 	vector<CGameObject*> LandObject;
-
+	list<CGameObject*> Shadows;
 
 	CGameObject* AimUI = NULL;
 	CGameObject* BackGround = NULL;

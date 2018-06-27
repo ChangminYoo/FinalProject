@@ -61,7 +61,7 @@ public:
 	list<CGameObject*>* NoCollObject = NULL; //스태틱인데 충돌이 안일어나는 오브젝트
 
 	vector<CGameObject*>* LandObject = NULL;
-	vector<CGameObject*>* Shadow = NULL;
+	list<CGameObject*>* Shadows = NULL;
 
 	CGameObject** SkyObject = NULL;//다른오브젝트와 달리 하나만 있으면 됨
 	

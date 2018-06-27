@@ -57,6 +57,27 @@ void CGameObject::SetWorldMatrix()
 	XMStoreFloat4x4(&ObjData.WorldMatrix, wmatrix);
 }
 
+void CGameObject::SetShadowMatrix()
+{
+	auto wmatrix = XMMatrixIdentity();
+	auto pos = XMLoadFloat4(&CenterPos);
+	auto quater = XMLoadFloat4(&Orient);
+	
+	wmatrix *= XMMatrixRotationY(0.5f*MMPE_PI);
+	wmatrix *= XMMatrixTranslationFromVector(pos);
+	
+	XMStoreFloat4x4(&ObjData.WorldMatrix, wmatrix);
+
+	XMFLOAT3 Direction = { 0.7f,-1.5f,1.1f };
+
+	XMVECTOR shadowPlane = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f); // xz plane
+	XMVECTOR toMainLight = -XMLoadFloat3(&Direction);
+	XMMATRIX S = XMMatrixShadow(shadowPlane, toMainLight);
+	XMMATRIX shadowOffsetY = XMMatrixTranslation(0.0f, 0.01f, 0.0f);
+
+	XMStoreFloat4x4(&ObjData.WorldMatrix, wmatrix* S * shadowOffsetY);
+}
+
 void CGameObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer& gt)
 {
 
@@ -150,16 +171,20 @@ void CGameObject::CreateConstBuffer(ID3D12Device * m_Device)
 
 }
 
-void CGameObject::UpdateConstBuffer(ID3D12GraphicsCommandList * commandlist)
+void CGameObject::UpdateConstBuffer(ID3D12GraphicsCommandList * commandlist, bool isShadow)
 {
 	//항상 호출할것. 룩벡터와 라이트벡터를 업데이트해준다.
 	UpdateLookVector();
-	
-	SetWorldMatrix();//현재 포지션과 로테이션정보로 월드행렬을 만든다.
+
+	if (isShadow == false)
+		SetWorldMatrix();//현재 포지션과 로테이션정보로 월드행렬을 만든다.
+	else
+		SetShadowMatrix();
 
 	XMMATRIX world = XMLoadFloat4x4(&ObjData.WorldMatrix);
 
 	XMStoreFloat4x4(&ObjData.WorldMatrix, XMMatrixTranspose(world));
+	
 
 	//상수버퍼 업데이트
 	ConstBuffer->CopyData(0, ObjData);
@@ -432,7 +457,7 @@ void CCubeManObject::Render(ID3D12GraphicsCommandList * commandlist, const GameT
 
 
 
-	UpdateConstBuffer(commandlist);
+	UpdateConstBuffer(commandlist, false);
 
 	Mat.UpdateConstantBuffer(commandlist);
 
@@ -639,7 +664,7 @@ void BulletCube::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer
 
 	if (Textures.size()>0)
 		SetTexture(commandlist, SrvDescriptorHeap, Textures["BulletTex"].get()->Resource.Get(), false);
-	UpdateConstBuffer(commandlist);
+	UpdateConstBuffer(commandlist, false);
 
 	Mat.UpdateConstantBuffer(commandlist);
 
@@ -834,7 +859,7 @@ void HeavyBulletCube::Render(ID3D12GraphicsCommandList * commandlist, const Game
 
 	if (Textures.size()>0)
 		SetTexture(commandlist, SrvDescriptorHeap, Textures["BulletTex"].get()->Resource.Get(), false);
-	UpdateConstBuffer(commandlist);
+	UpdateConstBuffer(commandlist, false);
 
 	Mat.UpdateConstantBuffer(commandlist);
 
@@ -1017,7 +1042,7 @@ void Tetris1::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer& g
 
 	if (Textures.size()>0)
 		SetTexture(commandlist, SrvDescriptorHeap, Textures["Tetris1Tex"].get()->Resource.Get(), false);
-	UpdateConstBuffer(commandlist);
+	UpdateConstBuffer(commandlist, false);
 
 	Mat.UpdateConstantBuffer(commandlist);
 
@@ -1194,7 +1219,7 @@ void Tetris2::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer& g
 
 	if (Textures.size()>0)
 		SetTexture(commandlist, SrvDescriptorHeap, Textures["Tetris2Tex"].get()->Resource.Get(), false);
-	UpdateConstBuffer(commandlist);
+	UpdateConstBuffer(commandlist, false);
 
 	Mat.UpdateConstantBuffer(commandlist);
 
@@ -1371,7 +1396,7 @@ void Tetris3::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer& g
 
 	if (Textures.size()>0)
 		SetTexture(commandlist, SrvDescriptorHeap, Textures["Tetris3Tex"].get()->Resource.Get(), false);
-	UpdateConstBuffer(commandlist);
+	UpdateConstBuffer(commandlist, false);
 
 	Mat.UpdateConstantBuffer(commandlist);
 
@@ -1546,7 +1571,7 @@ void Tetris4::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer& g
 
 	if (Textures.size()>0)
 		SetTexture(commandlist, SrvDescriptorHeap, Textures["Tetris4Tex"].get()->Resource.Get(), false);
-	UpdateConstBuffer(commandlist);
+	UpdateConstBuffer(commandlist, false);
 
 	Mat.UpdateConstantBuffer(commandlist);
 
@@ -1774,7 +1799,7 @@ void Tetrike::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer& g
 
 	if (Textures.size()>0)
 		SetTexture(commandlist, SrvDescriptorHeap, Textures["Tetrike"].get()->Resource.Get(), false);
-	UpdateConstBuffer(commandlist);
+	UpdateConstBuffer(commandlist, false);
 
 	Mat.UpdateConstantBuffer(commandlist);
 
@@ -1903,7 +1928,7 @@ void DiceStrike::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer
 
 	if (Textures.size()>0)
 		SetTexture(commandlist, SrvDescriptorHeap, Textures["DiceStrike"].get()->Resource.Get(), false);
-	UpdateConstBuffer(commandlist);
+	UpdateConstBuffer(commandlist, false);
 
 	Mat.UpdateConstantBuffer(commandlist);
 
@@ -2028,7 +2053,7 @@ void SphereObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTim
 
 	if (Textures.size()>0)
 		SetTexture(commandlist, SrvDescriptorHeap, Textures["MapTex"].get()->Resource.Get(), true);
-	UpdateConstBuffer(commandlist);
+	UpdateConstBuffer(commandlist, false);
 
 	//이후 그린다.
 
@@ -2145,7 +2170,7 @@ void CubeObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer
 	if (Textures.size() > 0)
 		SetTexture(commandlist, SrvDescriptorHeap, Textures[TextureName].get()->Resource.Get(), false, TexOff);
 
-	UpdateConstBuffer(commandlist);
+	UpdateConstBuffer(commandlist, false);
 
 	//이후 그린다.
 
@@ -2264,7 +2289,7 @@ void MoveCubeObject::Render(ID3D12GraphicsCommandList * commandlist, const GameT
 	if (Textures.size() > 0)
 		SetTexture(commandlist, SrvDescriptorHeap, Textures[TextureName].get()->Resource.Get(), false, TexOff);
 
-	UpdateConstBuffer(commandlist);
+	UpdateConstBuffer(commandlist, false);
 
 	//이후 그린다.
 	Mesh.Render(commandlist);
@@ -2377,8 +2402,9 @@ void GridObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer
 
 	if (Textures.size()>0)
 		SetTexture(commandlist, SrvDescriptorHeap, Textures["GridTex"].get()->Resource.Get(), false);
-	UpdateConstBuffer(commandlist);
+	UpdateConstBuffer(commandlist, false);
 
+	Mat.UpdateConstantBuffer(commandlist);
 	//이후 그린다.
 
 	Mesh.Render(commandlist);
@@ -2461,7 +2487,7 @@ void BarObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer 
 {
 	if (Textures.size()>0)
 		SetTexture(commandlist, SrvDescriptorHeap, Textures["HPTex"].get()->Resource.Get(), false);
-	UpdateConstBuffer(commandlist);
+	UpdateConstBuffer(commandlist, false);
 
 
 	D3D12_VERTEX_BUFFER_VIEW vbv;
@@ -2553,7 +2579,7 @@ void BarFrameObject::Render(ID3D12GraphicsCommandList * commandlist, const GameT
 {
 	if (Textures.size()>0)
 		SetTexture(commandlist, SrvDescriptorHeap, Textures["HPFrameTex"].get()->Resource.Get(), false);
-	UpdateConstBuffer(commandlist);
+	UpdateConstBuffer(commandlist, false);
 
 
 	D3D12_VERTEX_BUFFER_VIEW vbv;
@@ -2754,7 +2780,7 @@ void DiceObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer
 	if (Textures.size()>0)
 		SetTexture(commandlist, SrvDescriptorHeap, Textures["DiceTex"].get()->Resource.Get(), false);
 
-	UpdateConstBuffer(commandlist);
+	UpdateConstBuffer(commandlist, false);
 
 
 	D3D12_VERTEX_BUFFER_VIEW vbv;
@@ -2859,7 +2885,7 @@ void DamageObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTim
 	if (Textures.size() > 0)
 		SetTexture(commandlist, SrvDescriptorHeap, Textures["DamageTex"].get()->Resource.Get(), false);
 
-	UpdateConstBuffer(commandlist);
+	UpdateConstBuffer(commandlist, false);
 
 
 	D3D12_VERTEX_BUFFER_VIEW vbv;
@@ -2980,7 +3006,7 @@ void RigidCubeObject::Render(ID3D12GraphicsCommandList * commandlist, const Game
 {
 	if (Textures.size()>0)
 		SetTexture(commandlist, SrvDescriptorHeap, Textures["CubeTex"].get()->Resource.Get(), false);
-	UpdateConstBuffer(commandlist);
+	UpdateConstBuffer(commandlist, false);
 
 	//이후 그린다.
 
@@ -3196,7 +3222,7 @@ void SmallWallObject::Render(ID3D12GraphicsCommandList * commandlist, const Game
 
 	if (Textures.size()>0)
 		SetTexture(commandlist, SrvDescriptorHeap, Textures["SmallWall"].get()->Resource.Get(), false);
-	UpdateConstBuffer(commandlist);
+	UpdateConstBuffer(commandlist, false);
 
 	//이후 그린다.
 
@@ -3307,7 +3333,7 @@ void BigWallObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTi
 
 	if (Textures.size()>0)
 		SetTexture(commandlist, SrvDescriptorHeap, Textures["Wall"].get()->Resource.Get(), false);
-	UpdateConstBuffer(commandlist);
+	UpdateConstBuffer(commandlist, false);
 
 	//이후 그린다.
 
@@ -3401,7 +3427,7 @@ void BuildingObject::Render(ID3D12GraphicsCommandList * commandlist, const GameT
 
 	if (Textures.size()>0)
 		SetTexture(commandlist, SrvDescriptorHeap, Textures["CubeTex"].get()->Resource.Get(), false);
-	UpdateConstBuffer(commandlist);
+	UpdateConstBuffer(commandlist, false);
 
 	//이후 그린다.
 
@@ -3496,7 +3522,7 @@ void Rock1Object::Render(ID3D12GraphicsCommandList * commandlist, const GameTime
 
 	if (Textures.size()>0)
 		SetTexture(commandlist, SrvDescriptorHeap, Textures["CubeTex"].get()->Resource.Get(), false);
-	UpdateConstBuffer(commandlist);
+	UpdateConstBuffer(commandlist, false);
 
 	//이후 그린다.
 
@@ -3576,7 +3602,7 @@ void RangeObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTime
 
 	if (Textures.size()>0)
 		SetTexture(commandlist, SrvDescriptorHeap, Textures["CubeTex"].get()->Resource.Get(), false);
-	UpdateConstBuffer(commandlist);
+	UpdateConstBuffer(commandlist, false);
 
 	//이후 그린다.
 
@@ -3688,7 +3714,7 @@ void ParticleObject::Render(ID3D12GraphicsCommandList * commandlist, const GameT
 {
 	if (Textures.size()>0)
 		SetTexture(commandlist, SrvDescriptorHeap, Textures["sparkTex"].get()->Resource.Get(), false);
-	UpdateConstBuffer(commandlist);
+	UpdateConstBuffer(commandlist, false);
 
 
 	D3D12_VERTEX_BUFFER_VIEW vbv;
@@ -3792,7 +3818,7 @@ void ShieldArmor::Render(ID3D12GraphicsCommandList * commandlist, const GameTime
 	if (Textures.size()>0)
 		SetTexture(commandlist, SrvDescriptorHeap, Textures["ShieldTex"].get()->Resource.Get(), false);
 
-	UpdateConstBuffer(commandlist);
+	UpdateConstBuffer(commandlist, false);
 
 	Mesh.Render(commandlist);
 }
@@ -3939,7 +3965,7 @@ void ImpObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer 
 
 
 
-	UpdateConstBuffer(commandlist);
+	UpdateConstBuffer(commandlist, false);
 
 	Mat.UpdateConstantBuffer(commandlist);
 
@@ -4170,34 +4196,72 @@ void RingObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer
 	if (Textures.size() > 0)
 		SetTexture(commandlist, SrvDescriptorHeap, Textures[TextureName].get()->Resource.Get(), false, TexOff);
 
-	UpdateConstBuffer(commandlist);
+	UpdateConstBuffer(commandlist, false);
 
 	//이후 그린다.
 
 	Mesh.Render(commandlist);
 }
 
-ShadowObject::ShadowObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, CGameObject * master, XMFLOAT4 cp)
+ShadowObject::ShadowObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, CGameObject * master, XMFLOAT4 cp) :CGameObject(m_Device, commandlist, Plist, cp)
 {
+
+	Master = master;
+	ObjData.Scale = 2.0f;
+	ObjData.BlendValue = true;
+	ObjData.BlendValue = 0.3f;
+
+	if (CreateMesh == false)
+	{
+		Mesh.Index = NULL;
+		Mesh.SubResource = NULL;
+		SetMesh(m_Device, commandlist);
+		SetMaterial(m_Device, commandlist);
+		CreateMesh = true;
+	}
+	
+}
+
+void ShadowObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
+{
+	
+	LoadMD5Model(L".\\플레이어메쉬들\\cIdle.MD5MESH", &Mesh, 0, 1);
+
+	Mesh.SetNormal(false);
+	Mesh.CreateVertexBuffer(m_Device, commandlist);
+	Mesh.CreateIndexBuffer(m_Device, commandlist);
+
+	//LoadMD5Anim(m_Device, L".\\플레이어메쉬들\\cIdle.MD5ANIM", &Mesh, this, animations);//0
+	//LoadMD5Anim(m_Device, L".\\플레이어메쉬들\\cRunning.MD5ANIM", &Mesh, this, animations);//1
+	//LoadMD5Anim(m_Device, L".\\플레이어메쉬들\\cAttack.MD5ANIM", &Mesh, this, animations);//2
+	//LoadMD5Anim(m_Device, L".\\플레이어메쉬들\\cDeath.MD5ANIM", &Mesh, this, animations);//2
 }
 
 void ShadowObject::SetMaterial(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
 {
 	if (Mat.ConstBuffer == NULL)
 		Mat.ConstBuffer = new UploadBuffer<MaterialData>(m_Device, 1, true);
+	
+	Mat.MatData.Diffuse = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.5f);
 
-
-	Mat.MatData.Roughness = 0.0f;
+	Mat.MatData.Roughness = 0.1f;
 }
 
 void ShadowObject::Tick(const GameTimer & gt)
 {
+	if (Master->DelObj)
+		DelObj = true;
 
-	//XMStoreFloat4x4(&)
+	CenterPos = Master->CenterPos;
+
+
 }
 
 void ShadowObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer & gt)
 {
+	UpdateConstBuffer(commandlist, true);
+
 	Mat.UpdateConstantBuffer(commandlist);
 
+	Mesh.Render(commandlist);
 }

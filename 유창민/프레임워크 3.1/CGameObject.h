@@ -119,15 +119,15 @@ public:
 	Obj_State obs = Dynamic;
 
 	GameData gamedata;
-	CLight light;
 
 	RayCastObject rco;//레이캐스트 오브젝트
 	CGameObject* LockOn=NULL;
 	//기타 공용 함수들
 	virtual void SetWorldMatrix();//월드매트릭스 설정.
-	
+	virtual void SetShadowMatrix();
+
 	virtual void CreateConstBuffer(ID3D12Device* m_Device);
-	virtual void UpdateConstBuffer(ID3D12GraphicsCommandList* commandlist);
+	virtual void UpdateConstBuffer(ID3D12GraphicsCommandList* commandlist, bool isShadow);
 	
 	virtual void SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist)=0;//셋메시는 메시를 최종적으로 생성한다. 즉 메시를구성하는 정점과 삼각형을구성하는인덱스버퍼생성
 	virtual void SetMaterial(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist);
@@ -790,15 +790,18 @@ public:
 class ShadowObject : public CGameObject
 {
 public:
-	ShadowObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, CGameObject* master,  XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
+	ShadowObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, CGameObject* master, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
+	CGameObject* Master = NULL;
 public:
 	static bool CreateMesh;//최초로 false며 메쉬를 만든후 true가된다.
 	static CMesh Mesh;//오로지 한번만 만들어짐
 	static CMaterial Mat;
 public:
+	virtual void SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist);
 	virtual void SetMaterial(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist); //머테리얼 생성
 	virtual void Tick(const GameTimer& gt);
 	virtual void Render(ID3D12GraphicsCommandList* commandlist, const GameTimer& gt);	
+	virtual void Collision(list<CGameObject*>* collist, float DeltaTime) {}
 };
 
 
@@ -817,7 +820,7 @@ public:
 
 
 public:
-	virtual void SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist);//셋메시는 메시를 최종적으로 생성한다. 즉 메시를구성하는 정점과 삼각형을구성하는인덱스버퍼생성
+	virtual void SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist);
 	virtual void Tick(const GameTimer& gt);
 	virtual void Render(ID3D12GraphicsCommandList* commandlist, const GameTimer& gt);
 	virtual void Collision(list<CGameObject*>* collist, float DeltaTime){}

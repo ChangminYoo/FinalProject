@@ -5,6 +5,7 @@ using namespace DirectX;
 
 struct MaterialData
 {
+	XMFLOAT4 Diffuse = { 1.0f, 1.0f, 1.0f, 1.0f };
 	float Roughness = 0.25f;	//°ÅÄ¥±â
 	XMFLOAT3 CustomMaterial = { 0,0,0 };
 	XMFLOAT4 Emissive = { 0, 0, 0, 1.0f };
