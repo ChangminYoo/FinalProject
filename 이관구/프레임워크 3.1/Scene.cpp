@@ -540,7 +540,7 @@ void Scene::Render(const GameTimer& gt)
 				BackGround->Render(commandlist, gt);
 				Player->Camera.UpdateConstantBuffer(commandlist);
 			}
-	}
+	} 
 }
 
 void Scene::Tick(const GameTimer & gt)

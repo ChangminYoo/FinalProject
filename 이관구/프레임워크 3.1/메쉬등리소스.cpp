@@ -93,6 +93,11 @@ bool ParticleObject::CreateMesh = false;
 unordered_map<string, unique_ptr<CTexture>> ParticleObject::Textures;//텍스처들을 저장함
 CMesh  ParticleObject::Mesh;//나중에 메쉬는 static으로 둬야함
 ComPtr<ID3D12DescriptorHeap> ParticleObject::SrvDescriptorHeap;//텍스처 용 힙
+ //--------------------------------------------------------------------------------------
+bool ParticleObject2::CreateMesh = false;
+unordered_map<string, unique_ptr<CTexture>> ParticleObject2::Textures;//텍스처들을 저장함
+CMesh  ParticleObject2::Mesh;//나중에 메쉬는 static으로 둬야함
+ComPtr<ID3D12DescriptorHeap> ParticleObject2::SrvDescriptorHeap;//텍스처 용 힙
 //--------------------------------------------------------------------------------------
 bool DamageObject::CreateMesh = false;
 unordered_map<string, unique_ptr<CTexture>> DamageObject::Textures;//텍스처들을 저장함

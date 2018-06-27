@@ -579,8 +579,8 @@ BulletCube::BulletCube(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 	{
 		BulletParticles = new ParticleObject(m_Device, commandlist, ParticleList, this, 0.2f, XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, 0));
 		ParticleList->push_back(BulletParticles);
-		//BulletParticles2 = new ParticleObject(m_Device, commandlist, ParticleList, this, 0.3f, XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, 0));
-		//ParticleList->push_back(BulletParticles2);
+		//미리 생성만해둠. 이후 총알이 어딘가에 부딪혔을때 ParticleList에 넣는다. 그렇게되면 틱함수가 호출되고,렌더함수가호출됨
+
 	}
 
 }
@@ -589,8 +589,6 @@ BulletCube::~BulletCube()
 {
 	if (BulletParticles != NULL)
 		BulletParticles->DelObj = true;
-	if (BulletParticles2 != NULL)
-		BulletParticles2->DelObj = true;
 }
 
 
@@ -702,6 +700,9 @@ void BulletCube::Collision(list<CGameObject*>* collist, float DeltaTime)
 				pp->ResolveVelocity(*(*i)->pp, cn, DeltaTime);
 				(*i)->pp->SetBounce(false);
 				//겹치는 부분을 제거할필요가 없는게 투사체는 어처피 사라지니까.
+				auto BulletParticles2 = new ParticleObject2(device, commandlist, ParticleList, this, 0.7f, XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, 0));
+				ParticleList->push_back(BulletParticles2);
+
 				DelObj = true;
 
 
@@ -781,8 +782,7 @@ HeavyBulletCube::~HeavyBulletCube()
 {
 	if (BulletParticles != NULL)
 		BulletParticles->DelObj = true;
-	if (BulletParticles2 != NULL)
-		BulletParticles2->DelObj = true;
+
 }
 
 
@@ -895,6 +895,8 @@ void HeavyBulletCube::Collision(list<CGameObject*>* collist, float DeltaTime)
 				//겹치는 부분을 제거할필요가 없는게 투사체는 어처피 사라지니까.
 				DelObj = true;
 
+				auto BulletParticles2 = new ParticleObject2(device, commandlist, ParticleList, this, 0.7f, XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, 0));
+				ParticleList->push_back(BulletParticles2);
 
 			}
 		}
@@ -965,8 +967,6 @@ Tetris1::~Tetris1()
 {
 	if (BulletParticles != NULL)
 		BulletParticles->DelObj = true;
-	if (BulletParticles2 != NULL)
-		BulletParticles2->DelObj = true;
 }
 
 
@@ -1074,6 +1074,8 @@ void Tetris1::Collision(list<CGameObject*>* collist, float DeltaTime)
 
 				//겹치는 부분을 제거할필요가 없는게 투사체는 어처피 사라지니까.
 				DelObj = true;
+				auto BulletParticles2 = new ParticleObject2(device, commandlist, ParticleList, this, 1.2f, XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, 0));
+				ParticleList->push_back(BulletParticles2);
 
 
 			}
@@ -1142,9 +1144,8 @@ Tetris2::~Tetris2()
 {
 	if (BulletParticles != NULL)
 		BulletParticles->DelObj = true;
-	if (BulletParticles2 != NULL)
-		BulletParticles2->DelObj = true;
 }
+
 
 
 void Tetris2::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList* commandlist)
@@ -1252,6 +1253,8 @@ void Tetris2::Collision(list<CGameObject*>* collist, float DeltaTime)
 
 				//겹치는 부분을 제거할필요가 없는게 투사체는 어처피 사라지니까.
 				DelObj = true;
+				auto BulletParticles2 = new ParticleObject2(device, commandlist, ParticleList, this, 1.2f, XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, 0));
+				ParticleList->push_back(BulletParticles2);
 
 
 			}
@@ -1319,8 +1322,6 @@ Tetris3::~Tetris3()
 {
 	if (BulletParticles != NULL)
 		BulletParticles->DelObj = true;
-	if (BulletParticles2 != NULL)
-		BulletParticles2->DelObj = true;
 }
 
 
@@ -1427,6 +1428,8 @@ void Tetris3::Collision(list<CGameObject*>* collist, float DeltaTime)
 
 				pp->ResolveVelocity(*(*i)->pp, cn, DeltaTime);
 				DelObj = true;
+				auto BulletParticles2 = new ParticleObject2(device, commandlist, ParticleList, this, 1.2f, XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, 0));
+				ParticleList->push_back(BulletParticles2);
 
 
 			}
@@ -1494,8 +1497,6 @@ Tetris4::~Tetris4()
 {
 	if (BulletParticles != NULL)
 		BulletParticles->DelObj = true;
-	if (BulletParticles2 != NULL)
-		BulletParticles2->DelObj = true;
 }
 
 
@@ -1603,6 +1604,8 @@ void Tetris4::Collision(list<CGameObject*>* collist, float DeltaTime)
 				pp->ResolveVelocity(*(*i)->pp, cn, DeltaTime);
 
 				DelObj = true;
+				auto BulletParticles2 = new ParticleObject2(device, commandlist, ParticleList, this, 1.2f, XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, 0));
+				ParticleList->push_back(BulletParticles2);
 
 
 			}
@@ -1850,8 +1853,7 @@ DiceStrike::DiceStrike(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 	{
 		BulletParticles = new ParticleObject(m_Device, commandlist, ParticleList, this, 0.2f, XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, 0));
 		ParticleList->push_back(BulletParticles);
-		BulletParticles2 = new ParticleObject(m_Device, commandlist, ParticleList, this, 0.3f, XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, 0));
-		ParticleList->push_back(BulletParticles2);
+		
 	}
 
 
@@ -1861,8 +1863,7 @@ DiceStrike::~DiceStrike()
 {
 	if (BulletParticles != NULL)
 		BulletParticles->DelObj = true;
-	if (BulletParticles2 != NULL)
-		BulletParticles2->DelObj = true;
+
 }
 
 void DiceStrike::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
@@ -1959,6 +1960,8 @@ void DiceStrike::Collision(list<CGameObject*>* collist, float DeltaTime)
 				//겹치는 부분을 제거할필요가 없는게 투사체는 어처피 사라지니까.
 				DelObj = true;
 
+				auto BulletParticles2 = new ParticleObject2(device, commandlist, ParticleList, this, 1.5f, XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, 0));
+				ParticleList->push_back(BulletParticles2);
 
 			}
 		}
@@ -3070,7 +3073,9 @@ void RigidCubeObject::Collision(list<CGameObject*>* collist, float DeltaTime)
 							(*i)->pp->SetVelocity(ppConvertrb.GetVelocity());
 							*(*i)->pp->CenterPos=ppConvertrb.GetPosition();
 							(*i)->pp->SetAccel(ppConvertrb.GetAccel());
-							
+							auto BulletParticles2 = new ParticleObject2(device, commandlist, ParticleList, NULL, 0.7f, XMFLOAT4((*i)->CenterPos.x, (*i)->CenterPos.y, (*i)->CenterPos.z, 0));
+							ParticleList->push_back(BulletParticles2);
+
 						}
 						else
 						{
@@ -3730,6 +3735,124 @@ void ParticleObject::Render(ID3D12GraphicsCommandList * commandlist, const GameT
 	commandlist->DrawIndexedInstanced(Mesh.nindex, 1, Mesh.nioffset, Mesh.nOffset, 0);
 }
 
+ParticleObject2::ParticleObject2(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, CGameObject * master, float lifeTime, XMFLOAT4 cp) : CGameObject(m_Device,commandlist,Plist,cp)
+{
+	ObjData.isAnimation = 0;
+	ObjData.Scale = 6.5f;
+	ObjData.SpecularParamater = 0.3f;//스페큘러를 낮게준다.
+	ObjData.CustomData1.x = 10;
+	Master = master;
+	LifeTime = lifeTime;
+
+	//게임관련 데이터들
+	gamedata.MAXHP = 0;
+	gamedata.HP = 0;
+	gamedata.Damage = 0;
+	gamedata.GodMode = true;
+	gamedata.Speed = 20;
+	staticobject = true;
+	obs = UI;
+
+	if (CreateMesh == false)
+	{
+		Mesh.Index = NULL;
+		Mesh.SubResource = NULL;
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "sparkTex", L"textures/effect/Stars.dds", false);
+		SetMesh(m_Device, commandlist);
+		CreateMesh = true;
+
+	}
+
+	Lookvector = XMFLOAT3(0, 1, 0);
+	Lookvector = Float3Normalize(Lookvector);
+
+	XMFLOAT3 Vel = XMFLOAT3(Lookvector.x * gamedata.Speed, Lookvector.y * gamedata.Speed, Lookvector.z * gamedata.Speed);
+	ParticleTime = 0;
+	ObjData.Velocity = Vel;
+
+	auto q = XMLoadFloat4(&Orient);
+	XMFLOAT3 axis = { 0,1,0 };
+
+
+	UpdateLookVector();
+}
+
+void ParticleObject2::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
+{
+	UINT numOfParticle = 10;
+
+	Mesh.SubResource = new CVertex[numOfParticle];
+	Mesh.nVertex = numOfParticle;
+	Mesh.nStride = sizeof(CVertex);
+	Mesh.nOffset = 0;
+
+
+	Mesh.Index = new UINT[numOfParticle];
+	Mesh.nindex = numOfParticle;
+	Mesh.nioffset = 0;
+	Mesh.nisize = sizeof(UINT);
+
+
+	//여기서 좌표를 일괄적으로 설정 할 수 있다
+	for (int i = 0; i < numOfParticle; ++i)
+	{
+
+		Mesh.SubResource[i].V.x = 0;
+		Mesh.SubResource[i].V.y = 0;
+		Mesh.SubResource[i].V.z = 0;
+
+		Mesh.SubResource[i].N.x = 0 + (cosf(MMPE_PI / 180 * i*(float)(rand() % 10000)));
+		Mesh.SubResource[i].N.y = 0;// +(sinf(MMPE_PI / 180 * i*(float)(rand() % 10000)));
+		Mesh.SubResource[i].N.z = (cosf(MMPE_PI / 180 * i*(float)(rand() % 10000)));
+		Mesh.SubResource[i].N.w = (float)(rand() % 100);
+		Mesh.Index[i] = i;
+
+	}
+
+	Mesh.CreateVertexBuffer(m_Device, commandlist);
+	Mesh.CreateIndexBuffer(m_Device, commandlist);
+
+}
+
+void ParticleObject2::Tick(const GameTimer & gt)
+
+{
+	if (LifeTime <= 0)
+		DelObj = true;
+	else
+		LifeTime -= gt.DeltaTime();
+	//현재 기본파티클오브젝트는 PTime에 의해 위치가 변경됨.
+	ObjData.PTime += gt.DeltaTime();
+}
+
+
+void ParticleObject2::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer & gt)
+{
+	if (Textures.size()>0)
+		SetTexture(commandlist, SrvDescriptorHeap, Textures["sparkTex"].get()->Resource.Get(), false);
+	UpdateConstBuffer(commandlist);
+
+
+	D3D12_VERTEX_BUFFER_VIEW vbv;
+
+	vbv.BufferLocation = Mesh.VertexBuffer->GetGPUVirtualAddress();
+	vbv.StrideInBytes = Mesh.nStride;
+	vbv.SizeInBytes = Mesh.nStride *  Mesh.nVertex;
+
+	commandlist->IASetVertexBuffers(0, 1, &vbv);
+
+	D3D12_INDEX_BUFFER_VIEW ibv;
+	ibv.BufferLocation = Mesh.IndexBuffer->GetGPUVirtualAddress();
+	ibv.Format = DXGI_FORMAT_R16_UINT;
+	ibv.SizeInBytes = Mesh.nisize *  Mesh.nindex;
+
+	commandlist->IASetIndexBuffer(&ibv);
+	commandlist->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
+
+
+	commandlist->DrawIndexedInstanced(Mesh.nindex, 1, Mesh.nioffset, Mesh.nOffset, 0);
+
+}
 
 
 ShieldArmor::ShieldArmor(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, CGameObject * master, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
@@ -4195,3 +4318,4 @@ void RingObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer
 
 	Mesh.Render(commandlist);
 }
+
