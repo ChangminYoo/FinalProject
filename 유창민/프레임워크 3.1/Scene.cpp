@@ -265,8 +265,7 @@ void Scene::CreateGameObject()
 	delete resource;
 	resource = new DiceObject(device, commandlist, &BbObject, NULL, NULL, XMFLOAT4(0, 0, 0, 0));
 	delete resource;
-
-	resource = new ShadowObject(device, commandlist, &BbObject, NULL, XMFLOAT4(0, 0, 0, 0));
+	resource = new ShadowObject(device, commandlist, &BbObject, NULL, 0, XMFLOAT3(0, 0, 0), XMFLOAT4(0, 0, 0, 0));
 	delete resource;
 	//--------------------------------------------------//
 	
@@ -274,13 +273,17 @@ void Scene::CreateGameObject()
 	LandObject.push_back(new GridObject(device, commandlist, &BbObject, XMFLOAT4(0, 0, 0, 0)));
 
 	DynamicObject.push_back(new CCubeManObject(device, commandlist,&BbObject, XMFLOAT4(0, 0, -240, 0)));
+	Shadows.push_back(new ShadowObject(device, commandlist, &BbObject, DynamicObject.back(), 0, XMFLOAT3(0, 0, 0), XMFLOAT4(0, 0, 0, 0)));
+
 	DynamicObject.push_back(new CCubeManObject(device, commandlist,&BbObject, XMFLOAT4(100, 0, 110, 0)));
-	Shadows.push_back(new ShadowObject(device, commandlist, &BbObject, DynamicObject.front(), XMFLOAT4(0, 0, 0, 0)));
-	//NoCollObject.push_back(new ShieldArmor(device, commandlist, &BbObject, DynamicObject.back(), DynamicObject.back()->CenterPos));
+	Shadows.push_back(new ShadowObject(device, commandlist, &BbObject, DynamicObject.back(), 0, XMFLOAT3(0, 0, 0), XMFLOAT4(0, 0, 0, 0)));
+
 
 	CGameObject* imp = new ImpObject(device, commandlist, &BbObject, XMFLOAT4(-100, 0, 220, 0));
 	((ImpObject*)imp)->fsm = new FSM(imp, &DynamicObject, &StaticObject);
 	DynamicObject.push_back(imp);
+	Shadows.push_back(new ShadowObject(device, commandlist, &BbObject, DynamicObject.back(), 2, XMFLOAT3(0, 0, 0), XMFLOAT4(0, 0, 0, 0)));
+
 	//DynamicObject.back()->pp->SetBounce(true);
 	//DynamicObject.back()->pp->AddForce(-600, 0, 600);
 	//DynamicObject.back()->pp->integrate(0.1f);//힘은 지속적으로 가해지는것이며 즉발적이려면 힘을 가한 시간을 통해 계산한다.

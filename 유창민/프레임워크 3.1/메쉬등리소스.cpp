@@ -94,6 +94,11 @@ unordered_map<string, unique_ptr<CTexture>> ParticleObject::Textures;//텍스처들�
 CMesh  ParticleObject::Mesh;//나중에 메쉬는 static으로 둬야함
 ComPtr<ID3D12DescriptorHeap> ParticleObject::SrvDescriptorHeap;//텍스처 용 힙
 //--------------------------------------------------------------------------------------
+bool ParticleObject2::CreateMesh = false;
+unordered_map<string, unique_ptr<CTexture>> ParticleObject2::Textures;//텍스처들을 저장함
+CMesh  ParticleObject2::Mesh;//나중에 메쉬는 static으로 둬야함
+ComPtr<ID3D12DescriptorHeap> ParticleObject2::SrvDescriptorHeap;//텍스처 용 힙
+//--------------------------------------------------------------------------------------
 bool DamageObject::CreateMesh = false;
 unordered_map<string, unique_ptr<CTexture>> DamageObject::Textures;//텍스처들을 저장함
 CMesh  DamageObject::Mesh;//나중에 메쉬는 static으로 둬야함
@@ -191,19 +196,17 @@ unordered_map<string, unique_ptr<CTexture>> Rock1Object::Textures;//텍스처들을 �
 CMesh Rock1Object::Mesh;//오로지 한번만 만들어짐
 ComPtr<ID3D12DescriptorHeap> Rock1Object::SrvDescriptorHeap;//텍스처 용 힙
 
-
- //--------------------------------------------------------------------------------------
-
+//--------------------------------------------------------------------------------------
 bool RangeObject::CreateMesh = false;
 unordered_map<string, unique_ptr<CTexture>> RangeObject::Textures;//텍스처들을 저장함
 CMesh  RangeObject::Mesh;//나중에 메쉬는 static으로 둬야함
 ComPtr<ID3D12DescriptorHeap> RangeObject::SrvDescriptorHeap;//텍스처 용 힙
 CMaterial RangeObject::Mat;
-
+//--------------------------------------------------------------------------------------
 bool ShadowObject::CreateMesh = false;
 CMesh ShadowObject::Mesh;//나중에 메쉬는 static으로 둬야함
 CMaterial ShadowObject::Mat;
-
+std::vector<ModelAnimation> ShadowObject::animations;
 //-------------------------------------------------------------------------------------
 bool ImpObject::CreateMesh = false;
 unordered_map<string, unique_ptr<CTexture>> ImpObject::Textures;//텍스처들을 저장함

@@ -269,7 +269,7 @@ public:
 
 //---------------------- 투 사 체 -----------------------------//
 class ParticleObject;
-
+class ParticleObject2;
 class BulletCube : public CGameObject
 {
 public:
@@ -279,7 +279,7 @@ public:
 	CGameObject* LockOn = NULL;//유도시사용됨
 	float LifeTime = 10;//생존시간. 10초 후 제거됨
 	ParticleObject* BulletParticles = NULL;
-	ParticleObject* BulletParticles2 = NULL;
+
 
 public:
 	static CMaterial Mat;
@@ -308,7 +308,6 @@ public:
 	CGameObject* LockOn = NULL;//유도시사용됨
 	float LifeTime = 10;//생존시간. 10초 후 제거됨
 	ParticleObject* BulletParticles = NULL;
-	ParticleObject* BulletParticles2 = NULL;
 
 public:
 	static CMaterial Mat;
@@ -506,7 +505,7 @@ public:
 	ShieldArmor(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, CGameObject* master, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
 	CGameObject* Master = NULL;//소유자
 
-	float LifeTime = 15;
+	float LifeTime = 5;
 
 public:
 	static CMaterial Mat;
@@ -787,15 +786,43 @@ public:
 
 };
 
+class ParticleObject2 : public CGameObject
+{
+public:
+	ParticleObject2(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, CGameObject* master, float lifeTime, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
+	CGameObject* Master = NULL;
+	float LifeTime = 0.2f;
+	float ParticleTime = 0.0f;
+
+public:
+	static bool CreateMesh;//최초로 false며 메쉬를 만든후 true가된다.
+	static unordered_map<string, unique_ptr<CTexture>> Textures;//텍스처들을 저장함
+	static CMesh Mesh;//오로지 한번만 만들어짐
+	static ComPtr<ID3D12DescriptorHeap> SrvDescriptorHeap;//텍스처 용 힙
+
+
+public:
+	virtual void SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist);//셋메시는 메시를 최종적으로 생성한다. 즉 메시를구성하는 정점과 삼각형을구성하는인덱스버퍼생성
+	virtual void Tick(const GameTimer& gt);
+	virtual void Render(ID3D12GraphicsCommandList* commandlist, const GameTimer& gt);
+	virtual void Collision(list<CGameObject*>* collist, float DeltaTime) {}
+
+};
+
 class ShadowObject : public CGameObject
 {
 public:
-	ShadowObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, CGameObject* master, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
+	ShadowObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, CGameObject* master, float kinds, XMFLOAT3 size, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
 	CGameObject* Master = NULL;
+	XMFLOAT3 Size = XMFLOAT3{ 10,10,10 };
+	float Kinds;
+
 public:
 	static bool CreateMesh;//최초로 false며 메쉬를 만든후 true가된다.
 	static CMesh Mesh;//오로지 한번만 만들어짐
 	static CMaterial Mat;
+	static std::vector<ModelAnimation> animations;//애니메이션 데이터 저장. 메쉬와 이거,텍스처는 한번만생성해서 공유하도록해야됨
+
 public:
 	virtual void SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist);
 	virtual void SetMaterial(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist); //머테리얼 생성
