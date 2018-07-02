@@ -4,7 +4,7 @@ class CPhysicEngineWorker
 private:
 	high_resolution_clock::time_point	m_currtime, m_prevtime;
 
-	float m_deltime;
+	long long m_deltime;
 	
 
 	high_resolution_clock::time_point tt;

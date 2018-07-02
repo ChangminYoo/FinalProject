@@ -68,10 +68,10 @@ public:
 	void ProcessPacket(Packet* packet);
 
 	// ---------------------------------------------------------------------------------------
-	virtual void GravitySystem(float deltime);
-	virtual void Tick(float deltime);
-	virtual void Tick(float deltime, Position& pos4f);
-	virtual void AfterGravitySystem(float deltime);
+	virtual void GravitySystem(double deltime);
+	virtual void Tick(double deltime);
+	virtual void Tick(double deltime, Position& pos4f);
+	virtual void AfterGravitySystem(double deltime);
 	void Collision(vector<CPlayerObject*>* clients, __int64 deltime);
 	void Collision(unordered_set<CStaticObject*>* sobjs, __int64 deltime);
 
@@ -89,7 +89,7 @@ public:
 	void Init_PlayerInfo();
 	void InitData_To_Client();
 	//void RegularUpdate();
-	void PlayerInput(float deltime);
+	void PlayerInput(double deltime);
 	
 	// ---------------------------------------------------------------------------------------
 	// [4].기타 GET - SET 함수
