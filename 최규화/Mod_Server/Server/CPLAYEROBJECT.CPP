@@ -1,5 +1,3 @@
-//#include "CPlayerObject.h"
-//#include "ShareHeader.h"
 #include "stdafx.h"
 
 CPlayerObject::~CPlayerObject()
@@ -45,6 +43,7 @@ bool CPlayerObject::CheckPlayerInfo()
 
 void CPlayerObject::Init_MonsterInfo()
 {
+
 }
 
 void CPlayerObject::Init_PlayerInfo()
@@ -67,7 +66,7 @@ void CPlayerObject::Init_PlayerInfo()
 	m_ability.orignHP = 100;
 	m_ability.exp = 0;
 	m_ability.level = 1;
-	m_ability.speed = 10000.0f;	
+	m_ability.speed = 500;
 
 	if (m_id == 0)
 		m_pos4f = { -100.f, -1000.f, 0.f, 0.f };
@@ -582,6 +581,8 @@ void CPlayerObject::Tick(float deltime, Position& pos4f)
 
 void CPlayerObject::AfterGravitySystem(float deltime)
 {
+	//cout << "AfterGravitySystem PosY: " << m_pos4f.y << "\n";
+
 	float ppy = pp->GetPosition().y;
 	float hby = pp->GetHalfBox().y;
 	if (ppy - hby < 0)
@@ -597,7 +598,7 @@ void CPlayerObject::AfterGravitySystem(float deltime)
 	}
 }
 
-void CPlayerObject::Collision(vector<CPlayerObject*>* clients, float deltime)
+void CPlayerObject::Collision(vector<CPlayerObject*>* clients, __int64 deltime)
 {
 	
 	for (auto iter = clients->begin(); iter != clients->end(); ++iter)
@@ -641,7 +642,7 @@ void CPlayerObject::Collision(vector<CPlayerObject*>* clients, float deltime)
 	
 }
 
-void CPlayerObject::Collision(unordered_set<CStaticObject*>* sobjs, float deltime)
+void CPlayerObject::Collision(unordered_set<CStaticObject*>* sobjs, __int64 deltime)
 {
 	//주인은 사람 - 충돌 대상은 스테틱오브젝트
 	

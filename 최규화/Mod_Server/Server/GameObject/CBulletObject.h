@@ -6,7 +6,7 @@
 class CBulletObject : public CMonoObject
 {
 private: 
-	float m_lifetime{ 0 };
+	double m_lifetime{ 0 };
 	
 	short m_id{ -1 };
 	unsigned short m_masterID;
@@ -16,7 +16,7 @@ private:
 public:
 	__int64					      m_prevTime{ 0 };
 	__int64					      m_currTime{ 0 };
-	float						  m_deltaTime{ 0.f };
+	//float						  m_deltaTime{ 0.f };
 	CTS_BulletObject_Info         m_bulldata;
 
 public:
@@ -24,11 +24,11 @@ public:
 		const Position& pos, const Rotation& rot, float bulltime,
 		Vel3f& vel, const unsigned char& type, const Position3D& endpt);
 
-	virtual void AfterGravitySystem(float deltime);
-	virtual void Tick(float deltime);
+	virtual void AfterGravitySystem();
+	virtual void Tick(__int64 deltime);
 	virtual void Update(float deltime);
-	void Collision(vector<CPlayerObject*>* clients, float deltime);
-	void Collision(unordered_set<CStaticObject*>* sobjs, float deltime);
+	void Collision(vector<CPlayerObject*>* clients, __int64 deltime);
+	void Collision(unordered_set<CStaticObject*>* sobjs, __int64 deltime);
 
 	float			  GetBulletLifeTime() const { return m_lifetime; }
 	void			  SetBulletLifeTime(float time) { m_lifetime += time; }

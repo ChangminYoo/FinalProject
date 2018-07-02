@@ -4,12 +4,12 @@
 
 struct ObjectStatus
 {
-	unsigned short attack{ 10 };
-	float speed;
-	unsigned short orignHP{ 100 };
-	unsigned short curHP{ 100 };
-	unsigned short exp{ 0 };
-	unsigned char level{ 1 };
+	int orignHP{ 100 };
+	int curHP{ 100 };
+	int attack{ 10 };
+	int exp{ 0 };
+	int level{ 1 };
+	double speed;
 };
 
 class CMonoObject

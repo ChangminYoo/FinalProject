@@ -5,6 +5,7 @@ CPhysicEngineWorker::CPhysicEngineWorker()
 
 }
 
+//60fps -> 60 frame per second
 void CPhysicEngineWorker::Update()
 {
 	// 물리효과와 충돌처리를 계속 루프를 돌면서 cpu를 쉬지 않고 돌려가며 작업을 해야한다
@@ -16,12 +17,14 @@ void CPhysicEngineWorker::Update()
 	while (true)
 	{
 		m_currtime = high_resolution_clock::now();
-		m_deltime = duration_cast<milliseconds>(m_currtime - m_prevtime).count() / 1000.0f;
+		m_deltime = (float)(duration_cast<microseconds>(m_currtime - m_prevtime).count() / 1000000.0f); // 10의 -6
 		m_prevtime = m_currtime;
 
-		cout << "Time : " << m_deltime << endl;
-		//cout << "Delta time: " << duration_cast<microseconds>(m_currtime - m_prevtime).count() << endl;
-		
+		//cout << "Time : " << m_deltime << "\n";
+
+		// 0.00000028
+		//2838 
+
 		//for (auto client : g_clients)
 		//{
 		//	client->PlayerInput(client->GetPlayerDirection(), m_deltime);
@@ -40,13 +43,21 @@ void CPhysicEngineWorker::Update()
 		{
 			for (int i = 0; i < g_clients.size(); ++i)
 			{
+				//double t_time = m_deltime / 1000000;
+
 				g_clients[i]->PlayerInput(m_deltime);
 				g_clients[i]->GravitySystem(m_deltime);
 				g_clients[i]->Tick(m_deltime);
 				g_clients[i]->AfterGravitySystem(m_deltime);
 				g_clients[i]->SetChangedPlayerState();
+
+				cout << "PosX: " << g_clients[i]->m_pdata.pos.x << "PosY: " << g_clients[i]->m_pdata.pos.y << "PosZ: " << g_clients[i]->m_pdata.pos.z << "\n";
 			}
 
+			auto data = g_clients[0]->m_pdata;
+			cout << data.pos.y << endl;
+
+		
 			/*
 			for (auto client : g_clients)
 			{
@@ -67,25 +78,33 @@ void CPhysicEngineWorker::Update()
 				client->SetChangedPlayerState();
 			}
 			*/
+
 		}
 
+		/*
 		for (auto bullet : g_bullets)
 		{
 			if (bullet->GetBulletIsAlive() == true)
 			{
-				bullet->Tick(m_deltime);
-				bullet->AfterGravitySystem(m_deltime);
+				auto temp_time = m_deltime / 1000000;
+				bullet->Tick(temp_time);
+				bullet->AfterGravitySystem();
 			}
-			//cout << "Bullet ID: " << bullet->GetBulletID() << "Bullet MID: " << bullet->GetBulletMasterID() <<
-			//	"Position: " << bullet->m_bulldata.pos4f.x << ", " << bullet->m_bulldata.pos4f.y << ", " << bullet->m_bulldata.pos4f.z <<
-			//	"LifeTime: " << bullet->GetBulletLifeTime() << endl; 
 
+			cout << "Bullet ID: " << bullet->GetBulletID() << "Bullet MID: " << bullet->GetBulletMasterID() <<
+				"Position: " << bullet->m_bulldata.pos4f.x << ", " << bullet->m_bulldata.pos4f.y << ", " << bullet->m_bulldata.pos4f.z <<
+				"LifeTime: " << bullet->GetBulletLifeTime() << endl; 
+		
 		}
+		*/
+		
 
-		CollisionSystem(m_deltime);
+		//CollisionSystem(m_deltime);
 
 		
 		// alive 가 false인 오브젝트들 지워주기 
+		
+		/*
 		for (auto iter = g_bullets.begin(); iter != g_bullets.end();)
 		{
 			if ((*iter)->GetBulletIsAlive() == false)
@@ -111,13 +130,17 @@ void CPhysicEngineWorker::Update()
 				++iter;
 			}
 		}
+		*/
+		
 
 
 	}
 }
 
-void CPhysicEngineWorker::CollisionSystem(float deltime)
+void CPhysicEngineWorker::CollisionSystem(__int64 deltime)
 {
+
+	/*
 	for (auto bullet : g_bullets)
 	{
 		if (bullet->GetBulletIsAlive() == true)
@@ -126,6 +149,7 @@ void CPhysicEngineWorker::CollisionSystem(float deltime)
 			bullet->Collision(&g_staticobjs, deltime);
 		}
 	}
+	*/
 
 	for (auto client : g_clients)
 	{

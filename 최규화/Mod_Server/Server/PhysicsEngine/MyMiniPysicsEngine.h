@@ -35,7 +35,7 @@ namespace MiniPhysicsEngineG9
 		float rad = 0;
 
 	public:
-		void integrate(float DeltaTime, XMFLOAT4* ObjPos = NULL, XMFLOAT3* ObjVel = NULL);//적분기. 속도와 가속도로 위치를 구하고 가속도를 이용해 속도를 갱신함.
+		void integrate(__int64 DeltaTime, XMFLOAT4* ObjPos = NULL, XMFLOAT3* ObjVel = NULL);//적분기. 속도와 가속도로 위치를 구하고 가속도를 이용해 속도를 갱신함.
 		void SetMass(float M);//무게의 역을 쉽게 저장하기 위한 함수. M을 넣으면 역수로 저장해줌
 		float GetMass(bool Inverse = true);//기본적으로 무게의 역을 구함. 다만 false로 두면 그대로 나온다.
 		void SetDamping(float D);//댐핑지수를 설정함.
@@ -73,14 +73,14 @@ namespace MiniPhysicsEngineG9
 
 		//충돌체 해소 관련. 이때 키보드 처리는 따로 해줘야함. 왜냐하면 대각선으로 눌렀을때 충돌안되는 부분은 스무스하게
 		//움직이게 하기위해서다. CollisionN은 충돌시 내가 밀려나야하는 방향을 나타낸다.
-		void CollisionResolve(PhysicsPoint& p2, XMFLOAT3& CollisionN, float DeltaTime);
+		void CollisionResolve(PhysicsPoint& p2, XMFLOAT3& CollisionN, __int64 DeltaTime);
 		//상대속도를 구한다.
 		float GetSeparateVelocity(PhysicsPoint& p2, XMFLOAT3& CollisionN);
 		//충돌후 속도를 구한다.
 		bool GetBounce();
-		void ResolveVelocity(PhysicsPoint& p2, XMFLOAT3& CollisionN, float DeltaTime);
+		void ResolveVelocity(PhysicsPoint& p2, XMFLOAT3& CollisionN, __int64 DeltaTime);
 		//겹쳐진 부분을 밀어낸다.
-		void ResolvePenetration(PhysicsPoint& p2, float DeltaTime);
+		void ResolvePenetration(PhysicsPoint& p2, __int64 DeltaTime);
 	};
 
 

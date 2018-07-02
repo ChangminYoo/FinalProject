@@ -59,7 +59,7 @@ CBulletObject::CBulletObject(const unsigned short & master_id, const unsigned sh
 	//--------------------------------------------------------------------------------------------
 }
 
-void CBulletObject::AfterGravitySystem(float deltime)
+void CBulletObject::AfterGravitySystem()
 {
 	if (m_pos4f.y <= 0 && m_alive == true)
 	{
@@ -69,8 +69,12 @@ void CBulletObject::AfterGravitySystem(float deltime)
 		
 }
 
-void CBulletObject::Tick(float deltime)
+void CBulletObject::Tick(__int64 deltime)
 {
+	//deltime = deltime / 10000;
+
+	cout << "Bullet DeltaTime: " << deltime << endl;
+
 	XMFLOAT4 xmf4_rot{ m_rot4f.x, m_rot4f.y, m_rot4f.z, m_rot4f.w };
 	XMFLOAT4 xmf4_pos{ m_pos4f.x, m_pos4f.y, m_pos4f.z, m_pos4f.w };
 	
@@ -79,7 +83,8 @@ void CBulletObject::Tick(float deltime)
 	xmf4_rot = QuaternionMultiply(xmf4_rot, QuaternionRotation(m_Lookvector, MMPE_PI * deltime));
 	
 	m_lifetime += deltime;
-	
+
+	m_lifetime = 0;
 	if (m_lifetime >= MAX_LIGHT_BULLET_TIME && BULLET_TYPE::protocol_LightBullet == static_cast<int>(m_type))
 	{
 		m_alive = false;
@@ -96,13 +101,14 @@ void CBulletObject::Tick(float deltime)
 	m_bulldata.alive = m_alive;
 
 	cout << "IsAlive: " << static_cast<int>(m_bulldata.alive) << endl;
+
 }
 
 void CBulletObject::Update(float deltime)
 {
 }
 
-void CBulletObject::Collision(vector<CPlayerObject*>* clients, float deltime)
+void CBulletObject::Collision(vector<CPlayerObject*>* clients, __int64 deltime)
 {
 
 	for (auto iter = clients->begin(); iter != clients->end(); ++iter)
@@ -134,7 +140,7 @@ void CBulletObject::Collision(vector<CPlayerObject*>* clients, float deltime)
 	
 }
 
-void CBulletObject::Collision(unordered_set<CStaticObject*>* sobjs, float deltime)
+void CBulletObject::Collision(unordered_set<CStaticObject*>* sobjs, __int64 deltime)
 {
 
 	for (auto iter = sobjs->begin(); iter != sobjs->end(); ++iter)

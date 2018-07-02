@@ -174,13 +174,13 @@ PhysicsPoint::~PhysicsPoint()
 {
 }
 
-void PhysicsPoint::integrate(float DeltaTime, XMFLOAT4* ObjPos, XMFLOAT3* ObjVel)
+void PhysicsPoint::integrate(__int64 DeltaTime, XMFLOAT4* ObjPos, XMFLOAT3* ObjVel)
 {
 
 	if (InverseMass <= 0.0f)
 		return;
 
-	assert(DeltaTime >= 0.0);
+	assert(DeltaTime >= 0);
 
 	XMFLOAT3 temp_objPos;
 	temp_objPos.x = ObjPos->x; temp_objPos.y = ObjPos->y; temp_objPos.z = ObjPos->z;
@@ -438,7 +438,7 @@ bool MiniPhysicsEngineG9::PhysicsPoint::CollisionTest(PhysicsPoint & p2, XMFLOAT
 	return false;
 }
 
-void MiniPhysicsEngineG9::PhysicsPoint::CollisionResolve(PhysicsPoint & p2, XMFLOAT3 & CollisionN, float DeltaTime)
+void MiniPhysicsEngineG9::PhysicsPoint::CollisionResolve(PhysicsPoint & p2, XMFLOAT3 & CollisionN, __int64 DeltaTime)
 {
 	//충돌후 속도를 계산함.
 	ResolveVelocity(p2, CollisionN, DeltaTime);
@@ -462,7 +462,7 @@ bool MiniPhysicsEngineG9::PhysicsPoint::GetBounce()
 	return Bounce;
 }
 
-void MiniPhysicsEngineG9::PhysicsPoint::ResolveVelocity(PhysicsPoint & p2, XMFLOAT3 & CollisionN, float DeltaTime)
+void MiniPhysicsEngineG9::PhysicsPoint::ResolveVelocity(PhysicsPoint & p2, XMFLOAT3 & CollisionN, __int64 DeltaTime)
 {
 	//충돌후 속도 변화는 다음과 같다.
 	//1. 충돌전 분리속도를 구하고
@@ -537,7 +537,7 @@ void MiniPhysicsEngineG9::PhysicsPoint::ResolveVelocity(PhysicsPoint & p2, XMFLO
 //만약 이게 마음에 안들면 x와 z의 속도가 0이면 밀려나지 않도록 하는 방법이 있음.
 //물론 이게 또 문제가 뭐냐면 아예 완전히 겹쳐있는 순간에 안움직이고 있으면 안떼어내진다.
 //나는 그냥 공중에서는 밀어내도 상관 없도록 하는게 나을것 같음.
-void MiniPhysicsEngineG9::PhysicsPoint::ResolvePenetration(PhysicsPoint & p2, float DeltaTime)
+void MiniPhysicsEngineG9::PhysicsPoint::ResolvePenetration(PhysicsPoint & p2, __int64 DeltaTime)
 {
 	if (penetration < MMPE_EPSILON)//밀어낼 필요가 없는경우
 		return;
