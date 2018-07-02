@@ -62,15 +62,17 @@ void CGameObject::SetShadowMatrix()
 {
 	auto wmatrix = XMMatrixIdentity();
 	auto pos = XMLoadFloat4(&CenterPos);
-	
+	auto quater = XMLoadFloat4(&Orient);
+
+	//wmatrix *= XMMatrixRotationQuaternion(quater);
 	wmatrix *= XMMatrixRotationY(0.5f*MMPE_PI);
-	wmatrix *= XMMatrixScaling(0.5f, 1.5f, 0.5f);
+	wmatrix *= XMMatrixScaling(1.0f, 1.5f, 1.0f);
 	wmatrix *= XMMatrixTranslationFromVector(pos);
 
 
 	XMStoreFloat4x4(&ObjData.WorldMatrix, wmatrix);
 
-	XMFLOAT3 Direction = { 0.7f,-1.5f,1.1f };
+	XMFLOAT3 Direction = { 0.7f,-1.5f,1.1f }; //light[0].Direction
 
 	XMVECTOR shadowPlane = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f); // xz plane
 	XMVECTOR toMainLight = -XMLoadFloat3(&Direction);
@@ -2273,18 +2275,18 @@ MoveCubeObject::MoveCubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 	pp->SetBounce(false);//튕기지 않는다.
 	pp->SetMass(INFINITY);//고정된 물체는 무게가 무한이다.
 	
-	if (Shadow != NULL)
-	{
-		s = new ShadowObject(m_Device, commandlist, NULL, Shadow, this, XMFLOAT3(2, 1, 2), 1, CenterPos);
-		s->ObjData.Scale = 10.0f;
-		Shadow->push_back(s);
-	}
+	//if (Shadow != NULL)
+	//{
+	//	s = new ShadowObject(m_Device, commandlist, NULL, Shadow, this, XMFLOAT3(2, 1, 2), 1, CenterPos);
+	//	s->ObjData.Scale = 10.0f;
+	//	Shadow->push_back(s);
+	//}
 }
 
 MoveCubeObject::~MoveCubeObject()
 {
-	if (s != NULL)
-		s->DelObj = true;
+	//if (s != NULL)
+	//	s->DelObj = true;
 }
 
 
@@ -3016,8 +3018,8 @@ RigidCubeObject::RigidCubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandL
 
 RigidCubeObject::~RigidCubeObject()
 {
-	/*if (s != NULL)
-		s->DelObj = true;*/
+	//if (s != NULL)
+	//	s->DelObj = true;
 }
 
 void RigidCubeObject::Tick(const GameTimer & gt)
@@ -4418,7 +4420,7 @@ void RingObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer
 	Mesh.Render(commandlist);
 }
 
-ShadowObject::ShadowObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, list<CGameObject*>*shadow,  CGameObject * master, XMFLOAT3 size, int kinds, XMFLOAT4 cp) :CGameObject(m_Device, commandlist, Plist,shadow, cp)
+ShadowObject::ShadowObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, list<CGameObject*>*shadow,  CGameObject * master, XMFLOAT3 size, int kinds, XMFLOAT4& ori, XMFLOAT4 cp) :CGameObject(m_Device, commandlist, Plist,shadow, cp)
 {
 	//조인트가 저장될 배열.
 	jarr = new UploadBuffer<JointArr>(m_Device, 1, true);
@@ -4452,6 +4454,8 @@ ShadowObject::ShadowObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * 
 	}
 
 	SetMesh(m_Device, commandlist);
+	/*Orient = QuaternionMultiply(Orient, ori);
+	UpdateLookVector();*/
 }
 
 void ShadowObject::SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist)
@@ -4540,7 +4544,7 @@ void ShadowObject::Tick(const GameTimer & gt)
 
 	}
 
-
+	
 }
 
 void ShadowObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer & gt)

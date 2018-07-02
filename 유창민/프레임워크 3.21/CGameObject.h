@@ -828,7 +828,7 @@ public:
 class ShadowObject : public CGameObject
 {
 public:
-	ShadowObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, CGameObject* master, XMFLOAT3 size, int kinds, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
+	ShadowObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, CGameObject* master, XMFLOAT3 size, int kinds, XMFLOAT4& ori, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
 	CGameObject* Master = NULL;
 	XMFLOAT3 Size = XMFLOAT3{ 10,10,10 };
 	int Kinds;
