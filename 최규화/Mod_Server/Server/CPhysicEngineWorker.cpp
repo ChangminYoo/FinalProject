@@ -17,8 +17,12 @@ void CPhysicEngineWorker::Update()
 	while (true)
 	{
 		m_currtime = high_resolution_clock::now();
+<<<<<<< HEAD
 		m_deltime = duration_cast<microseconds>(m_currtime - m_prevtime).count(); // 10ÀÇ -6
 		m_deltime = m_deltime / 1000000.0;
+=======
+		m_deltime = duration_cast<microseconds>(m_currtime - m_prevtime).count();
+>>>>>>> d49c29b133bfb755c81ee4c50a7fda69b21e920e
 		m_prevtime = m_currtime;
 
 		//cout << "Time : " << m_deltime << "\n";
@@ -28,6 +32,27 @@ void CPhysicEngineWorker::Update()
 	
 		if (!g_clients.empty())
 		{
+<<<<<<< HEAD
+=======
+			for (int i = 0; i < g_clients.size(); ++i)
+			{
+				double t_time = m_deltime / 1000000.0;
+
+				g_clients[i]->PlayerInput(t_time);
+				g_clients[i]->GravitySystem(t_time);
+				g_clients[i]->Tick(t_time);
+				g_clients[i]->AfterGravitySystem(t_time);
+				g_clients[i]->SetChangedPlayerState();
+
+	//			cout << "PosX: " << g_clients[i]->m_pdata.pos.x << "PosY: " << g_clients[i]->m_pdata.pos.y << "PosZ: " << g_clients[i]->m_pdata.pos.z << "\n";
+			}
+
+			auto data = g_clients[0]->m_pdata;
+	//		cout << data.pos.y << endl;
+
+		
+			/*
+>>>>>>> d49c29b133bfb755c81ee4c50a7fda69b21e920e
 			for (auto client : g_clients)
 			{
 				client->PlayerInput(m_deltime);

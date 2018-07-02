@@ -66,7 +66,11 @@ void CPlayerObject::Init_PlayerInfo()
 	m_ability.orignHP = 100;
 	m_ability.exp = 0;
 	m_ability.level = 1;
+<<<<<<< HEAD
 	m_ability.speed = 30000;
+=======
+	m_ability.speed = 2000;
+>>>>>>> d49c29b133bfb755c81ee4c50a7fda69b21e920e
 
 	if (m_id == 0)
 		m_pos4f = { -100.f, -1000.f, 0.f, 0.f };
@@ -443,6 +447,7 @@ void CPlayerObject::ProcessPacket(Packet * packet)
 
 	case PACKET_PROTOCOL_TYPE::PLAYER_ATTACK:
 	{
+		break;
 		if (m_state == PLAYER_STATE::DEAD)		
 			break;
 
