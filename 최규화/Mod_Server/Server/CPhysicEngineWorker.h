@@ -4,11 +4,7 @@ class CPhysicEngineWorker
 private:
 	high_resolution_clock::time_point	m_currtime, m_prevtime;
 
-<<<<<<< HEAD
 	double m_deltime;
-=======
-	long long m_deltime;
->>>>>>> d49c29b133bfb755c81ee4c50a7fda69b21e920e
 	
 
 	high_resolution_clock::time_point tt;

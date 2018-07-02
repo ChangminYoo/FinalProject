@@ -72,13 +72,8 @@ public:
 	virtual void Tick(double deltime);
 	virtual void Tick(double deltime, Position& pos4f);
 	virtual void AfterGravitySystem(double deltime);
-<<<<<<< HEAD
 	void Collision(vector<CPlayerObject*>* clients, double deltime);
 	void Collision(unordered_set<CStaticObject*>* sobjs, double deltime);
-=======
-	void Collision(vector<CPlayerObject*>* clients, __int64 deltime);
-	void Collision(unordered_set<CStaticObject*>* sobjs, __int64 deltime);
->>>>>>> d49c29b133bfb755c81ee4c50a7fda69b21e920e
 
 	// ---------------------------------------------------------------------------------------
 	// [2]. DB관련 함수
