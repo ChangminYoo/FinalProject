@@ -17,76 +17,34 @@ void CPhysicEngineWorker::Update()
 	while (true)
 	{
 		m_currtime = high_resolution_clock::now();
-		m_deltime = (float)(duration_cast<microseconds>(m_currtime - m_prevtime).count() / 1000000.0f); // 10의 -6
+		m_deltime = duration_cast<microseconds>(m_currtime - m_prevtime).count(); // 10의 -6
+		m_deltime = m_deltime / 1000000.0;
 		m_prevtime = m_currtime;
 
 		//cout << "Time : " << m_deltime << "\n";
 
 		// 0.00000028
 		//2838 
-
-		//for (auto client : g_clients)
-		//{
-		//	client->PlayerInput(client->GetPlayerDirection(), m_deltime);
-		//	client->GravitySystem(m_deltime);
-		//	client->Tick(m_deltime);
-		//	client->AfterGravitySystem(m_deltime);
-		//
-		//	//client->Collision(m_deltime);
-		//
-		//	//임시
-		//	//client->SetPlayerDirection(0);
-		//	//client->SetPlayerAnimation(Ani_State::Idle);
-		//}
-
+	
 		if (!g_clients.empty())
 		{
-			for (int i = 0; i < g_clients.size(); ++i)
-			{
-				//double t_time = m_deltime / 1000000;
-
-				g_clients[i]->PlayerInput(m_deltime);
-				g_clients[i]->GravitySystem(m_deltime);
-				g_clients[i]->Tick(m_deltime);
-				g_clients[i]->AfterGravitySystem(m_deltime);
-				g_clients[i]->SetChangedPlayerState();
-
-				cout << "PosX: " << g_clients[i]->m_pdata.pos.x << "PosY: " << g_clients[i]->m_pdata.pos.y << "PosZ: " << g_clients[i]->m_pdata.pos.z << "\n";
-			}
-
-			auto data = g_clients[0]->m_pdata;
-			cout << data.pos.y << endl;
-
-		
-			/*
 			for (auto client : g_clients)
 			{
-				//cout << "Time : " << m_deltime << endl;
-				//if (static_cast<int>(g_clients[i]->GetPlayerDirection()) != 0)
 				client->PlayerInput(m_deltime);
-
-				//cout << "PlayerInput Time: " << duration_cast<milliseconds>(high_resolution_clock::now() - m_prevtime).count() / 1000.f << endl;
 				client->GravitySystem(m_deltime);
-
-				//cout << "GravitySystem Time: " << duration_cast<milliseconds>(high_resolution_clock::now() - m_prevtime).count() / 1000.f << endl;
 				client->Tick(m_deltime);
-
-				//cout << "Tick Time: " << duration_cast<milliseconds>(high_resolution_clock::now() - m_prevtime).count() / 1000.f << endl;
 				client->AfterGravitySystem(m_deltime);
-
-				//cout << "AfterGravitySystem Time: " << duration_cast<milliseconds>(high_resolution_clock::now() - m_prevtime).count() / 1000.f << endl;
 				client->SetChangedPlayerState();
+
+				//cout << "PosX: " << client->m_pdata.pos.x << "PosY: " << client->m_pdata.pos.y << "PosZ: " << client->m_pdata.pos.z << "\n";
 			}
-			*/
-
 		}
-
+	
 		/*
 		for (auto bullet : g_bullets)
 		{
 			if (bullet->GetBulletIsAlive() == true)
 			{
-				auto temp_time = m_deltime / 1000000;
 				bullet->Tick(temp_time);
 				bullet->AfterGravitySystem();
 			}
@@ -98,8 +56,9 @@ void CPhysicEngineWorker::Update()
 		}
 		*/
 		
+		
 
-		//CollisionSystem(m_deltime);
+		CollisionSystem(m_deltime);
 
 		
 		// alive 가 false인 오브젝트들 지워주기 
@@ -137,7 +96,7 @@ void CPhysicEngineWorker::Update()
 	}
 }
 
-void CPhysicEngineWorker::CollisionSystem(__int64 deltime)
+void CPhysicEngineWorker::CollisionSystem(double deltime)
 {
 
 	/*

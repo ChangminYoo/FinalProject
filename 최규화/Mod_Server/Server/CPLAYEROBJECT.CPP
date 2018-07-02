@@ -66,7 +66,7 @@ void CPlayerObject::Init_PlayerInfo()
 	m_ability.orignHP = 100;
 	m_ability.exp = 0;
 	m_ability.level = 1;
-	m_ability.speed = 500;
+	m_ability.speed = 30000;
 
 	if (m_id == 0)
 		m_pos4f = { -100.f, -1000.f, 0.f, 0.f };
@@ -546,7 +546,7 @@ void CPlayerObject::ProcessPacket(Packet * packet)
 	}
 }
 
-void CPlayerObject::GravitySystem(float deltime)
+void CPlayerObject::GravitySystem(double deltime)
 {
 	GeneratorGravity gg;
 	gg.SetGravityAccel(XMFLOAT3(0, -100, 0));
@@ -557,7 +557,7 @@ void CPlayerObject::GravitySystem(float deltime)
 	}
 }
 
-void CPlayerObject::Tick(float deltime)
+void CPlayerObject::Tick(double deltime)
 {
 	XMFLOAT4 xmf4_pos{ m_pos4f.x, m_pos4f.y, m_pos4f.z, m_pos4f.w };
 	pp->integrate(deltime, &xmf4_pos);
@@ -568,7 +568,7 @@ void CPlayerObject::Tick(float deltime)
 	m_pos4f.w = xmf4_pos.w;
 }
 
-void CPlayerObject::Tick(float deltime, Position& pos4f)
+void CPlayerObject::Tick(double deltime, Position& pos4f)
 {
 	XMFLOAT4 xmf4{ pos4f.x, pos4f.y, pos4f.z, pos4f.w };
 	pp->integrate(deltime, &xmf4);
@@ -579,7 +579,7 @@ void CPlayerObject::Tick(float deltime, Position& pos4f)
 	m_pos4f.w = xmf4.w;
 }
 
-void CPlayerObject::AfterGravitySystem(float deltime)
+void CPlayerObject::AfterGravitySystem(double deltime)
 {
 	//cout << "AfterGravitySystem PosY: " << m_pos4f.y << "\n";
 
@@ -598,7 +598,7 @@ void CPlayerObject::AfterGravitySystem(float deltime)
 	}
 }
 
-void CPlayerObject::Collision(vector<CPlayerObject*>* clients, __int64 deltime)
+void CPlayerObject::Collision(vector<CPlayerObject*>* clients, double deltime)
 {
 	
 	for (auto iter = clients->begin(); iter != clients->end(); ++iter)
@@ -642,7 +642,7 @@ void CPlayerObject::Collision(vector<CPlayerObject*>* clients, __int64 deltime)
 	
 }
 
-void CPlayerObject::Collision(unordered_set<CStaticObject*>* sobjs, __int64 deltime)
+void CPlayerObject::Collision(unordered_set<CStaticObject*>* sobjs, double deltime)
 {
 	//주인은 사람 - 충돌 대상은 스테틱오브젝트
 	
@@ -717,11 +717,8 @@ void CPlayerObject::SetChangedPlayerState()
 	pp->SetPosition(m_pos4f.x, m_pos4f.y, m_pos4f.z);
 }
 
-void CPlayerObject::PlayerInput(float deltime)
+void CPlayerObject::PlayerInput(double deltime)
 {
-	//if (m_dir !=0)
-		//cout << "Direction: " << static_cast<int>(m_dir) << endl;
-
 	switch (m_dir)
 	{
 		case CHAR_MOVE::FRONT_MOVE:
@@ -737,7 +734,7 @@ void CPlayerObject::PlayerInput(float deltime)
 
 			m_pos4f.x = xmf4.x; m_pos4f.y = xmf4.y; m_pos4f.z = xmf4.z; m_pos4f.w = xmf4.w;
 			
-			m_dir = 0;
+			//m_dir = 0;
 
 			//cout << "Front Move Pos[x, y, z, w]: " << m_pos4f.x << " , " << m_pos4f.y << " , " << m_pos4f.z << " , " << m_pos4f.w << endl;
 			//cout << "Front Move!!" << endl;
@@ -757,7 +754,7 @@ void CPlayerObject::PlayerInput(float deltime)
 
 			m_pos4f.x = xmf4.x; m_pos4f.y = xmf4.y; m_pos4f.z = xmf4.z; m_pos4f.w = xmf4.w;
 			
-			m_dir = 0;
+			//m_dir = 0;
 
 			//cout << "Back Move Pos[x, y, z, w]: " << m_pos4f.x << " , " << m_pos4f.y << " , " << m_pos4f.z << " , " << m_pos4f.w << endl;
 			//cout << "Back Move!!" << endl;
@@ -766,7 +763,7 @@ void CPlayerObject::PlayerInput(float deltime)
 
 		case CHAR_MOVE::LEFT_MOVE:
 		{
-			printf("Deltime : %f", deltime);
+			
 
 			auto r = XMLoadFloat3(&m_Rightvector);
 			r *= m_ability.speed * deltime;
@@ -782,7 +779,7 @@ void CPlayerObject::PlayerInput(float deltime)
 
 			m_pos4f.x = xmf4.x; m_pos4f.y = xmf4.y; m_pos4f.z = xmf4.z; m_pos4f.w = xmf4.w;
 			
-			m_dir = 0;
+			//m_dir = 0;
 
 			//cout << "Left Move Pos[x, y, z, w]: " << m_pos4f.x << " , " << m_pos4f.y << " , " << m_pos4f.z << " , " << m_pos4f.w << endl;
 			//cout << "Left Move!!" << endl;
@@ -802,7 +799,7 @@ void CPlayerObject::PlayerInput(float deltime)
 
 			m_pos4f.x = xmf4.x; m_pos4f.y = xmf4.y; m_pos4f.z = xmf4.z; m_pos4f.w = xmf4.w;
 			
-			m_dir = 0;
+			//m_dir = 0;
 
 			//cout << "Right Move Pos[x, y, z, w]: " << m_pos4f.x << " , " << m_pos4f.y << " , " << m_pos4f.z << " , " << m_pos4f.w << endl;
 			//cout << "Right Move!!" << endl;
@@ -819,7 +816,7 @@ void CPlayerObject::PlayerInput(float deltime)
 			*/
 			//cout << "Jump!!" << endl;
 
-			m_dir = 0;
+			//m_dir = 0;
 		}
 		break;
 
