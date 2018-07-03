@@ -578,10 +578,10 @@ public:
 class MoveCubeObject : public CGameObject
 {
 public:
-	MoveCubeObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, float rad, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
+	MoveCubeObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, float len, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
 	~MoveCubeObject();
 	int selectColor;
-	float Rad;
+	float Len;
 	float n = 0;
 	ShadowObject* s = NULL;
 public:
@@ -828,7 +828,7 @@ public:
 class ShadowObject : public CGameObject
 {
 public:
-	ShadowObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, CGameObject* master, XMFLOAT3 size, int kinds, XMFLOAT4& ori, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
+	ShadowObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, CGameObject* master, XMFLOAT3 size, int kinds, XMFLOAT4& ori,  XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
 	CGameObject* Master = NULL;
 	XMFLOAT3 Size = XMFLOAT3{ 10,10,10 };
 	int Kinds;
@@ -845,7 +845,6 @@ public:
 	static CMaterial Mat;
 	static std::vector<ModelAnimation> cAnimations;//애니메이션 데이터 저장. 메쉬와 이거,텍스처는 한번만생성해서 공유하도록해야됨
 	static std::vector<ModelAnimation> iAnimations;//애니메이션 데이터 저장. 메쉬와 이거,텍스처는 한번만생성해서 공유하도록해야됨
-	static std::vector<ModelAnimation> oAnimations;//애니메이션 데이터 저장. 메쉬와 이거,텍스처는 한번만생성해서 공유하도록해야됨
 
 public:
 	virtual void SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist);

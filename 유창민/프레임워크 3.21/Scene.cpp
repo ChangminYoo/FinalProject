@@ -289,10 +289,10 @@ void Scene::CreateGameObject()
 	//DynamicObject.back()->pp->integrate(0.1f);//힘은 지속적으로 가해지는것이며 즉발적이려면 힘을 가한 시간을 통해 계산한다.
 	
 	//MoveCube
-	StaticObject.push_back(new MoveCubeObject(device, commandlist, &BbObject, &Shadows, 155.0f, XMFLOAT4(0, 25, 155, 0)));
-	StaticObject.push_back(new MoveCubeObject(device, commandlist, &BbObject, &Shadows, -150.0f, XMFLOAT4(0, 52, -150, 0)));
-	StaticObject.push_back(new MoveCubeObject(device, commandlist, &BbObject, &Shadows, 140.0f, XMFLOAT4(140, 34, 0, 0)));
-	StaticObject.push_back(new MoveCubeObject(device, commandlist, &BbObject, &Shadows, 65.0f, XMFLOAT4(-65, 96, 0, 0)));
+	StaticObject.push_back(new MoveCubeObject(device, commandlist, &BbObject, &Shadows, 80.0f, XMFLOAT4(0, 25, 115, 0)));
+	StaticObject.push_back(new MoveCubeObject(device, commandlist, &BbObject, &Shadows, 80.0f, XMFLOAT4(0, 52, -150, 0)));
+	StaticObject.push_back(new MoveCubeObject(device, commandlist, &BbObject, &Shadows, 80.0f, XMFLOAT4(130, 34, 0, 0)));
+	StaticObject.push_back(new MoveCubeObject(device, commandlist, &BbObject, &Shadows, 80.0f, XMFLOAT4(-105, 96, 0, 0)));
 
 
 	//Cube

@@ -2199,7 +2199,7 @@ void CubeObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer
 	Mesh.Render(commandlist);
 }
 
-MoveCubeObject::MoveCubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, list<CGameObject*>*shadow, float rad, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist,shadow, cp)
+MoveCubeObject::MoveCubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, list<CGameObject*>*shadow, float len, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist,shadow, cp)
 {
 	if (CreateMesh == false)
 	{
@@ -2238,7 +2238,7 @@ MoveCubeObject::MoveCubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 
 	TexOff = selectColor;
 
-	Rad = rad;
+	Len = len;
 
 	n = rand() % 30;
 
@@ -2313,8 +2313,7 @@ void MoveCubeObject::Tick(const GameTimer & gt)
 {
 	n += gt.DeltaTime();
 
-	CenterPos.x = Rad * cosf(MMPE_PI * n * 0.1f);
-	CenterPos.z = Rad * sinf(MMPE_PI * n * 0.1f);
+	CenterPos.y = Len * sinf(MMPE_PI * n * 0.1f)+ 20;
 
 }
 
@@ -2772,29 +2771,29 @@ void DiceObject::Tick(const GameTimer & gt)
 
 		else if (Dicedata == 2)
 		{
-			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist,NULL, Master, ori, MMPE_PI / 9, NULL, Master->CenterPos));
-			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist,NULL, Master, ori, -MMPE_PI / 9, NULL, Master->CenterPos));
+			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist,NULL, Master, ori, MMPE_PI / 18, NULL, Master->CenterPos));
+			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist,NULL, Master, ori, -MMPE_PI / 18, NULL, Master->CenterPos));
 		}
 		else if (Dicedata == 3)
 		{
 			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist,NULL, Master, ori, 0, NULL, Master->CenterPos));
-			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist,NULL, Master, ori, MMPE_PI / 6, NULL, Master->CenterPos));
-			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist,NULL, Master, ori, -MMPE_PI / 6, NULL, Master->CenterPos));
+			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist,NULL, Master, ori, MMPE_PI / 9, NULL, Master->CenterPos));
+			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist,NULL, Master, ori, -MMPE_PI / 9, NULL, Master->CenterPos));
 		}
 		else if (Dicedata == 4)
 		{
+			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist,NULL, Master, ori, MMPE_PI / 18, NULL, Master->CenterPos));
+			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist,NULL, Master, ori, -MMPE_PI / 18, NULL, Master->CenterPos));
 			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist,NULL, Master, ori, MMPE_PI / 9, NULL, Master->CenterPos));
 			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist,NULL, Master, ori, -MMPE_PI / 9, NULL, Master->CenterPos));
-			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist,NULL, Master, ori, MMPE_PI / 6, NULL, Master->CenterPos));
-			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist,NULL, Master, ori, -MMPE_PI / 6, NULL, Master->CenterPos));
 		}
 		else if (Dicedata == 5)
 		{
 			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist,NULL, Master, ori, 0, NULL, Master->CenterPos));
+			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist,NULL, Master, ori, MMPE_PI / 18, NULL, Master->CenterPos));
+			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist,NULL, Master, ori, -MMPE_PI / 18, NULL, Master->CenterPos));
 			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist,NULL, Master, ori, MMPE_PI / 9, NULL, Master->CenterPos));
-			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist,NULL, Master, ori, -MMPE_PI / 9, NULL, Master->CenterPos));
-			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist,NULL, Master, ori, MMPE_PI / 6, NULL, Master->CenterPos));
-			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist, NULL, Master, ori, -MMPE_PI / 6, NULL, Master->CenterPos));
+			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist, NULL, Master, ori, -MMPE_PI / 9, NULL, Master->CenterPos));
 		}
 
 		DelObj = true;
@@ -3978,7 +3977,7 @@ ShieldArmor::ShieldArmor(ID3D12Device * m_Device, ID3D12GraphicsCommandList * co
 	ObjData.Scale = 1.0f;
 	ObjData.SpecularParamater = 0.3f;//스페큘러를 낮게준다.
 	Blending = true;
-	ObjData.BlendValue = 0.3;
+	ObjData.BlendValue = 0.3f;
 	Master = master;
 
 	//게임관련 데이터들

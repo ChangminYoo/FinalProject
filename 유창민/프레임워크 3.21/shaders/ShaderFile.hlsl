@@ -202,6 +202,7 @@ litColor = litColor * textureColor;  //엠비언트 * 텍스쳐 컬러
 litColor = saturate(litColor + specular); //마지막으로 스패큘러 더한다.
 litColor.w = BlendValue;
 
+//litColor = textureColor;
 //litColor.a = textureColor.a;
 
 //노멀매핑이 되었는지 확인. 줄무늬가 있으면 노멀매핑때문에 그 줄무늬쪽이 노멀이 0 이되므로 적용된것!

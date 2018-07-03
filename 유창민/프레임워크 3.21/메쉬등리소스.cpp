@@ -213,7 +213,6 @@ CMesh ShadowObject::oMesh;//나중에 메쉬는 static으로 둬야함
 CMaterial ShadowObject::Mat;
 std::vector<ModelAnimation> ShadowObject::cAnimations;
 std::vector<ModelAnimation> ShadowObject::iAnimations;
-std::vector<ModelAnimation> ShadowObject::oAnimations;
 //-------------------------------------------------------------------------------------
 bool ImpObject::CreateMesh = false;
 unordered_map<string, unique_ptr<CTexture>> ImpObject::Textures;//텍스처들을 저장함
