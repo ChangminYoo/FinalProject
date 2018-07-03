@@ -27,13 +27,13 @@ class CPlayer
 {
 public:
 	UINT MouseOn = 0;
-	CPlayer(HWND hwnd,ID3D12Device* Device, ID3D12GraphicsCommandList* commandlist, float asp, XMFLOAT3& e, XMFLOAT3& a, XMFLOAT3& u);
+	CPlayer(HWND hwnd, ID3D12Device* Device, ID3D12GraphicsCommandList* commandlist, float asp, XMFLOAT3& e, XMFLOAT3& a, XMFLOAT3& u);
 	~CPlayer();
-	CGameObject* TraceObject=NULL;
-	void TPSCameraSystem(int mx,int my,float DeltaTime);
+	CGameObject* TraceObject = NULL;
+	void TPSCameraSystem(int mx, int my, float DeltaTime);
 	void PlayerCameraReLocate();
 	void SetPlayer(CGameObject* obj);
-	void PlayerInput(float DeltaTime,Scene* scene);
+	void PlayerInput(float DeltaTime, Scene* scene);
 	CCamera Camera;
 	CGameObject* PlayerObject;
 
@@ -48,12 +48,16 @@ public:
 	bool m_trigger{ false };
 
 	void Tick(float DeltaTime);
-	void CreateBullet(ID3D12Device* Device,ID3D12GraphicsCommandList* cl, XMFLOAT3& Goal, CGameObject* lock, list<CGameObject*>* bulletlist);
+	void CreateBullet(ID3D12Device* Device, ID3D12GraphicsCommandList* cl, XMFLOAT3& Goal, CGameObject* lock, list<CGameObject*>* bulletlist);
 	void CheckTraceSkill();//현재 선택한 스킬넘버링이 추적데이터가 존재해야하는지 검사하고, 검사한 결과를 MouseTrace에 입힌다. 
 	bool MouseTrace = false;
 
 	void CreateOtherClientBullet(ID3D12Device* Device, ID3D12GraphicsCommandList* cl, Position3D& Goal, CGameObject* lock, list<CGameObject*>* bulletlist, STC_BulletObject_Info server_bulldata);
 public:
+	char		  curr_playerdir{ 0 };
+	bool		  m_right_flag{ false }, m_left_flag{ false }, m_up_flag{ false }, m_down_flag{ false };
+	bool		  m_jump_flag{ false };
+
 	AsyncClient * m_async_client;
 
 };

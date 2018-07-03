@@ -174,7 +174,7 @@ PhysicsPoint::~PhysicsPoint()
 {
 }
 
-void PhysicsPoint::integrate(__int64 DeltaTime, XMFLOAT4* ObjPos, XMFLOAT3* ObjVel)
+void PhysicsPoint::integrate(double DeltaTime, XMFLOAT4* ObjPos, XMFLOAT3* ObjVel)
 {
 
 	if (InverseMass <= 0.0f)

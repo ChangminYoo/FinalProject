@@ -215,16 +215,17 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 	{
 		if (PlayerObject != NULL && PlayerObject->gamedata.HP > 0 && GetFocus())
 		{
-			char playerdir = 0;
 			bool move = false;
 
 			m_async_client->RgCkInfo.PtCheck.Deltime = DeltaTime;
 
-			if (GetKeyState(0x57) & 0x8000)//W키
+			STC_CharMove cts_move;
+			if (GetAsyncKeyState(0x57) & 0x8000)//W키
 			{
-				playerdir = 1;
+				curr_playerdir = 1;
 				move = true;
-
+				
+				m_up_flag = true;
 				//룩벡터의 +방향으로 움직인다.
 				/*
 				auto l = XMLoadFloat3(&PlayerObject->Lookvector);
@@ -278,11 +279,26 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 				*/
 
 			}
-			else if (GetKeyState(0x53) & 0x8000)//S키
+			else
 			{
-				playerdir = 2;
+				if (m_up_flag)
+				{
+					cout << "up_flag_false" << "\n";
+					m_up_flag = false;
+
+					cts_move.dir = 0;
+					m_async_client->SendPacket(reinterpret_cast<Packet*>(&cts_move));
+					m_async_client->SetMovePrevDir(0);
+				}
+					
+			}
+
+			if (GetAsyncKeyState(0x53) & 0x8000)//S키
+			{
+				curr_playerdir = 2;
 				move = true;
 
+				m_down_flag = true;
 				//룩벡터의 -방향으로 움직인다.
 				/*
 				auto l = XMLoadFloat3(&PlayerObject->Lookvector);
@@ -329,12 +345,25 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 				*/
 
 			}
-
-			if (GetKeyState(0x41) & 0x8000)//A키
+			else
 			{
-				playerdir = 3;
+				if (m_down_flag)
+				{
+					cout << "down_flag_false" << "\n";
+					m_down_flag = false;
+
+					cts_move.dir = 0;
+					m_async_client->SendPacket(reinterpret_cast<Packet*>(&cts_move));
+					m_async_client->SetMovePrevDir(0);
+				}
+			}
+
+			if (GetAsyncKeyState(0x41) & 0x8000)//A키
+			{
+				curr_playerdir = 3;
 				move = true;
 
+				m_left_flag = true;
 				//라이트벡터의 -방향으로 움직인다.
 				/*
 				auto r = XMLoadFloat3(&PlayerObject->Rightvector);
@@ -381,11 +410,25 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 				*/
 
 			}
-			else if (GetKeyState(0x44) & 0x8000)//D키
+			else
 			{
-				playerdir = 4;
+				if (m_left_flag)
+				{
+					cout << "left_flag_false" << "\n";
+					m_left_flag = false;
+
+					cts_move.dir = 0;
+					m_async_client->SendPacket(reinterpret_cast<Packet*>(&cts_move));
+					m_async_client->SetMovePrevDir(0);
+				}
+			}
+
+			if (GetAsyncKeyState(0x44) & 0x8000)//D키
+			{
+				curr_playerdir = 4;
 				move = true;
 
+				m_right_flag = true;
 				//라이트벡터의 +방향으로 움직인다.
 				/*
 				auto r = XMLoadFloat3(&PlayerObject->Rightvector);
@@ -432,9 +475,19 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 				*/
 
 			}
+			else
+			{
+				if (m_right_flag)
+				{
+					cout << "left_flag_false" << "\n";
+					m_right_flag = false;
 
+					cts_move.dir = 0;
+					m_async_client->SendPacket(reinterpret_cast<Packet*>(&cts_move));
+					m_async_client->SetMovePrevDir(0);
+				}
+			}
 
-			STC_CharMove cts_move;
 
 			//캐릭터가 이동을 할 때, 즉 키를 누를때 눌렀다는 정보를 서버로 보냄		
 			if (move == true)//움직이고 있으면 움직이는 모션으로
@@ -446,12 +499,19 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 					m_async_client->RgCkInfo.AniCheck.AniState = Run;
 					//m_async_client->RgCkInfo.PtCheck.PositionInfo = { PlayerObject->CenterPos.x, PlayerObject->CenterPos.y, PlayerObject->CenterPos.z, PlayerObject->CenterPos.w };
 					//2018-05-24 수정
-					cts_move.dir = playerdir;
+					
+					if (m_async_client->GetMovePrevDir() != curr_playerdir)
+					{
+						cts_move.dir = curr_playerdir;
+						m_async_client->SendPacket(reinterpret_cast<Packet*>(&cts_move));
+
+						//cout << "move keydown prev_playerdir : " << static_cast<int>(m_async_client->GetMovePrevDir()) << "\n";
+						//cout << "move keydown curr_playerdir : " << static_cast<int>(curr_playerdir) << "\n";
+					}
+						
+					m_async_client->SetMovePrevDir(curr_playerdir);
+
 			
-					m_async_client->SendPacket(reinterpret_cast<Packet*>(&cts_move));
-
-					//cout << "Run Current Direction : " << static_cast<int>(playerdir) << endl;
-
 				}
 			}
 			else
@@ -474,44 +534,87 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 				}
 			}
 
-			if (GetKeyState(VK_SPACE) & 0x8000 && PlayerObject->AirBone == false)
+			if (GetAsyncKeyState(VK_SPACE) & 0x8000)
 			{
-				playerdir = 5;
+				if (!PlayerObject->AirBone)
+				{
+					m_jump_flag = true;
+					curr_playerdir = 5;
 
-				//GeneratorJump j;
-				//j.SetJumpVel(XMFLOAT3(0, 100, 0));//나중에 플레이어의 점프력만큼 추가할것
-				//j.Update(DeltaTime, *PlayerObject->pp);
-				//PlayerObject->AirBone = true;//공중상태를 true로
+					//GeneratorJump j;
+					//j.SetJumpVel(XMFLOAT3(0, 100, 0));//나중에 플레이어의 점프력만큼 추가할것
+					//j.Update(DeltaTime, *PlayerObject->pp);
+					//PlayerObject->AirBone = true;//공중상태를 true로
 
-				cts_move.dir = playerdir;
+					m_async_client->RgCkInfo.AniCheck.AniState = Idle;
 
-				m_async_client->RgCkInfo.AniCheck.AniState = Idle;
-				m_async_client->SendPacket(reinterpret_cast<Packet*>(&cts_move));
+					if (m_async_client->GetMovePrevDir() != curr_playerdir)
+					{
+						cts_move.dir = curr_playerdir;
+						m_async_client->SendPacket(reinterpret_cast<Packet*>(&cts_move));
+					}
 
-				//cout << "Jump Current Direction : " << static_cast<int>(playerdir) << endl;
+					m_async_client->SetMovePrevDir(curr_playerdir);
 
-
-				//STC_CharJump cts_charjump;
-				//cts_charjump.id = PlayerObject->m_player_data.id;
-				//cts_charjump.ani_state;  //나중에 점프 애니메이션 추가되면 설정해줄것임
-				//m_async_client->SendPacket(reinterpret_cast<Packet*>(&cts_charjump));
+					//STC_CharJump cts_charjump;
+					//cts_charjump.id = PlayerObject->m_player_data.id;
+					//cts_charjump.ani_state;  //나중에 점프 애니메이션 추가되면 설정해줄것임
+					//m_async_client->SendPacket(reinterpret_cast<Packet*>(&cts_charjump));
+				}	
 			}
+			else
+			{
+				if (m_jump_flag)
+				{
+					cout << "Jump Flag!!" << "\n";
+					m_jump_flag = false;
+
+					cts_move.dir = 0;
+					m_async_client->SendPacket(reinterpret_cast<Packet*>(&cts_move));
+					m_async_client->SetMovePrevDir(0);
+				}
+			}
+
+			/*
+			if (GetAsyncKeyState(0x57) & 0x8001)
+			{
+				cout << "0x8001" << "\n";
+			}
+			if (GetAsyncKeyState(0x57) & 0x0000)
+			{
+				cout << "0x0000" << "\n";
+			}
+			if (GetAsyncKeyState(0x57) & 1)
+			{
+				cout << "0x0001" << "\n";
+			}
+			*/
 
 			//(move == true) &&
 			//캐릭터가 이동을 멈추고, 즉 누르던 키를 땠을 때 땠다는 정보를 서버로 보냄
+			/*
 			if ((move == true) && ((GetKeyState(0x57) & 0x0001) || (GetKeyState(0x53) & 0x0001) ||
 				(GetKeyState(0x41) & 0x0001) || (GetKeyState(0x44) & 0x0001) ||
 				(GetKeyState(VK_SPACE) & 0x0001)))//W키 S키 A키 D키
 			{
 				move = false;
-				playerdir = 0;
+				curr_playerdir = 0;
 
-				cts_move.dir = playerdir;
-				m_async_client->SendPacket(reinterpret_cast<Packet*>(&cts_move));
-
-				//cout << "KeyUp Current Direction : " << static_cast<int>(playerdir) << endl;
-
+				cout << "응기잇" << "\n";
+				if (m_async_client->GetMovePrevDir() != curr_playerdir)
+				{
+					cts_move.dir = curr_playerdir;
+					m_async_client->SendPacket(reinterpret_cast<Packet*>(&cts_move));
+					cout << "응기잇2" << "\n";
+					//cout << "keyup prev_playerdir : " << static_cast<int>(m_async_client->GetMovePrevDir()) << "\n";
+					//cout << "keyup curr_playerdir : " << static_cast<int>(curr_playerdir) << "\n";
+				}
+					
+				m_async_client->SetMovePrevDir(curr_playerdir);
+		
 				m_trigger = true;
+
+		
 			}
 
 			if ((m_trigger == true) && ((GetKeyState(0x57) & 0x0000) || (GetKeyState(0x53) & 0x0000) ||
@@ -523,7 +626,7 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 
 				cout << "Trigger True to False\n";
 			}
-
+			*/
 
 			if (GetKeyState(0x31) & 0x8000)
 				skilldata.SellectBulletIndex = 0;

@@ -66,7 +66,7 @@ void CPlayerObject::Init_PlayerInfo()
 	m_ability.orignHP = 100;
 	m_ability.exp = 0;
 	m_ability.level = 1;
-	m_ability.speed = 30000;
+	m_ability.speed = 100;
 
 	if (m_id == 0)
 		m_pos4f = { -100.f, -1000.f, 0.f, 0.f };
@@ -334,6 +334,8 @@ void CPlayerObject::ProcessPacket(Packet * packet)
 
 		auto mdata = reinterpret_cast<STC_CharMove*>(packet);
 		m_dir = mdata->dir;
+
+		cout << "Direction: " << static_cast<int>(m_dir) << "\n";
 
 	}
 	break;
@@ -807,14 +809,17 @@ void CPlayerObject::PlayerInput(double deltime)
 		break;
 
 		case CHAR_MOVE::JUMP:
-		{
-			/*
-			GeneratorJump j;
-			j.SetJumpVel(XMFLOAT3(0, 100, 0));
-			j.Update(deltime, *pp);
-			m_airbone = true;	
-			*/
-			//cout << "Jump!!" << endl;
+		{		
+			if (!m_airbone)
+			{
+				GeneratorJump j;
+				j.SetJumpVel(XMFLOAT3(0, 100, 0));
+				j.Update(deltime, *pp);
+				m_airbone = true;
+
+				cout << "Jump!!" << endl;
+			}
+
 
 			//m_dir = 0;
 		}

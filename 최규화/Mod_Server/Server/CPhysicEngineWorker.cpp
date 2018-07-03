@@ -17,11 +17,9 @@ void CPhysicEngineWorker::Update()
 	while (true)
 	{
 		m_currtime = high_resolution_clock::now();
-		m_deltime = duration_cast<microseconds>(m_currtime - m_prevtime).count(); // 10ÀÇ -6
-		m_deltime = m_deltime / 1000000.0;
+		__int64 local_deltime = duration_cast<microseconds>(m_currtime - m_prevtime).count(); // 10ÀÇ -6
+		m_deltime = local_deltime / 1000000.0;
 		m_prevtime = m_currtime;
-
-		//cout << "Time : " << m_deltime << "\n";
 
 		// 0.00000028
 		//2838 
@@ -36,6 +34,7 @@ void CPhysicEngineWorker::Update()
 				client->AfterGravitySystem(m_deltime);
 				client->SetChangedPlayerState();
 
+				//cout << "PosY: " << client->m_pdata.pos.y << "\n";
 				//cout << "PosX: " << client->m_pdata.pos.x << "PosY: " << client->m_pdata.pos.y << "PosZ: " << client->m_pdata.pos.z << "\n";
 			}
 		}

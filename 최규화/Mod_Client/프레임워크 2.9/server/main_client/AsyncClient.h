@@ -50,6 +50,8 @@ private:
 
 	float m_totalTime{ 0.0f };
 
+	char m_move_prevdir{ 0 };
+
 public:
 	AsyncClient() : m_socket(g_io_service) {};
 	~AsyncClient();
@@ -76,6 +78,10 @@ public:
 	//해당 변경된 gameobject의 데이터를 dynamicobject에 넣어줄것인지? -> 서버에서 데이터를 받을 때마다
 	//변경된 데이터들을 수시로 찾아가며 바꿔야함
 	//processpacket 내부에서 변경된 데이터를 바로 인자로 받은 dynamicobject에 넣어줄것인지
+
+
+	void SetMovePrevDir(char dir) { m_move_prevdir = dir; }
+	char GetMovePrevDir() const { return m_move_prevdir; }
 
 };
 

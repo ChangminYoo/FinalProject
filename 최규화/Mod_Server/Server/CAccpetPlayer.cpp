@@ -136,8 +136,8 @@ void CAccpetPlayer::MainLogic()
 	m_pWorkerThread.emplace_back(new thread{ [&]()
 	{ 
 		g_timer_queue.CheckPrevTime();
+		g_timer_queue.AddEvent(0, 0, REGULAR_PACKET_EXCHANGE, true, 0);
 		g_timer_queue.TimerThread(); 
-		g_timer_queue.AddEvent(0,0,REGULAR_PACKET_EXCHANGE, true,0);
 
 	} });
 

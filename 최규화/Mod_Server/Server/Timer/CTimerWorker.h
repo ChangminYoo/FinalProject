@@ -42,7 +42,7 @@ private:
 	__int64 countsPerSec;
 	double mSecondsPerCount;
 
-	float m_deltime;
+	double m_deltime;
 
 	int m_tcnt{ 0 };
 	float m_tdeltime;

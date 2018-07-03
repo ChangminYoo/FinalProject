@@ -167,9 +167,18 @@ void CTimerWorker::ProcessPacket(event_type * et)
 		case REGULAR_PACKET_EXCHANGE:
 		{
 			// 1초에 20번 패킷을 정기적으로 보내줘야함 
-			m_deltime += duration_cast<milliseconds>(high_resolution_clock::now() - m_prevtime).count() / 1000.f;
+			m_currtime = high_resolution_clock::now();
+			__int64 local_deltime = duration_cast<microseconds>(m_currtime - m_prevtime).count();
+			m_deltime = (local_deltime / 1000000.0);
 			m_currtime = m_prevtime;
 
+			//cout << "시간: " << m_deltime << endl;
+			++m_tcnt;
+			if (m_deltime >= 1.0)
+			{
+				//cout << m_tcnt << endl;
+				//system("pause");
+			}
 			//1. 1초에 20번씩 서버에서 업데이트된 클라이언트의 모든정보를 보냄
 			STC_CharCurrState stc_char_state;
 			for(auto myclient : g_clients)
