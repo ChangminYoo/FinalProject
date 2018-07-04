@@ -220,6 +220,7 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 			m_async_client->RgCkInfo.PtCheck.Deltime = DeltaTime;
 
 			STC_CharMove cts_move;
+			STC_CharAnimation cts_cani;
 			if (GetAsyncKeyState(0x57) & 0x8000)//W키
 			{
 				curr_playerdir = 1;
@@ -289,6 +290,10 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 					cts_move.dir = 0;
 					m_async_client->SendPacket(reinterpret_cast<Packet*>(&cts_move));
 					m_async_client->SetMovePrevDir(0);
+
+					cts_cani.ani_state = Ani_State::Idle;
+					cts_cani.id = PlayerObject->m_player_data.id;
+					m_async_client->SendPacket(reinterpret_cast<Packet*>(&cts_cani));
 				}
 					
 			}
@@ -355,6 +360,10 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 					cts_move.dir = 0;
 					m_async_client->SendPacket(reinterpret_cast<Packet*>(&cts_move));
 					m_async_client->SetMovePrevDir(0);
+
+					cts_cani.ani_state = Ani_State::Idle;
+					cts_cani.id = PlayerObject->m_player_data.id;
+					m_async_client->SendPacket(reinterpret_cast<Packet*>(&cts_cani));
 				}
 			}
 
@@ -420,6 +429,10 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 					cts_move.dir = 0;
 					m_async_client->SendPacket(reinterpret_cast<Packet*>(&cts_move));
 					m_async_client->SetMovePrevDir(0);
+
+					cts_cani.ani_state = Ani_State::Idle;
+					cts_cani.id = PlayerObject->m_player_data.id;
+					m_async_client->SendPacket(reinterpret_cast<Packet*>(&cts_cani));
 				}
 			}
 
@@ -485,6 +498,10 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 					cts_move.dir = 0;
 					m_async_client->SendPacket(reinterpret_cast<Packet*>(&cts_move));
 					m_async_client->SetMovePrevDir(0);
+
+					cts_cani.ani_state = Ani_State::Idle;
+					cts_cani.id = PlayerObject->m_player_data.id;
+					m_async_client->SendPacket(reinterpret_cast<Packet*>(&cts_cani));
 				}
 			}
 
@@ -495,23 +512,21 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 				if (PlayerObject->n_Animation != Ani_State::Attack)//공격모션이 아니면 다시 대기상태로
 				{
 					PlayerObject->SetAnimation(Ani_State::Run);
-					
-					m_async_client->RgCkInfo.AniCheck.AniState = Run;
-					//m_async_client->RgCkInfo.PtCheck.PositionInfo = { PlayerObject->CenterPos.x, PlayerObject->CenterPos.y, PlayerObject->CenterPos.z, PlayerObject->CenterPos.w };
-					//2018-05-24 수정
-					
+							
 					if (m_async_client->GetMovePrevDir() != curr_playerdir)
 					{
 						cts_move.dir = curr_playerdir;
 						m_async_client->SendPacket(reinterpret_cast<Packet*>(&cts_move));
+
+						cts_cani.ani_state = Ani_State::Run;
+						cts_cani.id = PlayerObject->m_player_data.id;
+						m_async_client->SendPacket(reinterpret_cast<Packet*>(&cts_cani));
 
 						//cout << "move keydown prev_playerdir : " << static_cast<int>(m_async_client->GetMovePrevDir()) << "\n";
 						//cout << "move keydown curr_playerdir : " << static_cast<int>(curr_playerdir) << "\n";
 					}
 						
 					m_async_client->SetMovePrevDir(curr_playerdir);
-
-			
 				}
 			}
 			else
@@ -521,15 +536,6 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 					PlayerObject->SetAnimation(Ani_State::Idle);	
 					
 					m_async_client->RgCkInfo.AniCheck.AniState = Idle;
-					//m_async_client->RgCkInfo.PtCheck.PositionInfo = { PlayerObject->CenterPos.x, PlayerObject->CenterPos.y, PlayerObject->CenterPos.z, PlayerObject->CenterPos.w };
-					//2018-05-24 수정
-					//cts_move.dir = playerdir;
-					//cts_move.deltime = DeltaTime;
-
-					//m_async_client->SendPacket(reinterpret_cast<Packet*>(&cts_move));
-
-					//cout << "Idle Current Direction : " << static_cast<int>(playerdir) << endl;
-
 
 				}
 			}
@@ -552,6 +558,8 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 					{
 						cts_move.dir = curr_playerdir;
 						m_async_client->SendPacket(reinterpret_cast<Packet*>(&cts_move));
+
+						//점프 애니메이션 추가 시 이곳에 넣어준다
 					}
 
 					m_async_client->SetMovePrevDir(curr_playerdir);
@@ -575,23 +583,7 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 				}
 			}
 
-			/*
-			if (GetAsyncKeyState(0x57) & 0x8001)
-			{
-				cout << "0x8001" << "\n";
-			}
-			if (GetAsyncKeyState(0x57) & 0x0000)
-			{
-				cout << "0x0000" << "\n";
-			}
-			if (GetAsyncKeyState(0x57) & 1)
-			{
-				cout << "0x0001" << "\n";
-			}
-			*/
 
-			//(move == true) &&
-			//캐릭터가 이동을 멈추고, 즉 누르던 키를 땠을 때 땠다는 정보를 서버로 보냄
 			/*
 			if ((move == true) && ((GetKeyState(0x57) & 0x0001) || (GetKeyState(0x53) & 0x0001) ||
 				(GetKeyState(0x41) & 0x0001) || (GetKeyState(0x44) & 0x0001) ||
@@ -600,12 +592,11 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 				move = false;
 				curr_playerdir = 0;
 
-				cout << "응기잇" << "\n";
 				if (m_async_client->GetMovePrevDir() != curr_playerdir)
 				{
 					cts_move.dir = curr_playerdir;
 					m_async_client->SendPacket(reinterpret_cast<Packet*>(&cts_move));
-					cout << "응기잇2" << "\n";
+					
 					//cout << "keyup prev_playerdir : " << static_cast<int>(m_async_client->GetMovePrevDir()) << "\n";
 					//cout << "keyup curr_playerdir : " << static_cast<int>(curr_playerdir) << "\n";
 				}

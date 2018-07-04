@@ -125,6 +125,24 @@ switch (packet[1])
 void AsyncClient::SendPacketRegular(CGameObject& gobj, const GameTimer& gt)
 {
 	//클라이언트에서 매 프레임마다 정기적으로 보내줘야할 데이터 패킷
+
+	//클라이언트에서 플레이어의 공격 모션이 끝났을 때 바로 IDLE 모션을 서버로 전송해야한다
+	if (gobj.m_end_attack)
+	{
+		STC_CharAnimation cts_cani;
+		cts_cani.id = gobj.m_player_data.id;
+		cts_cani.ani_state = Ani_State::Idle;
+
+		SendPacket(reinterpret_cast<Packet*>(&cts_cani));
+		gobj.m_end_attack = false;
+	}
+
+	//플레이어가 죽는 모션을 끝마쳤을 때
+	if (gobj.m_end_die)
+	{
+	
+	}
+
 	m_totalTime += gt.DeltaTime();
 
 	// 1.서버에서 담고있는 캐릭터회전정보를 주기적으로 0.2초마다 검사 및 패킷송신
@@ -146,7 +164,7 @@ void AsyncClient::SendPacketRegular(CGameObject& gobj, const GameTimer& gt)
 			cts_c_ani.id = gobj.m_player_data.id;
 			cts_c_ani.ani_state = RgCkInfo.AniCheck.AniState;
 
-			SendPacket(reinterpret_cast<Packet*>(&cts_c_ani));
+			//SendPacket(reinterpret_cast<Packet*>(&cts_c_ani));
 		}
 
 	}

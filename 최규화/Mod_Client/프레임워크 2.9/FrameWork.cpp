@@ -458,13 +458,15 @@ LRESULT FrameWork::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 void FrameWork::OnMouseDown(WPARAM btnState, int x, int y)
 {
-	
 	//레이를 쏜다. 단 플레이어 오브젝트가 살아있고, 해당 스킬이 쏠수있는 true상태라면!
 	if (scene->Player->PlayerObject->gamedata.HP > 0 && scene->Player->skilldata.isSkillOn[scene->Player->skilldata.SellectBulletIndex])
 	{//공격 애니메이션으로 전환
 		scene->Player->PlayerObject->SetAnimation(2);
 
-		scene->Player->m_async_client->RgCkInfo.AniCheck.AniState = Attack;
+		STC_CharAnimation cts_cani;
+		cts_cani.id = scene->Player->PlayerObject->m_player_data.id;
+		cts_cani.ani_state = Ani_State::Attack;
+		scene->Player->m_async_client->SendPacket(reinterpret_cast<Packet*>(&cts_cani));
 
 		auto RAY = MousePicking(x, y, scene->Player->Camera.CamData.EyePos, scene->Player->Camera.CamData.View, scene->Player->Camera.CamData.Proj);
 		XMFLOAT3 savepoint;
@@ -478,7 +480,6 @@ void FrameWork::OnMouseDown(WPARAM btnState, int x, int y)
 				//광선의 길이보다 가까울때
 				if (FloatLength(Float4Add(scene->Player->PlayerObject->CenterPos, (*b)->CenterPos, false)) <= MAXRAYLEN)
 				{
-
 
 					if ((*b)->rco.RayCasting(RAY.RayOrgin, RAY.RayDir, XMFloat4to3((*b)->CenterPos), XMFloat4to3(scene->Player->PlayerObject->CenterPos),
 						scene->Player->PlayerObject->Lookvector, &savepoint) == true && Shot == false)//광선이 다른 오브젝트를 맞출경우

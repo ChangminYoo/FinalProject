@@ -514,7 +514,7 @@ void CCubeManObject::Collision(list<CGameObject*>* collist, float DeltaTime)
 }
 
 
-
+// 클라이언트에서 공격, 죽는 모션을 끝냈을 시 이를 서버에 알려야됨 
 void CCubeManObject::EndAnimation(int nAni)
 {
 
@@ -522,11 +522,14 @@ void CCubeManObject::EndAnimation(int nAni)
 	{
 		SetAnimation((int)Ani_State::Idle);//대기상태로둔다.
 
+		m_end_attack = true;
 	}
 
 	if (nAni == Ani_State::Dead)//죽는모션이었으면
 	{
 		DelObj = true;
+
+		m_end_die = true;
 	}
 }
 

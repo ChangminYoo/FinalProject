@@ -123,6 +123,7 @@ public:
 	char	GetPlayerDirection() const   { return m_dir; }
 	void	SetPlayerAnimation(unsigned char ani) { m_ani = ani; }
 	unsigned char GetPlayerAnimation() const { return m_ani; }
+
 	// ---------------------------------------------------------------------------------------
 	// [5]. 물리효과 함수
 
