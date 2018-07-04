@@ -33,7 +33,7 @@ XMFLOAT3 CGameObject::GetUpvector()
 	return up;
 }
 
-CGameObject::CGameObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, XMFLOAT4 cp)
+CGameObject::CGameObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, XMFLOAT4 cp)
 {
 
 	//여기서는 기본적인것들만 처리한다. 위치나 회전각 등 초기화
@@ -41,6 +41,7 @@ CGameObject::CGameObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* comm
 	this->commandlist = commandlist;
 	this->CenterPos = cp;//중점위치
 	this->ParticleList = Plist;
+	this->Shadow = shadow;
 	this->OrgPos = cp;
 	XMStoreFloat4(&Orient, XMQuaternionIdentity());//방향을 초기화 한다.
 	SetWorldMatrix();	//월드변환생성
@@ -61,13 +62,17 @@ void CGameObject::SetShadowMatrix()
 {
 	auto wmatrix = XMMatrixIdentity();
 	auto pos = XMLoadFloat4(&CenterPos);
-	
+	auto quater = XMLoadFloat4(&Orient);
+
+	//wmatrix *= XMMatrixRotationQuaternion(quater);
 	wmatrix *= XMMatrixRotationY(0.5f*MMPE_PI);
+	wmatrix *= XMMatrixScaling(1.0f, 1.5f, 1.0f);
 	wmatrix *= XMMatrixTranslationFromVector(pos);
-	
+
+
 	XMStoreFloat4x4(&ObjData.WorldMatrix, wmatrix);
 
-	XMFLOAT3 Direction = { 0.7f,-1.5f,1.1f };
+	XMFLOAT3 Direction = { 0.7f,-1.5f,1.1f }; //light[0].Direction
 
 	XMVECTOR shadowPlane = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f); // xz plane
 	XMVECTOR toMainLight = -XMLoadFloat3(&Direction);
@@ -277,7 +282,7 @@ void LoadTexture(ID3D12Device* device, ID3D12GraphicsCommandList* commandlist, C
 
 //=================================================== 오브젝트 생성 ===============================================================
 
-CCubeManObject::CCubeManObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
+CCubeManObject::CCubeManObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist,shadow, cp)
 {
 
 	//게임오브젝트 생성자에서 기본적인것을 처리했으므로 여기서는
@@ -291,7 +296,7 @@ CCubeManObject::CCubeManObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 	{
 		Mesh.Index = NULL;
 		Mesh.SubResource = NULL;
-	
+
 		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Female Brown Casual", L"textures/human/Female Brown Casual 03B.dds", false, num, 0);
 		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Female Black Knight", L"textures/human/Female Black Knight 04 Green.dds", false, num, 1);
 		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Female Brown Sorceress", L"textures/human/Female Brown Sorceress 03 White.dds", false, num, 2);
@@ -302,8 +307,7 @@ CCubeManObject::CCubeManObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Male Black Archer", L"textures/human/Male Black Archer 05 Green.dds", false, num, 7);
 		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Male Fire", L"textures/human/Male Fire 01 Orange.dds", false, num, 8);
 		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Male White King", L"textures/human/Male White King 01 Red.dds", false, num, 9);
-	
-	
+		
 		SetMesh(m_Device, commandlist);
 		SetMaterial(m_Device, commandlist);
 	
@@ -371,11 +375,16 @@ CCubeManObject::CCubeManObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 	//머리위에 HP바 띄움
 	if (ParticleList != NULL)
 	{
-		Hpbar = new BarObject(m_Device, commandlist, ParticleList, this, 10, XMFLOAT4(CenterPos.x, 10, CenterPos.z, 0));
-		HPFrame = new BarFrameObject(m_Device, commandlist, ParticleList, this, 10, XMFLOAT4(CenterPos.x, 10, CenterPos.z, 0));
+		Hpbar = new BarObject(m_Device, commandlist, ParticleList,NULL, this, 10, XMFLOAT4(CenterPos.x, 10, CenterPos.z, 0));
+		HPFrame = new BarFrameObject(m_Device, commandlist, ParticleList, NULL, this, 10, XMFLOAT4(CenterPos.x, 10, CenterPos.z, 0));
 		ParticleList->push_back(HPFrame);
 		ParticleList->push_back(Hpbar);
-
+	}
+	if (Shadow != NULL)
+	{
+		s = new ShadowObject(m_Device, commandlist, NULL, Shadow, this, XMFLOAT3(0, 0, 0), 0, CenterPos);
+		s->ObjData.Scale = 2.0f;
+		Shadow->push_back(s);
 	}
 
 }
@@ -387,13 +396,13 @@ CCubeManObject::~CCubeManObject()
 		Hpbar->DelObj = true;
 	if (HPFrame != NULL)
 		HPFrame->DelObj = true;
-	
+	if (s != NULL)
+		s->DelObj = true;
 }
 
 
-void CCubeManObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList* commandlist)
+void CCubeManObject::SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist)
 {
-
 	//모델 로드
 	LoadMD5Model(L".\\플레이어메쉬들\\cIdle.MD5MESH", &Mesh, 0, 1);
 	Mesh.SetNormal(true);
@@ -405,8 +414,7 @@ void CCubeManObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList*
 	LoadMD5Anim(m_Device, L".\\플레이어메쉬들\\cRunning.MD5ANIM", &Mesh, this, animations);//1
 	LoadMD5Anim(m_Device, L".\\플레이어메쉬들\\cAttack.MD5ANIM", &Mesh, this, animations);//2
 	LoadMD5Anim(m_Device, L".\\플레이어메쉬들\\cDeath.MD5ANIM", &Mesh, this, animations);//3
-
-
+	
 }
 
 void CCubeManObject::SetMaterial(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
@@ -542,7 +550,7 @@ void CCubeManObject::EndAnimation(int nAni)
 
 //------------------- 투 사 체 -----------------------//
 
-BulletCube::BulletCube(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, CGameObject* master, XMFLOAT4& ori, CGameObject* lockon, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
+BulletCube::BulletCube(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, CGameObject* master, XMFLOAT4& ori, CGameObject* lockon, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist,shadow, cp)
 {
 
 	if (CreateMesh == false)
@@ -601,7 +609,7 @@ BulletCube::BulletCube(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 
 	if (ParticleList != NULL)
 	{
-		BulletParticles = new ParticleObject(m_Device, commandlist, ParticleList, this, 0.2f, XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, 0));
+		BulletParticles = new ParticleObject(m_Device, commandlist, ParticleList,NULL, this, 0.2f, XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, 0));
 		ParticleList->push_back(BulletParticles);
 
 	}
@@ -616,7 +624,7 @@ BulletCube::~BulletCube()
 }
 
 
-void BulletCube::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList* commandlist)
+void BulletCube::SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist)
 {
 
 	CreateCube(&Mesh, 2, 2, 2);
@@ -708,7 +716,7 @@ void BulletCube::Collision(list<CGameObject*>* collist, float DeltaTime)
 					// 파티클리스트에 데미지 오브젝트를 생성해서 넣음. 파티클을 띄운다.
 					if (ParticleList != NULL)
 					{
-						ParticleList->push_back(new DamageObject(device, commandlist, ParticleList, gamedata.Damage, XMFLOAT4((*i)->CenterPos.x, (*i)->CenterPos.y + 11, (*i)->CenterPos.z, 0)));
+						ParticleList->push_back(new DamageObject(device, commandlist, ParticleList, NULL, gamedata.Damage, XMFLOAT4((*i)->CenterPos.x, (*i)->CenterPos.y + 11, (*i)->CenterPos.z, 0)));
 					}
 					//고정된 물체가아니면 잠깐 바운스를 풀어둔다. 그래야 튕기니까.
 					(*i)->pp->SetBounce(true);
@@ -724,7 +732,7 @@ void BulletCube::Collision(list<CGameObject*>* collist, float DeltaTime)
 				pp->ResolveVelocity(*(*i)->pp, cn, DeltaTime);
 				(*i)->pp->SetBounce(false);
 				//겹치는 부분을 제거할필요가 없는게 투사체는 어처피 사라지니까.
-				auto BulletParticles2 = new ParticleObject2(device, commandlist, ParticleList, this, 0.7f, XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, 0));
+				auto BulletParticles2 = new ParticleObject2(device, commandlist, ParticleList, NULL, this, 0.7f, XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, 0));
 				ParticleList->push_back(BulletParticles2);
 
 				DelObj = true;
@@ -737,7 +745,7 @@ void BulletCube::Collision(list<CGameObject*>* collist, float DeltaTime)
 
 
 
-HeavyBulletCube::HeavyBulletCube(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, CGameObject* master, XMFLOAT4& ori, CGameObject* lockon, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
+HeavyBulletCube::HeavyBulletCube(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, CGameObject* master, XMFLOAT4& ori, CGameObject* lockon, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist,shadow, cp)
 {
 
 	if (CreateMesh == false)
@@ -794,7 +802,7 @@ HeavyBulletCube::HeavyBulletCube(ID3D12Device * m_Device, ID3D12GraphicsCommandL
 	pp->SetMass(1);
 	if (ParticleList != NULL)
 	{
-		BulletParticles = new ParticleObject(m_Device, commandlist, ParticleList, this, 0.2f, XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, 0));
+		BulletParticles = new ParticleObject(m_Device, commandlist, ParticleList,NULL, this, 0.2f, XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, 0));
 		ParticleList->push_back(BulletParticles);
 	
 	}
@@ -808,7 +816,7 @@ HeavyBulletCube::~HeavyBulletCube()
 }
 
 
-void HeavyBulletCube::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList* commandlist)
+void HeavyBulletCube::SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist)
 {
 
 
@@ -899,7 +907,7 @@ void HeavyBulletCube::Collision(list<CGameObject*>* collist, float DeltaTime)
 					// 파티클리스트에 데미지 오브젝트를 생성해서 넣음. 파티클을 띄운다.
 					if (ParticleList != NULL)
 					{
-						ParticleList->push_back(new DamageObject(device, commandlist, ParticleList, gamedata.Damage, XMFLOAT4((*i)->CenterPos.x, (*i)->CenterPos.y + 11, (*i)->CenterPos.z, 0)));
+						ParticleList->push_back(new DamageObject(device, commandlist, ParticleList,NULL, gamedata.Damage, XMFLOAT4((*i)->CenterPos.x, (*i)->CenterPos.y + 11, (*i)->CenterPos.z, 0)));
 					}
 					//고정된 물체가아니면 잠깐 바운스를 풀어둔다. 그래야 튕기니까.
 					(*i)->pp->SetBounce(true);
@@ -917,7 +925,7 @@ void HeavyBulletCube::Collision(list<CGameObject*>* collist, float DeltaTime)
 				//겹치는 부분을 제거할필요가 없는게 투사체는 어처피 사라지니까.
 				DelObj = true;
 
-				auto BulletParticles2 = new ParticleObject2(device, commandlist, ParticleList, this, 0.7f, XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, 0));
+				auto BulletParticles2 = new ParticleObject2(device, commandlist, ParticleList,NULL, this, 0.7f, XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, 0));
 				ParticleList->push_back(BulletParticles2);
 			}
 		}
@@ -926,7 +934,7 @@ void HeavyBulletCube::Collision(list<CGameObject*>* collist, float DeltaTime)
 
 //-------------------- 테트라이크 ---------------------------------//
 
-Tetris1::Tetris1(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, CGameObject* master, CGameObject* lockon, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
+Tetris1::Tetris1(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, CGameObject* master, CGameObject* lockon, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist,shadow, cp)
 {
 
 	if (CreateMesh == false)
@@ -993,7 +1001,7 @@ Tetris1::~Tetris1()
 }
 
 
-void Tetris1::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList* commandlist)
+void Tetris1::SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist)
 {
 
 
@@ -1082,7 +1090,7 @@ void Tetris1::Collision(list<CGameObject*>* collist, float DeltaTime)
 					// 파티클리스트에 데미지 오브젝트를 생성해서 넣음. 파티클을 띄운다.
 					if (ParticleList != NULL)
 					{
-						ParticleList->push_back(new DamageObject(device, commandlist, ParticleList, gamedata.Damage, XMFLOAT4((*i)->CenterPos.x, (*i)->CenterPos.y + 11, (*i)->CenterPos.z, 0)));
+						ParticleList->push_back(new DamageObject(device, commandlist, ParticleList,NULL, gamedata.Damage, XMFLOAT4((*i)->CenterPos.x, (*i)->CenterPos.y + 11, (*i)->CenterPos.z, 0)));
 					}
 
 				}
@@ -1098,14 +1106,14 @@ void Tetris1::Collision(list<CGameObject*>* collist, float DeltaTime)
 				//겹치는 부분을 제거할필요가 없는게 투사체는 어처피 사라지니까.
 				DelObj = true;
 
-				auto BulletParticles2 = new ParticleObject2(device, commandlist, ParticleList, this, 0.7f, XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, 0));
+				auto BulletParticles2 = new ParticleObject2(device, commandlist, ParticleList,NULL, this, 0.7f, XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, 0));
 				ParticleList->push_back(BulletParticles2);
 			}
 		}
 	}
 }
 
-Tetris2::Tetris2(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, CGameObject* master, CGameObject* lockon, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
+Tetris2::Tetris2(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, CGameObject* master, CGameObject* lockon, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist,shadow, cp)
 {
 
 	if (CreateMesh == false)
@@ -1171,7 +1179,7 @@ Tetris2::~Tetris2()
 }
 
 
-void Tetris2::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList* commandlist)
+void Tetris2::SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist)
 {
 
 
@@ -1260,7 +1268,7 @@ void Tetris2::Collision(list<CGameObject*>* collist, float DeltaTime)
 					// 파티클리스트에 데미지 오브젝트를 생성해서 넣음. 파티클을 띄운다.
 					if (ParticleList != NULL)
 					{
-						ParticleList->push_back(new DamageObject(device, commandlist, ParticleList, gamedata.Damage, XMFLOAT4((*i)->CenterPos.x, (*i)->CenterPos.y + 11, (*i)->CenterPos.z, 0)));
+						ParticleList->push_back(new DamageObject(device, commandlist, ParticleList,NULL, gamedata.Damage, XMFLOAT4((*i)->CenterPos.x, (*i)->CenterPos.y + 11, (*i)->CenterPos.z, 0)));
 					}
 
 
@@ -1276,7 +1284,7 @@ void Tetris2::Collision(list<CGameObject*>* collist, float DeltaTime)
 
 				//겹치는 부분을 제거할필요가 없는게 투사체는 어처피 사라지니까.
 				DelObj = true;
-				auto BulletParticles2 = new ParticleObject2(device, commandlist, ParticleList, this, 0.7f, XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, 0));
+				auto BulletParticles2 = new ParticleObject2(device, commandlist, ParticleList,NULL, this, 0.7f, XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, 0));
 				ParticleList->push_back(BulletParticles2);
 
 			}
@@ -1284,7 +1292,7 @@ void Tetris2::Collision(list<CGameObject*>* collist, float DeltaTime)
 	}
 }
 
-Tetris3::Tetris3(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, CGameObject* master, CGameObject* lockon, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
+Tetris3::Tetris3(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, CGameObject* master, CGameObject* lockon, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist,shadow, cp)
 {
 
 	if (CreateMesh == false)
@@ -1349,7 +1357,7 @@ Tetris3::~Tetris3()
 }
 
 
-void Tetris3::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList* commandlist)
+void Tetris3::SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist)
 {
 
 
@@ -1438,7 +1446,7 @@ void Tetris3::Collision(list<CGameObject*>* collist, float DeltaTime)
 					// 파티클리스트에 데미지 오브젝트를 생성해서 넣음. 파티클을 띄운다.
 					if (ParticleList != NULL)
 					{
-						ParticleList->push_back(new DamageObject(device, commandlist, ParticleList, gamedata.Damage, XMFLOAT4((*i)->CenterPos.x, (*i)->CenterPos.y + 11, (*i)->CenterPos.z, 0)));
+						ParticleList->push_back(new DamageObject(device, commandlist, ParticleList,NULL, gamedata.Damage, XMFLOAT4((*i)->CenterPos.x, (*i)->CenterPos.y + 11, (*i)->CenterPos.z, 0)));
 					}
 
 
@@ -1452,7 +1460,7 @@ void Tetris3::Collision(list<CGameObject*>* collist, float DeltaTime)
 
 				pp->ResolveVelocity(*(*i)->pp, cn, DeltaTime);
 				DelObj = true;
-				auto BulletParticles2 = new ParticleObject2(device, commandlist, ParticleList, this, 0.7f, XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, 0));
+				auto BulletParticles2 = new ParticleObject2(device, commandlist, ParticleList,NULL ,this, 0.7f, XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, 0));
 				ParticleList->push_back(BulletParticles2);
 
 			}
@@ -1461,7 +1469,7 @@ void Tetris3::Collision(list<CGameObject*>* collist, float DeltaTime)
 }
 
 
-Tetris4::Tetris4(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, CGameObject* master, CGameObject* lockon, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
+Tetris4::Tetris4(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, CGameObject* master, CGameObject* lockon, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist,shadow, cp)
 {
 
 	if (CreateMesh == false)
@@ -1525,7 +1533,7 @@ Tetris4::~Tetris4()
 }
 
 
-void Tetris4::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList* commandlist)
+void Tetris4::SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist)
 {
 
 
@@ -1614,7 +1622,7 @@ void Tetris4::Collision(list<CGameObject*>* collist, float DeltaTime)
 					// 파티클리스트에 데미지 오브젝트를 생성해서 넣음. 파티클을 띄운다.
 					if (ParticleList != NULL)
 					{
-						ParticleList->push_back(new DamageObject(device, commandlist, ParticleList, gamedata.Damage, XMFLOAT4((*i)->CenterPos.x, (*i)->CenterPos.y + 11, (*i)->CenterPos.z, 0)));
+						ParticleList->push_back(new DamageObject(device, commandlist, ParticleList,NULL, gamedata.Damage, XMFLOAT4((*i)->CenterPos.x, (*i)->CenterPos.y + 11, (*i)->CenterPos.z, 0)));
 					}
 
 
@@ -1629,7 +1637,7 @@ void Tetris4::Collision(list<CGameObject*>* collist, float DeltaTime)
 				pp->ResolveVelocity(*(*i)->pp, cn, DeltaTime);
 
 				DelObj = true;
-				auto BulletParticles2 = new ParticleObject2(device, commandlist, ParticleList, this, 0.7f, XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, 0));
+				auto BulletParticles2 = new ParticleObject2(device, commandlist, ParticleList,NULL, this, 0.7f, XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, 0));
 				ParticleList->push_back(BulletParticles2);
 
 			}
@@ -1637,7 +1645,7 @@ void Tetris4::Collision(list<CGameObject*>* collist, float DeltaTime)
 	}
 }
 
-Tetrike::Tetrike(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, list<CGameObject*>*Bulletlist, CGameObject* master, CGameObject* lockon, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
+Tetrike::Tetrike(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, list<CGameObject*>*Bulletlist, CGameObject* master, CGameObject* lockon, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist,shadow, cp)
 {
 
 	if (CreateMesh == false)
@@ -1685,7 +1693,7 @@ Tetrike::~Tetrike()
 }
 
 
-void Tetrike::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList* commandlist)
+void Tetrike::SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist)
 {
 
 	CreateCube(&Mesh, 120, 0.01, 120);
@@ -1742,10 +1750,10 @@ void Tetrike::Tick(const GameTimer & gt)
 
 			int g = (rand()*(int)(gt.TotalTime() * 32524)) % 4;
 			if (g == 0)
-				Blist->push_back(new Tetris1(device, commandlist, ParticleList, Master, NULL, pos));
+				Blist->push_back(new Tetris1(device, commandlist, ParticleList,NULL, Master, NULL, pos));
 			else if (g == 1)
 			{
-				auto t = new Tetris2(device, commandlist, ParticleList, Master, NULL, pos);
+				auto t = new Tetris2(device, commandlist, ParticleList,NULL, Master, NULL, pos);
 				int k = (rand()*(int)(gt.TotalTime() * 32524)) % 2;
 
 				if (k == 0)
@@ -1754,7 +1762,7 @@ void Tetrike::Tick(const GameTimer & gt)
 			}
 			else if (g == 2)
 			{
-				auto t = new Tetris3(device, commandlist, ParticleList, Master, NULL, pos);
+				auto t = new Tetris3(device, commandlist, ParticleList,NULL, Master, NULL, pos);
 				int k = (rand()*(int)(gt.TotalTime() * 32524)) % 3;
 
 				if (k == 0)
@@ -1767,7 +1775,7 @@ void Tetrike::Tick(const GameTimer & gt)
 			}
 			else if (g == 3)
 			{
-				auto t = new Tetris4(device, commandlist, ParticleList, Master, NULL, pos);
+				auto t = new Tetris4(device, commandlist, ParticleList,NULL, Master, NULL, pos);
 				int k = (rand()*(int)(gt.TotalTime() * 32524)) % 3;
 
 				if (k == 0)
@@ -1812,7 +1820,7 @@ void Tetrike::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer& g
 }
 
 
-DiceStrike::DiceStrike(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, CGameObject * master, XMFLOAT4& ori, float degree, CGameObject * lockon, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
+DiceStrike::DiceStrike(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, list<CGameObject*>*shadow, CGameObject * master, XMFLOAT4& ori, float degree, CGameObject * lockon, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist,shadow, cp)
 {
 	if (CreateMesh == false)
 	{
@@ -1852,8 +1860,8 @@ DiceStrike::DiceStrike(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 	gamedata.HP = 1;
 	gamedata.Damage = 20;
 	gamedata.GodMode = true;
-	gamedata.Speed = 50;
-	LifeTime = 3.5f;
+	gamedata.Speed = 100;
+	LifeTime = 5.5f;
 	Master = master;
 	LockOn = lockon;
 
@@ -1875,9 +1883,9 @@ DiceStrike::DiceStrike(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 
 	if (ParticleList != NULL)
 	{
-		BulletParticles = new ParticleObject(m_Device, commandlist, ParticleList, this, 0.2f, XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, 0));
+		BulletParticles = new ParticleObject(m_Device, commandlist, ParticleList,NULL, this, 0.2f, XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, 0));
 		ParticleList->push_back(BulletParticles);
-		BulletParticles2 = new ParticleObject(m_Device, commandlist, ParticleList, this, 0.3f, XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, 0));
+		BulletParticles2 = new ParticleObject(m_Device, commandlist, ParticleList,NULL, this, 0.3f, XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, 0));
 		ParticleList->push_back(BulletParticles2);
 	}
 
@@ -1968,7 +1976,7 @@ void DiceStrike::Collision(list<CGameObject*>* collist, float DeltaTime)
 					// 파티클리스트에 데미지 오브젝트를 생성해서 넣음. 파티클을 띄운다.
 					if (ParticleList != NULL)
 					{
-						ParticleList->push_back(new DamageObject(device, commandlist, ParticleList, gamedata.Damage, XMFLOAT4((*i)->CenterPos.x, (*i)->CenterPos.y + 11, (*i)->CenterPos.z, 0)));
+						ParticleList->push_back(new DamageObject(device, commandlist, ParticleList,NULL, gamedata.Damage, XMFLOAT4((*i)->CenterPos.x, (*i)->CenterPos.y + 11, (*i)->CenterPos.z, 0)));
 					}
 					//고정된 물체가아니면 잠깐 바운스를 풀어둔다. 그래야 튕기니까.
 					(*i)->pp->SetBounce(true);
@@ -1985,7 +1993,7 @@ void DiceStrike::Collision(list<CGameObject*>* collist, float DeltaTime)
 				(*i)->pp->SetBounce(false);
 				//겹치는 부분을 제거할필요가 없는게 투사체는 어처피 사라지니까.
 				DelObj = true;
-				auto BulletParticles2 = new ParticleObject2(device, commandlist, ParticleList, this, 0.7f, XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, 0));
+				auto BulletParticles2 = new ParticleObject2(device, commandlist, ParticleList,NULL, this, 0.7f, XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, 0));
 				ParticleList->push_back(BulletParticles2);
 
 			}
@@ -1997,7 +2005,7 @@ void DiceStrike::Collision(list<CGameObject*>* collist, float DeltaTime)
 
 //---------------------- 스태틱 오브젝트 -----------------------------//
 
-SphereObject::SphereObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
+SphereObject::SphereObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist,shadow, cp)
 {
 
 	if (CreateMesh == false)
@@ -2037,7 +2045,7 @@ SphereObject::SphereObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * 
 }
 
 
-void SphereObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
+void SphereObject::SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist)
 {
 	//모델 로드
 	LoadMD5Model(L".\\플레이어메쉬들\\sphere.MD5MESH", &Mesh, 0, 1);
@@ -2067,7 +2075,7 @@ void SphereObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTim
 
 //////////////
 
-CubeObject::CubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
+CubeObject::CubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist,  list<CGameObject*>*shadow, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist,shadow, cp)
 {
 
 	if (CreateMesh == false)
@@ -2143,10 +2151,21 @@ CubeObject::CubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 	pp->SetBounce(false);//튕기지 않는다.
 	pp->SetMass(INFINITY);//고정된 물체는 무게가 무한이다.
 
-
+	if (Shadow != NULL)
+	{
+		s = new ShadowObject(m_Device, commandlist, NULL, Shadow, this, XMFLOAT3(1, 1, 1), 1, CenterPos);
+		s->ObjData.Scale = 10.0f;
+		Shadow->push_back(s);
+	}
 }
 
-void CubeObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
+CubeObject::~CubeObject()
+{
+	if (s != NULL)
+		s->DelObj = true;
+}
+
+void CubeObject::SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist)
 {
 	CreateCube(&Mesh, 1, 1, 1);
 	//LoadMD5Model(L".\\플레이어메쉬들\\ring.MD5MESH", &Mesh, 0, 1);
@@ -2180,7 +2199,7 @@ void CubeObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer
 	Mesh.Render(commandlist);
 }
 
-MoveCubeObject::MoveCubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, float rad, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
+MoveCubeObject::MoveCubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, list<CGameObject*>*shadow, float len, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist,shadow, cp)
 {
 	if (CreateMesh == false)
 	{
@@ -2219,7 +2238,7 @@ MoveCubeObject::MoveCubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 
 	TexOff = selectColor;
 
-	Rad = rad;
+	Len = len;
 
 	n = rand() % 30;
 
@@ -2233,7 +2252,7 @@ MoveCubeObject::MoveCubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 	ObjData.Scale = 10.0f;
 	ObjData.SpecularParamater = 0.0f;//스페큘러를 낮게준다.
 
-
+	obs = Static;
 									 //게임관련 데이터들
 	gamedata.MAXHP = 100;
 	gamedata.HP = 100;
@@ -2255,11 +2274,23 @@ MoveCubeObject::MoveCubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 	pp->SetDamping(0.5f);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
 	pp->SetBounce(false);//튕기지 않는다.
 	pp->SetMass(INFINITY);//고정된 물체는 무게가 무한이다.
+	
+	//if (Shadow != NULL)
+	//{
+	//	s = new ShadowObject(m_Device, commandlist, NULL, Shadow, this, XMFLOAT3(2, 1, 2), 1, CenterPos);
+	//	s->ObjData.Scale = 10.0f;
+	//	Shadow->push_back(s);
+	//}
+}
 
+MoveCubeObject::~MoveCubeObject()
+{
+	//if (s != NULL)
+	//	s->DelObj = true;
 }
 
 
-void MoveCubeObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
+void MoveCubeObject::SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist)
 {
 	CreateCube(&Mesh, 2, 1, 2);
 
@@ -2282,8 +2313,7 @@ void MoveCubeObject::Tick(const GameTimer & gt)
 {
 	n += gt.DeltaTime();
 
-	CenterPos.x = Rad * cosf(MMPE_PI * n * 0.1f);
-	CenterPos.z = Rad * sinf(MMPE_PI * n * 0.1f);
+	CenterPos.y = Len * sinf(MMPE_PI * n * 0.1f)+ 20;
 
 }
 
@@ -2352,7 +2382,7 @@ void MoveCubeObject::Collision(list<CGameObject*>* collist, float DeltaTime)
 
 /////////////
 
-GridObject::GridObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
+GridObject::GridObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist,shadow, cp)
 {
 	if (CreateMesh == false)
 	{
@@ -2381,7 +2411,7 @@ GridObject::GridObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 
 }
 
-void GridObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
+void GridObject::SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist)
 {
 	CreatePentagon(&Mesh, 1200.0f);
 	Mesh.SetNormal();
@@ -2416,7 +2446,7 @@ void GridObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer
 ///////////////////////////////////
 
 //HPBar오브젝트
-BarObject::BarObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, CGameObject* master, float size, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
+BarObject::BarObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, list<CGameObject*>*shadow, CGameObject* master, float size, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist,shadow, cp)
 {
 	ObjData.isAnimation = 0;
 	ObjData.Scale = size;
@@ -2446,7 +2476,7 @@ BarObject::BarObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comman
 	}
 }
 
-void BarObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
+void BarObject::SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist)
 {
 	UINT numOfitem = 1;
 
@@ -2515,7 +2545,7 @@ void BarObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer 
 
 
 //HPbar 틀
-BarFrameObject::BarFrameObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, CGameObject * master, float size, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
+BarFrameObject::BarFrameObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, list<CGameObject*>*shadow, CGameObject * master, float size, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist,shadow, cp)
 {
 	ObjData.isAnimation = 0;
 	ObjData.Scale = size;
@@ -2545,7 +2575,7 @@ BarFrameObject::BarFrameObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 	}
 }
 
-void BarFrameObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
+void BarFrameObject::SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist)
 {
 	UINT numOfitem = 1;
 
@@ -2605,13 +2635,14 @@ void BarFrameObject::Render(ID3D12GraphicsCommandList * commandlist, const GameT
 	commandlist->DrawIndexedInstanced(Mesh.nindex, 1, Mesh.nioffset, Mesh.nOffset, 0);
 }
 
-DiceObject::DiceObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, CGameObject * master, list<CGameObject*>* bulletlist, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
+DiceObject::DiceObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, list<CGameObject*>*shadow, CGameObject * master, list<CGameObject*>* bulletlist, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist,shadow, cp)
 {
 	ObjData.isAnimation = 0;
 	ObjData.Scale = 5.0f;
 	ObjData.SpecularParamater = 0.5f;//스페큘러를 낮게준다.
 	ObjData.CustomData1.x = 0;
 	LifeTime = 3.0f;
+
 
 	Device = m_Device;
 	Commandlist = commandlist;
@@ -2624,6 +2655,7 @@ DiceObject::DiceObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 	gamedata.GodMode = true;
 	staticobject = true;
 	obs = UI;
+	
 
 	if (CreateMesh == false)
 	{
@@ -2638,7 +2670,7 @@ DiceObject::DiceObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 	}
 }
 
-void DiceObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
+void DiceObject::SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist)
 {
 	UINT numOfitem = 1;
 
@@ -2735,33 +2767,33 @@ void DiceObject::Tick(const GameTimer & gt)
 		XMStoreFloat4(&ori, tempori);//최종 회전 방향
 
 		if (Dicedata == 1)
-			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist, Master, ori, 0, NULL, Master->CenterPos));
+			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist,NULL, Master, ori, 0, NULL, Master->CenterPos));
 
 		else if (Dicedata == 2)
 		{
-			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist, Master, ori, MMPE_PI / 9, NULL, Master->CenterPos));
-			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist, Master, ori, -MMPE_PI / 9, NULL, Master->CenterPos));
+			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist,NULL, Master, ori, MMPE_PI / 18, NULL, Master->CenterPos));
+			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist,NULL, Master, ori, -MMPE_PI / 18, NULL, Master->CenterPos));
 		}
 		else if (Dicedata == 3)
 		{
-			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist, Master, ori, 0, NULL, Master->CenterPos));
-			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist, Master, ori, MMPE_PI / 6, NULL, Master->CenterPos));
-			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist, Master, ori, -MMPE_PI / 6, NULL, Master->CenterPos));
+			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist,NULL, Master, ori, 0, NULL, Master->CenterPos));
+			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist,NULL, Master, ori, MMPE_PI / 9, NULL, Master->CenterPos));
+			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist,NULL, Master, ori, -MMPE_PI / 9, NULL, Master->CenterPos));
 		}
 		else if (Dicedata == 4)
 		{
-			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist, Master, ori, MMPE_PI / 9, NULL, Master->CenterPos));
-			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist, Master, ori, -MMPE_PI / 9, NULL, Master->CenterPos));
-			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist, Master, ori, MMPE_PI / 6, NULL, Master->CenterPos));
-			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist, Master, ori, -MMPE_PI / 6, NULL, Master->CenterPos));
+			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist,NULL, Master, ori, MMPE_PI / 18, NULL, Master->CenterPos));
+			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist,NULL, Master, ori, -MMPE_PI / 18, NULL, Master->CenterPos));
+			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist,NULL, Master, ori, MMPE_PI / 9, NULL, Master->CenterPos));
+			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist,NULL, Master, ori, -MMPE_PI / 9, NULL, Master->CenterPos));
 		}
 		else if (Dicedata == 5)
 		{
-			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist, Master, ori, 0, NULL, Master->CenterPos));
-			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist, Master, ori, MMPE_PI / 9, NULL, Master->CenterPos));
-			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist, Master, ori, -MMPE_PI / 9, NULL, Master->CenterPos));
-			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist, Master, ori, MMPE_PI / 6, NULL, Master->CenterPos));
-			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist, Master, ori, -MMPE_PI / 6, NULL, Master->CenterPos));
+			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist,NULL, Master, ori, 0, NULL, Master->CenterPos));
+			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist,NULL, Master, ori, MMPE_PI / 18, NULL, Master->CenterPos));
+			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist,NULL, Master, ori, -MMPE_PI / 18, NULL, Master->CenterPos));
+			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist,NULL, Master, ori, MMPE_PI / 9, NULL, Master->CenterPos));
+			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist, NULL, Master, ori, -MMPE_PI / 9, NULL, Master->CenterPos));
 		}
 
 		DelObj = true;
@@ -2807,7 +2839,7 @@ void DiceObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer
 }
 
 
-DamageObject::DamageObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, float Damaged, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
+DamageObject::DamageObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, float Damaged, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist,shadow, cp)
 {
 	ObjData.isAnimation = 0;
 	ObjData.Scale = 15.0f;
@@ -2841,7 +2873,7 @@ DamageObject::DamageObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * 
 
 }
 
-void DamageObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
+void DamageObject::SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist)
 {
 	UINT numOfitem = 1;
 
@@ -2911,7 +2943,7 @@ void DamageObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTim
 	commandlist->DrawIndexedInstanced(Mesh.nindex, 1, Mesh.nioffset, Mesh.nOffset, 0);
 }
 
-RigidCubeObject::RigidCubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
+RigidCubeObject::RigidCubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist,shadow, cp)
 {
 	//메쉬와 텍스처 
 
@@ -2975,6 +3007,18 @@ RigidCubeObject::RigidCubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandL
 	rb->AddForcePoint(testForce, testPoint);
 	rb->integrate(0.1f);
 
+	//if (Shadow != NULL)
+	//{
+	//	s = new ShadowObject(m_Device, commandlist, NULL, Shadow, this, XMFLOAT3(1, 1, 1), 1, CenterPos);
+	//	s->ObjData.Scale = 20.0f;
+	//	Shadow->push_back(s);
+	//}
+}
+
+RigidCubeObject::~RigidCubeObject()
+{
+	//if (s != NULL)
+	//	s->DelObj = true;
 }
 
 void RigidCubeObject::Tick(const GameTimer & gt)
@@ -2983,7 +3027,7 @@ void RigidCubeObject::Tick(const GameTimer & gt)
 		rb->integrate(gt.DeltaTime());
 }
 
-void RigidCubeObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
+void RigidCubeObject::SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist)
 {
 	CreateCube(&Mesh, 1, 1, 1);
 
@@ -3099,7 +3143,7 @@ void RigidCubeObject::Collision(list<CGameObject*>* collist, float DeltaTime)
 							(*i)->pp->SetVelocity(ppConvertrb.GetVelocity());
 							*(*i)->pp->CenterPos=ppConvertrb.GetPosition();
 							(*i)->pp->SetAccel(ppConvertrb.GetAccel());
-							auto BulletParticles2 = new ParticleObject2(device, commandlist, ParticleList, this, 0.7f, XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, 0));
+							auto BulletParticles2 = new ParticleObject2(device, commandlist, ParticleList,NULL, this, 0.7f, XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, 0));
 							ParticleList->push_back(BulletParticles2);
 						}
 						else
@@ -3127,7 +3171,7 @@ void RigidCubeObject::Collision(list<CGameObject*>* collist, float DeltaTime)
 
 //================================벽오브젝트=======================================
 
-SmallWallObject::SmallWallObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, float dgree, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
+SmallWallObject::SmallWallObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, float dgree, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist,shadow, cp)
 {
 
 	if (CreateMesh == false)
@@ -3194,10 +3238,21 @@ SmallWallObject::SmallWallObject(ID3D12Device * m_Device, ID3D12GraphicsCommandL
 	pp->SetBounce(false);//튕기지 않는다.
 	pp->SetMass(INFINITY);//고정된 물체는 무게가 무한이다.
 
-
+	//if (Shadow != NULL)
+	//{
+	//	s = new ShadowObject(m_Device, commandlist, NULL, Shadow, this, XMFLOAT3(40, 20, 10), 1, CenterPos);
+	//	s->ObjData.Scale = 12.0f;
+	//	Shadow->push_back(s);
+	//}
 }
 
-void SmallWallObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
+SmallWallObject::~SmallWallObject()
+{
+	//if (s != NULL)
+	//	s->DelObj = true;
+}
+
+void SmallWallObject::SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist)
 {
 	CreateCube(&Mesh, 40, 20, 10);
 
@@ -3236,7 +3291,7 @@ void SmallWallObject::Render(ID3D12GraphicsCommandList * commandlist, const Game
 
 
 
-BigWallObject::BigWallObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, float dgree, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
+BigWallObject::BigWallObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, float dgree, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist,shadow, cp)
 {
 
 	if (CreateMesh == false)
@@ -3305,10 +3360,21 @@ BigWallObject::BigWallObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList 
 	pp->SetBounce(false);//튕기지 않는다.
 	pp->SetMass(INFINITY);//고정된 물체는 무게가 무한이다.
 
-
+	//if (Shadow != NULL)
+	//{
+	//	s = new ShadowObject(m_Device, commandlist, NULL, Shadow, this, XMFLOAT3(700, 100, 10), 1, CenterPos);
+	//	s->ObjData.Scale = 2.0f;
+	//	Shadow->push_back(s);
+	//}
 }
 
-void BigWallObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
+BigWallObject::~BigWallObject()
+{
+	/*if (s != NULL)
+		s->DelObj = true;*/
+}
+
+void BigWallObject::SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist)
 {
 	CreateCube(&Mesh, 700, 100, 10);
 
@@ -3345,7 +3411,7 @@ void BigWallObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTi
 }
 
 
-BuildingObject::BuildingObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, float dgree, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
+BuildingObject::BuildingObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, float dgree, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist,shadow, cp)
 {
 
 	if (CreateMesh == false)
@@ -3354,7 +3420,7 @@ BuildingObject::BuildingObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 		Mesh.Index = NULL;
 		Mesh.SubResource = NULL;
 
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "CubeTex", L"textures/object/orange.dds", false);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "CubeTex", L"textures/object/tower.dds", false);
 		SetMesh(m_Device, commandlist);
 		SetMaterial(m_Device, commandlist);
 		CreateMesh = true;
@@ -3373,8 +3439,8 @@ BuildingObject::BuildingObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 
 	UpdateLookVector();
 	ObjData.isAnimation = 0;
-	ObjData.Scale = 1.0f;
-	ObjData.SpecularParamater = 0.0f;//스페큘러를 낮게준다.
+	ObjData.Scale = 4.5f;
+	ObjData.SpecularParamater = -0.01f;//스페큘러를 낮게준다.
 
 
 
@@ -3388,26 +3454,38 @@ BuildingObject::BuildingObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 	obs = Static;
 	//광선충돌 검사용 육면체
 	XMFLOAT3 rx(15, 0, 0);
-	XMFLOAT3 ry(0, 45, 0);
+	XMFLOAT3 ry(0, 50, 0);
 	XMFLOAT3 rz(0, 0, 15);
 	rco.SetPlane(rx, ry, rz);
 
 	//질점오브젝트 사용시 필요한 데이터들 설정
 	pp = new PhysicsPoint();
 	pp->SetPosition(&CenterPos);//이 값은 항상 갱신되야한다.
-	pp->SetHalfBox(15, 45, 15);//충돌 박스의 x,y,z 크기
+	pp->SetHalfBox(15, 50, 15);//충돌 박스의 x,y,z 크기
 	pp->SetDamping(0.5f);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
 	pp->SetBounce(false);//튕기지 않는다.
 	pp->SetMass(INFINITY);//고정된 물체는 무게가 무한이다.
 
+	//if (Shadow != NULL)
+	//{
+	//	s = new ShadowObject(m_Device, commandlist, NULL, Shadow, this, XMFLOAT3(30, 90, 30), 1, CenterPos);
+	//	s->ObjData.Scale = 1.0f;
+	//	Shadow->push_back(s);
+	//}
 }
 
-void BuildingObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
+BuildingObject::~BuildingObject()
 {
-	CreateCube(&Mesh, 30, 90, 30);
+	/*if (s != NULL)
+		s->DelObj = true;*/
+}
+
+void BuildingObject::SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist)
+{
+	//CreateCube(&Mesh, 30, 90, 30);
 
 	//모델 로드
-	//LoadMD5Model(L".\\플레이어메쉬들\\Cube.MD5MESH", &Mesh, 0, 1);
+	LoadMD5Model(L".\\플레이어메쉬들\\tower.MD5MESH", &Mesh, 0, 1);
 	//
 	Mesh.SetNormal(false);
 	Mesh.CreateVertexBuffer(m_Device, commandlist);
@@ -3440,7 +3518,7 @@ void BuildingObject::Render(ID3D12GraphicsCommandList * commandlist, const GameT
 
 //피라미드
 
-Rock1Object::Rock1Object(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, float dgree, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
+Rock1Object::Rock1Object(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, float dgree, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist,shadow, cp)
 {
 
 	if (CreateMesh == false)
@@ -3497,7 +3575,7 @@ Rock1Object::Rock1Object(ID3D12Device * m_Device, ID3D12GraphicsCommandList * co
 
 }
 
-void Rock1Object::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
+void Rock1Object::SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist)
 {
 	
 
@@ -3538,7 +3616,7 @@ void Rock1Object::Render(ID3D12GraphicsCommandList * commandlist, const GameTime
 
 //범위 오브젝트
 
-RangeObject::RangeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
+RangeObject::RangeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist,shadow, cp)
 {
 
 	if (CreateMesh == false)
@@ -3580,7 +3658,7 @@ RangeObject::RangeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * co
 
 }
 
-void RangeObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
+void RangeObject::SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist)
 {
 	CreateCube(&Mesh, 60, 0.01, 60);
 
@@ -3635,7 +3713,7 @@ w의 경우 시작되는 지점을 정해줌. 뭔소리냐면 파티클의 각 위치는 정해준 속도 * 흘�
 
 */
 ////////////////////
-ParticleObject::ParticleObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, CGameObject* master, float LifeTime, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
+ParticleObject::ParticleObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, CGameObject* master, float LifeTime, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist,shadow, cp)
 {
 
 	ObjData.isAnimation = 0;
@@ -3683,7 +3761,7 @@ ParticleObject::ParticleObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 	UpdateLookVector();
 }
 
-void ParticleObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
+void ParticleObject::SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist)
 {
 	UINT numOfParticle = 200;
 
@@ -3758,7 +3836,7 @@ void ParticleObject::Render(ID3D12GraphicsCommandList * commandlist, const GameT
 }
 
 
-ParticleObject2::ParticleObject2(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, CGameObject * master, float lifeTime, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
+ParticleObject2::ParticleObject2(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, list<CGameObject*>*shadow, CGameObject * master, float lifeTime, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist,shadow, cp)
 {
 	ObjData.isAnimation = 0;
 	ObjData.Scale = 6.5f;
@@ -3800,7 +3878,7 @@ ParticleObject2::ParticleObject2(ID3D12Device * m_Device, ID3D12GraphicsCommandL
 	UpdateLookVector();
 }
 
-void ParticleObject2::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
+void ParticleObject2::SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist)
 {
 	UINT numOfParticle = 10;
 
@@ -3878,7 +3956,7 @@ void ParticleObject2::Render(ID3D12GraphicsCommandList * commandlist, const Game
 }
 
 
-ShieldArmor::ShieldArmor(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, CGameObject * master, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
+ShieldArmor::ShieldArmor(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, list<CGameObject*>*shadow, CGameObject * master, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist,shadow, cp)
 {
 
 	if (CreateMesh == false)
@@ -3899,7 +3977,7 @@ ShieldArmor::ShieldArmor(ID3D12Device * m_Device, ID3D12GraphicsCommandList * co
 	ObjData.Scale = 1.0f;
 	ObjData.SpecularParamater = 0.3f;//스페큘러를 낮게준다.
 	Blending = true;
-	ObjData.BlendValue = 0.3;
+	ObjData.BlendValue = 0.3f;
 	Master = master;
 
 	//게임관련 데이터들
@@ -3929,7 +4007,7 @@ ShieldArmor::ShieldArmor(ID3D12Device * m_Device, ID3D12GraphicsCommandList * co
 		Master->isShieldOn = true;
 }
 
-void ShieldArmor::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
+void ShieldArmor::SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist)
 {
 	CreateCube(&Mesh, 20, 20, 20);
 
@@ -3962,13 +4040,14 @@ void ShieldArmor::Render(ID3D12GraphicsCommandList * commandlist, const GameTime
 	Mesh.Render(commandlist);
 }
 
-ImpObject::ImpObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
+ImpObject::ImpObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, list<CGameObject*>*shadow, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist,shadow, cp)
 {
 	//게임오브젝트 생성자에서 기본적인것을 처리했으므로 여기서는
 	//메쉬와 텍스처 사용시 불러오기와 애니메이션 로드등을 처리해야한다.
 
 	//조인트가 저장될 배열.
 	jarr = new UploadBuffer<JointArr>(m_Device, 1, true);
+
 
 	int num = 1;
 	if (CreateMesh == false)
@@ -4024,15 +4103,18 @@ ImpObject::ImpObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comman
 	//머리위에 HP바 띄움
 	if (ParticleList != NULL)
 	{
-		Hpbar = new BarObject(m_Device, commandlist, ParticleList, this, 20, XMFLOAT4(CenterPos.x, 20, CenterPos.z, 0));
-		HPFrame = new BarFrameObject(m_Device, commandlist, ParticleList, this, 20, XMFLOAT4(CenterPos.x, 20, CenterPos.z, 0));
+		Hpbar = new BarObject(m_Device, commandlist, ParticleList,NULL, this, 20, XMFLOAT4(CenterPos.x, 20, CenterPos.z, 0));
+		HPFrame = new BarFrameObject(m_Device, commandlist, ParticleList,NULL, this, 20, XMFLOAT4(CenterPos.x, 20, CenterPos.z, 0));
 
 		ParticleList->push_back(HPFrame);
 		ParticleList->push_back(Hpbar);
 	}
-
-
-
+	if (Shadow != NULL)
+	{
+		s = new ShadowObject(m_Device, commandlist, NULL, Shadow, this, XMFLOAT3(0, 0, 0), 2, CenterPos);
+		s->ObjData.Scale = 60.0f;
+		Shadow->push_back(s);
+	}
 }
 
 ImpObject::~ImpObject()
@@ -4041,6 +4123,8 @@ ImpObject::~ImpObject()
 		Hpbar->DelObj = true;
 	if (HPFrame != NULL)
 		HPFrame->DelObj = true;
+	if (s != NULL)
+		s->DelObj = true;
 }
 
 void ImpObject::ToDead()
@@ -4048,7 +4132,7 @@ void ImpObject::ToDead()
 	SetAnimation(Ani_State::Dead);
 }
 
-void ImpObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
+void ImpObject::SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist)
 {
 	//모델 로드
 	LoadMD5Model(L".\\플레이어메쉬들\\monster\\Idle.MD5MESH", &Mesh, 0, 1);
@@ -4057,10 +4141,11 @@ void ImpObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * com
 	Mesh.CreateIndexBuffer(m_Device, commandlist);
 
 	//애니메이션 로드
-	LoadMD5Anim(m_Device, L".\\플레이어메쉬들\\monster\\Idle.MD5ANIM", &Mesh, this, animations);//0
-	LoadMD5Anim(m_Device, L".\\플레이어메쉬들\\monster\\Run.MD5ANIM", &Mesh, this, animations);//1
+	LoadMD5Anim(m_Device, L".\\플레이어메쉬들\\monster\\Idle.MD5ANIM",    &Mesh, this, animations);//0
+	LoadMD5Anim(m_Device, L".\\플레이어메쉬들\\monster\\Run.MD5ANIM",     &Mesh, this, animations);//1
 	LoadMD5Anim(m_Device, L".\\플레이어메쉬들\\monster\\Attack1.MD5ANIM", &Mesh, this, animations);//2
-	LoadMD5Anim(m_Device, L".\\플레이어메쉬들\\monster\\Death.MD5ANIM", &Mesh, this, animations);//2
+	LoadMD5Anim(m_Device, L".\\플레이어메쉬들\\monster\\Death.MD5ANIM",   &Mesh, this, animations);//2
+
 }
 
 void ImpObject::SetMaterial(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
@@ -4081,16 +4166,8 @@ void ImpObject::Tick(const GameTimer & gt)
 
 	if (ObjData.isAnimation == true)
 	{
-
-		//애니메이션 업데이트 애니메이션은 24프레임으로 구성됨. 문제는 FPS가 24프레임이 아님. 그보다 큰 프레임. 따라서 24프레임으로 해당프레임을 나눠 보정.
-		if (n_Animation != Attack)
-			UpdateMD5Model(commandlist, &Mesh, this, gt.DeltaTime()*60.0 / 24.0, n_Animation, animations, jarr);
-		else
-		{
-
-			UpdateMD5Model(commandlist, &Mesh, this, gt.DeltaTime()*60.0 / 24.0, n_Animation, animations, jarr);
-		}
-
+	
+		UpdateMD5Model(commandlist, &Mesh, this, gt.DeltaTime()*60.0 / 24.0, n_Animation, animations, jarr);
 	}
 	if (fsm != NULL)
 		fsm->Update(gt.DeltaTime());
@@ -4222,7 +4299,7 @@ void ImpObject::EndAnimation(int nAni)
 	}
 }
 
-RingObject::RingObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, XMFLOAT4 cp):CGameObject(m_Device,commandlist,Plist,cp)
+RingObject::RingObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, list<CGameObject*>*shadow, XMFLOAT4 cp):CGameObject(m_Device,commandlist,Plist,shadow,cp)
 {
 	if (CreateMesh == false)
 	{
@@ -4300,7 +4377,7 @@ RingObject::RingObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 	pp->SetMass(INFINITY);//고정된 물체는 무게가 무한이다.
 }
 
-void RingObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
+void RingObject::SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist)
 {
 
 	LoadMD5Model(L".\\플레이어메쉬들\\ring.MD5MESH", &Mesh, 0, 1);
@@ -4342,7 +4419,7 @@ void RingObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer
 	Mesh.Render(commandlist);
 }
 
-ShadowObject::ShadowObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, CGameObject * master, float kinds, XMFLOAT3 size, XMFLOAT4 cp) :CGameObject(m_Device, commandlist, Plist, cp)
+ShadowObject::ShadowObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, list<CGameObject*>*shadow,  CGameObject * master, XMFLOAT3 size, int kinds, XMFLOAT4& ori, XMFLOAT4 cp) :CGameObject(m_Device, commandlist, Plist,shadow, cp)
 {
 	//조인트가 저장될 배열.
 	jarr = new UploadBuffer<JointArr>(m_Device, 1, true);
@@ -4350,12 +4427,8 @@ ShadowObject::ShadowObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * 
 	Master = master;
 	Size = size;
 	Kinds = kinds;
-	// Kinds == 0 : 캐릭터
-	// Kinds == 1 : 큐브
-	// Kinds == 2 : 보스
 
-	
-	ObjData.BlendValue = true;
+
 	ObjData.BlendValue = 0.3f;
 
 	if (Master != NULL)
@@ -4363,53 +4436,74 @@ ShadowObject::ShadowObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * 
 		if (Master->obs == Dynamic)
 		{
 			ObjData.isAnimation = true;
-			if (Kinds == 0)
-				ObjData.Scale = 2.0f;
-			else
-				ObjData.Scale = 5.0f;
 		}
 	}
 
-
 	if (CreateMesh == false)
 	{
-		Mesh.Index = NULL;
-		Mesh.SubResource = NULL;
+		cMesh.Index = NULL;
+		cMesh.SubResource = NULL;
+		oMesh.Index = NULL;
+		oMesh.SubResource = NULL;
+		iMesh.Index = NULL;
+		iMesh.SubResource = NULL;
 
-		SetMesh(m_Device, commandlist);
 		SetMaterial(m_Device, commandlist);
 		CreateMesh = true;
 	}
-	
+
+	SetMesh(m_Device, commandlist);
+	/*Orient = QuaternionMultiply(Orient, ori);
+	UpdateLookVector();*/
 }
 
-void ShadowObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
+void ShadowObject::SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist)
 {
 	if (Kinds == 0)
 	{
-		LoadMD5Model(L".\\플레이어메쉬들\\cIdle.MD5MESH", &Mesh, 0, 1);
-		Mesh.SetNormal(true);
+		if (CreatecMesh == false)
+		{
+			LoadMD5Model(L".\\플레이어메쉬들\\cIdle.MD5MESH", &cMesh, 0, 1);
+			cMesh.SetNormal(true);
+			cMesh.CreateVertexBuffer(m_Device, commandlist);
+			cMesh.CreateIndexBuffer(m_Device, commandlist);
+
+			LoadMD5Anim(m_Device, L".\\플레이어메쉬들\\cIdle.MD5ANIM", &cMesh, this, cAnimations);//0
+			LoadMD5Anim(m_Device, L".\\플레이어메쉬들\\cRunning.MD5ANIM", &cMesh, this, cAnimations);//1
+			LoadMD5Anim(m_Device, L".\\플레이어메쉬들\\cAttack.MD5ANIM", &cMesh, this, cAnimations);//2
+			LoadMD5Anim(m_Device, L".\\플레이어메쉬들\\cDeath.MD5ANIM", &cMesh, this, cAnimations);//3
+			
+			CreatecMesh = true;
+		}
 	}
 	else if (Kinds == 1)
 	{
-		CreateCube(&Mesh, Size.x, Size.y, Size.z);
-		Mesh.SetNormal(false);
+		if (CreateoMesh == false)
+		{
+			CreateCube(&oMesh, 1, 1, 1);
+			oMesh.SetNormal(false);
+			oMesh.CreateVertexBuffer(m_Device, commandlist);
+			oMesh.CreateIndexBuffer(m_Device, commandlist);
+			CreateoMesh = true;
+		}
 	}
 	else if (Kinds == 2)
 	{
-		LoadMD5Model(L".\\플레이어메쉬들\\monster\\Idle.MD5MESH", &Mesh, 0, 1);
-		Mesh.SetNormal(true);
+		if (CreateiMesh == false)
+		{
+			LoadMD5Model(L".\\플레이어메쉬들\\monster\\Idle.MD5MESH", &iMesh, 0, 1);
+			iMesh.SetNormal(true);
+			iMesh.CreateVertexBuffer(m_Device, commandlist);
+			iMesh.CreateIndexBuffer(m_Device, commandlist);
+
+			LoadMD5Anim(m_Device, L".\\플레이어메쉬들\\monster\\Idle.MD5ANIM", &iMesh, this, iAnimations);//0
+			LoadMD5Anim(m_Device, L".\\플레이어메쉬들\\monster\\Run.MD5ANIM", &iMesh, this, iAnimations);//1
+			LoadMD5Anim(m_Device, L".\\플레이어메쉬들\\monster\\Attack1.MD5ANIM", &iMesh, this, iAnimations);//2
+			LoadMD5Anim(m_Device, L".\\플레이어메쉬들\\monster\\Death.MD5ANIM", &iMesh, this, iAnimations);//3
+
+			CreateiMesh = true;
+		}
 	}
-
-	Mesh.CreateVertexBuffer(m_Device, commandlist);
-	Mesh.CreateIndexBuffer(m_Device, commandlist);
-
-	//애니메이션 로드
-	LoadMD5Anim(m_Device, L".\\플레이어메쉬들\\cIdle.MD5ANIM", &Mesh, this, animations);//0
-	LoadMD5Anim(m_Device, L".\\플레이어메쉬들\\cRunning.MD5ANIM", &Mesh, this, animations);//1
-	LoadMD5Anim(m_Device, L".\\플레이어메쉬들\\cAttack.MD5ANIM", &Mesh, this, animations);//2
-	LoadMD5Anim(m_Device, L".\\플레이어메쉬들\\cDeath.MD5ANIM", &Mesh, this, animations);//3
-	
 
 }
 
@@ -4432,21 +4526,24 @@ void ShadowObject::Tick(const GameTimer & gt)
 	
 	if (ObjData.isAnimation == true)
 	{
-
-		//애니메이션 업데이트 애니메이션은 24프레임으로 구성됨. 문제는 FPS가 24프레임이 아님. 그보다 큰 프레임. 따라서 24프레임으로 해당프레임을 나눠 보정.
-		if (Master->n_Animation != Attack)
-			UpdateMD5Model(commandlist, &Mesh, this, gt.DeltaTime()*60.0 / 24.0, Master->n_Animation, animations, jarr);
-		else
+		if (CreatecMesh && Kinds == 0)
 		{
-			if(Kinds == 0)
-				UpdateMD5Model(commandlist, &Mesh, this, 2 * gt.DeltaTime()*60.0 / 24.0, Master->n_Animation, animations, jarr);
+			//애니메이션 업데이트 애니메이션은 24프레임으로 구성됨. 문제는 FPS가 24프레임이 아님. 그보다 큰 프레임. 따라서 24프레임으로 해당프레임을 나눠 보정.
+			if (Master->n_Animation != Attack)
+			{
+				UpdateMD5Model(commandlist, &cMesh, this, gt.DeltaTime()*60.0 / 24.0, Master->n_Animation, cAnimations, jarr);
+			}
 			else
-				UpdateMD5Model(commandlist, &Mesh, this, gt.DeltaTime()*60.0 / 24.0, Master->n_Animation, animations, jarr);
+			{
+				UpdateMD5Model(commandlist, &cMesh, this, 2 * gt.DeltaTime()*60.0 / 24.0, Master->n_Animation, cAnimations, jarr);
+			}
 		}
+		else if(CreateiMesh && Kinds == 2)
+			UpdateMD5Model(commandlist, &iMesh, this, 0.8*gt.DeltaTime()*60.0 / 24.0, Master->n_Animation, iAnimations, jarr);
 
 	}
 
-
+	
 }
 
 void ShadowObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer & gt)
@@ -4457,6 +4554,105 @@ void ShadowObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTim
 
 	commandlist->SetGraphicsRootConstantBufferView(3, jarr->Resource()->GetGPUVirtualAddress());
 
-	Mesh.Render(commandlist);
+	if(CreatecMesh && Kinds == 0)
+		cMesh.Render(commandlist);
+	if (CreateoMesh && Kinds == 1)
+		oMesh.Render(commandlist);
+	if (CreateiMesh && Kinds == 2)
+		iMesh.Render(commandlist);
 }
 
+
+
+
+BreakCartObject::BreakCartObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, list<CGameObject*>* shadow, float dgree, XMFLOAT4 cp) : CGameObject(m_Device,commandlist,Plist,shadow,cp)
+{
+	if (CreateMesh == false)
+	{
+
+		Mesh.Index = NULL;
+		Mesh.SubResource = NULL;
+
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "CubeTex", L"textures/object/wood.dds", false);
+		SetMesh(m_Device, commandlist);
+		SetMaterial(m_Device, commandlist);
+		CreateMesh = true;
+
+	}
+
+	//게임오브젝트마다 룩벡터와 라이트벡터가 다르므로 초기 오프셋 설정을 해준다.
+	//실제 룩벡터 등은 모두 UpdateLookVector에서 처리된다(라이트벡터도) 따라서 Tick함수에서 반드시 호출해야한다.
+	OffLookvector = XMFLOAT3(0, 0, 1);
+	OffRightvector = XMFLOAT3(1, 0, 0);
+
+	auto q = XMLoadFloat4(&Orient);//방향을 degree만큼 돌리려 한다.
+	XMFLOAT3 axis{ 0,1,0 };
+	auto q2 = QuaternionRotation(axis, dgree);
+	Orient = QuaternionMultiply(Orient, q2);
+
+	UpdateLookVector();
+	ObjData.isAnimation = 0;
+	ObjData.Scale = 4.5f;
+	ObjData.SpecularParamater = 0.0f;//스페큘러를 낮게준다.
+
+
+
+									 //게임관련 데이터들
+	gamedata.MAXHP = 100;
+	gamedata.HP = 100;
+	gamedata.Damage = 0;
+	gamedata.GodMode = true;
+	gamedata.Speed = 0;
+	staticobject = true;
+	obs = Static;
+	//광선충돌 검사용 육면체
+	XMFLOAT3 rx(15, 0, 0);
+	XMFLOAT3 ry(0, 8, 0);
+	XMFLOAT3 rz(0, 0, 15);
+	rco.SetPlane(rx, ry, rz);
+
+	//질점오브젝트 사용시 필요한 데이터들 설정
+	pp = new PhysicsPoint();
+	pp->SetPosition(&CenterPos);//이 값은 항상 갱신되야한다.
+	pp->SetHalfBox(15, 8, 15);//충돌 박스의 x,y,z 크기
+	pp->SetDamping(0.5f);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
+	pp->SetBounce(false);//튕기지 않는다.
+	pp->SetMass(INFINITY);//고정된 물체는 무게가 무한이다.
+}
+
+BreakCartObject::~BreakCartObject()
+{
+}
+
+void BreakCartObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
+{
+	//모델 로드
+	LoadMD5Model(L".\\플레이어메쉬들\\cart.MD5MESH", &Mesh, 0, 1);
+	//
+	Mesh.SetNormal(false);
+	Mesh.CreateVertexBuffer(m_Device, commandlist);
+	Mesh.CreateIndexBuffer(m_Device, commandlist);
+}
+
+void BreakCartObject::SetMaterial(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
+{
+	if (Mat.ConstBuffer == NULL)
+		Mat.ConstBuffer = new UploadBuffer<MaterialData>(m_Device, 1, true);
+
+
+	Mat.MatData.Roughness = 0.2f;
+}
+
+void BreakCartObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer & gt)
+{
+	//게임오브젝트의 렌더링은 간단하다. 
+	//텍스처를 연결하고, 월드행렬을 연결한다.
+
+	if (Textures.size()>0)
+		SetTexture(commandlist, SrvDescriptorHeap, Textures["CubeTex"].get()->Resource.Get(), false);
+	UpdateConstBuffer(commandlist, false);
+
+	//이후 그린다.
+
+	Mesh.Render(commandlist);
+}

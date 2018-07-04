@@ -9,7 +9,7 @@
 class AimObject : public CGameObject
 {
 public:
-	AimObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
+	AimObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
 
 
 public:
@@ -30,7 +30,7 @@ public:
 class SkillFrameUIObject : public CGameObject
 {
 public:
-	SkillFrameUIObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, int SkillNum, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
+	SkillFrameUIObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, int SkillNum, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
 
 
 public:
@@ -51,7 +51,7 @@ public:
 class SkillUIObject : public CGameObject
 {
 public:
-	SkillUIObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, int SkillNum, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
+	SkillUIObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, int SkillNum, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
 
 public:
 	static bool CreateMesh;//최초로 false며 메쉬를 만든후 true가된다.
@@ -70,7 +70,7 @@ public:
 class SelectBarObject : public CGameObject
 {
 public:
-	SelectBarObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
+	SelectBarObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
 public:
 	static bool CreateMesh;//최초로 false며 메쉬를 만든후 true가된다.
 	static unordered_map<string, unique_ptr<CTexture>> Textures;//텍스처들을 저장함
@@ -91,7 +91,7 @@ public:
 class BackGroundObject : public CGameObject
 {
 public:
-	BackGroundObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
+	BackGroundObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
 
 
 public:
@@ -112,7 +112,7 @@ public:
 class CoolBarObject : public CGameObject
 {
 public:
-	CoolBarObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, float maxtime, CGameObject* master, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
+	CoolBarObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, float maxtime, CGameObject* master, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
 	CGameObject* Master = NULL;//소유자
 public:
 	static bool CreateMesh;//최초로 false며 메쉬를 만든후 true가된다.

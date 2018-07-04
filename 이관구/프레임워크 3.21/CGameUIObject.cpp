@@ -1,6 +1,6 @@
 #include "CGameUIObject.h"
 
-AimObject::AimObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
+AimObject::AimObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, shadow, cp)
 {
 	ObjData.isAnimation = 0;
 	ObjData.Scale = 20.0f;
@@ -24,7 +24,7 @@ AimObject::AimObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comman
 
 }
 
-void AimObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
+void AimObject::SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist)
 {
 	UINT numOfitem = 1;
 
@@ -88,7 +88,7 @@ void AimObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer 
 }
 
 
-CoolBarObject::CoolBarObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, float maxtime, CGameObject * master, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
+CoolBarObject::CoolBarObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, list<CGameObject*>*shadow, float maxtime, CGameObject * master, XMFLOAT4 cp) :CGameObject(m_Device, commandlist, Plist, shadow, cp)
 {
 	MaxCoolTime = maxtime;
 	ObjData.isAnimation = 0;
@@ -116,7 +116,7 @@ CoolBarObject::CoolBarObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList 
 
 }
 
-void CoolBarObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
+void CoolBarObject::SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist)
 {
 	UINT numOfitem = 1;
 
@@ -174,7 +174,7 @@ void CoolBarObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTi
 }
 
 
-SkillFrameUIObject::SkillFrameUIObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, int SkillNum, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
+SkillFrameUIObject::SkillFrameUIObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, list<CGameObject*>*shadow, int SkillNum, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist,shadow, cp)
 {
 	ObjData.isAnimation = 0;
 	ObjData.Scale = 80.0f;
@@ -197,7 +197,7 @@ SkillFrameUIObject::SkillFrameUIObject(ID3D12Device * m_Device, ID3D12GraphicsCo
 	}
 }
 
-void SkillFrameUIObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
+void SkillFrameUIObject::SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist)
 {
 	UINT numOfitem = 1;
 
@@ -258,7 +258,7 @@ void SkillFrameUIObject::Render(ID3D12GraphicsCommandList * commandlist, const G
 	commandlist->DrawIndexedInstanced(Mesh.nindex, 1, Mesh.nioffset, Mesh.nOffset, 0);
 }
 
-SkillUIObject::SkillUIObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, int SkillNum, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
+SkillUIObject::SkillUIObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, list<CGameObject*>*shadow, int SkillNum, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist,shadow, cp)
 {
 	ObjData.isAnimation = 0;
 	ObjData.Scale = 70.0f;
@@ -294,7 +294,7 @@ SkillUIObject::SkillUIObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList 
 	TexOff = SkillNum;
 }
 
-void SkillUIObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
+void SkillUIObject::SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist)
 {
 	UINT numOfitem = 1;
 
@@ -357,7 +357,7 @@ void SkillUIObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTi
 
 
 
-SelectBarObject::SelectBarObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
+SelectBarObject::SelectBarObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, list<CGameObject*>*shadow, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist,shadow, cp)
 {
 	ObjData.isAnimation = 0;
 	ObjData.Scale = 80.0f;
@@ -383,7 +383,7 @@ SelectBarObject::SelectBarObject(ID3D12Device * m_Device, ID3D12GraphicsCommandL
 	}
 }
 
-void SelectBarObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
+void SelectBarObject::SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist)
 {
 	UINT numOfitem = 1;
 
@@ -439,7 +439,7 @@ void SelectBarObject::Render(ID3D12GraphicsCommandList * commandlist, const Game
 }
 
 //----------
-BackGroundObject::BackGroundObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
+BackGroundObject::BackGroundObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, list<CGameObject*>*shadow, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist,shadow, cp)
 {
 	//이녀석은 스케일을 x 길이로 CustomData1.x는 5로 설정해서 뭐하는녀석인지 선택하게 한후 CustomData1.y가 y길이로 하는 사각형이된다.
 
@@ -468,7 +468,7 @@ BackGroundObject::BackGroundObject(ID3D12Device * m_Device, ID3D12GraphicsComman
 	}
 }
 
-void BackGroundObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
+void BackGroundObject::SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist)
 {
 	UINT numOfitem = 1;
 

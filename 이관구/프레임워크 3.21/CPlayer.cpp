@@ -4,7 +4,7 @@
 CPlayer::CPlayer(HWND hWnd,ID3D12Device* Device, ID3D12GraphicsCommandList* commandlist, float asp, XMFLOAT3& e, XMFLOAT3& a, XMFLOAT3& u) : Camera(hWnd,Device,commandlist,asp,e,a,u)
 {
 	//벽대신 다른 오브젝트를 추가할것.
-	TraceObject = new RangeObject(Device, commandlist, NULL,  XMFLOAT4(-10000, -10000, -10000, 1));
+	TraceObject = new RangeObject(Device, commandlist, NULL, NULL, XMFLOAT4(-10000, -10000, -10000, 1));
 	PlayerObject = NULL;
 
 
@@ -451,7 +451,7 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 			if (skilldata.Skills[skilldata.SellectBulletIndex] == 4 && skilldata.isSkillOn[skilldata.SellectBulletIndex])//파동파인경우
 			{
 				//고리생성
-				scene->StaticObject.push_back(new RingObject(scene->device, scene->commandlist,&scene->BbObject, PlayerObject->CenterPos));
+				scene->StaticObject.push_back(new RingObject(scene->device, scene->commandlist,&scene->BbObject, &scene->Shadows, PlayerObject->CenterPos));
 				skilldata.SkillsCoolTime[skilldata.SellectBulletIndex] = skilldata.SkillsMaxCoolTime[skilldata.Skills[skilldata.SellectBulletIndex]];
 				skilldata.isSkillOn[skilldata.SellectBulletIndex] = false;
 				skilldata.SellectBulletIndex = 0;//스킬 시전후 가장 첫번째 스킬로 변경함
@@ -495,7 +495,7 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 			else if (skilldata.Skills[skilldata.SellectBulletIndex] == 5 && skilldata.isSkillOn[skilldata.SellectBulletIndex])//실드
 			{
 				//실드 생성
-				scene->NoCollObject.push_back(new ShieldArmor(scene->device, scene->commandlist, &scene->BbObject, PlayerObject, PlayerObject->CenterPos));
+				scene->NoCollObject.push_back(new ShieldArmor(scene->device, scene->commandlist, &scene->BbObject, &scene->Shadows, PlayerObject, PlayerObject->CenterPos));
 				skilldata.SkillsCoolTime[skilldata.SellectBulletIndex] = skilldata.SkillsMaxCoolTime[skilldata.Skills[skilldata.SellectBulletIndex]];
 				skilldata.isSkillOn[skilldata.SellectBulletIndex] = false;
 				skilldata.SellectBulletIndex = 0;
@@ -618,7 +618,7 @@ void CPlayer::CreateBullet(ID3D12Device* Device, ID3D12GraphicsCommandList* cl,X
 		XMStoreFloat4(&ori, tempori);//최종 회전 방향
  
 
-		bulletlist->push_back(new BulletCube(Device, cl, PlayerObject->ParticleList, PlayerObject, ori, lock, PlayerObject->CenterPos));
+		bulletlist->push_back(new BulletCube(Device, cl, PlayerObject->ParticleList,NULL, PlayerObject, ori, lock, PlayerObject->CenterPos));
 		break;
 	}
 
@@ -681,7 +681,7 @@ void CPlayer::CreateBullet(ID3D12Device* Device, ID3D12GraphicsCommandList* cl,X
 
 
 		
-		bulletlist->push_back(new HeavyBulletCube(Device, cl, PlayerObject->ParticleList, PlayerObject, ori, lock, PlayerObject->CenterPos));
+		bulletlist->push_back(new HeavyBulletCube(Device, cl, PlayerObject->ParticleList,NULL, PlayerObject, ori, lock, PlayerObject->CenterPos));
 		break;
 
 	}
@@ -693,7 +693,7 @@ void CPlayer::CreateBullet(ID3D12Device* Device, ID3D12GraphicsCommandList* cl,X
 		skilldata.isSkillOn[skilldata.SellectBulletIndex] = false;
 
 		
-		bulletlist->push_back(new Tetrike(Device, cl, PlayerObject->ParticleList,bulletlist, PlayerObject, lock, XMFloat3to4(Goal)));
+		bulletlist->push_back(new Tetrike(Device, cl, PlayerObject->ParticleList,NULL, bulletlist, PlayerObject, lock, XMFloat3to4(Goal)));
 		break;
 
 	}
@@ -703,7 +703,7 @@ void CPlayer::CreateBullet(ID3D12Device* Device, ID3D12GraphicsCommandList* cl,X
 		skilldata.SkillsCoolTime[skilldata.SellectBulletIndex] = skilldata.SkillsMaxCoolTime[skilldata.Skills[skilldata.SellectBulletIndex]];
 		skilldata.isSkillOn[skilldata.SellectBulletIndex] = false;
 
-		PlayerObject->ParticleList->push_back(new DiceObject(Device, cl, PlayerObject->ParticleList, PlayerObject, bulletlist ,XMFLOAT4(PlayerObject->CenterPos.x, 35, PlayerObject->CenterPos.z, 0)));
+		PlayerObject->ParticleList->push_back(new DiceObject(Device, cl, PlayerObject->ParticleList,NULL, PlayerObject, bulletlist ,XMFLOAT4(PlayerObject->CenterPos.x, 35, PlayerObject->CenterPos.z, 0)));
 
 		break;
 	}
