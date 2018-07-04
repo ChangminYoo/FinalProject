@@ -478,20 +478,20 @@ void CPlayerObject::ProcessPacket(Packet * packet)
 		g_bullets.emplace_back(g_bullobj);
 
 		//불렛을 쏜 캐릭터의 공격애니메이션을 다른 클라이언트에게도 보내준다
-		STC_CharAnimation stc_charani;
-		stc_charani.id = g_bullobj->GetBulletMasterID();
-		stc_charani.ani_state = Ani_State::Attack;
+		//STC_CharAnimation stc_charani;
+		//stc_charani.id = g_bullobj->GetBulletMasterID();
+		//stc_charani.ani_state = Ani_State::Attack;
 
 		//불렛이 생성된 위치를 나 말고도 상대방도 알고 있어야함. //상대방 클라이언트에게 내 불렛 생성위치를 보냄
-		for (auto client : g_clients)
-		{
-			//불렛을 쏜 클라이언트는 자신이 불렛을 생성했으므로 따로 생성정보를 보내주지 않아도됨 
-			if (client->m_id == n_bldata->bull_data.master_id) continue;
-			if (client->GetIsAI() == true || client->GetConnectState() == false) continue;
-
-			client->SendPacket(reinterpret_cast<Packet*>(&stc_charani));
-
-		}
+		//for (auto client : g_clients)
+		//{
+		//	//불렛을 쏜 클라이언트는 자신이 불렛을 생성했으므로 따로 생성정보를 보내주지 않아도됨 
+		//	if (client->m_id == n_bldata->bull_data.master_id) continue;
+		//	if (client->GetIsAI() == true || client->GetConnectState() == false) continue;
+		//
+		//	client->SendPacket(reinterpret_cast<Packet*>(&stc_charani));
+		//
+		//}
 		//if (n_bldata->bull_data.type == BULLET_TYPE::protocol_LightBullet)
 		//	g_timer_queue.AddEvent(n_bldata->bull_data.myID, 0, LIGHT_BULLET, true, n_bldata->bull_data.Master_ID);
 		//if (n_bldata->bull_data.type == BULLET_TYPE::protocol_HeavyBullet)

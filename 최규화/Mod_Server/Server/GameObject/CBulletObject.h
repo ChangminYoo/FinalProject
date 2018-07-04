@@ -1,7 +1,7 @@
 #pragma once
 //#include "CMonoObject.h"
-#define MAX_LIGHT_BULLET_TIME 3.5
-#define MAX_HEAVY_BULLET_TIME 5
+#define MAX_LIGHT_BULLET_TIME 2
+#define MAX_HEAVY_BULLET_TIME 3.5
 
 class CBulletObject : public CMonoObject
 {
@@ -16,7 +16,6 @@ private:
 public:
 	__int64					      m_prevTime{ 0 };
 	__int64					      m_currTime{ 0 };
-	//float						  m_deltaTime{ 0.f };
 	CTS_BulletObject_Info         m_bulldata;
 
 public:
@@ -25,10 +24,10 @@ public:
 		Vel3f& vel, const unsigned char& type, const Position3D& endpt);
 
 	virtual void AfterGravitySystem();
-	virtual void Tick(__int64 deltime);
+	virtual void Tick(double deltime);
 	virtual void Update(float deltime);
-	void Collision(vector<CPlayerObject*>* clients, __int64 deltime);
-	void Collision(unordered_set<CStaticObject*>* sobjs, __int64 deltime);
+	void Collision(vector<CPlayerObject*>* clients, double deltime);
+	void Collision(unordered_set<CStaticObject*>* sobjs, double deltime);
 
 	float			  GetBulletLifeTime() const { return m_lifetime; }
 	void			  SetBulletLifeTime(float time) { m_lifetime += time; }

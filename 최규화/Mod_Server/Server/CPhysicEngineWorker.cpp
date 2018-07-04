@@ -39,30 +39,27 @@ void CPhysicEngineWorker::Update()
 			}
 		}
 	
-		/*
+		
 		for (auto bullet : g_bullets)
 		{
 			if (bullet->GetBulletIsAlive() == true)
 			{
-				bullet->Tick(temp_time);
+				bullet->Tick(m_deltime);
 				bullet->AfterGravitySystem();
 			}
 
-			cout << "Bullet ID: " << bullet->GetBulletID() << "Bullet MID: " << bullet->GetBulletMasterID() <<
-				"Position: " << bullet->m_bulldata.pos4f.x << ", " << bullet->m_bulldata.pos4f.y << ", " << bullet->m_bulldata.pos4f.z <<
-				"LifeTime: " << bullet->GetBulletLifeTime() << endl; 
-		
+			//cout << "Bullet ID: " << bullet->GetBulletID() << "Bullet MID: " << bullet->GetBulletMasterID() <<
+			//	"Position: " << bullet->m_bulldata.pos4f.x << ", " << bullet->m_bulldata.pos4f.y << ", " << bullet->m_bulldata.pos4f.z <<
+			//	"LifeTime: " << bullet->GetBulletLifeTime() << endl; 
+		   
 		}
-		*/
 		
-		
-
 		CollisionSystem(m_deltime);
 
 		
 		// alive 가 false인 오브젝트들 지워주기 
 		
-		/*
+		
 		for (auto iter = g_bullets.begin(); iter != g_bullets.end();)
 		{
 			if ((*iter)->GetBulletIsAlive() == false)
@@ -88,7 +85,7 @@ void CPhysicEngineWorker::Update()
 				++iter;
 			}
 		}
-		*/
+		
 		
 
 
@@ -98,7 +95,7 @@ void CPhysicEngineWorker::Update()
 void CPhysicEngineWorker::CollisionSystem(double deltime)
 {
 
-	/*
+	
 	for (auto bullet : g_bullets)
 	{
 		if (bullet->GetBulletIsAlive() == true)
@@ -107,7 +104,7 @@ void CPhysicEngineWorker::CollisionSystem(double deltime)
 			bullet->Collision(&g_staticobjs, deltime);
 		}
 	}
-	*/
+	
 
 	for (auto client : g_clients)
 	{
