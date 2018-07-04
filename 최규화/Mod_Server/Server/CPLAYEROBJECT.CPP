@@ -531,16 +531,16 @@ void CPlayerObject::ProcessPacket(Packet * packet)
 		g_clients[ani->id]->m_ani = ani->ani_state;
 		g_clients[ani->id]->m_pdata.ani = ani->ani_state;
 
-		STC_CharAnimation stc_c_ani;
-		stc_c_ani.ani_state = ani->ani_state;
-		stc_c_ani.id = ani->id;
+		STC_CharAnimation stc_cani;
+		stc_cani.ani_state = ani->ani_state;
+		stc_cani.id = ani->id;
 
 		for (auto client : g_clients)
 		{
 			if (client->m_id == ani->id) continue;
 			if (client->GetIsAI() == true || client->GetConnectState() == false) continue;
 
-			client->SendPacket(reinterpret_cast<Packet*>(&stc_c_ani));
+			client->SendPacket(reinterpret_cast<Packet*>(&stc_cani));
 		}
 	}
 	break;
