@@ -4587,7 +4587,10 @@ Floor2Object::Floor2Object(ID3D12Device * m_Device, ID3D12GraphicsCommandList * 
 	ObjData.Scale = size;
 	ObjData.SpecularParamater = 0.3f;//스페큘러를 낮게준다.
 	ObjData.CustomData1.w = 1234;
+	OffLookvector = XMFLOAT3(0, 0, 1);
+	OffRightvector = XMFLOAT3(1, 0, 0);
 
+	UpdateLookVector();
 	obs = Static;
 
 	//게임관련 데이터들
