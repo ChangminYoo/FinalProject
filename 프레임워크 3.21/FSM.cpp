@@ -79,13 +79,13 @@ void FSM::CheckTarget(float DeltaTime)
 			continue;
 
 		auto v1 = Float4Add((*i)->CenterPos, Master->CenterPos, false);
-		v1.y = 0;
+		//v1.y = 0;
 		auto nv1 = Float4Normalize(v1);
 		float nv1dotLook = nv1.x*Master->Lookvector.x + nv1.y*Master->Lookvector.y + nv1.z*Master->Lookvector.z;
 		auto l = FloatLength(v1);
 		
 		bool blind = false;
-		if (aidata.VisionLength >= l && nv1dotLook>0.5)
+		if (aidata.VisionLength >= l && nv1dotLook>1.73/2.0f)
 		{
 			////현재는 장애물을 이용하지 못한다. 이후에 추가할것
 			//for (auto s : *StaticObj)
