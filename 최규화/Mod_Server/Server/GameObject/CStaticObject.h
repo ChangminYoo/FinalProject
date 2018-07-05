@@ -15,7 +15,7 @@ class CStaticObject : public CMonoObject
 protected:
 	double		        m_degree{ 0 };
 	static map<int, BasicInfo> m_sobj_bdata;
-
+	
 public:
 	StaticObject_Info m_stc_sobjdata;
 

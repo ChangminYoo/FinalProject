@@ -44,7 +44,7 @@ CGameObject::CGameObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* comm
 	this->CenterPos = cp;//중점위치
 	this->ParticleList = Plist;
 
-	XMStoreFloat4(&Orient, XMQuaternionIdentity());//방향을 초기화 한다.
+	XMStoreFloat4(&Orient, XMQuaternionIdentity());//방향을 초기화 한다.	// 0, 0, 0, 1 로 초기화
 	SetWorldMatrix();	//월드변환생성
 	CreateConstBuffer(m_Device);//상수버퍼생성
 }
@@ -2903,18 +2903,18 @@ BigWallObject::BigWallObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList 
 	//광선충돌 검사용 육면체
 	XMFLOAT3 rx(350, 0, 0);
 	auto rqx = QuaternionRotation(raxis, dgree);
-	Orient = QuaternionMultiply(XMFLOAT4(rx.x, rx.y, rx.z, 0), rqx);
-	rx.x = Orient.x; rx.y = Orient.y, rx.z = Orient.z;
+	auto rOrient = QuaternionMultiply(XMFLOAT4(rx.x, rx.y, rx.z, 0), rqx);
+	rx.x = rOrient.x; rx.y = rOrient.y, rx.z = rOrient.z;
 
 	XMFLOAT3 ry(0, 50, 0);
 	auto rqy = QuaternionRotation(raxis, dgree);
-	Orient = QuaternionMultiply(XMFLOAT4(ry.x, ry.y, ry.z, 0), rqy);
-	ry.x = Orient.x; ry.y = Orient.y, ry.z = Orient.z;
+	rOrient = QuaternionMultiply(XMFLOAT4(ry.x, ry.y, ry.z, 0), rqy);
+	ry.x = rOrient.x; ry.y = rOrient.y, ry.z = rOrient.z;
 
 	XMFLOAT3 rz(0, 0, 5);
 	auto rqz = QuaternionRotation(raxis, dgree);
-	Orient = QuaternionMultiply(XMFLOAT4(ry.x, ry.y, ry.z, 0), rqz);
-	rz.x = Orient.x; rz.y = Orient.y, rz.z = Orient.z;
+	rOrient = QuaternionMultiply(XMFLOAT4(rz.x, rz.y, rz.z, 0), rqz);
+	rz.x = rOrient.x; rz.y = rOrient.y, rz.z = rOrient.z;
 
 	rco.SetPlane(rx, ry, rz);
 

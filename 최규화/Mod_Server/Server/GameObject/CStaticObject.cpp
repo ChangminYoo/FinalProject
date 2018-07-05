@@ -164,6 +164,7 @@ NormalBoxObject::NormalBoxObject(unsigned short id)
 	m_alive = true;
 	m_pos4f = m_sobj_bdata[m_id].pos;
 	m_rot4f = { 0.f, 0.f, 0.f, 1.f };
+
 	m_dir = 0;
 	m_ai = true;
 	m_godmode = true;
@@ -235,10 +236,10 @@ SmallWallObject::SmallWallObject(unsigned short id)
 	auto q2 = QuaternionRotation(axis, m_degree);
 	xmf4_rot = QuaternionMultiply(xmf4_rot, q2);
 
+	m_rot4f = { xmf4_rot.x, xmf4_rot.y, xmf4_rot.z, xmf4_rot.w };
+	
 	UpdateLookvector();
 	UpdateUpvector();
-
-	m_rot4f = { xmf4_rot.x, xmf4_rot.y, xmf4_rot.z, xmf4_rot.w };
 
 	pp->SetPosition(m_pos4f.x, m_pos4f.y, m_pos4f.z);
 	pp->SetHalfBox(20, 10, 5);
@@ -289,10 +290,10 @@ BigWallObject::BigWallObject(unsigned short id)
 	auto q2 = QuaternionRotation(axis, m_degree);
 	xmf4_rot = QuaternionMultiply(xmf4_rot, q2);
 
+	m_rot4f = { xmf4_rot.x, xmf4_rot.y, xmf4_rot.z, xmf4_rot.w };
+
 	UpdateLookvector();
 	UpdateUpvector();
-
-	m_rot4f = { xmf4_rot.x, xmf4_rot.y, xmf4_rot.z, xmf4_rot.w };
 
 	pp->SetPosition(m_pos4f.x, m_pos4f.y, m_pos4f.z);
 	pp->SetHalfBox(350, 50, 5);
@@ -343,10 +344,12 @@ Building::Building(unsigned short id)
 	auto q2 = QuaternionRotation(axis, m_degree);
 	xmf4_rot = QuaternionMultiply(xmf4_rot, q2);
 
+	m_rot4f = { xmf4_rot.x, xmf4_rot.y, xmf4_rot.z, xmf4_rot.w };			
+	
+	//스테틱오브젝트 충돌 시, 회전된 스테틱오브젝트들은 Lookvector 와 Rightvector를 회전한 값에 따라 바꿔줘야한다
+	//그래야지 충돌처리할 때 Lookvector, Rightvector를 이용하는데, 바뀐 값이 적용되서 충돌처리를 한다 
 	UpdateLookvector();
 	UpdateUpvector();
-
-	m_rot4f = { xmf4_rot.x, xmf4_rot.y, xmf4_rot.z, xmf4_rot.w };
 
 	pp->SetPosition(m_pos4f.x, m_pos4f.y, m_pos4f.z);
 	pp->SetHalfBox(15, 45, 15);

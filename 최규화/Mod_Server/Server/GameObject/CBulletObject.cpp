@@ -87,7 +87,7 @@ void CBulletObject::Tick(double deltime)
 	if (m_lifetime >= MAX_LIGHT_BULLET_TIME && BULLET_TYPE::protocol_LightBullet == static_cast<int>(m_type))
 	{
 		m_alive = false;
-		cout << "불렛 타임 초과" << endl;
+		//cout << "불렛 타임 초과" << endl;
 	}
 	else if (m_lifetime >= MAX_HEAVY_BULLET_TIME && BULLET_TYPE::protocol_HeavyBullet == static_cast<int>(m_type))
 		m_alive = false;

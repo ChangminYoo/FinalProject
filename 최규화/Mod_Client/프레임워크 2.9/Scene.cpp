@@ -427,7 +427,7 @@ void Scene::CreateGameObject()
 	StaticObject.push_back(new BigWallObject(device, commandlist, &BbObject, -BigWall_Rad1 * 2, XMFLOAT4(BigWall_X2, 0, BigWall_Z2, 0)));//¿ìÇÏ
 	StaticObject.push_back(new BigWallObject(device, commandlist, &BbObject, 0, XMFLOAT4(0, 0, BigWall_Z3, 0)));//ÇÏ
 	StaticObject.push_back(new BigWallObject(device, commandlist, &BbObject, BigWall_Rad1 * 2, XMFLOAT4(-BigWall_X2, 0, BigWall_Z2, 0)));//ÁÂÇÏ
-																																	 //building 3
+																																	 //building 
 	StaticObject.push_back(new BuildingObject(device, commandlist, &BbObject, 0, XMFLOAT4(90, 0, 60, 0)));
 	StaticObject.push_back(new BuildingObject(device, commandlist, &BbObject, 0, XMFLOAT4(-75, 0, 40, 0)));
 	StaticObject.push_back(new BuildingObject(device, commandlist, &BbObject, 0, XMFLOAT4(0, 0, -100, 0)));
@@ -827,7 +827,6 @@ void Scene::SET_SOBJECT_BY_SERVER_DATA(const unsigned short & id, StaticObject_I
 					sobj->m_sobj_data.type = sobjdata.type;
 
 					sobj->pp->SetPosition(sobj->CenterPos);
-
 					break;
 				}
 			}
@@ -864,9 +863,9 @@ void Scene::SET_BULLET_BY_SERVER_DATA(STC_BulletObject_Info & bulldata, const un
 							lbul->DelObj = true;
 							findBullet = true;
 
-							cout << "Bullet ID: " << bulldata.my_id << "Bullet MID: " << bulldata.master_id <<
-								"Position: " << bulldata.pos4f.x << ", " << bulldata.pos4f.y << ", " << bulldata.pos4f.z << ", " << bulldata.pos4f.w <<
-								"IsAlive: " << static_cast<bool>(bulldata.alive) << endl;
+							//cout << "Bullet ID: " << bulldata.my_id << "Bullet MID: " << bulldata.master_id <<
+							//	"Position: " << bulldata.pos4f.x << ", " << bulldata.pos4f.y << ", " << bulldata.pos4f.z << ", " << bulldata.pos4f.w <<
+							//	"IsAlive: " << static_cast<bool>(bulldata.alive) << endl;
 						
 							break;
 						}

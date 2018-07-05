@@ -48,7 +48,7 @@ private:
 	CGameObject* m_myObj;
 	Scene* m_myScene;
 
-	float m_totalTime{ 0.0f };
+	float m_totalTime{ 0.f };
 
 	char m_move_prevdir{ 0 };
 
@@ -73,6 +73,8 @@ public:
 	Packet* Get_RecvBuf() { return m_recvBuf; }
 
 	RegularCheckInfo RgCkInfo;
+	bool			 m_start_attack{ false };
+	int				 m_curr_skillnum{ -1};
 	
 	//유보 - frameadvance에서 서버에서 받은 데이터가 processpacket 함수를 지나서
 	//해당 변경된 gameobject의 데이터를 dynamicobject에 넣어줄것인지? -> 서버에서 데이터를 받을 때마다

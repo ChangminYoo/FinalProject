@@ -284,16 +284,19 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 			{
 				if (m_up_flag)
 				{
-					cout << "up_flag_false" << "\n";
+					//cout << "up_flag_false" << "\n";
 					m_up_flag = false;
 
 					cts_move.dir = 0;
 					m_async_client->SendPacket(reinterpret_cast<Packet*>(&cts_move));
 					m_async_client->SetMovePrevDir(0);
 
-					cts_cani.ani_state = Ani_State::Idle;
-					cts_cani.id = PlayerObject->m_player_data.id;
-					m_async_client->SendPacket(reinterpret_cast<Packet*>(&cts_cani));
+					if (PlayerObject->n_Animation != Ani_State::Attack)
+					{
+						cts_cani.ani_state = Ani_State::Idle;
+						cts_cani.id = PlayerObject->m_player_data.id;
+						m_async_client->SendPacket(reinterpret_cast<Packet*>(&cts_cani));
+					}
 				}
 					
 			}
@@ -354,16 +357,19 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 			{
 				if (m_down_flag)
 				{
-					cout << "down_flag_false" << "\n";
+					//cout << "down_flag_false" << "\n";
 					m_down_flag = false;
 
 					cts_move.dir = 0;
 					m_async_client->SendPacket(reinterpret_cast<Packet*>(&cts_move));
 					m_async_client->SetMovePrevDir(0);
 
-					cts_cani.ani_state = Ani_State::Idle;
-					cts_cani.id = PlayerObject->m_player_data.id;
-					m_async_client->SendPacket(reinterpret_cast<Packet*>(&cts_cani));
+					if (PlayerObject->n_Animation != Ani_State::Attack)
+					{
+						cts_cani.ani_state = Ani_State::Idle;
+						cts_cani.id = PlayerObject->m_player_data.id;
+						m_async_client->SendPacket(reinterpret_cast<Packet*>(&cts_cani));
+					}
 				}
 			}
 
@@ -423,16 +429,19 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 			{
 				if (m_left_flag)
 				{
-					cout << "left_flag_false" << "\n";
+					//cout << "left_flag_false" << "\n";
 					m_left_flag = false;
 
 					cts_move.dir = 0;
 					m_async_client->SendPacket(reinterpret_cast<Packet*>(&cts_move));
 					m_async_client->SetMovePrevDir(0);
 
-					cts_cani.ani_state = Ani_State::Idle;
-					cts_cani.id = PlayerObject->m_player_data.id;
-					m_async_client->SendPacket(reinterpret_cast<Packet*>(&cts_cani));
+					if (PlayerObject->n_Animation != Ani_State::Attack)
+					{
+						cts_cani.ani_state = Ani_State::Idle;
+						cts_cani.id = PlayerObject->m_player_data.id;
+						m_async_client->SendPacket(reinterpret_cast<Packet*>(&cts_cani));
+					}
 				}
 			}
 
@@ -492,16 +501,19 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 			{
 				if (m_right_flag)
 				{
-					cout << "left_flag_false" << "\n";
+					//cout << "left_flag_false" << "\n";
 					m_right_flag = false;
 
 					cts_move.dir = 0;
 					m_async_client->SendPacket(reinterpret_cast<Packet*>(&cts_move));
 					m_async_client->SetMovePrevDir(0);
 
-					cts_cani.ani_state = Ani_State::Idle;
-					cts_cani.id = PlayerObject->m_player_data.id;
-					m_async_client->SendPacket(reinterpret_cast<Packet*>(&cts_cani));
+					if (PlayerObject->n_Animation != Ani_State::Attack)
+					{
+						cts_cani.ani_state = Ani_State::Idle;
+						cts_cani.id = PlayerObject->m_player_data.id;
+						m_async_client->SendPacket(reinterpret_cast<Packet*>(&cts_cani));
+					}
 				}
 			}
 
@@ -574,7 +586,7 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 			{
 				if (m_jump_flag)
 				{
-					cout << "Jump Flag!!" << "\n";
+					//cout << "Jump Flag!!" << "\n";
 					m_jump_flag = false;
 
 					cts_move.dir = 0;
@@ -680,7 +692,7 @@ void CPlayer::CreateBullet(ID3D12Device* Device, ID3D12GraphicsCommandList* cl,X
 	case 0://불렛큐브(라이트 큐브)
 	{
 		//먼저 해당스킬의 쿨타임을 넣어주자.
-		skilldata.SkillsCoolTime[skilldata.SellectBulletIndex] = 0.45f;
+		skilldata.SkillsCoolTime[skilldata.SellectBulletIndex] = 0.6f;
 		skilldata.isSkillOn[skilldata.SellectBulletIndex] = false;
 
 		auto v = Float3Add(Goal, XMFloat4to3(PlayerObject->CenterPos), false);

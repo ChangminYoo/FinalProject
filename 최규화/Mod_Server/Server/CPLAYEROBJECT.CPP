@@ -467,13 +467,13 @@ void CPlayerObject::ProcessPacket(Packet * packet)
 		stc_attack.bull_data.alive = n_bldata->bull_data.alive;
 		stc_attack.bull_data.endpoint = move(n_bldata->bull_data.endpoint);
 
-		for (auto client : g_clients)
-		{
-			if (client->m_id == n_bldata->bull_data.master_id) continue;
-			if (client->GetIsAI() == true || client->GetConnectState() == false) continue;
-
-			client->SendPacket(reinterpret_cast<Packet*>(&stc_attack));
-		}
+		//for (auto client : g_clients)
+		//{
+		//	if (client->m_id == n_bldata->bull_data.master_id) continue;
+		//	if (client->GetIsAI() == true || client->GetConnectState() == false) continue;
+		//
+		//	client->SendPacket(reinterpret_cast<Packet*>(&stc_attack));
+		//}
 
 		g_bullets.emplace_back(g_bullobj);
 

@@ -459,14 +459,18 @@ LRESULT FrameWork::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 void FrameWork::OnMouseDown(WPARAM btnState, int x, int y)
 {
 	//레이를 쏜다. 단 플레이어 오브젝트가 살아있고, 해당 스킬이 쏠수있는 true상태라면!
-	if (scene->Player->PlayerObject->gamedata.HP > 0 && scene->Player->skilldata.isSkillOn[scene->Player->skilldata.SellectBulletIndex])
+	if (scene->Player->PlayerObject->gamedata.HP > 0 && scene->Player->skilldata.isSkillOn[scene->Player->skilldata.SellectBulletIndex]
+		&& scene->Player->m_async_client->m_start_attack == false)
 	{//공격 애니메이션으로 전환
 		scene->Player->PlayerObject->SetAnimation(2);
 
 		STC_CharAnimation cts_cani;
 		cts_cani.id = scene->Player->PlayerObject->m_player_data.id;
 		cts_cani.ani_state = Ani_State::Attack;
+
+		scene->Player->m_async_client->m_curr_skillnum = scene->Player->skilldata.Skills[scene->Player->skilldata.SellectBulletIndex];
 		scene->Player->m_async_client->SendPacket(reinterpret_cast<Packet*>(&cts_cani));
+		scene->Player->m_async_client->m_start_attack = true;
 
 		auto RAY = MousePicking(x, y, scene->Player->Camera.CamData.EyePos, scene->Player->Camera.CamData.View, scene->Player->Camera.CamData.Proj);
 		XMFLOAT3 savepoint;
