@@ -2253,7 +2253,7 @@ MoveCubeObject::MoveCubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 	ObjData.SpecularParamater = 0.0f;//스페큘러를 낮게준다.
 
 	obs = Static;
-									 //게임관련 데이터들
+	//게임관련 데이터들
 	gamedata.MAXHP = 100;
 	gamedata.HP = 100;
 	gamedata.Damage = 0;
@@ -2313,7 +2313,7 @@ void MoveCubeObject::Tick(const GameTimer & gt)
 {
 	n += gt.DeltaTime();
 
-	CenterPos.y = Len * sinf(MMPE_PI * n * 0.1f)+ 20;
+	CenterPos.y = Len * sinf(MMPE_PI * n * 0.15f)+ 50;
 
 }
 
@@ -4582,15 +4582,21 @@ Floor2Object::Floor2Object(ID3D12Device * m_Device, ID3D12GraphicsCommandList * 
 		SetMaterial(m_Device, commandlist);
 		CreateMesh = true;
 	}
+	OffLookvector = XMFLOAT3(0, 0, 1);
+	OffRightvector = XMFLOAT3(1, 0, 0);
+	
+	auto q = XMLoadFloat4(&Orient);//방향을 degree만큼 돌리려 한다.
+	XMFLOAT3 axis{ 0,1,0 };
+	auto q2 = QuaternionRotation(axis, MMPE_PI*0.25);
+	Orient = QuaternionMultiply(Orient, q2);
+
+	UpdateLookVector();
 
 	ObjData.isAnimation = 0;
 	ObjData.Scale = size;
 	ObjData.SpecularParamater = 0.3f;//스페큘러를 낮게준다.
 	ObjData.CustomData1.w = 1234;
-	OffLookvector = XMFLOAT3(0, 0, 1);
-	OffRightvector = XMFLOAT3(1, 0, 0);
 
-	UpdateLookVector();
 	obs = Static;
 
 	//게임관련 데이터들
@@ -4600,17 +4606,34 @@ Floor2Object::Floor2Object(ID3D12Device * m_Device, ID3D12GraphicsCommandList * 
 	gamedata.GodMode = true;
 	gamedata.Speed = 0;
 	staticobject = true;
+	Blending = true;
 
+	ObjData.BlendValue = 0.5f;
+
+	XMFLOAT3 raxis{ 0,1,0 };
 	//광선충돌 검사용 육면체
-	XMFLOAT3 rx(75, 0, 0);
-	XMFLOAT3 ry(0, 1, 0);
-	XMFLOAT3 rz(0, 0, 75);
+	XMFLOAT3 rx(90, 0, 0);
+	auto rqx = QuaternionRotation(raxis, MMPE_PI*0.25);
+	Orient = QuaternionMultiply(XMFLOAT4(rx.x, rx.y, rx.z, 0), rqx);
+	rx.x = Orient.x; rx.y = Orient.y, rx.z = Orient.z;
+
+	XMFLOAT3 ry(0, 0.5f, 0);
+	auto rqy = QuaternionRotation(raxis, MMPE_PI*0.25);
+	Orient = QuaternionMultiply(XMFLOAT4(ry.x, ry.y, ry.z, 0), rqy);
+	ry.x = Orient.x; ry.y = Orient.y, ry.z = Orient.z;
+
+	XMFLOAT3 rz(0, 0, 90);
+	auto rqz = QuaternionRotation(raxis, MMPE_PI*0.25);
+	Orient = QuaternionMultiply(XMFLOAT4(ry.x, ry.y, ry.z, 0), rqz);
+	rz.x = Orient.x; rz.y = Orient.y, rz.z = Orient.z;
+
 	rco.SetPlane(rx, ry, rz);
+
 
 	//질점오브젝트 사용시 필요한 데이터들 설정
 	pp = new PhysicsPoint();
 	pp->SetPosition(&CenterPos);//이 값은 항상 갱신되야한다.
-	pp->SetHalfBox(75, 1, 75);//충돌 박스의 x,y,z 크기
+	pp->SetHalfBox(90, 0.5, 90);//충돌 박스의 x,y,z 크기
 	pp->SetDamping(0.5f);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
 	pp->SetBounce(false);//튕기지 않는다.
 	pp->SetMass(INFINITY);//고정된 물체는 무게가 무한이다.
@@ -4618,7 +4641,7 @@ Floor2Object::Floor2Object(ID3D12Device * m_Device, ID3D12GraphicsCommandList * 
 
 void Floor2Object::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
 {
-	CreateCube(&Mesh, 150, 2, 150);
+	CreateCube(&Mesh, 180, 1, 180);
 
 	Mesh.SetNormal(false);
 	Mesh.CreateVertexBuffer(m_Device, commandlist);
