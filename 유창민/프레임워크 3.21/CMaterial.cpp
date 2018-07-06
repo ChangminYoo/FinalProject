@@ -19,6 +19,6 @@ void CMaterial::UpdateConstantBuffer(ID3D12GraphicsCommandList * commandlist)
 	
 
 	ConstBuffer->CopyData(0, MatData);
-	commandlist->SetGraphicsRootConstantBufferView(6, ConstBuffer->Resource()->GetGPUVirtualAddress());
+	commandlist->SetGraphicsRootConstantBufferView(4, ConstBuffer->Resource()->GetGPUVirtualAddress());
 
 }

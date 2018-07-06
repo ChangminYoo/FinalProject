@@ -10,6 +10,7 @@ Shader::Shader()
 
 Shader::~Shader()
 {
+	
 }
 
 D3D12_RASTERIZER_DESC Shader::CreateRasterizerState()
@@ -374,6 +375,16 @@ void Shader::Render(ID3D12GraphicsCommandList * CommandList, const GameTimer& gt
 		}
 	}
 
+
+	// ========================= 파티클 ======================================//
+	SetParticleShader(CommandList);
+	for (auto b = BbObject->cbegin(); b != BbObject->cend(); b++)
+	{
+		(*b)->Render(CommandList, gt);
+	}
+
+
+
 	//============ 스태틱오브젝트와 리지드바디 오브젝트는 블렌딩이 일어나므로, 노블랜딩 -> 블랜딩 오브젝트 순으로 그려야한다. ==================//
 	vector<CGameObject*> NoBlendingVector;//블랜딩안씀
 	vector<CGameObject*> BlendingVector;//애초에 블랜딩쓰는 물체
@@ -477,13 +488,6 @@ void Shader::Render(ID3D12GraphicsCommandList * CommandList, const GameTimer& gt
 	for (auto b = Shadows->cbegin(); b != Shadows->cend(); b++)
 		(*b)->Render(CommandList, gt);
 
-	// ========================= 파티클 ======================================//
-	SetParticleShader(CommandList);
-	for (auto b = BbObject->cbegin(); b != BbObject->cend(); b++)
-	{
-		(*b)->Render(CommandList, gt);
-	}
-	
 
 	//플레이어의 추적오브젝트.
 	SetShader(CommandList, true);

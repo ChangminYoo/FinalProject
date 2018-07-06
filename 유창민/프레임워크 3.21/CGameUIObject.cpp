@@ -60,7 +60,7 @@ void AimObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer 
 {
 	//텍스처가 사이즈가 0 이상이면 연결
 	if (Textures.size()>0)
-		SetTexture(commandlist, SrvDescriptorHeap, Textures["AimTex"].get()->Resource.Get(), false);
+		SetTexture(commandlist, SrvDescriptorHeap, Textures["AimTex"].get()->Resource.Get());
 	//월드변환 업데이트 및 연결
 	UpdateConstBuffer(commandlist, false);
 
@@ -148,7 +148,7 @@ void CoolBarObject::SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* c
 void CoolBarObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer & gt)
 {
 	if (Textures.size()>0)
-		SetTexture(commandlist, SrvDescriptorHeap, Textures["CoolBarTex"].get()->Resource.Get(), false);
+		SetTexture(commandlist, SrvDescriptorHeap, Textures["CoolBarTex"].get()->Resource.Get());
 	UpdateConstBuffer(commandlist, false);
 
 
@@ -231,7 +231,7 @@ void SkillFrameUIObject::Render(ID3D12GraphicsCommandList * commandlist, const G
 {
 	//텍스처가 사이즈가 0 이상이면 연결
 	if (Textures.size()>0)
-		SetTexture(commandlist, SrvDescriptorHeap, Textures["SkillBG"].get()->Resource.Get(), false);
+		SetTexture(commandlist, SrvDescriptorHeap, Textures["SkillBG"].get()->Resource.Get());
 	//월드변환 업데이트 및 연결
 	UpdateConstBuffer(commandlist, false);
 
@@ -328,7 +328,7 @@ void SkillUIObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTi
 {
 	//텍스처가 사이즈가 0 이상이면 연결
 	if (Textures.size()>0)
-		SetTexture(commandlist, SrvDescriptorHeap, Textures[TextureName].get()->Resource.Get(), false, TexOff);
+		SetTexture(commandlist, SrvDescriptorHeap, Textures[TextureName].get()->Resource.Get(), 0, TexOff);
 	//월드변환 업데이트 및 연결
 	UpdateConstBuffer(commandlist, false);
 
@@ -414,7 +414,7 @@ void SelectBarObject::SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList*
 void SelectBarObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer & gt)
 {
 	if (Textures.size()>0)
-		SetTexture(commandlist, SrvDescriptorHeap, Textures["SelectTex"].get()->Resource.Get(), false);
+		SetTexture(commandlist, SrvDescriptorHeap, Textures["SelectTex"].get()->Resource.Get());
 	UpdateConstBuffer(commandlist, false);
 
 
@@ -502,7 +502,7 @@ void BackGroundObject::Render(ID3D12GraphicsCommandList * commandlist, const Gam
 {
 	//텍스처가 사이즈가 0 이상이면 연결
 	if (Textures.size()>0)
-		SetTexture(commandlist, SrvDescriptorHeap, Textures[TextureName].get()->Resource.Get(), false,TexOff);
+		SetTexture(commandlist, SrvDescriptorHeap, Textures[TextureName].get()->Resource.Get(), 0,TexOff);
 	//월드변환 업데이트 및 연결
 	UpdateConstBuffer(commandlist, false);
 

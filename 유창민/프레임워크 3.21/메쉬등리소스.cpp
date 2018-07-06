@@ -89,6 +89,12 @@ CMesh  GridObject::Mesh;//나중에 메쉬는 static으로 둬야함
 ComPtr<ID3D12DescriptorHeap> GridObject::SrvDescriptorHeap;//텍스처 용 힙
 CMaterial GridObject::Mat;
 //--------------------------------------------------------------------------------------
+bool Floor2Object::CreateMesh = false;
+unordered_map<string, unique_ptr<CTexture>> Floor2Object::Textures;//텍스처들을 저장함
+CMesh Floor2Object::Mesh;//나중에 메쉬는 static으로 둬야함
+ComPtr<ID3D12DescriptorHeap> Floor2Object::SrvDescriptorHeap;//텍스처 용 힙
+CMaterial Floor2Object::Mat;
+//--------------------------------------------------------------------------------------
 bool ParticleObject::CreateMesh = false;
 unordered_map<string, unique_ptr<CTexture>> ParticleObject::Textures;//텍스처들을 저장함
 CMesh  ParticleObject::Mesh;//나중에 메쉬는 static으로 둬야함

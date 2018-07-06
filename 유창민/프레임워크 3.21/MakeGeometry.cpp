@@ -105,10 +105,10 @@ void CreateCube(CMesh * Mesh, float sizex, float sizey, float sizez)
 
 }
 
-void CreatePentagon(CMesh* Mesh, float size, float sizey)
+void CreatePentagon(CMesh* Mesh, float size, float ypos)
 {
 	float half = 0.5 * size;
-	float y = -0.5f;
+	float y = ypos;
 
 	float s1 = half * sinf(0.4f * MMPE_PI);
 	float s2 = half * sinf(0.8f * MMPE_PI);
@@ -144,27 +144,27 @@ void CreatePentagon(CMesh* Mesh, float size, float sizey)
 	Mesh->SubResource[7].V = XMFLOAT3(0, y, 0);
 	Mesh->SubResource[8].V = XMFLOAT3(s1, y, c1);
 
-	Mesh->SubResource[6].Tex = XMFLOAT2(1, 0);
-	Mesh->SubResource[7].Tex = XMFLOAT2(0, 0);
-	Mesh->SubResource[8].Tex = XMFLOAT2(1, 1);
+	Mesh->SubResource[6].Tex = XMFLOAT2(0, 0);
+	Mesh->SubResource[7].Tex = XMFLOAT2(1, 1);
+	Mesh->SubResource[8].Tex = XMFLOAT2(1, 0);
 
 	//
 	Mesh->SubResource[9] = XMFLOAT3(-s2, y, -c2);
 	Mesh->SubResource[10] = XMFLOAT3(0, y, 0);
 	Mesh->SubResource[11] = XMFLOAT3(s2, y, -c2);
 
-	Mesh->SubResource[9].Tex = XMFLOAT2(0, 0);
+	Mesh->SubResource[9].Tex = XMFLOAT2(1, 0);
 	Mesh->SubResource[10].Tex = XMFLOAT2(1, 1);
-	Mesh->SubResource[11].Tex = XMFLOAT2(1, 0);
+	Mesh->SubResource[11].Tex = XMFLOAT2(0, 0);
 
 	//
 	Mesh->SubResource[12] = XMFLOAT3(-s1, y, c1);
 	Mesh->SubResource[13] = XMFLOAT3(0, y, 0);
 	Mesh->SubResource[14] = XMFLOAT3(-s2, y, -c2);
 
-	Mesh->SubResource[12].Tex = XMFLOAT2(0, 0);
+	Mesh->SubResource[12].Tex = XMFLOAT2(1, 0);
 	Mesh->SubResource[13].Tex = XMFLOAT2(1, 1);
-	Mesh->SubResource[14].Tex = XMFLOAT2(1, 0);
+	Mesh->SubResource[14].Tex = XMFLOAT2(0, 0);
 
 
 

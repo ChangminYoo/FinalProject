@@ -5,6 +5,9 @@ TextureCube gCubeMap : register(t0);
 
 Texture2D gDiffuseMap : register(t1);
 
+Texture2D gNormalMap : register(t2);
+
+
 // 샘플러
 SamplerState gsamPointWrap        : register(s0);
 SamplerState gsamPointClamp       : register(s1);
@@ -51,7 +54,12 @@ struct Light
 //------------------------------------
 // 상수버퍼
 //-------------------------------------
-cbuffer ObjectData : register(b0)
+cbuffer JointArr : register(b0)//조인트들의 배열. 현재는 65개가 최대 조인트
+{
+	Joint interpolatedSkeleton[MAXJOINT];
+
+};
+cbuffer ObjectData : register(b1)
 {
 	float4x4 gWorld;
 	float Scale;
@@ -62,12 +70,6 @@ cbuffer ObjectData : register(b0)
 	float PTime;
 	float3 Velocity;
 	float4 TexClamp;
-};
-
-cbuffer JointArr : register(b1)//조인트들의 배열. 현재는 65개가 최대 조인트
-{
-	Joint interpolatedSkeleton[MAXJOINT];
-
 };
 
 cbuffer CameraData :register(b2)
@@ -93,4 +95,7 @@ cbuffer MaterialData : register(b4)
 	float  gRoughness;//MaterialData(상수버퍼임)
 	float3 CustomMaterialData;//커스텀용데이터 무조건 상수버퍼는 16바이트여야함.
 	float4 Emissive;
+
 }
+
+
