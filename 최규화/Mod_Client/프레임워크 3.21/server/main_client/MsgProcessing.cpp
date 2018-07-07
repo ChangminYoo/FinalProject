@@ -96,6 +96,13 @@ switch (packet[1])
 	}
 	break;
 
+	case PACKET_PROTOCOL_TYPE::PLAYER_SKILL_SHIELD:
+	{
+		auto myskilldata = reinterpret_cast<STC_SKILL_SHIELD*>(packet);
+
+		scene.SET_PLAYER_SKILL(myskilldata->skill_data.master_id, myskilldata->skill_data);
+	}
+	break;
 
 	case PACKET_PROTOCOL_TYPE::PLAYER_ANIMATION:
 	{

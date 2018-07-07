@@ -17,6 +17,13 @@ enum PLAYER_STATE
 	DEAD,
 };
 
+struct SKILL_SHIELD_DATA
+{
+	bool   once_flag;
+	bool   on_using;
+	double op_time;
+};
+
 class CPlayerObject : public CMonoObject
 {
 private:
@@ -36,6 +43,7 @@ private:
 	//CBulletObject		*m_bullObj;
 	float				m_prevtime{ 0 };
 	float				m_elaspedtime{ 0 };
+	SKILL_SHIELD_DATA	m_skill_shield;
 
 public:
 	unsigned int		m_curr_packet_size{ 0 };
@@ -124,6 +132,14 @@ public:
 	void	SetPlayerAnimation(unsigned char ani) { m_ani = ani; }
 	unsigned char GetPlayerAnimation() const { return m_ani; }
 
+	bool	GetShieldState() const { return m_skill_shield.on_using; }
+	void	SetShieldState(bool flag) { m_skill_shield.on_using = flag; }
+
+	bool    GetShieldOnceFlag() const { return m_skill_shield.once_flag; }
+	void	SetShieldOnceFlag(bool flag) { m_skill_shield.once_flag = flag; }
+
+	double  GetShieldCurrTime() const { return m_skill_shield.op_time; }
+	void	SetShieldCurrTime(double time) { m_skill_shield.op_time = time; }
 	// ---------------------------------------------------------------------------------------
 	// [5]. 물리효과 함수
 

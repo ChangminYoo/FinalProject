@@ -13,6 +13,8 @@
 #define KEYINPUT_UP 0x0001
 #define KEYINPUT_DOWN 0x0010
 
+#define SKILL_SHIELD_OP_TIME 5.0
+
 #define RegularPacketExchangeTime  (1.0 / 20.0) // 1초에 20번 패킷을 교환(morpg 형식)
 
 //추가
@@ -39,10 +41,12 @@ enum PACKET_PROTOCOL_TYPE
 	STATIC_OBJECT,			//고정된 물체,
 	PLAYER_ANIMATION,
 	PLAYER_CURR_STATE,	//플레이어의 현재 상태(모든 정보 저장)
+	PLAYER_SKILL_SHIELD,
 	TEST					//테스트용 패킷
 };
 
 enum CHAR_MOVE { FRONT_MOVE = 1, BACK_MOVE, LEFT_MOVE, RIGHT_MOVE, JUMP };
+enum CHAR_SKILL { TETRIKE = 2, DICE_STRIKE, WAVE_SHOCK, SHIELD };
 
 enum Ani_State
 {
@@ -116,6 +120,7 @@ struct Position
 	float		z{ 50 };			           //4
 	float		w{ 0.0f };			           //4
 };
+
 //16
 
 
@@ -169,6 +174,14 @@ struct STC_BulletObject_Info
 	unsigned char				type;
 	char						alive;
 };
+
+struct STC_SkillData
+{
+	unsigned short master_id;   //스킬을 사용한 플레이어
+	char		   my_id;		//스킬 넘버
+	char		   alive;
+};
+
 
 #pragma pack (push, 1)
 
@@ -316,5 +329,13 @@ typedef struct Server_To_Client_Player_Test
 	Time time;
 
 }STC_Test;
+
+typedef struct Server_To_Client_Skill_Shield
+{
+	unsigned char packet_size = sizeof(STC_SkillData) + sizeof(unsigned char) + sizeof(unsigned char);
+	unsigned char packet_type = PACKET_PROTOCOL_TYPE::PLAYER_SKILL_SHIELD;
+	STC_SkillData skill_data;
+	
+}STC_SKILL_SHIELD;
 
 #pragma pack (pop)

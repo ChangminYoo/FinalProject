@@ -1,7 +1,6 @@
 #pragma once
 #include <map>
 #include <unordered_set>
-//#include "CMonoObject.h"
 
 struct BasicInfo
 {

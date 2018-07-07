@@ -93,7 +93,6 @@ void CAccpetPlayer::AcceptEvent()
 
 				if (m_start_timer)
 				{
-					g_timer_queue.SetRegularPrevTime();
 					g_timer_queue.AddEvent(0, 0, REGULAR_PACKET_EXCHANGE, true, 0);
 					m_start_timer = false;
 

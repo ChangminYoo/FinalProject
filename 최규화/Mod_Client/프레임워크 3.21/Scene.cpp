@@ -964,6 +964,44 @@ void Scene::SET_PLAYER_STATE_BY_SERVER_DATA(const Player_Data & playerdata)
 	}
 }
 
+void Scene::SET_PLAYER_SKILL(const unsigned int & id, const STC_SkillData & playerdata)
+{
+	for (auto GameObject : DynamicObject)
+	{
+		// 사용스킬에 대한 패킷을 보낸 ID == 현재 이 클라이언트의 아이디
+		if (id == GameObject->m_player_data.id)
+		{
+			switch (playerdata.my_id)
+			{
+			case CHAR_SKILL::SHIELD:
+			{
+				if (playerdata.alive)
+				{
+					NoCollObject.push_back(new ShieldArmor(device, commandlist, &BbObject, GameObject, GameObject->CenterPos));
+				}
+				else
+				{
+					for (auto object : NoCollObject)
+					{
+						if (id == object->m_player_data.id)
+						{
+							object->DelObj = true;
+							break;
+						}
+					}
+				}
+			}
+			break;
+
+			default:
+				break;
+			}
+			
+			// 실드를 따로 생성해서 Centerpos를 패킷으로 받은 아이디를 가진 플레이어값으로 지정한다 
+		}
+	}
+}
+
 
 
 array<const CD3DX12_STATIC_SAMPLER_DESC, 6> Scene::GetStaticSamplers()

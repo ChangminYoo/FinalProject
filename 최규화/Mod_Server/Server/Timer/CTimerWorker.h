@@ -7,15 +7,15 @@ enum TIMER_EVENT_TYPE
 	CHANGE_PLAYER_STATE,
 	LIGHT_BULLET,
 	HEAVY_BULLET,
-	REGULAR_PACKET_EXCHANGE
+	REGULAR_PACKET_EXCHANGE,
+	SKILL_SHIELD
 };
 
 using event_type = struct Event_Type
 {
-	unsigned short id;
-	unsigned short master_id;		//bullet의 경우에만
-	float wakeup_time;
-	float curr_time;
+	unsigned int id;
+	unsigned int master_id;		//bullet의 경우에만
+	double wakeup_time;
 	char type;
 	bool ai{ false };
 };
@@ -36,12 +36,6 @@ private:
 
 	high_resolution_clock::time_point m_currtime, m_prevtime;
 
-	__int64 mRegularPrevTime{ 0 };
-	__int64 mRegularCurrTime{ 0 };
-
-	__int64 countsPerSec;
-	double mSecondsPerCount;
-
 	double m_deltime;
 
 	int m_tcnt{ 0 };
@@ -56,9 +50,8 @@ public:
 	void TimerThread();
 
 	void ProcessPacket(event_type* et);
-	void AddEvent(const unsigned short& id, const float& sec, TIMER_EVENT_TYPE type, bool is_ai, const unsigned short& master_id);
-	void SetRegularCurrTime();
-	void SetRegularPrevTime();
+	void AddEvent(const unsigned int& id, const double& sec, TIMER_EVENT_TYPE type, bool is_ai, const unsigned int& master_id);
+
 	priority_queue<event_type*, vector<event_type*>, waketime_cmp> t_queue;
 
 	void CheckCurrTime() { m_currtime = high_resolution_clock::now(); }

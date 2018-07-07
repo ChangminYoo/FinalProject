@@ -3,8 +3,7 @@
 
 CTimerWorker::CTimerWorker()
 {
-	countsPerSec = 3515623;
-	mSecondsPerCount = 1.0 / (double)countsPerSec;
+	
 }
 
 void CTimerWorker::TimerThread()
@@ -39,7 +38,7 @@ void CTimerWorker::TimerThread()
 	}
 }
 
-void CTimerWorker::AddEvent(const unsigned short & id, const float & sec, TIMER_EVENT_TYPE type, bool is_ai, const unsigned short & master_id)
+void CTimerWorker::AddEvent(const unsigned int& id, const double& sec, TIMER_EVENT_TYPE type, bool is_ai, const unsigned int& master_id)
 {
 	event_type *event_ptr = new event_type;
 
@@ -47,7 +46,6 @@ void CTimerWorker::AddEvent(const unsigned short & id, const float & sec, TIMER_
 	event_ptr->ai = is_ai;
 	event_ptr->type = type;
 	event_ptr->wakeup_time = (sec * 1000) + GetTickCount();		//sec으로 받아온 시간 *1000 + 현재시간 //ms
-	event_ptr->curr_time = (sec * 1000);
 	event_ptr->master_id = master_id;
 
 	t_lock.lock();
@@ -55,20 +53,44 @@ void CTimerWorker::AddEvent(const unsigned short & id, const float & sec, TIMER_
 	t_lock.unlock();
 }
 
-void CTimerWorker::SetRegularCurrTime()
-{
-	QueryPerformanceCounter((LARGE_INTEGER*)&mRegularCurrTime);
-}
-
-void CTimerWorker::SetRegularPrevTime()
-{
-	QueryPerformanceCounter((LARGE_INTEGER*)&mRegularPrevTime);
-}
-
 void CTimerWorker::ProcessPacket(event_type * et)
 {
 	switch (et->type)
 	{
+		case SKILL_SHIELD:
+		{
+			if (!g_clients[et->master_id]->GetShieldState())
+				g_clients[et->master_id]->SetShieldState(true);
+			
+			if (g_clients[et->master_id]->GetShieldCurrTime() < SKILL_SHIELD_OP_TIME)
+			{
+				AddEvent(et->id, 5.0, SKILL_SHIELD, true, et->master_id);
+				g_clients[et->master_id]->SetShieldCurrTime(5.0);
+			}
+			else
+			{
+				g_clients[et->master_id]->SetShieldOnceFlag(true);
+				g_clients[et->master_id]->SetShieldState(false);
+				g_clients[et->master_id]->SetShieldCurrTime(0.0);
+
+
+				STC_SKILL_SHIELD stc_skill_shield;
+				stc_skill_shield.skill_data.alive = false;
+				stc_skill_shield.skill_data.master_id = et->master_id;
+				stc_skill_shield.skill_data.my_id = CHAR_SKILL::SHIELD;
+
+				for (auto client : g_clients)
+				{
+					if (client->GetIsAI() == true || client->GetConnectState() == false) continue;
+
+					client->SendPacket(reinterpret_cast<Packet*>(&stc_skill_shield));
+				}
+
+			}
+			
+		}
+		break;
+
 		case DEAD_TO_ALIVE:
 		{
 
@@ -172,13 +194,6 @@ void CTimerWorker::ProcessPacket(event_type * et)
 			m_deltime = (local_deltime / 1000000.0);
 			m_currtime = m_prevtime;
 
-			//cout << "시간: " << m_deltime << endl;
-			++m_tcnt;
-			if (m_deltime >= 1.0)
-			{
-				//cout << m_tcnt << endl;
-				//system("pause");
-			}
 			//1. 1초에 20번씩 서버에서 업데이트된 클라이언트의 모든정보를 보냄
 			STC_CharCurrState stc_char_state;
 			for(auto myclient : g_clients)
@@ -250,14 +265,7 @@ void CTimerWorker::ProcessPacket(event_type * et)
 
 			AddEvent(0, RegularPacketExchangeTime , REGULAR_PACKET_EXCHANGE, true, 0);
 
-			//cout << "실행\n" << endl;
-
-			//if (m_deltime >= 1.0f)
-			//{
-			//	cout << "루프\n" << endl;
-			//	m_deltime = 0.f;
-			//}
-	
+		
 
 			/*
 			if (g_clients.size() > 0)

@@ -103,6 +103,7 @@ public:
 	void SET_PLAYER_ANIMATION_BY_SERVER_DATA(const unsigned short& id, const unsigned char& ani);
 	void Set_RemovePlayerData(const unsigned int& id, Player_Data& playerdata);
 	void SET_PLAYER_STATE_BY_SERVER_DATA(const Player_Data& playerdata);
+	void SET_PLAYER_SKILL(const unsigned int& id, const STC_SkillData& playerdata);
 
 	//서버에서 받은 PlayerData를 이용하면 이 함수는 없어도됨
 	//PlayerData를 기반으로 Player의 값이 달라질것이므로

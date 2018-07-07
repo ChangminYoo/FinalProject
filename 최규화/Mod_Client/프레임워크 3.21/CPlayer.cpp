@@ -609,11 +609,19 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 			}
 			else if (skilldata.Skills[skilldata.SellectBulletIndex] == 5 && skilldata.isSkillOn[skilldata.SellectBulletIndex])//실드
 			{
+				STC_SKILL_SHIELD cts_skill_shield;
+				cts_skill_shield.skill_data.master_id = PlayerObject->m_player_data.id;
+				cts_skill_shield.skill_data.my_id = skilldata.Skills[skilldata.SellectBulletIndex];
+				cts_skill_shield.skill_data.alive = true;
+			
 				//실드 생성
 				scene->NoCollObject.push_back(new ShieldArmor(scene->device, scene->commandlist, &scene->BbObject, PlayerObject, PlayerObject->CenterPos));
 				skilldata.SkillsCoolTime[skilldata.SellectBulletIndex] = skilldata.SkillsMaxCoolTime[skilldata.Skills[skilldata.SellectBulletIndex]];
 				skilldata.isSkillOn[skilldata.SellectBulletIndex] = false;
 				skilldata.SellectBulletIndex = 0;
+				
+
+				scene->Player->m_async_client->SendPacket(reinterpret_cast<Packet*>(&cts_skill_shield));
 			}
 
 

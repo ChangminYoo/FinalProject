@@ -145,6 +145,7 @@
     <ClCompile Include="CScene.cpp" />
     <ClCompile Include="GameObject\CBulletObject.cpp" />
     <ClCompile Include="GameObject\CMonoObject.cpp" />
+    <ClCompile Include="GameObject\CSkillObject.cpp" />
     <ClCompile Include="GameObject\CStaticObject.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="PhysicsEngine\MyMiniPysicsEngine.cpp" />
@@ -158,6 +159,7 @@
     <ClInclude Include="CScene.h" />
     <ClInclude Include="GameObject\CBulletObject.h" />
     <ClInclude Include="GameObject\CMonoObject.h" />
+    <ClInclude Include="GameObject\CSkillObject.h" />
     <ClInclude Include="GameObject\CStaticObject.h" />
     <ClInclude Include="PhysicsEngine\MyMiniPysicsEngine.h" />
     <ClInclude Include="PhysicsEngine\PhysicalEffect.h" />

@@ -35,9 +35,7 @@ using namespace chrono;
 #include "Timer\CTimerWorker.h"
 #include "CAccpetPlayer.h"
 #include "CPhysicEngineWorker.h"
-
-#define RegularPhysicsTime (1.f / 120.f)
-
+#include "GameObject/CSkillObject.h"
 
 extern CTimerWorker g_timer_queue;
 extern CPhysicEngineWorker g_physics_worker;

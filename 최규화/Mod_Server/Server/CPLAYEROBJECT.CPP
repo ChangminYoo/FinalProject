@@ -68,6 +68,9 @@ void CPlayerObject::Init_PlayerInfo()
 	m_ability.level = 1;
 	m_ability.speed = 100;
 
+	m_skill_shield.once_flag = true;
+	m_skill_shield.on_using = false;
+
 	if (m_id == 0)
 		m_pos4f = { -100.f, -1000.f, 0.f, 0.f };
 	else if (m_id == 1)
@@ -545,6 +548,35 @@ void CPlayerObject::ProcessPacket(Packet * packet)
 	}
 	break;
 
+	case PACKET_PROTOCOL_TYPE::PLAYER_SKILL_SHIELD:
+	{
+		if (m_state == DEAD)
+			break;
+
+		auto data = reinterpret_cast<STC_SKILL_SHIELD*>(packet);
+
+		STC_SKILL_SHIELD stc_skill_shield;
+		stc_skill_shield.skill_data.alive = true;
+		stc_skill_shield.skill_data.master_id = data->skill_data.master_id;
+		stc_skill_shield.skill_data.my_id = data->skill_data.my_id;
+
+		if (m_skill_shield.once_flag)
+		{
+			m_skill_shield.once_flag = false;
+			m_skill_shield.op_time = 0.0;
+			g_timer_queue.AddEvent(0, 0.0, SKILL_SHIELD, true, data->skill_data.master_id);
+
+			for (auto client : g_clients)
+			{
+				if (client->m_id == data->skill_data.master_id) continue;
+				if (client->GetIsAI() == true || client->GetConnectState() == false) continue;
+
+				client->SendPacket(reinterpret_cast<Packet*>(&stc_skill_shield));
+			}
+		}
+	}
+	break;
+
 	}
 }
 
@@ -683,7 +715,14 @@ void CPlayerObject::Collision(unordered_set<CStaticObject*>* sobjs, double delti
 
 void CPlayerObject::GetDamaged(int damage)
 {
-	if (m_godmode == false && m_ability.curHP > 0)
+	if (m_godmode) return;
+
+	if (m_skill_shield.on_using)			//실드 스킬 사용 중일 시 데미지 1씩 뜸
+	{
+		m_ability.curHP -= 1;
+	}
+		
+	if (m_ability.curHP > 0 && m_skill_shield.on_using == false)
 	{
 		//캐릭터 hp를 감소
 		m_ability.curHP -= damage;

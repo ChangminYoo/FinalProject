@@ -60,6 +60,9 @@
     <ClCompile Include="CPhysicEngineWorker.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="GameObject\CSkillObject.cpp">
+      <Filter>소스 파일\GameObject</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Timer\CTimerWorker.h">
@@ -100,6 +103,9 @@
     </ClInclude>
     <ClInclude Include="CPhysicEngineWorker.h">
       <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="GameObject\CSkillObject.h">
+      <Filter>소스 파일\GameObject</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

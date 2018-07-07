@@ -3914,6 +3914,8 @@ void ParticleObject2::Render(ID3D12GraphicsCommandList * commandlist, const Game
 
 ShieldArmor::ShieldArmor(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, CGameObject * master, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
 {
+	if (CreateMesh)
+		m_player_data.id = master->m_player_data.id;
 
 	if (CreateMesh == false)
 	{
@@ -3975,12 +3977,12 @@ void ShieldArmor::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * c
 
 void ShieldArmor::Tick(const GameTimer & gt)
 {
-	LifeTime -= gt.DeltaTime();
-	if (LifeTime <= 0)
-	{
-		Master->isShieldOn = false;
-		DelObj = true;
-	}
+	//LifeTime -= gt.DeltaTime();
+	//if (LifeTime <= 0)
+	//{
+	//	Master->isShieldOn = false;
+	//	DelObj = true;
+	//}
 
 	Orient = QuaternionMultiply(Orient, QuaternionRotation(XMFLOAT3(0,1,0), MMPE_PI * gt.DeltaTime()));
 	CenterPos = Master->CenterPos;
