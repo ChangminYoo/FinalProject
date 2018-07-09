@@ -12,6 +12,7 @@ struct VertexIn
 	float4 WeightPos2 : WEIGHTPOS1;
 	float4 WeightPos3 : WEIGHTPOS2;
 	float4 WeightPos4 : WEIGHTPOS3;
+	float3 Tangent : TANGENT;//탄젠트
 
 
 };
@@ -23,7 +24,8 @@ struct VertexOut
 	float3 Normal : NORMAL;
 	float dummy : DUMMY;
 	float2 Tex : TEXTURE;
-	
+	float2 dummy2 : Dummy2;//대소문자 관계없으므로 Dummy하면 에러난다
+	float3 Tangent : TANGENT;
 };
 
 
@@ -87,7 +89,8 @@ VertexOut VS(VertexIn vin)
 	vout.PosW = vout.PosH;
 	vout.Normal = mul(vin.Normal, gWorld);
 	vout.Normal = normalize(vout.Normal);
-
+	vout.Tangent = mul(vin.Tangent, gWorld);
+	vout.Tangent = normalize(vout.Tangent);
 	vout.PosH = mul(vout.PosH, gViewProj);
 
 	vout.Tex = vin.Tex;
@@ -99,90 +102,115 @@ VertexOut VS(VertexIn vin)
 float4 PS(VertexOut pin) : SV_Target
 {
 	float4 textureColor; //텍스쳐 색상
-	float3 lightDir;     //빛벡터
-	float lightIntensity; 
-	float3 reflection;   //반사광
-	float4 specular=float4(0,0,0,1);
-	float4 litColor=float4(1,1,1,1);
-	float3 viewDirection;
+float3 lightDir;     //빛벡터
+float lightIntensity;
+float3 reflection;   //반사광
+float4 specular = float4(0,0,0,1);
+float4 litColor = float4(1,1,1,1);
+float3 viewDirection;
 
 
-	//텍스쳐의 기본 색상 - 샘플러를 사용하여 값 추출
-	textureColor = gDiffuseMap.Sample(gsamAnisotropicWrap, pin.Tex);
-	
-	//알파 테스트
-	//clip(textureColor.a - 0.1f);
-	//
+//텍스쳐의 기본 색상 - 샘플러를 사용하여 값 추출
+textureColor = gDiffuseMap.Sample(gsamAnisotropicWrap, pin.Tex) * gDiffuse;
 
-	if (SpecularParamater >= 0)
+//알파 테스트
+//clip(textureColor.a - 0.1f);
+//
+
+//CustomData1의 w가 1234 이면 노멀매핑을 쓰는것.
+if (CustomData1.w == 1234)
+{
+	//노멀매핑할때 텍스처를 절반으로 나눠야함. 0~0.5까지는 일반텍스처고 0.5~1.0 까진 노멀맵
+	float2 ptex = pin.Tex;
+	ptex.x /= 2;
+	float2 ntex = ptex;
+	ntex.x += 0.5;
+	float3 binormal = cross(pin.Normal, pin.Tangent);
+	binormal = normalize(binormal);
+	float3x3 tbn = float3x3(pin.Tangent, binormal, pin.Normal);
+	textureColor = gDiffuseMap.Sample(gsamAnisotropicWrap, ptex);
+
+	float3 newNormal = gDiffuseMap.Sample(gsamAnisotropicWrap, ntex);
+
+	newNormal = (newNormal * 2) - 1;//노멀은 -1~1범위를 가져야 하니까 이런처리를 한다.
+
+	pin.Normal = mul(newNormal, tbn);
+
+
+}
+
+float3 NormalVector = pin.Normal;
+
+
+if (SpecularParamater >= 0)
+{
+	for (int i = 0; i < nLights; ++i)
 	{
-		for (int i = 0; i < nLights; ++i)
+
+		viewDirection = gEyePos - pin.PosW.xyz;
+		viewDirection = normalize(viewDirection);
+
+		lightDir = -(gLights[i].Direction);
+		lightDir = normalize(lightDir);
+		litColor = gAmbientLight;
+
+		specular = float4(0.0f, 0.0f, 0.0f, 0.0f);
+
+		//픽셀당 비치는 빛의양 (0 ~ 1)
+		lightIntensity = saturate(dot(NormalVector, lightDir));   //-> 람베르트 코사인 법칙 
+
+																//lightIntensity = round(lightIntensity * 4) / 3;
+
+																// 0보다 크면 (빛을 받는 부분이면)
+		if (lightIntensity > 0.0f)
 		{
 
-			viewDirection = gEyePos - pin.PosW.xyz;
-			viewDirection = normalize(viewDirection);
+			litColor += (float4(gLights[i].DiffuseColor) * float4(0.37, 0.37, 0.37, 1));
 
-			lightDir = -(gLights[i].Direction);
-			lightDir = normalize(lightDir);
-			litColor = gAmbientLight;
 
-			specular = float4(0.0f, 0.0f, 0.0f, 0.0f);
 
-			//픽셀당 비치는 빛의양 (0 ~ 1)
-			lightIntensity = saturate(dot(pin.Normal, lightDir));   //-> 람베르트 코사인 법칙 
 
-			//lightIntensity = round(lightIntensity * 4) / 3;
+			litColor += (float4(gLights[i].DiffuseColor) * lightIntensity);
 
-			// 0보다 크면 (빛을 받는 부분이면)
-			if (lightIntensity > 0.0f)
-			{
-				if (lightIntensity > 0.85)
-					litColor += (float4(gLights[i].DiffuseColor) * float4(1, 1, 1, 1));
+			litColor = saturate(litColor);
 
-				else if (lightIntensity > 0.45)
-					litColor += (float4(gLights[i].DiffuseColor) * float4(0.7, 0.7, 0.7, 1));
-				else if (lightIntensity > 0.1)
-					litColor += (float4(gLights[i].DiffuseColor) * float4(0.3, 0.3, 0.3, 1));
+			reflection = normalize(2 * lightIntensity * NormalVector - lightDir);
 
-				
-				litColor += (float4(gLights[i].DiffuseColor) * lightIntensity);
+			//원래는 6.0 대신 32였음.
+			specular = pow(saturate(dot(reflection, viewDirection)), 6.0f)*SpecularParamater;
+		}
 
-				litColor = saturate(litColor);
+		// 0이면 (빛을 안 받는 부분이면)
+		else if (lightIntensity <= 0.0f)
+		{
 
-				reflection = normalize(2 * lightIntensity * pin.Normal - lightDir);
+			litColor += (float4(gLights[i].DiffuseColor) * float4(0.472f, 0.472f, 0.472f, 1.0f)); //여기 부분을 조정하면 빛을 안받는 부분의 음영을 조정할 수 있습니다.
 
-				//원래는 6.0 대신 32였음.
-				specular = pow(saturate(dot(reflection, viewDirection)), 6.0f)*SpecularParamater;
-			}
+			litColor = saturate(litColor);
 
-			// 0이면 (빛을 안 받는 부분이면)
-			else if (lightIntensity <= 0.0f)
-			{
+			reflection = normalize(2 * lightIntensity * pin.Normal - lightDir);
 
-				litColor += (float4(gLights[i].DiffuseColor) * float4(0.35f, 0.35f, 0.35f, 1.0f)); //여기 부분을 조정하면 빛을 안받는 부분의 음영을 조정할 수 있습니다.
-
-				litColor = saturate(litColor);
-
-				reflection = normalize(2 * lightIntensity * pin.Normal - lightDir);
-
-				specular = pow(saturate(dot(reflection, viewDirection)), 32.0f)*SpecularParamater;
-			}
-
+			specular = pow(saturate(dot(reflection, viewDirection)), 32.0f)*SpecularParamater;
 		}
 
 	}
-		
-		litColor = litColor * textureColor;  //엠비언트 * 텍스쳐 컬러
 
-		litColor = saturate(litColor + specular); //마지막으로 스패큘러 더한다.
-		litColor.w = BlendValue;
-		
-		//litColor.a = textureColor.a;
+}
 
-		if (nLights > 0)
-			return litColor;
-		else
-			return float4(0, 0, 0, 1);
+litColor = litColor * textureColor;  //엠비언트 * 텍스쳐 컬러
+
+litColor = saturate(litColor + specular); //마지막으로 스패큘러 더한다.
+litColor.w = BlendValue;
+
+//litColor = textureColor;
+//litColor.a = textureColor.a;
+
+//노멀매핑이 되었는지 확인. 줄무늬가 있으면 노멀매핑때문에 그 줄무늬쪽이 노멀이 0 이되므로 적용된것!
+//litColor = float4(pin.Normal,1);
+if (nLights > 0)
+return litColor;
+else
+return float4(0, 0, 0, 1);
 
 }
 
@@ -256,3 +284,20 @@ float4 PS2(VertexOut pin) : SV_Target
 	
 	
 }
+
+//VertexOut ShadowVS(VertexIn vin)
+//{
+//	vin.PosL = vin.PosL * Scale;
+//	vout.PosH = mul(float4(vin.PosL, 1), gWorld);
+//	vout.PosW = vout.PosH;
+//	vout.PosH = mul(vout.PosH, gViewProj);
+//	vout.Tex = vin.Tex;
+//	
+//	return vout;
+//}
+//
+//void ShadowPS(VertexOut pin)
+//{
+//	flaot4 diffuseColor = gDiffuseMap.Sample(gsamAnisotropicWrap, pin.Tex);
+//
+//}

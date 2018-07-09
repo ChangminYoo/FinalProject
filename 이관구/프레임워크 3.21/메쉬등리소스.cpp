@@ -24,6 +24,13 @@ CMesh  HeavyBulletCube::Mesh;//나중에 메쉬는 static으로 둬야함
 ComPtr<ID3D12DescriptorHeap> HeavyBulletCube::SrvDescriptorHeap;//텍스처 용 힙
 CMaterial HeavyBulletCube::Mat;
 //--------------------------------------------------------------------------------------
+bool StoneBullet::CreateMesh = false;
+unordered_map<string, unique_ptr<CTexture>> StoneBullet::Textures;//텍스처들을 저장함
+CMesh  StoneBullet::Mesh;//나중에 메쉬는 static으로 둬야함
+ComPtr<ID3D12DescriptorHeap> StoneBullet::SrvDescriptorHeap;//텍스처 용 힙
+CMaterial StoneBullet::Mat;
+
+//--------------------------------------------------------------------------------------
 bool Tetris1::CreateMesh = false;
 unordered_map<string, unique_ptr<CTexture>> Tetris1::Textures;//텍스처들을 저장함
 CMesh  Tetris1::Mesh;//나중에 메쉬는 static으로 둬야함
@@ -89,6 +96,12 @@ CMesh  GridObject::Mesh;//나중에 메쉬는 static으로 둬야함
 ComPtr<ID3D12DescriptorHeap> GridObject::SrvDescriptorHeap;//텍스처 용 힙
 CMaterial GridObject::Mat;
 //--------------------------------------------------------------------------------------
+bool Floor2Object::CreateMesh = false;
+unordered_map<string, unique_ptr<CTexture>> Floor2Object::Textures;//텍스처들을 저장함
+CMesh Floor2Object::Mesh;//나중에 메쉬는 static으로 둬야함
+ComPtr<ID3D12DescriptorHeap> Floor2Object::SrvDescriptorHeap;//텍스처 용 힙
+CMaterial Floor2Object::Mat;
+//--------------------------------------------------------------------------------------
 bool ParticleObject::CreateMesh = false;
 unordered_map<string, unique_ptr<CTexture>> ParticleObject::Textures;//텍스처들을 저장함
 CMesh  ParticleObject::Mesh;//나중에 메쉬는 static으로 둬야함
@@ -99,6 +112,11 @@ unordered_map<string, unique_ptr<CTexture>> ParticleObject2::Textures;//텍스처들
 CMesh  ParticleObject2::Mesh;//나중에 메쉬는 static으로 둬야함
 ComPtr<ID3D12DescriptorHeap> ParticleObject2::SrvDescriptorHeap;//텍스처 용 힙
 //--------------------------------------------------------------------------------------
+bool ParticleObject3::CreateMesh = false;
+unordered_map<string, unique_ptr<CTexture>> ParticleObject3::Textures;//텍스처들을 저장함
+CMesh  ParticleObject3::Mesh;//나중에 메쉬는 static으로 둬야함
+ComPtr<ID3D12DescriptorHeap> ParticleObject3::SrvDescriptorHeap;//텍스처 용 힙
+ //--------------------------------------------------------------------------------------
 bool DamageObject::CreateMesh = false;
 unordered_map<string, unique_ptr<CTexture>> DamageObject::Textures;//텍스처들을 저장함
 CMesh  DamageObject::Mesh;//나중에 메쉬는 static으로 둬야함
@@ -183,13 +201,6 @@ CMesh BuildingObject::Mesh;//오로지 한번만 만들어짐
 ComPtr<ID3D12DescriptorHeap> BuildingObject::SrvDescriptorHeap;//텍스처 용 힙
 // --------------------------------------------------------------------------------------
 
-CMaterial BreakCartObject::Mat;
-bool BreakCartObject::CreateMesh;//최초로 false며 메쉬를 만든후 true가된다.
-unordered_map<string, unique_ptr<CTexture>> BreakCartObject::Textures;//텍스처들을 저장함
-CMesh BreakCartObject::Mesh;//오로지 한번만 만들어짐
-ComPtr<ID3D12DescriptorHeap> BreakCartObject::SrvDescriptorHeap;//텍스처 용 힙
- // --------------------------------------------------------------------------------------
-
 CMaterial RingObject::Mat;
 bool RingObject::CreateMesh;//최초로 false며 메쉬를 만든후 true가된다.
 unordered_map<string, unique_ptr<CTexture>> RingObject::Textures;//텍스처들을 저장함
@@ -227,3 +238,17 @@ CMesh  ImpObject::Mesh;//나중에 메쉬는 static으로 둬야함
 std::vector<ModelAnimation> ImpObject::animations;//애니메이션 데이터 저장. 메쉬와 이거,텍스처는 한번만생성해서 공유하도록해야됨
 ComPtr<ID3D12DescriptorHeap> ImpObject::SrvDescriptorHeap;//텍스처 용 힙
 CMaterial ImpObject::Mat;
+// --------------------------------------------------------------------------------------
+
+CMaterial TowerObject::Mat;
+bool TowerObject::CreateMesh;//최초로 false며 메쉬를 만든후 true가된다.
+unordered_map<string, unique_ptr<CTexture>> TowerObject::Textures;//텍스처들을 저장함
+CMesh TowerObject::Mesh;//오로지 한번만 만들어짐
+ComPtr<ID3D12DescriptorHeap> TowerObject::SrvDescriptorHeap;//텍스처 용 힙
+// --------------------------------------------------------------------------------------
+
+CMaterial BreakCartObject::Mat;
+bool BreakCartObject::CreateMesh;//최초로 false며 메쉬를 만든후 true가된다.
+unordered_map<string, unique_ptr<CTexture>> BreakCartObject::Textures;//텍스처들을 저장함
+CMesh BreakCartObject::Mesh;//오로지 한번만 만들어짐
+ComPtr<ID3D12DescriptorHeap> BreakCartObject::SrvDescriptorHeap;//텍스처 용 힙

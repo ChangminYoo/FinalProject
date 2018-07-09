@@ -72,7 +72,7 @@ void CCamera::UpdateConstantBuffer(ID3D12GraphicsCommandList* commandlist)
 
 	ConstBuffer->CopyData(0, tempCamData);
 
-	commandlist->SetGraphicsRootConstantBufferView(4, ConstBuffer->Resource()->GetGPUVirtualAddress());//월드행렬연결
+	commandlist->SetGraphicsRootConstantBufferView(2, ConstBuffer->Resource()->GetGPUVirtualAddress());//월드행렬연결
 
 }
 
@@ -110,7 +110,7 @@ void CCamera::UpdateConstantBufferOrtho(ID3D12GraphicsCommandList * commandlist)
 
 	ConstBufferOrtho->CopyData(0, tempCamData);
 
-	commandlist->SetGraphicsRootConstantBufferView(4, ConstBufferOrtho->Resource()->GetGPUVirtualAddress());//카메라 행렬들 연결
+	commandlist->SetGraphicsRootConstantBufferView(2, ConstBufferOrtho->Resource()->GetGPUVirtualAddress());//카메라 행렬들 연결
 
 }
 

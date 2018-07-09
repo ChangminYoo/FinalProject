@@ -193,13 +193,16 @@ void CGameObject::UpdateConstBuffer(ID3D12GraphicsCommandList * commandlist, boo
 	//상수버퍼 업데이트
 	ConstBuffer->CopyData(0, ObjData);
 
-	commandlist->SetGraphicsRootConstantBufferView(2, ConstBuffer->Resource()->GetGPUVirtualAddress());//월드행렬연결
+	commandlist->SetGraphicsRootConstantBufferView(1, ConstBuffer->Resource()->GetGPUVirtualAddress());//월드행렬연결
 }
 
 
 //========================================= 텍스쳐 세팅 =========================================================================
 
-void SetTexture(ID3D12GraphicsCommandList * commandlist, ComPtr<ID3D12DescriptorHeap>& SrvDescriptorHeap, ID3D12Resource* texture, bool isCubeMap, int Offset)
+//texMap == 0 DiffuseMap
+//texMap == 1 CubeMap
+//texMap == 2 NormalMap
+void SetTexture(ID3D12GraphicsCommandList * commandlist, ComPtr<ID3D12DescriptorHeap>& SrvDescriptorHeap, ID3D12Resource* texture, int texMap, int Offset)
 {
 
 	commandlist->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(texture,
@@ -211,15 +214,20 @@ void SetTexture(ID3D12GraphicsCommandList * commandlist, ComPtr<ID3D12Descriptor
 	commandlist->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
 
 	CD3DX12_GPU_DESCRIPTOR_HANDLE tex(SrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
-	if (isCubeMap)
+	if (texMap == 1)
 	{
 		tex.Offset(0, CbvSrvDescriptorSize);
-		commandlist->SetGraphicsRootDescriptorTable(0, tex);
+		commandlist->SetGraphicsRootDescriptorTable(5, tex);
+	}
+	else if (texMap == 2)
+	{
+		tex.Offset(0, CbvSrvDescriptorSize);
+		commandlist->SetGraphicsRootDescriptorTable(7, tex);
 	}
 	else
 	{
 		tex.Offset(Offset, CbvSrvDescriptorSize);
-		commandlist->SetGraphicsRootDescriptorTable(1, tex);
+		commandlist->SetGraphicsRootDescriptorTable(6, tex);
 	}
 	commandlist->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(texture,
 		D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE));
@@ -460,7 +468,7 @@ void CCubeManObject::Render(ID3D12GraphicsCommandList * commandlist, const GameT
 
 
 	if (Textures.size()>0)
-		SetTexture(commandlist, SrvDescriptorHeap, Textures[TextureName].get()->Resource.Get(), false, TexOff);
+		SetTexture(commandlist, SrvDescriptorHeap, Textures[TextureName].get()->Resource.Get(), 0, TexOff);
 
 
 
@@ -470,7 +478,7 @@ void CCubeManObject::Render(ID3D12GraphicsCommandList * commandlist, const GameT
 
 	//틱함수에서 업데이트한 애니메이션된 조인트를 연결함.
 
-	commandlist->SetGraphicsRootConstantBufferView(3, jarr->Resource()->GetGPUVirtualAddress());
+	commandlist->SetGraphicsRootConstantBufferView(0, jarr->Resource()->GetGPUVirtualAddress());
 	//이후 그린다.
 
 	Mesh.Render(commandlist);
@@ -668,7 +676,7 @@ void BulletCube::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer
 	//텍스처를 연결하고, 월드행렬을 연결한다.
 
 	if (Textures.size()>0)
-		SetTexture(commandlist, SrvDescriptorHeap, Textures["BulletTex"].get()->Resource.Get(), false);
+		SetTexture(commandlist, SrvDescriptorHeap, Textures["BulletTex"].get()->Resource.Get());
 	UpdateConstBuffer(commandlist, false);
 
 	Mat.UpdateConstantBuffer(commandlist);
@@ -863,7 +871,7 @@ void HeavyBulletCube::Render(ID3D12GraphicsCommandList * commandlist, const Game
 	//텍스처를 연결하고, 월드행렬을 연결한다.
 
 	if (Textures.size()>0)
-		SetTexture(commandlist, SrvDescriptorHeap, Textures["BulletTex"].get()->Resource.Get(), false);
+		SetTexture(commandlist, SrvDescriptorHeap, Textures["BulletTex"].get()->Resource.Get());
 	UpdateConstBuffer(commandlist, false);
 
 	Mat.UpdateConstantBuffer(commandlist);
@@ -1047,7 +1055,7 @@ void Tetris1::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer& g
 	//텍스처를 연결하고, 월드행렬을 연결한다.
 
 	if (Textures.size()>0)
-		SetTexture(commandlist, SrvDescriptorHeap, Textures["Tetris1Tex"].get()->Resource.Get(), false);
+		SetTexture(commandlist, SrvDescriptorHeap, Textures["Tetris1Tex"].get()->Resource.Get());
 	UpdateConstBuffer(commandlist, false);
 
 	Mat.UpdateConstantBuffer(commandlist);
@@ -1225,7 +1233,7 @@ void Tetris2::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer& g
 	//텍스처를 연결하고, 월드행렬을 연결한다.
 
 	if (Textures.size()>0)
-		SetTexture(commandlist, SrvDescriptorHeap, Textures["Tetris2Tex"].get()->Resource.Get(), false);
+		SetTexture(commandlist, SrvDescriptorHeap, Textures["Tetris2Tex"].get()->Resource.Get());
 	UpdateConstBuffer(commandlist, false);
 
 	Mat.UpdateConstantBuffer(commandlist);
@@ -1403,7 +1411,7 @@ void Tetris3::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer& g
 	//텍스처를 연결하고, 월드행렬을 연결한다.
 
 	if (Textures.size()>0)
-		SetTexture(commandlist, SrvDescriptorHeap, Textures["Tetris3Tex"].get()->Resource.Get(), false);
+		SetTexture(commandlist, SrvDescriptorHeap, Textures["Tetris3Tex"].get()->Resource.Get());
 	UpdateConstBuffer(commandlist, false);
 
 	Mat.UpdateConstantBuffer(commandlist);
@@ -1579,7 +1587,7 @@ void Tetris4::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer& g
 	//텍스처를 연결하고, 월드행렬을 연결한다.
 
 	if (Textures.size()>0)
-		SetTexture(commandlist, SrvDescriptorHeap, Textures["Tetris4Tex"].get()->Resource.Get(), false);
+		SetTexture(commandlist, SrvDescriptorHeap, Textures["Tetris4Tex"].get()->Resource.Get());
 	UpdateConstBuffer(commandlist, false);
 
 	Mat.UpdateConstantBuffer(commandlist);
@@ -1808,7 +1816,7 @@ void Tetrike::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer& g
 	//텍스처를 연결하고, 월드행렬을 연결한다.
 
 	if (Textures.size()>0)
-		SetTexture(commandlist, SrvDescriptorHeap, Textures["Tetrike"].get()->Resource.Get(), false);
+		SetTexture(commandlist, SrvDescriptorHeap, Textures["Tetrike"].get()->Resource.Get());
 	UpdateConstBuffer(commandlist, false);
 
 	Mat.UpdateConstantBuffer(commandlist);
@@ -1937,7 +1945,7 @@ void DiceStrike::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer
 	//텍스처를 연결하고, 월드행렬을 연결한다.
 
 	if (Textures.size()>0)
-		SetTexture(commandlist, SrvDescriptorHeap, Textures["DiceStrike"].get()->Resource.Get(), false);
+		SetTexture(commandlist, SrvDescriptorHeap, Textures["DiceStrike"].get()->Resource.Get());
 	UpdateConstBuffer(commandlist, false);
 
 	Mat.UpdateConstantBuffer(commandlist);
@@ -2063,7 +2071,7 @@ void SphereObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTim
 	//텍스처를 연결하고, 월드행렬을 연결한다.
 
 	if (Textures.size()>0)
-		SetTexture(commandlist, SrvDescriptorHeap, Textures["MapTex"].get()->Resource.Get(), true);
+		SetTexture(commandlist, SrvDescriptorHeap, Textures["MapTex"].get()->Resource.Get(), 1);
 	UpdateConstBuffer(commandlist, false);
 
 	//이후 그린다.
@@ -2083,14 +2091,17 @@ CubeObject::CubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 
 		Mesh.Index = NULL;
 		Mesh.SubResource = NULL;
+	   
+		//LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "redTex", L"textures/object/Red.dds", false, 7, 0);
+		//LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "orangeTex", L"textures/object/orange.dds", false, 7, 1);
+		//LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "yellowTex", L"textures/object/yellow.dds", false, 7, 2);
+		//LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "pinkTex", L"textures/object/pink.dds", false, 7, 3);
+		//LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "whiteTex", L"textures/object/white.dds", false, 7, 4);
+		//LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "blueTex", L"textures/object/blue.dds", false, 7, 5);
+		//LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "greenTex", L"textures/object/green.dds", false, 7, 6);
 
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "redTex", L"textures/object/Red.dds", false, 7, 0);
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "orangeTex", L"textures/object/orange.dds", false, 7, 1);
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "yellowTex", L"textures/object/yellow.dds", false, 7, 2);
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "pinkTex", L"textures/object/pink.dds", false, 7, 3);
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "whiteTex", L"textures/object/white.dds", false, 7, 4);
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "blueTex", L"textures/object/blue.dds", false, 7, 5);
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "greenTex", L"textures/object/green.dds", false, 7, 6);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Tex", L"textures/object/bricks2.dds", false,2, 0);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "NormalTex", L"textures/object/bricks2_nmap.dds", false, 2, 1);
 
 		SetMesh(m_Device, commandlist);
 		SetMaterial(m_Device, commandlist);
@@ -2098,23 +2109,23 @@ CubeObject::CubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 		CreateMesh = true;
 
 	}
-	selectColor = rand() % 7 + 0;
-	if (selectColor == 0)
-		TextureName = "redTex";
-	else if (selectColor == 1)
-		TextureName = "orangeTex";
-	else if (selectColor == 2)
-		TextureName = "yellowTex";
-	else if (selectColor == 3)
-		TextureName = "pinkTex"; 
-	else if (selectColor == 4)
-		TextureName = "whiteTex";
-	else if (selectColor == 5)
-		TextureName = "blueTex"; 
-	else if (selectColor == 6)
-		TextureName = "greenTex";
-
-	TexOff = selectColor;
+	//selectColor = rand() % 7 + 0;
+	//if (selectColor == 0)
+	//	TextureName = "redTex";
+	//else if (selectColor == 1)
+	//	TextureName = "orangeTex";
+	//else if (selectColor == 2)
+	//	TextureName = "yellowTex";
+	//else if (selectColor == 3)
+	//	TextureName = "pinkTex"; 
+	//else if (selectColor == 4)
+	//	TextureName = "whiteTex";
+	//else if (selectColor == 5)
+	//	TextureName = "blueTex"; 
+	//else if (selectColor == 6)
+	//	TextureName = "greenTex";
+	//
+	//TexOff = selectColor;
 
 	//게임오브젝트마다 룩벡터와 라이트벡터가 다르므로 초기 오프셋 설정을 해준다.
 	//실제 룩벡터 등은 모두 UpdateLookVector에서 처리된다(라이트벡터도) 따라서 Tick함수에서 반드시 호출해야한다.
@@ -2125,7 +2136,7 @@ CubeObject::CubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 	ObjData.isAnimation = 0;
 	ObjData.Scale = 10.0f;
 	ObjData.SpecularParamater = 0.46f;//스페큘러를 낮게준다.
-	//ObjData.CustomData1.w = 1234;//CustomData1의 w가 1234 이면 노멀매핑을 쓰는것.
+	ObjData.CustomData1.w = 1234;//CustomData1의 w가 1234 이면 노멀매핑을 쓰는것.
 
 	obs = Static;
 
@@ -2168,7 +2179,7 @@ CubeObject::~CubeObject()
 void CubeObject::SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist)
 {
 	CreateCube(&Mesh, 1, 1, 1);
-	//LoadMD5Model(L".\\플레이어메쉬들\\ring.MD5MESH", &Mesh, 0, 1);
+
 	Mesh.SetNormal(false);
 	Mesh.CreateVertexBuffer(m_Device, commandlist);
 	Mesh.CreateIndexBuffer(m_Device, commandlist);
@@ -2190,8 +2201,10 @@ void CubeObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer
 	//텍스처를 연결하고, 월드행렬을 연결한다.
 	
 	if (Textures.size() > 0)
-		SetTexture(commandlist, SrvDescriptorHeap, Textures[TextureName].get()->Resource.Get(), false, TexOff);
-
+	{
+		SetTexture(commandlist, SrvDescriptorHeap, Textures["Tex"].get()->Resource.Get(), 0, 0);
+		SetTexture(commandlist, SrvDescriptorHeap, Textures["NormalTex"].get()->Resource.Get(),2, 1);
+	}
 	UpdateConstBuffer(commandlist, false);
 
 	//이후 그린다.
@@ -2253,7 +2266,7 @@ MoveCubeObject::MoveCubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 	ObjData.SpecularParamater = 0.0f;//스페큘러를 낮게준다.
 
 	obs = Static;
-									 //게임관련 데이터들
+	//게임관련 데이터들
 	gamedata.MAXHP = 100;
 	gamedata.HP = 100;
 	gamedata.Damage = 0;
@@ -2313,14 +2326,14 @@ void MoveCubeObject::Tick(const GameTimer & gt)
 {
 	n += gt.DeltaTime();
 
-	CenterPos.y = Len * sinf(MMPE_PI * n * 0.1f)+ 20;
+	CenterPos.y = Len * sinf(MMPE_PI * n * 0.15f)+ 50;
 
 }
 
 void MoveCubeObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer & gt)
 {
 	if (Textures.size() > 0)
-		SetTexture(commandlist, SrvDescriptorHeap, Textures[TextureName].get()->Resource.Get(), false, TexOff);
+		SetTexture(commandlist, SrvDescriptorHeap, Textures[TextureName].get()->Resource.Get(), 0, TexOff);
 
 	UpdateConstBuffer(commandlist, false);
 
@@ -2382,14 +2395,15 @@ void MoveCubeObject::Collision(list<CGameObject*>* collist, float DeltaTime)
 
 /////////////
 
-GridObject::GridObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist,shadow, cp)
+GridObject::GridObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, float size, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist,shadow, cp)
 {
 	if (CreateMesh == false)
 	{
 
 		Mesh.Index = NULL;
 		Mesh.SubResource = NULL;
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "GridTex", L"textures/object/normaltile.dds", false);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "GridTex", L"textures/object/floor.dds", false,2,0);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "GridNormalTex", L"textures/object/floorN.dds", false,2,1);
 		SetMesh(m_Device, commandlist);
 		SetMaterial(m_Device, commandlist);
 		CreateMesh = true;
@@ -2397,8 +2411,8 @@ GridObject::GridObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 	}
 
 	ObjData.isAnimation = 0;
-	ObjData.Scale = 1.0f;
-	ObjData.SpecularParamater = 0.3f;//스페큘러를 낮게준다.
+	ObjData.Scale = size;
+	ObjData.SpecularParamater = 0.4f;//스페큘러를 낮게준다.
 	ObjData.CustomData1.w = 1234;
 	obs = Static;
 	//게임관련 데이터들
@@ -2413,7 +2427,7 @@ GridObject::GridObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 
 void GridObject::SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist)
 {
-	CreatePentagon(&Mesh, 1200.0f);
+	CreatePentagon(&Mesh, 1200.0f, CenterPos.y);
 	Mesh.SetNormal();
 	Mesh.CreateVertexBuffer(m_Device, commandlist);
 	Mesh.CreateIndexBuffer(m_Device, commandlist);
@@ -2433,8 +2447,12 @@ void GridObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer
 	//게임오브젝트의 렌더링은 간단하다. 
 	//텍스처를 연결하고, 월드행렬을 연결한다.
 
-	if (Textures.size()>0)
-		SetTexture(commandlist, SrvDescriptorHeap, Textures["GridTex"].get()->Resource.Get(), false);
+	if (Textures.size() > 0)
+	{
+		SetTexture(commandlist, SrvDescriptorHeap, Textures["GridTex"].get()->Resource.Get(),0,0);
+		SetTexture(commandlist, SrvDescriptorHeap, Textures["GridNormalTex"].get()->Resource.Get(),2,1);
+	}
+
 	UpdateConstBuffer(commandlist, false);
 
 	Mat.UpdateConstantBuffer(commandlist);
@@ -2519,7 +2537,7 @@ void BarObject::Tick(const GameTimer & gt)
 void BarObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer & gt)
 {
 	if (Textures.size()>0)
-		SetTexture(commandlist, SrvDescriptorHeap, Textures["HPTex"].get()->Resource.Get(), false);
+		SetTexture(commandlist, SrvDescriptorHeap, Textures["HPTex"].get()->Resource.Get());
 	UpdateConstBuffer(commandlist, false);
 
 
@@ -2611,7 +2629,7 @@ void BarFrameObject::Tick(const GameTimer & gt)
 void BarFrameObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer & gt)
 {
 	if (Textures.size()>0)
-		SetTexture(commandlist, SrvDescriptorHeap, Textures["HPFrameTex"].get()->Resource.Get(), false);
+		SetTexture(commandlist, SrvDescriptorHeap, Textures["HPFrameTex"].get()->Resource.Get());
 	UpdateConstBuffer(commandlist, false);
 
 
@@ -2635,7 +2653,7 @@ void BarFrameObject::Render(ID3D12GraphicsCommandList * commandlist, const GameT
 	commandlist->DrawIndexedInstanced(Mesh.nindex, 1, Mesh.nioffset, Mesh.nOffset, 0);
 }
 
-DiceObject::DiceObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, list<CGameObject*>*shadow, CGameObject * master, list<CGameObject*>* bulletlist, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist,shadow, cp)
+DiceObject::DiceObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, list<CGameObject*>*shadow, CGameObject * master, XMFLOAT3 goal, list<CGameObject*>* bulletlist, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist,shadow, cp)
 {
 	ObjData.isAnimation = 0;
 	ObjData.Scale = 5.0f;
@@ -2651,6 +2669,8 @@ DiceObject::DiceObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 	Bulletlist = bulletlist;
 	YPos = CenterPos.y;
 	
+	V = goal;
+
 	//게임관련 데이터들
 	gamedata.GodMode = true;
 	staticobject = true;
@@ -2714,10 +2734,18 @@ void DiceObject::Tick(const GameTimer & gt)
 			Dicedata = 3;
 
 		Master->SetAnimation(2);
+		//기존 룩벡터와 새로운 룩벡터를 외적해서 방향축을 구한다.
+
+		auto v = Float3Add(V, XMFloat4to3(Master->CenterPos), false);
+
+		v = Float3Normalize(Master->Lookvector);//새로운 룩벡터(발사방향)
+							   //여기서 룩벡터라 함은, 플레이어가 아니라, 총알의 룩벡터다. 모든 오브젝트는 보통 룩벡터는 0,0,1 또는 0,0,-1 인데, 날아가는 방향을 바라보도록  
+							   //해야하므로 새로운 룩벡터를 필요로 하는것이다.  
+
 
 		XMFLOAT3 l{ 0,0,1 };
 		XMVECTOR ol = XMLoadFloat3(&l);
-		XMVECTOR nl = XMLoadFloat3(&Master->Lookvector);
+		XMVECTOR nl = XMLoadFloat3(&v);
 		auto axis = XMVector3Cross(ol, nl);
 		//방향축을 완성.
 		axis = XMVector3Normalize(axis);
@@ -2765,7 +2793,6 @@ void DiceObject::Tick(const GameTimer & gt)
 		auto tempori = XMLoadFloat4(&ori);
 		tempori = XMQuaternionMultiply(tempori, ori2);
 		XMStoreFloat4(&ori, tempori);//최종 회전 방향
-
 		if (Dicedata == 1)
 			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist,NULL, Master, ori, 0, NULL, Master->CenterPos));
 
@@ -2793,7 +2820,7 @@ void DiceObject::Tick(const GameTimer & gt)
 			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist,NULL, Master, ori, MMPE_PI / 18, NULL, Master->CenterPos));
 			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist,NULL, Master, ori, -MMPE_PI / 18, NULL, Master->CenterPos));
 			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist,NULL, Master, ori, MMPE_PI / 9, NULL, Master->CenterPos));
-			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist, NULL, Master, ori, -MMPE_PI / 9, NULL, Master->CenterPos));
+			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist, NULL, Master,ori, -MMPE_PI / 9, NULL, Master->CenterPos));
 		}
 
 		DelObj = true;
@@ -2813,7 +2840,7 @@ void DiceObject::Tick(const GameTimer & gt)
 void DiceObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer & gt)
 {
 	if (Textures.size()>0)
-		SetTexture(commandlist, SrvDescriptorHeap, Textures["DiceTex"].get()->Resource.Get(), false);
+		SetTexture(commandlist, SrvDescriptorHeap, Textures["DiceTex"].get()->Resource.Get());
 
 	UpdateConstBuffer(commandlist, false);
 
@@ -2918,7 +2945,7 @@ void DamageObject::Tick(const GameTimer & gt)
 void DamageObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer & gt)
 {
 	if (Textures.size() > 0)
-		SetTexture(commandlist, SrvDescriptorHeap, Textures["DamageTex"].get()->Resource.Get(), false);
+		SetTexture(commandlist, SrvDescriptorHeap, Textures["DamageTex"].get()->Resource.Get());
 
 	UpdateConstBuffer(commandlist, false);
 
@@ -3052,7 +3079,7 @@ void RigidCubeObject::SetMaterial(ID3D12Device * m_Device, ID3D12GraphicsCommand
 void RigidCubeObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer & gt)
 {
 	if (Textures.size()>0)
-		SetTexture(commandlist, SrvDescriptorHeap, Textures["CubeTex"].get()->Resource.Get(), false);
+		SetTexture(commandlist, SrvDescriptorHeap, Textures["CubeTex"].get()->Resource.Get());
 	UpdateConstBuffer(commandlist, false);
 
 	//이후 그린다.
@@ -3280,7 +3307,7 @@ void SmallWallObject::Render(ID3D12GraphicsCommandList * commandlist, const Game
 	//텍스처를 연결하고, 월드행렬을 연결한다.
 
 	if (Textures.size()>0)
-		SetTexture(commandlist, SrvDescriptorHeap, Textures["SmallWall"].get()->Resource.Get(), false);
+		SetTexture(commandlist, SrvDescriptorHeap, Textures["SmallWall"].get()->Resource.Get());
 	UpdateConstBuffer(commandlist, false);
 
 	//이후 그린다.
@@ -3402,7 +3429,7 @@ void BigWallObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTi
 	//텍스처를 연결하고, 월드행렬을 연결한다.
 
 	if (Textures.size()>0)
-		SetTexture(commandlist, SrvDescriptorHeap, Textures["Wall"].get()->Resource.Get(), false);
+		SetTexture(commandlist, SrvDescriptorHeap, Textures["Wall"].get()->Resource.Get());
 	UpdateConstBuffer(commandlist, false);
 
 	//이후 그린다.
@@ -3420,7 +3447,7 @@ BuildingObject::BuildingObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 		Mesh.Index = NULL;
 		Mesh.SubResource = NULL;
 
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "CubeTex", L"textures/object/tower.dds", false);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "CubeTex", L"textures/object/orange.dds", false);
 		SetMesh(m_Device, commandlist);
 		SetMaterial(m_Device, commandlist);
 		CreateMesh = true;
@@ -3439,8 +3466,8 @@ BuildingObject::BuildingObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 
 	UpdateLookVector();
 	ObjData.isAnimation = 0;
-	ObjData.Scale = 4.5f;
-	ObjData.SpecularParamater = -0.01f;//스페큘러를 낮게준다.
+	ObjData.Scale = 1.0f;
+	ObjData.SpecularParamater = 0.0f;//스페큘러를 낮게준다.
 
 
 
@@ -3454,14 +3481,14 @@ BuildingObject::BuildingObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 	obs = Static;
 	//광선충돌 검사용 육면체
 	XMFLOAT3 rx(15, 0, 0);
-	XMFLOAT3 ry(0, 50, 0);
+	XMFLOAT3 ry(0, 45, 0);
 	XMFLOAT3 rz(0, 0, 15);
 	rco.SetPlane(rx, ry, rz);
 
 	//질점오브젝트 사용시 필요한 데이터들 설정
 	pp = new PhysicsPoint();
 	pp->SetPosition(&CenterPos);//이 값은 항상 갱신되야한다.
-	pp->SetHalfBox(15, 50, 15);//충돌 박스의 x,y,z 크기
+	pp->SetHalfBox(15, 45, 15);//충돌 박스의 x,y,z 크기
 	pp->SetDamping(0.5f);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
 	pp->SetBounce(false);//튕기지 않는다.
 	pp->SetMass(INFINITY);//고정된 물체는 무게가 무한이다.
@@ -3482,10 +3509,10 @@ BuildingObject::~BuildingObject()
 
 void BuildingObject::SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist)
 {
-	//CreateCube(&Mesh, 30, 90, 30);
+	CreateCube(&Mesh, 30, 90, 30);
 
 	//모델 로드
-	LoadMD5Model(L".\\플레이어메쉬들\\tower.MD5MESH", &Mesh, 0, 1);
+	//LoadMD5Model(L".\\플레이어메쉬들\\Cube.MD5MESH", &Mesh, 0, 1);
 	//
 	Mesh.SetNormal(false);
 	Mesh.CreateVertexBuffer(m_Device, commandlist);
@@ -3508,7 +3535,7 @@ void BuildingObject::Render(ID3D12GraphicsCommandList * commandlist, const GameT
 	//텍스처를 연결하고, 월드행렬을 연결한다.
 
 	if (Textures.size()>0)
-		SetTexture(commandlist, SrvDescriptorHeap, Textures["CubeTex"].get()->Resource.Get(), false);
+		SetTexture(commandlist, SrvDescriptorHeap, Textures["CubeTex"].get()->Resource.Get());
 	UpdateConstBuffer(commandlist, false);
 
 	//이후 그린다.
@@ -3603,7 +3630,7 @@ void Rock1Object::Render(ID3D12GraphicsCommandList * commandlist, const GameTime
 	//텍스처를 연결하고, 월드행렬을 연결한다.
 
 	if (Textures.size()>0)
-		SetTexture(commandlist, SrvDescriptorHeap, Textures["CubeTex"].get()->Resource.Get(), false);
+		SetTexture(commandlist, SrvDescriptorHeap, Textures["CubeTex"].get()->Resource.Get());
 	UpdateConstBuffer(commandlist, false);
 
 	//이후 그린다.
@@ -3683,7 +3710,7 @@ void RangeObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTime
 	//텍스처를 연결하고, 월드행렬을 연결한다.
 
 	if (Textures.size()>0)
-		SetTexture(commandlist, SrvDescriptorHeap, Textures["CubeTex"].get()->Resource.Get(), false);
+		SetTexture(commandlist, SrvDescriptorHeap, Textures["CubeTex"].get()->Resource.Get());
 	UpdateConstBuffer(commandlist, false);
 
 	//이후 그린다.
@@ -3694,14 +3721,14 @@ void RangeObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTime
 
 ////////////////////
 /*
-현재 구현한 파티클 갯수 : 1
+현재 구현한 파티클 갯수 : 2
 
 이름 : ParticleObject
 설명 : 꼬리에 불붙은것 처럼 약간 퍼져서 원뿔 모양으로 날아감. 투사체에 적용하기 위함.
 구현방법 : 일단 투사체의 룩벡터의 반대방향으로 향하는게 기본뼈대 방향으로 삼아야한다.
 이후 독자적인 각 정점마다 날아갈 방향을 정해줘야한다.
 이를위해 나는 버텍스의 노멀값에다가 날아갈 속도를 넣어줬음. 즉 이름만 노멀일뿐 실은 날아갈 속도임.
-xyz는 cos과 sin, 랜덤값을 이용해 각각 날아갈 방향으로 지정해줬으며
+노멀의 xyz는 cos과 sin, 랜덤값을 이용해 각각 날아갈 방향으로 지정해줬으며
 w의 경우 시작되는 지점을 정해줌. 뭔소리냐면 파티클의 각 위치는 정해준 속도 * 흘러간 시간으로 위치를 바꾼다.
 문제는 흘러간 시간을 0부터 시작하게되면 일괄적으로 같은위치에 존재하므로 뭔가 어색하게 된다. 또한 허공에 빈칸도 늘어나고...
 그래서 흘러간시간에다가 랜덤한 시작점을 넣어줌. 그리고 흘러간시간에 frac를 취해서 0~1사이의 범위를 갖게함.
@@ -3710,6 +3737,12 @@ w의 경우 시작되는 지점을 정해줌. 뭔소리냐면 파티클의 각 위치는 정해준 속도 * 흘�
 
 또 파티클은 라이프타임이 따로 필요없음. 왜냐하면 PTime에 frac을 해놔서 알아서 0~1범위로 갱신이된다.
 다만 매 프레임마다 마스터 즉 총알은 움직이므로, 그 총알의 위치를 쫓아가도록 CenterPos를 갱신만 해준다.
+
+이름 : ParticleObject2
+설명 : 피격을 당하거나 땅에 부딪히거나 하면 발생하며, 위쪽 방향으로 별들이 톡하고 올라갔다가 살짝떨어지며 사라짐
+구현방법 : 먼저 기본 뼈대 속도는 룩벡터 방향으로 날아가는것이다. 이때 룩벡터는 0,1,0 인 벡터이며
+노멀의 x와 z만 랜덤한 값을 입력해주었고, w에 랜덤한 시작 위치를 주었다.
+중요한건 노멀의 y는 딱히 건드리지 않았으며, 중력효과를 가하기 위해 쉐이더에서 임의의 중력가속도를 가하도록 했음.
 
 */
 ////////////////////
@@ -3811,7 +3844,7 @@ void ParticleObject::Tick(const GameTimer & gt)
 void ParticleObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer & gt)
 {
 	if (Textures.size()>0)
-		SetTexture(commandlist, SrvDescriptorHeap, Textures["sparkTex"].get()->Resource.Get(), false);
+		SetTexture(commandlist, SrvDescriptorHeap, Textures["sparkTex"].get()->Resource.Get());
 	UpdateConstBuffer(commandlist,false);
 
 
@@ -3930,7 +3963,7 @@ void ParticleObject2::Tick(const GameTimer & gt)
 void ParticleObject2::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer & gt)
 {
 	if (Textures.size()>0)
-		SetTexture(commandlist, SrvDescriptorHeap, Textures["sparkTex"].get()->Resource.Get(), false);
+		SetTexture(commandlist, SrvDescriptorHeap, Textures["sparkTex"].get()->Resource.Get());
 	UpdateConstBuffer(commandlist, false);
 
 
@@ -3953,6 +3986,118 @@ void ParticleObject2::Render(ID3D12GraphicsCommandList * commandlist, const Game
 
 	commandlist->DrawIndexedInstanced(Mesh.nindex, 1, Mesh.nioffset, Mesh.nOffset, 0);
 
+}
+
+ParticleObject3::ParticleObject3(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, list<CGameObject*>* shadow, CGameObject * master, float lifeTime, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, shadow, cp)
+{
+	ObjData.isAnimation = 0;
+	ObjData.Scale = 0.5f;
+	ObjData.SpecularParamater = 0.3f;//스페큘러를 낮게준다.
+	ObjData.CustomData1.x = 11;
+	Master = master;
+	LifeTime = lifeTime;
+
+	//게임관련 데이터들
+	gamedata.MAXHP = 0;
+	gamedata.HP = 0;
+	gamedata.Damage = 0;
+	gamedata.GodMode = true;
+	gamedata.Speed = 20;
+	staticobject = true;
+	obs = UI;
+
+	if (CreateMesh == false)
+	{
+		Mesh.Index = NULL;
+		Mesh.SubResource = NULL;
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "sparkTex", L"textures/effect/fire.dds", false);
+		SetMesh(m_Device, commandlist);
+		CreateMesh = true;
+
+	}
+
+	Lookvector = XMFLOAT3(0, 1, 0);
+	Lookvector = Float3Normalize(Lookvector);
+
+	XMFLOAT3 Vel = XMFLOAT3(0,0,0);
+	ParticleTime = 0;
+	ObjData.Velocity = Vel;
+
+	auto q = XMLoadFloat4(&Orient);
+	XMFLOAT3 axis = { 0,1,0 };
+
+
+	UpdateLookVector();
+}
+
+void ParticleObject3::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
+{
+	UINT numOfParticle = 180;
+
+	Mesh.SubResource = new CVertex[numOfParticle];
+	Mesh.nVertex = numOfParticle;
+	Mesh.nStride = sizeof(CVertex);
+	Mesh.nOffset = 0;
+
+
+	Mesh.Index = new UINT[numOfParticle];
+	Mesh.nindex = numOfParticle;
+	Mesh.nioffset = 0;
+	Mesh.nisize = sizeof(UINT);
+
+
+	//여기서 좌표를 일괄적으로 설정 할 수 있다
+	for (int i = 0; i < numOfParticle; ++i)
+	{
+
+		Mesh.SubResource[i].V.x = 0;
+		Mesh.SubResource[i].V.y = 0;
+		Mesh.SubResource[i].V.z = 0;
+
+		Mesh.SubResource[i].N.x = 0 + (cosf(MMPE_PI / numOfParticle * i*(float)(rand() % 10000)));
+		Mesh.SubResource[i].N.y = 0 +(sinf(MMPE_PI /numOfParticle * i*(float)(rand() % 10000)));
+		Mesh.SubResource[i].N.z = (cosf(MMPE_PI / numOfParticle * i*(float)(rand() % 10000)));
+		Mesh.SubResource[i].N.w = (float)(rand() % numOfParticle);
+		Mesh.Index[i] = i;
+
+	}
+
+	Mesh.CreateVertexBuffer(m_Device, commandlist);
+	Mesh.CreateIndexBuffer(m_Device, commandlist);
+}
+
+void ParticleObject3::Tick(const GameTimer & gt)
+{
+	CenterPos = Master->CenterPos;
+	//현재 기본파티클오브젝트는 PTime에 의해 위치가 변경됨.
+	ObjData.PTime += gt.DeltaTime();
+}
+
+void ParticleObject3::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer & gt)
+{
+	if (Textures.size()>0)
+		SetTexture(commandlist, SrvDescriptorHeap, Textures["sparkTex"].get()->Resource.Get());
+	UpdateConstBuffer(commandlist, false);
+
+
+	D3D12_VERTEX_BUFFER_VIEW vbv;
+
+	vbv.BufferLocation = Mesh.VertexBuffer->GetGPUVirtualAddress();
+	vbv.StrideInBytes = Mesh.nStride;
+	vbv.SizeInBytes = Mesh.nStride *  Mesh.nVertex;
+
+	commandlist->IASetVertexBuffers(0, 1, &vbv);
+
+	D3D12_INDEX_BUFFER_VIEW ibv;
+	ibv.BufferLocation = Mesh.IndexBuffer->GetGPUVirtualAddress();
+	ibv.Format = DXGI_FORMAT_R16_UINT;
+	ibv.SizeInBytes = Mesh.nisize *  Mesh.nindex;
+
+	commandlist->IASetIndexBuffer(&ibv);
+	commandlist->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
+
+
+	commandlist->DrawIndexedInstanced(Mesh.nindex, 1, Mesh.nioffset, Mesh.nOffset, 0);
 }
 
 
@@ -4033,7 +4178,7 @@ void ShieldArmor::Tick(const GameTimer & gt)
 void ShieldArmor::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer & gt)
 {
 	if (Textures.size()>0)
-		SetTexture(commandlist, SrvDescriptorHeap, Textures["ShieldTex"].get()->Resource.Get(), false);
+		SetTexture(commandlist, SrvDescriptorHeap, Textures["ShieldTex"].get()->Resource.Get());
 
 	UpdateConstBuffer(commandlist, false);
 
@@ -4177,7 +4322,7 @@ void ImpObject::Tick(const GameTimer & gt)
 void ImpObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer & gt)
 {
 	if (Textures.size()>0)
-		SetTexture(commandlist, SrvDescriptorHeap, Textures[TextureName].get()->Resource.Get(), false, TexOff);
+		SetTexture(commandlist, SrvDescriptorHeap, Textures[TextureName].get()->Resource.Get(), 0, TexOff);
 
 
 
@@ -4187,7 +4332,7 @@ void ImpObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer 
 
 	//틱함수에서 업데이트한 애니메이션된 조인트를 연결함.
 
-	commandlist->SetGraphicsRootConstantBufferView(3, jarr->Resource()->GetGPUVirtualAddress());
+	commandlist->SetGraphicsRootConstantBufferView(0, jarr->Resource()->GetGPUVirtualAddress());
 	//이후 그린다.
 
 	Mesh.Render(commandlist);
@@ -4410,7 +4555,7 @@ void RingObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer
 	}
 
 	if (Textures.size() > 0)
-		SetTexture(commandlist, SrvDescriptorHeap, Textures[TextureName].get()->Resource.Get(), false, TexOff);
+		SetTexture(commandlist, SrvDescriptorHeap, Textures[TextureName].get()->Resource.Get(), 0, TexOff);
 
 	UpdateConstBuffer(commandlist, false);
 
@@ -4552,7 +4697,7 @@ void ShadowObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTim
 
 	Mat.UpdateConstantBuffer(commandlist);
 
-	commandlist->SetGraphicsRootConstantBufferView(3, jarr->Resource()->GetGPUVirtualAddress());
+	commandlist->SetGraphicsRootConstantBufferView(0, jarr->Resource()->GetGPUVirtualAddress());
 
 	if(CreatecMesh && Kinds == 0)
 		cMesh.Render(commandlist);
@@ -4562,10 +4707,214 @@ void ShadowObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTim
 		iMesh.Render(commandlist);
 }
 
+Floor2Object::Floor2Object(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, list<CGameObject*>* shadow, float size, XMFLOAT4 cp) :CGameObject(m_Device, commandlist, Plist, shadow, cp)
+{
+	if (CreateMesh == false)
+	{
+		Mesh.Index = NULL;
+		Mesh.SubResource = NULL;
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "FloorTex", L"textures/object/tile.dds",false);
+		SetMesh(m_Device, commandlist);
+		SetMaterial(m_Device, commandlist);
+		CreateMesh = true;
+	}
+	OffLookvector = XMFLOAT3(0, 0, 1);
+	OffRightvector = XMFLOAT3(1, 0, 0);
+	
+	auto q = XMLoadFloat4(&Orient);//방향을 degree만큼 돌리려 한다.
+	XMFLOAT3 axis{ 0,1,0 };
+	auto q2 = QuaternionRotation(axis, MMPE_PI*0.25);
+	Orient = QuaternionMultiply(Orient, q2);
+
+	UpdateLookVector();
+
+	ObjData.isAnimation = 0;
+	ObjData.Scale = size;
+	ObjData.SpecularParamater = 0.3f;//스페큘러를 낮게준다.
+	ObjData.CustomData1.w = 1234;
+
+	obs = Static;
+
+	//게임관련 데이터들
+	gamedata.MAXHP = 100;
+	gamedata.HP = 100;
+	gamedata.Damage = 0;
+	gamedata.GodMode = true;
+	gamedata.Speed = 0;
+	staticobject = true;
+	Blending = true;
+
+	ObjData.BlendValue = 0.5f;
+
+	XMFLOAT3 raxis{ 0,1,0 };
+	//광선충돌 검사용 육면체
+	XMFLOAT3 rx(90, 0, 0);
+	auto rqx = QuaternionRotation(raxis, MMPE_PI*0.25);
+	Orient = QuaternionMultiply(XMFLOAT4(rx.x, rx.y, rx.z, 0), rqx);
+	rx.x = Orient.x; rx.y = Orient.y, rx.z = Orient.z;
+
+	XMFLOAT3 ry(0, 0.5f, 0);
+	auto rqy = QuaternionRotation(raxis, MMPE_PI*0.25);
+	Orient = QuaternionMultiply(XMFLOAT4(ry.x, ry.y, ry.z, 0), rqy);
+	ry.x = Orient.x; ry.y = Orient.y, ry.z = Orient.z;
+
+	XMFLOAT3 rz(0, 0, 90);
+	auto rqz = QuaternionRotation(raxis, MMPE_PI*0.25);
+	Orient = QuaternionMultiply(XMFLOAT4(ry.x, ry.y, ry.z, 0), rqz);
+	rz.x = Orient.x; rz.y = Orient.y, rz.z = Orient.z;
+
+	rco.SetPlane(rx, ry, rz);
+
+
+	//질점오브젝트 사용시 필요한 데이터들 설정
+	pp = new PhysicsPoint();
+	pp->SetPosition(&CenterPos);//이 값은 항상 갱신되야한다.
+	pp->SetHalfBox(90, 0.5, 90);//충돌 박스의 x,y,z 크기
+	pp->SetDamping(0.5f);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
+	pp->SetBounce(false);//튕기지 않는다.
+	pp->SetMass(INFINITY);//고정된 물체는 무게가 무한이다.
+}
+
+void Floor2Object::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
+{
+	CreateCube(&Mesh, 180, 1, 180);
+
+	Mesh.SetNormal(false);
+	Mesh.CreateVertexBuffer(m_Device, commandlist);
+	Mesh.CreateIndexBuffer(m_Device, commandlist);
+}
+
+void Floor2Object::SetMaterial(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
+{
+	if (Mat.ConstBuffer == NULL)
+		Mat.ConstBuffer = new UploadBuffer<MaterialData>(m_Device, 1, true);
+
+
+	Mat.MatData.Roughness = 0.2f;
+}
+
+void Floor2Object::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer & gt)
+{
+	if (Textures.size() > 0)
+	{
+		SetTexture(commandlist, SrvDescriptorHeap, Textures["FloorTex"].get()->Resource.Get());
+	}
+	UpdateConstBuffer(commandlist, false);
+
+	//이후 그린다.
+	Mesh.Render(commandlist);
+}
+
+TowerObject::TowerObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, float dgree, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, shadow, cp)
+{
+
+	if (CreateMesh == false)
+	{
+
+		Mesh.Index = NULL;
+		Mesh.SubResource = NULL;
+
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "CubeTex", L"textures/object/tower.dds", false);
+		SetMesh(m_Device, commandlist);
+		SetMaterial(m_Device, commandlist);
+		CreateMesh = true;
+
+	}
+
+	//게임오브젝트마다 룩벡터와 라이트벡터가 다르므로 초기 오프셋 설정을 해준다.
+	//실제 룩벡터 등은 모두 UpdateLookVector에서 처리된다(라이트벡터도) 따라서 Tick함수에서 반드시 호출해야한다.
+	OffLookvector = XMFLOAT3(0, 0, 1);
+	OffRightvector = XMFLOAT3(1, 0, 0);
+
+	auto q = XMLoadFloat4(&Orient);//방향을 degree만큼 돌리려 한다.
+	XMFLOAT3 axis{ 0,1,0 };
+	auto q2 = QuaternionRotation(axis, dgree);
+	Orient = QuaternionMultiply(Orient, q2);
+
+	UpdateLookVector();
+	ObjData.isAnimation = 0;
+	ObjData.Scale = 4.5f;
+	ObjData.SpecularParamater = -0.01f;//스페큘러를 낮게준다.
 
 
 
-BreakCartObject::BreakCartObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, list<CGameObject*>* shadow, float dgree, XMFLOAT4 cp) : CGameObject(m_Device,commandlist,Plist,shadow,cp)
+									   //게임관련 데이터들
+	gamedata.MAXHP = 100;
+	gamedata.HP = 100;
+	gamedata.Damage = 0;
+	gamedata.GodMode = true;
+	gamedata.Speed = 0;
+	staticobject = true;
+	obs = Static;
+	//광선충돌 검사용 육면체
+	XMFLOAT3 rx(15, 0, 0);
+	XMFLOAT3 ry(0, 50, 0);
+	XMFLOAT3 rz(0, 0, 15);
+	rco.SetPlane(rx, ry, rz);
+
+	//질점오브젝트 사용시 필요한 데이터들 설정
+	pp = new PhysicsPoint();
+	pp->SetPosition(&CenterPos);//이 값은 항상 갱신되야한다.
+	pp->SetHalfBox(15, 50, 15);//충돌 박스의 x,y,z 크기
+	pp->SetDamping(0.5f);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
+	pp->SetBounce(false);//튕기지 않는다.
+	pp->SetMass(INFINITY);//고정된 물체는 무게가 무한이다.
+
+						  //if (Shadow != NULL)
+						  //{
+						  //	s = new ShadowObject(m_Device, commandlist, NULL, Shadow, this, XMFLOAT3(30, 90, 30), 1, CenterPos);
+						  //	s->ObjData.Scale = 1.0f;
+						  //	Shadow->push_back(s);
+						  //}
+}
+
+TowerObject::~TowerObject()
+{
+	/*if (s != NULL)
+	s->DelObj = true;*/
+}
+
+void TowerObject::SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist)
+{
+	//CreateCube(&Mesh, 30, 90, 30);
+
+	//모델 로드
+	LoadMD5Model(L".\\플레이어메쉬들\\tower.MD5MESH", &Mesh, 0, 1);
+	//
+	Mesh.SetNormal(false);
+	Mesh.CreateVertexBuffer(m_Device, commandlist);
+	Mesh.CreateIndexBuffer(m_Device, commandlist);
+
+}
+
+void TowerObject::SetMaterial(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
+{
+	if (Mat.ConstBuffer == NULL)
+		Mat.ConstBuffer = new UploadBuffer<MaterialData>(m_Device, 1, true);
+
+
+	Mat.MatData.Roughness = 0.2f;
+}
+
+void TowerObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer & gt)
+{
+	//게임오브젝트의 렌더링은 간단하다. 
+	//텍스처를 연결하고, 월드행렬을 연결한다.
+
+	if (Textures.size()>0)
+		SetTexture(commandlist, SrvDescriptorHeap, Textures["CubeTex"].get()->Resource.Get(), false);
+	UpdateConstBuffer(commandlist, false);
+
+	//이후 그린다.
+
+	Mesh.Render(commandlist);
+}
+
+
+
+
+
+BreakCartObject::BreakCartObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, list<CGameObject*>* shadow, float dgree, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, shadow, cp)
 {
 	if (CreateMesh == false)
 	{
@@ -4656,3 +5005,185 @@ void BreakCartObject::Render(ID3D12GraphicsCommandList * commandlist, const Game
 
 	Mesh.Render(commandlist);
 }
+
+
+StoneBullet::StoneBullet(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, list<CGameObject*>* shadow, CGameObject * master, XMFLOAT4 & ori, CGameObject * lockon, XMFLOAT4 cp, XMFLOAT4 opp):CGameObject(m_Device,commandlist,Plist,shadow,cp)
+{
+	if (CreateMesh == false)
+	{
+
+		Mesh.Index = NULL;
+		Mesh.SubResource = NULL;
+
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "BulletTex", L"textures/effect/fire.dds", false);
+		SetMesh(m_Device, commandlist);
+		SetMaterial(m_Device, commandlist);
+		CreateMesh = true;
+
+	}
+
+	orgpluspos = opp;
+	//게임오브젝트마다 룩벡터와 라이트벡터가 다르므로 초기 오프셋 설정을 해준다.
+	//실제 룩벡터 등은 모두 UpdateLookVector에서 처리된다(라이트벡터도) 따라서 Tick함수에서 반드시 호출해야한다.
+	OffLookvector = XMFLOAT3(0, 0, 1);
+	OffRightvector = XMFLOAT3(1, 0, 0);
+	//인자로 발사방향으로 룩벡터가 될정도로 회전한 ori값을 받고, 현재 방향(아직은 0,0,0,1)과 곱해준다.
+	Orient = QuaternionMultiply(Orient, ori);
+
+	UpdateLookVector();
+
+	obs = Bullet;
+
+	ObjData.isAnimation = 0;
+	ObjData.Scale = 1.0;
+	ObjData.SpecularParamater = 0.2f;//스페큘러를 낮게준다.
+
+									 //게임관련 데이터들
+	gamedata.MAXHP = 1;
+	gamedata.HP = 1;
+	gamedata.Damage = 40;
+	gamedata.GodMode = true;
+	gamedata.Speed = 0;
+	LifeTime = 10.0f;
+	Master = master;
+	LockOn = lockon;
+
+
+	//광선충돌 검사용 육면체
+	XMFLOAT3 rx(1, 0, 0);
+	XMFLOAT3 ry(0, 1, 0);
+	XMFLOAT3 rz(0, 0, 1);
+	rco.SetPlane(rx, ry, rz);
+
+	//질점오브젝트 사용시 필요한 데이터들 설정
+	pp = new PhysicsPoint();
+	pp->SetPosition(&CenterPos);//이 값은 항상 갱신되야한다.
+	pp->SetHalfBox(1, 1, 1);//충돌 박스의 x,y,z 크기
+	pp->SetDamping(1);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
+	pp->SetBounce(false);//튕기지 않는다.
+	pp->SetVelocity(0,0,0);//트랜스폼으로 움직일거임
+	pp->SetMass(0.35f);
+
+	if (ParticleList != NULL)
+	{
+		BulletParticles = new ParticleObject3(m_Device, commandlist, ParticleList, NULL, this, 0.2f, XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, 0));
+		ParticleList->push_back(BulletParticles);
+
+	}
+
+}
+
+StoneBullet::~StoneBullet()
+{
+	if (BulletParticles != NULL)
+		BulletParticles->DelObj = true;
+
+}
+
+void StoneBullet::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
+{
+	CreateCube(&Mesh, 2, 2, 2);
+	//
+	Mesh.SetNormal(false);
+	Mesh.CreateVertexBuffer(m_Device, commandlist);
+	Mesh.CreateIndexBuffer(m_Device, commandlist);
+
+}
+
+void StoneBullet::SetMaterial(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
+{
+	if (Mat.ConstBuffer == NULL)
+		Mat.ConstBuffer = new UploadBuffer<MaterialData>(m_Device, 1, true);
+
+	Mat.MatData.Roughness = 0.3f;
+	Mat.MatData.Emissive = XMFLOAT4{ 0.75f, 0.23f, 0.13f, 0.7f };
+
+}
+
+void StoneBullet::Tick(const GameTimer & gt)
+{
+
+	//pp->integrate(gt.DeltaTime());
+
+	Orient = QuaternionMultiply(Orient, QuaternionRotation(GetUpvector(), MMPE_PI * gt.DeltaTime()));
+	
+	CenterPos = orgpluspos;
+	
+	tempangle += MMPE_PI/4 *gt.DeltaTime();
+	XMFLOAT4 tempori = QuaternionRotation(XMFLOAT3(0, 1, 0),tempangle );
+
+	XMVECTOR to = XMLoadFloat4(&tempori);
+	XMVECTOR cp = XMLoadFloat4(&CenterPos);
+
+	 cp=XMVector4Transform(cp, XMMatrixRotationQuaternion(to));
+	 XMStoreFloat4(&CenterPos, cp);
+	 CenterPos = Float4Add(CenterPos, Master->CenterPos);
+	//투사체는 생명 주기가 있어야 한다.
+	LifeTime -= gt.DeltaTime();
+
+	if (LifeTime <= 0)
+		DelObj = true;
+}
+
+void StoneBullet::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer & gt)
+{
+	//텍스처를 연결하고, 월드행렬을 연결한다.
+
+	if (Textures.size()>0)
+		SetTexture(commandlist, SrvDescriptorHeap, Textures["BulletTex"].get()->Resource.Get());
+	UpdateConstBuffer(commandlist, false);
+
+	Mat.UpdateConstantBuffer(commandlist);
+
+	//이후 그린다.
+
+	Mesh.Render(commandlist);
+}
+
+void StoneBullet::Collision(list<CGameObject*>* collist, float DeltaTime)
+{
+	
+		CollisionList = collist;
+		//충돌리스트의 모든 요소와 충돌검사를 실시한다.
+		for (auto i = CollisionList->begin(); i != CollisionList->end(); i++)
+		{
+
+			if (*i != this && *i != Master && (*i)->pp != NULL) // pp가 NULL이 아니면 질점 오브젝트이다.
+			{
+
+				bool test = pp->CollisionTest(*(*i)->pp, Lookvector, Rightvector, GetUpvector(), (*i)->Lookvector, (*i)->Rightvector, (*i)->GetUpvector());
+
+				if (test)//충돌했으면 pp의 경우는 그냥 데미지를 주고 자신을 없애면 됨. 
+				{
+					if ((*i)->isShieldOn) //상대가 실드 on 상태면
+						gamedata.Damage = 100; //100 이지만 1만뜸 텍스쳐 stride때문에 100이라고 설정하고 ToDamage에서 1로 설정
+
+					
+					
+					XMFLOAT3 cn;
+					//고정된 물체가 아니면
+					if ((*i)->staticobject == false)
+					{
+						//1. 먼저 데미지를 준다.
+
+						(*i)->ToDamage(gamedata.Damage);
+
+
+						
+						// 파티클리스트에 데미지 오브젝트를 생성해서 넣음. 파티클을 띄운다.
+						if (ParticleList != NULL)
+						{
+							ParticleList->push_back(new DamageObject(device, commandlist, ParticleList, NULL, gamedata.Damage, XMFLOAT4((*i)->CenterPos.x, (*i)->CenterPos.y + 11, (*i)->CenterPos.z, 0)));
+						}
+
+						DelObj = true;
+
+					}
+					
+
+				}
+			}
+		}
+
+}
+

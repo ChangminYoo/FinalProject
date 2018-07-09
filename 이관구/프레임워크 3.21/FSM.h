@@ -24,6 +24,7 @@ struct AIdata
 	float timeout = 0.0f;
 	curState_State curstateEnum = s_Idle;
 	XMFLOAT3 collisionmove=XMFLOAT3(0,0,0);
+	int stack = 10;//요 스택이 의미하는것은 5스택 쌓으면 주변에 마법구슬을 만들어서 회전시킴.
 };
 
 class state
@@ -97,7 +98,8 @@ public:
 	//타겟이 될 수 있는 오브젝트들.
 	list<CGameObject*>* DynamicObj = NULL;
 	list<CGameObject*>* StaticObj = NULL;
-	
+	list<CGameObject*>* BulletObj = NULL;
+
 	AIdata aidata;
 private:
 	state * GlobalState = NULL;//모든 상태에서 바뀔 수 있는 상태. 대표적으로 공격상태가 있음. 추적상태든 대기상태든 공격을 해야할땐 바로 바뀌어야하니까.
@@ -107,7 +109,7 @@ public:
 	void ChangeState(state* st);//'현재 상태' 를 바꿈
 	void CheckTarget(float DeltaTime);
 
-	FSM(CGameObject* master,list<CGameObject*>* dobj,list<CGameObject*>* sobj);
+	FSM(CGameObject* master,list<CGameObject*>* dobj,list<CGameObject*>* sobj, list<CGameObject*>* bobj);
 	~FSM()
 	{
 
