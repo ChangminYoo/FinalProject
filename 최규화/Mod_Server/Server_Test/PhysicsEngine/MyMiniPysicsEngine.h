@@ -19,12 +19,11 @@ namespace MiniPhysicsEngineG9
 	public:
 		PhysicsPoint();
 		~PhysicsPoint();
-		XMFLOAT4 CenterPos;//중점
-
+		XMFLOAT4* CenterPos = NULL;//중점
 	protected:
 		float InverseMass;//무게의 역수. a=1/m * F 이므로 이렇게함. 무게보다 가속도가 더 중요하니까. 이때 m이 무한이면 0이다.
 		XMFLOAT3 Velocity;//속도
-		
+
 		float damping;//제동용 값. 마찰력 대용으로도 사용
 		XMFLOAT3 TotalForce;//최종적으로 가해진 모든 힘
 		XMFLOAT3 Accel;//가속도
@@ -36,7 +35,7 @@ namespace MiniPhysicsEngineG9
 		float rad = 0;
 
 	public:
-		void integrate(double DeltaTime, XMFLOAT4* ObjPos = NULL, XMFLOAT3* ObjVel = NULL);//적분기. 속도와 가속도로 위치를 구하고 가속도를 이용해 속도를 갱신함.
+		void integrate(double DeltaTime);//적분기. 속도와 가속도로 위치를 구하고 가속도를 이용해 속도를 갱신함.
 		void SetMass(float M);//무게의 역을 쉽게 저장하기 위한 함수. M을 넣으면 역수로 저장해줌
 		float GetMass(bool Inverse = true);//기본적으로 무게의 역을 구함. 다만 false로 두면 그대로 나온다.
 		void SetDamping(float D);//댐핑지수를 설정함.
@@ -44,10 +43,15 @@ namespace MiniPhysicsEngineG9
 
 		float GetRad();
 		void SetBounce(bool bounce);
-		//void SetPosition(XMFLOAT3& pos);//중점 위치 설정
-		void SetPosition(XMFLOAT4& pos);//중점 위치 설정
-		void SetPosition(float x, float y, float z, float w);//중점 위치 설정
+
+		void SetPosition(XMFLOAT4* pos); // 중점 위치 설정
 		XMFLOAT4 GetPosition();//중점 얻기
+
+		//void SetPosition(XMFLOAT3& pos);//중점 위치 설정
+		//void SetPosition(XMFLOAT4& pos);//중점 위치 설정
+		//void SetPosition(float x, float y, float z);//중점 위치 설정
+
+		//XMFLOAT3 GetPosition();//중점 얻기
 
 		void SetVelocity(XMFLOAT3& V);//속도설정. 이는 초기속도이며, 대부분의 속도는 적분기에서 계산되야한다.
 		void SetVelocity(float x, float y, float z);
@@ -126,7 +130,8 @@ namespace MiniPhysicsEngineG9
 		float MaxImpurse = 400;
 
 	public:
-		void integrate(float DeltaTime);//적분기. 속도와 가속도로 위치를 구하고 가속도를 이용해 속도를 갱신함.
+		//void integrate(double DeltaTime, XMFLOAT4* ObjPos, XMFLOAT3* ObjVel);//적분기. 속도와 가속도로 위치를 구하고 가속도를 이용해 속도를 갱신함.
+		void integrate(double DeltaTime);
 		void SetMass(float M);//무게의 역을 쉽게 저장하기 위한 함수. M을 넣으면 역수로 저장해줌
 		float GetMass(bool Inverse = true);//기본적으로 무게의 역을 구함. 다만 false로 두면 그대로 나온다.
 		float AmendTime = 0;//보정이 일어날 수 있는 시간은 0초가 되었을때.즉 그전에는 안정적인 충돌을 보장.
@@ -183,7 +188,7 @@ namespace MiniPhysicsEngineG9
 
 		void SetE(float tempE);
 		float GetE();
-		float CalculateImpulse(CollisionPoint& cp, RigidBody* rb2, float deltatime, float E = 1);
+		float CalculateImpulse(CollisionPoint& cp, RigidBody* rb2, double deltatime, float E = 1);
 
 
 		void SetHalfBox(float x, float y, float z);
@@ -204,13 +209,13 @@ namespace MiniPhysicsEngineG9
 
 		//충돌체 해소 관련. 이때 키보드 처리는 따로 해줘야함. 왜냐하면 대각선으로 눌렀을때 충돌안되는 부분은 스무스하게
 		//움직이게 하기위해서다. CollisionN은 충돌시 내가 밀려나야하는 방향을 나타낸다.
-		void CollisionResolve(RigidBody & rb2, XMFLOAT3& CollisionN, float DeltaTime, float i1, float i2, float amendtime = 1.5);
+		void CollisionResolve(RigidBody & rb2, XMFLOAT3& CollisionN, double DeltaTime, float i1, float i2, float amendtime = 1.5);
 		//상대속도를 구한다.
 		float GetSeparateVelocity(RigidBody & rb2, XMFLOAT3& CollisionN);
 		//충돌후 속도를 구한다.
-		void ResolveVelocity(RigidBody & rb2, XMFLOAT3& CollisionN, float DeltaTime, float i1, float i2, float amendtime = 1.5);
+		void ResolveVelocity(RigidBody & rb2, XMFLOAT3& CollisionN, double DeltaTime, float i1, float i2, float amendtime = 1.5);
 		//겹쳐진 부분을 밀어낸다.
-		void ResolvePenetration(RigidBody & rb2, float DeltaTime);
+		void ResolvePenetration(RigidBody & rb2, double DeltaTime);
 
 
 	};

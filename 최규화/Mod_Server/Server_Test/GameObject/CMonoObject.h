@@ -35,10 +35,12 @@ protected:
 	XMFLOAT3			m_Upvector; //업벡터
 	XMFLOAT3			m_OffLookvector;//초기룩벡터. 오브젝트가 바라보고있는 방향.
 	XMFLOAT3			m_OffRightvector;//초기라이트벡터. 오브젝트가 바라보고있는 방향의 오른쪽방향.
-
+	
 	//3. 물리효과
 	RigidBody			*rb{ nullptr };
 	PhysicsPoint		*pp{ nullptr };
+
+
 	//PhysicalEffect		*pe{ nullptr };
 
 	__int64				m_prevtime{ 0 };
@@ -48,22 +50,38 @@ protected:
 
 public:
 	CMonoObject();
-	virtual void Update(float deltime);
-	virtual void AfterGravitySystem(float deltime);
-	virtual void GravitySystem(float deltime);
-	virtual void Tick(float deltime);
+	virtual ~CMonoObject();
+
+	XMFLOAT4 xmf4_pos;
+	XMFLOAT4 xmf4_rot;
+
+	PhysicsPoint* GetPhysicsPoint() { return pp; }
+	RigidBody*    GetRigidBody() { return rb; }
+
 	XMFLOAT3 GetRightVector() const { return m_Rightvector; }
 	XMFLOAT3 GetLookVector() const { return m_Lookvector; }
 	XMFLOAT3 GetUpVector() const { return m_Upvector; }
 	bool	GetAirbone() const { return m_airbone; }
 	void	SetAirbone(bool flag) { m_airbone = flag; }
-	PhysicsPoint* GetPhysicsPoint() { return pp; }
+	void    SetAlive(bool flag) { m_alive = flag; }
+	bool    GetAlive() const { return m_alive; }
+	void SetCenterPos4f(float x, float y, float z, float w) { m_pos4f.x = x; m_pos4f.y = y; m_pos4f.z = z; m_pos4f.w = w; }
+	void SetCenterPos3f(float x, float y, float z) { m_pos4f.x = x; m_pos4f.y = y; m_pos4f.z = z; }
+	void SetCenterPos4f(const XMFLOAT4& pos) { m_pos4f.x = pos.x; m_pos4f.y = pos.y; m_pos4f.z = pos.z; m_pos4f.w = pos.w; }
+	void SetCenterPos3f(const XMFLOAT3& pos) { m_pos4f.x = pos.x; m_pos4f.y = pos.y; m_pos4f.z = pos.z; }
+	void SetRotatePos4f(const XMFLOAT4& rot) { m_rot4f.x = rot.x; m_rot4f.y = rot.y; m_rot4f.z = rot.z; m_rot4f.w = rot.w; }
+	XMFLOAT4 GetRotatePos4f() const { return XMFLOAT4(m_rot4f.x, m_rot4f.y, m_rot4f.z, m_rot4f.z); }
 	XMFLOAT4 GetCenterPos4f() const { return XMFLOAT4(m_pos4f.x, m_pos4f.y, m_pos4f.z, m_pos4f.w); }
 	XMFLOAT3 GetCenterPos3f() const { return XMFLOAT3(m_pos4f.x, m_pos4f.y, m_pos4f.z); }
 
-	void UpdateUpvector();
-	void UpdateLookvector();
-	void UpdatePPosCenterPos();
-	virtual ~CMonoObject();
+public:
+	virtual void AfterGravitySystem(double deltime);
+	virtual void GravitySystem(double deltime);
+	virtual void Tick(double deltime);
+	virtual void Tick(double deltime, Position& pos4f);
+
+	virtual void UpdateUpvector();
+	virtual void UpdateLookvector();
+	virtual void UpdatePPosCenterPos();
 };
 

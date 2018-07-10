@@ -135,7 +135,8 @@ void CStaticObject::AfterGravitySystem(float deltime)
 	float hby = pp->GetHalfBox().y;
 	if (ppy - hby < 0)
 	{
-		XMFLOAT3 gp = pp->GetPosition();
+		//XMFLOAT3 gp = pp->GetPosition();
+		XMFLOAT4 gp = pp->GetPosition();
 		gp.y += hby - ppy;
 		UpdatePPosCenterPos();
 		auto v = pp->GetVelocity();
@@ -186,7 +187,8 @@ NormalBoxObject::NormalBoxObject(unsigned short id)
 	UpdateLookvector();
 	UpdateUpvector();
 
-	pp->SetPosition(m_pos4f.x, m_pos4f.y, m_pos4f.z);
+	//pp->SetPosition(m_pos4f.x, m_pos4f.y, m_pos4f.z);
+	pp->SetPosition(m_pos4f.x, m_pos4f.y, m_pos4f.z, m_pos4f.w);
 	pp->SetHalfBox(5, 5, 5);
 	pp->SetDamping(0.5f);
 	pp->SetBounce(false);
@@ -241,7 +243,8 @@ SmallWallObject::SmallWallObject(unsigned short id)
 	UpdateLookvector();
 	UpdateUpvector();
 
-	pp->SetPosition(m_pos4f.x, m_pos4f.y, m_pos4f.z);
+	//pp->SetPosition(m_pos4f.x, m_pos4f.y, m_pos4f.z);
+	pp->SetPosition(m_pos4f.x, m_pos4f.y, m_pos4f.z, m_pos4f.w);
 	pp->SetHalfBox(20, 10, 5);
 	pp->SetDamping(0.5f);
 	pp->SetBounce(false);
@@ -295,7 +298,9 @@ BigWallObject::BigWallObject(unsigned short id)
 	UpdateLookvector();
 	UpdateUpvector();
 
-	pp->SetPosition(m_pos4f.x, m_pos4f.y, m_pos4f.z);
+	//pp->SetPosition(m_pos4f.x, m_pos4f.y, m_pos4f.z);
+
+	pp->SetPosition(m_pos4f.x, m_pos4f.y, m_pos4f.z, m_pos4f.w);
 	pp->SetHalfBox(350, 50, 5);
 	pp->SetDamping(0.5f);
 	pp->SetBounce(false);
@@ -351,7 +356,9 @@ Building::Building(unsigned short id)
 	UpdateLookvector();
 	UpdateUpvector();
 
-	pp->SetPosition(m_pos4f.x, m_pos4f.y, m_pos4f.z);
+	//pp->SetPosition(m_pos4f.x, m_pos4f.y, m_pos4f.z);
+	
+	pp->SetPosition(m_pos4f.x, m_pos4f.y, m_pos4f.z, m_pos4f.w);
 	pp->SetHalfBox(15, 45, 15);
 	pp->SetDamping(0.5f);
 	pp->SetBounce(false);
@@ -365,4 +372,111 @@ Building::Building(unsigned short id)
 	m_stc_sobjdata.Rotate_status = m_rot4f;
 	m_stc_sobjdata.type = m_type;
 	//
+}
+
+RigidCubeObject::RigidCubeObject(unsigned int id)
+{
+	m_OffLookvector = XMFLOAT3(0, 0, 1);
+	m_OffRightvector = XMFLOAT3(1, 0, 0);
+
+	UpdateLookvector();
+
+	m_fixed = false;
+	m_ability.attack = 0;
+	m_ability.orignHP = 100;
+	m_ability.curHP = 100;
+	m_godmode = true;
+	m_ability.speed = 0;
+
+	rb = new RigidBody();
+
+	XMFLOAT4 xmf4 = { m_pos4f.x, m_pos4f.y, m_pos4f.z, m_pos4f.w };
+	rb->SetPosition(&xmf4);
+	rb->SetHalfBox(10, 10, 10);
+	rb->SetDamping(0.5f, 0.38f);
+	rb->SetBounce(false);
+	rb->SetMass(1.5);
+	rb->SetIMoment(10, 10, 10);
+
+	XMFLOAT4 Orient = { 0,0,0,1 };
+	rb->SetOrient(&Orient);
+
+	XMFLOAT3 testForce{ -5,-3,2 };
+	XMFLOAT3 testPoint{ -15, 5,-5 };
+
+	rb->AddForcePoint(testForce, testPoint);
+	rb->integrate(0.1);
+
+}
+
+void RigidCubeObject::Tick(double deltime)
+{
+	if (rb != nullptr)
+		rb->integrate(deltime);
+}
+
+void RigidCubeObject::Collision(unordered_set<RigidCubeObject*>* rbobjs, double deltime)
+{
+	for (auto iter = rbobjs->begin(); iter != rbobjs->end(); ++iter)
+	{
+		if ((*iter) != this)
+		{
+			if ((*iter)->rb != nullptr)
+			{
+				bool test = rb->CollisionTest(*(*iter)->rb, m_Lookvector, m_Rightvector, m_Upvector, (*iter)->m_Lookvector, (*iter)->m_Rightvector, (*iter)->m_Upvector);
+
+				if (test)
+				{
+					if (rb->CollisionPointVector[0].pAxis.y > 0)
+					{
+						rb->SetVelocity(rb->GetVelocity().x, 0, rb->GetVelocity().z);
+						m_airbone = false;
+					}
+
+					if (rb->CollisionPointVector[0].pAxis.y < 0)
+					{
+						(*iter)->rb->SetVelocity((*iter)->rb->GetVelocity().x, 0, (*iter)->rb->GetVelocity().z);
+						(*iter)->m_airbone = false;
+					}
+
+					rb->ResolvePenetration(*(*iter)->rb, deltime);
+				}
+			}
+			else
+			{
+				if ((*iter)->pp != nullptr)
+				{
+					RigidBody ppConvertrb;
+					ppConvertrb.SetVelocity((*iter)->pp->GetVelocity());
+					ppConvertrb.SetPosition(&(*iter)->GetCenterPos4f());
+					ppConvertrb.SetMass((*iter)->pp->GetMass(false));
+					ppConvertrb.SetHalfBox((*iter)->pp->GetHalfBox().x, (*iter)->pp->GetHalfBox().y, (*iter)->pp->GetHalfBox().z);
+					ppConvertrb.SetE(1);
+					ppConvertrb.SetDamping((*iter)->pp->GetDamping(), 0);
+					ppConvertrb.SetBounce((*iter)->pp->GetBounce());
+					ppConvertrb.SetAngularVelocity(0, 0, 0);
+					ppConvertrb.SetAccel((*iter)->pp->GetAccel());
+
+
+					bool test = rb->CollisionTest(ppConvertrb, m_Lookvector, m_Rightvector, m_Upvector,
+						(*iter)->GetLookVector(), (*iter)->GetRightVector(), (*iter)->GetUpVector());
+					if (test)
+					{
+						if (rb->CollisionPointVector[0].pAxis.y < 0)
+						{
+							ppConvertrb.SetVelocity(ppConvertrb.GetVelocity().x, 0, ppConvertrb.GetVelocity().z);
+							(*iter)->m_airbone = false;
+						}
+
+						rb->AmendTime = 0;
+						rb->ResolvePenetration(ppConvertrb, deltime);
+						(*iter)->pp->SetVelocity(ppConvertrb.GetVelocity());
+						*(*iter)->pp->CenterPos = ppConvertrb.GetPosition();
+						(*iter)->pp->SetAccel(ppConvertrb.GetAccel());
+					}
+
+				}
+			}
+		}
+	}
 }

@@ -162,7 +162,7 @@ PhysicsPoint::PhysicsPoint()
 {
 	InverseMass = 1;
 	Velocity = XMFLOAT3(0, 0, 0);
-	CenterPos = XMFLOAT4(0, 0, 0, 0);
+	//CenterPos = XMFLOAT3(0, 0, 0);
 	damping = 0.99;
 	TotalForce = XMFLOAT3(0, 0, 0);
 	Accel = XMFLOAT3(0, 0, 0);
@@ -174,7 +174,7 @@ PhysicsPoint::~PhysicsPoint()
 {
 }
 
-void PhysicsPoint::integrate(double DeltaTime, XMFLOAT4* ObjPos, XMFLOAT3* ObjVel)
+void PhysicsPoint::integrate(double DeltaTime)
 {
 
 	if (InverseMass <= 0.0f)
@@ -182,9 +182,11 @@ void PhysicsPoint::integrate(double DeltaTime, XMFLOAT4* ObjPos, XMFLOAT3* ObjVe
 
 	assert(DeltaTime >= 0);
 
-	XMFLOAT3 temp_objPos;
-	temp_objPos.x = ObjPos->x; temp_objPos.y = ObjPos->y; temp_objPos.z = ObjPos->z;
-	XMVECTOR centerpos = XMLoadFloat3(&temp_objPos);
+	//XMFLOAT3 temp_objPos;
+	//temp_objPos.x = ObjPos->x; temp_objPos.y = ObjPos->y; temp_objPos.z = ObjPos->z;
+	//XMVECTOR centerpos = XMLoadFloat3(&temp_objPos);
+	XMVECTOR centerpos = XMLoadFloat4(CenterPos);
+
 	//중력에 의해 속도가 너무 빨라질경우를 대비한 if문이다.
 	//-40보다 더 늦게 떨어지면 그대로 가되, -40이상의 속도면 -40으로 고정한다.
 	//tempV를 이용한 이유는 실제 속도를 -40으로 변경해버리면 댐핑이후에 속도가 이전보다 느려지기 때문이다.
@@ -222,13 +224,11 @@ void PhysicsPoint::integrate(double DeltaTime, XMFLOAT4* ObjPos, XMFLOAT3* ObjVe
 	velocity *= powf(damping, DeltaTime);
 	float e = 0;
 	XMStoreFloat(&e, XMVector3Length(velocity));
+
 	if (e <= MMPE_EPSILON)
 		velocity = XMVectorZero();
-
-
 	//결과 물을 저장한다.
-	//XMStoreFloat3(&CenterPos, centerpos);
-	XMStoreFloat4(&CenterPos, centerpos);
+	XMStoreFloat4(CenterPos, centerpos);
 	XMStoreFloat3(&Velocity, velocity);
 	XMStoreFloat3(&Accel, accel);
 
@@ -238,10 +238,10 @@ void PhysicsPoint::integrate(double DeltaTime, XMFLOAT4* ObjPos, XMFLOAT3* ObjVe
 
 	//계산된 결과의 중점과 속도 정보를 PhysicsPoint를 가지고있는 오브젝트가 직접가지고 있어야 한다면
 
-	if (ObjPos != NULL)//만약 게임오브젝트가 따로 가지고 있는 중점 변수가 있으면
-		*ObjPos = XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, ObjPos->w);
-	if (ObjVel != NULL)//만약 게임오브젝트가 따로 가지고 있는 속도 변수가 있으면
-		*ObjVel = Velocity;
+	//if (ObjPos != NULL)//만약 게임오브젝트가 따로 가지고 있는 중점 변수가 있으면
+	//	*ObjPos = XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, ObjPos->w);
+	//if (ObjVel != NULL)//만약 게임오브젝트가 따로 가지고 있는 속도 변수가 있으면
+	//	*ObjVel = Velocity;
 }
 
 void PhysicsPoint::SetMass(float M)
@@ -278,26 +278,31 @@ void MiniPhysicsEngineG9::PhysicsPoint::SetBounce(bool bounce)
 	Bounce = bounce;
 }
 
-/*
-void PhysicsPoint::SetPosition(XMFLOAT3 & pos)
+void PhysicsPoint::SetPosition(XMFLOAT4* pos)
 {
 	CenterPos = pos;
-}
-*/
-
-void PhysicsPoint::SetPosition(XMFLOAT4 & pos)
-{
-	CenterPos = XMFLOAT4(pos.x, pos.y, pos.z, pos.w);
-}
-void PhysicsPoint::SetPosition(float x, float y, float z, float w)
-{
-	CenterPos = XMFLOAT4(x, y, z, w);
 }
 
 XMFLOAT4 PhysicsPoint::GetPosition()
 {
+	return *CenterPos;
+}
+
+/*
+void PhysicsPoint::SetPosition(XMFLOAT4* pos)
+{
+	CenterPos = XMFLOAT4(pos->x, pos->y, pos->z, pos->w);
+}
+void PhysicsPoint::SetPosition(float x, float y, float z)
+{
+	CenterPos = XMFLOAT4(x, y, z, 0);
+}
+
+XMFLOAT3 PhysicsPoint::GetPosition()
+{
 	return CenterPos;
 }
+*/
 
 void PhysicsPoint::SetVelocity(XMFLOAT3 & V)
 {
@@ -373,8 +378,7 @@ XMFLOAT3 MiniPhysicsEngineG9::PhysicsPoint::GetHalfBox()
 bool MiniPhysicsEngineG9::PhysicsPoint::CollisionTest(PhysicsPoint & p2, XMFLOAT3 & l1, XMFLOAT3 & r1, XMFLOAT3 & u1, XMFLOAT3 & l2, XMFLOAT3 & r2, XMFLOAT3 & u2)
 {
 	//먼저 구 오브젝트로 검사한다.
-	//float L = FloatLength(Float3Add(CenterPos, p2.CenterPos, false));
-	float L = FloatLength(Float4Add(CenterPos, p2.CenterPos, false));
+	float L = FloatLength(Float4Add(*CenterPos, *p2.CenterPos, false));
 	if (GetRad() + p2.GetRad() > L)
 	{
 		//15번 검사를 해야하며, 각 축의 정보는 다음과같다.
@@ -539,7 +543,7 @@ void MiniPhysicsEngineG9::PhysicsPoint::ResolveVelocity(PhysicsPoint & p2, XMFLO
 }
 //겹쳐질경우 서로를 밀어냄. 키보드 입력일땐 자신만 밀려남
 //공중일때가 좀 문제임 공중이면 상대방이 밀릴수있음 왜냐하면 이게 정상인게
-//공중상태로 내려갈때는 중력만 영향을 받게되므로 키보드 입력이 아니게됨 이때 충돌이 일어나면
+//공중상태로 내려갈때는 중력만 영향을 받게되므s로 키보드 입력이 아니게됨 이때 충돌이 일어나면
 //대각선으로 보통 밀어내게 되고 이렇게 되면 y값을 제외하면 x나 z값이 0이아니게 되면서 밀리는것.
 //만약 이게 마음에 안들면 x와 z의 속도가 0이면 밀려나지 않도록 하는 방법이 있음.
 //물론 이게 또 문제가 뭐냐면 아예 완전히 겹쳐있는 순간에 안움직이고 있으면 안떼어내진다.
@@ -565,20 +569,20 @@ void MiniPhysicsEngineG9::PhysicsPoint::ResolvePenetration(PhysicsPoint & p2, do
 	auto p1 = GetPosition();
 	auto result1 = Float4Add(p1, XMFloat3to4(m1));
 
-	//auto result1 = Float3Add(p1, m1);
+	*CenterPos = result1;
+
 	//SetPosition(result1);//자신을 옮긴다.
-	CenterPos = result1;
-
-
 
 
 	XMFLOAT3 m2(-movevector.x*p2.GetMass(), -movevector.y*p2.GetMass(), -movevector.z*p2.GetMass());
 	auto pp2 = p2.GetPosition();
+	auto result2 = Float4Add(pp2, XMFloat3to4(m2));
+	*p2.CenterPos = result2;//겹쳐진 대상을 옮긴다.
+
 	//auto result2 = Float3Add(pp2, m2);
 	//p2.SetPosition(result2);//겹쳐진 대상을 옮긴다.
 
-	auto result2 = Float4Add(pp2, XMFloat3to4(m2));
-	p2.CenterPos = result2;//겹쳐진 대상을 옮긴다.
+
 
 }
 
@@ -959,7 +963,6 @@ void MiniPhysicsEngineG9::GeneratorAnchor::SetAnchorSpring(XMFLOAT3 & a, float k
 
 void MiniPhysicsEngineG9::GeneratorAnchor::Update(float DeltaTime, PhysicsPoint & pp)
 {
-	//XMVECTOR objpos = XMLoadFloat3(&pp.GetPosition());
 	XMVECTOR objpos = XMLoadFloat4(&pp.GetPosition());
 	XMVECTOR ancpos = XMLoadFloat3(&AnchorPos);
 
@@ -1013,7 +1016,7 @@ MiniPhysicsEngineG9::RigidBody::~RigidBody()
 {
 }
 
-void MiniPhysicsEngineG9::RigidBody::integrate(float DeltaTime)
+void MiniPhysicsEngineG9::RigidBody::integrate(double DeltaTime)
 {
 	//질량이 0 이하면 벽같은 것이므로 움직일 필요가 없다.
 	if (InverseMass <= 0.0f)
@@ -2137,12 +2140,27 @@ bool MiniPhysicsEngineG9::RigidBody::CollisionTest(RigidBody & rb2, XMFLOAT3 & l
 						CollisionPointVector.push_back(newPoint);
 
 					}
-					else//점3개이상이면 중점5로
+					else if (lastPoints.size() >= 3)//점3개이상이면 중점5로
 					{
 						CollisionPointVector.push_back(ColPoint2[4]);
 					}
-
-
+					else//최종적으로 못찾은 경우
+					{
+						//면과 면 충돌인데 뒤집어서 검사해도 없다면, 두번째 오브젝트의 중점에 가장 가까운 첫번째 오브젝트의 충돌점을 선택한다.
+						float MinLn = 10000;
+						int index = 0;
+						for (int g = 0; g < 5; g++)
+						{
+							auto vl = Float4Add(ColPoint2[4].Pos, ColPoint[g].Pos, false);
+							auto ml = FloatLength(vl);
+							if (MinLn > ml)
+							{
+								MinLn = ml;
+								index = g;
+							}
+						}
+						CollisionPointVector.push_back(ColPoint[index]);
+					}
 				}
 			}
 			else if (lastPoints.size() == 1)//점1개면 그 점을 충돌점으로 한다.
@@ -2201,7 +2219,7 @@ bool MiniPhysicsEngineG9::RigidBody::CollisionTest(RigidBody & rb2, XMFLOAT3 & l
 }
 
 
-void MiniPhysicsEngineG9::RigidBody::CollisionResolve(RigidBody & rb2, XMFLOAT3 & CollisionN, float DeltaTime, float i1, float i2, float amendtime)
+void MiniPhysicsEngineG9::RigidBody::CollisionResolve(RigidBody & rb2, XMFLOAT3 & CollisionN, double DeltaTime, float i1, float i2, float amendtime)
 {
 	ResolveVelocity(rb2, CollisionN, DeltaTime, i1, i2, amendtime);
 	ResolvePenetration(rb2, DeltaTime);
@@ -2213,7 +2231,7 @@ float MiniPhysicsEngineG9::RigidBody::GetSeparateVelocity(RigidBody & rb2, XMFLO
 	return 0.0f;
 }
 
-void MiniPhysicsEngineG9::RigidBody::ResolveVelocity(RigidBody & rb2, XMFLOAT3 & CollisionN, float DeltaTime, float i1, float i2, float amendtime)
+void MiniPhysicsEngineG9::RigidBody::ResolveVelocity(RigidBody & rb2, XMFLOAT3 & CollisionN, double DeltaTime, float i1, float i2, float amendtime)
 {
 	//고정된 물체가아니면.
 	if (rb2.GetMass() > MMPE_EPSILON)
@@ -2238,7 +2256,7 @@ void MiniPhysicsEngineG9::RigidBody::ResolveVelocity(RigidBody & rb2, XMFLOAT3 &
 	}
 }
 
-void MiniPhysicsEngineG9::RigidBody::ResolvePenetration(RigidBody & rb2, float DeltaTime)
+void MiniPhysicsEngineG9::RigidBody::ResolvePenetration(RigidBody & rb2, double DeltaTime)
 {
 	if (CollisionPointVector[0].penetration < MMPE_EPSILON)//밀어낼 필요가 없는경우
 		return;
@@ -2281,7 +2299,7 @@ float MiniPhysicsEngineG9::RigidBody::GetE()
 }
 
 
-float MiniPhysicsEngineG9::RigidBody::CalculateImpulse(CollisionPoint& cp, RigidBody* rb2, float deltatime, float E)
+float MiniPhysicsEngineG9::RigidBody::CalculateImpulse(CollisionPoint& cp, RigidBody* rb2, double deltatime, float E)
 {
 
 	float finalE = -(1 + E);
@@ -2377,5 +2395,6 @@ float MiniPhysicsEngineG9::RigidBody::CalculateImpulse(CollisionPoint& cp, Rigid
 		return abs((First / Second)*deltatime);
 	else
 		return 0;
+
 
 }

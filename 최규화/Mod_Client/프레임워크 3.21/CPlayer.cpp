@@ -575,6 +575,7 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 				파동파위치.y += -PlayerObject->pp->GetHalfBox().y;
 				float impurse = 20000;
 				float rad = 150.f;//범위
+
 				//다이나믹 오브젝트와 리지드오브젝트를 날려버린다.
 				for (auto l : scene->DynamicObject)
 				{
