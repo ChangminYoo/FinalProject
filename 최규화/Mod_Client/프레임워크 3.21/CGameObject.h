@@ -160,6 +160,7 @@ public:
 	
 	Player_Data			 m_player_data;
 	StaticObject_Info	 m_sobj_data;
+	RigidbodyData		 m_rigidbody_data;
 	STC_BulletObject_Info	 m_bullet_data;
 
 	CPlayer* m_player{ nullptr };

@@ -429,6 +429,13 @@ void Scene::CreateGameObject()
 		++player_num;
 	}
 
+	for (auto rbobj : RigidObject)
+	{
+		rbobj->m_rigidbody_data.id = player_num;
+		++player_num;
+	}
+	player_num = 0;
+	
 	//플레이어의 오브젝트 설정. 이건 나중에 바꿔야함.
 	Player->SetPlayer(DynamicObject.front());
 	Player->PlayerObject->Blending = false;
@@ -821,10 +828,10 @@ void Scene::SET_SOBJECT_BY_SERVER_DATA(const unsigned short & id, StaticObject_I
 {
 	switch (type)
 	{
-	case STATIC_OBJECT_TYPE::Box:
-	case STATIC_OBJECT_TYPE::SmallWall:
-	case STATIC_OBJECT_TYPE::BigWall:
-	case STATIC_OBJECT_TYPE::NormalBuilding:
+	case INSTALLED_OBJECT_TYPE::Box:
+	case INSTALLED_OBJECT_TYPE::SmallWall:
+	case INSTALLED_OBJECT_TYPE::BigWall:
+	case INSTALLED_OBJECT_TYPE::NormalBuilding:
 	{
 		//클라는 0 ~ 77까지의 스테틱오브젝트가 순서대로 ID가 저장된 상태
 		//서버에서 오는 데이터는 뒤죽박죽 섞인 ID를 갖는 스테틱오브젝트정보
@@ -848,6 +855,30 @@ void Scene::SET_SOBJECT_BY_SERVER_DATA(const unsigned short & id, StaticObject_I
 	}
 	break;
 	default:
+		break;
+	}
+}
+
+void Scene::SET_RIGIDOBJECT_BY_SERVER_DATA(const unsigned int & id, RigidbodyData & rbobjdata, const unsigned char & type)
+{
+	switch (type)
+	{
+		case INSTALLED_OBJECT_TYPE::Rigidbodybox:
+		{
+			for (auto rigid : RigidObject)
+			{
+				if (rigid->m_rigidbody_data.id == rbobjdata.id)
+				{
+					rigid->m_rigidbody_data = move(rbobjdata);
+
+					rigid->Orient = { rbobjdata.rot4f.x, rbobjdata.rot4f.y, rbobjdata.rot4f.z, rbobjdata.rot4f.w };
+					rigid->CenterPos = { rbobjdata.pos4f.x, rbobjdata.pos4f.y, rbobjdata.pos4f.z, rbobjdata.pos4f.w };
+					
+					rigid->rb->SetPosition(&rigid->CenterPos);
+					break;
+				}
+			}
+		}
 		break;
 	}
 }

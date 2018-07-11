@@ -37,7 +37,7 @@ public:
 	RigidCubeObject(unsigned int id);
 	void AmendObject(XMFLOAT3 axis, float radian, CMonoObject *obj);
 	void RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, double deltime, CMonoObject *obj);
-	STC_RigidbodyData m_stc_robjdata;
+	RigidbodyData m_stc_robjdata;
 
 public:
 	virtual void GravitySystem(double deltime) override;

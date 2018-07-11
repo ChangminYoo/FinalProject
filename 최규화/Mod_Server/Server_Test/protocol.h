@@ -184,7 +184,7 @@ struct STC_SkillData
 	char		   alive;
 };
 
-struct STC_RigidbodyData
+struct RigidbodyData
 {
 	Position       pos4f;
 	Rotation	   rot4f;
@@ -284,9 +284,9 @@ typedef struct Server_To_Client_Static_Object
 
 typedef struct Server_To_Client_Rigidbody_Object
 {
-	unsigned char packet_size = sizeof(STC_RigidbodyData) + sizeof(unsigned char) + sizeof(unsigned char);
+	unsigned char packet_size = sizeof(RigidbodyData) + sizeof(unsigned char) + sizeof(unsigned char);
 	unsigned char pack_type = PACKET_PROTOCOL_TYPE::RIGIDBODY_OBJECT;
-	STC_RigidbodyData rbobj_data;
+	RigidbodyData rbobj_data;
 
 }STC_RigidbodyObject;
 

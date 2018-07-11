@@ -3009,6 +3009,7 @@ RigidCubeObject::RigidCubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandL
 	rb->AddForcePoint(testForce, testPoint);
 	rb->integrate(0.1f);
 
+
 }
 
 void RigidCubeObject::Tick(const GameTimer & gt)

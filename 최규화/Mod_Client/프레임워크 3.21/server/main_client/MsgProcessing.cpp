@@ -72,7 +72,6 @@ switch (packet[1])
 
 		scene.SET_PLAYER_BY_SEVER_DATA(rot_data->id, new_rotdata, packet[1]);
 	}
-
 	break;
 
 	case PACKET_PROTOCOL_TYPE::STATIC_OBJECT:
@@ -81,7 +80,14 @@ switch (packet[1])
 
 		scene.SET_SOBJECT_BY_SERVER_DATA(mysobjdata->sobj_data.ID, mysobjdata->sobj_data, mysobjdata->sobj_data.type);
 	}
+	break;
 
+	case PACKET_PROTOCOL_TYPE::RIGIDBODY_OBJECT:
+	{
+		auto myrbobjdata = reinterpret_cast<STC_RigidbodyObject*>(packet);
+
+		scene.SET_RIGIDOBJECT_BY_SERVER_DATA(myrbobjdata->rbobj_data.id, myrbobjdata->rbobj_data, myrbobjdata->rbobj_data.type);
+	}
 	break;
 
 	case PACKET_PROTOCOL_TYPE::PLAYER_ATTACK:
