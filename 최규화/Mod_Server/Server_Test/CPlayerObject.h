@@ -154,6 +154,5 @@ public:
 	void Collision(unordered_set<CStaticObject*>* sobjs, double deltime);
 
 
-
 };
 

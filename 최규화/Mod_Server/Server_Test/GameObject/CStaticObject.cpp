@@ -1034,6 +1034,7 @@ void RigidCubeObject::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance,
 
 		}
 
+		UpdateRPosCenterPos();
 
 		allpoint.clear();
 		tempcollisionpoint.clear();
@@ -1135,74 +1136,135 @@ void RigidCubeObject::Collision(unordered_set<RigidCubeObject*>* rbobjs, double 
 	}
 }
 
-/*
+void RigidCubeObject::Collision(unordered_set<CStaticObject*>* sobjs, double deltime)
+{
+	for (auto iter = sobjs->begin(); iter != sobjs->end(); ++iter)
+	{	
+		if ((*iter)->GetPhysicsPoint() != nullptr)
+		{
+			RigidBody ppConvertrb;
+			ppConvertrb.SetVelocity((*iter)->GetPhysicsPoint()->GetVelocity());
+			ppConvertrb.SetPosition(&(*iter)->GetCenterPos4f());
+			ppConvertrb.SetMass((*iter)->GetPhysicsPoint()->GetMass(false));
+			ppConvertrb.SetHalfBox((*iter)->GetPhysicsPoint()->GetHalfBox().x, (*iter)->GetPhysicsPoint()->GetHalfBox().y, (*iter)->GetPhysicsPoint()->GetHalfBox().z);
+			ppConvertrb.SetE(1);
+			ppConvertrb.SetDamping((*iter)->GetPhysicsPoint()->GetDamping(), 0);
+			ppConvertrb.SetBounce((*iter)->GetPhysicsPoint()->GetBounce());
+			ppConvertrb.SetAngularVelocity(0, 0, 0);
+			ppConvertrb.SetAccel((*iter)->GetPhysicsPoint()->GetAccel());
+
+
+			bool test = rb->CollisionTest(ppConvertrb, m_Lookvector, m_Rightvector, m_Upvector,
+				(*iter)->GetLookVector(), (*iter)->GetRightVector(), (*iter)->GetUpVector());
+
+			if (test)
+			{
+				if (rb->CollisionPointVector[0].pAxis.y < 0)
+				{
+					ppConvertrb.SetVelocity(ppConvertrb.GetVelocity().x, 0, ppConvertrb.GetVelocity().z);
+					(*iter)->SetAirbone(false);
+				}
+
+				rb->AmendTime = 0;
+				rb->ResolvePenetration(ppConvertrb, deltime);
+				(*iter)->GetPhysicsPoint()->SetVelocity(ppConvertrb.GetVelocity());
+				*(*iter)->GetPhysicsPoint()->CenterPos = ppConvertrb.GetPosition();
+				(*iter)->GetPhysicsPoint()->SetAccel(ppConvertrb.GetAccel());
+
+				(*iter)->UpdatePPosCenterPos();
+			}
+		}		
+
+
+	}
+}
+
+void RigidCubeObject::Collision(vector<CPlayerObject*>* clients, double deltime)
+{
+	for (auto iter = clients->begin(); iter != clients->end(); ++iter)
+	{
+		if ((*iter)->GetPhysicsPoint() != nullptr)
+		{
+			RigidBody ppConvertrb;
+			ppConvertrb.SetVelocity((*iter)->GetPhysicsPoint()->GetVelocity());
+			ppConvertrb.SetPosition(&(*iter)->GetCenterPos4f());
+			ppConvertrb.SetMass((*iter)->GetPhysicsPoint()->GetMass(false));
+			ppConvertrb.SetHalfBox((*iter)->GetPhysicsPoint()->GetHalfBox().x, (*iter)->GetPhysicsPoint()->GetHalfBox().y, (*iter)->GetPhysicsPoint()->GetHalfBox().z);
+			ppConvertrb.SetE(1);
+			ppConvertrb.SetDamping((*iter)->GetPhysicsPoint()->GetDamping(), 0);
+			ppConvertrb.SetBounce((*iter)->GetPhysicsPoint()->GetBounce());
+			ppConvertrb.SetAngularVelocity(0, 0, 0);
+			ppConvertrb.SetAccel((*iter)->GetPhysicsPoint()->GetAccel());
+
+
+			bool test = rb->CollisionTest(ppConvertrb, m_Lookvector, m_Rightvector, m_Upvector,
+				(*iter)->GetLookVector(), (*iter)->GetRightVector(), (*iter)->GetUpVector());
+
+			if (test)
+			{
+				if (rb->CollisionPointVector[0].pAxis.y < 0)
+				{
+					ppConvertrb.SetVelocity(ppConvertrb.GetVelocity().x, 0, ppConvertrb.GetVelocity().z);
+					(*iter)->SetAirbone(false);
+				}
+
+				rb->AmendTime = 0;
+				rb->ResolvePenetration(ppConvertrb, deltime);
+				(*iter)->GetPhysicsPoint()->SetVelocity(ppConvertrb.GetVelocity());
+				*(*iter)->GetPhysicsPoint()->CenterPos = ppConvertrb.GetPosition();
+				(*iter)->GetPhysicsPoint()->SetAccel(ppConvertrb.GetAccel());
+
+				(*iter)->UpdatePPosCenterPos();
+			}
+		}
+
+
+	}
+}
+
+
 void RigidCubeObject::Collision(list<CBulletObject*>* bullets, double deltime)
 {
 	for (auto iter = bullets->begin(); iter != bullets->end(); ++iter)
 	{
-		if ((*iter)->GetRigidBody() != nullptr)
+		if ((*iter)->GetPhysicsPoint() != nullptr)
 		{
-			bool test = rb->CollisionTest(*(*iter)->GetRigidBody(), m_Lookvector, m_Rightvector, m_Upvector, (*iter)->GetLookVector(), (*iter)->GetRightVector(), (*iter)->GetUpVector());
+			RigidBody ppConvertrb;
+			ppConvertrb.SetVelocity((*iter)->GetPhysicsPoint()->GetVelocity());
+			ppConvertrb.SetPosition(&(*iter)->GetCenterPos4f());
+			ppConvertrb.SetMass((*iter)->GetPhysicsPoint()->GetMass(false));
+			ppConvertrb.SetHalfBox((*iter)->GetPhysicsPoint()->GetHalfBox().x, (*iter)->GetPhysicsPoint()->GetHalfBox().y, (*iter)->GetPhysicsPoint()->GetHalfBox().z);
+			ppConvertrb.SetE(1);
+			ppConvertrb.SetDamping((*iter)->GetPhysicsPoint()->GetDamping(), 0);
+			ppConvertrb.SetBounce((*iter)->GetPhysicsPoint()->GetBounce());
+			ppConvertrb.SetAngularVelocity(0, 0, 0);
+			ppConvertrb.SetAccel((*iter)->GetPhysicsPoint()->GetAccel());
+
+
+			bool test = rb->CollisionTest(ppConvertrb, m_Lookvector, m_Rightvector, m_Upvector,
+				(*iter)->GetLookVector(), (*iter)->GetRightVector(), (*iter)->GetUpVector());
 
 			if (test)
 			{
-				if (rb->CollisionPointVector[0].pAxis.y > 0)
-				{
-					rb->SetVelocity(rb->GetVelocity().x, 0, rb->GetVelocity().z);
-					m_airbone = false;
-				}
-
 				if (rb->CollisionPointVector[0].pAxis.y < 0)
 				{
-					(*iter)->GetRigidBody()->SetVelocity((*iter)->GetRigidBody()->GetVelocity().x, 0, (*iter)->GetRigidBody()->GetVelocity().z);
+					ppConvertrb.SetVelocity(ppConvertrb.GetVelocity().x, 0, ppConvertrb.GetVelocity().z);
 					(*iter)->SetAirbone(false);
 				}
 
-				rb->ResolvePenetration(*(*iter)->GetRigidBody(), deltime);
-			}
-		}
-		else
-		{
-			if ((*iter)->GetPhysicsPoint() != nullptr)
-			{
-				RigidBody ppConvertrb;
-				ppConvertrb.SetVelocity((*iter)->GetPhysicsPoint()->GetVelocity());
-				ppConvertrb.SetPosition(&(*iter)->GetCenterPos4f());
-				ppConvertrb.SetMass((*iter)->GetPhysicsPoint()->GetMass(false));
-				ppConvertrb.SetHalfBox((*iter)->GetPhysicsPoint()->GetHalfBox().x, (*iter)->GetPhysicsPoint()->GetHalfBox().y, (*iter)->GetPhysicsPoint()->GetHalfBox().z);
-				ppConvertrb.SetE(1);
-				ppConvertrb.SetDamping((*iter)->GetPhysicsPoint()->GetDamping(), 0);
-				ppConvertrb.SetBounce((*iter)->GetPhysicsPoint()->GetBounce());
-				ppConvertrb.SetAngularVelocity(0, 0, 0);
-				ppConvertrb.SetAccel((*iter)->GetPhysicsPoint()->GetAccel());
+				(*iter)->SetAlive(false);
+				//충돌 처리. 충격량을 가하고 겹침부분해소
+				rb->CollisionResolve(ppConvertrb, XMFLOAT3(0, 0, 0), deltime, 6000, 1400, 1.5);
 
+				(*iter)->GetPhysicsPoint()->SetVelocity(ppConvertrb.GetVelocity());
+				*(*iter)->GetPhysicsPoint()->CenterPos = ppConvertrb.GetPosition();
+				(*iter)->GetPhysicsPoint()->SetAccel(ppConvertrb.GetAccel());
 
-				bool test = rb->CollisionTest(ppConvertrb, m_Lookvector, m_Rightvector, m_Upvector,
-					(*iter)->GetLookVector(), (*iter)->GetRightVector(), (*iter)->GetUpVector());
-
-				if (test)
-				{
-					if (rb->CollisionPointVector[0].pAxis.y < 0)
-					{
-						ppConvertrb.SetVelocity(ppConvertrb.GetVelocity().x, 0, ppConvertrb.GetVelocity().z);
-						(*iter)->SetAirbone(false);
-					}
-
-					(*iter)->SetAlive(false);
-					//충돌 처리. 충격량을 가하고 겹침부분해소
-					rb->CollisionResolve(ppConvertrb, XMFLOAT3(0, 0, 0), deltime, 6000, 1400, 1.5);
-
-					(*iter)->GetPhysicsPoint()->SetVelocity(ppConvertrb.GetVelocity());
-					*(*iter)->GetPhysicsPoint()->CenterPos = ppConvertrb.GetPosition();
-					(*iter)->GetPhysicsPoint()->SetAccel(ppConvertrb.GetAccel());
-					(*iter)->UpdatePPosCenterPos();
-
-				}
+				(*iter)->UpdatePPosCenterPos();
 
 			}
 		}
 
-			
+
 	}
 }
-*/

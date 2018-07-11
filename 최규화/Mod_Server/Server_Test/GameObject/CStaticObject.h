@@ -2,6 +2,9 @@
 #include <map>
 #include <unordered_set>
 
+class CPlayerObject;
+class CBulletObject;
+
 struct BasicInfo
 {
 	Position  pos;
@@ -46,7 +49,9 @@ public:
 
 	void SetUpdatedRigidybodyObject();
 	void Collision(unordered_set<RigidCubeObject*>* rbobjs, double deltime);
-	//void Collision(list<CBulletObject*>* bullets, double deltime);
+	void Collision(unordered_set<CStaticObject*>* sobjs, double deltime);
+	void Collision(vector<CPlayerObject*>* clients, double deltime);
+	void Collision(list<CBulletObject*>* bullets, double deltime);
 
 	//void Collision(vector<CPlayerObject*>* clients, double deltime);
 	//void Collision(unordered_set<CStaticObject*>* sobjs, double deltime);

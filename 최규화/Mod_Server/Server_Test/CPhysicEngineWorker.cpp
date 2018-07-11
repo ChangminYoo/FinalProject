@@ -123,7 +123,10 @@ void CPhysicEngineWorker::CollisionSystem(double deltime)
 
 	for (auto rigid : g_rigidobjs)
 	{
-
+		rigid->Collision(&g_rigidobjs, deltime);
+		rigid->Collision(&g_staticobjs, deltime);
+		rigid->Collision(&g_clients, deltime);
+		rigid->Collision(&g_bullets, deltime);
 	}
 }
 
