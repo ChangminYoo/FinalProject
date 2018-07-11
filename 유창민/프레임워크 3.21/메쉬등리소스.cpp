@@ -227,16 +227,14 @@ std::vector<ModelAnimation> ImpObject::animations;//애니메이션 데이터 저장. 메쉬
 ComPtr<ID3D12DescriptorHeap> ImpObject::SrvDescriptorHeap;//텍스처 용 힙
 CMaterial ImpObject::Mat;
 // --------------------------------------------------------------------------------------
-
-CMaterial TowerObject::Mat;
-bool TowerObject::CreateMesh;//최초로 false며 메쉬를 만든후 true가된다.
-unordered_map<string, unique_ptr<CTexture>> TowerObject::Textures;//텍스처들을 저장함
-CMesh TowerObject::Mesh;//오로지 한번만 만들어짐
-ComPtr<ID3D12DescriptorHeap> TowerObject::SrvDescriptorHeap;//텍스처 용 힙
-// --------------------------------------------------------------------------------------
-
 CMaterial BreakCartObject::Mat;
 bool BreakCartObject::CreateMesh;//최초로 false며 메쉬를 만든후 true가된다.
 unordered_map<string, unique_ptr<CTexture>> BreakCartObject::Textures;//텍스처들을 저장함
 CMesh BreakCartObject::Mesh;//오로지 한번만 만들어짐
 ComPtr<ID3D12DescriptorHeap> BreakCartObject::SrvDescriptorHeap;//텍스처 용 힙
+ // --------------------------------------------------------------------------------------
+bool ColumnObject::CreateMesh;//최초로 false며 메쉬를 만든후 true가된다.
+CMaterial ColumnObject::Mat;
+unordered_map<string, unique_ptr<CTexture>> ColumnObject::Textures;//텍스처들을 저장함
+CMesh ColumnObject::Mesh;//오로지 한번만 만들어짐
+ComPtr<ID3D12DescriptorHeap> ColumnObject::SrvDescriptorHeap;//텍스처 용 힙
