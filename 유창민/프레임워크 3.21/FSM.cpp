@@ -85,7 +85,7 @@ void FSM::CheckTarget(float DeltaTime)
 		auto l = FloatLength(v1);
 		
 		bool blind = false;
-		if (aidata.VisionLength >= l && nv1dotLook>1.73/2.0f)
+		if (aidata.VisionLength >= l && nv1dotLook>1.53/2.0f)
 		{
 			////현재는 장애물을 이용하지 못한다. 이후에 추가할것
 			//for (auto s : *StaticObj)
@@ -126,11 +126,12 @@ void FSM::CheckTarget(float DeltaTime)
 
 }
 
-FSM::FSM(CGameObject* master, list<CGameObject*>* dobj,list<CGameObject*>* sobj)
+FSM::FSM(CGameObject* master, list<CGameObject*>* dobj,list<CGameObject*>* sobj, list<CGameObject*>* bobj)
 {
 	Master = master;
 	DynamicObj = dobj;
 	StaticObj = sobj;
+	BulletObj = bobj;
 	GlobalState = state_global::Instance();
 	CurrentState = state_idle::Instance();
 	aidata.LastPosition = master->CenterPos;
@@ -184,6 +185,18 @@ state * state_global::Execute(float DeltaTime, CGameObject * master, AIdata& ada
 {
 	if (master != NULL)
 	{
+		if (adata.stack >= 5)
+		{
+			((ImpObject*)master)->fsm->BulletObj->push_back(new StoneBullet(master->device,master->commandlist,master->ParticleList,NULL,master,XMFLOAT4(0,0,0,1),NULL,master->CenterPos,XMFLOAT4(30,0,0,0)));
+			((ImpObject*)master)->fsm->BulletObj->push_back(new StoneBullet(master->device, master->commandlist, master->ParticleList, NULL, master, XMFLOAT4(0, 0, 0, 1), NULL, master->CenterPos, XMFLOAT4(-30, 0, 0, 0)));
+			((ImpObject*)master)->fsm->BulletObj->push_back(new StoneBullet(master->device, master->commandlist, master->ParticleList, NULL, master, XMFLOAT4(0, 0, 0, 1), NULL, master->CenterPos, XMFLOAT4(0, 0, 30, 0)));
+			((ImpObject*)master)->fsm->BulletObj->push_back(new StoneBullet(master->device, master->commandlist, master->ParticleList, NULL, master, XMFLOAT4(0, 0, 0, 1), NULL, master->CenterPos, XMFLOAT4(0, 0, -30, 0)));
+
+			adata.stack = 0;
+		}
+
+
+
 		float l;
 		XMFLOAT4 v1;
 		
@@ -227,6 +240,8 @@ state * state_attack::Execute(float DeltaTime, CGameObject * master, AIdata & ad
 				adata.Target->ToDamage(100);
 			else
 				adata.Target->ToDamage(20);
+
+			adata.stack += 1;
 		}
 
 		adata.FireOn = false;

@@ -119,12 +119,12 @@ float4 PS(VertexOut pin) : SV_Target
 	//CustomData1의 w가 1234 이면 노멀매핑을 쓰는것.
 	if (CustomData1.w == 1234)
 	{
-		float3 Normaltexture = gNormalMap.Sample(gsamAnisotropicWrap, pin.Tex);
 		//노멀매핑할때 텍스처를 절반으로 나눠야함. 0~0.5까지는 일반텍스처고 0.5~1.0 까진 노멀맵
 		//float2 ptex = pin.Tex;
 		//ptex.x = clamp(ptex.x / 2, 0, 0.5f);
 		//float2 ntex = ptex;
 		//ntex.x = clamp(ntex.x + 0.5f, 0.5f, 1.0f);
+		float3 Normaltexture = gNormalMap.Sample(gsamAnisotropicWrap, pin.Tex);
 		float3 tangent = normalize(pin.Tangent - dot(pin.Tangent, pin.Normal)*pin.Normal);
 		float3 binormal = cross(pin.Normal, tangent);
 

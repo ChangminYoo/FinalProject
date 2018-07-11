@@ -24,6 +24,12 @@ CMesh  HeavyBulletCube::Mesh;//나중에 메쉬는 static으로 둬야함
 ComPtr<ID3D12DescriptorHeap> HeavyBulletCube::SrvDescriptorHeap;//텍스처 용 힙
 CMaterial HeavyBulletCube::Mat;
 //--------------------------------------------------------------------------------------
+bool StoneBullet::CreateMesh = false;
+unordered_map<string, unique_ptr<CTexture>> StoneBullet::Textures;//텍스처들을 저장함
+CMesh  StoneBullet::Mesh;//나중에 메쉬는 static으로 둬야함
+ComPtr<ID3D12DescriptorHeap> StoneBullet::SrvDescriptorHeap;//텍스처 용 힙
+CMaterial StoneBullet::Mat;
+//--------------------------------------------------------------------------------------
 bool Tetris1::CreateMesh = false;
 unordered_map<string, unique_ptr<CTexture>> Tetris1::Textures;//텍스처들을 저장함
 CMesh  Tetris1::Mesh;//나중에 메쉬는 static으로 둬야함
@@ -104,6 +110,11 @@ bool ParticleObject2::CreateMesh = false;
 unordered_map<string, unique_ptr<CTexture>> ParticleObject2::Textures;//텍스처들을 저장함
 CMesh  ParticleObject2::Mesh;//나중에 메쉬는 static으로 둬야함
 ComPtr<ID3D12DescriptorHeap> ParticleObject2::SrvDescriptorHeap;//텍스처 용 힙
+//--------------------------------------------------------------------------------------
+bool ParticleObject3::CreateMesh = false;
+unordered_map<string, unique_ptr<CTexture>> ParticleObject3::Textures;//텍스처들을 저장함
+CMesh  ParticleObject3::Mesh;//나중에 메쉬는 static으로 둬야함
+ComPtr<ID3D12DescriptorHeap> ParticleObject3::SrvDescriptorHeap;//텍스처 용 힙
 //--------------------------------------------------------------------------------------
 bool DamageObject::CreateMesh = false;
 unordered_map<string, unique_ptr<CTexture>> DamageObject::Textures;//텍스처들을 저장함
