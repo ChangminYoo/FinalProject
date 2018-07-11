@@ -83,5 +83,6 @@ public:
 	virtual void UpdateUpvector();
 	virtual void UpdateLookvector();
 	virtual void UpdatePPosCenterPos();
+	virtual void UpdateRPosCenterPos();
 };
 

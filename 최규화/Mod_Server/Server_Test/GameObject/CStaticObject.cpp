@@ -99,15 +99,15 @@ void CStaticObject::MakeStaticObjectBasicData()
 		{ 74,{ { 90.f, 0.f, 60.f, 0.f },{ 0 },{ NormalBuilding } } },
 		{ 75,{ { -75.f, 0.f, 40.f, 0.f },{ 0 },{ NormalBuilding } } },
 		{ 76,{ { 0.f, 0.f, -100.f, 0.f },{ 0 },{ NormalBuilding } } },
-		{ 77, {{0.f, 200.0f, 290.0f, 0.0f},{0},{Rigidbody}}},
-		{ 78,{ {-270.f, 250.f, 60.f, 0.0f },{ 0 },{ Rigidbody } } },
-		{ 79,{ { 270.f, 330.f, 60.f, 0.0f },{ 0 },{ Rigidbody } } },
-		{ 80,{ { -210.f, 390.f, -200.f, 0.f },{ 0 },{ Rigidbody } } },
-		{ 81,{ { 200.f, 180.0f, -180.0f, 0.f },{ 0 },{ Rigidbody } } },
-		{ 82,{ { 80.f, 310.0f, -30.0f, 0.f },{ 0 },{ Rigidbody } } },
-		{ 83,{ { -31.f, 250.0f, 160.0f, 0.f },{ 0 },{ Rigidbody } } },
-		{ 84,{ { 90.f, 270.f, -340.f, 0.f },{ 0 },{ Rigidbody } } },
-		{ 85,{ { -70.f, 220.f, -55.f, 0.f },{ 0 },{ Rigidbody } } },
+		{ 77, {{0.f, 200.0f, 290.0f, 0.0f},{0},{ Rigidbodybox }}},
+		{ 78,{ {-270.f, 250.f, 60.f, 0.0f },{ 0 },{ Rigidbodybox } } },
+		{ 79,{ { 270.f, 330.f, 60.f, 0.0f },{ 0 },{ Rigidbodybox } } },
+		{ 80,{ { -210.f, 390.f, -200.f, 0.f },{ 0 },{ Rigidbodybox } } },
+		{ 81,{ { 200.f, 180.0f, -180.0f, 0.f },{ 0 },{ Rigidbodybox } } },
+		{ 82,{ { 80.f, 310.0f, -30.0f, 0.f },{ 0 },{ Rigidbodybox } } },
+		{ 83,{ { -31.f, 250.0f, 160.0f, 0.f },{ 0 },{ Rigidbodybox } } },
+		{ 84,{ { 90.f, 270.f, -340.f, 0.f },{ 0 },{ Rigidbodybox } } },
+		{ 85,{ { -70.f, 220.f, -55.f, 0.f },{ 0 },{ Rigidbodybox } } },
 
 	};
 }
@@ -404,20 +404,33 @@ Building::Building(unsigned int id)
 
 RigidCubeObject::RigidCubeObject(unsigned int id)
 {
+	rb = new RigidBody();
+	pp = new PhysicsPoint();
+
+	m_id = id;
+	m_fixed = false;
+	m_alive = true;
+
+	m_dir = 0;
+	m_ai = true;
+	m_godmode = true;
+	m_airbone = false;
+	m_type = Rigidbodybox;
+
+	m_ability.curHP = 100;
+	m_ability.orignHP = 100;
+	m_ability.attack = 0;
+	m_ability.speed = 0;
+	m_ability.level = 1;
+	m_ability.exp = 0;
+
+	m_degree = 0;
+
 	m_OffLookvector = XMFLOAT3(0, 0, 1);
 	m_OffRightvector = XMFLOAT3(1, 0, 0);
-	
+
 	UpdateLookvector();
 	UpdateUpvector();
-
-	m_fixed = false;
-	m_ability.attack = 0;
-	m_ability.orignHP = 100;
-	m_ability.curHP = 100;
-	m_godmode = true;
-	m_ability.speed = 0;
-
-	rb = new RigidBody();
 
 	//XMFLOAT4 xmf4 = { m_pos4f.x, m_pos4f.y, m_pos4f.z, m_pos4f.w };
 	xmf4_pos = XMFLOAT4(m_sobj_bdata[id].pos.x, m_sobj_bdata[id].pos.y, m_sobj_bdata[id].pos.z, m_sobj_bdata[id].pos.w);
@@ -428,10 +441,12 @@ RigidCubeObject::RigidCubeObject(unsigned int id)
 	rb->SetMass(1.5);
 	rb->SetIMoment(10, 10, 10);
 
-	//XMFLOAT4 Orient = { 0,0,0,1 };
-	//rb->SetOrient(&Orient);
 	xmf4_rot = { 0,0,0,1 };
 	rb->SetOrient(&xmf4_rot);
+
+	//물리엔진 값을 이용한 pos 와 rot을 업데이트
+	UpdateRPosCenterPos();
+	m_rot4f.x = xmf4_rot.x; m_rot4f.y = xmf4_rot.y; m_rot4f.z = xmf4_rot.z; m_rot4f.w = xmf4_rot.w;
 
 	XMFLOAT3 testForce{ -5,-3,2 };
 	XMFLOAT3 testPoint{ -15, 5,-5 };
@@ -1043,6 +1058,14 @@ void RigidCubeObject::Tick(double deltime)
 {
 	if (rb != nullptr)
 		rb->integrate(deltime);
+}
+
+void RigidCubeObject::SetUpdatedRigidybodyObject()
+{
+	m_stc_robjdata.id = m_id;
+	m_stc_robjdata.pos4f = m_pos4f;
+	m_stc_robjdata.rot4f = m_rot4f;
+	m_stc_robjdata.type = Rigidbodybox;
 }
 
 void RigidCubeObject::Collision(unordered_set<RigidCubeObject*>* rbobjs, double deltime)

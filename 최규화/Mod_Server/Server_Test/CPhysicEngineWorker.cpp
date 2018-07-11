@@ -61,16 +61,14 @@ void CPhysicEngineWorker::Update()
 			rigid->GravitySystem(m_deltime);
 			rigid->Tick(m_deltime);
 			rigid->AfterGravitySystem(m_deltime);
+			rigid->SetUpdatedRigidybodyObject();
 		}
 
 
 		CollisionSystem(m_deltime);
 
 		
-		// alive 가 false인 오브젝트들 지워주기 
-		
-		
-		
+		// alive 가 false인 오브젝트들 지워주기 	
 		for (auto iter = g_bullets.begin(); iter != g_bullets.end();)
 		{
 			if ((*iter)->GetBulletIsAlive() == false)

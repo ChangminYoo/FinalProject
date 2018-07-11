@@ -16,6 +16,10 @@ void CMonoObject::Tick(double deltime)
 {
 }
 
+void CMonoObject::Tick(double deltime, Position & pos4f)
+{
+}
+
 void CMonoObject::AfterGravitySystem(double deltime)
 {
 }
@@ -79,6 +83,14 @@ void CMonoObject::UpdatePPosCenterPos()
 	m_pos4f.y = pp->GetPosition().y;
 	m_pos4f.z = pp->GetPosition().z;
 	m_pos4f.w = pp->GetPosition().w;
+}
+
+void CMonoObject::UpdateRPosCenterPos()
+{
+	m_pos4f.x = rb->GetPosition().x;
+	m_pos4f.y = rb->GetPosition().y;
+	m_pos4f.z = rb->GetPosition().z;
+	m_pos4f.w = rb->GetPosition().w;
 }
 
 

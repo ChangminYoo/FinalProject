@@ -1022,7 +1022,7 @@ void MiniPhysicsEngineG9::RigidBody::integrate(double DeltaTime)
 	if (InverseMass <= 0.0f)
 		return;
 
-	assert(DeltaTime > 0.0);
+	assert(DeltaTime >= 0.0);
 
 	XMVECTOR centerpos = XMLoadFloat4(CenterPos);
 

@@ -113,10 +113,6 @@ void CBulletObject::Tick(double deltime)
 
 }
 
-void CBulletObject::Update(float deltime)
-{
-}
-
 void CBulletObject::Collision(vector<CPlayerObject*>* clients, double deltime)
 {
 

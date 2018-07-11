@@ -1,7 +1,7 @@
 #pragma once
 
 #define SERVERPORT 31400
-#define MAX_PLAYER 4
+#define MAX_PLAYER 10
 #define MAX_MONSTER_TYPE 3
 #define MAX_MONSTER_NUM 5
 
@@ -39,6 +39,7 @@ enum PACKET_PROTOCOL_TYPE
 	PLAYER_JUMP,
 	PLAYER_ATTACK,		    //플레이어 공격
 	STATIC_OBJECT,			//고정된 물체,
+	RIGIDBODY_OBJECT,		//물리효과가 적용된 물체
 	PLAYER_ANIMATION,
 	PLAYER_CURR_STATE,	//플레이어의 현재 상태(모든 정보 저장)
 	PLAYER_SKILL_SHIELD,
@@ -72,7 +73,7 @@ enum INSTALLED_OBJECT_TYPE
 	SmallWall,
 	BigWall,
 	NormalBuilding,
-	Rigidbody
+	Rigidbodybox
 };
 
 enum OBJECT_TYPE
@@ -183,6 +184,15 @@ struct STC_SkillData
 	char		   alive;
 };
 
+struct STC_RigidbodyData
+{
+	Position       pos4f;
+	Rotation	   rot4f;
+	unsigned short id;
+	unsigned char  type;
+
+};
+
 
 #pragma pack (push, 1)
 
@@ -271,6 +281,15 @@ typedef struct Server_To_Client_Static_Object
 	StaticObject_Info sobj_data;
 
 }STC_StaticObject;
+
+typedef struct Server_To_Client_Rigidbody_Object
+{
+	unsigned char packet_size = sizeof(STC_RigidbodyData) + sizeof(unsigned char) + sizeof(unsigned char);
+	unsigned char pack_type = PACKET_PROTOCOL_TYPE::RIGIDBODY_OBJECT;
+	STC_RigidbodyData rbobj_data;
+
+}STC_RigidbodyObject;
+
 
 typedef struct Client_To_Server_Attack_Info
 {

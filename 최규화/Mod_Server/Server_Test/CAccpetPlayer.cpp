@@ -6,6 +6,7 @@
 CAccpetPlayer::CAccpetPlayer() : m_acceptor(g_io_service,
 	boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), SERVERPORT)), m_socket(g_io_service)
 {
+	g_clients.reserve(MAX_PLAYER);
 	//1. ¿¬°áµÈ ³×Æ®¿öÅ© IPÈ¹µæ
 	//GetMyServerIP();
 

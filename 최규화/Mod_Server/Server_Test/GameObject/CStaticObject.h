@@ -37,12 +37,14 @@ public:
 	RigidCubeObject(unsigned int id);
 	void AmendObject(XMFLOAT3 axis, float radian, CMonoObject *obj);
 	void RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, double deltime, CMonoObject *obj);
+	STC_RigidbodyData m_stc_robjdata;
 
 public:
 	virtual void GravitySystem(double deltime) override;
 	virtual void AfterGravitySystem(double deltime) override;
 	virtual void Tick(double deltime) override;
 
+	void SetUpdatedRigidybodyObject();
 	void Collision(unordered_set<RigidCubeObject*>* rbobjs, double deltime);
 	//void Collision(list<CBulletObject*>* bullets, double deltime);
 

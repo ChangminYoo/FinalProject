@@ -194,6 +194,21 @@ void CTimerWorker::ProcessPacket(event_type * et)
 			m_deltime = (local_deltime / 1000000.0);
 			m_currtime = m_prevtime;
 
+			//------------- 1초에 18번정도 보냄 - 20번x, 시간누적오차 때문에 ---------------//
+
+
+			//0. 1초에 20번씩 서버에서 업데이트된 리즈드바디 오브젝트의 정보를 보냄 
+			STC_RigidbodyObject stc_rigidbody_object;
+			for (auto rigid : g_rigidobjs)
+			{
+				stc_rigidbody_object.rbobj_data = move(rigid->m_stc_robjdata);
+				for (auto client : g_clients)
+				{
+					client->SendPacket(reinterpret_cast<Packet*>(&stc_rigidbody_object));
+				}
+			}
+
+
 			//1. 1초에 20번씩 서버에서 업데이트된 클라이언트의 모든정보를 보냄
 			STC_CharCurrState stc_char_state;
 			for(auto myclient : g_clients)
@@ -206,36 +221,6 @@ void CTimerWorker::ProcessPacket(event_type * et)
 					myclient->SendPacket(reinterpret_cast<Packet*>(&stc_char_state));
 				}
 				
-				//cout << "Timer // ID : " << g_clients[i]->GetID() << "Pos[x, y, z, w]: " << g_clients[i]->m_pdata.pos.x << " , " << g_clients[i]->m_pdata.pos.y << " , " << g_clients[i]->m_pdata.pos.z << " , " << g_clients[i]->m_pdata.pos.w << endl;
-
-				/*
-				for (auto i = 0; i < 100000000; ++i)
-				{
-					int sum = 0;
-					 sum += i;
-				}
-
-				cout << "ID : " << g_clients[i]->GetID() << "Pos[x, y, z, w]: " << g_clients[i]->m_pdata.pos.x << " , " << g_clients[i]->m_pdata.pos.y << " , " << g_clients[i]->m_pdata.pos.z << " , " << g_clients[i]->m_pdata.pos.w << endl;
-				++m_tcnt;
-
-				m_currtime = high_resolution_clock::now();
-				if (m_flag)
-				{
-					m_prevtime = m_currtime;
-					m_flag = false;
-				}
-
-				m_tdeltime += (duration_cast<milliseconds>(m_currtime - m_prevtime).count()) / 1000.f;
-				m_prevtime = m_currtime;
-
-				cout << "카운트 : " << m_tcnt << "시간: " << m_tdeltime << "카운트_어나더: " << o_tcnt << endl;
-
-				if (m_tdeltime >= 1.0f)
-				{
-					cout << "카운트 : " << m_tcnt << "시간: " << m_tdeltime << endl;
-					system("pause");
-				}
-				*/
 			}
 
 			//2. 불렛 데이터도 1초에 20번씩 클라이언트로 보냄 
