@@ -1,58 +1,64 @@
 #include "Sound.h"
 
-void ErrorCheck(FMOD_RESULT &result)
+CSound::CSound(void)
 {
-	if (result != FMOD_OK)
-	{
-		//printf("FMOD error! (%d) %s\n", result, FMOD_ErrorString(result));
-		exit(-1);
-	}
-}
+	FMOD::System_Create(&system);
+	system->init(32, FMOD_INIT_NORMAL, nullptr);
+	
+	system->createSound("sound/title2.ogg", FMOD_DEFAULT, 0, &titleSound);
+	system->createSound("sound/hit1.ogg", FMOD_DEFAULT, 0,   &hitSound1);
+	system->createSound("sound/skill1.ogg", FMOD_DEFAULT, 0, &shotSound1);
+	system->createSound("sound/skill2.ogg", FMOD_DEFAULT, 0, &shotSound2);
 
-CSound::CSound()
-{
-	system = NULL;
-	sound[COUNT] = NULL;
-	channel[COUNT] = NULL;
-
-}
-CSound::~CSound()
-{
 }
 
 
-void CSound::DeleteSound()
+CSound::~CSound(void)
 {
-	for (int i = 0; i < SoundType::COUNT; ++i)
-	{
-		sound[i]->release();
-	}
-
-	//system->close();
-	//system->release();
 }
+
 
 void CSound::PlaySoundEffect(SoundType id)
 {
-	system->playSound(sound[id], 0, false, &channel[id]);
-}
-void CSound::PauseSound(SoundType id)
-{
-	channel[id]->setPaused(true);
-}
-void CSound::ContinueSound(SoundType id)
-{
-	channel[id]->setPaused(false);
-}
-void CSound::PauseAllGameSounds()
-{
-	for (int i = 0; i < SoundType::COUNT; ++i)
+	if (id == HIT1)
 	{
-		channel[i]->setPaused(true);
+		system->playSound(hitSound1, 0, false, &channel);
+		channel->setVolume(0.5f);
+	}
+	else if (id == SKILL1)
+	{
+		system->playSound(shotSound1, 0, false, &channel);
+		channel->setVolume(0.7f);
+	}
+	else if (id == SKILL1)
+	{
+		system->playSound(shotSound2, 0, false, &channel);
+		channel->setVolume(0.7f);
 	}
 }
 
-void CSound::SetVolume(SoundType id, float vol)
+void CSound::PlaySoundBG()
 {
-	channel[id]->setVolume(vol);
+	system->playSound(titleSound, 0, false, &channel);
+	
+	titleSound->setMode(FMOD_LOOP_NORMAL);
+
+}
+
+void CSound::StopSound()
+{
+
+}
+
+void CSound::ReleaseSound()
+{
+	titleSound->release();
+	hitSound1->release();
+	shotSound1->release();
+	shotSound2->release();
+}
+
+void CSound::Update()
+{
+
 }

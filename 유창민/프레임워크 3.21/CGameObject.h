@@ -117,6 +117,7 @@ public:
 	bool Blending = false;
 	bool PrevCool = false;
 	bool isShieldOn = false;
+	bool isHit1 = false;
 
 	//벽들에 굳이 마우스를 움직일때마다 체크할 필요는 없으므로 추가함. 또 벽은 또 벽대로 뭔가 처리할게 있을것같음.
 	Obj_State obs = Dynamic;
@@ -895,11 +896,11 @@ public:
 class ParticleObject2 : public CGameObject
 {
 public:
-	ParticleObject2(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, CGameObject* master, float lifeTime, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
+	ParticleObject2(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, CGameObject* master, float lifeTime,float num, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
 	CGameObject* Master = NULL;
 	float LifeTime = 0.2f;
 	float ParticleTime = 0.0f;
-
+	float Num;
 public:
 	static bool CreateMesh;//최초로 false며 메쉬를 만든후 true가된다.
 	static unordered_map<string, unique_ptr<CTexture>> Textures;//텍스처들을 저장함
@@ -1013,5 +1014,31 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList* commandlist, const GameTimer& gt);
 	virtual void Collision(list<CGameObject*>* collist, float DeltaTime);
 	virtual void EndAnimation(int nAni);
+
+};
+
+
+class MeteorObject : public CGameObject
+{
+public:
+	MeteorObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, CGameObject* master, XMFLOAT4& ori, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
+	~MeteorObject();
+	ShadowObject* s = NULL;
+	CGameObject* Master = NULL;//소유자
+	ParticleObject* BulletParticles = NULL;
+	list<CGameObject*>* Blist = NULL;
+public:
+	static CMaterial Mat;
+	static bool CreateMesh;//최초로 false며 메쉬를 만든후 true가된다.
+	static unordered_map<string, unique_ptr<CTexture>> Textures;//텍스처들을 저장함
+	static CMesh Mesh;//오로지 한번만 만들어짐
+	static ComPtr<ID3D12DescriptorHeap> SrvDescriptorHeap;//텍스처 용 힙
+
+public:
+	virtual void SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist);//셋메시는 메시를 최종적으로 생성한다. 즉 메시를구성하는 정점과 삼각형을구성하는인덱스버퍼생성
+	virtual void SetMaterial(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist); //머테리얼 생성
+	virtual void Tick(const GameTimer& gt);
+	virtual void Render(ID3D12GraphicsCommandList* commandlist, const GameTimer& gt);
+	virtual void Collision(list<CGameObject*>* collist, float DeltaTime) {}
 
 };

@@ -553,6 +553,7 @@ void CPlayer::CreateBullet(ID3D12Device* Device, ID3D12GraphicsCommandList* cl,X
 
 	case 0://불렛큐브(라이트 큐브)
 	{
+
 		PlayerObject->SetAnimation(2);
 		//먼저 해당스킬의 쿨타임을 넣어주자.
 		skilldata.SkillsCoolTime[skilldata.SellectBulletIndex] = skilldata.SkillsMaxCoolTime[skilldata.Skills[skilldata.SellectBulletIndex]];

@@ -140,7 +140,7 @@ void MainFrameWork::AfterGravitySystem(const GameTimer & gt)
 	{
 		if ((*i)->CenterPos.y <= 0)
 		{
-			auto BulletParticles2 = new ParticleObject2(Device.Get(), mCommandList.Get(), &scene->BbObject, &scene->Shadows, NULL, 0.7f, XMFLOAT4((*i)->CenterPos.x, (*i)->CenterPos.y, (*i)->CenterPos.z, 0));
+			auto BulletParticles2 = new ParticleObject2(Device.Get(), mCommandList.Get(), &scene->BbObject, &scene->Shadows, NULL, 0.7f, 100, XMFLOAT4((*i)->CenterPos.x, (*i)->CenterPos.y, (*i)->CenterPos.z, 0));
 			scene->BbObject.push_back(BulletParticles2);
 
 			(*i)->DelObj = true;

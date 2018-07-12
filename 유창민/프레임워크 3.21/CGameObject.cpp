@@ -702,6 +702,7 @@ void BulletCube::Collision(list<CGameObject*>* collist, float DeltaTime)
 
 			if (test)//충돌했으면 pp의 경우는 그냥 데미지를 주고 자신을 없애면 됨. 
 			{
+
 				if ((*i)->isShieldOn) //상대가 실드 on 상태면
 					gamedata.Damage = 100; //100 이지만 1만뜸 텍스쳐 stride때문에 100이라고 설정하고 ToDamage에서 1로 설정
 
@@ -716,7 +717,7 @@ void BulletCube::Collision(list<CGameObject*>* collist, float DeltaTime)
 				//고정된 물체가 아니면
 				if ((*i)->staticobject == false)
 				{
-
+					(*i)->isHit1 = true;
 					//상대속도 방향을 구한다. A-B
 					cn = XMFloat4to3(Float4Add(pp->GetPosition(), (*(*i)->pp).GetPosition(), false));
 					cn = Float3Normalize(cn);
@@ -729,6 +730,7 @@ void BulletCube::Collision(list<CGameObject*>* collist, float DeltaTime)
 					//고정된 물체가아니면 잠깐 바운스를 풀어둔다. 그래야 튕기니까.
 					(*i)->pp->SetBounce(true);
 
+				
 				}
 				else//고정된 물체면 충돌한 평면의 노멀방향으로 cn을 설정할것.
 				{
@@ -740,7 +742,7 @@ void BulletCube::Collision(list<CGameObject*>* collist, float DeltaTime)
 				pp->ResolveVelocity(*(*i)->pp, cn, DeltaTime);
 				(*i)->pp->SetBounce(false);
 				//겹치는 부분을 제거할필요가 없는게 투사체는 어처피 사라지니까.
-				auto BulletParticles2 = new ParticleObject2(device, commandlist, ParticleList, NULL, this, 0.7f, XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, 0));
+				auto BulletParticles2 = new ParticleObject2(device, commandlist, ParticleList, NULL, this, 0.7f, 100, XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, 0));
 				ParticleList->push_back(BulletParticles2);
 
 				DelObj = true;
@@ -933,7 +935,7 @@ void HeavyBulletCube::Collision(list<CGameObject*>* collist, float DeltaTime)
 				//겹치는 부분을 제거할필요가 없는게 투사체는 어처피 사라지니까.
 				DelObj = true;
 
-				auto BulletParticles2 = new ParticleObject2(device, commandlist, ParticleList,NULL, this, 0.7f, XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, 0));
+				auto BulletParticles2 = new ParticleObject2(device, commandlist, ParticleList,NULL, this, 0.7f, 100, XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, 0));
 				ParticleList->push_back(BulletParticles2);
 			}
 		}
@@ -1114,7 +1116,7 @@ void Tetris1::Collision(list<CGameObject*>* collist, float DeltaTime)
 				//겹치는 부분을 제거할필요가 없는게 투사체는 어처피 사라지니까.
 				DelObj = true;
 
-				auto BulletParticles2 = new ParticleObject2(device, commandlist, ParticleList,NULL, this, 0.7f, XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, 0));
+				auto BulletParticles2 = new ParticleObject2(device, commandlist, ParticleList,NULL, this, 0.7f, 100, XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, 0));
 				ParticleList->push_back(BulletParticles2);
 			}
 		}
@@ -1292,7 +1294,7 @@ void Tetris2::Collision(list<CGameObject*>* collist, float DeltaTime)
 
 				//겹치는 부분을 제거할필요가 없는게 투사체는 어처피 사라지니까.
 				DelObj = true;
-				auto BulletParticles2 = new ParticleObject2(device, commandlist, ParticleList,NULL, this, 0.7f, XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, 0));
+				auto BulletParticles2 = new ParticleObject2(device, commandlist, ParticleList,NULL, this, 0.7f, 100, XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, 0));
 				ParticleList->push_back(BulletParticles2);
 
 			}
@@ -1468,7 +1470,7 @@ void Tetris3::Collision(list<CGameObject*>* collist, float DeltaTime)
 
 				pp->ResolveVelocity(*(*i)->pp, cn, DeltaTime);
 				DelObj = true;
-				auto BulletParticles2 = new ParticleObject2(device, commandlist, ParticleList,NULL ,this, 0.7f, XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, 0));
+				auto BulletParticles2 = new ParticleObject2(device, commandlist, ParticleList,NULL ,this, 0.7f, 100, XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, 0));
 				ParticleList->push_back(BulletParticles2);
 
 			}
@@ -1645,7 +1647,7 @@ void Tetris4::Collision(list<CGameObject*>* collist, float DeltaTime)
 				pp->ResolveVelocity(*(*i)->pp, cn, DeltaTime);
 
 				DelObj = true;
-				auto BulletParticles2 = new ParticleObject2(device, commandlist, ParticleList,NULL, this, 0.7f, XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, 0));
+				auto BulletParticles2 = new ParticleObject2(device, commandlist, ParticleList,NULL, this, 0.7f, 100, XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, 0));
 				ParticleList->push_back(BulletParticles2);
 
 			}
@@ -2001,7 +2003,7 @@ void DiceStrike::Collision(list<CGameObject*>* collist, float DeltaTime)
 				(*i)->pp->SetBounce(false);
 				//겹치는 부분을 제거할필요가 없는게 투사체는 어처피 사라지니까.
 				DelObj = true;
-				auto BulletParticles2 = new ParticleObject2(device, commandlist, ParticleList,NULL, this, 0.7f, XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, 0));
+				auto BulletParticles2 = new ParticleObject2(device, commandlist, ParticleList,NULL, this, 0.7f, 100, XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, 0));
 				ParticleList->push_back(BulletParticles2);
 
 			}
@@ -3176,7 +3178,7 @@ void RigidCubeObject::Collision(list<CGameObject*>* collist, float DeltaTime)
 							(*i)->pp->SetVelocity(ppConvertrb.GetVelocity());
 							*(*i)->pp->CenterPos=ppConvertrb.GetPosition();
 							(*i)->pp->SetAccel(ppConvertrb.GetAccel());
-							auto BulletParticles2 = new ParticleObject2(device, commandlist, ParticleList,NULL, this, 0.7f, XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, 0));
+							auto BulletParticles2 = new ParticleObject2(device, commandlist, ParticleList,NULL, this, 0.7f, 100, XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, 0));
 							ParticleList->push_back(BulletParticles2);
 						}
 						else
@@ -3964,7 +3966,7 @@ void ParticleObject::Render(ID3D12GraphicsCommandList * commandlist, const GameT
 }
 
 
-ParticleObject2::ParticleObject2(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, list<CGameObject*>*shadow, CGameObject * master, float lifeTime, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist,shadow, cp)
+ParticleObject2::ParticleObject2(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, list<CGameObject*>*shadow, CGameObject * master, float lifeTime, float num, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist,shadow, cp)
 {
 	ObjData.isAnimation = 0;
 	ObjData.Scale = 6.5f;
@@ -5174,3 +5176,104 @@ void StoneBullet::Collision(list<CGameObject*>* collist, float DeltaTime)
 
 }
 
+MeteorObject::MeteorObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, list<CGameObject*>* shadow, CGameObject* master, XMFLOAT4& ori, XMFLOAT4 cp) :CGameObject(m_Device, commandlist, Plist, shadow, cp)
+{
+	if (CreateMesh == false)
+	{
+
+		Mesh.Index = NULL;
+		Mesh.SubResource = NULL;
+
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "MeteorTex", L"textures/object/Meteor.dds", false,2,0);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "MeteorNTex", L"textures/object/MeteorN.dds", false,2,1);
+
+		
+		SetMesh(m_Device, commandlist);
+		SetMaterial(m_Device, commandlist);
+		CreateMesh = true;
+
+	}
+
+	//게임오브젝트마다 룩벡터와 라이트벡터가 다르므로 초기 오프셋 설정을 해준다.
+	//실제 룩벡터 등은 모두 UpdateLookVector에서 처리된다(라이트벡터도) 따라서 Tick함수에서 반드시 호출해야한다.
+	OffLookvector = XMFLOAT3(0, 0, 1);
+	OffRightvector = XMFLOAT3(1, 0, 0);
+	UpdateLookVector();
+	
+	
+	obs = Static;
+	
+	ObjData.isAnimation = 0;
+	ObjData.Scale = 30.0;
+	ObjData.SpecularParamater = 0.1f;//스페큘러를 낮게준다.
+	staticobject = true;
+
+	//게임관련 데이터들
+	gamedata.MAXHP = 1;
+	gamedata.HP = 1;
+	gamedata.Damage = 60;
+	gamedata.GodMode = true;
+	gamedata.Speed = 3;
+	Master = master;
+
+	//광선충돌 검사용 육면체
+	XMFLOAT3 rx(1, 0, 0);
+	XMFLOAT3 ry(0, 1, 0);
+	XMFLOAT3 rz(0, 0, 1);
+	rco.SetPlane(rx, ry, rz);
+
+	//질점오브젝트 사용시 필요한 데이터들 설정
+	pp = new PhysicsPoint();
+	pp->SetPosition(&CenterPos);//이 값은 항상 갱신되야한다.
+	pp->SetHalfBox(15, 15, 15);//충돌 박스의 x,y,z 크기
+	pp->SetDamping(1);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
+	pp->SetBounce(false);//튕기지 않는다.
+	pp->SetVelocity(0, -1 * gamedata.Speed, 0);
+	pp->SetMass(2);
+}
+
+MeteorObject::~MeteorObject()
+{
+}
+
+void MeteorObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
+{
+	//모델 로드
+	//CreateCube(&Mesh, 1, 1, 1);
+	LoadMD5Model(L".\\플레이어메쉬들\\sphere.MD5MESH", &Mesh, 0, 1);
+	//
+	Mesh.SetNormal(false);
+	Mesh.CreateVertexBuffer(m_Device, commandlist);
+	Mesh.CreateIndexBuffer(m_Device, commandlist);
+}
+
+void MeteorObject::SetMaterial(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
+{
+	if (Mat.ConstBuffer == NULL)
+		Mat.ConstBuffer = new UploadBuffer<MaterialData>(m_Device, 1, true);
+
+	Mat.MatData.Roughness = 0.1f;
+}
+
+void MeteorObject::Tick(const GameTimer & gt)
+{
+
+}
+
+void MeteorObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer & gt)
+{
+	//텍스처를 연결하고, 월드행렬을 연결한다.
+
+	if (Textures.size() > 0)
+	{
+		SetTexture(commandlist, SrvDescriptorHeap, Textures["MeteorTex"].get()->Resource.Get(),0,0);
+		SetTexture(commandlist, SrvDescriptorHeap, Textures["MeteorNTex"].get()->Resource.Get(), 2, 1);
+	}
+	UpdateConstBuffer(commandlist, false);
+
+	Mat.UpdateConstantBuffer(commandlist);
+
+	//이후 그린다.
+
+	Mesh.Render(commandlist);
+}

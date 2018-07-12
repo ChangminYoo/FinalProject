@@ -26,7 +26,6 @@ Scene::Scene(HWND hwnd,ID3D12Device * m_Device, ID3D12GraphicsCommandList * m_DC
 	CreateUI();
 
 	Sound = new CSound();
-	Sound->Init();
 
 }
 
@@ -103,8 +102,10 @@ Scene::~Scene()
 	}
 
 	if (Sound != NULL)
-		Sound->DeleteSound();
-
+	{
+		Sound->ReleaseSound();
+		delete Sound;
+	}
 	if (Player != NULL)
 		delete Player;
 	if (light != NULL)
@@ -133,8 +134,7 @@ void Scene::SceneState()
 			SetGameState(GS_PLAY);
 			ShowCursor(false);
 
-		/*	Sound->PlaySoundEffect(CSound::SoundType::TITLE);
-			Sound->SetVolume(CSound::SoundType::TITLE, 0.5f);*/
+			Sound->PlaySoundBG();
 		}
 		else
 		{
@@ -276,6 +276,8 @@ void Scene::CreateGameObject()
 	delete resource;
 	resource = new BreakCartObject(device, commandlist, &BbObject, &Shadows, NULL, XMFLOAT4(0, 0, 0, 0));
 	delete resource;
+	resource = new MeteorObject(device, commandlist, &BbObject, &Shadows, NULL, XMFLOAT4(0, 0, 0, 1), XMFLOAT4(0, 0, 0, 0));
+	delete resource;
 	//--------------------------------------------------//
 	
 	SkyObject = new SphereObject(device, commandlist,  &BbObject, &Shadows, XMFLOAT4(0, 0, 0, 0));
@@ -287,6 +289,10 @@ void Scene::CreateGameObject()
 	CGameObject* imp = new ImpObject(device, commandlist, &BbObject, &Shadows, XMFLOAT4(0, 0, 220, 0));
 	((ImpObject*)imp)->fsm = new FSM(imp, &DynamicObject, &StaticObject, &BulletObject);
 	DynamicObject.push_back(imp);
+
+
+	StaticObject.push_back(new MeteorObject(device, commandlist, &BbObject, &Shadows,NULL, XMFLOAT4(0,0,0,1), XMFLOAT4(0, 50, -240, 0)));
+
 
 	//MoveCube
 	StaticObject.push_back(new MoveCubeObject(device, commandlist, &BbObject, &Shadows, 50.0f, XMFLOAT4(0, 25, 145, 0)));
@@ -437,7 +443,7 @@ void Scene::CreateGameObject()
 
 	//Building
 	StaticObject.push_back(new BuildingObject(device, commandlist, &BbObject, &Shadows, MMPE_PI / 3, XMFLOAT4(370 * sinf(0.8f * MMPE_PI), 0, -320 * cosf(0.2f * MMPE_PI), 0)));
-
+ 
 
 	//좌하
 	StaticObject.push_back(new SmallWallObject(device, commandlist, &BbObject, &Shadows, -MMPE_PI / 3, XMFLOAT4(-520 * sinf(0.8f * MMPE_PI), 0, -500 * cosf(0.2f * MMPE_PI), 0)));
@@ -712,7 +718,15 @@ void Scene::Tick(const GameTimer & gt)
 		//오브젝트 틱함수 처리
 		//--------------------------------------------------------------
 		for (auto b = DynamicObject.begin(); b != DynamicObject.end(); b++)
+		{
+			if ((*b)->isHit1)
+			{
+				Sound->PlaySoundEffect(CSound::SoundType::HIT1);
+				(*b)->isHit1 = false;
+			}
+
 			(*b)->Tick(gt);
+		}
 
 		for (auto b = StaticObject.begin(); b != StaticObject.end(); b++)
 			(*b)->Tick(gt);
@@ -742,6 +756,7 @@ void Scene::Tick(const GameTimer & gt)
 
 		Player->Tick(gt.DeltaTime());
 
+		
 
 		UITick(gt);
 		//카메라 리 로케이트 
