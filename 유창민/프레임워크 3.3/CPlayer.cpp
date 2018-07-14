@@ -727,7 +727,7 @@ void CPlayer::CreateBullet(ID3D12Device* Device, ID3D12GraphicsCommandList* cl,X
 		skilldata.isSkillOn[skilldata.SellectBulletIndex] = false;
 
 
-		bulletlist->push_back(new MeteorObject(Device, cl, PlayerObject->ParticleList, NULL, PlayerObject, XMFLOAT4(0,0,0,1), XMFloat3to4(Goal)));
+		bulletlist->push_back(new MeteorObject(Device, cl, PlayerObject->ParticleList, PlayerObject->Shadow, PlayerObject, XMFLOAT4(0,0,0,1), XMFloat3to4(Goal)));
 		break;
 	}
 

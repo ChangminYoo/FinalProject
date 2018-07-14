@@ -1061,7 +1061,6 @@ public:
 	~MeteorObject();
 	ShadowObject* s = NULL;
 	CGameObject* Master = NULL;//¼ÒÀ¯ÀÚ
-	ParticleObject* BulletParticles = NULL;
 	list<CGameObject*>* Blist = NULL;
 	float LifeTime = 7.0f;
 

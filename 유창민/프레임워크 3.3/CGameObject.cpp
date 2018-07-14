@@ -5256,7 +5256,7 @@ MeteorObject::MeteorObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * 
 	if (Shadow != NULL)
 	{
 		s = new ShadowObject(m_Device, commandlist, NULL, Shadow, this, XMFLOAT3(1, 1, 1), 3, XMFLOAT4(0, 0, 0, 1), CenterPos);
-		s->ObjData.Scale = 60.0f;
+		s->ObjData.Scale = 10.0f;
 		Shadow->push_back(s);
 	}
 
@@ -5266,6 +5266,8 @@ MeteorObject::~MeteorObject()
 {
 	if (s != NULL)
 		s->DelObj = true;
+
+
 }
 
 void MeteorObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
@@ -5293,6 +5295,7 @@ void MeteorObject::Tick(const GameTimer & gt)
 	//이때 pp의 position과 CenterPos를 일치시켜야하므로 CenterPos의 포인터를 인자로 넘겨야 한다.
 	pp->AddForce(0, -20, 0);
 	pp->integrate(gt.DeltaTime());
+	s->ObjData.Scale += 0.02f;
 
 	LifeTime -= gt.DeltaTime();
 
