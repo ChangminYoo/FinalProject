@@ -405,14 +405,14 @@ void Scene::CreateGameObject()
 
 	//RigidObject
 	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, XMFLOAT4(0, 200, 290, 0)));
-	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, XMFLOAT4(-270, 250, 60, 0)));
-	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, XMFLOAT4(270, 330, 60, 0)));
-	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, XMFLOAT4(-210, 390, -200, 0)));
-	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, XMFLOAT4(200, 180, -180, 0)));
-	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, XMFLOAT4(80, 310, -30, 0)));
-	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, XMFLOAT4(-31, 250, 160, 0)));
-	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, XMFLOAT4(90, 270, -340, 0)));
-	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, XMFLOAT4(-70, 220, -55, 0)));
+	//RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, XMFLOAT4(-270, 250, 60, 0)));
+	//RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, XMFLOAT4(270, 330, 60, 0)));
+	//RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, XMFLOAT4(-210, 390, -200, 0)));
+	//RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, XMFLOAT4(200, 180, -180, 0)));
+	//RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, XMFLOAT4(80, 310, -30, 0)));
+	//RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, XMFLOAT4(-31, 250, 160, 0)));
+	//RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, XMFLOAT4(90, 270, -340, 0)));
+	//RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, XMFLOAT4(-70, 220, -55, 0)));
 	//RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, XMFLOAT4(193, 160, 40, 0)));
 
 	int player_num = 0;
@@ -875,6 +875,11 @@ void Scene::SET_RIGIDOBJECT_BY_SERVER_DATA(const unsigned int & id, RigidbodyDat
 					rigid->CenterPos = { rbobjdata.pos4f.x, rbobjdata.pos4f.y, rbobjdata.pos4f.z, rbobjdata.pos4f.w };
 					
 					rigid->rb->SetPosition(&rigid->CenterPos);
+
+
+					//cout << "RigidybodyObject ID: " << rigid->m_rigidbody_data.id << "PosX: " << rigid->m_rigidbody_data.pos4f.x << "PosY: "
+					//	<< rigid->m_rigidbody_data.pos4f.y << "PosZ: " << rigid->m_rigidbody_data.pos4f.z << "PosW: " << rigid->m_rigidbody_data.pos4f.w << "\n";
+					
 					break;
 				}
 			}
@@ -1004,25 +1009,44 @@ void Scene::SET_PLAYER_SKILL(const unsigned int & id, const STC_SkillData & play
 		{
 			switch (playerdata.my_id)
 			{
-			case CHAR_SKILL::SHIELD:
-			{
-				if (playerdata.alive)
+				case CHAR_SKILL::SHIELD:
 				{
-					NoCollObject.push_back(new ShieldArmor(device, commandlist, &BbObject, GameObject, GameObject->CenterPos));
-				}
-				else
-				{
-					for (auto object : NoCollObject)
+					if (playerdata.alive)
 					{
-						if (id == object->m_player_data.id)
+						NoCollObject.push_back(new ShieldArmor(device, commandlist, &BbObject, GameObject, GameObject->CenterPos));
+					}
+					else
+					{
+						for (auto object : NoCollObject)
 						{
-							object->DelObj = true;
-							break;
+							if (id == object->m_player_data.id)
+							{
+								object->DelObj = true;
+								break;
+							}
 						}
 					}
 				}
-			}
-			break;
+				break;
+
+				case CHAR_SKILL::WAVE_SHOCK:
+				{
+					if (playerdata.alive)
+					{
+						StaticObject.push_back(new RingObject(device, commandlist, &BbObject, GameObject->CenterPos));
+					}
+					else
+					{
+						for (auto object : StaticObject)
+						{
+							if (id == object->m_player_data.id)
+							{
+								object->DelObj = true;
+								break;
+							}
+						}
+					}
+				}
 
 			default:
 				break;

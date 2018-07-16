@@ -24,6 +24,15 @@ struct SKILL_SHIELD_DATA
 	double op_time;
 };
 
+struct SKILL_WAVESHOCK_DATA
+{
+	bool once_flag;
+	bool on_using;
+	bool operated;
+	double op_time;
+
+};
+
 class CPlayerObject : public CMonoObject
 {
 private:
@@ -44,6 +53,7 @@ private:
 	float				m_prevtime{ 0 };
 	float				m_elaspedtime{ 0 };
 	SKILL_SHIELD_DATA	m_skill_shield;
+	SKILL_WAVESHOCK_DATA m_skill_waveshock;
 
 public:
 	unsigned int		m_curr_packet_size{ 0 };
@@ -52,6 +62,7 @@ public:
 	Player_Data			m_pdata;
 	mutex				m_mtx;
 
+	
 	//void				Lock() { m_mtx.lock(); }
 	//void				UnLock() { m_mtx.unlock(); }
 
@@ -129,8 +140,19 @@ public:
 	bool    GetShieldOnceFlag() const { return m_skill_shield.once_flag; }
 	void	SetShieldOnceFlag(bool flag) { m_skill_shield.once_flag = flag; }
 
-	double  GetShieldCurrTime() const { return m_skill_shield.op_time; }
-	void	SetShieldCurrTime(double time) { m_skill_shield.op_time = time; }
+	double  GetShieldCurrtime() const { return m_skill_shield.op_time; }
+	void	SetShieldCurrtime(double time) { m_skill_shield.op_time = time; }
+	
+	bool    GetWaveshockState() const { return m_skill_waveshock.on_using; }
+	void	SetWaveshockState(bool flag) { m_skill_waveshock.on_using = flag; }
+
+	bool    GetWaveshockOnceFlag() const { return m_skill_waveshock.once_flag; }
+	void	SetWaveshockOnceFlag(bool flag) { m_skill_waveshock.once_flag = flag; }
+
+	double  GetWaveshockCurrtime() const { return m_skill_waveshock.op_time; }
+	void    SetWaveshockCurrtime(double time) { m_skill_waveshock.op_time = time; }
+	
+	
 	// ---------------------------------------------------------------------------------------
 	// [5]. 물리효과 함수
 
@@ -152,7 +174,7 @@ public:
 
 	void Collision(vector<CPlayerObject*>* clients, double deltime);
 	void Collision(unordered_set<CStaticObject*>* sobjs, double deltime);
-
+	void Collision_With_Waveshock();
 
 };
 

@@ -62,16 +62,16 @@ void CTimerWorker::ProcessPacket(event_type * et)
 			if (!g_clients[et->master_id]->GetShieldState())
 				g_clients[et->master_id]->SetShieldState(true);
 			
-			if (g_clients[et->master_id]->GetShieldCurrTime() < SKILL_SHIELD_OP_TIME)
+			if (g_clients[et->master_id]->GetShieldCurrtime() < SKILL_SHIELD_OP_TIME)
 			{
-				AddEvent(et->id, 5.0, SKILL_SHIELD, true, et->master_id);
-				g_clients[et->master_id]->SetShieldCurrTime(5.0);
+				AddEvent(et->id, SKILL_SHIELD_OP_TIME, SKILL_SHIELD, true, et->master_id);
+				g_clients[et->master_id]->SetShieldCurrtime(SKILL_SHIELD_OP_TIME);
 			}
 			else
 			{
 				g_clients[et->master_id]->SetShieldOnceFlag(true);
 				g_clients[et->master_id]->SetShieldState(false);
-				g_clients[et->master_id]->SetShieldCurrTime(0.0);
+				g_clients[et->master_id]->SetShieldCurrtime(0.0);
 
 
 				STC_SKILL_SHIELD stc_skill_shield;
@@ -90,6 +90,36 @@ void CTimerWorker::ProcessPacket(event_type * et)
 			
 		}
 		break;
+
+		case SKILL_WAVESHOCK:
+		{
+			if (!g_clients[et->master_id]->GetWaveshockState())
+				g_clients[et->master_id]->SetWaveshockState(true);
+
+			if (g_clients[et->master_id]->GetWaveshockCurrtime() < SKILL_WAVESHOCK_OP_TIME)
+			{
+				AddEvent(et->id, SKILL_WAVESHOCK_OP_TIME, SKILL_WAVESHOCK, true, et->master_id);
+				g_clients[et->master_id]->SetWaveshockCurrtime(SKILL_WAVESHOCK_OP_TIME);
+			}
+			else
+			{
+				g_clients[et->master_id]->SetWaveshockOnceFlag(true);
+				g_clients[et->master_id]->SetWaveshockState(false);
+				g_clients[et->master_id]->SetWaveshockCurrtime(0.0);
+
+				STC_SKILL_WAVESHOCK stc_skill_waveshock;
+				stc_skill_waveshock.skill_data.alive = false;
+				stc_skill_waveshock.skill_data.master_id = et->master_id;
+				stc_skill_waveshock.skill_data.my_id = CHAR_SKILL::WAVE_SHOCK;
+
+				for (auto client : g_clients)
+				{
+					if (client->GetIsAI() == true || client->GetConnectState() == false) continue;
+					
+					client->SendPacket(reinterpret_cast<Packet*>(&stc_skill_waveshock));
+				}
+			}
+		}
 
 		case DEAD_TO_ALIVE:
 		{
@@ -199,12 +229,15 @@ void CTimerWorker::ProcessPacket(event_type * et)
 
 			//0. 1초에 20번씩 서버에서 업데이트된 리즈드바디 오브젝트의 정보를 보냄 
 			STC_RigidbodyObject stc_rigidbody_object;
-			for (auto rigid : g_rigidobjs)
+			for (auto client : g_clients)
 			{
-				stc_rigidbody_object.rbobj_data = move(rigid->m_stc_robjdata);
-				for (auto client : g_clients)
+				for (auto rigid : g_rigidobjs)
 				{
+					stc_rigidbody_object.rbobj_data = move(rigid->m_stc_robjdata);
 					client->SendPacket(reinterpret_cast<Packet*>(&stc_rigidbody_object));
+
+					//cout << "RigidybodyObject ID: " << rigid->m_stc_robjdata.id << "PosX: " << rigid->m_stc_robjdata.pos4f.x << "PosY: "
+					//	<< rigid->m_stc_robjdata.pos4f.y << "PosZ: " << rigid->m_stc_robjdata.pos4f.z << "PosW: " << rigid->m_stc_robjdata.pos4f.w << "\n";
 				}
 			}
 

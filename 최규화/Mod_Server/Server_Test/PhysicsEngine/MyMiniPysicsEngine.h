@@ -97,6 +97,9 @@ namespace MiniPhysicsEngineG9
 		RigidBody();
 		~RigidBody();
 
+		XMFLOAT4* CenterPos;//중점
+		XMFLOAT4* Orient;//방향.
+
 	protected:
 		float InverseMass;//무게의 역수. a=1/m * F 이므로 이렇게함. 무게보다 가속도가 더 중요하니까. 이때 m이 무한이면 0이다.
 		XMFLOAT4X4 Inverse_I_Moment;//t=Ia에서 I를 인버스한것. 
@@ -105,8 +108,7 @@ namespace MiniPhysicsEngineG9
 		XMFLOAT3 AngularVelocity;//각속도. 
 
 								 //중점과 방향은 포인터로 공유한다. 즉 실제 오브젝트의 위치와 방향으로!
-		XMFLOAT4* CenterPos;//중점
-		XMFLOAT4* Orient;//방향.
+		
 
 		float damping;//제동용 값. 마찰력 대용으로도 사용
 		float Angulardamping;//회전의 마찰력 대용

@@ -42,6 +42,7 @@ void CMonoObject::UpdateLookvector()
 {
 	auto wmatrix = XMMatrixIdentity();
 	
+	//이거문제였음
 	XMFLOAT4 xmf4{ m_rot4f.x,m_rot4f.y,m_rot4f.z,m_rot4f.w };
 	auto quater = XMLoadFloat4(&xmf4);
 	wmatrix *= XMMatrixRotationQuaternion(quater);
@@ -91,6 +92,25 @@ void CMonoObject::UpdateRPosCenterPos()
 	m_pos4f.y = rb->GetPosition().y;
 	m_pos4f.z = rb->GetPosition().z;
 	m_pos4f.w = rb->GetPosition().w;
+}
+
+void CMonoObject::UpdateRRotatePos()
+{
+	m_rot4f.x = rb->GetOrient().x;
+	m_rot4f.y = rb->GetOrient().y;
+	m_rot4f.z = rb->GetOrient().z;
+	m_rot4f.w = rb->GetOrient().w;
+}
+
+void CMonoObject::UpdateRigidCenterPos()
+{
+	xmf4_pos = XMFLOAT4(m_pos4f.x, m_pos4f.y, m_pos4f.z, m_pos4f.w);
+	rb->CenterPos = &xmf4_pos;
+}
+
+void CMonoObject::UpdateRigidRotatePos()
+{
+	rb->Orient = &XMFLOAT4(m_rot4f.x, m_rot4f.y, m_rot4f.z, m_rot4f.w);
 }
 
 

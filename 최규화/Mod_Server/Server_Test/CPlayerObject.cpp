@@ -71,6 +71,10 @@ void CPlayerObject::Init_PlayerInfo()
 	m_skill_shield.once_flag = true;
 	m_skill_shield.on_using = false;
 
+	m_skill_waveshock.once_flag = true;
+	m_skill_waveshock.on_using = false;
+	m_skill_waveshock.operated = false;
+
 	if (m_id == 0)
 		m_pos4f = { -100.f, -1000.f, 0.f, 0.f };
 	else if (m_id == 1)
@@ -349,7 +353,7 @@ void CPlayerObject::ProcessPacket(Packet * packet)
 	/*
 	case PACKET_PROTOCOL_TYPE::CHANGED_PLAYER_POSITION:
 	{
-		
+
 		if (m_state == PLAYER_STATE::DEAD)
 			break;
 
@@ -382,14 +386,14 @@ void CPlayerObject::ProcessPacket(Packet * packet)
 		SetChangedPlayerState();
 
 		g_clients[PosMove_Data->id]->m_pos4f;
-		
+
 
 		cout << "ID: " << PosMove_Data->id << " 변화된 위치값: " << "[x:" << PosMove_Data->pos.x << "\t" << "y:" << PosMove_Data->pos.y
 			<< "\t" << "z:" << PosMove_Data->pos.z << "]" << "\t" << "w:" << PosMove_Data->pos.w << endl;
 
 		4. 변화된 내 (포지션, 애니메이션) 정보를 다른 클라에 전달 - 반드시 이렇게 다시 만들어줘야함
 		PosMove_Data를 바로 sendpacket에 packet으로 형변화하여 보내면 size error가 난다
-		
+
 		STC_ChangedPos stc_other_pos;
 
 		stc_other_pos.id = PosMove_Data->id;
@@ -408,7 +412,7 @@ void CPlayerObject::ProcessPacket(Packet * packet)
 			//갱신된 나의 데이터를 상대방에게 전달
 			client->SendPacket(reinterpret_cast<Packet*>(&stc_other_pos));
 		}
-		
+
 	}
 	break;
 	*/
@@ -425,7 +429,7 @@ void CPlayerObject::ProcessPacket(Packet * packet)
 		// 1. 받은 정보를 내 클라이언트에 넣어주고
 		m_rot4f = move(rot_data->rotate_status);
 		m_pdata.rot = move(rot_data->rotate_status);
-		
+
 		// 2. 받은 정보를 토대로 lookvector와 rightvector를 업데이트
 		UpdateLookvector();
 		UpdateUpvector();
@@ -451,7 +455,7 @@ void CPlayerObject::ProcessPacket(Packet * packet)
 
 	case PACKET_PROTOCOL_TYPE::PLAYER_ATTACK:
 	{
-		if (m_state == PLAYER_STATE::DEAD)		
+		if (m_state == PLAYER_STATE::DEAD)
 			break;
 
 		m_state = PLAYER_STATE::ATTACK;
@@ -579,6 +583,36 @@ void CPlayerObject::ProcessPacket(Packet * packet)
 		}
 	}
 	break;
+
+	case PACKET_PROTOCOL_TYPE::PLAYER_SKILL_WAVESHOCK:
+	{
+		if (m_state == DEAD) break;
+
+		auto data = reinterpret_cast<STC_SKILL_WAVESHOCK*>(packet);
+
+		STC_SKILL_WAVESHOCK stc_skill_waveshock;
+		stc_skill_waveshock.skill_data.master_id = data->skill_data.master_id;
+		stc_skill_waveshock.skill_data.my_id = data->skill_data.my_id;
+		stc_skill_waveshock.skill_data.alive = true;
+
+		if (m_skill_waveshock.once_flag)
+		{
+			m_skill_waveshock.once_flag = false;
+			m_skill_waveshock.op_time = 0.0;
+			g_timer_queue.AddEvent(0, 0.0, SKILL_WAVESHOCK, true, data->skill_data.master_id);
+
+			for (auto client : g_clients)
+			{
+				if (client->m_id == data->skill_data.master_id) continue;
+				if (client->GetIsAI() == true || client->GetConnectState() == false) continue;
+
+				client->SendPacket(reinterpret_cast<Packet*>(&stc_skill_waveshock));
+			}
+		}
+
+	}
+	break;
+
 
 	}
 }
@@ -711,6 +745,49 @@ void CPlayerObject::Collision(unordered_set<CStaticObject*>* sobjs, double delti
 		}
 	}
 	
+}
+
+void CPlayerObject::Collision_With_Waveshock()
+{
+	if (m_skill_waveshock.operated)
+	{
+		XMFLOAT4 wavepos = this->GetCenterPos4f();
+		wavepos.y += -this->pp->GetHalfBox().y;
+		float impurse = 20000;
+		float rad = 150.f; //범위
+
+						   //다이나믹 오브젝트와 리지드오브젝트를 날려버린다.
+		for (auto client : g_clients)
+		{
+			if (client != this)
+			{
+				auto enemy = Float3Add(XMFloat4to3(client->GetCenterPos4f()), XMFloat4to3(wavepos), false);
+
+				if (FloatLength(enemy) <= rad) //범위 안에적이있으면
+				{
+					enemy = Float3Normalize(enemy);
+					enemy = Float3Float(enemy, impurse * (1 - FloatLength(enemy) / rad));
+					client->pp->AddForce(enemy);
+					client->pp->integrate(0.01);
+				}
+			}
+		}
+
+		for (auto rigid : g_rigidobjs)
+		{
+			auto enemy = Float3Add(XMFloat4to3(rigid->GetCenterPos4f()), XMFloat4to3(wavepos), false);
+
+			if (FloatLength(enemy) <= rad)
+			{
+				enemy = Float3Normalize(enemy);
+				enemy = Float3Float(enemy, impurse *(1 - FloatLength(enemy) / rad));
+				rigid->GetRigidBody()->AddForce(enemy);
+				rigid->GetRigidBody()->integrate(0.01);
+			}
+		}
+
+		m_skill_waveshock.operated = false;
+	}
 }
 
 void CPlayerObject::GetDamaged(int damage)

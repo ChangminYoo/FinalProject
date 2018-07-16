@@ -110,6 +110,14 @@ switch (packet[1])
 	}
 	break;
 
+	case PACKET_PROTOCOL_TYPE::PLAYER_SKILL_WAVESHOCK:
+	{
+		auto myskilldata = reinterpret_cast<STC_SKILL_WAVESHOCK*>(packet);
+
+		scene.SET_PLAYER_SKILL(myskilldata->skill_data.master_id, myskilldata->skill_data);
+	}
+	break;
+
 	case PACKET_PROTOCOL_TYPE::PLAYER_ANIMATION:
 	{
 		auto mycharani = reinterpret_cast<STC_CharAnimation*>(packet);

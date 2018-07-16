@@ -65,10 +65,10 @@ void MainFrameWork::CollisionSystem(const GameTimer& gt)
 {
 	for (auto i = scene->RigidObject.begin(); i != scene->RigidObject.end(); i++)
 	{
-		(*i)->Collision(&scene->RigidObject, gt.DeltaTime());
-		(*i)->Collision(&scene->DynamicObject, gt.DeltaTime());
-		(*i)->Collision(&scene->StaticObject, gt.DeltaTime());
-		(*i)->Collision(&scene->BulletObject, gt.DeltaTime());
+		//(*i)->Collision(&scene->RigidObject, gt.DeltaTime());
+		//(*i)->Collision(&scene->DynamicObject, gt.DeltaTime());
+		//(*i)->Collision(&scene->StaticObject, gt.DeltaTime());
+		//(*i)->Collision(&scene->BulletObject, gt.DeltaTime());
 
 	}
 
@@ -105,8 +105,9 @@ void MainFrameWork::System(const GameTimer & gt)
 
 void MainFrameWork::GravitySystem(const GameTimer & gt)
 {
-	GeneratorGravity gg;
-	gg.SetGravityAccel(XMFLOAT3(0, -100, 0));
+	//GeneratorGravity gg;
+	//g.SetGravityAccel(XMFLOAT3(0, -100, 0));
+
 	//고정된 물체를 제외한 모든오브젝트에 중력을 가한다. 단 투사체는 제외한다.
 	/*
 	for (auto i = scene->DynamicObject.begin(); i != scene->DynamicObject.end(); i++)
@@ -116,12 +117,13 @@ void MainFrameWork::GravitySystem(const GameTimer & gt)
 	}
 	*/
 
+	/*
 	for (auto i = scene->RigidObject.begin(); i != scene->RigidObject.end(); i++)
 	{
 
 		gg.Update(gt.DeltaTime(), *(*i)->rb);
 	}
-
+	*/
 
 }
 
@@ -186,10 +188,12 @@ void MainFrameWork::AfterGravitySystem(const GameTimer & gt)
 	*/
 
 
+	/*
 	for (auto i = scene->RigidObject.begin(); i != scene->RigidObject.end(); i++)
 	{
 		RigidBodyCollisionPlane(XMFLOAT3(0, 1, 0), 0, *i);
 	}
+	*/
 }
 
 void MainFrameWork::OnResize()

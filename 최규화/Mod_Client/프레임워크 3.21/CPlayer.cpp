@@ -565,14 +565,22 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 			//위의 버튼을 눌렀을때 생존기 스킬인 넘버링 4와 5인 경우(4는 파동파 , 5는 방어력증가(?))
 			if (skilldata.Skills[skilldata.SellectBulletIndex] == 4 && skilldata.isSkillOn[skilldata.SellectBulletIndex])//파동파인경우
 			{
+				STC_SKILL_WAVESHOCK cts_skill_waveshock;
+				cts_skill_waveshock.skill_data.master_id = PlayerObject->m_player_data.id;
+				cts_skill_waveshock.skill_data.my_id = skilldata.Skills[skilldata.SellectBulletIndex];
+				cts_skill_waveshock.skill_data.alive = true;
+
+				scene->Player->m_async_client->SendPacket(reinterpret_cast<Packet*>(&cts_skill_waveshock));
+
 				//고리생성
 				scene->StaticObject.push_back(new RingObject(scene->device, scene->commandlist,&scene->BbObject, PlayerObject->CenterPos));
 				skilldata.SkillsCoolTime[skilldata.SellectBulletIndex] = skilldata.SkillsMaxCoolTime[skilldata.Skills[skilldata.SellectBulletIndex]];
 				skilldata.isSkillOn[skilldata.SellectBulletIndex] = false;
 				skilldata.SellectBulletIndex = 0;//스킬 시전후 가장 첫번째 스킬로 변경함
 
-				XMFLOAT4 파동파위치 = PlayerObject->CenterPos;
-				파동파위치.y += -PlayerObject->pp->GetHalfBox().y;
+				/*
+				XMFLOAT4 wavepos = PlayerObject->CenterPos;
+				wavepos.y += -PlayerObject->pp->GetHalfBox().y;
 				float impurse = 20000;
 				float rad = 150.f;//범위
 
@@ -581,7 +589,7 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 				{
 					if (l != PlayerObject)
 					{
-						auto l2 = Float3Add(XMFloat4to3(l->CenterPos), XMFloat4to3(파동파위치), false);
+						auto l2 = Float3Add(XMFloat4to3(l->CenterPos), XMFloat4to3(wavepos), false);
 						
 						if (FloatLength(l2) <= rad)//범위 안에적이있으면
 						{
@@ -595,7 +603,7 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 				}
 				for (auto l : scene->RigidObject)
 				{
-					auto l2 = Float3Add(XMFloat4to3(l->CenterPos), XMFloat4to3(파동파위치), false);
+					auto l2 = Float3Add(XMFloat4to3(l->CenterPos), XMFloat4to3(wavepos), false);
 
 					if (FloatLength(l2) <= rad)//범위 안에적이있으면
 					{
@@ -606,6 +614,7 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 					}
 
 				}
+				*/
 				
 			}
 			else if (skilldata.Skills[skilldata.SellectBulletIndex] == 5 && skilldata.isSkillOn[skilldata.SellectBulletIndex])//실드

@@ -3014,8 +3014,10 @@ RigidCubeObject::RigidCubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandL
 
 void RigidCubeObject::Tick(const GameTimer & gt)
 {
+	/*
 	if (rb != NULL)
 		rb->integrate(gt.DeltaTime());
+	*/
 }
 
 void RigidCubeObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
@@ -4358,6 +4360,7 @@ void RingObject::SetMaterial(ID3D12Device * m_Device, ID3D12GraphicsCommandList 
 
 void RingObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer & gt)
 {
+	/*
 	if (times >= 0.125f)
 	{
 		DelObj = true;
@@ -4368,6 +4371,10 @@ void RingObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer
 		times += gt.DeltaTime();
 		ObjData.Scale += gt.DeltaTime() *1000;
 	}
+	*/
+
+	times += gt.DeltaTime();
+	ObjData.Scale += gt.DeltaTime() * 125;
 
 	if (Textures.size() > 0)
 		SetTexture(commandlist, SrvDescriptorHeap, Textures[TextureName].get()->Resource.Get(), false, TexOff);

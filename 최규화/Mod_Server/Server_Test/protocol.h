@@ -14,6 +14,7 @@
 #define KEYINPUT_DOWN 0x0010
 
 #define SKILL_SHIELD_OP_TIME 5.0
+#define SKILL_WAVESHOCK_OP_TIME 0.125
 
 #define RegularPacketExchangeTime  (1.0 / 20.0) // 1초에 20번 패킷을 교환(morpg 형식)
 
@@ -43,6 +44,7 @@ enum PACKET_PROTOCOL_TYPE
 	PLAYER_ANIMATION,
 	PLAYER_CURR_STATE,	//플레이어의 현재 상태(모든 정보 저장)
 	PLAYER_SKILL_SHIELD,
+	PLAYER_SKILL_WAVESHOCK,
 	TEST					//테스트용 패킷
 };
 
@@ -357,5 +359,14 @@ typedef struct Server_To_Client_Skill_Shield
 	STC_SkillData skill_data;
 	
 }STC_SKILL_SHIELD;
+
+
+typedef struct Server_To_Client_Skill_WaveShock
+{
+	unsigned char packet_size = sizeof(STC_SkillData) + sizeof(unsigned char) + sizeof(unsigned char);
+	unsigned char packet_type = PACKET_PROTOCOL_TYPE::PLAYER_SKILL_WAVESHOCK;
+	STC_SkillData skill_data;
+
+}STC_SKILL_WAVESHOCK;
 
 #pragma pack (pop)

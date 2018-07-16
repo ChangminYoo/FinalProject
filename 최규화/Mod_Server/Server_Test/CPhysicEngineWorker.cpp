@@ -40,7 +40,26 @@ void CPhysicEngineWorker::Update()
 			}
 		}
 	
-		
+		for (auto rigid : g_rigidobjs)
+		{
+			rigid->GravitySystem(m_deltime);
+
+			//cout << "PosX: " << rigid->GetCenterPos4f().x << "PosY: " << rigid->GetCenterPos4f().y << "PosZ: " << rigid->GetCenterPos4f().z << "PosW: " << rigid->GetCenterPos4f().w << "\n";
+
+			rigid->Tick(m_deltime);
+
+			//cout << "PosX: " << rigid->GetCenterPos4f().x << "PosY: " << rigid->GetCenterPos4f().y << "PosZ: " << rigid->GetCenterPos4f().z << "PosW: " << rigid->GetCenterPos4f().w << "\n";
+			rigid->AfterGravitySystem(m_deltime);
+
+			//cout << "PosX: " << rigid->GetCenterPos4f().x << "PosY: " << rigid->GetCenterPos4f().y << "PosZ: " << rigid->GetCenterPos4f().z << "PosW: " << rigid->GetCenterPos4f().w << "\n";
+
+			rigid->UpdateLookvector();
+			rigid->UpdateUpvector();
+
+			rigid->SetUpdatedRigidybodyObject();
+
+			//cout << "PosX: " << rigid->GetCenterPos4f().x << "PosY: " << rigid->GetCenterPos4f().y << "PosZ: " << rigid->GetCenterPos4f().z << "PosW: " << rigid->GetCenterPos4f().w << "\n";
+		}
 		
 		for (auto bullet : g_bullets)
 		{
@@ -56,13 +75,7 @@ void CPhysicEngineWorker::Update()
 		   
 		}
 		
-		for (auto rigid : g_rigidobjs)
-		{
-			rigid->GravitySystem(m_deltime);
-			rigid->Tick(m_deltime);
-			rigid->AfterGravitySystem(m_deltime);
-			rigid->SetUpdatedRigidybodyObject();
-		}
+	
 
 
 		CollisionSystem(m_deltime);
@@ -99,25 +112,13 @@ void CPhysicEngineWorker::Update()
 
 void CPhysicEngineWorker::CollisionSystem(double deltime)
 {
-
-	
-	for (auto bullet : g_bullets)
-	{
-		if (bullet->GetBulletIsAlive() == true)
-		{
-			bullet->Collision(&g_clients, deltime);
-			bullet->Collision(&g_staticobjs, deltime);
-		}
-	}
-	
-	
-
 	for (auto client : g_clients)
 	{
 		if (client->GetPlayerIsAlive() == true)
 		{
 			client->Collision(&g_clients, deltime);
 			client->Collision(&g_staticobjs, deltime);
+			client->Collision_With_Waveshock();
 		}
 	}
 
@@ -128,6 +129,18 @@ void CPhysicEngineWorker::CollisionSystem(double deltime)
 		rigid->Collision(&g_clients, deltime);
 		rigid->Collision(&g_bullets, deltime);
 	}
+
+	for (auto bullet : g_bullets)
+	{
+		if (bullet->GetBulletIsAlive() == true)
+		{
+			bullet->Collision(&g_clients, deltime);
+			bullet->Collision(&g_staticobjs, deltime);
+		}
+	}
+	
+
+
 }
 
 

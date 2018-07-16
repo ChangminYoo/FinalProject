@@ -100,14 +100,14 @@ void CStaticObject::MakeStaticObjectBasicData()
 		{ 75,{ { -75.f, 0.f, 40.f, 0.f },{ 0 },{ NormalBuilding } } },
 		{ 76,{ { 0.f, 0.f, -100.f, 0.f },{ 0 },{ NormalBuilding } } },
 		{ 77, {{0.f, 200.0f, 290.0f, 0.0f},{0},{ Rigidbodybox }}},
-		{ 78,{ {-270.f, 250.f, 60.f, 0.0f },{ 0 },{ Rigidbodybox } } },
-		{ 79,{ { 270.f, 330.f, 60.f, 0.0f },{ 0 },{ Rigidbodybox } } },
-		{ 80,{ { -210.f, 390.f, -200.f, 0.f },{ 0 },{ Rigidbodybox } } },
-		{ 81,{ { 200.f, 180.0f, -180.0f, 0.f },{ 0 },{ Rigidbodybox } } },
-		{ 82,{ { 80.f, 310.0f, -30.0f, 0.f },{ 0 },{ Rigidbodybox } } },
-		{ 83,{ { -31.f, 250.0f, 160.0f, 0.f },{ 0 },{ Rigidbodybox } } },
-		{ 84,{ { 90.f, 270.f, -340.f, 0.f },{ 0 },{ Rigidbodybox } } },
-		{ 85,{ { -70.f, 220.f, -55.f, 0.f },{ 0 },{ Rigidbodybox } } },
+		//{ 78,{ {-270.f, 250.f, 60.f, 0.0f },{ 0 },{ Rigidbodybox } } },
+		//{ 79,{ { 270.f, 330.f, 60.f, 0.0f },{ 0 },{ Rigidbodybox } } },
+		//{ 80,{ { -210.f, 390.f, -200.f, 0.f },{ 0 },{ Rigidbodybox } } },
+		//{ 81,{ { 200.f, 180.0f, -180.0f, 0.f },{ 0 },{ Rigidbodybox } } },
+		//{ 82,{ { 80.f, 310.0f, -30.0f, 0.f },{ 0 },{ Rigidbodybox } } },
+		//{ 83,{ { -31.f, 250.0f, 160.0f, 0.f },{ 0 },{ Rigidbodybox } } },
+		//{ 84,{ { 90.f, 270.f, -340.f, 0.f },{ 0 },{ Rigidbodybox } } },
+		//{ 85,{ { -70.f, 220.f, -55.f, 0.f },{ 0 },{ Rigidbodybox } } },
 
 	};
 }
@@ -451,7 +451,7 @@ RigidCubeObject::RigidCubeObject(unsigned int id)
 	XMFLOAT3 testForce{ -5,-3,2 };
 	XMFLOAT3 testPoint{ -15, 5,-5 };
 
-	rb->AddForcePoint(testForce, testPoint);
+ 	rb->AddForcePoint(testForce, testPoint);
 	rb->integrate(0.1);
 
 }
@@ -485,6 +485,10 @@ void RigidCubeObject::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance,
 		}
 
 		XMFLOAT4 arr[8];
+		//cout << "Main Pos: " << obj->GetRigidBody()->GetPosition().x << " , " << obj->GetRigidBody()->GetPosition().y << " , " << obj->GetRigidBody()->GetPosition().z << " , " << obj->GetRigidBody()->GetPosition().w << "\n";
+ 		//cout << "Mainframework: " << obj->GetLookVector().x << " , " << obj->GetLookVector().y << " , " << obj->GetLookVector().z << "\n";
+		//cout << "Mainframework: " << obj->GetRightVector().x << " , " << obj->GetRightVector().y << " , " << obj->GetRightVector().z << "\n";
+
 
 		//먼저 8 개의 점을 가져온다.
 		obj->GetRigidBody()->GetEightPoint(arr, obj->GetUpVector(), obj->GetLookVector(), obj->GetRightVector());
@@ -699,7 +703,9 @@ void RigidCubeObject::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance,
 				auto px = fabsf(contactpoint[0].penetration)*Normal.x;
 				auto py = fabsf(contactpoint[0].penetration)*Normal.y;
 				auto pz = fabsf(contactpoint[0].penetration)*Normal.z;
+
 				obj->SetCenterPos3f(m_pos4f.x + px, m_pos4f.y + py, m_pos4f.z + pz);
+				obj->UpdateRigidCenterPos();
 		
 			}
 		}
@@ -906,7 +912,7 @@ void RigidCubeObject::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance,
 					auto py = fabsf(contactpoint[0].penetration)*Normal.y;
 					auto pz = fabsf(contactpoint[0].penetration)*Normal.z;
 					obj->SetCenterPos3f(m_pos4f.x + px, m_pos4f.y + py, m_pos4f.z + pz);
-
+					obj->UpdateRigidCenterPos();
 
 				}
 
@@ -962,6 +968,7 @@ void RigidCubeObject::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance,
 			auto py = fabsf(contactpoint[0].penetration)*Normal.y;
 			auto pz = fabsf(contactpoint[0].penetration)*Normal.z;
 			obj->SetCenterPos3f(m_pos4f.x + px, m_pos4f.y + py, m_pos4f.z + pz);
+			obj->UpdateRigidCenterPos();
 
 			//땅에 닿았으니 현재 속도의 y는 반감되어야 한다. 원래는 탄성계수가 있지만.. 그냥 절반 감소시킨후 부호를 -로 하자.
 			auto d = obj->GetRigidBody()->GetVelocity();
@@ -976,6 +983,7 @@ void RigidCubeObject::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance,
 			auto py = fabsf(contactpoint[0].penetration)*Normal.y;
 			auto pz = fabsf(contactpoint[0].penetration)*Normal.z;
 			obj->SetCenterPos3f(m_pos4f.x + px, m_pos4f.y + py, m_pos4f.z + pz);
+			obj->UpdateRigidCenterPos();
 
 			//땅에 닿았으니 현재 속도의 y는 반감되어야 한다. 원래는 탄성계수가 있지만.. 그냥 절반 감소시킨후 부호를 -로 하자.
 			auto d = obj->GetRigidBody()->GetVelocity();
@@ -1031,10 +1039,12 @@ void RigidCubeObject::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance,
 			auto py = fabsf(ttempcollisionpoint[0].penetration)*Normal.y;
 			auto pz = fabsf(ttempcollisionpoint[0].penetration)*Normal.z;
 			obj->SetCenterPos3f(m_pos4f.x + px, m_pos4f.y + py, m_pos4f.z + pz);
-
+			obj->UpdateRigidCenterPos();
 		}
 
-		UpdateRPosCenterPos();
+		//UpdateRPosCenterPos();
+
+		//cout << "Inner PosX: " << m_pos4f.x << " , " << "PosY: " << m_pos4f.y << " , " << "PosZ: " << m_pos4f.z << " , " << "PosW: " << m_pos4f.w << "\n";
 
 		allpoint.clear();
 		tempcollisionpoint.clear();
@@ -1059,6 +1069,10 @@ void RigidCubeObject::Tick(double deltime)
 {
 	if (rb != nullptr)
 		rb->integrate(deltime);
+
+	UpdateRPosCenterPos();
+	UpdateRRotatePos();
+	
 }
 
 void RigidCubeObject::SetUpdatedRigidybodyObject()
@@ -1253,6 +1267,8 @@ void RigidCubeObject::Collision(list<CBulletObject*>* bullets, double deltime)
 				}
 
 				(*iter)->SetAlive(false);
+				(*iter)->m_bulldata.alive = false;
+
 				//충돌 처리. 충격량을 가하고 겹침부분해소
 				rb->CollisionResolve(ppConvertrb, XMFLOAT3(0, 0, 0), deltime, 6000, 1400, 1.5);
 

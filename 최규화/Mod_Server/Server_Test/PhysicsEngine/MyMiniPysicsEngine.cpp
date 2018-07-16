@@ -1024,6 +1024,8 @@ void MiniPhysicsEngineG9::RigidBody::integrate(double DeltaTime)
 
 	assert(DeltaTime >= 0.0);
 
+	
+
 	XMVECTOR centerpos = XMLoadFloat4(CenterPos);
 
 	XMVECTOR velocity = XMLoadFloat3(&Velocity);
