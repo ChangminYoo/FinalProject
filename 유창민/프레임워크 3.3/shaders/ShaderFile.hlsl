@@ -175,14 +175,14 @@ float4 PS(VertexOut pin) : SV_Target
 				reflection = normalize(2 * lightIntensity * NormalVector - lightDir);
 
 				//원래는 6.0 대신 32였음.
-				specular = pow(saturate(dot(reflection, viewDirection)), 6.0f)*SpecularParamater;
+				specular = pow(saturate(dot(reflection, viewDirection)), 32.0f)*SpecularParamater;
 			}
 
 			// 0이면 (빛을 안 받는 부분이면)
 			else if (lightIntensity <= 0.0f)
 			{
 
-				litColor += (float4(gLights[i].DiffuseColor) * float4(0.472f, 0.472f, 0.472f, 1.0f)); //여기 부분을 조정하면 빛을 안받는 부분의 음영을 조정할 수 있습니다.
+				litColor += (float4(gLights[i].DiffuseColor) * float4(0.672f, 0.672f, 0.672f, 1.0f)); //여기 부분을 조정하면 빛을 안받는 부분의 음영을 조정할 수 있습니다.
 
 				litColor = saturate(litColor);
 

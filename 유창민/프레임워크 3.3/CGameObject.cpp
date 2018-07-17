@@ -299,52 +299,95 @@ CCubeManObject::CCubeManObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 	//조인트가 저장될 배열.
 	jarr = new UploadBuffer<JointArr>(m_Device, 1, true);
 
-	int num = 10;
+	int num = 20;
 	if (CreateMesh == false)
 	{
 		Mesh.Index = NULL;
 		Mesh.SubResource = NULL;
 
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Female Brown Casual", L"textures/human/Female Brown Casual 03B.dds", false, num, 0);
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Female Black Knight", L"textures/human/Female Black Knight 04 Green.dds", false, num, 1);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Female Brown Casual",   L"textures/human/Female Brown Casual 03B.dds", false, num, 0);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Female Black Knight",   L"textures/human/Female Black Knight 04 Green.dds", false, num, 1);
 		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Female Brown Sorceress", L"textures/human/Female Brown Sorceress 03 White.dds", false, num, 2);
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Female White Knight", L"textures/human/Female White Knight 04 Purple.dds", false, num, 3);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Female White Knight",   L"textures/human/Female White Knight 04 Purple.dds", false, num, 3);
 		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Female White Barbarian", L"textures/human/Female White Barbarian 05 Red.dds", false, num, 4);
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Male Black Knight", L"textures/human/Male Black Knight 07 White.dds", false, num, 5);
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Male White Wizard", L"textures/human/Male White Wizard 06 White.dds", false, num, 6);
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Male Black Archer", L"textures/human/Male Black Archer 05 Green.dds", false, num, 7);
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Male Fire", L"textures/human/Male Fire 01 Orange.dds", false, num, 8);
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Male White King", L"textures/human/Male White King 01 Red.dds", false, num, 9);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Male Black Knight",    L"textures/human/Male Black Knight 07 White.dds", false, num, 5);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Male White Wizard",    L"textures/human/Male White Wizard 06 White.dds", false, num, 6);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Male Black Archer",    L"textures/human/Male Black Archer 05 Green.dds", false, num, 7);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Male Fire",            L"textures/human/Male Fire 01 Orange.dds", false, num, 8);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Male White King",      L"textures/human/Male White King 01 Red.dds", false, num, 9);
 		
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Female Brown Casual N", L"textures/human/Female Brown Casual N.dds", false, num, 10);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Female Black Knight N", L"textures/human/Female Black Knight N.dds", false, num, 11);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Female Brown Sorceress N", L"textures/human/Female Brown Sorceress N.dds", false, num, 12);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Female White Knight N", L"textures/human/Female White Knight N.dds", false, num, 13);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Female White Barbarian N", L"textures/human/Female White Barbarian N.dds", false, num, 14);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Male Black Knight N", L"textures/human/Male Black Knight N.dds", false, num, 15);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Male White Wizard N", L"textures/human/Male White Wizard N.dds", false, num, 16);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Male Black Archer N", L"textures/human/Male Black Archer N.dds", false, num, 17);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Male Fire N", L"textures/human/Male Fire N.dds", false, num, 18);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Male White King N", L"textures/human/Male White King N.dds", false, num, 19);
+
+
+
 		SetMesh(m_Device, commandlist);
 		SetMaterial(m_Device, commandlist);
 	
 		CreateMesh = true;
 	
 	}
-	select = rand() % num;
+	select = rand() % 10;
 	if (select == 0)
-	TextureName = "Female Brown Casual";
+	{
+		TextureName = "Female Brown Casual";
+		NTextureName = "Female Brown Casual N";
+	}
 	else if (select == 1)
-	TextureName = "Female Black Knight";
+	{
+		TextureName = "Female Black Knight";
+		NTextureName = "Female Black Knight N";
+	}
 	else if (select == 2)
-	TextureName = "Female Brown Sorceress";
+	{
+		TextureName = "Female Brown Sorceress";
+		NTextureName = "Female Brown Sorceress N";
+	}
 	else if (select == 3)
-	TextureName = "Female White Knight";
+	{
+		TextureName = "Female White Knight";
+		NTextureName = "Female White Knight N";
+	}
 	else if (select == 4)
-	TextureName = "Female White Barbarian";
+	{
+		TextureName = "Female White Barbarian";
+		NTextureName = "Female White Barbarian N";
+	}
 	else if (select == 5)
-	TextureName = "Male Black Knight";
+	{
+		TextureName = "Male Black Knight";
+		NTextureName = "Male Black Knight N";
+	}
 	else if (select == 6)
-	TextureName = "Male White Wizard";
+	{
+		TextureName = "Male White Wizard";
+		NTextureName = "Male White Wizard N";
+	}
 	else if (select == 7)
-	TextureName = "Male Black Archer";
+	{
+		TextureName = "Male Black Archer";
+		NTextureName = "Male Black Archer N";
+	}
 	else if (select == 8)
-	TextureName = "Male Fire";
+	{
+		TextureName = "Male Fire";
+		NTextureName = "Male Fire N";
+	}
 	else if (select == 9)
-	TextureName = "Male White King";
+	{
+		TextureName = "Male White King";
+		NTextureName = "Male White King N";
+	}
 	TexOff = select;
-	
+	NTexOff = TexOff + 10;
 	
 	//게임오브젝트마다 룩벡터와 라이트벡터가 다르므로 초기 오프셋 설정을 해준다.
 	//실제 룩벡터 등은 모두 UpdateLookVector에서 처리된다(라이트벡터도) 따라서 Tick함수에서 반드시 호출해야한다.
@@ -358,7 +401,8 @@ CCubeManObject::CCubeManObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 	ObjData.isAnimation = true;
 	ObjData.Scale = 3;
 	ObjData.SpecularParamater = 0.0f;//스페큘러를 낮게준다.
-	
+	ObjData.CustomData1.w = 1234;
+
 	obs = Dynamic;
 	//게임 데이터 (스텟)을 찍는다. 캐릭터는 데미지를 갖지 않고, 탄환이 데미지를 갖도록하자.
 	gamedata.MAXHP = 100;
@@ -467,9 +511,11 @@ void CCubeManObject::Render(ID3D12GraphicsCommandList * commandlist, const GameT
 	//텍스처를 연결하고, 월드행렬을 연결한다.
 
 
-	if (Textures.size()>0)
+	if (Textures.size() > 0)
+	{
 		SetTexture(commandlist, SrvDescriptorHeap, Textures[TextureName].get()->Resource.Get(), 0, TexOff);
-
+		SetTexture(commandlist, SrvDescriptorHeap, Textures[NTextureName].get()->Resource.Get(), 2 , NTexOff);
+	}
 
 
 	UpdateConstBuffer(commandlist, false);
@@ -3551,7 +3597,9 @@ BuildingObject::BuildingObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 		Mesh.Index = NULL;
 		Mesh.SubResource = NULL;
 
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "CubeTex", L"textures/object/tower.dds", false);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "towerTex", L"textures/object/tower.dds", false, 2,0);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "towerNTex", L"textures/object/towerN.dds", false, 2, 1);
+		
 		SetMesh(m_Device, commandlist);
 		SetMaterial(m_Device, commandlist);
 		CreateMesh = true;
@@ -3572,7 +3620,7 @@ BuildingObject::BuildingObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 	ObjData.isAnimation = 0;
 	ObjData.Scale = 4.5f;
 	ObjData.SpecularParamater = -0.01f;//스페큘러를 낮게준다.
-
+	ObjData.CustomData1.w = 1234;
 
 
 									   //게임관련 데이터들
@@ -3638,8 +3686,11 @@ void BuildingObject::Render(ID3D12GraphicsCommandList * commandlist, const GameT
 	//게임오브젝트의 렌더링은 간단하다. 
 	//텍스처를 연결하고, 월드행렬을 연결한다.
 
-	if (Textures.size()>0)
-		SetTexture(commandlist, SrvDescriptorHeap, Textures["CubeTex"].get()->Resource.Get(), false);
+	if (Textures.size() > 0)
+	{
+		SetTexture(commandlist, SrvDescriptorHeap, Textures["towerTex"].get()->Resource.Get(), 0, 0);
+		SetTexture(commandlist, SrvDescriptorHeap, Textures["towerNTex"].get()->Resource.Get(), 2, 1);
+	}
 	UpdateConstBuffer(commandlist, false);
 
 	//이후 그린다.
@@ -5219,44 +5270,45 @@ MeteorObject::MeteorObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * 
 	OffRightvector = XMFLOAT3(1, 0, 0);
 	UpdateLookVector();
 	
-	CenterPos.y += 1000;
+	CenterPos.y += 1100.0f;
 	
 	obs = Bullet;
 	
 	ObjData.isAnimation = 0;
 	ObjData.Scale = 30.0;
 	ObjData.SpecularParamater = 0.1f;//스페큘러를 낮게준다.
+	ObjData.CustomData1.w = 1234;
 	staticobject = true;
 	LifeTime = 10.0f;
 
 	//게임관련 데이터들
 	gamedata.MAXHP = 1;
 	gamedata.HP = 1;
-	gamedata.Damage = 60;
+	gamedata.Damage = 80;
 	gamedata.GodMode = true;
-	gamedata.Speed = 200;
+	gamedata.Speed = 300;
 	
 	Master = master;
 
 	//광선충돌 검사용 육면체
-	XMFLOAT3 rx(20, 0, 0);
-	XMFLOAT3 ry(0, 20, 0);
-	XMFLOAT3 rz(0, 0, 20);
+	XMFLOAT3 rx(30, 0, 0);
+	XMFLOAT3 ry(0, 30, 0);
+	XMFLOAT3 rz(0, 0, 30);
 	rco.SetPlane(rx, ry, rz);
 
 	//질점오브젝트 사용시 필요한 데이터들 설정
 	pp = new PhysicsPoint();
 	pp->SetPosition(&CenterPos);//이 값은 항상 갱신되야한다.
-	pp->SetHalfBox(20, 20, 20);//충돌 박스의 x,y,z 크기
+	pp->SetHalfBox(30, 30, 30);//충돌 박스의 x,y,z 크기
 	pp->SetDamping(1);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
 	pp->SetBounce(false);//튕기지 않는다.
 	pp->SetVelocity(0, -1 * gamedata.Speed, 0);
-	pp->SetMass(1000);
+	pp->SetMass(1400);
 
 	if (Shadow != NULL)
 	{
 		s = new ShadowObject(m_Device, commandlist, NULL, Shadow, this, XMFLOAT3(1, 1, 1), 3, XMFLOAT4(0, 0, 0, 1), CenterPos);
-		s->ObjData.Scale = 10.0f;
+		s->ObjData.Scale = 50.0f;
 		Shadow->push_back(s);
 	}
 
@@ -5293,9 +5345,12 @@ void MeteorObject::Tick(const GameTimer & gt)
 {
 	//적분기. 적분기란? 매 틱마다 힘! 에의해서 변화 되는 가속도/속도/위치를 갱신한다.
 	//이때 pp의 position과 CenterPos를 일치시켜야하므로 CenterPos의 포인터를 인자로 넘겨야 한다.
-	pp->AddForce(0, -20, 0);
+	pp->AddForce(0, -300, 0);
 	pp->integrate(gt.DeltaTime());
-	s->ObjData.Scale += 0.02f;
+
+
+	Orient = QuaternionMultiply(Orient, QuaternionRotation(XMFLOAT3(0,1,0), MMPE_PI * gt.DeltaTime()*2));
+
 
 	LifeTime -= gt.DeltaTime();
 
