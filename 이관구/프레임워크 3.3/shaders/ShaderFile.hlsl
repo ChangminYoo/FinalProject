@@ -110,8 +110,11 @@ float4 PS(VertexOut pin) : SV_Target
 	float3 viewDirection;
 	
 	//텍스쳐의 기본 색상 - 샘플러를 사용하여 값 추출
-	textureColor = gDiffuseMap.Sample(gsamAnisotropicWrap, pin.Tex) * gDiffuse;
-	
+
+	if(CustomData1.w>=100 && CustomData1.w<=500)
+		textureColor = gDiffuseMap.Sample(gsamAnisotropicWrap, frac(pin.Tex*CustomData1.w*pow(pin.Tex.x,3))) * gDiffuse;
+	else
+		textureColor = gDiffuseMap.Sample(gsamAnisotropicWrap, pin.Tex) * gDiffuse;
 	//알파 테스트
 	//clip(textureColor.a - 0.1f);
 	//

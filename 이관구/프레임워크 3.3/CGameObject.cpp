@@ -1,5 +1,6 @@
 #include "CGameObject.h"
 #include"FSM.h"
+
 extern UINT CbvSrvDescriptorSize;
 
 
@@ -2087,14 +2088,14 @@ void SphereObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTim
 
 CubeObject::CubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist,  list<CGameObject*>*shadow, float degree, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist,shadow, cp)
 {
-
+	
 	if (CreateMesh == false)
 	{
 
 		Mesh.Index = NULL;
 		Mesh.SubResource = NULL;
 	   
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "redTex", L"textures/object/Red.dds", false, 7, 0);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "redTex", L"textures/object/staticcubes.dds", false, 7, 0);
 		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "orangeTex", L"textures/object/orange.dds", false, 7, 1);
 		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "yellowTex", L"textures/object/yellow.dds", false, 7, 2);
 		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "pinkTex", L"textures/object/pink.dds", false, 7, 3);
@@ -2109,9 +2110,10 @@ CubeObject::CubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 		SetMaterial(m_Device, commandlist);
 
 		CreateMesh = true;
+		srand(time(NULL));
 
 	}
-	selectColor = rand() % 7 + 0;
+	selectColor = 0;// rand() % 7 + 0;
 	if (selectColor == 0)
 		TextureName = "redTex";
 	else if (selectColor == 1)
@@ -2138,12 +2140,15 @@ CubeObject::CubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 	XMFLOAT3 axis{ 0,1,0 };
 	auto q2 = QuaternionRotation(axis, degree);
 	Orient = QuaternionMultiply(Orient, q2);
+//	Orient = QuaternionRotation(XMFLOAT3(1, 0, 0), 3.14);
 
 	UpdateLookVector();
 	ObjData.isAnimation = 0;
-	ObjData.Scale = 10.0f;
-	ObjData.SpecularParamater = 0.46f;//스페큘러를 낮게준다.
+	ObjData.Scale = 3.5f;
+	ObjData.SpecularParamater = 0.2f;//스페큘러를 낮게준다.
 	
+	
+	ObjData.CustomData1.w = rand() % 400+100;
 	obs = Static;
 
 	//게임관련 데이터들
@@ -2185,8 +2190,8 @@ CubeObject::~CubeObject()
 
 void CubeObject::SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist)
 {
-	CreateCube(&Mesh, 1, 1, 1);
-
+	//CreateCube(&Mesh, 1, 1, 1);
+	LoadMD5Model(L".\\플레이어메쉬들\\staticcube1.MD5MESH", &Mesh, 0, 1);
 	Mesh.SetNormal(false);
 	Mesh.CreateVertexBuffer(m_Device, commandlist);
 	Mesh.CreateIndexBuffer(m_Device, commandlist);
@@ -3551,7 +3556,7 @@ BuildingObject::BuildingObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 		Mesh.Index = NULL;
 		Mesh.SubResource = NULL;
 
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "CubeTex", L"textures/object/tower.dds", false);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "CubeTex", L"textures/object/staticcubes.dds", false);
 		SetMesh(m_Device, commandlist);
 		SetMaterial(m_Device, commandlist);
 		CreateMesh = true;
@@ -3616,7 +3621,7 @@ void BuildingObject::SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* 
 	//CreateCube(&Mesh, 30, 90, 30);
 
 	//모델 로드
-	LoadMD5Model(L".\\플레이어메쉬들\\tower.MD5MESH", &Mesh, 0, 1);
+	LoadMD5Model(L".\\플레이어메쉬들\\tree.MD5MESH", &Mesh, 0, 1);
 	//
 	Mesh.SetNormal(false);
 	Mesh.CreateVertexBuffer(m_Device, commandlist);
