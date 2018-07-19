@@ -32,13 +32,8 @@ void CLight::UpdateConstantBuffer(ID3D12GraphicsCommandList* commandlist)
 	//LData.light[1].SpecularPower = 32.0f;
 	//LData.nLight = 2;
 
-	//LData.light[1].LightColor = { 0.8f, 0.8f, 0.8f,1 };
-	//LData.light[1].Direction = { 0.4f, -1.577f, -1.577f, 1.0f };
-	//LData.light[1].Position = { 102.0f, 220.0f, -120.0f };
-	//LData.light[1].SpecularPower = 32.0f;
-	//LData.nLight = 2;
 	
-	LData.AmbientLight = { 0.158f, 0.169f, 0.154f, 0.9f };
+	LData.AmbientLight = { 0.288f, 0.289f, 0.284f, 0.8f };
 
 	ConstBuffer->CopyData(0, LData);
 	commandlist->SetGraphicsRootConstantBufferView(3, ConstBuffer->Resource()->GetGPUVirtualAddress());

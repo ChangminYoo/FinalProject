@@ -110,8 +110,10 @@ float4 PS(VertexOut pin) : SV_Target
 	float3 viewDirection;
 	
 	//텍스쳐의 기본 색상 - 샘플러를 사용하여 값 추출
-	textureColor = gDiffuseMap.Sample(gsamAnisotropicWrap, pin.Tex) * gDiffuse;
-	
+	if (CustomData1.w >= 100 && CustomData1.w <= 500)
+		textureColor = gDiffuseMap.Sample(gsamAnisotropicWrap, frac(pin.Tex*CustomData1.w*pow(pin.Tex.x, 3))) * gDiffuse;
+	else
+		textureColor = gDiffuseMap.Sample(gsamAnisotropicWrap, pin.Tex) * gDiffuse;
 	//알파 테스트
 	//clip(textureColor.a - 0.1f);
 	//
@@ -157,39 +159,51 @@ float4 PS(VertexOut pin) : SV_Target
 			//픽셀당 비치는 빛의양 (0 ~ 1)
 			lightIntensity = saturate(dot(NormalVector, lightDir));   //-> 람베르트 코사인 법칙 
 
-																//lightIntensity = round(lightIntensity * 4) / 3;
+																
+			lightIntensity = ceil(lightIntensity * 5) / 5.0f;
+			//ceil : 올림 따라서 값은 0, 0.2 0.4, 0.6, 0.8, 1
+															
 
-																// 0보다 크면 (빛을 받는 부분이면)
-			if (lightIntensity > 0.0f)
-			{
+	
+			litColor += (float4(gLights[i].DiffuseColor) * float4(lightIntensity, lightIntensity, lightIntensity, 1.0f));
+			litColor = saturate(litColor);
 
-				litColor += (float4(gLights[i].DiffuseColor) * float4(0.37, 0.37, 0.37, 1));
+			reflection = normalize(2 * lightIntensity * NormalVector - lightDir);
 
+			specular = pow(saturate(dot(reflection, viewDirection)), 32.0f)*SpecularParamater;
+			
 
-
-
-				litColor += (float4(gLights[i].DiffuseColor) * lightIntensity);
-
-				litColor = saturate(litColor);
-
-				reflection = normalize(2 * lightIntensity * NormalVector - lightDir);
-
-				//원래는 6.0 대신 32였음.
-				specular = pow(saturate(dot(reflection, viewDirection)), 32.0f)*SpecularParamater;
-			}
-
-			// 0이면 (빛을 안 받는 부분이면)
-			else if (lightIntensity <= 0.0f)
-			{
-
-				litColor += (float4(gLights[i].DiffuseColor) * float4(0.672f, 0.672f, 0.672f, 1.0f)); //여기 부분을 조정하면 빛을 안받는 부분의 음영을 조정할 수 있습니다.
-
-				litColor = saturate(litColor);
-
-				reflection = normalize(2 * lightIntensity * pin.Normal - lightDir);
-
-				specular = pow(saturate(dot(reflection, viewDirection)), 32.0f)*SpecularParamater;
-			}
+			// 0보다 크면 (빛을 받는 부분이면)
+			//if (lightIntensity > 0.0f)
+			//{
+			//
+			//	litColor += (float4(gLights[i].DiffuseColor) * float4(0.37, 0.37, 0.37, 1));
+			//
+			//
+			//
+			//
+			//	litColor += (float4(gLights[i].DiffuseColor) * lightIntensity);
+			//
+			//	litColor = saturate(litColor);
+			//
+			//	reflection = normalize(2 * lightIntensity * NormalVector - lightDir);
+			//
+			//	//원래는 6.0 대신 32였음.
+			//	specular = pow(saturate(dot(reflection, viewDirection)), 6.0f)*SpecularParamater;
+			//}
+			//
+			//// 0이면 (빛을 안 받는 부분이면)
+			//else if (lightIntensity <= 0.0f)
+			//{
+			//
+			//	litColor += (float4(gLights[i].DiffuseColor) * float4(0.872f, 0.872f, 0.872f, 1.0f)); //여기 부분을 조정하면 빛을 안받는 부분의 음영을 조정할 수 있습니다.
+			//
+			//	litColor = saturate(litColor);
+			//
+			//	reflection = normalize(2 * lightIntensity * pin.Normal - lightDir);
+			//
+			//	specular = pow(saturate(dot(reflection, viewDirection)), 32.0f)*SpecularParamater;
+			//}
 
 		}
 

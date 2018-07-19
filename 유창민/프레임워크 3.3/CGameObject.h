@@ -755,7 +755,7 @@ public:
 class BigWallObject : public CGameObject
 {
 public:
-	BigWallObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, float dgree, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
+	BigWallObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, float degree, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
 	~BigWallObject();
 	ShadowObject* s = NULL;
 public:
@@ -776,7 +776,7 @@ public:
 class BuildingObject : public CGameObject
 {
 public:
-	BuildingObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, float dgree, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
+	BuildingObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, float degree, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
 	~BuildingObject();
 	ShadowObject* s = NULL;
 public:
@@ -798,7 +798,7 @@ public:
 class ColumnObject : public CGameObject
 {
 public:
-	ColumnObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, float dgree, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
+	ColumnObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, float degree, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
 	~ColumnObject();
 	ShadowObject* s = NULL;
 public:
@@ -819,7 +819,7 @@ public:
 class BreakCartObject : public CGameObject
 {
 public:
-	BreakCartObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, float dgree, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
+	BreakCartObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, float degree, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
 	~BreakCartObject();
 	ShadowObject* s = NULL;
 public:
@@ -841,7 +841,7 @@ public:
 class Rock1Object : public CGameObject
 {
 public:
-	Rock1Object(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, float dgree, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
+	Rock1Object(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, float degree, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
 	ShadowObject* s = NULL;
 public:
 	static CMaterial Mat;

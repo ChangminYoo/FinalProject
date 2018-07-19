@@ -514,7 +514,7 @@ void CCubeManObject::Render(ID3D12GraphicsCommandList * commandlist, const GameT
 	if (Textures.size() > 0)
 	{
 		SetTexture(commandlist, SrvDescriptorHeap, Textures[TextureName].get()->Resource.Get(), 0, TexOff);
-		SetTexture(commandlist, SrvDescriptorHeap, Textures[NTextureName].get()->Resource.Get(), 2 , NTexOff);
+		SetTexture(commandlist, SrvDescriptorHeap, Textures[NTextureName].get()->Resource.Get(), 2, NTexOff);
 	}
 
 
@@ -2140,40 +2140,14 @@ CubeObject::CubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 		Mesh.Index = NULL;
 		Mesh.SubResource = NULL;
 	   
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "redTex", L"textures/object/Red.dds", false, 7, 0);
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "orangeTex", L"textures/object/orange.dds", false, 7, 1);
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "yellowTex", L"textures/object/yellow.dds", false, 7, 2);
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "pinkTex", L"textures/object/pink.dds", false, 7, 3);
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "whiteTex", L"textures/object/white.dds", false, 7, 4);
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "blueTex", L"textures/object/blue.dds", false, 7, 5);
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "greenTex", L"textures/object/green.dds", false, 7, 6);
-
-		//LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Tex", L"textures/object/bricks2.dds", false,2, 0);
-		//LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "NormalTex", L"textures/object/bricks2_nmap.dds", false, 2, 1);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "cubeTex", L"textures/object/staticcubes.dds", false);
 
 		SetMesh(m_Device, commandlist);
 		SetMaterial(m_Device, commandlist);
 
 		CreateMesh = true;
-
+		srand(time(NULL));
 	}
-	selectColor = rand() % 7 + 0;
-	if (selectColor == 0)
-		TextureName = "redTex";
-	else if (selectColor == 1)
-		TextureName = "orangeTex";
-	else if (selectColor == 2)
-		TextureName = "yellowTex";
-	else if (selectColor == 3)
-		TextureName = "pinkTex"; 
-	else if (selectColor == 4)
-		TextureName = "whiteTex";
-	else if (selectColor == 5)
-		TextureName = "blueTex"; 
-	else if (selectColor == 6)
-		TextureName = "greenTex";
-	
-	TexOff = selectColor;
 
 	//게임오브젝트마다 룩벡터와 라이트벡터가 다르므로 초기 오프셋 설정을 해준다.
 	//실제 룩벡터 등은 모두 UpdateLookVector에서 처리된다(라이트벡터도) 따라서 Tick함수에서 반드시 호출해야한다.
@@ -2188,8 +2162,11 @@ CubeObject::CubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 	UpdateLookVector();
 	ObjData.isAnimation = 0;
 	ObjData.Scale = 10.0f;
-	ObjData.SpecularParamater = 0.46f;//스페큘러를 낮게준다.
-	
+	ObjData.Scale = 3.2f;
+	ObjData.SpecularParamater = 0.2f;//스페큘러를 낮게준다.
+
+
+	ObjData.CustomData1.w = rand() % 400 + 100;
 	obs = Static;
 
 	//게임관련 데이터들
@@ -2200,10 +2177,23 @@ CubeObject::CubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 	gamedata.Speed = 0;
 	staticobject = true;
 
+	XMFLOAT3 raxis{ 0,1,0 };
 	//광선충돌 검사용 육면체
 	XMFLOAT3 rx(5, 0, 0);
+	auto rqx = QuaternionRotation(raxis, degree);
+	Orient = QuaternionMultiply(XMFLOAT4(rx.x, rx.y, rx.z, 0), rqx);
+	rx.x = Orient.x; rx.y = Orient.y, rx.z = Orient.z;
+
 	XMFLOAT3 ry(0, 5, 0);
+	auto rqy = QuaternionRotation(raxis, degree);
+	Orient = QuaternionMultiply(XMFLOAT4(ry.x, ry.y, ry.z, 0), rqy);
+	ry.x = Orient.x; ry.y = Orient.y,  ry.z = Orient.z;
+
 	XMFLOAT3 rz(0, 0, 5);
+	auto rqz = QuaternionRotation(raxis, degree);
+	Orient = QuaternionMultiply(XMFLOAT4(ry.x, ry.y, ry.z, 0), rqz);
+	rz.x = Orient.x; rz.y = Orient.y, rz.z = Orient.z;
+
 	rco.SetPlane(rx, ry, rz);
 
 	//질점오브젝트 사용시 필요한 데이터들 설정
@@ -2231,8 +2221,8 @@ CubeObject::~CubeObject()
 
 void CubeObject::SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist)
 {
-	CreateCube(&Mesh, 1, 1, 1);
-
+	//CreateCube(&Mesh, 1, 1, 1);
+	LoadMD5Model(L".\\플레이어메쉬들\\staticcube1.MD5MESH", &Mesh, 0, 1);
 	Mesh.SetNormal(false);
 	Mesh.CreateVertexBuffer(m_Device, commandlist);
 	Mesh.CreateIndexBuffer(m_Device, commandlist);
@@ -2254,11 +2244,9 @@ void CubeObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer
 	//텍스처를 연결하고, 월드행렬을 연결한다.
 	
 	if (Textures.size() > 0)
-	{
-		SetTexture(commandlist, SrvDescriptorHeap, Textures[TextureName].get()->Resource.Get(),0,TexOff);
-		//SetTexture(commandlist, SrvDescriptorHeap, Textures["Tex"].get()->Resource.Get(), 0, 0);
-		//SetTexture(commandlist, SrvDescriptorHeap, Textures["NormalTex"].get()->Resource.Get(),2, 1);
-	}
+		SetTexture(commandlist, SrvDescriptorHeap, Textures["cubeTex"].get()->Resource.Get());
+
+	
 	UpdateConstBuffer(commandlist, false);
 
 	//이후 그린다.
@@ -3372,7 +3360,7 @@ void SmallWallObject::Render(ID3D12GraphicsCommandList * commandlist, const Game
 
 
 
-BigWallObject::BigWallObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, float dgree, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist,shadow, cp)
+BigWallObject::BigWallObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, float degree, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist,shadow, cp)
 {
 
 	if (CreateMesh == false)
@@ -3396,7 +3384,7 @@ BigWallObject::BigWallObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList 
 
 	auto q = XMLoadFloat4(&Orient);//방향을 degree만큼 돌리려 한다.
 	XMFLOAT3 axis{ 0,1,0 };
-	auto q2 = QuaternionRotation(axis, dgree);
+	auto q2 = QuaternionRotation(axis, degree);
 	Orient = QuaternionMultiply(Orient, q2);
 
 	obs = Static;
@@ -3417,17 +3405,17 @@ BigWallObject::BigWallObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList 
 	XMFLOAT3 raxis{ 0,1,0 };
 	//광선충돌 검사용 육면체
 	XMFLOAT3 rx(350, 0, 0);
-	auto rqx = QuaternionRotation(raxis, dgree);
+	auto rqx = QuaternionRotation(raxis, degree);
 	Orient = QuaternionMultiply(XMFLOAT4(rx.x, rx.y, rx.z, 0), rqx);
 	rx.x = Orient.x; rx.y = Orient.y, rx.z = Orient.z;
 
 	XMFLOAT3 ry(0, 50, 0);
-	auto rqy = QuaternionRotation(raxis, dgree);
+	auto rqy = QuaternionRotation(raxis, degree);
 	Orient = QuaternionMultiply(XMFLOAT4(ry.x, ry.y, ry.z, 0), rqy);
 	ry.x = Orient.x; ry.y = Orient.y, ry.z = Orient.z;
 
 	XMFLOAT3 rz(0, 0, 5);
-	auto rqz = QuaternionRotation(raxis, dgree);
+	auto rqz = QuaternionRotation(raxis, degree);
 	Orient = QuaternionMultiply(XMFLOAT4(ry.x, ry.y, ry.z, 0), rqz);
 	rz.x = Orient.x; rz.y = Orient.y, rz.z = Orient.z;
 
@@ -3492,7 +3480,7 @@ void BigWallObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTi
 }
 
 
-ColumnObject::ColumnObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, float dgree, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist,shadow, cp)
+ColumnObject::ColumnObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, float degree, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist,shadow, cp)
 {
 
 	if (CreateMesh == false)
@@ -3515,7 +3503,7 @@ ColumnObject::ColumnObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * 
 
 	auto q = XMLoadFloat4(&Orient);//방향을 degree만큼 돌리려 한다.
 	XMFLOAT3 axis{ 0,1,0 };
-	auto q2 = QuaternionRotation(axis, dgree);
+	auto q2 = QuaternionRotation(axis, degree);
 	Orient = QuaternionMultiply(Orient, q2);
 
 	UpdateLookVector();
@@ -3533,11 +3521,27 @@ ColumnObject::ColumnObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * 
 	gamedata.Speed = 0;
 	staticobject = true;
 	obs = Static;
+
+
+	XMFLOAT3 raxis{ 0,1,0 };
 	//광선충돌 검사용 육면체
 	XMFLOAT3 rx(15, 0, 0);
+	auto rqx = QuaternionRotation(raxis, degree);
+	Orient = QuaternionMultiply(XMFLOAT4(rx.x, rx.y, rx.z, 0), rqx);
+	rx.x = Orient.x; rx.y = Orient.y, rx.z = Orient.z;
+
 	XMFLOAT3 ry(0, 45, 0);
+	auto rqy = QuaternionRotation(raxis, degree);
+	Orient = QuaternionMultiply(XMFLOAT4(ry.x, ry.y, ry.z, 0), rqy);
+	ry.x = Orient.x; ry.y = Orient.y, ry.z = Orient.z;
+
 	XMFLOAT3 rz(0, 0, 15);
+	auto rqz = QuaternionRotation(raxis, degree);
+	Orient = QuaternionMultiply(XMFLOAT4(ry.x, ry.y, ry.z, 0), rqz);
+	rz.x = Orient.x; rz.y = Orient.y, rz.z = Orient.z;
+
 	rco.SetPlane(rx, ry, rz);
+
 
 	//질점오브젝트 사용시 필요한 데이터들 설정
 	pp = new PhysicsPoint();
@@ -3588,7 +3592,7 @@ void ColumnObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTim
 }
 
 
-BuildingObject::BuildingObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, float dgree, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, shadow, cp)
+BuildingObject::BuildingObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, float degree, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, shadow, cp)
 {
 
 	if (CreateMesh == false)
@@ -3613,7 +3617,7 @@ BuildingObject::BuildingObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 
 	auto q = XMLoadFloat4(&Orient);//방향을 degree만큼 돌리려 한다.
 	XMFLOAT3 axis{ 0,1,0 };
-	auto q2 = QuaternionRotation(axis, dgree);
+	auto q2 = QuaternionRotation(axis, degree);
 	Orient = QuaternionMultiply(Orient, q2);
 
 	UpdateLookVector();
@@ -3631,10 +3635,25 @@ BuildingObject::BuildingObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 	gamedata.Speed = 0;
 	staticobject = true;
 	obs = Static;
+
+
+	XMFLOAT3 raxis{ 0,1,0 };
 	//광선충돌 검사용 육면체
 	XMFLOAT3 rx(15, 0, 0);
+	auto rqx = QuaternionRotation(raxis, degree);
+	Orient = QuaternionMultiply(XMFLOAT4(rx.x, rx.y, rx.z, 0), rqx);
+	rx.x = Orient.x; rx.y = Orient.y, rx.z = Orient.z;
+
 	XMFLOAT3 ry(0, 50, 0);
+	auto rqy = QuaternionRotation(raxis, degree);
+	Orient = QuaternionMultiply(XMFLOAT4(ry.x, ry.y, ry.z, 0), rqy);
+	ry.x = Orient.x; ry.y = Orient.y, ry.z = Orient.z;
+
 	XMFLOAT3 rz(0, 0, 15);
+	auto rqz = QuaternionRotation(raxis, degree);
+	Orient = QuaternionMultiply(XMFLOAT4(ry.x, ry.y, ry.z, 0), rqz);
+	rz.x = Orient.x; rz.y = Orient.y, rz.z = Orient.z;
+
 	rco.SetPlane(rx, ry, rz);
 
 	//질점오브젝트 사용시 필요한 데이터들 설정
@@ -3645,12 +3664,12 @@ BuildingObject::BuildingObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 	pp->SetBounce(false);//튕기지 않는다.
 	pp->SetMass(INFINITY);//고정된 물체는 무게가 무한이다.
 
-						  //if (Shadow != NULL)
-						  //{
-						  //	s = new ShadowObject(m_Device, commandlist, NULL, Shadow, this, XMFLOAT3(30, 90, 30), 1, CenterPos);
-						  //	s->ObjData.Scale = 1.0f;
-						  //	Shadow->push_back(s);
-						  //}
+	//if (Shadow != NULL)
+	//{
+	//	s = new ShadowObject(m_Device, commandlist, NULL, Shadow, this, XMFLOAT3(30, 90, 30), 1, CenterPos);
+	//	s->ObjData.Scale = 1.0f;
+	//	Shadow->push_back(s);
+	//}
 }
 
 BuildingObject::~BuildingObject()
@@ -3664,7 +3683,7 @@ void BuildingObject::SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* 
 	//CreateCube(&Mesh, 30, 90, 30);
 
 	//모델 로드
-	LoadMD5Model(L".\\플레이어메쉬들\\tower.MD5MESH", &Mesh, 0, 1);
+	LoadMD5Model(L".\\플레이어메쉬들\\tree.MD5MESH", &Mesh, 0, 1);
 	//
 	Mesh.SetNormal(false);
 	Mesh.CreateVertexBuffer(m_Device, commandlist);
@@ -3699,7 +3718,7 @@ void BuildingObject::Render(ID3D12GraphicsCommandList * commandlist, const GameT
 }
 //피라미드
 
-Rock1Object::Rock1Object(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, float dgree, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist,shadow, cp)
+Rock1Object::Rock1Object(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, float degree, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist,shadow, cp)
 {
 
 	if (CreateMesh == false)
@@ -3722,7 +3741,7 @@ Rock1Object::Rock1Object(ID3D12Device * m_Device, ID3D12GraphicsCommandList * co
 
 	auto q = XMLoadFloat4(&Orient);//방향을 degree만큼 돌리려 한다.
 	XMFLOAT3 axis{ 0,1,0 };
-	auto q2 = QuaternionRotation(axis, dgree);
+	auto q2 = QuaternionRotation(axis, degree);
 	Orient = QuaternionMultiply(Orient, q2);
 
 	UpdateLookVector();
@@ -4973,7 +4992,7 @@ void Floor2Object::Render(ID3D12GraphicsCommandList * commandlist, const GameTim
 }
 
 
-BreakCartObject::BreakCartObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, list<CGameObject*>* shadow, float dgree, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, shadow, cp)
+BreakCartObject::BreakCartObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, list<CGameObject*>* shadow, float degree, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, shadow, cp)
 {
 	if (CreateMesh == false)
 	{
@@ -4995,7 +5014,7 @@ BreakCartObject::BreakCartObject(ID3D12Device * m_Device, ID3D12GraphicsCommandL
 
 	auto q = XMLoadFloat4(&Orient);//방향을 degree만큼 돌리려 한다.
 	XMFLOAT3 axis{ 0,1,0 };
-	auto q2 = QuaternionRotation(axis, dgree);
+	auto q2 = QuaternionRotation(axis, degree);
 	Orient = QuaternionMultiply(Orient, q2);
 
 	UpdateLookVector();
@@ -5013,10 +5032,25 @@ BreakCartObject::BreakCartObject(ID3D12Device * m_Device, ID3D12GraphicsCommandL
 	gamedata.Speed = 0;
 	staticobject = true;
 	obs = Static;
+	
+
+	XMFLOAT3 raxis{ 0,1,0 };
 	//광선충돌 검사용 육면체
 	XMFLOAT3 rx(15, 0, 0);
+	auto rqx = QuaternionRotation(raxis, degree);
+	Orient = QuaternionMultiply(XMFLOAT4(rx.x, rx.y, rx.z, 0), rqx);
+	rx.x = Orient.x; rx.y = Orient.y, rx.z = Orient.z;
+
 	XMFLOAT3 ry(0, 8, 0);
+	auto rqy = QuaternionRotation(raxis, degree);
+	Orient = QuaternionMultiply(XMFLOAT4(ry.x, ry.y, ry.z, 0), rqy);
+	ry.x = Orient.x; ry.y = Orient.y, ry.z = Orient.z;
+
 	XMFLOAT3 rz(0, 0, 15);
+	auto rqz = QuaternionRotation(raxis, degree);
+	Orient = QuaternionMultiply(XMFLOAT4(ry.x, ry.y, ry.z, 0), rqz);
+	rz.x = Orient.x; rz.y = Orient.y, rz.z = Orient.z;
+
 	rco.SetPlane(rx, ry, rz);
 
 	//질점오브젝트 사용시 필요한 데이터들 설정
@@ -5279,7 +5313,7 @@ MeteorObject::MeteorObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * 
 	ObjData.SpecularParamater = 0.1f;//스페큘러를 낮게준다.
 	ObjData.CustomData1.w = 1234;
 	staticobject = true;
-	LifeTime = 10.0f;
+	LifeTime = 20.0f;
 
 	//게임관련 데이터들
 	gamedata.MAXHP = 1;
