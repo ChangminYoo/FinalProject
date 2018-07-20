@@ -26,12 +26,13 @@ typedef struct SkillData
 	스킬넘버링 4 : 파동파
 	스킬넘버링 5 : 실드
 	스킬넘버링 6 : 해머불렛
+	스킬넘버링 7 : 메테오
 	*/
-	float SkillsMaxCoolTime[7] = { 0.6f, 1.1f, 25.0f, 5.0f,20.0f, 20.0f,3.5f };
+	float SkillsMaxCoolTime[8] = { 0.6f, 1.1f, 25.0f, 5.0f,20.0f, 20.0f,3.5f, 5.0f };
 
 
 	//스킬별 사용가능 여부
-	bool isSkillOn[7] = { true };
+	bool isSkillOn[8] = { true };
 
 	
 };

@@ -292,10 +292,6 @@ void Scene::CreateGameObject()
 	((ImpObject*)imp)->fsm = new FSM(imp, &DynamicObject, &StaticObject, &BulletObject);
 	DynamicObject.push_back(imp);
 
-
-	StaticObject.push_back(new MeteorObject(device, commandlist, &BbObject, &Shadows,NULL, XMFLOAT4(0,0,0,1), XMFLOAT4(0, 50, -240, 0)));
-
-
 	//MoveCube
 	StaticObject.push_back(new MoveCubeObject(device, commandlist, &BbObject, &Shadows, 50.0f, XMFLOAT4(0, 25, 145, 0)));
 	StaticObject.push_back(new MoveCubeObject(device, commandlist, &BbObject, &Shadows, 50.0f, XMFLOAT4(0, 52, -150, 0)));
@@ -528,7 +524,8 @@ void Scene::CreateUI()
 
 		case 6://ÇØ¸ÓºÒ·¿
 			ct = Player->skilldata.SkillsMaxCoolTime[Player->skilldata.Skills[i]];
-
+		case 7://ÇØ¸ÓºÒ·¿
+			ct = Player->skilldata.SkillsMaxCoolTime[Player->skilldata.Skills[i]];
 		}
 
 

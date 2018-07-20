@@ -228,12 +228,14 @@ ComPtr<ID3D12DescriptorHeap> RangeObject::SrvDescriptorHeap;//텍스처 용 힙
 CMaterial RangeObject::Mat;
 //--------------------------------------------------------------------------------------
 bool ShadowObject::CreateMesh = false;
+bool ShadowObject::CreatemMesh = false;
 bool ShadowObject::CreatecMesh = false;
 bool ShadowObject::CreateiMesh = false;
 bool ShadowObject::CreateoMesh = false;
 CMesh ShadowObject::cMesh;//나중에 메쉬는 static으로 둬야함
 CMesh ShadowObject::iMesh;//나중에 메쉬는 static으로 둬야함
 CMesh ShadowObject::oMesh;//나중에 메쉬는 static으로 둬야함
+CMesh ShadowObject::mMesh;//나중에 메쉬는 static으로 둬야함
 CMaterial ShadowObject::Mat;
 std::vector<ModelAnimation> ShadowObject::cAnimations;
 std::vector<ModelAnimation> ShadowObject::iAnimations;

@@ -98,7 +98,25 @@ VertexOut VS(VertexIn vin)
 	return vout;
 }
 
+float4 CalcDiffuseLight(float3 normal, float3 lightDirection, float4 lightColor, float lightIntensity)
+{
+	return saturate(dot(normal, -lightDirection)) * lightIntensity * lightColor;
+}
 
+float4 CalcSpecularLight(float3 normal, float3 lightDirection, float3 cameraDirection, float4 lightColor, float lightIntensity)
+{
+	
+	float3 halfVector = normalize(-lightDirection + -cameraDirection);
+	float specular = saturate(dot(halfVector, normal));
+
+	float specularPower = 20;
+
+	return lightIntensity * lightColor * pow(abs(specular), specularPower);
+}
+float lengthSquared(float3 v1)
+{
+	return v1.x * v1.x + v1.y * v1.y + v1.z * v1.z;
+}
 float4 PS(VertexOut pin) : SV_Target
 {
 	float4 textureColor; //텍스쳐 색상
@@ -108,11 +126,11 @@ float4 PS(VertexOut pin) : SV_Target
 	float4 specular = float4(0,0,0,1);
 	float4 litColor = float4(1,1,1,1);
 	float3 viewDirection;
-	
-	//텍스쳐의 기본 색상 - 샘플러를 사용하여 값 추출
+	float4 finalcolor;
 
-	if(CustomData1.w>=100 && CustomData1.w<=500)
-		textureColor = gDiffuseMap.Sample(gsamAnisotropicWrap, frac(pin.Tex*CustomData1.w*pow(pin.Tex.x,3))) * gDiffuse;
+	//텍스쳐의 기본 색상 - 샘플러를 사용하여 값 추출
+	if (CustomData1.w >= 100 && CustomData1.w <= 500)
+		textureColor = gDiffuseMap.Sample(gsamAnisotropicWrap, frac(pin.Tex*CustomData1.w*pow(pin.Tex.x, 3))) * gDiffuse;
 	else
 		textureColor = gDiffuseMap.Sample(gsamAnisotropicWrap, pin.Tex) * gDiffuse;
 	//알파 테스트
@@ -142,76 +160,75 @@ float4 PS(VertexOut pin) : SV_Target
 
 	float3 NormalVector = pin.Normal;
 
+	float4 diffuseLight = float4(0, 0, 0, 0);
+	float4 specularLight = float4(0, 0, 0, 0);
+
+	//카메라 방향 계산
+	viewDirection = gEyePos - pin.PosW.xyz;
+	viewDirection = normalize(viewDirection);
+	//빛의 방향 계산.
+	lightDir = -(gLights[0].Direction);
+	lightDir = normalize(lightDir);
+	//기본적인 빛 색상
+	litColor = gLights[0].DiffuseColor;
+	//기본적인 빛의 세기
+	lightIntensity = max(dot(NormalVector, lightDir),0);
+	lightIntensity =ceil(lightIntensity * 5) / 5;
+	//기본적인 빛 계산
+	diffuseLight += CalcDiffuseLight(pin.Normal, lightDir, litColor, lightIntensity);
+	specularLight += CalcSpecularLight(pin.Normal, lightDir,viewDirection, litColor, lightIntensity);
 
 	if (SpecularParamater >= 0)
 	{
-		for (int i = 0; i < nLights; ++i)
+		//i가 0일때는 그냥 전역광원(태양 같은걸로 처리) 하고 나머지는 점광원으로 할예정..
+		for (int i = 1; i < nLights; ++i)
 		{
 
-			viewDirection = gEyePos - pin.PosW.xyz;
-			viewDirection = normalize(viewDirection);
+			float3 PointLightDirection = pin.PosW.xyz -gLights[i].Position;
 
-			lightDir = -(gLights[i].Direction);
-			lightDir = normalize(lightDir);
-			litColor = gAmbientLight;
+			float DistanceSq = lengthSquared(PointLightDirection);
 
-			specular = float4(0.0f, 0.0f, 0.0f, 0.0f);
+			float radius = 1500;
 
-			//픽셀당 비치는 빛의양 (0 ~ 1)
-			lightIntensity = saturate(dot(NormalVector, lightDir));   //-> 람베르트 코사인 법칙 
-
-																//lightIntensity = round(lightIntensity * 4) / 3;
-
-																// 0보다 크면 (빛을 받는 부분이면)
-			if (lightIntensity > 0.0f)
+			
+			if (DistanceSq < abs(radius * radius))
 			{
+				float Distance = sqrt(DistanceSq);
 
-				litColor += (float4(gLights[i].DiffuseColor) * float4(0.37, 0.37, 0.37, 1));
+				//노멀화
+				PointLightDirection /= Distance;
 
+				float du = Distance / (1 - DistanceSq / (radius * radius - 1));
+				
+				float denom = du / abs(radius) + 1;
 
+				
+				float attenuation = 1 / (denom * denom);
 
+				float pointintensity= max(dot(NormalVector, -normalize(gLights[i].Direction)), 0);
+				pointintensity = smoothstep(0.25, 0.7, pointintensity)+0.15f;
+		
+				diffuseLight += CalcDiffuseLight(pin.Normal, PointLightDirection, gLights[i].DiffuseColor, pointintensity) * attenuation;
 
-				litColor += (float4(gLights[i].DiffuseColor) * lightIntensity);
-
-				litColor = saturate(litColor);
-
-				reflection = normalize(2 * lightIntensity * NormalVector - lightDir);
-
-				//원래는 6.0 대신 32였음.
-				specular = pow(saturate(dot(reflection, viewDirection)), 6.0f)*SpecularParamater;
+				specularLight += CalcSpecularLight(pin.Normal, PointLightDirection, viewDirection, gLights[i].DiffuseColor, pointintensity) * attenuation;
 			}
 
-			// 0이면 (빛을 안 받는 부분이면)
-			else if (lightIntensity <= 0.0f)
-			{
+			
+			
 
-				litColor += (float4(gLights[i].DiffuseColor) * float4(0.472f, 0.472f, 0.472f, 1.0f)); //여기 부분을 조정하면 빛을 안받는 부분의 음영을 조정할 수 있습니다.
-
-				litColor = saturate(litColor);
-
-				reflection = normalize(2 * lightIntensity * pin.Normal - lightDir);
-
-				specular = pow(saturate(dot(reflection, viewDirection)), 32.0f)*SpecularParamater;
-			}
+			
 
 		}
 
 	}
 
-	litColor = litColor * textureColor;  //엠비언트 * 텍스쳐 컬러
+	finalcolor = (textureColor * diffuseLight) + litColor * textureColor * lightIntensity +float4(0.3205,0.3205,0.3205,1)*textureColor;
+	finalcolor.w = BlendValue;
 	
-	litColor = saturate(litColor + specular); //마지막으로 스패큘러 더한다.
-	litColor.w = BlendValue;
-	
-	//litColor = textureColor;
-	//litColor.a = textureColor.a;
-	
-	//노멀매핑이 되었는지 확인. 줄무늬가 있으면 노멀매핑때문에 그 줄무늬쪽이 노멀이 0 이되므로 적용된것!
-	//litColor = float4(pin.Normal,1);
 	if (nLights > 0)
-	return litColor;
+		return finalcolor;//float4(pin.Normal,1);
 	else
-	return float4(0, 0, 0, 1);
+		return float4(0, 0, 0, 1);
 
 }
 

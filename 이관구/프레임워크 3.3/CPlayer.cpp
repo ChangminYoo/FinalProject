@@ -9,7 +9,7 @@ CPlayer::CPlayer(HWND hWnd,ID3D12Device* Device, ID3D12GraphicsCommandList* comm
 
 
 	skilldata.Skills[0] = 0;
-	skilldata.Skills[1] = 4; //1
+	skilldata.Skills[1] = 7; //1
 	skilldata.Skills[2] = 5; //2
 	skilldata.Skills[3] = 6;
 }
@@ -719,7 +719,17 @@ void CPlayer::CreateBullet(ID3D12Device* Device, ID3D12GraphicsCommandList* cl,X
 
 		break;
 	}
+	case 7:
+	{
+		PlayerObject->SetAnimation(2);
+		//먼저 해당스킬의 쿨타임을 넣어주자.
+		skilldata.SkillsCoolTime[skilldata.SellectBulletIndex] = skilldata.SkillsMaxCoolTime[skilldata.Skills[skilldata.SellectBulletIndex]];
+		skilldata.isSkillOn[skilldata.SellectBulletIndex] = false;
 
+
+		bulletlist->push_back(new MeteorObject(Device, cl, PlayerObject->ParticleList, PlayerObject->Shadow, PlayerObject, XMFLOAT4(0,0,0,1), XMFloat3to4(Goal)));
+		break;
+	}
 
 	}
 
@@ -734,6 +744,9 @@ void CPlayer::CheckTraceSkill()
 		MouseTrace = true;
 		break;
 
+	case 7:
+		MouseTrace = true;
+		break;
 	default:
 		MouseTrace = false;
 		TraceObject->CenterPos = XMFLOAT4(-10000, -10000, -10000, 1);

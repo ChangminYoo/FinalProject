@@ -34,6 +34,7 @@ VertexOut VS(VertexIn vin)
 {
 	const float CDX2 = 20;
 	const float CDX10 = 60;
+	const float CDX11 = 10;
 	VertexOut vout;
 
 	vout.Pos = mul(float4(vin.Pos, 1), gWorld);
@@ -54,6 +55,7 @@ VertexOut VS(VertexIn vin)
 		vout.Pos.z += NV.z* frac(PTime*vin.Normal.w / 100) * 8;
 		vout.Pos.x += NV.x* frac(PTime*vin.Normal.w / 100) * 8;
 	}
+	
 	else if (CustomData1.x == 10)//총알 파티클
 	{
 		//	vout.Pos.x += cos(20*Velocity.x * PTime * 3.141592/180 )*5;
@@ -68,6 +70,17 @@ VertexOut VS(VertexIn vin)
 		vout.Pos.y += NV.y*(PTime + vin.Normal.w / 700) - 35 * PTime*PTime;
 		vout.Pos.z += NV.z*(PTime * 3 + vin.Normal.w / 200);
 		vout.Pos.x += NV.x*(PTime * 2 + vin.Normal.w / 100);
+	}
+	else if (CustomData1.x ==11)//총알 파티클
+	{
+		float3 NV = float3(0, 0, 0);
+		NV.x = (Velocity.x + vin.Normal.x);
+		NV.y = (Velocity.y + vin.Normal.y);
+		NV.z = (Velocity.z + vin.Normal.z);
+		NV = normalize(NV)*CDX11;
+		vout.Pos.y += NV.y* frac(PTime*4*vin.Normal.w / 400) * 0.48;
+		vout.Pos.z += NV.z* frac(PTime * 4 *vin.Normal.w / 300) * 0.48;
+		vout.Pos.x += NV.x* frac(PTime * 4 *vin.Normal.w / 500) * 0.48;
 	}
 	vout.Pos = mul(vout.Pos, gView);
 
@@ -216,7 +229,26 @@ void GS(point VertexOut gin[1], inout TriangleStream<GeoOut> triStream)
 
 
 	}
+	else if (CustomData1.x == 11)//보스 스택 기술
+	{
+		halfWidth = 0.5f *  Scale*max(0.6,sin(PTime * 10 + gin[0].Normal.w / 120)) + 0.5f;
+		halfHeight = 0.5f * Scale*max(0.5,sin(PTime * 10 + gin[0].Normal.w / 140)) + 0.5f;
 
+
+		v[0].x += -halfWidth;
+		v[0].y += -halfHeight;
+
+		v[1].x += -halfWidth;
+		v[1].y += halfHeight;
+
+		v[2].x += halfWidth;
+		v[2].y += -halfHeight;
+
+		v[3].x += halfWidth;
+		v[3].y += +halfHeight;
+
+
+	}
 
 
 	float2 tex[4];
@@ -254,18 +286,28 @@ PSOUT PS(GeoOut pin)
 	clip(textureColor.a - 0.1f);
 
 	PSOUT pout;
-	pout.Color = textureColor;
-
+	
 
 	pout.Depth = -1;
 
+	//피격시 별모양 파티클
+	if (CustomData1.x == 10)
+	{
+
+		textureColor.x = max(cos(PTime * 3 * pin.PrevNormal.w / 120), 0.3) + 0.15;
+		textureColor.y = max(sin(PTime * 4 * pin.PrevNormal.w / 120), 0.5) + 0.15;
+		textureColor.z = max(cos(PTime * 5 * pin.PrevNormal.w / 120), 0.4) + 0.15;
+
+
+	}
+	pout.Color = textureColor;
 
 
 	return pout;
 
 }
 
-PSOUT PS2(GeoOut pin)
+float4 PS2(GeoOut pin) : SV_TARGET
 {
 	float4 textureColor; //텍스쳐 색상
 	float4 litColor;
@@ -279,8 +321,7 @@ PSOUT PS2(GeoOut pin)
 	//알파테스트 실행
 	clip(textureColor.a - 0.1f);
 
-	PSOUT pout;
-
+	
 	//pout.Depth = 1.0f;
 	if (CustomData1.x == 2)
 	{
@@ -288,16 +329,16 @@ PSOUT PS2(GeoOut pin)
 		textureColor.y = max(cos(PTime * 6 * pin.PrevNormal.w / 100), 0.2) + 0.125;
 		textureColor.z = max(sin(PTime * 3 * pin.PrevNormal.w / 100), 0.14) + 0.115;
 	}
-	else if (CustomData1.x == 10)
+	
+	else if (CustomData1.x == 11)
 	{
 
-		textureColor.x = max(cos(PTime * 3 * pin.PrevNormal.w / 120), 0.3) + 0.15;
-		textureColor.y = max(sin(PTime * 4 * pin.PrevNormal.w / 120), 0.5) + 0.15;
-		textureColor.z = max(cos(PTime * 5 * pin.PrevNormal.w / 120), 0.4) + 0.15;
-		pout.Depth = 0;
-
+		textureColor.x = max(cos(PTime * 2 * pin.PrevNormal.w / 131), 0.3) + 0.15;
+		textureColor.y =sin(PTime * 14 * pin.PrevNormal.w / 324) + 0.45;
+		textureColor.z = cos(PTime * 5 * pin.PrevNormal.w / 650) + 0.25;
+	
 	}
-	pout.Color = textureColor;
-	return pout;
+
+	return  textureColor;
 
 }

@@ -211,7 +211,7 @@ void Shader::CreateShader(ID3D12Device * Device, ID3D12RootSignature * GraphicsR
 
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC bulletPsoDesc = d3dPipelineStateDesc;
 	bulletPsoDesc.VS = CreateVertexShader(L"shaders/ShaderFile.hlsl", "VS", "vs_5_0");
-	bulletPsoDesc.PS = CreatePixelShader(L"shaders/ShaderFile.hlsl", "PS2", "ps_5_0");;
+	bulletPsoDesc.PS = CreatePixelShader(L"shaders/ShaderFile.hlsl", "PS", "ps_5_0");;
 	Device->CreateGraphicsPipelineState(&bulletPsoDesc, IID_PPV_ARGS(&BulletPSO));//블랜드용 PSO생성
 
 

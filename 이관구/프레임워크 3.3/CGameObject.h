@@ -98,7 +98,10 @@ public:
 	bool AirBone = false;
 
 	char* TextureName = NULL;
+	char* NTextureName = NULL;
 	UINT TexOff = 0;
+	UINT NTexOff = 0;
+
 	//룩벡터와 라이트벡터
 	XMFLOAT3 Lookvector;//룩벡터. 오브젝트가 바라보고있는 방향.
 	XMFLOAT3 Rightvector;//라이트벡터. 오브젝트가 바라보고있는 방향의 오른쪽방향.
@@ -752,7 +755,7 @@ public:
 class BigWallObject : public CGameObject
 {
 public:
-	BigWallObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, float dgree, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
+	BigWallObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, float degree, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
 	~BigWallObject();
 	ShadowObject* s = NULL;
 public:
@@ -773,7 +776,7 @@ public:
 class BuildingObject : public CGameObject
 {
 public:
-	BuildingObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, float dgree, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
+	BuildingObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, float degree, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
 	~BuildingObject();
 	ShadowObject* s = NULL;
 public:
@@ -795,7 +798,7 @@ public:
 class ColumnObject : public CGameObject
 {
 public:
-	ColumnObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, float dgree, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
+	ColumnObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, float degree, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
 	~ColumnObject();
 	ShadowObject* s = NULL;
 public:
@@ -816,7 +819,7 @@ public:
 class BreakCartObject : public CGameObject
 {
 public:
-	BreakCartObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, float dgree, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
+	BreakCartObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, float degree, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
 	~BreakCartObject();
 	ShadowObject* s = NULL;
 public:
@@ -838,7 +841,7 @@ public:
 class Rock1Object : public CGameObject
 {
 public:
-	Rock1Object(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, float dgree, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
+	Rock1Object(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, float degree, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
 	ShadowObject* s = NULL;
 public:
 	static CMaterial Mat;
@@ -979,14 +982,17 @@ public:
 	int Kinds;
 
 public:
-	static bool CreateMesh;//최초로 false며 메쉬를 만든후 true가된다.
+	static bool CreateMesh ;//최초로 false며 메쉬를 만든후 true가된다.
 	static bool CreatecMesh;//최초로 false며 메쉬를 만든후 true가된다.
 	static bool CreateiMesh;//최초로 false며 메쉬를 만든후 true가된다.
 	static bool CreateoMesh;//최초로 false며 메쉬를 만든후 true가된다.
+	static bool CreatemMesh;//최초로 false며 메쉬를 만든후 true가된다.
+
 
 	static CMesh cMesh;//오로지 한번만 만들어짐
 	static CMesh iMesh;//오로지 한번만 만들어짐
 	static CMesh oMesh;//오로지 한번만 만들어짐
+	static CMesh mMesh;//오로지 한번만 만들어짐
 	static CMaterial Mat;
 	static std::vector<ModelAnimation> cAnimations;//애니메이션 데이터 저장. 메쉬와 이거,텍스처는 한번만생성해서 공유하도록해야됨
 	static std::vector<ModelAnimation> iAnimations;//애니메이션 데이터 저장. 메쉬와 이거,텍스처는 한번만생성해서 공유하도록해야됨
@@ -1058,8 +1064,9 @@ public:
 	~MeteorObject();
 	ShadowObject* s = NULL;
 	CGameObject* Master = NULL;//소유자
-	ParticleObject* BulletParticles = NULL;
 	list<CGameObject*>* Blist = NULL;
+	float LifeTime = 7.0f;
+
 public:
 	static CMaterial Mat;
 	static bool CreateMesh;//최초로 false며 메쉬를 만든후 true가된다.
@@ -1072,6 +1079,6 @@ public:
 	virtual void SetMaterial(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist); //머테리얼 생성
 	virtual void Tick(const GameTimer& gt);
 	virtual void Render(ID3D12GraphicsCommandList* commandlist, const GameTimer& gt);
-	virtual void Collision(list<CGameObject*>* collist, float DeltaTime) {}
+	virtual void Collision(list<CGameObject*>* collist, float DeltaTime);
 
 };

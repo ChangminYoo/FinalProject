@@ -1,6 +1,5 @@
 #include "CGameObject.h"
 #include"FSM.h"
-
 extern UINT CbvSrvDescriptorSize;
 
 
@@ -300,52 +299,95 @@ CCubeManObject::CCubeManObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 	//조인트가 저장될 배열.
 	jarr = new UploadBuffer<JointArr>(m_Device, 1, true);
 
-	int num = 10;
+	int num = 20;
 	if (CreateMesh == false)
 	{
 		Mesh.Index = NULL;
 		Mesh.SubResource = NULL;
 
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Female Brown Casual", L"textures/human/Female Brown Casual 03B.dds", false, num, 0);
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Female Black Knight", L"textures/human/Female Black Knight 04 Green.dds", false, num, 1);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Female Brown Casual",   L"textures/human/Female Brown Casual 03B.dds", false, num, 0);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Female Black Knight",   L"textures/human/Female Black Knight 04 Green.dds", false, num, 1);
 		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Female Brown Sorceress", L"textures/human/Female Brown Sorceress 03 White.dds", false, num, 2);
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Female White Knight", L"textures/human/Female White Knight 04 Purple.dds", false, num, 3);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Female White Knight",   L"textures/human/Female White Knight 04 Purple.dds", false, num, 3);
 		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Female White Barbarian", L"textures/human/Female White Barbarian 05 Red.dds", false, num, 4);
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Male Black Knight", L"textures/human/Male Black Knight 07 White.dds", false, num, 5);
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Male White Wizard", L"textures/human/Male White Wizard 06 White.dds", false, num, 6);
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Male Black Archer", L"textures/human/Male Black Archer 05 Green.dds", false, num, 7);
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Male Fire", L"textures/human/Male Fire 01 Orange.dds", false, num, 8);
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Male White King", L"textures/human/Male White King 01 Red.dds", false, num, 9);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Male Black Knight",    L"textures/human/Male Black Knight 07 White.dds", false, num, 5);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Male White Wizard",    L"textures/human/Male White Wizard 06 White.dds", false, num, 6);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Male Black Archer",    L"textures/human/Male Black Archer 05 Green.dds", false, num, 7);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Male Fire",            L"textures/human/Male Fire 01 Orange.dds", false, num, 8);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Male White King",      L"textures/human/Male White King 01 Red.dds", false, num, 9);
 		
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Female Brown Casual N", L"textures/human/Female Brown Casual N.dds", false, num, 10);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Female Black Knight N", L"textures/human/Female Black Knight N.dds", false, num, 11);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Female Brown Sorceress N", L"textures/human/Female Brown Sorceress N.dds", false, num, 12);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Female White Knight N", L"textures/human/Female White Knight N.dds", false, num, 13);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Female White Barbarian N", L"textures/human/Female White Barbarian N.dds", false, num, 14);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Male Black Knight N", L"textures/human/Male Black Knight N.dds", false, num, 15);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Male White Wizard N", L"textures/human/Male White Wizard N.dds", false, num, 16);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Male Black Archer N", L"textures/human/Male Black Archer N.dds", false, num, 17);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Male Fire N", L"textures/human/Male Fire N.dds", false, num, 18);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Male White King N", L"textures/human/Male White King N.dds", false, num, 19);
+
+
+
 		SetMesh(m_Device, commandlist);
 		SetMaterial(m_Device, commandlist);
 	
 		CreateMesh = true;
 	
 	}
-	select = rand() % num;
+	select = rand() % 10;
 	if (select == 0)
-	TextureName = "Female Brown Casual";
+	{
+		TextureName = "Female Brown Casual";
+		NTextureName = "Female Brown Casual N";
+	}
 	else if (select == 1)
-	TextureName = "Female Black Knight";
+	{
+		TextureName = "Female Black Knight";
+		NTextureName = "Female Black Knight N";
+	}
 	else if (select == 2)
-	TextureName = "Female Brown Sorceress";
+	{
+		TextureName = "Female Brown Sorceress";
+		NTextureName = "Female Brown Sorceress N";
+	}
 	else if (select == 3)
-	TextureName = "Female White Knight";
+	{
+		TextureName = "Female White Knight";
+		NTextureName = "Female White Knight N";
+	}
 	else if (select == 4)
-	TextureName = "Female White Barbarian";
+	{
+		TextureName = "Female White Barbarian";
+		NTextureName = "Female White Barbarian N";
+	}
 	else if (select == 5)
-	TextureName = "Male Black Knight";
+	{
+		TextureName = "Male Black Knight";
+		NTextureName = "Male Black Knight N";
+	}
 	else if (select == 6)
-	TextureName = "Male White Wizard";
+	{
+		TextureName = "Male White Wizard";
+		NTextureName = "Male White Wizard N";
+	}
 	else if (select == 7)
-	TextureName = "Male Black Archer";
+	{
+		TextureName = "Male Black Archer";
+		NTextureName = "Male Black Archer N";
+	}
 	else if (select == 8)
-	TextureName = "Male Fire";
+	{
+		TextureName = "Male Fire";
+		NTextureName = "Male Fire N";
+	}
 	else if (select == 9)
-	TextureName = "Male White King";
+	{
+		TextureName = "Male White King";
+		NTextureName = "Male White King N";
+	}
 	TexOff = select;
-	
+	NTexOff = TexOff + 10;
 	
 	//게임오브젝트마다 룩벡터와 라이트벡터가 다르므로 초기 오프셋 설정을 해준다.
 	//실제 룩벡터 등은 모두 UpdateLookVector에서 처리된다(라이트벡터도) 따라서 Tick함수에서 반드시 호출해야한다.
@@ -359,7 +401,8 @@ CCubeManObject::CCubeManObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 	ObjData.isAnimation = true;
 	ObjData.Scale = 3;
 	ObjData.SpecularParamater = 0.0f;//스페큘러를 낮게준다.
-	
+	ObjData.CustomData1.w = 1234;
+
 	obs = Dynamic;
 	//게임 데이터 (스텟)을 찍는다. 캐릭터는 데미지를 갖지 않고, 탄환이 데미지를 갖도록하자.
 	gamedata.MAXHP = 100;
@@ -391,7 +434,7 @@ CCubeManObject::CCubeManObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 	}
 	if (Shadow != NULL)
 	{
-		s = new ShadowObject(m_Device, commandlist, NULL, Shadow, this, XMFLOAT3(0, 0, 0), 0, CenterPos);
+		s = new ShadowObject(m_Device, commandlist, NULL, Shadow, this, XMFLOAT3(0, 0, 0), 0, XMFLOAT4(0, 0, 0, 1), CenterPos);
 		s->ObjData.Scale = 2.0f;
 		Shadow->push_back(s);
 	}
@@ -468,9 +511,11 @@ void CCubeManObject::Render(ID3D12GraphicsCommandList * commandlist, const GameT
 	//텍스처를 연결하고, 월드행렬을 연결한다.
 
 
-	if (Textures.size()>0)
+	if (Textures.size() > 0)
+	{
 		SetTexture(commandlist, SrvDescriptorHeap, Textures[TextureName].get()->Resource.Get(), 0, TexOff);
-
+		SetTexture(commandlist, SrvDescriptorHeap, Textures[NTextureName].get()->Resource.Get(), 2, NTexOff);
+	}
 
 
 	UpdateConstBuffer(commandlist, false);
@@ -2088,48 +2133,21 @@ void SphereObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTim
 
 CubeObject::CubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist,  list<CGameObject*>*shadow, float degree, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist,shadow, cp)
 {
-	
+
 	if (CreateMesh == false)
 	{
 
 		Mesh.Index = NULL;
 		Mesh.SubResource = NULL;
 	   
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "redTex", L"textures/object/staticcubes.dds", false, 7, 0);
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "orangeTex", L"textures/object/orange.dds", false, 7, 1);
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "yellowTex", L"textures/object/yellow.dds", false, 7, 2);
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "pinkTex", L"textures/object/pink.dds", false, 7, 3);
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "whiteTex", L"textures/object/white.dds", false, 7, 4);
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "blueTex", L"textures/object/blue.dds", false, 7, 5);
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "greenTex", L"textures/object/green.dds", false, 7, 6);
-
-		//LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Tex", L"textures/object/bricks2.dds", false,2, 0);
-		//LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "NormalTex", L"textures/object/bricks2_nmap.dds", false, 2, 1);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "cubeTex", L"textures/object/staticcubes.dds", false);
 
 		SetMesh(m_Device, commandlist);
 		SetMaterial(m_Device, commandlist);
 
 		CreateMesh = true;
 		srand(time(NULL));
-
 	}
-	selectColor = 0;// rand() % 7 + 0;
-	if (selectColor == 0)
-		TextureName = "redTex";
-	else if (selectColor == 1)
-		TextureName = "orangeTex";
-	else if (selectColor == 2)
-		TextureName = "yellowTex";
-	else if (selectColor == 3)
-		TextureName = "pinkTex"; 
-	else if (selectColor == 4)
-		TextureName = "whiteTex";
-	else if (selectColor == 5)
-		TextureName = "blueTex"; 
-	else if (selectColor == 6)
-		TextureName = "greenTex";
-	
-	TexOff = selectColor;
 
 	//게임오브젝트마다 룩벡터와 라이트벡터가 다르므로 초기 오프셋 설정을 해준다.
 	//실제 룩벡터 등은 모두 UpdateLookVector에서 처리된다(라이트벡터도) 따라서 Tick함수에서 반드시 호출해야한다.
@@ -2140,15 +2158,15 @@ CubeObject::CubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 	XMFLOAT3 axis{ 0,1,0 };
 	auto q2 = QuaternionRotation(axis, degree);
 	Orient = QuaternionMultiply(Orient, q2);
-//	Orient = QuaternionRotation(XMFLOAT3(1, 0, 0), 3.14);
 
 	UpdateLookVector();
 	ObjData.isAnimation = 0;
-	ObjData.Scale = 3.5f;
+	ObjData.Scale = 10.0f;
+	ObjData.Scale = 3.2f;
 	ObjData.SpecularParamater = 0.2f;//스페큘러를 낮게준다.
-	
-	
-	ObjData.CustomData1.w = rand() % 400+100;
+
+
+	ObjData.CustomData1.w = rand() % 400 + 100;
 	obs = Static;
 
 	//게임관련 데이터들
@@ -2159,10 +2177,23 @@ CubeObject::CubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 	gamedata.Speed = 0;
 	staticobject = true;
 
+	XMFLOAT3 raxis{ 0,1,0 };
 	//광선충돌 검사용 육면체
 	XMFLOAT3 rx(5, 0, 0);
+	auto rqx = QuaternionRotation(raxis, degree);
+	Orient = QuaternionMultiply(XMFLOAT4(rx.x, rx.y, rx.z, 0), rqx);
+	rx.x = Orient.x; rx.y = Orient.y, rx.z = Orient.z;
+
 	XMFLOAT3 ry(0, 5, 0);
+	auto rqy = QuaternionRotation(raxis, degree);
+	Orient = QuaternionMultiply(XMFLOAT4(ry.x, ry.y, ry.z, 0), rqy);
+	ry.x = Orient.x; ry.y = Orient.y,  ry.z = Orient.z;
+
 	XMFLOAT3 rz(0, 0, 5);
+	auto rqz = QuaternionRotation(raxis, degree);
+	Orient = QuaternionMultiply(XMFLOAT4(ry.x, ry.y, ry.z, 0), rqz);
+	rz.x = Orient.x; rz.y = Orient.y, rz.z = Orient.z;
+
 	rco.SetPlane(rx, ry, rz);
 
 	//질점오브젝트 사용시 필요한 데이터들 설정
@@ -2176,7 +2207,7 @@ CubeObject::CubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 	
 	if (Shadow != NULL)
 	{
-		s = new ShadowObject(m_Device, commandlist, NULL, Shadow, this, XMFLOAT3(1, 1, 1), 1, CenterPos);
+		s = new ShadowObject(m_Device, commandlist, NULL, Shadow, this, XMFLOAT3(1, 1, 1), 1, XMFLOAT4(0, 0, 0, 1), CenterPos);
 		s->ObjData.Scale = 10.0f;
 		Shadow->push_back(s);
 	}
@@ -2213,11 +2244,9 @@ void CubeObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer
 	//텍스처를 연결하고, 월드행렬을 연결한다.
 	
 	if (Textures.size() > 0)
-	{
-		SetTexture(commandlist, SrvDescriptorHeap, Textures[TextureName].get()->Resource.Get(),0,TexOff);
-		//SetTexture(commandlist, SrvDescriptorHeap, Textures["Tex"].get()->Resource.Get(), 0, 0);
-		//SetTexture(commandlist, SrvDescriptorHeap, Textures["NormalTex"].get()->Resource.Get(),2, 1);
-	}
+		SetTexture(commandlist, SrvDescriptorHeap, Textures["cubeTex"].get()->Resource.Get());
+
+	
 	UpdateConstBuffer(commandlist, false);
 
 	//이후 그린다.
@@ -3331,7 +3360,7 @@ void SmallWallObject::Render(ID3D12GraphicsCommandList * commandlist, const Game
 
 
 
-BigWallObject::BigWallObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, float dgree, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist,shadow, cp)
+BigWallObject::BigWallObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, float degree, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist,shadow, cp)
 {
 
 	if (CreateMesh == false)
@@ -3355,7 +3384,7 @@ BigWallObject::BigWallObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList 
 
 	auto q = XMLoadFloat4(&Orient);//방향을 degree만큼 돌리려 한다.
 	XMFLOAT3 axis{ 0,1,0 };
-	auto q2 = QuaternionRotation(axis, dgree);
+	auto q2 = QuaternionRotation(axis, degree);
 	Orient = QuaternionMultiply(Orient, q2);
 
 	obs = Static;
@@ -3376,17 +3405,17 @@ BigWallObject::BigWallObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList 
 	XMFLOAT3 raxis{ 0,1,0 };
 	//광선충돌 검사용 육면체
 	XMFLOAT3 rx(350, 0, 0);
-	auto rqx = QuaternionRotation(raxis, dgree);
+	auto rqx = QuaternionRotation(raxis, degree);
 	Orient = QuaternionMultiply(XMFLOAT4(rx.x, rx.y, rx.z, 0), rqx);
 	rx.x = Orient.x; rx.y = Orient.y, rx.z = Orient.z;
 
 	XMFLOAT3 ry(0, 50, 0);
-	auto rqy = QuaternionRotation(raxis, dgree);
+	auto rqy = QuaternionRotation(raxis, degree);
 	Orient = QuaternionMultiply(XMFLOAT4(ry.x, ry.y, ry.z, 0), rqy);
 	ry.x = Orient.x; ry.y = Orient.y, ry.z = Orient.z;
 
 	XMFLOAT3 rz(0, 0, 5);
-	auto rqz = QuaternionRotation(raxis, dgree);
+	auto rqz = QuaternionRotation(raxis, degree);
 	Orient = QuaternionMultiply(XMFLOAT4(ry.x, ry.y, ry.z, 0), rqz);
 	rz.x = Orient.x; rz.y = Orient.y, rz.z = Orient.z;
 
@@ -3451,7 +3480,7 @@ void BigWallObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTi
 }
 
 
-ColumnObject::ColumnObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, float dgree, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist,shadow, cp)
+ColumnObject::ColumnObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, float degree, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist,shadow, cp)
 {
 
 	if (CreateMesh == false)
@@ -3474,7 +3503,7 @@ ColumnObject::ColumnObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * 
 
 	auto q = XMLoadFloat4(&Orient);//방향을 degree만큼 돌리려 한다.
 	XMFLOAT3 axis{ 0,1,0 };
-	auto q2 = QuaternionRotation(axis, dgree);
+	auto q2 = QuaternionRotation(axis, degree);
 	Orient = QuaternionMultiply(Orient, q2);
 
 	UpdateLookVector();
@@ -3492,11 +3521,27 @@ ColumnObject::ColumnObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * 
 	gamedata.Speed = 0;
 	staticobject = true;
 	obs = Static;
+
+
+	XMFLOAT3 raxis{ 0,1,0 };
 	//광선충돌 검사용 육면체
 	XMFLOAT3 rx(15, 0, 0);
+	auto rqx = QuaternionRotation(raxis, degree);
+	Orient = QuaternionMultiply(XMFLOAT4(rx.x, rx.y, rx.z, 0), rqx);
+	rx.x = Orient.x; rx.y = Orient.y, rx.z = Orient.z;
+
 	XMFLOAT3 ry(0, 45, 0);
+	auto rqy = QuaternionRotation(raxis, degree);
+	Orient = QuaternionMultiply(XMFLOAT4(ry.x, ry.y, ry.z, 0), rqy);
+	ry.x = Orient.x; ry.y = Orient.y, ry.z = Orient.z;
+
 	XMFLOAT3 rz(0, 0, 15);
+	auto rqz = QuaternionRotation(raxis, degree);
+	Orient = QuaternionMultiply(XMFLOAT4(ry.x, ry.y, ry.z, 0), rqz);
+	rz.x = Orient.x; rz.y = Orient.y, rz.z = Orient.z;
+
 	rco.SetPlane(rx, ry, rz);
+
 
 	//질점오브젝트 사용시 필요한 데이터들 설정
 	pp = new PhysicsPoint();
@@ -3547,7 +3592,7 @@ void ColumnObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTim
 }
 
 
-BuildingObject::BuildingObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, float dgree, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, shadow, cp)
+BuildingObject::BuildingObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, float degree, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, shadow, cp)
 {
 
 	if (CreateMesh == false)
@@ -3556,7 +3601,9 @@ BuildingObject::BuildingObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 		Mesh.Index = NULL;
 		Mesh.SubResource = NULL;
 
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "CubeTex", L"textures/object/staticcubes.dds", false);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "towerTex", L"textures/object/tower.dds", false, 2,0);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "towerNTex", L"textures/object/towerN.dds", false, 2, 1);
+		
 		SetMesh(m_Device, commandlist);
 		SetMaterial(m_Device, commandlist);
 		CreateMesh = true;
@@ -3570,14 +3617,14 @@ BuildingObject::BuildingObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 
 	auto q = XMLoadFloat4(&Orient);//방향을 degree만큼 돌리려 한다.
 	XMFLOAT3 axis{ 0,1,0 };
-	auto q2 = QuaternionRotation(axis, dgree);
+	auto q2 = QuaternionRotation(axis, degree);
 	Orient = QuaternionMultiply(Orient, q2);
 
 	UpdateLookVector();
 	ObjData.isAnimation = 0;
 	ObjData.Scale = 4.5f;
 	ObjData.SpecularParamater = -0.01f;//스페큘러를 낮게준다.
-
+	ObjData.CustomData1.w = 1234;
 
 
 									   //게임관련 데이터들
@@ -3588,10 +3635,25 @@ BuildingObject::BuildingObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 	gamedata.Speed = 0;
 	staticobject = true;
 	obs = Static;
+
+
+	XMFLOAT3 raxis{ 0,1,0 };
 	//광선충돌 검사용 육면체
 	XMFLOAT3 rx(15, 0, 0);
+	auto rqx = QuaternionRotation(raxis, degree);
+	Orient = QuaternionMultiply(XMFLOAT4(rx.x, rx.y, rx.z, 0), rqx);
+	rx.x = Orient.x; rx.y = Orient.y, rx.z = Orient.z;
+
 	XMFLOAT3 ry(0, 50, 0);
+	auto rqy = QuaternionRotation(raxis, degree);
+	Orient = QuaternionMultiply(XMFLOAT4(ry.x, ry.y, ry.z, 0), rqy);
+	ry.x = Orient.x; ry.y = Orient.y, ry.z = Orient.z;
+
 	XMFLOAT3 rz(0, 0, 15);
+	auto rqz = QuaternionRotation(raxis, degree);
+	Orient = QuaternionMultiply(XMFLOAT4(ry.x, ry.y, ry.z, 0), rqz);
+	rz.x = Orient.x; rz.y = Orient.y, rz.z = Orient.z;
+
 	rco.SetPlane(rx, ry, rz);
 
 	//질점오브젝트 사용시 필요한 데이터들 설정
@@ -3602,12 +3664,12 @@ BuildingObject::BuildingObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 	pp->SetBounce(false);//튕기지 않는다.
 	pp->SetMass(INFINITY);//고정된 물체는 무게가 무한이다.
 
-						  //if (Shadow != NULL)
-						  //{
-						  //	s = new ShadowObject(m_Device, commandlist, NULL, Shadow, this, XMFLOAT3(30, 90, 30), 1, CenterPos);
-						  //	s->ObjData.Scale = 1.0f;
-						  //	Shadow->push_back(s);
-						  //}
+	//if (Shadow != NULL)
+	//{
+	//	s = new ShadowObject(m_Device, commandlist, NULL, Shadow, this, XMFLOAT3(30, 90, 30), 1, CenterPos);
+	//	s->ObjData.Scale = 1.0f;
+	//	Shadow->push_back(s);
+	//}
 }
 
 BuildingObject::~BuildingObject()
@@ -3643,8 +3705,11 @@ void BuildingObject::Render(ID3D12GraphicsCommandList * commandlist, const GameT
 	//게임오브젝트의 렌더링은 간단하다. 
 	//텍스처를 연결하고, 월드행렬을 연결한다.
 
-	if (Textures.size()>0)
-		SetTexture(commandlist, SrvDescriptorHeap, Textures["CubeTex"].get()->Resource.Get(), false);
+	if (Textures.size() > 0)
+	{
+		SetTexture(commandlist, SrvDescriptorHeap, Textures["towerTex"].get()->Resource.Get(), 0, 0);
+		SetTexture(commandlist, SrvDescriptorHeap, Textures["towerNTex"].get()->Resource.Get(), 2, 1);
+	}
 	UpdateConstBuffer(commandlist, false);
 
 	//이후 그린다.
@@ -3653,7 +3718,7 @@ void BuildingObject::Render(ID3D12GraphicsCommandList * commandlist, const GameT
 }
 //피라미드
 
-Rock1Object::Rock1Object(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, float dgree, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist,shadow, cp)
+Rock1Object::Rock1Object(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, float degree, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist,shadow, cp)
 {
 
 	if (CreateMesh == false)
@@ -3676,7 +3741,7 @@ Rock1Object::Rock1Object(ID3D12Device * m_Device, ID3D12GraphicsCommandList * co
 
 	auto q = XMLoadFloat4(&Orient);//방향을 degree만큼 돌리려 한다.
 	XMFLOAT3 axis{ 0,1,0 };
-	auto q2 = QuaternionRotation(axis, dgree);
+	auto q2 = QuaternionRotation(axis, degree);
 	Orient = QuaternionMultiply(Orient, q2);
 
 	UpdateLookVector();
@@ -4360,7 +4425,7 @@ ImpObject::ImpObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comman
 	}
 	if (Shadow != NULL)
 	{
-		s = new ShadowObject(m_Device, commandlist, NULL, Shadow, this, XMFLOAT3(0, 0, 0), 2, CenterPos);
+		s = new ShadowObject(m_Device, commandlist, NULL, Shadow, this, XMFLOAT3(0, 0, 0), 2, XMFLOAT4(0, 0, 0, 1), CenterPos);
 		s->ObjData.Scale = 60.0f;
 		Shadow->push_back(s);
 	}
@@ -4385,7 +4450,7 @@ void ImpObject::SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* comma
 {
 	//모델 로드
 	LoadMD5Model(L".\\플레이어메쉬들\\monster\\Idle.MD5MESH", &Mesh, 0, 1);
-	Mesh.SetNormal(true);
+	Mesh.SetNormal(false);
 	Mesh.CreateVertexBuffer(m_Device, commandlist);
 	Mesh.CreateIndexBuffer(m_Device, commandlist);
 
@@ -4677,6 +4742,9 @@ ShadowObject::ShadowObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * 
 	Size = size;
 	Kinds = kinds;
 
+	OffLookvector = XMFLOAT3(0, 0, 1);
+	OffRightvector = XMFLOAT3(1, 0, 0);
+	UpdateLookVector();
 
 	ObjData.BlendValue = 0.3f;
 
@@ -4741,7 +4809,7 @@ void ShadowObject::SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* co
 		if (CreateiMesh == false)
 		{
 			LoadMD5Model(L".\\플레이어메쉬들\\monster\\Idle.MD5MESH", &iMesh, 0, 1);
-			iMesh.SetNormal(true);
+			iMesh.SetNormal(false);
 			iMesh.CreateVertexBuffer(m_Device, commandlist);
 			iMesh.CreateIndexBuffer(m_Device, commandlist);
 
@@ -4753,7 +4821,17 @@ void ShadowObject::SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* co
 			CreateiMesh = true;
 		}
 	}
-
+	else if (Kinds == 3)
+	{
+		if (CreatemMesh == false)
+		{
+			LoadMD5Model(L".\\플레이어메쉬들\\sphere.MD5MESH", &mMesh, 0, 1);
+			mMesh.SetNormal(false);
+			mMesh.CreateVertexBuffer(m_Device, commandlist);
+			mMesh.CreateIndexBuffer(m_Device, commandlist);
+			CreatemMesh = true;
+		}
+	}
 }
 
 void ShadowObject::SetMaterial(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
@@ -4773,6 +4851,7 @@ void ShadowObject::Tick(const GameTimer & gt)
 
 	CenterPos = Master->CenterPos;
 	
+
 	if (ObjData.isAnimation == true)
 	{
 		if (CreatecMesh && Kinds == 0)
@@ -4801,7 +4880,8 @@ void ShadowObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTim
 
 	Mat.UpdateConstantBuffer(commandlist);
 
-	commandlist->SetGraphicsRootConstantBufferView(0, jarr->Resource()->GetGPUVirtualAddress());
+	if(ObjData.isAnimation)
+		commandlist->SetGraphicsRootConstantBufferView(0, jarr->Resource()->GetGPUVirtualAddress());
 
 	if(CreatecMesh && Kinds == 0)
 		cMesh.Render(commandlist);
@@ -4809,6 +4889,8 @@ void ShadowObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTim
 		oMesh.Render(commandlist);
 	if (CreateiMesh && Kinds == 2)
 		iMesh.Render(commandlist);
+	if (CreatemMesh && Kinds == 3)
+		mMesh.Render(commandlist);
 }
 
 Floor2Object::Floor2Object(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, list<CGameObject*>* shadow, float size, XMFLOAT4 cp) :CGameObject(m_Device, commandlist, Plist, shadow, cp)
@@ -4910,7 +4992,7 @@ void Floor2Object::Render(ID3D12GraphicsCommandList * commandlist, const GameTim
 }
 
 
-BreakCartObject::BreakCartObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, list<CGameObject*>* shadow, float dgree, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, shadow, cp)
+BreakCartObject::BreakCartObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, list<CGameObject*>* shadow, float degree, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, shadow, cp)
 {
 	if (CreateMesh == false)
 	{
@@ -4932,7 +5014,7 @@ BreakCartObject::BreakCartObject(ID3D12Device * m_Device, ID3D12GraphicsCommandL
 
 	auto q = XMLoadFloat4(&Orient);//방향을 degree만큼 돌리려 한다.
 	XMFLOAT3 axis{ 0,1,0 };
-	auto q2 = QuaternionRotation(axis, dgree);
+	auto q2 = QuaternionRotation(axis, degree);
 	Orient = QuaternionMultiply(Orient, q2);
 
 	UpdateLookVector();
@@ -4950,10 +5032,25 @@ BreakCartObject::BreakCartObject(ID3D12Device * m_Device, ID3D12GraphicsCommandL
 	gamedata.Speed = 0;
 	staticobject = true;
 	obs = Static;
+	
+
+	XMFLOAT3 raxis{ 0,1,0 };
 	//광선충돌 검사용 육면체
 	XMFLOAT3 rx(15, 0, 0);
+	auto rqx = QuaternionRotation(raxis, degree);
+	Orient = QuaternionMultiply(XMFLOAT4(rx.x, rx.y, rx.z, 0), rqx);
+	rx.x = Orient.x; rx.y = Orient.y, rx.z = Orient.z;
+
 	XMFLOAT3 ry(0, 8, 0);
+	auto rqy = QuaternionRotation(raxis, degree);
+	Orient = QuaternionMultiply(XMFLOAT4(ry.x, ry.y, ry.z, 0), rqy);
+	ry.x = Orient.x; ry.y = Orient.y, ry.z = Orient.z;
+
 	XMFLOAT3 rz(0, 0, 15);
+	auto rqz = QuaternionRotation(raxis, degree);
+	Orient = QuaternionMultiply(XMFLOAT4(ry.x, ry.y, ry.z, 0), rqz);
+	rz.x = Orient.x; rz.y = Orient.y, rz.z = Orient.z;
+
 	rco.SetPlane(rx, ry, rz);
 
 	//질점오브젝트 사용시 필요한 데이터들 설정
@@ -5207,40 +5304,56 @@ MeteorObject::MeteorObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * 
 	OffRightvector = XMFLOAT3(1, 0, 0);
 	UpdateLookVector();
 	
+	CenterPos.y += 1100.0f;
 	
-	obs = Static;
+	obs = Bullet;
 	
 	ObjData.isAnimation = 0;
 	ObjData.Scale = 30.0;
 	ObjData.SpecularParamater = 0.1f;//스페큘러를 낮게준다.
+	ObjData.CustomData1.w = 1234;
 	staticobject = true;
+	LifeTime = 20.0f;
 
 	//게임관련 데이터들
 	gamedata.MAXHP = 1;
 	gamedata.HP = 1;
-	gamedata.Damage = 60;
+	gamedata.Damage = 80;
 	gamedata.GodMode = true;
-	gamedata.Speed = 3;
+	gamedata.Speed = 300;
+	
 	Master = master;
 
 	//광선충돌 검사용 육면체
-	XMFLOAT3 rx(1, 0, 0);
-	XMFLOAT3 ry(0, 1, 0);
-	XMFLOAT3 rz(0, 0, 1);
+	XMFLOAT3 rx(30, 0, 0);
+	XMFLOAT3 ry(0, 30, 0);
+	XMFLOAT3 rz(0, 0, 30);
 	rco.SetPlane(rx, ry, rz);
 
 	//질점오브젝트 사용시 필요한 데이터들 설정
 	pp = new PhysicsPoint();
 	pp->SetPosition(&CenterPos);//이 값은 항상 갱신되야한다.
-	pp->SetHalfBox(15, 15, 15);//충돌 박스의 x,y,z 크기
+	pp->SetHalfBox(30, 30, 30);//충돌 박스의 x,y,z 크기
 	pp->SetDamping(1);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
 	pp->SetBounce(false);//튕기지 않는다.
 	pp->SetVelocity(0, -1 * gamedata.Speed, 0);
-	pp->SetMass(2);
+	pp->SetMass(1400);
+
+	if (Shadow != NULL)
+	{
+		s = new ShadowObject(m_Device, commandlist, NULL, Shadow, this, XMFLOAT3(1, 1, 1), 3, XMFLOAT4(0, 0, 0, 1), CenterPos);
+		s->ObjData.Scale = 50.0f;
+		Shadow->push_back(s);
+	}
+
 }
 
 MeteorObject::~MeteorObject()
 {
+	if (s != NULL)
+		s->DelObj = true;
+
+
 }
 
 void MeteorObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
@@ -5264,7 +5377,19 @@ void MeteorObject::SetMaterial(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 
 void MeteorObject::Tick(const GameTimer & gt)
 {
+	//적분기. 적분기란? 매 틱마다 힘! 에의해서 변화 되는 가속도/속도/위치를 갱신한다.
+	//이때 pp의 position과 CenterPos를 일치시켜야하므로 CenterPos의 포인터를 인자로 넘겨야 한다.
+	pp->AddForce(0, -300, 0);
+	pp->integrate(gt.DeltaTime());
 
+
+	Orient = QuaternionMultiply(Orient, QuaternionRotation(XMFLOAT3(0,1,0), MMPE_PI * gt.DeltaTime()*2));
+
+
+	LifeTime -= gt.DeltaTime();
+
+	if (LifeTime <= 0)
+		DelObj = true;
 }
 
 void MeteorObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer & gt)
@@ -5283,6 +5408,71 @@ void MeteorObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTim
 	//이후 그린다.
 
 	Mesh.Render(commandlist);
+}
+
+void MeteorObject::Collision(list<CGameObject*>* collist, float DeltaTime)
+{
+	CollisionList = collist;
+	//충돌리스트의 모든 요소와 충돌검사를 실시한다.
+	for (auto i = CollisionList->begin(); i != CollisionList->end(); i++)
+	{
+
+		if (*i != this && *i != Master && (*i)->pp != NULL) // pp가 NULL이 아니면 질점 오브젝트이다.
+		{
+
+			bool test = pp->CollisionTest(*(*i)->pp, Lookvector, Rightvector, GetUpvector(), (*i)->Lookvector, (*i)->Rightvector, (*i)->GetUpvector());
+
+			if (test)//충돌했으면 pp의 경우는 그냥 데미지를 주고 자신을 없애면 됨. 
+			{
+
+				if ((*i)->isShieldOn) //상대가 실드 on 상태면
+					gamedata.Damage = 10; //100 이지만 1만뜸 텍스쳐 stride때문에 100이라고 설정하고 ToDamage에서 1로 설정
+
+				//1. 먼저 데미지를 준다.
+				(*i)->ToDamage(gamedata.Damage);
+
+				//2. 보스몬스터면 총알방햐을 보도록함.
+				if ((*i)->gamedata.MAXHP > 1000)//보스몬스터면 총알 방향으로 오도록해야함.
+					((ImpObject*)*i)->fsm->aidata.LastPosition = this->CenterPos;
+
+				XMFLOAT3 cn;
+				//고정된 물체가 아니면
+				if ((*i)->staticobject == false)
+				{
+					(*i)->isHit1 = true;
+					//상대속도 방향을 구한다. A-B
+					cn = XMFloat4to3(Float4Add(pp->GetPosition(), (*(*i)->pp).GetPosition(), false));
+					cn = Float3Normalize(cn);
+
+					// 파티클리스트에 데미지 오브젝트를 생성해서 넣음. 파티클을 띄운다.
+					if (ParticleList != NULL)
+					{
+						ParticleList->push_back(new DamageObject(device, commandlist, ParticleList, NULL, gamedata.Damage, XMFLOAT4((*i)->CenterPos.x, (*i)->CenterPos.y + 11, (*i)->CenterPos.z, 0)));
+					}
+					//고정된 물체가아니면 잠깐 바운스를 풀어둔다. 그래야 튕기니까.
+					(*i)->pp->SetBounce(true);
+
+
+				}
+				else//고정된 물체면 충돌한 평면의 노멀방향으로 cn을 설정할것.
+				{
+					cn = pp->pAxis;
+				}
+
+				//충돌후 속도를 계산함.
+
+				pp->ResolveVelocity(*(*i)->pp, cn, DeltaTime);
+				(*i)->pp->SetBounce(false);
+				//겹치는 부분을 제거할필요가 없는게 투사체는 어처피 사라지니까.
+				auto BulletParticles2 = new ParticleObject2(device, commandlist, ParticleList, NULL, this, 0.7f, 100, XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, 0));
+				ParticleList->push_back(BulletParticles2);
+
+				DelObj = true;
+
+
+			}
+		}
+	}
 }
 
 HammerBullet::HammerBullet(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, list<CGameObject*>* bulletlist,int count, CGameObject* master, XMFLOAT4& ori, CGameObject* lockon, XMFLOAT4 cp , XMFLOAT4 opp) :CGameObject(m_Device, commandlist, Plist, shadow, cp)
