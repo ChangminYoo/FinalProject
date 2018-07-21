@@ -106,12 +106,19 @@ float4 CalcDiffuseLight(float3 normal, float3 lightDirection, float4 lightColor,
 float4 CalcSpecularLight(float3 normal, float3 lightDirection, float3 cameraDirection, float4 lightColor, float lightIntensity)
 {
 	
+	float specularPower = SpecularParamater;
+	if (specularPower <= 0)
+	{
+		specularPower = 1.0f;
+	}
 	float3 halfVector = normalize(-lightDirection + -cameraDirection);
 	float specular = saturate(dot(halfVector, normal));
 
-	float specularPower = 20;
+
+
 
 	return lightIntensity * lightColor * pow(abs(specular), specularPower);
+	
 }
 float lengthSquared(float3 v1)
 {
@@ -173,7 +180,8 @@ float4 PS(VertexOut pin) : SV_Target
 	litColor = gLights[0].DiffuseColor;
 	//기본적인 빛의 세기
 	lightIntensity = max(dot(NormalVector, lightDir),0);
-	lightIntensity =ceil(lightIntensity * 5) / 5;
+	if(SpecularParamater>=0)
+		lightIntensity =ceil(lightIntensity * 5) / 5;
 	//기본적인 빛 계산
 	diffuseLight += CalcDiffuseLight(pin.Normal, lightDir, litColor, lightIntensity);
 	specularLight += CalcSpecularLight(pin.Normal, lightDir,viewDirection, litColor, lightIntensity);
@@ -226,7 +234,11 @@ float4 PS(VertexOut pin) : SV_Target
 	finalcolor.w = BlendValue;
 	
 	if (nLights > 0)
-		return finalcolor;//float4(pin.Normal,1);
+	{
+		
+			return finalcolor;//float4(pin.Normal,1);
+		
+	}
 	else
 		return float4(0, 0, 0, 1);
 
