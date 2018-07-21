@@ -72,7 +72,7 @@ void CGameObject::SetShadowMatrix()
 
 	XMStoreFloat4x4(&ObjData.WorldMatrix, wmatrix);
 
-	XMFLOAT3 Direction = { 0.7f,-1.5f,1.1f }; //light[0].Direction
+	XMFLOAT3 Direction = { 5.7f,-10.5f,8.1f }; //light[0].Direction
 
 	XMVECTOR shadowPlane = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f); // xz plane
 	XMVECTOR toMainLight = -XMLoadFloat3(&Direction);
@@ -400,7 +400,7 @@ CCubeManObject::CCubeManObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 	UpdateLookVector();
 	ObjData.isAnimation = true;
 	ObjData.Scale = 3;
-	ObjData.SpecularParamater = 0.0f;//스페큘러를 낮게준다.
+	ObjData.SpecularParamater = 2.0f;//스페큘러를 낮게준다.
 	ObjData.CustomData1.w = 1234;
 
 	obs = Dynamic;
@@ -1710,7 +1710,7 @@ Tetrike::Tetrike(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlis
 		Mesh.Index = NULL;
 		Mesh.SubResource = NULL;
 
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Tetrike", L"textures/object/Portal.dds", false);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Tetrike", L"textures/effect/magicCircle.dds", false);
 		SetMesh(m_Device, commandlist);
 		SetMaterial(m_Device, commandlist);
 		CreateMesh = true;
@@ -3489,7 +3489,7 @@ ColumnObject::ColumnObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * 
 		Mesh.Index = NULL;
 		Mesh.SubResource = NULL;
 
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "CubeTex", L"textures/object/white.dds", false);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "CubeTex", L"textures/object/column.dds", false);
 		SetMesh(m_Device, commandlist);
 		SetMaterial(m_Device, commandlist);
 		CreateMesh = true;
@@ -3508,10 +3508,11 @@ ColumnObject::ColumnObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * 
 
 	UpdateLookVector();
 	ObjData.isAnimation = 0;
-	ObjData.Scale = 1.0f;
+	ObjData.Scale = 6.0f;
 	ObjData.SpecularParamater = 0.0f;//스페큘러를 낮게준다.
 
 
+	ObjData.CustomData1.w = rand() % 400 + 100;
 
 	//게임관련 데이터들
 	gamedata.MAXHP = 100;
@@ -3560,8 +3561,8 @@ ColumnObject::~ColumnObject()
 
 void ColumnObject::SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist)
 {
-	CreateCube(&Mesh, 30, 90, 30);
-
+	//CreateCube(&Mesh, 30, 90, 30);
+	LoadMD5Model(L".\\플레이어메쉬들\\mCol.MD5MESH", &Mesh, 0, 1);
 	Mesh.SetNormal(false);
 	Mesh.CreateVertexBuffer(m_Device, commandlist);
 	Mesh.CreateIndexBuffer(m_Device, commandlist);
@@ -3600,9 +3601,9 @@ BuildingObject::BuildingObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 
 		Mesh.Index = NULL;
 		Mesh.SubResource = NULL;
-
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "towerTex", L"textures/object/tower.dds", false, 2,0);
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "towerNTex", L"textures/object/towerN.dds", false, 2, 1);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "towerTex", L"textures/object/castle2.dds", false, 1, 0);
+		//LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "towerTex", L"textures/object/tower.dds", false, 2,0);
+		//LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "towerNTex", L"textures/object/towerN.dds", false, 2, 1);
 		
 		SetMesh(m_Device, commandlist);
 		SetMaterial(m_Device, commandlist);
@@ -3622,9 +3623,9 @@ BuildingObject::BuildingObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 
 	UpdateLookVector();
 	ObjData.isAnimation = 0;
-	ObjData.Scale = 4.5f;
-	ObjData.SpecularParamater = -0.01f;//스페큘러를 낮게준다.
-	ObjData.CustomData1.w = 1234;
+	ObjData.Scale = 22.0f;
+	ObjData.SpecularParamater = 16.31f;//스페큘러를 낮게준다.
+	//ObjData.CustomData1.w = 1234;
 
 
 									   //게임관련 데이터들
@@ -3644,7 +3645,7 @@ BuildingObject::BuildingObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 	Orient = QuaternionMultiply(XMFLOAT4(rx.x, rx.y, rx.z, 0), rqx);
 	rx.x = Orient.x; rx.y = Orient.y, rx.z = Orient.z;
 
-	XMFLOAT3 ry(0, 50, 0);
+	XMFLOAT3 ry(0, 35, 0);
 	auto rqy = QuaternionRotation(raxis, degree);
 	Orient = QuaternionMultiply(XMFLOAT4(ry.x, ry.y, ry.z, 0), rqy);
 	ry.x = Orient.x; ry.y = Orient.y, ry.z = Orient.z;
@@ -3659,17 +3660,17 @@ BuildingObject::BuildingObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 	//질점오브젝트 사용시 필요한 데이터들 설정
 	pp = new PhysicsPoint();
 	pp->SetPosition(&CenterPos);//이 값은 항상 갱신되야한다.
-	pp->SetHalfBox(15, 50, 15);//충돌 박스의 x,y,z 크기
+	pp->SetHalfBox(15, 35, 15);//충돌 박스의 x,y,z 크기
 	pp->SetDamping(0.5f);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
 	pp->SetBounce(false);//튕기지 않는다.
 	pp->SetMass(INFINITY);//고정된 물체는 무게가 무한이다.
 
-	//if (Shadow != NULL)
-	//{
-	//	s = new ShadowObject(m_Device, commandlist, NULL, Shadow, this, XMFLOAT3(30, 90, 30), 1, CenterPos);
-	//	s->ObjData.Scale = 1.0f;
-	//	Shadow->push_back(s);
-	//}
+	if (Shadow != NULL)
+	{
+		s = new ShadowObject(m_Device, commandlist, NULL, Shadow, this, XMFLOAT3(30, 90, 30), 1, CenterPos);
+		s->ObjData.Scale = 1.0f;
+		Shadow->push_back(s);
+	}
 }
 
 BuildingObject::~BuildingObject()
@@ -3683,7 +3684,7 @@ void BuildingObject::SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* 
 	//CreateCube(&Mesh, 30, 90, 30);
 
 	//모델 로드
-	LoadMD5Model(L".\\플레이어메쉬들\\tree.MD5MESH", &Mesh, 0, 1);
+	LoadMD5Model(L".\\플레이어메쉬들\\fcastle.MD5MESH", &Mesh, 0, 1);
 	//
 	Mesh.SetNormal(false);
 	Mesh.CreateVertexBuffer(m_Device, commandlist);
@@ -3708,7 +3709,7 @@ void BuildingObject::Render(ID3D12GraphicsCommandList * commandlist, const GameT
 	if (Textures.size() > 0)
 	{
 		SetTexture(commandlist, SrvDescriptorHeap, Textures["towerTex"].get()->Resource.Get(), 0, 0);
-		SetTexture(commandlist, SrvDescriptorHeap, Textures["towerNTex"].get()->Resource.Get(), 2, 1);
+		//SetTexture(commandlist, SrvDescriptorHeap, Textures["towerNTex"].get()->Resource.Get(), 2, 1);
 	}
 	UpdateConstBuffer(commandlist, false);
 
@@ -4450,7 +4451,7 @@ void ImpObject::SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* comma
 {
 	//모델 로드
 	LoadMD5Model(L".\\플레이어메쉬들\\monster\\Idle.MD5MESH", &Mesh, 0, 1);
-	Mesh.SetNormal(true);
+	Mesh.SetNormal(false);
 	Mesh.CreateVertexBuffer(m_Device, commandlist);
 	Mesh.CreateIndexBuffer(m_Device, commandlist);
 
@@ -4809,7 +4810,7 @@ void ShadowObject::SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* co
 		if (CreateiMesh == false)
 		{
 			LoadMD5Model(L".\\플레이어메쉬들\\monster\\Idle.MD5MESH", &iMesh, 0, 1);
-			iMesh.SetNormal(true);
+			iMesh.SetNormal(false);
 			iMesh.CreateVertexBuffer(m_Device, commandlist);
 			iMesh.CreateIndexBuffer(m_Device, commandlist);
 

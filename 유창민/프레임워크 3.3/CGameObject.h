@@ -296,8 +296,8 @@ public:
 	CGameObject* LockOn = NULL;//유도시사용됨
 	float LifeTime = 10;//생존시간. 10초 후 제거됨
 	ParticleObject* BulletParticles = NULL;
-
-
+	int TexStart = 0;
+	int dTime = 0;
 public:
 	static CMaterial Mat;
 	static bool CreateMesh;//최초로 false며 메쉬를 만든후 true가된다.

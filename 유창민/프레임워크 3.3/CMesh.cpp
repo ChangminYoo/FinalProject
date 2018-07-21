@@ -132,8 +132,9 @@ void CMesh::SetNormal(bool PlayerMesh,bool particle)//이녀석은 반드시 정점과 인�
 		if (PlayerMesh == true)//현재 가지고있는 플레이어 메쉬 노멀이 좀 이상하게 되어있음. x와z가 바뀌어있다.
 		{
 			auto x = SubResource[i].N.x;
-			SubResource[i].N.x =- SubResource[i].N.z;
-			SubResource[i].N.z = x;
+			SubResource[i].N.x = SubResource[i].N.z;
+			SubResource[i].N.y *= -1;
+			SubResource[i].N.z =- x;
 		}
 		
 

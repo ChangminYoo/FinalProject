@@ -603,6 +603,7 @@ void Scene::Render(const GameTimer& gt)
 				SkillUI[0]->Render(commandlist, gt);
 				SkillUI[1]->Render(commandlist, gt);
 				SkillUI[2]->Render(commandlist, gt);
+				SkillUI[3]->Render(commandlist, gt);
 
 				SelectBar->Render(commandlist, gt);
 				for (int i = 0; i < 4; i++)
