@@ -460,10 +460,12 @@ void FrameWork::OnMouseDown(WPARAM btnState, int x, int y)
 
 		if (scene->Player->skilldata.SellectBulletIndex == 0)
 			scene->Sound->PlaySoundEffect(CSound::SoundType::SKILL1);
-
 		else if (scene->Player->skilldata.SellectBulletIndex == 1)
 			scene->Sound->PlaySoundEffect(CSound::SoundType::SKILL2);
-
+		else if (scene->Player->skilldata.SellectBulletIndex == 2)
+			scene->Sound->PlaySoundEffect(CSound::SoundType::SKILL3);
+		else if (scene->Player->skilldata.SellectBulletIndex == 3)
+			scene->Sound->PlaySoundEffect(CSound::SoundType::SKILL4);
 
 		
 		//공격 애니메이션으로 전환

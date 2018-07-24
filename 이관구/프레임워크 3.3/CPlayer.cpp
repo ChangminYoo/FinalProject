@@ -9,9 +9,9 @@ CPlayer::CPlayer(HWND hWnd,ID3D12Device* Device, ID3D12GraphicsCommandList* comm
 
 
 	skilldata.Skills[0] = 0;
-	skilldata.Skills[1] = 7; //1
-	skilldata.Skills[2] = 5; //2
-	skilldata.Skills[3] = 6;
+	skilldata.Skills[1] = 1; //1
+	skilldata.Skills[2] = 2; //2
+	skilldata.Skills[3] = 3;
 }
 
 

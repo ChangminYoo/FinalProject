@@ -72,7 +72,7 @@ void CGameObject::SetShadowMatrix()
 
 	XMStoreFloat4x4(&ObjData.WorldMatrix, wmatrix);
 
-	XMFLOAT3 Direction = { 0.7f,-1.5f,1.1f }; //light[0].Direction
+	XMFLOAT3 Direction = { 5.7f,-10.5f,8.1f }; //light[0].Direction
 
 	XMVECTOR shadowPlane = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f); // xz plane
 	XMVECTOR toMainLight = -XMLoadFloat3(&Direction);
@@ -1710,7 +1710,7 @@ Tetrike::Tetrike(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlis
 		Mesh.Index = NULL;
 		Mesh.SubResource = NULL;
 
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Tetrike", L"textures/object/Portal.dds", false);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Tetrike", L"textures/effect/magicCircle.dds", false);
 		SetMesh(m_Device, commandlist);
 		SetMaterial(m_Device, commandlist);
 		CreateMesh = true;
@@ -2180,19 +2180,18 @@ CubeObject::CubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 	XMFLOAT3 raxis{ 0,1,0 };
 	//광선충돌 검사용 육면체
 	XMFLOAT3 rx(5, 0, 0);
-	auto rqx = QuaternionRotation(raxis, degree);
-	Orient = QuaternionMultiply(XMFLOAT4(rx.x, rx.y, rx.z, 0), rqx);
-	rx.x = Orient.x; rx.y = Orient.y, rx.z = Orient.z;
-
 	XMFLOAT3 ry(0, 5, 0);
-	auto rqy = QuaternionRotation(raxis, degree);
-	Orient = QuaternionMultiply(XMFLOAT4(ry.x, ry.y, ry.z, 0), rqy);
-	ry.x = Orient.x; ry.y = Orient.y,  ry.z = Orient.z;
-
 	XMFLOAT3 rz(0, 0, 5);
+	auto rqx = QuaternionRotation(raxis, degree);
+	rx = Vector3Rotation(rx, rqx);
+
+	
+	auto rqy = QuaternionRotation(raxis, degree);
+	ry = Vector3Rotation(ry, rqy);
+
+	
 	auto rqz = QuaternionRotation(raxis, degree);
-	Orient = QuaternionMultiply(XMFLOAT4(ry.x, ry.y, ry.z, 0), rqz);
-	rz.x = Orient.x; rz.y = Orient.y, rz.z = Orient.z;
+	rz = Vector3Rotation(rz, rqz);
 
 	rco.SetPlane(rx, ry, rz);
 
@@ -3036,7 +3035,7 @@ RigidCubeObject::RigidCubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandL
 	UpdateLookVector();
 	ObjData.isAnimation = 0;
 	ObjData.Scale = 20.0f;
-	ObjData.SpecularParamater =-1.f;//스페큘러를 낮게준다.
+	ObjData.SpecularParamater =1.f;//스페큘러를 낮게준다.
 
 	obs = Rigid;
 
@@ -3249,7 +3248,7 @@ SmallWallObject::SmallWallObject(ID3D12Device * m_Device, ID3D12GraphicsCommandL
 		Mesh.Index = NULL;
 		Mesh.SubResource = NULL;
 
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "SmallWall", L"textures/object/IceWall.dds", false);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "SmallWall", L"textures/object/smallWall.dds", false);
 		SetMesh(m_Device, commandlist);
 		SetMaterial(m_Device, commandlist);
 		CreateMesh = true;
@@ -3268,7 +3267,7 @@ SmallWallObject::SmallWallObject(ID3D12Device * m_Device, ID3D12GraphicsCommandL
 
 	UpdateLookVector();
 	ObjData.isAnimation = 0;
-	ObjData.Scale = 1.0f;
+	ObjData.Scale = 5.5f;
 	ObjData.SpecularParamater = 0.80f;//스페큘러를 낮게준다.
 
 	obs = Static;
@@ -3283,19 +3282,23 @@ SmallWallObject::SmallWallObject(ID3D12Device * m_Device, ID3D12GraphicsCommandL
 	XMFLOAT3 raxis{ 0,1,0 };
 	//광선충돌 검사용 육면체
 	XMFLOAT3 rx(20, 0, 0);
-	auto rqx = QuaternionRotation(raxis, degree);
-	Orient = QuaternionMultiply(XMFLOAT4(rx.x, rx.y, rx.z, 0), rqx);
-	rx.x = Orient.x; rx.y = Orient.y, rx.z = Orient.z;
-
+	
+	
 	XMFLOAT3 ry(0, 10, 0);
-	auto rqy = QuaternionRotation(raxis, degree);
-	Orient = QuaternionMultiply(XMFLOAT4(ry.x, ry.y, ry.z, 0), rqy);
-	ry.x = Orient.x; ry.y = Orient.y, ry.z = Orient.z;
+	
 
 	XMFLOAT3 rz(0, 0, 5);
+	
+	auto rqx = QuaternionRotation(raxis, degree);
+	rx = Vector3Rotation(rx, rqx);
+
+
+	auto rqy = QuaternionRotation(raxis, degree);
+	ry = Vector3Rotation(ry, rqy);
+
+
 	auto rqz = QuaternionRotation(raxis, degree);
-	Orient = QuaternionMultiply(XMFLOAT4(ry.x, ry.y, ry.z, 0), rqz);
-	rz.x = Orient.x; rz.y = Orient.y, rz.z = Orient.z;
+	rz = Vector3Rotation(rz, rqz);
 
 	rco.SetPlane(rx, ry, rz);
 
@@ -3323,10 +3326,10 @@ SmallWallObject::~SmallWallObject()
 
 void SmallWallObject::SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist)
 {
-	CreateCube(&Mesh, 40, 20, 10);
+	//CreateCube(&Mesh, 40, 20, 10);
 
 	//모델 로드
-	//LoadMD5Model(L".\\플레이어메쉬들\\Cube.MD5MESH", &Mesh, 0, 1);
+	LoadMD5Model(L".\\플레이어메쉬들\\fence.MD5MESH", &Mesh, 0, 1);
 	//
 	Mesh.SetNormal(false);
 	Mesh.CreateVertexBuffer(m_Device, commandlist);
@@ -3405,19 +3408,22 @@ BigWallObject::BigWallObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList 
 	XMFLOAT3 raxis{ 0,1,0 };
 	//광선충돌 검사용 육면체
 	XMFLOAT3 rx(350, 0, 0);
-	auto rqx = QuaternionRotation(raxis, degree);
-	Orient = QuaternionMultiply(XMFLOAT4(rx.x, rx.y, rx.z, 0), rqx);
-	rx.x = Orient.x; rx.y = Orient.y, rx.z = Orient.z;
+	
 
 	XMFLOAT3 ry(0, 50, 0);
-	auto rqy = QuaternionRotation(raxis, degree);
-	Orient = QuaternionMultiply(XMFLOAT4(ry.x, ry.y, ry.z, 0), rqy);
-	ry.x = Orient.x; ry.y = Orient.y, ry.z = Orient.z;
+	
 
 	XMFLOAT3 rz(0, 0, 5);
+	auto rqx = QuaternionRotation(raxis, degree);
+	rx = Vector3Rotation(rx, rqx);
+
+
+	auto rqy = QuaternionRotation(raxis, degree);
+	ry = Vector3Rotation(ry, rqy);
+
+
 	auto rqz = QuaternionRotation(raxis, degree);
-	Orient = QuaternionMultiply(XMFLOAT4(ry.x, ry.y, ry.z, 0), rqz);
-	rz.x = Orient.x; rz.y = Orient.y, rz.z = Orient.z;
+	rz = Vector3Rotation(rz, rqz);
 
 	rco.SetPlane(rx, ry, rz);
 
@@ -3527,19 +3533,22 @@ ColumnObject::ColumnObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * 
 	XMFLOAT3 raxis{ 0,1,0 };
 	//광선충돌 검사용 육면체
 	XMFLOAT3 rx(15, 0, 0);
-	auto rqx = QuaternionRotation(raxis, degree);
-	Orient = QuaternionMultiply(XMFLOAT4(rx.x, rx.y, rx.z, 0), rqx);
-	rx.x = Orient.x; rx.y = Orient.y, rx.z = Orient.z;
+	
 
 	XMFLOAT3 ry(0, 45, 0);
-	auto rqy = QuaternionRotation(raxis, degree);
-	Orient = QuaternionMultiply(XMFLOAT4(ry.x, ry.y, ry.z, 0), rqy);
-	ry.x = Orient.x; ry.y = Orient.y, ry.z = Orient.z;
+	
 
 	XMFLOAT3 rz(0, 0, 15);
+	auto rqx = QuaternionRotation(raxis, degree);
+	rx = Vector3Rotation(rx, rqx);
+
+
+	auto rqy = QuaternionRotation(raxis, degree);
+	ry = Vector3Rotation(ry, rqy);
+
+
 	auto rqz = QuaternionRotation(raxis, degree);
-	Orient = QuaternionMultiply(XMFLOAT4(ry.x, ry.y, ry.z, 0), rqz);
-	rz.x = Orient.x; rz.y = Orient.y, rz.z = Orient.z;
+	rz = Vector3Rotation(rz, rqz);
 
 	rco.SetPlane(rx, ry, rz);
 
@@ -3641,19 +3650,22 @@ BuildingObject::BuildingObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 	XMFLOAT3 raxis{ 0,1,0 };
 	//광선충돌 검사용 육면체
 	XMFLOAT3 rx(15, 0, 0);
-	auto rqx = QuaternionRotation(raxis, degree);
-	Orient = QuaternionMultiply(XMFLOAT4(rx.x, rx.y, rx.z, 0), rqx);
-	rx.x = Orient.x; rx.y = Orient.y, rx.z = Orient.z;
+	
 
 	XMFLOAT3 ry(0, 35, 0);
-	auto rqy = QuaternionRotation(raxis, degree);
-	Orient = QuaternionMultiply(XMFLOAT4(ry.x, ry.y, ry.z, 0), rqy);
-	ry.x = Orient.x; ry.y = Orient.y, ry.z = Orient.z;
+	
 
 	XMFLOAT3 rz(0, 0, 15);
+	auto rqx = QuaternionRotation(raxis, degree);
+	rx = Vector3Rotation(rx, rqx);
+
+
+	auto rqy = QuaternionRotation(raxis, degree);
+	ry = Vector3Rotation(ry, rqy);
+
+
 	auto rqz = QuaternionRotation(raxis, degree);
-	Orient = QuaternionMultiply(XMFLOAT4(ry.x, ry.y, ry.z, 0), rqz);
-	rz.x = Orient.x; rz.y = Orient.y, rz.z = Orient.z;
+	rz = Vector3Rotation(rz, rqz);
 
 	rco.SetPlane(rx, ry, rz);
 
@@ -4936,19 +4948,13 @@ Floor2Object::Floor2Object(ID3D12Device * m_Device, ID3D12GraphicsCommandList * 
 	XMFLOAT3 raxis{ 0,1,0 };
 	//광선충돌 검사용 육면체
 	XMFLOAT3 rx(90, 0, 0);
-	auto rqx = QuaternionRotation(raxis, MMPE_PI*0.25);
-	Orient = QuaternionMultiply(XMFLOAT4(rx.x, rx.y, rx.z, 0), rqx);
-	rx.x = Orient.x; rx.y = Orient.y, rx.z = Orient.z;
+
 
 	XMFLOAT3 ry(0, 0.5f, 0);
-	auto rqy = QuaternionRotation(raxis, MMPE_PI*0.25);
-	Orient = QuaternionMultiply(XMFLOAT4(ry.x, ry.y, ry.z, 0), rqy);
-	ry.x = Orient.x; ry.y = Orient.y, ry.z = Orient.z;
+	
 
 	XMFLOAT3 rz(0, 0, 90);
-	auto rqz = QuaternionRotation(raxis, MMPE_PI*0.25);
-	Orient = QuaternionMultiply(XMFLOAT4(ry.x, ry.y, ry.z, 0), rqz);
-	rz.x = Orient.x; rz.y = Orient.y, rz.z = Orient.z;
+	
 
 	rco.SetPlane(rx, ry, rz);
 
@@ -5038,19 +5044,22 @@ BreakCartObject::BreakCartObject(ID3D12Device * m_Device, ID3D12GraphicsCommandL
 	XMFLOAT3 raxis{ 0,1,0 };
 	//광선충돌 검사용 육면체
 	XMFLOAT3 rx(15, 0, 0);
-	auto rqx = QuaternionRotation(raxis, degree);
-	Orient = QuaternionMultiply(XMFLOAT4(rx.x, rx.y, rx.z, 0), rqx);
-	rx.x = Orient.x; rx.y = Orient.y, rx.z = Orient.z;
+	
 
 	XMFLOAT3 ry(0, 8, 0);
-	auto rqy = QuaternionRotation(raxis, degree);
-	Orient = QuaternionMultiply(XMFLOAT4(ry.x, ry.y, ry.z, 0), rqy);
-	ry.x = Orient.x; ry.y = Orient.y, ry.z = Orient.z;
+	
 
 	XMFLOAT3 rz(0, 0, 15);
+	auto rqx = QuaternionRotation(raxis, degree);
+	rx = Vector3Rotation(rx, rqx);
+
+
+	auto rqy = QuaternionRotation(raxis, degree);
+	ry = Vector3Rotation(ry, rqy);
+
+
 	auto rqz = QuaternionRotation(raxis, degree);
-	Orient = QuaternionMultiply(XMFLOAT4(ry.x, ry.y, ry.z, 0), rqz);
-	rz.x = Orient.x; rz.y = Orient.y, rz.z = Orient.z;
+	rz = Vector3Rotation(rz, rqz);
 
 	rco.SetPlane(rx, ry, rz);
 

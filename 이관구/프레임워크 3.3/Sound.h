@@ -21,12 +21,19 @@ public:
 	{
 		SKILL1,
 		SKILL2,
+		SKILL3,
+		SKILL4,
+		SKILL5,
+		SKILL6,
+		SKILL7,
+		SKILL8,
 		HIT1,//ÇÇ°Ý
+		IMP_ATTACK
 
 	};
 private:
 	FMOD::System *system;
-	FMOD::Sound  *titleSound, *shotSound1, *shotSound2, *hitSound1;
+	FMOD::Sound  *titleSound, *shotSound1, *shotSound2, *tetrikeSound, *diceSound, *waveSound, *shieldSound, *hammerSound, *MeteorSound,*hitSound1;
 	FMOD::Channel *channel = 0;
 
 public:

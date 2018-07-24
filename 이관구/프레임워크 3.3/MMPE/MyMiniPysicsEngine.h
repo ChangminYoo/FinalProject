@@ -295,7 +295,10 @@ namespace MiniPhysicsEngineG9
 	XMFLOAT4 Float4Float(XMFLOAT4& v, float v2);
 
 	XMFLOAT4 QuaternionRotation(XMFLOAT3& Axis, float radian);
-	XMFLOAT4 QuaternionMultiply(XMFLOAT4& q1, XMFLOAT4& q2);
+	XMFLOAT4 QuaternionMultiply(XMFLOAT4& q1, XMFLOAT4& q2);//쿼터니언의 곱일뿐 벡터를 넣으면 안되요 창민씨..
+
+	XMFLOAT3 Vector3Rotation(XMFLOAT3& Vec, XMFLOAT4& q1);
+	XMFLOAT4 Vector4Rotation(XMFLOAT4& Vec, XMFLOAT4& q1);
 
 
 

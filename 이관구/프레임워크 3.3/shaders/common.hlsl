@@ -98,4 +98,21 @@ cbuffer MaterialData : register(b4)
 
 }
 
+float4 CalcDiffuseLight(float3 normal, float3 lightDirection, float4 lightColor, float lightIntensity)
+{
+	return saturate(dot(normal, -lightDirection)) * lightIntensity * lightColor;
+}
 
+float4 CalcSpecularLight(float3 normal, float3 lightDirection, float3 cameraDirection, float4 lightColor, float lightIntensity)
+{
+	float3 halfVector = normalize(-lightDirection + -cameraDirection);
+	float specular = saturate(dot(halfVector, normal));
+
+	float specularPower = 20;
+
+	return lightIntensity * lightColor * pow(abs(specular), specularPower);
+}
+float lengthSquared(float3 v1)
+{
+	return v1.x * v1.x + v1.y * v1.y + v1.z * v1.z;
+}

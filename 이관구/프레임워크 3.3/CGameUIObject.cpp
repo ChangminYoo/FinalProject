@@ -274,9 +274,13 @@ SkillUIObject::SkillUIObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList 
 		Mesh.Index = NULL;
 		Mesh.SubResource = NULL;
 
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Skill1", L"textures/ui/cube1.dds", false, 3, 0);
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Skill2", L"textures/ui/cube2.dds", false, 3, 1);
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Skill3", L"textures/ui/tetrike.dds", false, 3, 2);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Skill1", L"textures/ui/cube1.dds", false,  7, 0);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Skill2", L"textures/ui/cube2.dds", false,  7, 1);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Skill3", L"textures/ui/tetrike.dds", false,7, 2);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Skill4", L"textures/ui/dice.dds", false,   7, 3);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Skill5", L"textures/ui/padong.dds", false, 7, 4);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Skill6", L"textures/ui/shield.dds", false, 7, 5);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "Skill7", L"textures/ui/hammer.dds", false, 7, 6);
 		SetMesh(m_Device, commandlist);
 		CreateMesh = true;
 
@@ -288,6 +292,14 @@ SkillUIObject::SkillUIObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList 
 		TextureName = "Skill2";
 	else if (SkillNum == 2)
 		TextureName = "Skill3";
+	else if (SkillNum == 3)
+		TextureName = "Skill4";
+	else if (SkillNum == 4)
+		TextureName = "Skill5";
+	else if (SkillNum == 5)
+		TextureName = "Skill6";
+	else if (SkillNum == 6)
+		TextureName = "Skill7";
 	else
 		TextureName = "Skill1"; //나중에 수정
 

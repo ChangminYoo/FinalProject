@@ -98,32 +98,7 @@ VertexOut VS(VertexIn vin)
 	return vout;
 }
 
-float4 CalcDiffuseLight(float3 normal, float3 lightDirection, float4 lightColor, float lightIntensity)
-{
-	return saturate(dot(normal, -lightDirection)) * lightIntensity * lightColor;
-}
 
-float4 CalcSpecularLight(float3 normal, float3 lightDirection, float3 cameraDirection, float4 lightColor, float lightIntensity)
-{
-	
-	float specularPower = SpecularParamater;
-	if (specularPower <= 0)
-	{
-		specularPower = 1.0f;
-	}
-	float3 halfVector = normalize(-lightDirection + -cameraDirection);
-	float specular = saturate(dot(halfVector, normal));
-
-
-
-
-	return lightIntensity * lightColor * pow(abs(specular), specularPower);
-	
-}
-float lengthSquared(float3 v1)
-{
-	return v1.x * v1.x + v1.y * v1.y + v1.z * v1.z;
-}
 float4 PS(VertexOut pin) : SV_Target
 {
 	float4 textureColor; //텍스쳐 색상
@@ -186,17 +161,19 @@ float4 PS(VertexOut pin) : SV_Target
 	diffuseLight += CalcDiffuseLight(pin.Normal, lightDir, litColor, lightIntensity);
 	specularLight += CalcSpecularLight(pin.Normal, lightDir,viewDirection, litColor, lightIntensity);
 
+	diffuseLight += CalcDiffuseLight(pin.Normal, -lightDir + float3(0, lightDir.y * 2, 0), litColor, lightIntensity/2);
+
 	if (SpecularParamater >= 0)
 	{
 		//i가 0일때는 그냥 전역광원(태양 같은걸로 처리) 하고 나머지는 점광원으로 할예정..
 		for (int i = 1; i < nLights; ++i)
 		{
 
-			float3 PointLightDirection = pin.PosW.xyz -gLights[i].Position;
+			float3 PointLightDirection = -pin.PosW.xyz +gLights[i].Position;
 
 			float DistanceSq = lengthSquared(PointLightDirection);
 
-			float radius = 1500;
+			float radius = 1000;
 
 			
 			if (DistanceSq < abs(radius * radius))
@@ -214,7 +191,7 @@ float4 PS(VertexOut pin) : SV_Target
 				float attenuation = 1 / (denom * denom);
 
 				float pointintensity= max(dot(NormalVector, -normalize(gLights[i].Direction)), 0);
-				pointintensity = smoothstep(0.25, 0.7, pointintensity)+0.15f;
+				//pointintensity = smoothstep(0.25, 0.7, pointintensity)+0.15f;
 		
 				diffuseLight += CalcDiffuseLight(pin.Normal, PointLightDirection, gLights[i].DiffuseColor, pointintensity) * attenuation;
 
@@ -230,7 +207,7 @@ float4 PS(VertexOut pin) : SV_Target
 
 	}
 
-	finalcolor = (textureColor * diffuseLight) + litColor * textureColor * lightIntensity +float4(0.3205,0.3205,0.3205,1)*textureColor;
+	finalcolor = (textureColor * diffuseLight) + litColor * textureColor * lightIntensity + gAmbientLight *textureColor+ specularLight*textureColor;
 	finalcolor.w = BlendValue;
 	
 	if (nLights > 0)
