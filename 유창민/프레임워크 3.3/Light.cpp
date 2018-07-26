@@ -20,29 +20,29 @@ CLight::~CLight()
 void CLight::UpdateConstantBuffer(ID3D12GraphicsCommandList* commandlist)
 {
 	
-	LData.light[0].LightColor = { 0.9f, 0.9f, 0.9f,1 };
-	LData.light[0].Direction = { 5.7f,-10.5f,8.1f,1.0f };
+	LData.light[0].LightColor = { 0.79f, 0.79f, 0.79f,1 };
+	LData.light[0].Direction = { -5.7f,-10.5f,8.1f,1.0f };
 	LData.light[0].Position = { -40.0f, 620.0f, 30.0f };
-	LData.light[0].SpecularPower = 32.0f;
+	LData.light[0].SpecularPower = 16.0f;
 	LData.nLight = 1;
 
-	LData.light[1].LightColor = { 0.9f, 0.9f, 0.9f,1 };
+	LData.light[1].LightColor = { 3.9f,3.9f, 3.9f,1 };
 	LData.light[1].Direction = { -0.577f, -1.977f, 1.577f, 1.0f };
-	LData.light[1].Position = { 10.0f, 10.0f, -7.0f };
-	LData.light[1].SpecularPower = 32.0f;
+	LData.light[1].Position = { 0.0f, 600.0f, -400.0f };
+	LData.light[1].SpecularPower = 8.0f;
 	LData.nLight = 2;
-
-	LData.light[2].LightColor = { 0.70f, 0.1f, 0.0f,1 };
+	
+	LData.light[2].LightColor = { 3.70f, 3.7f, 3.07f,1 };
 	LData.light[2].Direction = { 0.977f, -1.277f, -0.1577f, 1.0f };
-	LData.light[2].Position = { 0.0f, 500.0f, 0.0f };
+	LData.light[2].Position = { -150.0f, 500.0f, 100.0f };
 	LData.light[2].SpecularPower = 32.0f;
 	LData.nLight =3;
 	
-	//LData.light[3].LightColor = { 0.90f, 0.9f, 0.90f,1 };
-	//LData.light[3].Direction = { 3.977f, -1.277f, -8.577f, 1.0f };
-	//LData.light[3].Position = { -1300.0f, 2500.0f, -1470.0f };
-	//LData.light[3].SpecularPower = 32.0f;
-	//LData.nLight = 4;
+	LData.light[3].LightColor = {0.90f,0.9f,0.90f,1 };
+	LData.light[3].Direction = { 3.977f, -1.277f, -8.577f, 1.0f };
+	LData.light[3].Position = { 00.0f, 120.0f, 00.0f };
+	LData.light[3].SpecularPower =4.0f;
+	LData.nLight = 4;
 	//
 	//LData.light[4].LightColor = { 0.90f, 0.9f, 0.90f,1 };
 	//LData.light[4].Direction = { -3.977f, -1.277f, -6.577f, 1.0f };
@@ -80,7 +80,7 @@ void CLight::UpdateConstantBuffer(ID3D12GraphicsCommandList* commandlist)
 	//LData.light[9].SpecularPower = 32.0f;
 	//LData.nLight = 10;
 	
-	LData.AmbientLight = { 0.248f, 0.249f, 0.244f, 0.8f };
+	LData.AmbientLight = { 0.4305248f, 0.4305249f, 0.4305244f, 0.8f };
 
 	ConstBuffer->CopyData(0, LData);
 	commandlist->SetGraphicsRootConstantBufferView(3, ConstBuffer->Resource()->GetGPUVirtualAddress());

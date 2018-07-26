@@ -155,6 +155,32 @@ XMFLOAT4 MiniPhysicsEngineG9::QuaternionMultiply(XMFLOAT4 & q1, XMFLOAT4 & q2)
 	return Result;
 }
 
+XMFLOAT3 MiniPhysicsEngineG9::Vector3Rotation(XMFLOAT3 & Vec, XMFLOAT4 & q1)
+{
+	XMVECTOR v = XMLoadFloat3(&Vec);
+	XMMATRIX m = XMMatrixRotationQuaternion(XMLoadFloat4(&q1));
+	v = XMVector3Transform(v, m);
+
+	XMFLOAT3 result;
+	XMStoreFloat3(&result, v);
+
+
+	return result;
+}
+
+XMFLOAT4 MiniPhysicsEngineG9::Vector4Rotation(XMFLOAT4 & Vec, XMFLOAT4 & q1)
+{
+	XMVECTOR v = XMLoadFloat4(&Vec);
+	XMMATRIX m = XMMatrixRotationQuaternion(XMLoadFloat4(&q1));
+	v = XMVector3Transform(v, m);
+
+	XMFLOAT4 result;
+	XMStoreFloat4(&result, v);
+
+
+	return result;
+}
+
 
 
 

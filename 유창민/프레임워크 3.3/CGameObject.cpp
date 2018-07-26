@@ -1,5 +1,6 @@
 #include "CGameObject.h"
 #include"FSM.h"
+#include"CPlayer.h"
 extern UINT CbvSrvDescriptorSize;
 
 
@@ -429,6 +430,7 @@ CCubeManObject::CCubeManObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 	{
 		Hpbar = new BarObject(m_Device, commandlist, ParticleList,NULL, this, 10, XMFLOAT4(CenterPos.x, 10, CenterPos.z, 0));
 		HPFrame = new BarFrameObject(m_Device, commandlist, ParticleList, NULL, this, 10, XMFLOAT4(CenterPos.x, 10, CenterPos.z, 0));
+
 		ParticleList->push_back(HPFrame);
 		ParticleList->push_back(Hpbar);
 	}
@@ -448,6 +450,8 @@ CCubeManObject::~CCubeManObject()
 		Hpbar->DelObj = true;
 	if (HPFrame != NULL)
 		HPFrame->DelObj = true;
+	if (Rank1 != NULL)
+		Rank1->DelObj = true;
 	if (s != NULL)
 		s->DelObj = true;
 }
@@ -755,9 +759,28 @@ void BulletCube::Collision(list<CGameObject*>* collist, float DeltaTime)
 				//1. 먼저 데미지를 준다.
 				(*i)->ToDamage(gamedata.Damage);
 
+				bool isboss = false;
+			
 				//2. 보스몬스터면 총알방햐을 보도록함.
 				if ((*i)->gamedata.MAXHP > 1000)//보스몬스터면 총알 방향으로 오도록해야함.
+				{
 					((ImpObject*)*i)->fsm->aidata.LastPosition = this->CenterPos;
+					isboss = true;
+				}
+
+				//만약 상대가 죽었다면 점수를 추가한다.
+				if ((*i)->gamedata.HP <= 0)
+				{
+					if (((CCubeManObject*)Master)->player != NULL)
+					{
+						if (isboss)
+							((CCubeManObject*)Master)->player->pointrank.Point += 100;
+						else
+							((CCubeManObject*)Master)->player->pointrank.Point += 10;
+					}
+				}
+
+
 
 				XMFLOAT3 cn;
 				//고정된 물체가 아니면
@@ -950,8 +973,27 @@ void HeavyBulletCube::Collision(list<CGameObject*>* collist, float DeltaTime)
 
 				//1. 먼저 데미지를 준다.
 				(*i)->ToDamage(gamedata.Damage);
-				if ((*i)->gamedata.MAXHP > 1000)//보스몬스터면
+				bool isboss = false;
+			
+				//2. 보스몬스터면 총알방햐을 보도록함.
+				if ((*i)->gamedata.MAXHP > 1000)//보스몬스터면 총알 방향으로 오도록해야함.
+				{
 					((ImpObject*)*i)->fsm->aidata.LastPosition = this->CenterPos;
+					isboss = true;
+				}
+
+				//만약 상대가 죽었다면 점수를 추가한다.
+				if ((*i)->gamedata.HP <= 0)
+				{
+					if (((CCubeManObject*)Master)->player != NULL)
+					{
+						if (isboss)
+							((CCubeManObject*)Master)->player->pointrank.Point += 100;
+						else
+							((CCubeManObject*)Master)->player->pointrank.Point += 10;
+					}
+				}
+
 				XMFLOAT3 cn;
 				//고정된 물체가 아니면
 				if ((*i)->staticobject == false)
@@ -1134,6 +1176,26 @@ void Tetris1::Collision(list<CGameObject*>* collist, float DeltaTime)
 				//1. 먼저 데미지를 준다.
 				(*i)->ToDamage(gamedata.Damage);
 
+				bool isboss = false;
+
+				//2. 보스몬스터면 총알방햐을 보도록함.
+				if ((*i)->gamedata.MAXHP > 1000)//보스몬스터면 총알 방향으로 오도록해야함.
+				{
+					((ImpObject*)*i)->fsm->aidata.LastPosition = this->CenterPos;
+					isboss = true;
+				}
+
+				//만약 상대가 죽었다면 점수를 추가한다.
+				if ((*i)->gamedata.HP <= 0)
+				{
+					if (((CCubeManObject*)Master)->player != NULL)
+					{
+						if (isboss)
+							((CCubeManObject*)Master)->player->pointrank.Point += 100;
+						else
+							((CCubeManObject*)Master)->player->pointrank.Point += 10;
+					}
+				}
 
 				XMFLOAT3 cn;
 				//고정된 물체가 아니면
@@ -1312,6 +1374,26 @@ void Tetris2::Collision(list<CGameObject*>* collist, float DeltaTime)
 				//1. 먼저 데미지를 준다.
 				(*i)->ToDamage(gamedata.Damage);
 
+				bool isboss = false;
+
+				//2. 보스몬스터면 총알방햐을 보도록함.
+				if ((*i)->gamedata.MAXHP > 1000)//보스몬스터면 총알 방향으로 오도록해야함.
+				{
+					((ImpObject*)*i)->fsm->aidata.LastPosition = this->CenterPos;
+					isboss = true;
+				}
+
+				//만약 상대가 죽었다면 점수를 추가한다.
+				if ((*i)->gamedata.HP <= 0)
+				{
+					if (((CCubeManObject*)Master)->player != NULL)
+					{
+						if (isboss)
+							((CCubeManObject*)Master)->player->pointrank.Point += 100;
+						else
+							((CCubeManObject*)Master)->player->pointrank.Point += 10;
+					}
+				}
 
 				XMFLOAT3 cn;
 				//고정된 물체가 아니면
@@ -1490,6 +1572,27 @@ void Tetris3::Collision(list<CGameObject*>* collist, float DeltaTime)
 				//1. 먼저 데미지를 준다.
 				(*i)->ToDamage(gamedata.Damage);
 
+				bool isboss = false;
+
+				//2. 보스몬스터면 총알방햐을 보도록함.
+				if ((*i)->gamedata.MAXHP > 1000)//보스몬스터면 총알 방향으로 오도록해야함.
+				{
+					((ImpObject*)*i)->fsm->aidata.LastPosition = this->CenterPos;
+					isboss = true;
+				}
+
+				//만약 상대가 죽었다면 점수를 추가한다.
+				if ((*i)->gamedata.HP <= 0)
+				{
+					if (((CCubeManObject*)Master)->player != NULL)
+					{
+						if (isboss)
+							((CCubeManObject*)Master)->player->pointrank.Point += 100;
+						else
+							((CCubeManObject*)Master)->player->pointrank.Point += 10;
+					}
+				}
+
 
 				XMFLOAT3 cn;
 				//고정된 물체가 아니면
@@ -1665,6 +1768,26 @@ void Tetris4::Collision(list<CGameObject*>* collist, float DeltaTime)
 			{
 				//1. 먼저 데미지를 준다.
 				(*i)->ToDamage(gamedata.Damage);
+				bool isboss = false;
+
+				//2. 보스몬스터면 총알방햐을 보도록함.
+				if ((*i)->gamedata.MAXHP > 1000)//보스몬스터면 총알 방향으로 오도록해야함.
+				{
+					((ImpObject*)*i)->fsm->aidata.LastPosition = this->CenterPos;
+					isboss = true;
+				}
+
+				//만약 상대가 죽었다면 점수를 추가한다.
+				if ((*i)->gamedata.HP <= 0)
+				{
+					if (((CCubeManObject*)Master)->player != NULL)
+					{
+						if (isboss)
+							((CCubeManObject*)Master)->player->pointrank.Point += 100;
+						else
+							((CCubeManObject*)Master)->player->pointrank.Point += 10;
+					}
+				}
 
 
 				XMFLOAT3 cn;
@@ -2020,6 +2143,26 @@ void DiceStrike::Collision(list<CGameObject*>* collist, float DeltaTime)
 				//1. 먼저 데미지를 준다.
 				(*i)->ToDamage(gamedata.Damage);
 
+				bool isboss = false;
+
+				//2. 보스몬스터면 총알방햐을 보도록함.
+				if ((*i)->gamedata.MAXHP > 1000)//보스몬스터면 총알 방향으로 오도록해야함.
+				{
+					((ImpObject*)*i)->fsm->aidata.LastPosition = this->CenterPos;
+					isboss = true;
+				}
+
+				//만약 상대가 죽었다면 점수를 추가한다.
+				if ((*i)->gamedata.HP <= 0)
+				{
+					if (((CCubeManObject*)Master)->player != NULL)
+					{
+						if (isboss)
+							((CCubeManObject*)Master)->player->pointrank.Point += 100;
+						else
+							((CCubeManObject*)Master)->player->pointrank.Point += 10;
+					}
+				}
 
 				XMFLOAT3 cn;
 				//고정된 물체가 아니면
@@ -2180,19 +2323,18 @@ CubeObject::CubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 	XMFLOAT3 raxis{ 0,1,0 };
 	//광선충돌 검사용 육면체
 	XMFLOAT3 rx(5, 0, 0);
-	auto rqx = QuaternionRotation(raxis, degree);
-	Orient = QuaternionMultiply(XMFLOAT4(rx.x, rx.y, rx.z, 0), rqx);
-	rx.x = Orient.x; rx.y = Orient.y, rx.z = Orient.z;
-
 	XMFLOAT3 ry(0, 5, 0);
-	auto rqy = QuaternionRotation(raxis, degree);
-	Orient = QuaternionMultiply(XMFLOAT4(ry.x, ry.y, ry.z, 0), rqy);
-	ry.x = Orient.x; ry.y = Orient.y,  ry.z = Orient.z;
-
 	XMFLOAT3 rz(0, 0, 5);
+	auto rqx = QuaternionRotation(raxis, degree);
+	rx = Vector3Rotation(rx, rqx);
+
+	
+	auto rqy = QuaternionRotation(raxis, degree);
+	ry = Vector3Rotation(ry, rqy);
+
+	
 	auto rqz = QuaternionRotation(raxis, degree);
-	Orient = QuaternionMultiply(XMFLOAT4(ry.x, ry.y, ry.z, 0), rqz);
-	rz.x = Orient.x; rz.y = Orient.y, rz.z = Orient.z;
+	rz = Vector3Rotation(rz, rqz);
 
 	rco.SetPlane(rx, ry, rz);
 
@@ -2695,6 +2837,97 @@ void BarFrameObject::Render(ID3D12GraphicsCommandList * commandlist, const GameT
 	commandlist->DrawIndexedInstanced(Mesh.nindex, 1, Mesh.nioffset, Mesh.nOffset, 0);
 }
 
+
+Rank1Object::Rank1Object(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, list<CGameObject*>* shadow, CGameObject * master, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, shadow, cp)
+{
+	ObjData.isAnimation = 0;
+	ObjData.Scale = 10;
+	ObjData.SpecularParamater = 0.5f;//스페큘러를 낮게준다.
+	ObjData.CustomData1.x = 3;
+
+	Master = master;
+
+	//게임관련 데이터들
+	gamedata.HP = 0;
+	gamedata.GodMode = true;
+	staticobject = true;
+
+
+	obs = Static;
+
+	if (CreateMesh == false)
+	{
+		Mesh.Index = NULL;
+		Mesh.SubResource = NULL;
+
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "rankTex", L"textures/ui/rank1.dds", false);
+
+		SetMesh(m_Device, commandlist);
+		CreateMesh = true;
+
+	}
+}
+
+void Rank1Object::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
+{
+	UINT numOfitem = 1;
+
+	Mesh.SubResource = new CVertex;
+	Mesh.nVertex = numOfitem;
+	Mesh.nStride = sizeof(CVertex);
+	Mesh.nOffset = 0;
+
+
+	Mesh.Index = new UINT;
+	Mesh.nindex = numOfitem;
+	Mesh.nioffset = 0;
+	Mesh.nisize = sizeof(UINT);
+
+
+	//여기서 좌표를 일괄적으로 설정 할 수 있다
+	for (int i = 0; i < numOfitem; ++i)
+	{
+		Mesh.SubResource[i].V = XMFLOAT3(0, 0, 0);
+
+		Mesh.Index[i] = i;
+	}
+
+	Mesh.CreateVertexBuffer(m_Device, commandlist);
+	Mesh.CreateIndexBuffer(m_Device, commandlist);
+}
+
+void Rank1Object::Tick(const GameTimer & gt)
+{
+	CenterPos.x = Master->CenterPos.x; CenterPos.y = Master->CenterPos.y + 20; CenterPos.z = Master->CenterPos.z;
+}
+
+void Rank1Object::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer & gt)
+{
+	if (Textures.size()>0)
+		SetTexture(commandlist, SrvDescriptorHeap, Textures["rankTex"].get()->Resource.Get());
+	UpdateConstBuffer(commandlist, false);
+
+
+	D3D12_VERTEX_BUFFER_VIEW vbv;
+
+	vbv.BufferLocation = Mesh.VertexBuffer->GetGPUVirtualAddress();
+	vbv.StrideInBytes = Mesh.nStride;
+	vbv.SizeInBytes = Mesh.nStride *  Mesh.nVertex;
+
+	commandlist->IASetVertexBuffers(0, 1, &vbv);
+
+	D3D12_INDEX_BUFFER_VIEW ibv;
+	ibv.BufferLocation = Mesh.IndexBuffer->GetGPUVirtualAddress();
+	ibv.Format = DXGI_FORMAT_R16_UINT;
+	ibv.SizeInBytes = Mesh.nisize *  Mesh.nindex;
+
+	commandlist->IASetIndexBuffer(&ibv);
+	commandlist->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
+
+
+	commandlist->DrawIndexedInstanced(Mesh.nindex, 1, Mesh.nioffset, Mesh.nOffset, 0);
+}
+
 DiceObject::DiceObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, list<CGameObject*>*shadow, CGameObject * master, XMFLOAT3 goal, list<CGameObject*>* bulletlist, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist,shadow, cp)
 {
 	ObjData.isAnimation = 0;
@@ -3036,7 +3269,7 @@ RigidCubeObject::RigidCubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandL
 	UpdateLookVector();
 	ObjData.isAnimation = 0;
 	ObjData.Scale = 20.0f;
-	ObjData.SpecularParamater =-1.f;//스페큘러를 낮게준다.
+	ObjData.SpecularParamater =1.f;//스페큘러를 낮게준다.
 
 	obs = Rigid;
 
@@ -3249,7 +3482,7 @@ SmallWallObject::SmallWallObject(ID3D12Device * m_Device, ID3D12GraphicsCommandL
 		Mesh.Index = NULL;
 		Mesh.SubResource = NULL;
 
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "SmallWall", L"textures/object/IceWall.dds", false);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "SmallWall", L"textures/object/smallWall.dds", false);
 		SetMesh(m_Device, commandlist);
 		SetMaterial(m_Device, commandlist);
 		CreateMesh = true;
@@ -3268,7 +3501,7 @@ SmallWallObject::SmallWallObject(ID3D12Device * m_Device, ID3D12GraphicsCommandL
 
 	UpdateLookVector();
 	ObjData.isAnimation = 0;
-	ObjData.Scale = 1.0f;
+	ObjData.Scale = 5.5f;
 	ObjData.SpecularParamater = 0.80f;//스페큘러를 낮게준다.
 
 	obs = Static;
@@ -3283,19 +3516,23 @@ SmallWallObject::SmallWallObject(ID3D12Device * m_Device, ID3D12GraphicsCommandL
 	XMFLOAT3 raxis{ 0,1,0 };
 	//광선충돌 검사용 육면체
 	XMFLOAT3 rx(20, 0, 0);
-	auto rqx = QuaternionRotation(raxis, degree);
-	Orient = QuaternionMultiply(XMFLOAT4(rx.x, rx.y, rx.z, 0), rqx);
-	rx.x = Orient.x; rx.y = Orient.y, rx.z = Orient.z;
-
+	
+	
 	XMFLOAT3 ry(0, 10, 0);
-	auto rqy = QuaternionRotation(raxis, degree);
-	Orient = QuaternionMultiply(XMFLOAT4(ry.x, ry.y, ry.z, 0), rqy);
-	ry.x = Orient.x; ry.y = Orient.y, ry.z = Orient.z;
+	
 
 	XMFLOAT3 rz(0, 0, 5);
+	
+	auto rqx = QuaternionRotation(raxis, degree);
+	rx = Vector3Rotation(rx, rqx);
+
+
+	auto rqy = QuaternionRotation(raxis, degree);
+	ry = Vector3Rotation(ry, rqy);
+
+
 	auto rqz = QuaternionRotation(raxis, degree);
-	Orient = QuaternionMultiply(XMFLOAT4(ry.x, ry.y, ry.z, 0), rqz);
-	rz.x = Orient.x; rz.y = Orient.y, rz.z = Orient.z;
+	rz = Vector3Rotation(rz, rqz);
 
 	rco.SetPlane(rx, ry, rz);
 
@@ -3323,10 +3560,10 @@ SmallWallObject::~SmallWallObject()
 
 void SmallWallObject::SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist)
 {
-	CreateCube(&Mesh, 40, 20, 10);
+	//CreateCube(&Mesh, 40, 20, 10);
 
 	//모델 로드
-	//LoadMD5Model(L".\\플레이어메쉬들\\Cube.MD5MESH", &Mesh, 0, 1);
+	LoadMD5Model(L".\\플레이어메쉬들\\fence.MD5MESH", &Mesh, 0, 1);
 	//
 	Mesh.SetNormal(false);
 	Mesh.CreateVertexBuffer(m_Device, commandlist);
@@ -3405,19 +3642,22 @@ BigWallObject::BigWallObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList 
 	XMFLOAT3 raxis{ 0,1,0 };
 	//광선충돌 검사용 육면체
 	XMFLOAT3 rx(350, 0, 0);
-	auto rqx = QuaternionRotation(raxis, degree);
-	Orient = QuaternionMultiply(XMFLOAT4(rx.x, rx.y, rx.z, 0), rqx);
-	rx.x = Orient.x; rx.y = Orient.y, rx.z = Orient.z;
+	
 
 	XMFLOAT3 ry(0, 50, 0);
-	auto rqy = QuaternionRotation(raxis, degree);
-	Orient = QuaternionMultiply(XMFLOAT4(ry.x, ry.y, ry.z, 0), rqy);
-	ry.x = Orient.x; ry.y = Orient.y, ry.z = Orient.z;
+	
 
 	XMFLOAT3 rz(0, 0, 5);
+	auto rqx = QuaternionRotation(raxis, degree);
+	rx = Vector3Rotation(rx, rqx);
+
+
+	auto rqy = QuaternionRotation(raxis, degree);
+	ry = Vector3Rotation(ry, rqy);
+
+
 	auto rqz = QuaternionRotation(raxis, degree);
-	Orient = QuaternionMultiply(XMFLOAT4(ry.x, ry.y, ry.z, 0), rqz);
-	rz.x = Orient.x; rz.y = Orient.y, rz.z = Orient.z;
+	rz = Vector3Rotation(rz, rqz);
 
 	rco.SetPlane(rx, ry, rz);
 
@@ -3527,19 +3767,22 @@ ColumnObject::ColumnObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * 
 	XMFLOAT3 raxis{ 0,1,0 };
 	//광선충돌 검사용 육면체
 	XMFLOAT3 rx(15, 0, 0);
-	auto rqx = QuaternionRotation(raxis, degree);
-	Orient = QuaternionMultiply(XMFLOAT4(rx.x, rx.y, rx.z, 0), rqx);
-	rx.x = Orient.x; rx.y = Orient.y, rx.z = Orient.z;
+	
 
 	XMFLOAT3 ry(0, 45, 0);
-	auto rqy = QuaternionRotation(raxis, degree);
-	Orient = QuaternionMultiply(XMFLOAT4(ry.x, ry.y, ry.z, 0), rqy);
-	ry.x = Orient.x; ry.y = Orient.y, ry.z = Orient.z;
+	
 
 	XMFLOAT3 rz(0, 0, 15);
+	auto rqx = QuaternionRotation(raxis, degree);
+	rx = Vector3Rotation(rx, rqx);
+
+
+	auto rqy = QuaternionRotation(raxis, degree);
+	ry = Vector3Rotation(ry, rqy);
+
+
 	auto rqz = QuaternionRotation(raxis, degree);
-	Orient = QuaternionMultiply(XMFLOAT4(ry.x, ry.y, ry.z, 0), rqz);
-	rz.x = Orient.x; rz.y = Orient.y, rz.z = Orient.z;
+	rz = Vector3Rotation(rz, rqz);
 
 	rco.SetPlane(rx, ry, rz);
 
@@ -3641,19 +3884,22 @@ BuildingObject::BuildingObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 	XMFLOAT3 raxis{ 0,1,0 };
 	//광선충돌 검사용 육면체
 	XMFLOAT3 rx(15, 0, 0);
-	auto rqx = QuaternionRotation(raxis, degree);
-	Orient = QuaternionMultiply(XMFLOAT4(rx.x, rx.y, rx.z, 0), rqx);
-	rx.x = Orient.x; rx.y = Orient.y, rx.z = Orient.z;
+	
 
 	XMFLOAT3 ry(0, 35, 0);
-	auto rqy = QuaternionRotation(raxis, degree);
-	Orient = QuaternionMultiply(XMFLOAT4(ry.x, ry.y, ry.z, 0), rqy);
-	ry.x = Orient.x; ry.y = Orient.y, ry.z = Orient.z;
+	
 
 	XMFLOAT3 rz(0, 0, 15);
+	auto rqx = QuaternionRotation(raxis, degree);
+	rx = Vector3Rotation(rx, rqx);
+
+
+	auto rqy = QuaternionRotation(raxis, degree);
+	ry = Vector3Rotation(ry, rqy);
+
+
 	auto rqz = QuaternionRotation(raxis, degree);
-	Orient = QuaternionMultiply(XMFLOAT4(ry.x, ry.y, ry.z, 0), rqz);
-	rz.x = Orient.x; rz.y = Orient.y, rz.z = Orient.z;
+	rz = Vector3Rotation(rz, rqz);
 
 	rco.SetPlane(rx, ry, rz);
 
@@ -4936,19 +5182,13 @@ Floor2Object::Floor2Object(ID3D12Device * m_Device, ID3D12GraphicsCommandList * 
 	XMFLOAT3 raxis{ 0,1,0 };
 	//광선충돌 검사용 육면체
 	XMFLOAT3 rx(90, 0, 0);
-	auto rqx = QuaternionRotation(raxis, MMPE_PI*0.25);
-	Orient = QuaternionMultiply(XMFLOAT4(rx.x, rx.y, rx.z, 0), rqx);
-	rx.x = Orient.x; rx.y = Orient.y, rx.z = Orient.z;
+
 
 	XMFLOAT3 ry(0, 0.5f, 0);
-	auto rqy = QuaternionRotation(raxis, MMPE_PI*0.25);
-	Orient = QuaternionMultiply(XMFLOAT4(ry.x, ry.y, ry.z, 0), rqy);
-	ry.x = Orient.x; ry.y = Orient.y, ry.z = Orient.z;
+	
 
 	XMFLOAT3 rz(0, 0, 90);
-	auto rqz = QuaternionRotation(raxis, MMPE_PI*0.25);
-	Orient = QuaternionMultiply(XMFLOAT4(ry.x, ry.y, ry.z, 0), rqz);
-	rz.x = Orient.x; rz.y = Orient.y, rz.z = Orient.z;
+	
 
 	rco.SetPlane(rx, ry, rz);
 
@@ -5038,19 +5278,22 @@ BreakCartObject::BreakCartObject(ID3D12Device * m_Device, ID3D12GraphicsCommandL
 	XMFLOAT3 raxis{ 0,1,0 };
 	//광선충돌 검사용 육면체
 	XMFLOAT3 rx(15, 0, 0);
-	auto rqx = QuaternionRotation(raxis, degree);
-	Orient = QuaternionMultiply(XMFLOAT4(rx.x, rx.y, rx.z, 0), rqx);
-	rx.x = Orient.x; rx.y = Orient.y, rx.z = Orient.z;
+	
 
 	XMFLOAT3 ry(0, 8, 0);
-	auto rqy = QuaternionRotation(raxis, degree);
-	Orient = QuaternionMultiply(XMFLOAT4(ry.x, ry.y, ry.z, 0), rqy);
-	ry.x = Orient.x; ry.y = Orient.y, ry.z = Orient.z;
+	
 
 	XMFLOAT3 rz(0, 0, 15);
+	auto rqx = QuaternionRotation(raxis, degree);
+	rx = Vector3Rotation(rx, rqx);
+
+
+	auto rqy = QuaternionRotation(raxis, degree);
+	ry = Vector3Rotation(ry, rqy);
+
+
 	auto rqz = QuaternionRotation(raxis, degree);
-	Orient = QuaternionMultiply(XMFLOAT4(ry.x, ry.y, ry.z, 0), rqz);
-	rz.x = Orient.x; rz.y = Orient.y, rz.z = Orient.z;
+	rz = Vector3Rotation(rz, rqz);
 
 	rco.SetPlane(rx, ry, rz);
 
@@ -5432,9 +5675,26 @@ void MeteorObject::Collision(list<CGameObject*>* collist, float DeltaTime)
 				//1. 먼저 데미지를 준다.
 				(*i)->ToDamage(gamedata.Damage);
 
+				bool isboss = false;
+
 				//2. 보스몬스터면 총알방햐을 보도록함.
 				if ((*i)->gamedata.MAXHP > 1000)//보스몬스터면 총알 방향으로 오도록해야함.
+				{
 					((ImpObject*)*i)->fsm->aidata.LastPosition = this->CenterPos;
+					isboss = true;
+				}
+
+				//만약 상대가 죽었다면 점수를 추가한다.
+				if ((*i)->gamedata.HP <= 0)
+				{
+					if (((CCubeManObject*)Master)->player != NULL)
+					{
+						if (isboss)
+							((CCubeManObject*)Master)->player->pointrank.Point += 100;
+						else
+							((CCubeManObject*)Master)->player->pointrank.Point += 10;
+					}
+				}
 
 				XMFLOAT3 cn;
 				//고정된 물체가 아니면
@@ -5631,6 +5891,29 @@ void HammerBullet::Collision(list<CGameObject*>* collist, float DeltaTime)
 					//1. 먼저 데미지를 준다.
 
 					(*i)->ToDamage(gamedata.Damage);
+		
+					bool isboss = false;
+
+					//2. 보스몬스터면 총알방햐을 보도록함.
+					if ((*i)->gamedata.MAXHP > 1000)//보스몬스터면 총알 방향으로 오도록해야함.
+					{
+						((ImpObject*)*i)->fsm->aidata.LastPosition = this->CenterPos;
+						isboss = true;
+					}
+
+					//만약 상대가 죽었다면 점수를 추가한다.
+					if ((*i)->gamedata.HP <= 0)
+					{
+						if (((CCubeManObject*)Master)->player != NULL)
+						{
+							if (isboss)
+								((CCubeManObject*)Master)->player->pointrank.Point += 100;
+							else
+								((CCubeManObject*)Master)->player->pointrank.Point += 10;
+						}
+					}
+
+					
 					//해머는 다이나믹오브젝트랑 충돌시 재생성된다.
 					if (Count > 0)
 					{

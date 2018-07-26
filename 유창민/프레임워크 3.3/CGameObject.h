@@ -20,7 +20,7 @@ enum Obj_State
 	Particle,
 	Bullet,
 	Rigid,
-	UI
+	UI,test
 };
 
 enum Ani_State 
@@ -218,6 +218,26 @@ public:
 
 };
 
+class Rank1Object : public CGameObject
+{
+public:
+	Rank1Object(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, CGameObject* master, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
+	CGameObject* Master = NULL;//소유자
+public:
+	static bool CreateMesh;//최초로 false며 메쉬를 만든후 true가된다.
+	static unordered_map<string, unique_ptr<CTexture>> Textures;//텍스처들을 저장함
+	static CMesh Mesh;//오로지 한번만 만들어짐
+	static ComPtr<ID3D12DescriptorHeap> SrvDescriptorHeap;//텍스처 용 힙
+
+public:
+	virtual void SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist);//셋메시는 메시를 최종적으로 생성한다. 즉 메시를구성하는 정점과 삼각형을구성하는인덱스버퍼생성
+	virtual void Tick(const GameTimer& gt);
+	virtual void Render(ID3D12GraphicsCommandList* commandlist, const GameTimer& gt);
+	virtual void Collision(list<CGameObject*>* collist, float DeltaTime) {}
+
+
+};
+
 class DiceObject : public CGameObject
 {
 public:
@@ -251,7 +271,7 @@ public:
 
 class ShieldArmor;
 class ShadowObject;
-
+class CPlayer;
 //============ 캐릭터 ==========//
 class CCubeManObject : public CGameObject
 {
@@ -261,6 +281,8 @@ public:
 	BarObject* Hpbar = NULL;
 	BarFrameObject* HPFrame = NULL;
 	ShadowObject* s = NULL;
+	Rank1Object* Rank1 = NULL;
+
 	int select = 0;
 	float reviveTime = 5.0f;
 
@@ -271,7 +293,8 @@ public:
 	static CMesh Mesh;//오로지 한번만 만들어짐
 	static std::vector<ModelAnimation> animations;//애니메이션 데이터 저장. 메쉬와 이거,텍스처는 한번만생성해서 공유하도록해야됨
 	static ComPtr<ID3D12DescriptorHeap> SrvDescriptorHeap ;//텍스처 용 힙
-		
+	CPlayer* player=NULL;
+
 	virtual void ToDead();
 public:
 	virtual void SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist);//셋메시는 메시를 최종적으로 생성한다. 즉 메시를구성하는 정점과 삼각형을구성하는인덱스버퍼생성
