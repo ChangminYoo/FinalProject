@@ -201,8 +201,10 @@ void CPlayer::PlayerCameraReLocate()//카메라 위치를 재설정한다.
 void CPlayer::SetPlayer(CGameObject * obj)
 {
 	PlayerObject = obj;
+	((CCubeManObject*)obj)->player = this;
 	PlayerCameraReLocate();
-
+	pointrank.Rank = 1;
+	pointrank.Point = 40;
 }
 
 //여기서 중요한점은 키보드 누른 즉시 충돌검사를 한번 해줘야한다.
@@ -541,6 +543,46 @@ void CPlayer::Tick(float DeltaTime)
 			skilldata.isSkillOn[i] = true;
 		}
 	}
+
+	if (pointrank.Rank == 1 && pointrank.Point>=50)
+	{
+		if (pointrank.Init == false)
+		{
+			pointrank.TopMode = true;
+			PlayerObject->ObjData.Scale = 4;
+			XMFLOAT3 rx(4, 0, 0);
+			XMFLOAT3 ry(0, 13, 0);
+			XMFLOAT3 rz(0, 0, 4);
+			PlayerObject->rco.SetPlane(rx, ry, rz);
+			PlayerObject->pp->SetHalfBox(4, 13, 4);//충돌 박스의 x,y,z 크기
+			((CCubeManObject*)PlayerObject)->s->ObjData.Scale = 3.0f;
+			((CCubeManObject*)PlayerObject)->Hpbar->YPos = 16;
+			((CCubeManObject*)PlayerObject)->HPFrame->YPos = 16;
+			PlayerObject->gamedata.MAXHP = 1000;
+			PlayerObject->gamedata.Speed = 75;
+			PlayerObject->gamedata.HP = PlayerObject->gamedata.HP + 800;
+			pointrank.Init = true;
+		}
+	}
+	else
+	{
+		if (pointrank.TopMode == true)
+		{
+			pointrank.Init = false;
+			pointrank.TopMode = false;
+			PlayerObject->ObjData.Scale = 3;
+			XMFLOAT3 rx(3, 0, 0);
+			XMFLOAT3 ry(0, 10, 0);
+			XMFLOAT3 rz(0, 0, 3);
+			PlayerObject->rco.SetPlane(rx, ry, rz);
+			PlayerObject->gamedata.Speed = 50;
+			PlayerObject->pp->SetHalfBox(3, 10, 3);//충돌 박스의 x,y,z 크기
+			((CCubeManObject*)PlayerObject)->s->ObjData.Scale = 2.0f;
+			((CCubeManObject*)PlayerObject)->Hpbar->YPos = 10;
+			((CCubeManObject*)PlayerObject)->HPFrame->YPos = 10;
+		}
+	}
+
 
 }
 

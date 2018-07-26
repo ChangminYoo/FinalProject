@@ -1,5 +1,6 @@
 #include "CGameObject.h"
 #include"FSM.h"
+#include"CPlayer.h"
 extern UINT CbvSrvDescriptorSize;
 
 
@@ -755,9 +756,28 @@ void BulletCube::Collision(list<CGameObject*>* collist, float DeltaTime)
 				//1. 먼저 데미지를 준다.
 				(*i)->ToDamage(gamedata.Damage);
 
+				bool isboss = false;
+			
 				//2. 보스몬스터면 총알방햐을 보도록함.
 				if ((*i)->gamedata.MAXHP > 1000)//보스몬스터면 총알 방향으로 오도록해야함.
+				{
 					((ImpObject*)*i)->fsm->aidata.LastPosition = this->CenterPos;
+					isboss = true;
+				}
+
+				//만약 상대가 죽었다면 점수를 추가한다.
+				if ((*i)->gamedata.HP <= 0)
+				{
+					if (((CCubeManObject*)Master)->player != NULL)
+					{
+						if (isboss)
+							((CCubeManObject*)Master)->player->pointrank.Point += 100;
+						else
+							((CCubeManObject*)Master)->player->pointrank.Point += 10;
+					}
+				}
+
+
 
 				XMFLOAT3 cn;
 				//고정된 물체가 아니면
@@ -950,8 +970,27 @@ void HeavyBulletCube::Collision(list<CGameObject*>* collist, float DeltaTime)
 
 				//1. 먼저 데미지를 준다.
 				(*i)->ToDamage(gamedata.Damage);
-				if ((*i)->gamedata.MAXHP > 1000)//보스몬스터면
+				bool isboss = false;
+			
+				//2. 보스몬스터면 총알방햐을 보도록함.
+				if ((*i)->gamedata.MAXHP > 1000)//보스몬스터면 총알 방향으로 오도록해야함.
+				{
 					((ImpObject*)*i)->fsm->aidata.LastPosition = this->CenterPos;
+					isboss = true;
+				}
+
+				//만약 상대가 죽었다면 점수를 추가한다.
+				if ((*i)->gamedata.HP <= 0)
+				{
+					if (((CCubeManObject*)Master)->player != NULL)
+					{
+						if (isboss)
+							((CCubeManObject*)Master)->player->pointrank.Point += 100;
+						else
+							((CCubeManObject*)Master)->player->pointrank.Point += 10;
+					}
+				}
+
 				XMFLOAT3 cn;
 				//고정된 물체가 아니면
 				if ((*i)->staticobject == false)
@@ -1134,6 +1173,26 @@ void Tetris1::Collision(list<CGameObject*>* collist, float DeltaTime)
 				//1. 먼저 데미지를 준다.
 				(*i)->ToDamage(gamedata.Damage);
 
+				bool isboss = false;
+
+				//2. 보스몬스터면 총알방햐을 보도록함.
+				if ((*i)->gamedata.MAXHP > 1000)//보스몬스터면 총알 방향으로 오도록해야함.
+				{
+					((ImpObject*)*i)->fsm->aidata.LastPosition = this->CenterPos;
+					isboss = true;
+				}
+
+				//만약 상대가 죽었다면 점수를 추가한다.
+				if ((*i)->gamedata.HP <= 0)
+				{
+					if (((CCubeManObject*)Master)->player != NULL)
+					{
+						if (isboss)
+							((CCubeManObject*)Master)->player->pointrank.Point += 100;
+						else
+							((CCubeManObject*)Master)->player->pointrank.Point += 10;
+					}
+				}
 
 				XMFLOAT3 cn;
 				//고정된 물체가 아니면
@@ -1312,6 +1371,26 @@ void Tetris2::Collision(list<CGameObject*>* collist, float DeltaTime)
 				//1. 먼저 데미지를 준다.
 				(*i)->ToDamage(gamedata.Damage);
 
+				bool isboss = false;
+
+				//2. 보스몬스터면 총알방햐을 보도록함.
+				if ((*i)->gamedata.MAXHP > 1000)//보스몬스터면 총알 방향으로 오도록해야함.
+				{
+					((ImpObject*)*i)->fsm->aidata.LastPosition = this->CenterPos;
+					isboss = true;
+				}
+
+				//만약 상대가 죽었다면 점수를 추가한다.
+				if ((*i)->gamedata.HP <= 0)
+				{
+					if (((CCubeManObject*)Master)->player != NULL)
+					{
+						if (isboss)
+							((CCubeManObject*)Master)->player->pointrank.Point += 100;
+						else
+							((CCubeManObject*)Master)->player->pointrank.Point += 10;
+					}
+				}
 
 				XMFLOAT3 cn;
 				//고정된 물체가 아니면
@@ -1490,6 +1569,27 @@ void Tetris3::Collision(list<CGameObject*>* collist, float DeltaTime)
 				//1. 먼저 데미지를 준다.
 				(*i)->ToDamage(gamedata.Damage);
 
+				bool isboss = false;
+
+				//2. 보스몬스터면 총알방햐을 보도록함.
+				if ((*i)->gamedata.MAXHP > 1000)//보스몬스터면 총알 방향으로 오도록해야함.
+				{
+					((ImpObject*)*i)->fsm->aidata.LastPosition = this->CenterPos;
+					isboss = true;
+				}
+
+				//만약 상대가 죽었다면 점수를 추가한다.
+				if ((*i)->gamedata.HP <= 0)
+				{
+					if (((CCubeManObject*)Master)->player != NULL)
+					{
+						if (isboss)
+							((CCubeManObject*)Master)->player->pointrank.Point += 100;
+						else
+							((CCubeManObject*)Master)->player->pointrank.Point += 10;
+					}
+				}
+
 
 				XMFLOAT3 cn;
 				//고정된 물체가 아니면
@@ -1665,6 +1765,26 @@ void Tetris4::Collision(list<CGameObject*>* collist, float DeltaTime)
 			{
 				//1. 먼저 데미지를 준다.
 				(*i)->ToDamage(gamedata.Damage);
+				bool isboss = false;
+
+				//2. 보스몬스터면 총알방햐을 보도록함.
+				if ((*i)->gamedata.MAXHP > 1000)//보스몬스터면 총알 방향으로 오도록해야함.
+				{
+					((ImpObject*)*i)->fsm->aidata.LastPosition = this->CenterPos;
+					isboss = true;
+				}
+
+				//만약 상대가 죽었다면 점수를 추가한다.
+				if ((*i)->gamedata.HP <= 0)
+				{
+					if (((CCubeManObject*)Master)->player != NULL)
+					{
+						if (isboss)
+							((CCubeManObject*)Master)->player->pointrank.Point += 100;
+						else
+							((CCubeManObject*)Master)->player->pointrank.Point += 10;
+					}
+				}
 
 
 				XMFLOAT3 cn;
@@ -2020,6 +2140,26 @@ void DiceStrike::Collision(list<CGameObject*>* collist, float DeltaTime)
 				//1. 먼저 데미지를 준다.
 				(*i)->ToDamage(gamedata.Damage);
 
+				bool isboss = false;
+
+				//2. 보스몬스터면 총알방햐을 보도록함.
+				if ((*i)->gamedata.MAXHP > 1000)//보스몬스터면 총알 방향으로 오도록해야함.
+				{
+					((ImpObject*)*i)->fsm->aidata.LastPosition = this->CenterPos;
+					isboss = true;
+				}
+
+				//만약 상대가 죽었다면 점수를 추가한다.
+				if ((*i)->gamedata.HP <= 0)
+				{
+					if (((CCubeManObject*)Master)->player != NULL)
+					{
+						if (isboss)
+							((CCubeManObject*)Master)->player->pointrank.Point += 100;
+						else
+							((CCubeManObject*)Master)->player->pointrank.Point += 10;
+					}
+				}
 
 				XMFLOAT3 cn;
 				//고정된 물체가 아니면
@@ -5441,9 +5581,26 @@ void MeteorObject::Collision(list<CGameObject*>* collist, float DeltaTime)
 				//1. 먼저 데미지를 준다.
 				(*i)->ToDamage(gamedata.Damage);
 
+				bool isboss = false;
+
 				//2. 보스몬스터면 총알방햐을 보도록함.
 				if ((*i)->gamedata.MAXHP > 1000)//보스몬스터면 총알 방향으로 오도록해야함.
+				{
 					((ImpObject*)*i)->fsm->aidata.LastPosition = this->CenterPos;
+					isboss = true;
+				}
+
+				//만약 상대가 죽었다면 점수를 추가한다.
+				if ((*i)->gamedata.HP <= 0)
+				{
+					if (((CCubeManObject*)Master)->player != NULL)
+					{
+						if (isboss)
+							((CCubeManObject*)Master)->player->pointrank.Point += 100;
+						else
+							((CCubeManObject*)Master)->player->pointrank.Point += 10;
+					}
+				}
 
 				XMFLOAT3 cn;
 				//고정된 물체가 아니면
@@ -5640,6 +5797,29 @@ void HammerBullet::Collision(list<CGameObject*>* collist, float DeltaTime)
 					//1. 먼저 데미지를 준다.
 
 					(*i)->ToDamage(gamedata.Damage);
+		
+					bool isboss = false;
+
+					//2. 보스몬스터면 총알방햐을 보도록함.
+					if ((*i)->gamedata.MAXHP > 1000)//보스몬스터면 총알 방향으로 오도록해야함.
+					{
+						((ImpObject*)*i)->fsm->aidata.LastPosition = this->CenterPos;
+						isboss = true;
+					}
+
+					//만약 상대가 죽었다면 점수를 추가한다.
+					if ((*i)->gamedata.HP <= 0)
+					{
+						if (((CCubeManObject*)Master)->player != NULL)
+						{
+							if (isboss)
+								((CCubeManObject*)Master)->player->pointrank.Point += 100;
+							else
+								((CCubeManObject*)Master)->player->pointrank.Point += 10;
+						}
+					}
+
+					
 					//해머는 다이나믹오브젝트랑 충돌시 재생성된다.
 					if (Count > 0)
 					{
