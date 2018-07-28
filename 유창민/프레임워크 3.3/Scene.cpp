@@ -41,6 +41,8 @@ Scene::~Scene()
 		delete AimUI;
 	if (BackGround != NULL)
 		delete BackGround;
+	if (CharacterSelect != NULL)
+		delete CharacterSelect;
 	for (int i = 0; i < 4; i++)
 		if (SkillFrameUI[i] != NULL)
 			delete SkillFrameUI[i];
@@ -117,12 +119,71 @@ void Scene::SceneState()
 {
 	if (GAMESTATE == GS_START)//시작시 생성자에서 UI등 기본적인것은 거기서 로드함.
 	{
-		if (GetAsyncKeyState(VK_SPACE) & 0x8000&&GetFocus())
+		if (GetAsyncKeyState(VK_SPACE) & 0x8000 && GetFocus())
 		{
-			
 			SetGameState(GS_LOAD);
 		}
 
+		else if (GetAsyncKeyState(0x31) & 0x8000 && GetFocus())
+		{
+			CharacterSelect->CenterPos.x = -320;
+			CharacterSelect->CenterPos.y = 0;
+			CharacterSelect->ObjData.CustomData1.z = 1;
+		}
+		else if (GetAsyncKeyState(0x32) & 0x8000 && GetFocus())
+		{
+			CharacterSelect->CenterPos.x = -160;
+			CharacterSelect->CenterPos.y = 0;
+			CharacterSelect->ObjData.CustomData1.z = 2;
+		}
+		else if (GetAsyncKeyState(0x33) & 0x8000 && GetFocus())
+		{
+			CharacterSelect->CenterPos.x = 0;
+			CharacterSelect->CenterPos.y = 0;
+			CharacterSelect->ObjData.CustomData1.z = 3;
+		}
+		else if (GetAsyncKeyState(0x34) & 0x8000 && GetFocus())
+		{
+			CharacterSelect->CenterPos.x = 160;
+			CharacterSelect->CenterPos.y = 0;
+			CharacterSelect->ObjData.CustomData1.z = 4;
+		}
+		else if (GetAsyncKeyState(0x35) & 0x8000 && GetFocus())
+		{
+			CharacterSelect->CenterPos.x = 320;
+			CharacterSelect->CenterPos.y = 0;
+			CharacterSelect->ObjData.CustomData1.z = 5;
+		}
+		else if (GetAsyncKeyState(0x36) & 0x8000 && GetFocus())
+		{
+			CharacterSelect->CenterPos.x = -320;
+			CharacterSelect->CenterPos.y = -200;
+			CharacterSelect->ObjData.CustomData1.z = 6;
+		}
+		else if (GetAsyncKeyState(0x37) & 0x8000 && GetFocus())
+		{
+			CharacterSelect->CenterPos.x = -160;
+			CharacterSelect->CenterPos.y = -200;
+			CharacterSelect->ObjData.CustomData1.z = 7;
+		}
+		else if (GetAsyncKeyState(0x38) & 0x8000 && GetFocus())
+		{
+			CharacterSelect->CenterPos.x = 0;
+			CharacterSelect->CenterPos.y = -200;
+			CharacterSelect->ObjData.CustomData1.z = 8;
+		}
+		else if (GetAsyncKeyState(0x39) & 0x8000 && GetFocus())
+		{
+			CharacterSelect->CenterPos.x = 160;
+			CharacterSelect->CenterPos.y = -200;
+			CharacterSelect->ObjData.CustomData1.z = 9;
+		}
+		else if (GetAsyncKeyState(0x30) & 0x8000 && GetFocus())
+		{
+			CharacterSelect->CenterPos.x = 320;
+			CharacterSelect->CenterPos.y = -200;
+			CharacterSelect->ObjData.CustomData1.z = 10;
+		}
 	}
 	else if (GAMESTATE == GS_LOAD)
 	{
@@ -495,6 +556,8 @@ void Scene::CreateUI()
 	
 	BackGround = new BackGroundObject(device, commandlist, NULL, NULL, XMFLOAT4(0, 0,0,0));
 
+	CharacterSelect = new CharacterSelectObject(device, commandlist, NULL, NULL, XMFLOAT4(0, 0, 0, 0));
+
 	SelectBar = new SelectBarObject(device, commandlist, NULL, NULL, XMFLOAT4(0 * 100 - 150, 0.9*-mHeight / 2, 0, 0));
 
 	
@@ -618,6 +681,7 @@ void Scene::Render(const GameTimer& gt)
 			{
 				Player->Camera.UpdateConstantBufferOrtho(commandlist);
 				Shaders->SetBillboardShader(commandlist);
+				CharacterSelect->Render(commandlist, gt);
 				BackGround->Render(commandlist, gt);
 				Player->Camera.UpdateConstantBuffer(commandlist);
 			}
