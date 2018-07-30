@@ -30,7 +30,8 @@ public:
 	void StaticObjectLoop();
 
 public:
-	virtual void AfterGravitySystem(double deltime) override;		//static object는 gravitysystem x // tick x
+	//static object는 gravitysystem x // tick x
+	//static object는 aftergravitysystem만 존재
 	
 };
 
@@ -47,16 +48,12 @@ public:
 	virtual void AfterGravitySystem(double deltime) override;
 	virtual void Tick(double deltime) override;
 
-	void SetUpdatedRigidybodyObject();
 	void Collision(unordered_set<RigidCubeObject*>* rbobjs, double deltime);
 	void Collision(unordered_set<CStaticObject*>* sobjs, double deltime);
 	void Collision(vector<CPlayerObject*>* clients, double deltime);
 	void Collision(list<CBulletObject*>* bullets, double deltime);
 
-	//void Collision(vector<CPlayerObject*>* clients, double deltime);
-	//void Collision(unordered_set<CStaticObject*>* sobjs, double deltime);
-	//void Collision(list<CBulletObject*>* bullets, double deltime);
-
+	void SetUpdatedRigidybodyObject();
 };
 
 class NormalBoxObject : public CStaticObject

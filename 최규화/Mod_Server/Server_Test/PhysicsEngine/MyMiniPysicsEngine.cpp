@@ -1018,13 +1018,13 @@ MiniPhysicsEngineG9::RigidBody::~RigidBody()
 
 void MiniPhysicsEngineG9::RigidBody::integrate(double DeltaTime)
 {
+	//DeltaTime = 1.0;
+
 	//질량이 0 이하면 벽같은 것이므로 움직일 필요가 없다.
 	if (InverseMass <= 0.0f)
 		return;
 
 	assert(DeltaTime >= 0.0);
-
-	
 
 	XMVECTOR centerpos = XMLoadFloat4(CenterPos);
 

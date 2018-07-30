@@ -23,7 +23,6 @@ void CPhysicEngineWorker::Update()
 
 		// 0.00000028
 		//2838 
-		//for (auto rigidbody : )
 	
 		if (!g_clients.empty())
 		{
@@ -39,35 +38,46 @@ void CPhysicEngineWorker::Update()
 				//cout << "PosX: " << client->m_pdata.pos.x << "PosY: " << client->m_pdata.pos.y << "PosZ: " << client->m_pdata.pos.z << "\n";
 			}
 		}
+		
+		for (auto npc_monster : g_npcs)
+		{
+			if (!npc_monster->GetAlive()) continue;
+
+			npc_monster->GravitySystem(m_deltime);
+			npc_monster->Tick(m_deltime);
+			npc_monster->AfterGravitySystem(m_deltime);
+
+			npc_monster->UpdateLookvector();
+			npc_monster->UpdateUpvector();
+
+			npc_monster->SetMyBasicPacketData();
+		}
+
 	
 		for (auto rigid : g_rigidobjs)
 		{
 			rigid->GravitySystem(m_deltime);
-
 			//cout << "PosX: " << rigid->GetCenterPos4f().x << "PosY: " << rigid->GetCenterPos4f().y << "PosZ: " << rigid->GetCenterPos4f().z << "PosW: " << rigid->GetCenterPos4f().w << "\n";
 
 			rigid->Tick(m_deltime);
-
 			//cout << "PosX: " << rigid->GetCenterPos4f().x << "PosY: " << rigid->GetCenterPos4f().y << "PosZ: " << rigid->GetCenterPos4f().z << "PosW: " << rigid->GetCenterPos4f().w << "\n";
+			
 			rigid->AfterGravitySystem(m_deltime);
-
 			//cout << "PosX: " << rigid->GetCenterPos4f().x << "PosY: " << rigid->GetCenterPos4f().y << "PosZ: " << rigid->GetCenterPos4f().z << "PosW: " << rigid->GetCenterPos4f().w << "\n";
 
 			rigid->UpdateLookvector();
 			rigid->UpdateUpvector();
 
 			rigid->SetUpdatedRigidybodyObject();
-
 			//cout << "PosX: " << rigid->GetCenterPos4f().x << "PosY: " << rigid->GetCenterPos4f().y << "PosZ: " << rigid->GetCenterPos4f().z << "PosW: " << rigid->GetCenterPos4f().w << "\n";
 		}
 		
 		for (auto bullet : g_bullets)
 		{
-			if (bullet->GetBulletIsAlive() == true)
-			{
-				bullet->Tick(m_deltime);
-				bullet->AfterGravitySystem();
-			}
+			if (!bullet->GetBulletIsAlive()) continue;
+
+			bullet->Tick(m_deltime);
+			bullet->AfterGravitySystem();
 
 			//cout << "Bullet ID: " << bullet->GetBulletID() << "Bullet MID: " << bullet->GetBulletMasterID() <<
 			//	"Position: " << bullet->m_bulldata.pos4f.x << ", " << bullet->m_bulldata.pos4f.y << ", " << bullet->m_bulldata.pos4f.z <<
@@ -75,32 +85,50 @@ void CPhysicEngineWorker::Update()
 		   
 		}
 		
-	
-
-
 		CollisionSystem(m_deltime);
 
-		
 		// alive 가 false인 오브젝트들 지워주기 	
 		for (auto iter = g_bullets.begin(); iter != g_bullets.end();)
 		{
 			if ((*iter)->GetBulletIsAlive() == false)
 			{			
-				STC_Attack stc_attack;	
-				stc_attack.bull_data.pos4f = (*iter)->m_bulldata.pos4f;
-				stc_attack.bull_data.rot4f = (*iter)->m_bulldata.rot4f;
-				stc_attack.bull_data.endpoint = (*iter)->m_bulldata.endpoint;
-				stc_attack.bull_data.master_id = (*iter)->m_bulldata.master_id;
-				stc_attack.bull_data.my_id = (*iter)->m_bulldata.my_id;
-				stc_attack.bull_data.type = (*iter)->m_bulldata.type;
-				stc_attack.bull_data.alive = (*iter)->m_bulldata.alive;
+				//서버->클라 불렛 구조체 
+				STC_BulletObject_Info stc_bullet;
+				stc_bullet.pos4f = (*iter)->m_bulldata.pos4f;
+				stc_bullet.rot4f = (*iter)->m_bulldata.rot4f;
+				stc_bullet.endpoint = (*iter)->m_bulldata.endpoint;
+				stc_bullet.master_id = (*iter)->m_bulldata.master_id;
+				stc_bullet.my_id = (*iter)->m_bulldata.my_id;
+				stc_bullet.type = (*iter)->m_bulldata.type;
+				stc_bullet.alive = (*iter)->m_bulldata.alive;
+				stc_bullet.degree = (*iter)->m_bulldata.degree;
+				//
 
-				iter = g_bullets.erase(iter);
-
-				for (auto client : g_clients)
+				if ((*iter)->m_bulldata.type == protocol_DiceBullet)
 				{
-					client->SendPacket(reinterpret_cast<Packet*>(&stc_attack));
+					STC_SKILL_DICESTRIKE stc_skill_dicestrike;
+					stc_skill_dicestrike.bull_data = move(stc_bullet);
+					stc_skill_dicestrike.is_first = (*iter)->GetIsFirstBullet();
+					stc_skill_dicestrike.lookvector = (*iter)->GetDicestrikeOffLookvector();
+
+					for (auto client : g_clients)
+					{
+						client->SendPacket(reinterpret_cast<Packet*>(&stc_skill_dicestrike));
+					}
 				}
+				else
+				{
+					STC_Attack stc_attack;
+					stc_attack.bull_data = move(stc_bullet);
+					stc_attack.is_first = (*iter)->GetIsFirstBullet();
+
+					for (auto client : g_clients)
+					{
+						client->SendPacket(reinterpret_cast<Packet*>(&stc_attack));
+					}
+				}
+	
+				iter = g_bullets.erase(iter);
 			}
 			else
 			{
@@ -122,6 +150,14 @@ void CPhysicEngineWorker::CollisionSystem(double deltime)
 		}
 	}
 
+	for (auto npc_monster : g_npcs)
+	{
+		if (!npc_monster->GetAlive()) continue;
+
+		npc_monster->Collision(&g_clients, deltime);
+		npc_monster->Collision(&g_staticobjs, deltime);
+	}
+
 	for (auto rigid : g_rigidobjs)
 	{
 		rigid->Collision(&g_rigidobjs, deltime);
@@ -139,8 +175,6 @@ void CPhysicEngineWorker::CollisionSystem(double deltime)
 		}
 	}
 	
-
-
 }
 
 

@@ -1,9 +1,11 @@
 #pragma once
 
 #define SERVERPORT 31400
-#define MAX_PLAYER 10
-#define MAX_MONSTER_TYPE 3
-#define MAX_MONSTER_NUM 5
+#define MAX_PLAYER 2
+
+#define MAX_NPC_MONSTER_TYPE 1
+#define MAX_IMP_NUM 1
+#define MAX_NPC_MONSTER_NUM (MAX_IMP_NUM)
 
 #define DISCONNECTED 0
 #define CONNECTED 1
@@ -13,7 +15,16 @@
 #define KEYINPUT_UP 0x0001
 #define KEYINPUT_DOWN 0x0010
 
+#define SKILL_LIGHTBULLET_COOLTIME 0.6
+#define SKILL_HEAVYBULLET_COOLTIME 1.1
+#define SKILL_TETRIKE_COOLTIME 25.0
+#define SKILL_DICESTRIKE_COOLTIME 5.0
+
 #define SKILL_SHIELD_OP_TIME 5.0
+#define SKILL_SHIELD_COOLTIME 20.0
+
+#define SKILL_WAVESHOCK_OP_TIME 0.085
+#define SKILL_WAVESHOCK_COOLTIME 20.0
 
 #define RegularPacketExchangeTime  (1.0 / 20.0) // 1초에 20번 패킷을 교환(morpg 형식)
 
@@ -28,6 +39,7 @@ enum PACKET_PROTOCOL_TYPE
 	// 캐릭터 정보 초기화
 	INIT_CLIENT,
 	INIT_OTHER_CLIENT,
+	INIT_NPC,
 
 	// 캐릭터 좌표 및 방향전환
 	PLAYER_MOVE,
@@ -41,9 +53,13 @@ enum PACKET_PROTOCOL_TYPE
 	STATIC_OBJECT,			//고정된 물체,
 	RIGIDBODY_OBJECT,		//물리효과가 적용된 물체
 	PLAYER_ANIMATION,
-	PLAYER_CURR_STATE,	//플레이어의 현재 상태(모든 정보 저장)
+
+	PLAYER_CURR_STATE,		//플레이어의 현재 상태(모든 정보 저장)
+	NPC_MONSTER_CURR_STATE, //몬스터 npc의 현재 상태(모든 정보 저장)
+
 	PLAYER_SKILL_SHIELD,
 	PLAYER_SKILL_WAVESHOCK,
+	PLAYER_SKILL_DICESTRIKE,
 	TEST					//테스트용 패킷
 };
 
@@ -63,7 +79,8 @@ enum Ani_State
 enum BULLET_TYPE
 {
 	protocol_LightBullet = 0,
-	protocol_HeavyBullet
+	protocol_HeavyBullet,
+	protocol_DiceBullet
 };
 
 enum INSTALLED_OBJECT_TYPE
@@ -81,10 +98,15 @@ enum OBJECT_TYPE
 {
 	PLAYER,
 	FIXED_OBJECT,
-	BULLET
+	BULLET,
+	NPC_MONSTER_IMP
 };
 
-enum MONSTERS { NO_MONSTER, MONSTER01, MONSTER02, MONSTER03 };
+enum NPC_MONSTER_TYPE
+{
+	IMP
+};
+
 enum PLAYERS { NO_PLAYER, LUNA, CMETRA, RONDO, DONALD };
 
 struct Time
@@ -158,25 +180,28 @@ struct StaticObject_Info
 struct CTS_BulletObject_Info
 {
 	Position					pos4f;					//16
-	Rotation					rot4f;			//16
+	Rotation					rot4f;					//16
 	Vel3f						vel3f;					//12
+	float						degree;					//4
+	Position3D					endpoint;				//12
 	unsigned short				master_id{ 0 };			//2
 	unsigned short				my_id;					//2
-	Position3D					endpoint;				//12
 	unsigned char				type;					//1
 	char						alive;					//1
 };
 
 struct STC_BulletObject_Info
 {
-	Position					pos4f;
-	Rotation					rot4f;
-	Position3D					endpoint;
-	unsigned short				master_id;
-	unsigned short				my_id;
-	unsigned char				type;
-	char						alive;
+	Position					pos4f;					//16
+	Rotation					rot4f;					//16
+	Position3D					endpoint;				//12
+	float						degree;					//4
+	unsigned short				master_id;				//2
+	unsigned short				my_id;					//2
+	unsigned char				type;					//1
+	char						alive;					//1
 };
+
 
 struct STC_SkillData
 {
@@ -212,6 +237,21 @@ struct Player_Data
 												//Player_LoginDB  LoginData;
 };
 // 18 + 16 + 2 + 1 + 1 + 1 + 1 + 16 = 58  pragma pack 할시
+
+struct Npc_Data
+{
+	Position		pos;						//16
+	Rotation		rot;		                //16
+	PlayerStatus    status;					    //11
+	unsigned short  id{ 0 };					//2
+	char			connect{ false };			//1
+	unsigned char	ani{ Ani_State::Idle };     //1
+	char			godmode{ false };			//1
+	char			airbone{ false };			//1
+	unsigned char	monster_type;				//1
+	char			alive;						//1
+};
+
 #pragma pack (pop)
 
 
@@ -226,7 +266,6 @@ typedef struct Server_To_Client_Player_Info
 
 }STC_SetMyClient;
 
-
 typedef struct Server_To_Client_Player_TO_Other_Player_Info
 {
 	unsigned char pack_size = sizeof(Player_Data) + sizeof(unsigned char) + sizeof(unsigned char);
@@ -234,6 +273,14 @@ typedef struct Server_To_Client_Player_TO_Other_Player_Info
 	Player_Data player_data;
 
 }STC_SetOtherClient;
+
+typedef struct Server_To_Client_NPC_Info
+{
+	unsigned char pack_size = sizeof(Npc_Data) + sizeof(unsigned char) + sizeof(unsigned char);
+	unsigned char pack_type = PACKET_PROTOCOL_TYPE::INIT_NPC;
+	Npc_Data npc_data;
+
+}STC_SetMyNPC;
 
 typedef struct Server_To_Client_Player_Disconnected_Info
 {
@@ -243,7 +290,6 @@ typedef struct Server_To_Client_Player_Disconnected_Info
 	unsigned short id;
 
 }STC_Disconnected;
-
 
 typedef struct Server_To_Client_Player_Position_Changed
 {
@@ -303,9 +349,10 @@ typedef struct Client_To_Server_Attack_Info
 
 typedef struct Server_To_Client_Attack_Info
 {
-	unsigned char pack_size = sizeof(STC_BulletObject_Info) + sizeof(unsigned char) + sizeof(unsigned char);
+	unsigned char pack_size = sizeof(STC_BulletObject_Info) + sizeof(unsigned char) + sizeof(unsigned char) + sizeof(char);
 	unsigned char pack_type = PACKET_PROTOCOL_TYPE::PLAYER_ATTACK;
 	STC_BulletObject_Info bull_data;
+	char		  is_first;
 
 }STC_Attack;
 
@@ -342,6 +389,13 @@ typedef struct Server_To_Client_Curr_PlayerState
 
 }STC_CharCurrState;
 
+typedef struct Server_To_Client_Curr_NpcMonsterState
+{
+	unsigned char packet_size = sizeof(Npc_Data) + sizeof(unsigned char) + sizeof(unsigned char);
+	unsigned char packet_type = PACKET_PROTOCOL_TYPE::NPC_MONSTER_CURR_STATE;
+	Npc_Data   npc_data;
+}STC_NpcMonsterCurrState;
+
 typedef struct Server_To_Client_Player_Test
 {
 	unsigned char packet_size = sizeof(Player_Data) + sizeof(unsigned char) + sizeof(unsigned char);
@@ -353,19 +407,58 @@ typedef struct Server_To_Client_Player_Test
 
 typedef struct Server_To_Client_Skill_Shield
 {
+	unsigned char packet_size = sizeof(STC_SkillData) + sizeof(double) + sizeof(unsigned char) + sizeof(unsigned char);
+	unsigned char packet_type = PACKET_PROTOCOL_TYPE::PLAYER_SKILL_SHIELD;
+	STC_SkillData skill_data;
+	double		  cooltime;
+
+}STC_SKILL_SHIELD;
+
+typedef struct Client_To_Server_Skill_Shield
+{
 	unsigned char packet_size = sizeof(STC_SkillData) + sizeof(unsigned char) + sizeof(unsigned char);
 	unsigned char packet_type = PACKET_PROTOCOL_TYPE::PLAYER_SKILL_SHIELD;
 	STC_SkillData skill_data;
 
-}STC_SKILL_SHIELD;
-
+}CTS_SKILL_SHIELD;
 
 typedef struct Server_To_Client_Skill_WaveShock
 {
-	unsigned char packet_size = sizeof(STC_SkillData) + sizeof(unsigned char) + sizeof(unsigned char);
+	unsigned char packet_size = sizeof(STC_SkillData) + sizeof(double) + sizeof(unsigned char) + sizeof(unsigned char) + sizeof(unsigned char);
 	unsigned char packet_type = PACKET_PROTOCOL_TYPE::PLAYER_SKILL_WAVESHOCK;
 	STC_SkillData skill_data;
+	double		  cooltime;
+	unsigned char texture_number;
 
 }STC_SKILL_WAVESHOCK;
+
+typedef struct Client_To_Server_Skill_WaveShock
+{
+	unsigned char packet_size = sizeof(STC_SkillData) + sizeof(unsigned char) + sizeof(unsigned char) + sizeof(unsigned char);
+	unsigned char packet_type = PACKET_PROTOCOL_TYPE::PLAYER_SKILL_WAVESHOCK;
+	STC_SkillData skill_data;
+	unsigned char texture_number;
+
+}CTS_SKILL_WAVESHOCK;
+
+typedef struct Server_To_Client_DiceSkillAttack_Info
+{
+	unsigned char pack_size = sizeof(STC_BulletObject_Info) + sizeof(Position3D) + sizeof(unsigned char) + sizeof(unsigned char) + sizeof(char);
+	unsigned char pack_type = PACKET_PROTOCOL_TYPE::PLAYER_SKILL_DICESTRIKE;
+	STC_BulletObject_Info bull_data;
+	Position3D	  lookvector;
+	char		  is_first;
+
+}STC_SKILL_DICESTRIKE;
+
+typedef struct Client_To_Server_DiceSkillAttack_Info
+{
+	unsigned char pack_size = sizeof(CTS_BulletObject_Info) + sizeof(Position3D) + sizeof(unsigned char) + sizeof(unsigned char) + sizeof(char);
+	unsigned char pack_type = PACKET_PROTOCOL_TYPE::PLAYER_SKILL_DICESTRIKE;
+	CTS_BulletObject_Info bull_data;
+	Position3D			  lookvector;
+	char				  is_firstdice;
+
+}CTS_SKILL_DICESTRIKE;
 
 #pragma pack (pop)

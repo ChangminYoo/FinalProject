@@ -464,6 +464,7 @@ void UpdateMD5Model(ID3D12GraphicsCommandList* m_DC, CMesh* MD5Model, CGameObjec
 	//토탈 타임과 커렌트타임으로 애니메이션을 분할하자.
 
 	obj->currAnimTime += deltaTime; //최근애니메이션시간 갱신 
+									//서버에서 다른 클라이언트에게 변경된 애니메이션 값을 줄 경우 해당 클라이언트의 currAnimTime을 0으로 초기화시켜야한다
 
 	if (obj->currAnimTime > av[animation].totalAnimTime)
 	{

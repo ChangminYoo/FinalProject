@@ -25,6 +25,9 @@
     <Filter Include="소스 파일\GameObject">
       <UniqueIdentifier>{b799c4c0-2a72-479c-9535-cac63e501e7e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\FSM">
+      <UniqueIdentifier>{6953308c-e4bf-42d3-bc2a-75399b1f88ba}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Timer\CTimerWorker.cpp">
@@ -60,8 +63,11 @@
     <ClCompile Include="CPhysicEngineWorker.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="GameObject\CSkillObject.cpp">
-      <Filter>소스 파일\GameObject</Filter>
+    <ClCompile Include="CNpcObject.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="FSM\FSM.cpp">
+      <Filter>소스 파일\FSM</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -104,8 +110,14 @@
     <ClInclude Include="CPhysicEngineWorker.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="GameObject\CSkillObject.h">
-      <Filter>소스 파일\GameObject</Filter>
+    <ClInclude Include="SkillInformation.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="CNpcObject.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="FSM\FSM.h">
+      <Filter>소스 파일\FSM</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

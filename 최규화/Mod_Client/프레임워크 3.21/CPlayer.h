@@ -68,6 +68,7 @@ public:
 	//¼­¹ö¿ë
 
 	void CreateOtherClientBullet(ID3D12Device* Device, ID3D12GraphicsCommandList* cl, Position3D& Goal, CGameObject* lock, list<CGameObject*>* bulletlist, STC_BulletObject_Info server_bulldata);
+	void CreateOtherClientDicestrikeSkill(ID3D12Device* Device, ID3D12GraphicsCommandList* cl, Position3D& Goal, CGameObject* lock, list<CGameObject*>* bulletlist, STC_BulletObject_Info server_bulldata, const XMFLOAT3& OffLookvector);
 
 	char		  curr_playerdir{ 0 };
 	bool		  m_right_flag{ false }, m_left_flag{ false }, m_up_flag{ false }, m_down_flag{ false };

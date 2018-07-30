@@ -24,25 +24,29 @@ const unsigned short PORT = 31400;
 #define MAX_BULLDING_NUM 3
 //#define MAX_RIGIDBODY_NUM 9
 #define MAX_RIGIDBODY_NUM 1
+
 #define MAX_TOTAL_STATIC_OBJECT (MAX_BOX_NUM + MAX_SMALL_WALL_NUM + MAX_BIG_WALL_NUM + MAX_BULLDING_NUM + MAX_RIGIDBODY_NUM)
 
 using namespace std;
 using namespace chrono;
 
+#include "SkillInformation.h"
 #include "PhysicsEngine\MyMiniPysicsEngine.h"
 #include "GameObject\CMonoObject.h"
+#include "CNpcObject.h"
+#include "FSM\FSM.h"
 #include "GameObject\CStaticObject.h"
 #include "CPLAYEROBJECT.H"
 #include "GameObject\CBulletObject.h"
 #include "Timer\CTimerWorker.h"
 #include "CAccpetPlayer.h"
 #include "CPhysicEngineWorker.h"
-#include "GameObject/CSkillObject.h"
 
 extern CTimerWorker g_timer_queue;
 extern CPhysicEngineWorker g_physics_worker;
 
 extern vector<CPlayerObject*> g_clients;
+extern vector<CNpcObject*> g_npcs;
 
 extern list<CBulletObject*> g_bullets;
 extern CBulletObject		*g_bullobj;
@@ -51,6 +55,8 @@ extern unordered_set<CStaticObject*> g_staticobjs;
 extern unordered_set<RigidCubeObject*> g_rigidobjs;
 extern CStaticObject				*g_staticobj;
 
+extern FSM							*g_fsm;
+extern CNpcObject					*g_npcobj;
 
 extern queue<char>					g_pdir_queue;
 //io_service는 IO와 통신을 위해서사용 - 전역 하나만 있어도 된다

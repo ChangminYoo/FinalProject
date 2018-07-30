@@ -6,7 +6,7 @@
 CAccpetPlayer::CAccpetPlayer() : m_acceptor(g_io_service,
 	boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), SERVERPORT)), m_socket(g_io_service)
 {
-	g_clients.reserve(MAX_PLAYER);
+	g_clients.reserve(MAX_PLAYER + MAX_NPC_MONSTER_NUM);
 	//1. 연결된 네트워크 IP획득
 	//GetMyServerIP();
 
@@ -18,7 +18,7 @@ CAccpetPlayer::CAccpetPlayer() : m_acceptor(g_io_service,
 	g_staticobj->StaticObjectLoop();
 
 	//4. 초기화 and 몬스터 초기화는 게임판마다 실행되어야함
-	//Monster_Init();		
+	InitMonster();
 
 	//5. 클라이언트 연결 및 유저데이터 초기화
 	AcceptEvent();
@@ -56,6 +56,12 @@ void CAccpetPlayer::CheckMyCPUCore()
 
 void CAccpetPlayer::InitMonster()
 {
+	for (int i = 0; i < MAX_IMP_NUM; ++i)
+	{
+		CNpcObject *imp = new CNpcObject(i, NPC_MONSTER_TYPE::IMP);
+		imp->fsm = new FSM(imp);
+		g_npcs.emplace_back(imp);
+	}
 }
 
 void CAccpetPlayer::AcceptEvent()
@@ -86,7 +92,10 @@ void CAccpetPlayer::AcceptEvent()
 				//3. 초기화된 정보를 연결된 클라이언트로 보낸다.
 				g_clients[m_playerIndex]->InitData_To_Client();
 
-				//4.accept -> recv 순으로 해서 클라이언트로 부터 패킷을 받을 준비를 한다
+				//4. 초기화된 몬스터정보를 연결된 클라이언트로 보낸다.
+				g_clients[m_playerIndex]->InitNPCData_To_Client();
+
+				//5.accept -> recv 순으로 해서 클라이언트로 부터 패킷을 받을 준비를 한다
 				g_clients[m_playerIndex]->RecvPacket();
 
 				cout << "클라이언트 [ " << m_playerIndex << " ] 데이터할당 완료. " << endl;
@@ -155,4 +164,16 @@ CAccpetPlayer::~CAccpetPlayer()
 {
 	if (g_staticobj != nullptr)
 		delete g_staticobj;
+
+	if (!g_clients.empty())
+	{
+		delete g_clients.back();
+		g_clients.pop_back();
+	}
+
+	if (!g_npcs.empty())
+	{
+		delete g_npcs.back();
+		g_npcs.pop_back();
+	}
 }

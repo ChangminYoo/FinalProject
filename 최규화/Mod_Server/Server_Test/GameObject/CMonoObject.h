@@ -25,6 +25,7 @@ protected:
 	char				m_godmode{ false };
 	char				m_airbone{ false };
 	unsigned char	    m_type;			//스테틱 오브젝트 종류(box, wall, building...)
+	float				m_degree;
 
 	//1. 오브젝트 스테이터스(공격력, 속력, 체력, 경험치, 레벨)
 	ObjectStatus	    m_ability;
@@ -35,7 +36,7 @@ protected:
 	XMFLOAT3			m_Upvector; //업벡터
 	XMFLOAT3			m_OffLookvector;//초기룩벡터. 오브젝트가 바라보고있는 방향.
 	XMFLOAT3			m_OffRightvector;//초기라이트벡터. 오브젝트가 바라보고있는 방향의 오른쪽방향.
-	
+
 	//3. 물리효과
 	RigidBody			*rb{ nullptr };
 	PhysicsPoint		*pp{ nullptr };
@@ -65,12 +66,18 @@ public:
 	void	SetAirbone(bool flag) { m_airbone = flag; }
 	void    SetAlive(bool flag) { m_alive = flag; }
 	bool    GetAlive() const { return m_alive; }
+	int		GetMyCurrHP() const { return m_ability.curHP; }
+	void	SetMyCurrHP(int currhp) { m_ability.curHP = currhp; }
+	bool	GetIsFixed() const { return m_fixed; }
+	void    SetIsFixed(bool flag) { m_fixed = flag; }
+	int     GetObjectType() const { return static_cast<int>(m_type); }
+	void    SetObjectType(int type) { m_type = type; }
 	void SetCenterPos4f(float x, float y, float z, float w) { m_pos4f.x = x; m_pos4f.y = y; m_pos4f.z = z; m_pos4f.w = w; }
 	void SetCenterPos3f(float x, float y, float z) { m_pos4f.x = x; m_pos4f.y = y; m_pos4f.z = z; }
 	void SetCenterPos4f(const XMFLOAT4& pos) { m_pos4f.x = pos.x; m_pos4f.y = pos.y; m_pos4f.z = pos.z; m_pos4f.w = pos.w; }
 	void SetCenterPos3f(const XMFLOAT3& pos) { m_pos4f.x = pos.x; m_pos4f.y = pos.y; m_pos4f.z = pos.z; }
 	void SetRotatePos4f(const XMFLOAT4& rot) { m_rot4f.x = rot.x; m_rot4f.y = rot.y; m_rot4f.z = rot.z; m_rot4f.w = rot.w; }
-	XMFLOAT4 GetRotatePos4f() const { return XMFLOAT4(m_rot4f.x, m_rot4f.y, m_rot4f.z, m_rot4f.z); }
+	XMFLOAT4 GetRotatePos4f() const { return XMFLOAT4(m_rot4f.x, m_rot4f.y, m_rot4f.z, m_rot4f.w); }
 	XMFLOAT4 GetCenterPos4f() const { return XMFLOAT4(m_pos4f.x, m_pos4f.y, m_pos4f.z, m_pos4f.w); }
 	XMFLOAT3 GetCenterPos3f() const { return XMFLOAT3(m_pos4f.x, m_pos4f.y, m_pos4f.z); }
 
@@ -83,6 +90,7 @@ public:
 	virtual void UpdateUpvector();
 	virtual void UpdateLookvector();
 	virtual void UpdatePPosCenterPos();
+	virtual void UpdatePRotatePos();
 
 	virtual void UpdateRPosCenterPos();
 	virtual void UpdateRRotatePos();

@@ -383,6 +383,20 @@ void Shader::Render(ID3D12GraphicsCommandList * CommandList, const GameTimer& gt
 
 	for (auto b = RigidObject->cbegin(); b != RigidObject->cend(); b++)
 	{
+		if ((*b)->Blending)
+		{
+			BlendingVector.push_back(*b);
+		}
+		else//ºí·£µù ¾È¾¸
+		{
+			if (ishalfalphaRender(*b) == false)
+				NoBlendingVector.push_back(*b);
+			else
+				HalfBlendingVector.push_back(*b);
+
+
+		}
+		/*
 		if (isRender(*b) == true)
 		{
 			if ((*b)->Blending)
@@ -399,6 +413,7 @@ void Shader::Render(ID3D12GraphicsCommandList * CommandList, const GameTimer& gt
 
 			}
 		}
+		*/
 	}
 
 	for (auto b = StaticObject->cbegin(); b != StaticObject->cend(); b++)

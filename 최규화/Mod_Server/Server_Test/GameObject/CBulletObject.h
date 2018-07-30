@@ -2,17 +2,21 @@
 //#include "CMonoObject.h"
 #define MAX_LIGHT_BULLET_TIME 2
 #define MAX_HEAVY_BULLET_TIME 3.5
+#define MAX_DICE_BULLET_TIME 3.5
 
 class CBulletObject : public CMonoObject
 {
 private: 
 	double m_lifetime{ 0 };
-	
+
 	short m_id{ -1 };
 	unsigned short m_masterID;
 	Position3D m_savept;
 	Vel3f	   m_vel3f;
 
+	bool	   m_first_bullet;
+	Position3D m_dicestrike_offlookvector;
+	
 public:
 	__int64					      m_prevTime{ 0 };
 	__int64					      m_currTime{ 0 };
@@ -21,7 +25,7 @@ public:
 public:
 	CBulletObject(const unsigned short& master_id, const unsigned short& my_id,
 		const Position& pos, const Rotation& rot, float bulltime,
-		Vel3f& vel, const unsigned char& type, const Position3D& endpt);
+		Vel3f& vel, const unsigned char& type, const Position3D& endpt, const float& degree);
 
 	~CBulletObject();
 
@@ -41,6 +45,12 @@ public:
 	Rotation		  GetBulletOldRot() const { return m_rot4f; }
 	void			  SetBulletRotatevalue(const XMFLOAT4& xmf4);
 	void			  SetChangedBulletState();
+
+	void			  SetIsFirstBullet(bool flag) { m_first_bullet = flag; }
+	bool			  GetIsFirstBullet() const { return m_first_bullet; }
+
+	Position3D		  GetDicestrikeOffLookvector() const { return m_dicestrike_offlookvector; }
+	void			  SetDicestrikeOffLookvector(const Position3D& pos3d) { m_dicestrike_offlookvector = move(pos3d); }
 
 public:
 	void AfterGravitySystem();

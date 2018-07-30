@@ -1,4 +1,3 @@
-//#include "CTimerWorker.h"
 #include "../stdafx.h"
 
 CTimerWorker::CTimerWorker()
@@ -87,7 +86,7 @@ void CTimerWorker::ProcessPacket(event_type * et)
 				}
 
 			}
-			
+
 		}
 		break;
 
@@ -120,6 +119,7 @@ void CTimerWorker::ProcessPacket(event_type * et)
 				}
 			}
 		}
+		break;
 
 		case DEAD_TO_ALIVE:
 		{
@@ -132,89 +132,6 @@ void CTimerWorker::ProcessPacket(event_type * et)
 
 		}
 		break;
-
-		
-		/*
-		case LIGHT_BULLET:
-		{
-			for (auto& bull : g_bullets)
-			{
-				if (bull->GetBulletID() == et->id && bull->GetBulletMasterID() == et->master_id &&
-					(bull->GetBulletCurrState() == true))
-				{
-					__int64 currTime;
-					QueryPerformanceCounter((LARGE_INTEGER*)&currTime);
-					bull->m_currTime = currTime;
-
-					bull->m_deltaTime = ((bull->m_currTime - bull->m_prevTime) * mSecondsPerCount);
-					if (bull->m_deltaTime < 0.0) { bull->m_deltaTime = 0.0; }
-
-					bull->m_prevTime = currTime;
-					bull->SetBulletLifeTime(bull->m_deltaTime);
-
-					if (bull->GetBulletLifeTime() >= MAX_LIGHT_BULLET_TIME)
-					{
-						//총알의 생명주기가 다했을 때 -> m_bulldata.alive = false로 
-						bull->DestroyBullet();
-						AddEvent(et->id, 0, REGULAR_PACKET_EXCHANGE, true, et->master_id);
-						//cout << "Light end " << "timeL: " << lbul->GetBulletLifeTime() << endl;
-						//cout << "Pos: " << xmf4.x << "," << xmf4.y << "," << xmf4.z << "," << xmf4.w << endl;
-						break;
-					}
-
-					bull->Tick(bull->m_deltaTime);
-					bull->AfterGravitySystem(bull->m_deltaTime);
-			
-					// 클라이언트 송수신용 패킷에 담을 정보 업데이트
-					bull->SetChangedBulletState();
-
-					if ((bull->GetBulletCurrState() == true))
-						AddEvent(et->id, 0.025, LIGHT_BULLET, true, et->master_id);
-				}
-			}
-		}
-		break;
-
-		case HEAVY_BULLET:
-		{
-			for (auto& bull : g_bullets)
-			{
-				if (bull->GetBulletID() == et->id && bull->GetBulletMasterID() == et->master_id &&
-					(bull->GetBulletCurrState() == true))
-				{
-					__int64 currTime;
-					QueryPerformanceCounter((LARGE_INTEGER*)&currTime);
-					bull->m_currTime = currTime;
-
-					bull->m_deltaTime = ((bull->m_currTime - bull->m_prevTime) * mSecondsPerCount);
-					if (bull->m_deltaTime < 0.0) { bull->m_deltaTime = 0.0; }
-
-					bull->m_prevTime = currTime;
-					bull->SetBulletLifeTime(bull->m_deltaTime);
-
-					if (bull->GetBulletLifeTime() >= MAX_HEAVY_BULLET_TIME)
-					{
-						//총알의 생명주기가 다했을 때 -> m_bulldata.alive = false로 
-						bull->DestroyBullet();
-						AddEvent(et->id, 0, REGULAR_PACKET_EXCHANGE, true, et->master_id);
-						//cout << "Heavy end " << "timeL: " << lbul->GetBulletLifeTime() << endl;
-						//cout << "Pos: " << xmf4.x << "," << xmf4.y << "," << xmf4.z << "," << xmf4.w << endl;
-						break;
-					}
-
-					bull->Tick(bull->m_deltaTime);
-					bull->AfterGravitySystem(bull->m_deltaTime);
-
-					// 클라이언트 송수신용 패킷에 담을 정보 업데이트
-					bull->SetChangedBulletState();
-
-					if ((bull->GetBulletCurrState() == true))
-						AddEvent(et->id, 0.025, HEAVY_BULLET, true, et->master_id);
-				}
-			}
-		}
-		break;
-		*/
 
 		case REGULAR_PACKET_EXCHANGE:
 		{
@@ -256,8 +173,22 @@ void CTimerWorker::ProcessPacket(event_type * et)
 				
 			}
 
-			//2. 불렛 데이터도 1초에 20번씩 클라이언트로 보냄 
-			STC_Attack stc_attack;
+			//2. 1초에 20번씩 서버에서 업데이트된 Monster NPC의 모든정보를 클라이언트로 보냄
+			STC_NpcMonsterCurrState stc_mnpcs_state;
+			for (auto npc_monster : g_npcs)
+			{
+				if (!npc_monster->GetMyBasicPacketData().connect) continue;
+				if (!npc_monster->GetAlive()) continue;
+
+				for (auto client : g_clients)
+				{
+					stc_mnpcs_state.npc_data = move(npc_monster->GetMyBasicPacketData());
+					client->SendPacket(reinterpret_cast<Packet*>(&stc_mnpcs_state));
+				}
+			}
+
+
+			//3. 불렛 데이터도 1초에 20번씩 클라이언트로 보냄 
 			for (auto bullet : g_bullets)
 			{
 				//cout << "Bullet ID: " << bullet->GetBulletID() << "Bullet MID: " << bullet->GetBulletMasterID() <<
@@ -266,114 +197,49 @@ void CTimerWorker::ProcessPacket(event_type * et)
 
 				if (bullet->GetBulletIsAlive() == true)
 				{
-					stc_attack.bull_data.pos4f = bullet->m_bulldata.pos4f;
-					stc_attack.bull_data.rot4f = bullet->m_bulldata.rot4f;
-					stc_attack.bull_data.endpoint = bullet->m_bulldata.endpoint;
-					stc_attack.bull_data.master_id = bullet->m_bulldata.master_id;
-					stc_attack.bull_data.my_id = bullet->m_bulldata.my_id;
-					stc_attack.bull_data.type = bullet->m_bulldata.type;
-					stc_attack.bull_data.alive = bullet->m_bulldata.alive;
+					//서버->클라 불렛 구조체 
+					STC_BulletObject_Info stc_bullet;
+					stc_bullet.pos4f = bullet->m_bulldata.pos4f;
+					stc_bullet.rot4f = bullet->m_bulldata.rot4f;
+					stc_bullet.endpoint = bullet->m_bulldata.endpoint;
+					stc_bullet.master_id = bullet->m_bulldata.master_id;
+					stc_bullet.my_id = bullet->m_bulldata.my_id;
+					stc_bullet.type = bullet->m_bulldata.type;
+					stc_bullet.alive = bullet->m_bulldata.alive;
+					stc_bullet.degree = bullet->m_bulldata.degree;
+					//
 
-					for (auto client : g_clients)
+					if (bullet->m_bulldata.type == protocol_DiceBullet && bullet->GetIsFirstBullet())
 					{
-						client->SendPacket(reinterpret_cast<Packet*>(&stc_attack));
+						STC_SKILL_DICESTRIKE stc_skill_dicestrike;
+						stc_skill_dicestrike.bull_data = move(stc_bullet);
+						stc_skill_dicestrike.is_first = bullet->GetIsFirstBullet();
+						stc_skill_dicestrike.lookvector = bullet->GetDicestrikeOffLookvector();
+
+						for (auto client : g_clients)
+						{
+							client->SendPacket(reinterpret_cast<Packet*>(&stc_skill_dicestrike));
+						}
 					}
+					else
+					{
+						STC_Attack stc_attack;
+						stc_attack.bull_data = move(stc_bullet);
+						stc_attack.is_first = bullet->GetIsFirstBullet();
+
+						for (auto client : g_clients)
+						{
+							client->SendPacket(reinterpret_cast<Packet*>(&stc_attack));
+						}
+
+					}
+
+					if (bullet->GetIsFirstBullet())
+						bullet->SetIsFirstBullet(false);
 				}
 			}			
 
-			AddEvent(0, RegularPacketExchangeTime , REGULAR_PACKET_EXCHANGE, true, 0);
-
-		
-
-			/*
-			if (g_clients.size() > 0)
-			{
-				if (m_deltime >= RegularPacketExchangeTime)
-				{
-					cout << "Time :" << m_tcnt << "number: " << m_deltime << endl;
-
-					m_tdeltime += m_deltime;
-					if (m_tdeltime >= 1)
-					{
-						cout << "1초동안 카운트 횟수: " << m_tcnt << endl;
-						system("pause");
-					}
-
-					m_deltime -= RegularPacketExchangeTime;
-					AddEvent(0, 0, REGULAR_PACKET_EXCHANGE, true, 0);
-
-				}
-			}
-			*/
-
-
-			/*
-			for (auto client : g_clients)
-			{
-				client->GravitySystem(mRegularDelTime);
-				client->GetPhysicsPoint()->GravitySystem(mRegularDelTime, client->GetPhysicsPoint());
-				client->Tick(mRegularDelTime);
-				XMFLOAT4 xmf4{ client->m_pdata.pos.x,client->m_pdata.pos.y, client->m_pdata.pos.z, client->m_pdata.pos.w };
-				client->GetPhysicsPoint()->integrate(mRegularDelTime, &xmf4);
-				client->SetPlayerData_Pos(xmf4);
-				client->AfterGravitySystem(mRegularDelTime);
-				client->GetPhysicsEffect()->AfterGravitySystem(mRegularDelTime, client->GetPhysicsPoint(), OBJECT_TYPE::PLAYER,
-					client->m_pdata.pos, client->m_pdata.airbone);
-
-				client->SetChangedPlayerState();
-
-				if (client->GetIsAI() == true || client->GetConnectState() == false) continue;
-
-				stc_char_state.player_data = move(client->m_pdata);
-
-				cout << "ID: " << stc_char_state.player_data.id << " " << "Pos: " << stc_char_state.player_data.pos.x << " "
-					<< stc_char_state.player_data.pos.y << " " << stc_char_state.player_data.pos.z << " " << stc_char_state.player_data.pos.w 
-					<< "  //  " << "Ani: " << stc_char_state.player_data.ani << endl;
-
-
-				cout << "Timer ID: " << stc_char_state.player_data.id << " 변화된 회전값: " << "[ x, y, z, w ]: "
-					<< stc_char_state.player_data.rot.x << ", " << stc_char_state.player_data.rot.y << ", " << stc_char_state.player_data.rot.z << ", " << stc_char_state.player_data.rot.w << endl;
-
-				client->SendPacket(reinterpret_cast<Packet*>(&stc_char_state));
-
-			}
-			*/
-
-			/*
-			for (auto bull = g_bullets.begin(); bull != g_bullets.end();)
-			{
-				STC_Attack stc_attack;
-				stc_attack.bull_data = move((*bull)->GetBulletInfo());
-				stc_attack.lifetime = (*bull)->GetBulletLifeTime();
-
-				for (auto client : g_clients)
-				{
-					client->SendPacket(reinterpret_cast<Packet*>(&stc_attack));
-				}
-
-				// if((*bullet)->m_lock.try_lock()) (*bullet)->m_lock.lock();
-				//(*bullet)->m_lock.lock();
-				if (!(*bull)->GetBulletCurrState())
-				{
-					//충돌처리 다음에 삭제시켜줘야한다. 안그러면 여기서 지워진 뒤 충돌처리를 시도해 에러가 남 
-					//delete (*bullet);
-					//(*bullet)->m_lock.unlock();
-
-					//(*bullet)->m_lock.lock();
-					bull = g_bullets.erase(bull);
-					//(*bullet)->m_lock.unlock();
-				}
-				else
-				{
-					//(*bullet)->m_lock.unlock();
-					++bull;
-				}
-
-			}*/
-
-
-			//AddEvent(0, RegularPacketExchangeTime, REGULAR_PACKET_EXCHANGE, true, 0);
-		
+			AddEvent(0, RegularPacketExchangeTime , REGULAR_PACKET_EXCHANGE, true, 0);	
 		}
 		break;
 	}

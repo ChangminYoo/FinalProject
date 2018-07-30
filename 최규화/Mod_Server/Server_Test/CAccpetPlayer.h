@@ -11,7 +11,7 @@ private:
 
 	unsigned short     m_playerIndex{ 0 };
 	unsigned int	   m_myCPUCoreCnt{ 1 };
-	const unsigned int m_monsterCnt{ MAX_MONSTER_NUM };
+	const unsigned int m_monsterCnt{ MAX_NPC_MONSTER_NUM };
 	bool			   m_server_shutdown{ false };
 
 	vector<thread*>    m_pWorkerThread;

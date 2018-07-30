@@ -52,6 +52,9 @@ Scene::~Scene()
 	if (SelectBar != NULL)
 		delete SelectBar;
 
+	if (EmptyObject != nullptr)
+		delete EmptyObject;
+
 	for (int i = 0; i < 4; i++)
 		if(SkillCoolBar[i]!=NULL)
 			delete SkillCoolBar[i];
@@ -418,6 +421,8 @@ void Scene::CreateGameObject()
 	int player_num = 0;
 	for (auto obj : DynamicObject)
 	{
+		if (obj->isNPC) continue;
+
 		obj->m_player_data.id = player_num;
 		++player_num;
 	}
@@ -701,6 +706,50 @@ void Scene::Tick(const GameTimer & gt)
 		UITick(gt);
 		//카메라 리 로케이트 
 		Player->PlayerCameraReLocate();
+
+
+		//서버 추가
+		//다이스트라이크 주사위 정보에 따른 불렛 데이터 서버로 전송(다이스트라이크 시전 시에만 호출)
+		//Orient는 플레이어 각도에 따라 업데이트된 Orient임. 
+		if (EmptyObject->g_numofdice != 0)
+		{
+			bool check_first{ true };
+			for (auto iter = BulletObject.crbegin(); iter != BulletObject.crend(); ++iter)
+			{
+				if (EmptyObject->g_numofdice <= 0) break;
+
+				CTS_BulletObject_Info bullet_info;
+				bullet_info.alive = true;
+				bullet_info.endpoint = { 0.f, 0.f, 0.f };
+				bullet_info.master_id = Player->PlayerObject->m_player_data.id;
+				bullet_info.pos4f = { Player->PlayerObject->CenterPos.x,  Player->PlayerObject->CenterPos.y,  Player->PlayerObject->CenterPos.z,  Player->PlayerObject->CenterPos.w };
+				bullet_info.rot4f = { (*iter)->Orient.x, (*iter)->Orient.y, (*iter)->Orient.z, (*iter)->Orient.w };
+				bullet_info.degree = (*iter)->m_degree;
+				bullet_info.vel3f = { (*iter)->pp->GetVelocity().x, (*iter)->pp->GetVelocity().y, (*iter)->pp->GetVelocity().z };
+				bullet_info.my_id = (*iter)->m_bullet_data.my_id;
+
+				bullet_info.type = BULLET_TYPE::protocol_DiceBullet;
+
+				--EmptyObject->g_numofdice;
+
+				CTS_SKILL_DICESTRIKE cts_skill_dicestrike;
+				cts_skill_dicestrike.bull_data = move(bullet_info);
+				cts_skill_dicestrike.lookvector = { Player->PlayerObject->Lookvector.x, Player->PlayerObject->Lookvector.y, Player->PlayerObject->Lookvector.z };
+				
+				if (check_first)
+				{
+					cts_skill_dicestrike.is_firstdice = true;
+					check_first = false;
+				}
+				else { cts_skill_dicestrike.is_firstdice = false; }
+				
+				
+				Player->m_async_client->SendPacket(reinterpret_cast<Packet*>(&cts_skill_dicestrike));
+
+			}
+
+			EmptyObject->g_numofdice = 0;
+		}
 	}
 }
 
@@ -727,6 +776,7 @@ void Scene::SET_PLAYER_BY_SEVER_DATA(const unsigned short & id, const Player_Dat
 {
 	for (auto GameObject : DynamicObject)
 	{
+		if (GameObject->isNPC) continue;
 		if (GameObject->m_player_data.id == id)
 		{
 			switch (packet_type)
@@ -810,16 +860,73 @@ void Scene::SET_PLAYER_BY_SEVER_DATA(const unsigned short & id, const Player_Dat
 			{
 				//GameObject->ObjData.isAnimation = true;
 
+				GameObject->currAnimTime = 0.f;
+				
 				GameObject->m_player_data.ani = playerdata.ani;
 
 				GameObject->n_Animation = static_cast<int>(playerdata.ani);
+
 			}
+			break;
 
 			default:
 				break;
 
 			}
 
+		}
+	}
+}
+
+void Scene::SET_NPC_BY_SERVER_DATA(const unsigned short & id, const Npc_Data & data, const unsigned char& monster_type, const unsigned char& packet_type)
+{
+	for (auto GameObject : DynamicObject)
+	{
+		if (!GameObject->isNPC) continue;
+
+		if (GameObject->m_npc_data.id == id)
+		{
+			switch (packet_type)
+			{
+				case PACKET_PROTOCOL_TYPE::INIT_NPC:
+				{
+					GameObject->m_npc_data = move(data);
+
+					GameObject->Orient = { data.rot.x , data.rot.y, data.rot.z, data.rot.w };
+					GameObject->CenterPos = { data.pos.x , data.pos.y , data.pos.z , data.pos.w };
+					GameObject->pp->SetPosition(&GameObject->CenterPos);
+
+					GameObject->gamedata.Damage = move(data.status.attack);
+					GameObject->gamedata.HP = move(data.status.cur_hp);
+					GameObject->gamedata.MAXHP = move(data.status.origin_hp);
+					GameObject->gamedata.Speed = move(data.status.speed);
+
+					GameObject->AirBone = data.airbone;
+				}
+				break;
+
+				case PACKET_PROTOCOL_TYPE::NPC_MONSTER_CURR_STATE:
+				{
+					GameObject->m_npc_data = move(data);
+
+					GameObject->Orient = { data.rot.x , data.rot.y, data.rot.z, data.rot.w };
+					GameObject->CenterPos = { data.pos.x , data.pos.y , data.pos.z , data.pos.w };
+					GameObject->pp->SetPosition(&GameObject->CenterPos);
+
+					GameObject->gamedata.Damage = move(data.status.attack);
+					GameObject->gamedata.HP = move(data.status.cur_hp);
+					GameObject->gamedata.MAXHP = move(data.status.origin_hp);
+					GameObject->gamedata.Speed = move(data.status.speed);
+
+					GameObject->AirBone = data.airbone;
+
+				}
+				break;
+
+
+			default:
+				break;
+			}
 		}
 	}
 }
@@ -888,63 +995,70 @@ void Scene::SET_RIGIDOBJECT_BY_SERVER_DATA(const unsigned int & id, RigidbodyDat
 	}
 }
 
-void Scene::SET_BULLET_BY_SERVER_DATA(STC_BulletObject_Info & bulldata, const unsigned char & packet_type)
+void Scene::SET_BULLET_BY_SERVER_DATA(STC_BulletObject_Info & bulldata, const unsigned char & packet_type, bool first_bullet, const XMFLOAT3& OffLookvector)
 {
 	switch (packet_type)
 	{
 	case BULLET_TYPE::protocol_LightBullet:
 	case BULLET_TYPE::protocol_HeavyBullet:
+	case BULLET_TYPE::protocol_DiceBullet:
 	{
 		//클라에서 먼저 불렛이 죽고 서버에서 죽었다는 정보를 주게되면 아래 분기문이 실행됨 -> 버그
 		//내 자신은 이걸 실행할 필요가없음
-		if (BulletObject.size() == 0 && bulldata.master_id != Player->PlayerObject->m_player_data.id)
+
+		//이동 전 첫번째 불렛이다 - 이 때만 Create로 불렛 생성
+		if (first_bullet)
 		{
-			Player->CreateOtherClientBullet(device, commandlist, bulldata.endpoint, nullptr, &BulletObject, bulldata);
-		}
-		else
-		{
-			auto findBullet = false;
-			for (auto lbul : BulletObject)
+			//1. 현재 클라이언트 아이디와 서버에서 건너온 불렛을 쏜 클라이언트 아이디가 다르다 -> CrateOtherClientBullet 실행
+			//2. 현재 클라이언트가 서버에서 건너온 불렛을 쏜 경우 -> Create 스킵하고 데이터(이동위치, 회전값 등)만 업데이트 해준다
+			if (bulldata.master_id != Player->PlayerObject->m_player_data.id)
 			{
-				if (bulldata.master_id == lbul->m_bullet_data.master_id && bulldata.my_id == lbul->m_bullet_data.my_id)
+				if (bulldata.type == protocol_DiceBullet)
+					Player->CreateOtherClientDicestrikeSkill(device, commandlist, bulldata.endpoint, nullptr, &BulletObject, bulldata, OffLookvector);
+				else
+					Player->CreateOtherClientBullet(device, commandlist, bulldata.endpoint, nullptr, &BulletObject, bulldata);
+				
+				//break;
+			}
+		}
+
+		for (auto lbul : BulletObject)
+		{
+			if (bulldata.master_id == lbul->m_bullet_data.master_id && bulldata.my_id == lbul->m_bullet_data.my_id)
+			{
+				//불렛이 소멸됨 -> 삭제
+				if (!bulldata.alive)
 				{
-					//불렛이 소멸됨 -> 삭제
-					if (!bulldata.alive)
-					{
-						lbul->DelObj = true;
-						findBullet = true;
+					lbul->DelObj = true;
 
-						//cout << "Bullet ID: " << bulldata.my_id << "Bullet MID: " << bulldata.master_id <<
-						//	"Position: " << bulldata.pos4f.x << ", " << bulldata.pos4f.y << ", " << bulldata.pos4f.z << ", " << bulldata.pos4f.w <<
-						//	"IsAlive: " << static_cast<bool>(bulldata.alive) << endl;
+					//cout << "Bullet ID: " << bulldata.my_id << "Bullet MID: " << bulldata.master_id <<
+					//	"Position: " << bulldata.pos4f.x << ", " << bulldata.pos4f.y << ", " << bulldata.pos4f.z << ", " << bulldata.pos4f.w <<
+					//	"IsAlive: " << static_cast<bool>(bulldata.alive) << endl;
 
-						break;
-					}
-
-					lbul->m_bullet_data = move(bulldata);
-
-					lbul->Orient = { bulldata.rot4f.x, bulldata.rot4f.y, bulldata.rot4f.z, bulldata.rot4f.w };
-					lbul->CenterPos = { bulldata.pos4f.x, bulldata.pos4f.y, bulldata.pos4f.z, bulldata.pos4f.w };
-
-					//lbul->pp->SetVelocity(bulldata.vel3f.x, bulldata.vel3f.y, bulldata.vel3f.z);
-					lbul->pp->SetPosition(&lbul->CenterPos);
-
-					findBullet = true;
 					break;
 				}
-			}
 
-			//다른 클라이언트가 생성한 불렛이 내 클라이언트가 관리하는 
-			//기존의 불렛리스트에 없다면 추가시켜줘야한다.
-			if (findBullet == false && bulldata.master_id != Player->PlayerObject->m_player_data.id)
-			{
-				Player->CreateOtherClientBullet(device, commandlist, bulldata.endpoint, nullptr, &BulletObject, bulldata);
+				lbul->m_bullet_data = move(bulldata);
+
+				lbul->CenterPos = { bulldata.pos4f.x, bulldata.pos4f.y, bulldata.pos4f.z, bulldata.pos4f.w };
+				lbul->pp->SetPosition(&lbul->CenterPos);
+
+				lbul->Orient = { bulldata.rot4f.x, bulldata.rot4f.y, bulldata.rot4f.z, bulldata.rot4f.w };
+				lbul->UpdateLookVector();
+
+
+				//cout << "Bullet ID: " << lbul->myID << "Orient: " << lbul->Orient.x << ", " << lbul->Orient.y << ", " << lbul->Orient.z << ", " << lbul->Orient.w << "\n";
+				//cout << "Bullet ID: " << lbul->myID << "Lookxyz: " << lbul->Lookvector.x << ", " << lbul->Lookvector.y << ", " << lbul->Lookvector.z << "\n";
+				//cout << "Bullet ID: " << lbul->myID << "Rightxyz: " << lbul->Rightvector.x << ", " << lbul->Rightvector.y << ", " << lbul->Rightvector.z << "\n";
+
+
+				break;
 			}
 		}
 
 	}
 	break;
-
+	
 	default:
 		break;
 	}
@@ -1009,6 +1123,7 @@ void Scene::SET_PLAYER_SKILL(const unsigned int & id, const STC_SkillData & play
 		{
 			switch (playerdata.my_id)
 			{
+				// 실드를 따로 생성해서 Centerpos를 패킷으로 받은 아이디를 가진 플레이어값으로 지정한다 
 				case CHAR_SKILL::SHIELD:
 				{
 					if (playerdata.alive)
@@ -1029,11 +1144,56 @@ void Scene::SET_PLAYER_SKILL(const unsigned int & id, const STC_SkillData & play
 				}
 				break;
 
+			default:
+				break;
+			}
+			
+		}
+	}
+}
+
+
+void Scene::SET_PLAYER_SKILL(const unsigned int& id, const STC_SkillData& playerdata, unsigned char texture_number)
+{
+	for (auto GameObject : DynamicObject)
+	{
+		// 사용스킬에 대한 패킷을 보낸 ID == 현재 이 클라이언트의 아이디
+		if (id == GameObject->m_player_data.id)
+		{
+			switch (playerdata.my_id)
+			{
 				case CHAR_SKILL::WAVE_SHOCK:
 				{
 					if (playerdata.alive)
 					{
 						StaticObject.push_back(new RingObject(device, commandlist, &BbObject, GameObject->CenterPos));
+						auto iter = StaticObject.back();
+						switch (texture_number)
+						{
+						case 0:
+							iter->TextureName = "redTex";
+							break;
+						case 1:
+							iter->TextureName = "orangeTex";
+							break;
+						case 2:
+							iter->TextureName = "yellowTex";
+							break;
+						case 3:
+							iter->TextureName = "pinkTex";
+							break;
+						case 4:
+							iter->TextureName = "whiteTex";
+							break;
+						case 5:
+							iter->TextureName = "blueTex";
+							break;
+						case 6:
+							iter->TextureName = "greenTex";
+							break;
+						default:
+							break;
+						}
 					}
 					else
 					{
@@ -1047,16 +1207,12 @@ void Scene::SET_PLAYER_SKILL(const unsigned int & id, const STC_SkillData & play
 						}
 					}
 				}
-
-			default:
 				break;
+
 			}
-			
-			// 실드를 따로 생성해서 Centerpos를 패킷으로 받은 아이디를 가진 플레이어값으로 지정한다 
 		}
 	}
 }
-
 
 
 array<const CD3DX12_STATIC_SAMPLER_DESC, 6> Scene::GetStaticSamplers()

@@ -559,24 +559,23 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 				skilldata.SellectBulletIndex = 2;
 			else if (GetAsyncKeyState(0x34) & 0x0001)
 				skilldata.SellectBulletIndex = 3;
-
-
-			
+		
 			//위의 버튼을 눌렀을때 생존기 스킬인 넘버링 4와 5인 경우(4는 파동파 , 5는 방어력증가(?))
 			if (skilldata.Skills[skilldata.SellectBulletIndex] == 4 && skilldata.isSkillOn[skilldata.SellectBulletIndex])//파동파인경우
 			{
-				STC_SKILL_WAVESHOCK cts_skill_waveshock;
+				CTS_SKILL_WAVESHOCK cts_skill_waveshock;
 				cts_skill_waveshock.skill_data.master_id = PlayerObject->m_player_data.id;
 				cts_skill_waveshock.skill_data.my_id = skilldata.Skills[skilldata.SellectBulletIndex];
 				cts_skill_waveshock.skill_data.alive = true;
-
-				scene->Player->m_async_client->SendPacket(reinterpret_cast<Packet*>(&cts_skill_waveshock));
-
+	
 				//고리생성
 				scene->StaticObject.push_back(new RingObject(scene->device, scene->commandlist,&scene->BbObject, PlayerObject->CenterPos));
 				skilldata.SkillsCoolTime[skilldata.SellectBulletIndex] = skilldata.SkillsMaxCoolTime[skilldata.Skills[skilldata.SellectBulletIndex]];
 				skilldata.isSkillOn[skilldata.SellectBulletIndex] = false;
 				skilldata.SellectBulletIndex = 0;//스킬 시전후 가장 첫번째 스킬로 변경함
+
+				cts_skill_waveshock.texture_number = scene->StaticObject.back()->TexOff;
+				scene->Player->m_async_client->SendPacket(reinterpret_cast<Packet*>(&cts_skill_waveshock));
 
 				/*
 				XMFLOAT4 wavepos = PlayerObject->CenterPos;
@@ -619,19 +618,19 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 			}
 			else if (skilldata.Skills[skilldata.SellectBulletIndex] == 5 && skilldata.isSkillOn[skilldata.SellectBulletIndex])//실드
 			{
-				STC_SKILL_SHIELD cts_skill_shield;
+				CTS_SKILL_SHIELD cts_skill_shield;
 				cts_skill_shield.skill_data.master_id = PlayerObject->m_player_data.id;
 				cts_skill_shield.skill_data.my_id = skilldata.Skills[skilldata.SellectBulletIndex];
 				cts_skill_shield.skill_data.alive = true;
 			
+				scene->Player->m_async_client->SendPacket(reinterpret_cast<Packet*>(&cts_skill_shield));
+				
 				//실드 생성
 				scene->NoCollObject.push_back(new ShieldArmor(scene->device, scene->commandlist, &scene->BbObject, PlayerObject, PlayerObject->CenterPos));
 				skilldata.SkillsCoolTime[skilldata.SellectBulletIndex] = skilldata.SkillsMaxCoolTime[skilldata.Skills[skilldata.SellectBulletIndex]];
 				skilldata.isSkillOn[skilldata.SellectBulletIndex] = false;
 				skilldata.SellectBulletIndex = 0;
 				
-
-				scene->Player->m_async_client->SendPacket(reinterpret_cast<Packet*>(&cts_skill_shield));
 			}
 
 
@@ -767,6 +766,7 @@ void CPlayer::CreateBullet(ID3D12Device* Device, ID3D12GraphicsCommandList* cl,X
 		cts_attack.bull_data.endpoint = { Goal.x , Goal.y , Goal.z };
 
 		cts_attack.lifetime = 0.0;
+		cts_attack.bull_data.degree = 0.f;
 
 		m_async_client->SendPacket(reinterpret_cast<Packet*>(&cts_attack));
 
@@ -849,6 +849,7 @@ void CPlayer::CreateBullet(ID3D12Device* Device, ID3D12GraphicsCommandList* cl,X
 		cts_attack.bull_data.endpoint = { Goal.x , Goal.y , Goal.z };
 
 		cts_attack.lifetime = 0.0;
+		cts_attack.bull_data.degree = 0.f;
 
 		m_async_client->SendPacket(reinterpret_cast<Packet*>(&cts_attack));
 
@@ -873,10 +874,12 @@ void CPlayer::CreateBullet(ID3D12Device* Device, ID3D12GraphicsCommandList* cl,X
 		skilldata.SkillsCoolTime[skilldata.SellectBulletIndex] = skilldata.SkillsMaxCoolTime[skilldata.Skills[skilldata.SellectBulletIndex]];
 		skilldata.isSkillOn[skilldata.SellectBulletIndex] = false;
 
-		PlayerObject->ParticleList->push_back(new DiceObject(Device, cl, PlayerObject->ParticleList, PlayerObject, bulletlist ,XMFLOAT4(PlayerObject->CenterPos.x, 35, PlayerObject->CenterPos.z, 0)));
+		PlayerObject->ParticleList->push_back(new DiceObject(Device, cl, PlayerObject->ParticleList, PlayerObject, bulletlist, XMFLOAT4(PlayerObject->CenterPos.x, 35, PlayerObject->CenterPos.z, 0)));
 
 		break;
 	}
+
+
 	}
 
 }
@@ -900,88 +903,199 @@ void CPlayer::CheckTraceSkill()
 
 void CPlayer::CreateOtherClientBullet(ID3D12Device * Device, ID3D12GraphicsCommandList * cl, Position3D & Goal, CGameObject * lock, list<CGameObject*>* bulletlist, STC_BulletObject_Info server_bulldata)
 {
+	XMFLOAT4 xmf4_pos{ server_bulldata.pos4f.x, server_bulldata.pos4f.y, server_bulldata.pos4f.z, server_bulldata.pos4f.w };
+	XMFLOAT3 xmf3_pos{ Goal.x, Goal.y, Goal.z };
+	
+	XMFLOAT4 ori = XMFLOAT4(0, 0, 0, 0);
+	CGameObject *bul = nullptr;
+	
+	//PlayerObject는 현재 이 클라이언트 플레이어를 의미한다
 	switch (server_bulldata.type)
 	{
-	case protocol_LightBullet:
-	{
-		XMFLOAT4 xmf4;
-		xmf4.x = server_bulldata.pos4f.x; xmf4.y = server_bulldata.pos4f.y;
-		xmf4.z = server_bulldata.pos4f.z; xmf4.w = server_bulldata.pos4f.w;
+		case protocol_LightBullet:
+		case protocol_HeavyBullet:
+		{		
+			//2018.07.25 - ori를 구하는 작업을 결국 해야지 particle의 방향이 맞게 생성된다
+			//이걸 서버에서 작업해서 Orient값을 업데이트해서 보내지만, 결국 클라에서 그 작업을 같이 해줘야함
+			//이 작업은 불렛이 한번 생성될 때만 하면된다.
+			//[1]ori값을 불렛생성시 클라->서버->클라 이 과정을 한번 진행하는것이 성능상 이점인가 아니면 [2]클라에서 이렇게 한번해주는게 이점인가
+			//클라 -> 서버로 갈 때 degree와 ori에 의해 업데이트 된 rotation값이 전달되므로 
+			//서버에서 아래의 작업은 진행하지 않음 
+			//[2]가 더 효율적인것 같음
+			//[1]을 하면, 전달패킷의 크기가 늘어나 패킷사이즈가 증가 -> 서버부하로 발생,
+			//           클라이언트는 cpu보다 성능이 좋은 gpu를 이용, 이 작업을 추가한다고해서 부하가 발생되지 않음
+			
+			auto v = Float3Add(xmf3_pos, XMFloat4to3(xmf4_pos), false);
 
-		XMFLOAT3 xmf3;
-		xmf3.x = Goal.x; xmf3.y = Goal.y; xmf3.z = Goal.z;
+			v = Float3Normalize(v);//새로운 룩벡터(발사방향)
+								   //여기서 룩벡터라 함은, 플레이어가 아니라, 총알의 룩벡터다. 모든 오브젝트는 보통 룩벡터는 0,0,1 또는 0,0,-1 인데, 날아가는 방향을 바라보도록  
+								   //해야하므로 새로운 룩벡터를 필요로 하는것이다.  
 
-		auto v = Float3Add(xmf3, XMFloat4to3(xmf4), false);
+								   //기존 룩벡터와 새로운 룩벡터를 외적해서 방향축을 구한다.
+			XMFLOAT3 l{ 0,0,1 };
+			XMVECTOR ol = XMLoadFloat3(&l);
+			XMVECTOR nl = XMLoadFloat3(&v);
 
-		v = Float3Normalize(v);//새로운 룩벡터(발사방향)
-							   //여기서 룩벡터라 함은, 플레이어가 아니라, 총알의 룩벡터다. 모든 오브젝트는 보통 룩벡터는 0,0,1 또는 0,0,-1 인데, 날아가는 방향을 바라보도록  
-							   //해야하므로 새로운 룩벡터를 필요로 하는것이다.  
+			auto axis = XMVector3Cross(ol, nl);
 
-							   //기존 룩벡터와 새로운 룩벡터를 외적해서 방향축을 구한다.
-		XMFLOAT3 l{ 0,0,1 };
-		XMVECTOR ol = XMLoadFloat3(&l);
+			//방향축을 완성.
+			axis = XMVector3Normalize(axis);
+			XMFLOAT3 Axis;
+			XMStoreFloat3(&Axis, axis);
+			//이제 회전각도를 구해야한다. 내적을 통해 회전각도를 구한다.
 
-		XMVECTOR nl = XMLoadFloat3(&v);
-		auto axis = XMVector3Cross(ol, nl);
+			auto temp = XMVector3Dot(ol, nl);
 
-		//방향축을 완성.
-		axis = XMVector3Normalize(axis);
-		XMFLOAT3 Axis;
-		XMStoreFloat3(&Axis, axis);
-		//이제 회전각도를 구해야한다. 내적을 통해 회전각도를 구한다.
+			float d;//기존 룩벡터와 새로운 룩벡터를 내적한 결과.
+			XMStoreFloat(&d, temp);
+			if (fabsf(d) <= 1)//반드시 이 결과는 -1~1 사이여야한다. 그래야 각도가 구해진다.
+				d = acos(d);//각도 완성. 라디안임
 
-		auto temp = XMVector3Dot(ol, nl);
+			auto ori = QuaternionRotation(Axis, d);
 
-		float d;//기존 룩벡터와 새로운 룩벡터를 내적한 결과.
-		XMStoreFloat(&d, temp);
-		if (fabsf(d) <= 1)//반드시 이 결과는 -1~1 사이여야한다. 그래야 각도가 구해진다.
-			d = acos(d);//각도 완성. 라디안임
+			//진짜 룩벡터를 구했으니 이제 진짜 Right벡터를 구한다. 진짜 Up은 진짜 룩과 진짜 라이트를 외적만하면됨.
+			//회전을 보정해준다. 회전축에서 룩벡터를 외적하면 진짜 Right벡터가 나온다.
+			//이때 오차가 있는 RightVector를 진짜 RightVector의 사잇각을 계산하고
+			//룩벡터를 회전축으로 돌려준다. 왜 회전축에 오차가 생기는가?
+			//간단하다 기존 룩벡터와 발사방향을 룩벡터의 회전축과
+			//기존 RightVector와 발사방향을 회전축을하면 서로 다르게 나온다.
+			//문제는 만약 그냥 이대로 넘어가게 되면 RightVector와 진짜 RightVector의 각도만큼 오차가 생기므로
+			//이렇게되면 나중에 Up을 구할때도 문제가 생긴다.
+			//사실 X축 Y축 Z축 순서대로 곱을하면 이러한 문제는 거의없지만, 특정축을 기반으로 회전할때 생기는 문제다.
 
-		auto ori = QuaternionRotation(Axis, d);
+			auto wmatrix = XMMatrixIdentity();
+			auto quater = XMLoadFloat4(&ori);
+			wmatrix *= XMMatrixRotationQuaternion(quater);
 
-		//진짜 룩벡터를 구했으니 이제 진짜 Right벡터를 구한다. 진짜 Up은 진짜 룩과 진짜 라이트를 외적만하면됨.
-		//회전을 보정해준다. 회전축에서 룩벡터를 외적하면 진짜 Right벡터가 나온다.
-		//이때 오차가 있는 RightVector를 진짜 RightVector의 사잇각을 계산하고
-		//룩벡터를 회전축으로 돌려준다. 왜 회전축에 오차가 생기는가?
-		//간단하다 기존 룩벡터와 발사방향을 룩벡터의 회전축과
-		//기존 RightVector와 발사방향을 회전축을하면 서로 다르게 나온다.
-		//문제는 만약 그냥 이대로 넘어가게 되면 RightVector와 진짜 RightVector의 각도만큼 오차가 생기므로
-		//이렇게되면 나중에 Up을 구할때도 문제가 생긴다.
-		//사실 X축 Y축 Z축 순서대로 곱을하면 이러한 문제는 거의없지만, 특정축을 기반으로 회전할때 생기는 문제다.
+			auto orr = XMVectorSet(1, 0, 0, 0);
+			orr = XMVector4Transform(orr, wmatrix);//가짜 라이트 벡터
+			orr = XMVector3Normalize(orr);
+			auto RealRight = XMVector3Cross(axis, nl);//진짜 라이트벡터
+			RealRight = XMVector3Normalize(RealRight);
 
-		auto wmatrix = XMMatrixIdentity();
-		auto quater = XMLoadFloat4(&ori);
-		wmatrix *= XMMatrixRotationQuaternion(quater);
+			//진짜 라이트 벡터와 가짜 라이트 벡터를 내적함.
+			temp = XMVector3Dot(RealRight, orr);
 
-		auto orr = XMVectorSet(1, 0, 0, 0);
-		orr = XMVector4Transform(orr, wmatrix);//가짜 라이트 벡터
-		orr = XMVector3Normalize(orr);
-		auto RealRight = XMVector3Cross(axis, nl);//진짜 라이트벡터
-		RealRight = XMVector3Normalize(RealRight);
+			XMStoreFloat(&d, temp);
+			if (fabsf(d) <= 1)//반드시 이 결과는 -1~1 사이여야한다. 그래야 각도가 구해진다.
+				d = acos(d);//각도 완성. 라디안임
+			auto ori2 = XMQuaternionRotationAxis(nl, d);//진짜 룩벡터를 회전축으로 삼고 진짜라이트와 가짜라이트의 사잇각만큼회전
 
-		//진짜 라이트 벡터와 가짜 라이트 벡터를 내적함.
-		temp = XMVector3Dot(RealRight, orr);
+			auto tempori = XMLoadFloat4(&ori);
+			tempori = XMQuaternionMultiply(tempori, ori2);
+			XMStoreFloat4(&ori, tempori);//최종 회전 방향
+			
+			bul = new BulletCube(Device, cl, PlayerObject->ParticleList, PlayerObject, ori, lock, PlayerObject->CenterPos, true);
 
-		XMStoreFloat(&d, temp);
-		if (fabsf(d) <= 1)//반드시 이 결과는 -1~1 사이여야한다. 그래야 각도가 구해진다.
-			d = acos(d);//각도 완성. 라디안임
-		auto ori2 = XMQuaternionRotationAxis(nl, d);//진짜 룩벡터를 회전축으로 삼고 진짜라이트와 가짜라이트의 사잇각만큼회전
+			//if (server_bulldata.type == protocol_LightBullet || server_bulldata.type == protocol_HeavyBullet)
+				//bul = new BulletCube(Device, cl, PlayerObject->ParticleList, PlayerObject, ori, lock, PlayerObject->CenterPos, true);
+			//else if (server_bulldata.type == protocol_DiceBullet)
+				//bul = new DiceStrike(Device, cl, PlayerObject->ParticleList, PlayerObject, ori, server_bulldata.degree, NULL, PlayerObject->CenterPos);
+		}
+		break;
 
-		auto tempori = XMLoadFloat4(&ori);
-		tempori = XMQuaternionMultiply(tempori, ori2);
-		XMStoreFloat4(&ori, tempori);//최종 회전 방향
-
-		CGameObject *bul = new BulletCube(Device, cl, PlayerObject->ParticleList, PlayerObject, ori, lock, PlayerObject->CenterPos, true);
-
-		bul->m_bullet_data.master_id = server_bulldata.master_id;
-		bul->m_bullet_data.my_id = server_bulldata.my_id;
-
-		bulletlist->push_back(bul);
-
+		default:
+			break;
 	}
-	break;
 
-	case protocol_HeavyBullet:
+	bul->m_bullet_data.master_id = server_bulldata.master_id;
+	bul->m_bullet_data.my_id = server_bulldata.my_id;
+	
+	bul->CenterPos = XMFLOAT4(server_bulldata.pos4f.x, server_bulldata.pos4f.y, server_bulldata.pos4f.z, server_bulldata.pos4f.w);
+	bul->pp->SetPosition(&bul->CenterPos);
+	
+	//bul->Orient = XMFLOAT4(server_bulldata.rot4f.x, server_bulldata.rot4f.y, server_bulldata.rot4f.z, server_bulldata.rot4f.w);
+	//bul->UpdateLookVector();
+
+	bul->m_bullet_data = move(server_bulldata);
+
+	//bul->ParticleList->back()->Orient = bul->Orient;
+	//bul->ParticleList->back()->UpdateLookVector();
+
+	bulletlist->push_back(bul);
+}
+
+void CPlayer::CreateOtherClientDicestrikeSkill(ID3D12Device * Device, ID3D12GraphicsCommandList * cl, Position3D & Goal, CGameObject * lock, list<CGameObject*>* bulletlist, STC_BulletObject_Info server_bulldata, const XMFLOAT3 & OffLookvector)
+{
+	XMFLOAT4 xmf4_pos{ server_bulldata.pos4f.x, server_bulldata.pos4f.y, server_bulldata.pos4f.z, server_bulldata.pos4f.w };
+	XMFLOAT3 xmf3_pos{ Goal.x, Goal.y, Goal.z };
+
+	XMFLOAT3 l{ 0,0,1 };
+	XMVECTOR ol = XMLoadFloat3(&l);
+	XMVECTOR nl = XMLoadFloat3(&OffLookvector);
+	auto axis = XMVector3Cross(ol, nl);
+	//방향축을 완성.
+	axis = XMVector3Normalize(axis);
+	XMFLOAT3 Axis;
+	XMStoreFloat3(&Axis, axis);
+	//이제 회전각도를 구해야한다. 내적을 통해 회전각도를 구한다.
+
+	auto temp = XMVector3Dot(ol, nl);
+
+	float d;//기존 룩벡터와 새로운 룩벡터를 내적한 결과.
+	XMStoreFloat(&d, temp);
+	if (fabsf(d) <= 1)//반드시 이 결과는 -1~1 사이여야한다. 그래야 각도가 구해진다.
+		d = acos(d);//각도 완성. 라디안임
+
+	auto ori = QuaternionRotation(Axis, d);
+
+	//진짜 룩벡터를 구했으니 이제 진짜 Right벡터를 구한다. 진짜 Up은 진짜 룩과 진짜 라이트를 외적만하면됨.
+	//회전을 보정해준다. 회전축에서 룩벡터를 외적하면 진짜 Right벡터가 나온다.
+	//이때 오차가 있는 RightVector를 진짜 RightVector의 사잇각을 계산하고
+	//룩벡터를 회전축으로 돌려준다. 왜 회전축에 오차가 생기는가?
+	//간단하다 기존 룩벡터와 발사방향을 룩벡터의 회전축과
+	//기존 RightVector와 발사방향을 회전축을하면 서로 다르게 나온다.
+	//문제는 만약 그냥 이대로 넘어가게 되면 RightVector와 진짜 RightVector의 각도만큼 오차가 생기므로
+	//이렇게되면 나중에 Up을 구할때도 문제가 생긴다.
+	//사실 X축 Y축 Z축 순서대로 곱을하면 이러한 문제는 거의없지만, 특정축을 기반으로 회전할때 생기는 문제다.
+
+	auto wmatrix = XMMatrixIdentity();
+	auto quater = XMLoadFloat4(&ori);
+	wmatrix *= XMMatrixRotationQuaternion(quater);
+
+	auto orr = XMVectorSet(1, 0, 0, 0);
+	orr = XMVector4Transform(orr, wmatrix);//가짜 라이트 벡터
+	orr = XMVector3Normalize(orr);
+	auto RealRight = XMVector3Cross(axis, nl);//진짜 라이트벡터
+	RealRight = XMVector3Normalize(RealRight);
+
+	//진짜 라이트 벡터와 가짜 라이트 벡터를 내적함.
+	temp = XMVector3Dot(RealRight, orr);
+
+	XMStoreFloat(&d, temp);
+	if (fabsf(d) <= 1)//반드시 이 결과는 -1~1 사이여야한다. 그래야 각도가 구해진다.
+		d = acos(d);//각도 완성. 라디안임
+	auto ori2 = XMQuaternionRotationAxis(nl, d);//진짜 룩벡터를 회전축으로 삼고 진짜라이트와 가짜라이트의 사잇각만큼회전
+
+	auto tempori = XMLoadFloat4(&ori);
+	tempori = XMQuaternionMultiply(tempori, ori2);
+	XMStoreFloat4(&ori, tempori);//최종 회전 방향
+
+	cout << "CreateOtherClientBullet Master Lookvector xyz: " << OffLookvector.x << " , " << OffLookvector.y << " , " << OffLookvector.z << "\n";
+	cout << "\n";
+
+	CGameObject *bul = new DiceStrike(Device, cl, PlayerObject->ParticleList, PlayerObject, ori, server_bulldata.degree, NULL, PlayerObject->CenterPos);
+	
+	bul->m_bullet_data.master_id = server_bulldata.master_id;
+	bul->m_bullet_data.my_id = server_bulldata.my_id;
+
+	bul->CenterPos = XMFLOAT4(server_bulldata.pos4f.x, server_bulldata.pos4f.y, server_bulldata.pos4f.z, server_bulldata.pos4f.w);
+	bul->pp->SetPosition(&bul->CenterPos);
+
+	//bul->Orient = XMFLOAT4(server_bulldata.rot4f.x, server_bulldata.rot4f.y, server_bulldata.rot4f.z, server_bulldata.rot4f.w);
+	//bul->UpdateLookVector();
+
+	bul->m_bullet_data = move(server_bulldata);
+
+	//bul->ParticleList->back()->Orient = bul->Orient;
+	//bul->ParticleList->back()->UpdateLookVector();
+
+	bulletlist->push_back(bul);
+
+}
+
+
+/*case protocol_HeavyBullet:
 	{
 		XMFLOAT4 xmf4;
 		xmf4.x = server_bulldata.pos4f.x; xmf4.y = server_bulldata.pos4f.y;
@@ -1058,5 +1172,62 @@ void CPlayer::CreateOtherClientBullet(ID3D12Device * Device, ID3D12GraphicsComma
 		bulletlist->push_back(bul);
 	}
 	break;
+
+	case protocol_DiceBullet:
+	{
+		XMFLOAT4 xmf4_pos{ server_bulldata.pos4f.x, server_bulldata.pos4f.y, server_bulldata.z, server_bulldata.w };
+		XMFLOAT3 xmf3_pos{ Goal.x, Goal.y, Goal.z };
+
+		auto v = Float3Add(xmf3_pos, XMFloat4to3(xmf4_pos), false);
+
+		v = Float3Normalize(v);
+
+		XMFLOAT3 l{ 0,0,1 };
+		XMVECTOR ol = XMLoadFloat3(&l);
+		XMVECTOR nl = XMLoadFloat3(&v);
+
+		auto axis = XMVector3Cross(ol, nl);
+
+		//방향축을 완성.
+		axis = XMVector3Normalize(axis);
+		XMFLOAT3 Axis;
+		XMStoreFloat3(&Axis, axis);
+		//이제 회전각도를 구해야한다. 내적을 통해 회전각도를 구한다.
+
+		auto temp = XMVector3Dot(ol, nl);
+
+		float d;//기존 룩벡터와 새로운 룩벡터를 내적한 결과.
+		XMStoreFloat(&d, temp);
+		if (fabsf(d) <= 1)//반드시 이 결과는 -1~1 사이여야한다. 그래야 각도가 구해진다.
+			d = acos(d);//각도 완성. 라디안임
+
+		auto ori = QuaternionRotation(Axis, d);
+
+		//진짜 룩벡터를 구했으니 이제 진짜 Right벡터를 구한다. 진짜 Up은 진짜 룩과 진짜 라이트를 외적만하면됨.
+		//회전을 보정해준다. 회전축에서 룩벡터를 외적하면 진짜 Right벡터가 나온다.
+		//이때 오차가 있는 RightVector를 진짜 RightVector의 사잇각을 계산하고
+		//룩벡터를 회전축으로 돌려준다. 왜 회전축에 오차가 생기는가?
+		//간단하다 기존 룩벡터와 발사방향을 룩벡터의 회전축과
+		//기존 RightVector와 발사방향을 회전축을하면 서로 다르게 나온다.
+		//문제는 만약 그냥 이대로 넘어가게 되면 RightVector와 진짜 RightVector의 각도만큼 오차가 생기므로
+		//이렇게되면 나중에 Up을 구할때도 문제가 생긴다.
+		//사실 X축 Y축 Z축 순서대로 곱을하면 이러한 문제는 거의없지만, 특정축을 기반으로 회전할때 생기는 문제다.
+
+		auto wmatrix = XMMatrixIdentity();
+		auto quater = XMLoadFloat4(&ori);
+		wmatrix *= XMMatrixRotationQuaternion(quater);
+
+		auto orr = XMVectorSet(1, 0, 0, 0);
+		orr = XMVector4Transform(orr, wmatrix);//가짜 라이트 벡터
+		orr = XMVector3Normalize(orr);
+		auto RealRight = XMVector3Cross(axis, nl);//진짜 라이트벡터
+		RealRight = XMVector3Normalize(RealRight);
+
+		//진짜 라이트 벡터와 가짜 라이트 벡터를 내적함.
+		temp = XMVector3Dot(RealRight, orr);
+
+		XMStoreFloat(&d, temp);
+
 	}
-}
+	break;
+	*/

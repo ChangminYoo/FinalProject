@@ -154,20 +154,27 @@ public:
 	//std::vector<ModelAnimation> animations;//애니메이션 데이터 저장. 메쉬와 이거,텍스처는 한번만생성해서 공유하도록해야됨
 	//ComPtr<ID3D12DescriptorHeap> SrvDescriptorHeap = nullptr;//텍스처 용 힙
 public:
-	//서버용
+	//서버 추가
+	static int g_numofdice;
+	static int npcID;
+	bool   isNPC{ false };
+
+	//bullet ID
 	static short myID;
 	static list<short> BulletIDList;
 	
 	Player_Data			 m_player_data;
+	Npc_Data			 m_npc_data;
 	StaticObject_Info	 m_sobj_data;
 	RigidbodyData		 m_rigidbody_data;
 	STC_BulletObject_Info	 m_bullet_data;
 
 	CPlayer* m_player{ nullptr };
 
-
 	bool m_end_attack{ false }, m_end_die{ false };
 	
+	//서버추가
+	float	m_degree;
 };
 void SetTexture(ID3D12GraphicsCommandList * commandlist, ComPtr<ID3D12DescriptorHeap>& SrvDescriptorHeap, ID3D12Resource* texture, bool isCubeMap, int Offset = 0);
 void LoadTexture(ID3D12Device* device, ID3D12GraphicsCommandList* commandlist, CGameObject* obj, unordered_map<string, unique_ptr<CTexture>>& Textures, ComPtr<ID3D12DescriptorHeap>& SrvDescriptorHeap, string texturename, wstring FileName, bool isCubeMap, int NumDescriptors = 1, int Offset = 0);
@@ -247,7 +254,6 @@ public:
 	virtual void Tick(const GameTimer& gt);
 	virtual void Render(ID3D12GraphicsCommandList* commandlist, const GameTimer& gt);
 	virtual void Collision(list<CGameObject*>* collist, float DeltaTime) {};
-
 
 };
 
@@ -513,7 +519,6 @@ public:
 	virtual void Tick(const GameTimer& gt);
 	virtual void Render(ID3D12GraphicsCommandList* commandlist, const GameTimer& gt);
 	virtual void Collision(list<CGameObject*>* collist, float DeltaTime);
-
 
 };
 

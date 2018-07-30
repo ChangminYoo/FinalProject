@@ -35,22 +35,15 @@ switch (packet[1])
 		scene.SET_PLAYER_BY_SEVER_DATA(init_otherdata->player_data.id, init_otherdata->player_data, packet[1]);
 	}
 	break;
-	
-	//case PACKET_PROTOCOL_TYPE::CHANGED_PLAYER_POSITION:
-	//{
-	//	auto move_data = reinterpret_cast<STC_ChangedPos*>(packet);
-	//	Player_Data new_movedata;
-	//
-	//	new_movedata.pos = move_data->pos;
-	//	new_movedata.ani = move_data->ani_state;
-	//
-	//	RgCkInfo.PtCheck.PositionInfo = move(move_data->pos);
-	//	RgCkInfo.PtCheck.AniState = static_cast<Ani_State>(move_data->ani_state);
-	//
-	//	scene.SET_PLAYER_BY_SEVER_DATA(move_data->id, new_movedata, packet[1]);
-	//}
-	//break;
 
+	case PACKET_PROTOCOL_TYPE::INIT_NPC:
+	{
+		auto init_npcdata = reinterpret_cast<STC_SetMyNPC*>(packet);
+
+		scene.SET_NPC_BY_SERVER_DATA(init_npcdata->npc_data.id, init_npcdata->npc_data, init_npcdata->npc_data.monster_type, packet[1]);
+	}
+	break;
+	
 	case PACKET_PROTOCOL_TYPE::PLAYER_DISCONNECT:
 	{
 		auto disc_data = reinterpret_cast<STC_Disconnected*>(packet);
@@ -97,8 +90,7 @@ switch (packet[1])
 
 		auto mybulldata = reinterpret_cast<STC_Attack*>(packet);
 
-
-		scene.SET_BULLET_BY_SERVER_DATA(mybulldata->bull_data, mybulldata->bull_data.type);
+		scene.SET_BULLET_BY_SERVER_DATA(mybulldata->bull_data, mybulldata->bull_data.type, mybulldata->is_first);
 	}
 	break;
 
@@ -114,7 +106,16 @@ switch (packet[1])
 	{
 		auto myskilldata = reinterpret_cast<STC_SKILL_WAVESHOCK*>(packet);
 
-		scene.SET_PLAYER_SKILL(myskilldata->skill_data.master_id, myskilldata->skill_data);
+		scene.SET_PLAYER_SKILL(myskilldata->skill_data.master_id, myskilldata->skill_data, myskilldata->texture_number);
+	}
+	break;
+
+	case PACKET_PROTOCOL_TYPE::PLAYER_SKILL_DICESTRIKE:
+	{
+		auto myskilldata = reinterpret_cast<STC_SKILL_DICESTRIKE*>(packet);
+
+		XMFLOAT3 xmf3_offlookvector{ myskilldata->lookvector.x, myskilldata->lookvector.y, myskilldata->lookvector.z };
+		scene.SET_BULLET_BY_SERVER_DATA(myskilldata->bull_data, myskilldata->bull_data.type, myskilldata->is_first, xmf3_offlookvector);
 	}
 	break;
 
@@ -136,6 +137,14 @@ switch (packet[1])
 		auto my_curr_state = reinterpret_cast<STC_CharCurrState*>(packet);
 
 		scene.SET_PLAYER_BY_SEVER_DATA(my_curr_state->player_data.id, my_curr_state->player_data, packet[1]);
+	}
+	break;
+
+	case PACKET_PROTOCOL_TYPE::NPC_MONSTER_CURR_STATE:
+	{
+		auto npc_curr_state = reinterpret_cast<STC_NpcMonsterCurrState*>(packet);
+		
+		scene.SET_NPC_BY_SERVER_DATA(npc_curr_state->npc_data.id, npc_curr_state->npc_data, npc_curr_state->npc_data.monster_type, packet[1]);
 	}
 	break;
 }
@@ -168,6 +177,7 @@ void AsyncClient::SendPacketRegular(CGameObject& gobj, const GameTimer& gt)
 	{
 
 	}
+
 
 	// 1.서버에서 담고있는 캐릭터회전정보를 주기적으로 0.2초마다 검사 및 패킷송신
 	RgCkInfo.AniCheck.t.t_time += gt.DeltaTime();

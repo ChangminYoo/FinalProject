@@ -43,12 +43,69 @@ bool CPlayerObject::CheckPlayerInfo()
 
 void CPlayerObject::Init_MonsterInfo()
 {
+	m_state = IDLE;
 
+	//-------------------------- 기본 데이터설정
+
+	m_ani = Ani_State::Idle;
+	m_connect = true;
+	m_dir = 0;
+	m_airbone = false;
+	m_ai = true;
+	m_rot4f = { 0.f, 0.f, 0.f, 1.f };
+	m_godmode = false;
+	m_fixed = false;
+	m_alive = true;
+	m_type = OBJECT_TYPE::NPC_MONSTER_IMP;
+
+	m_ability.attack = 1000;
+	m_ability.orignHP = 5000;
+	m_ability.curHP = 5000;
+	m_ability.speed = 40;
+	m_ability.exp = 0;
+	m_ability.level = 1;
+	
+	//---------------------------- Orient를 이용한 Lookvector // Rightvector // Upvector 설정
+	m_OffLookvector = XMFLOAT3(0, 0, -1);
+	m_OffRightvector = XMFLOAT3(-1, 0, 0);
+
+	xmf4_rot = { m_rot4f.x, m_rot4f.y, m_rot4f.z, m_rot4f.z };
+	auto q = XMLoadFloat4(&xmf4_rot);
+	XMFLOAT3 axis{ 0,1,0 };
+	auto q2 = QuaternionRotation(axis, MMPE_PI);
+	xmf4_rot = QuaternionMultiply(xmf4_rot, q2);
+	m_rot4f = { xmf4_rot.x, xmf4_rot.y, xmf4_rot.z, xmf4_rot.w };
+
+	UpdateLookvector();
+	UpdateUpvector();
+
+	//------------------------------ 물리효과 기본 데이터 설정
+	pp = new PhysicsPoint();
+
+	xmf4_pos = { m_pos4f.x, m_pos4f.y, m_pos4f.z, m_pos4f.w };
+	pp->SetPosition(&xmf4_pos);
+	pp->SetHalfBox(10, 20, 10);
+	pp->SetDamping(0.25);
+	pp->SetBounce(false);
+	pp->SetMass(500);
+
+
+	//------------------------------ 물리효과 적용
+	GravitySystem(0);
+
+	pp->integrate(0);
+	m_pos4f = { xmf4_pos.x, xmf4_pos.y, xmf4_pos.z, xmf4_pos.w };
+
+	AfterGravitySystem(0);
+
+	//------------------------------
 }
 
 void CPlayerObject::Init_PlayerInfo()
 {
 	m_state = IDLE;
+
+	//-------------------------- 기본 데이터설정
 
 	m_ani = Ani_State::Idle;
 	m_connect = true;
@@ -68,35 +125,34 @@ void CPlayerObject::Init_PlayerInfo()
 	m_ability.level = 1;
 	m_ability.speed = 100;
 
-	m_skill_shield.once_flag = true;
-	m_skill_shield.on_using = false;
-
-	m_skill_waveshock.once_flag = true;
-	m_skill_waveshock.on_using = false;
-	m_skill_waveshock.operated = false;
-
 	if (m_id == 0)
 		m_pos4f = { -100.f, -1000.f, 0.f, 0.f };
 	else if (m_id == 1)
 		m_pos4f = { 300.f, -1000.f, 0.f, 0.f };
 
+
+	//---------------------------- Orient를 이용한 Lookvector // Rightvector // Upvector 설정
+	//---------------------------- xmf4_rot -> m_rot4 끝
+
 	m_OffLookvector = XMFLOAT3(0, 0, -1);
 	m_OffRightvector = XMFLOAT3(-1, 0, 0);
 
-	//--------------------------------------------------------------------xmf4_rot -> m_rot4 끝
 	xmf4_rot = { m_rot4f.x, m_rot4f.y, m_rot4f.z, m_rot4f.w };
 	auto q = XMLoadFloat4(&xmf4_rot);
 	XMFLOAT3 axis{ 0,1,0 };
 	auto q2 = QuaternionRotation(axis, MMPE_PI);
 	xmf4_rot = QuaternionMultiply(xmf4_rot, q2);
-	m_rot4f.x = xmf4_rot.x; m_rot4f.y = xmf4_rot.y; m_rot4f.z = xmf4_rot.z; m_rot4f.w = xmf4_rot.w;
-	//--------------------------------------------------------------------
+	m_rot4f = { xmf4_rot.x, xmf4_rot.y, xmf4_rot.z, xmf4_rot.w };
 
 	UpdateLookvector();
 	UpdateUpvector();
 
+	//------------------------------
+
+
 	//물리효과 및 충돌처리를 위한 PhysicsPoint 클래스
-	//--------------------------------------------------------------------xmf4_pos -> m_pos4 끝
+	//------------------------------ 물리효과 기본 데이터 설정
+
 	pp = new PhysicsPoint();
 	xmf4_pos = { m_pos4f.x, m_pos4f.y, m_pos4f.z, m_pos4f.w };
 	pp->SetPosition(&xmf4_pos);
@@ -104,15 +160,15 @@ void CPlayerObject::Init_PlayerInfo()
 	pp->SetDamping(0.7);
 	pp->SetBounce(false);
 	
-	//2. 물리효과 적용
+	//------------------------------ 물리효과 적용
 	GravitySystem(0);
 
 	pp->integrate(0);
-	m_pos4f.x = xmf4_pos.x;  m_pos4f.y = xmf4_pos.y; m_pos4f.z = xmf4_pos.z; m_pos4f.w = xmf4_pos.w;
+	m_pos4f = { xmf4_pos.x, xmf4_pos.y, xmf4_pos.z, xmf4_pos.w };
 
 	AfterGravitySystem(0);
 
-	//--------------------------------------------------------------------
+	//------------------------------
 
 	//wcscpy(m_pdata.LoginData.name, m_loginID);
 	//wcscpy(m_pdata.LoginData.password, m_loginPW);
@@ -167,8 +223,24 @@ void CPlayerObject::InitData_To_Client()
 
 
 	//------------------------------------------------------------------------------------
+}
 
+void CPlayerObject::InitNPCData_To_Client()
+{
+	STC_SetMyNPC stc_npc_init;
 
+	for (auto npc : g_npcs)
+	{
+		stc_npc_init.npc_data = move(npc->GetMyBasicPacketData());
+		for (auto client : g_clients)
+		{
+			if (!client->GetConnectState()) continue;
+			if ( client->GetIsAI()) continue;
+
+			client->SendPacket(reinterpret_cast<Packet*>(&stc_npc_init));
+		}
+
+	}
 }
 
 /*
@@ -350,73 +422,6 @@ void CPlayerObject::ProcessPacket(Packet * packet)
 	}
 	break;
 
-	/*
-	case PACKET_PROTOCOL_TYPE::CHANGED_PLAYER_POSITION:
-	{
-
-		if (m_state == PLAYER_STATE::DEAD)
-			break;
-
-		1. 받아들인 데이터(키를 눌러 플레이어를 움직였음)에서 변화된 정보를 추출(물리효과 적용x)
-		auto PosMove_Data = reinterpret_cast<STC_ChangedPos*>(packet);
-
-		if (PosMove_Data->deltime <= 0)
-			PosMove_Data->deltime = 0.f;
-
-		if (PosMove_Data->ani_state == Ani_State::Idle)
-			m_state = PLAYER_STATE::IDLE;
-		else if (PosMove_Data->ani_state == Ani_State::Run)
-			m_state = PLAYER_STATE::MOVE;
-
-		2. 물리효과 적용
-		GravitySystem(PosMove_Data->deltime);
-		g_clients[PosMove_Data->id]->GravitySystem(PosMove_Data->deltime);
-
-		Tick(PosMove_Data->deltime,PosMove_Data->pos);
-		g_clients[PosMove_Data->id]->Tick(PosMove_Data->deltime, PosMove_Data->pos);
-
-		pp->SetPosition(m_pos4f.x, m_pos4f.y, m_pos4f.z);
-		g_clients[PosMove_Data->id]->pp->SetPosition(m_pos4f.x, m_pos4f.y, m_pos4f.z);
-
-		AfterGravitySystem(PosMove_Data->deltime);
-		g_clients[PosMove_Data->id]->AfterGravitySystem(PosMove_Data->deltime);
-
-		3. 이동 - (애니메이션, 위치 변경) 변경된 데이터를 서버에서관리하는 내 클라이언트에 저장
-		g_clients[PosMove_Data->id]->m_ani = PosMove_Data->ani_state;
-		SetChangedPlayerState();
-
-		g_clients[PosMove_Data->id]->m_pos4f;
-
-
-		cout << "ID: " << PosMove_Data->id << " 변화된 위치값: " << "[x:" << PosMove_Data->pos.x << "\t" << "y:" << PosMove_Data->pos.y
-			<< "\t" << "z:" << PosMove_Data->pos.z << "]" << "\t" << "w:" << PosMove_Data->pos.w << endl;
-
-		4. 변화된 내 (포지션, 애니메이션) 정보를 다른 클라에 전달 - 반드시 이렇게 다시 만들어줘야함
-		PosMove_Data를 바로 sendpacket에 packet으로 형변화하여 보내면 size error가 난다
-
-		STC_ChangedPos stc_other_pos;
-
-		stc_other_pos.id = PosMove_Data->id;
-		stc_other_pos.ani_state = PosMove_Data->ani_state;
-		stc_other_pos.pos = move(g_clients[PosMove_Data->id]->m_pos4f);
-
-		for (auto client : g_clients)
-		{
-			//상대가 ai / 연결끊김 / 나일 경우 보낼 필요 없음
-			if (static_cast<bool>(client->m_pdata.ai) == true) continue;
-			if (static_cast<bool>(client->m_pdata.connect) == false) continue;
-
-			//if (client->m_pdata.ID == PosMove_Data->id) continue;
-			//여기서 문제
-
-			//갱신된 나의 데이터를 상대방에게 전달
-			client->SendPacket(reinterpret_cast<Packet*>(&stc_other_pos));
-		}
-
-	}
-	break;
-	*/
-
 	case PACKET_PROTOCOL_TYPE::PLAYER_ROTATE:
 	{
 		if (m_state == PLAYER_STATE::DEAD)
@@ -466,42 +471,39 @@ void CPlayerObject::ProcessPacket(Packet * packet)
 		//불렛을 생성한 캐릭터 ID, 유도를 대비한 타겟 ID, 불렛 초기생성위치, 불렛 초기회전값, 불렛 생성시간, 불렛아이디
 		g_bullobj = new CBulletObject(n_bldata->bull_data.master_id, n_bldata->bull_data.my_id,
 			n_bldata->bull_data.pos4f, n_bldata->bull_data.rot4f, n_bldata->lifetime,
-			n_bldata->bull_data.vel3f, n_bldata->bull_data.type, n_bldata->bull_data.endpoint);
+			n_bldata->bull_data.vel3f, n_bldata->bull_data.type, n_bldata->bull_data.endpoint, n_bldata->bull_data.degree);
 
+		g_bullets.emplace_back(g_bullobj);
+
+		/*
 		STC_Attack stc_attack;
-		stc_attack.bull_data.pos4f = move(n_bldata->bull_data.pos4f);
-		stc_attack.bull_data.rot4f = move(n_bldata->bull_data.rot4f);
+		stc_attack.bull_data.pos4f = n_bldata->bull_data.pos4f;
+		stc_attack.bull_data.rot4f = n_bldata->bull_data.rot4f;
+		stc_attack.bull_data.endpoint = n_bldata->bull_data.endpoint;
 		stc_attack.bull_data.master_id = n_bldata->bull_data.master_id;
 		stc_attack.bull_data.my_id = n_bldata->bull_data.my_id;
 		stc_attack.bull_data.type = n_bldata->bull_data.type;
 		stc_attack.bull_data.alive = n_bldata->bull_data.alive;
-		stc_attack.bull_data.endpoint = move(n_bldata->bull_data.endpoint);
+		stc_attack.bull_data.degree = n_bldata->bull_data.degree;
 
-		//for (auto client : g_clients)
-		//{
-		//	if (client->m_id == n_bldata->bull_data.master_id) continue;
-		//	if (client->GetIsAI() == true || client->GetConnectState() == false) continue;
-		//
-		//	client->SendPacket(reinterpret_cast<Packet*>(&stc_attack));
-		//}
+		stc_attack.is_first = g_bullobj->GetIsFirstBullet();
+		//불렛이 생성된 위치를 나 말고도 상대방도 알고 있어야함. //상대방 클라이언트에게 내 불렛 생성위치를 보냄
+		for (auto client : g_clients)
+		{
+			//불렛을 쏜 클라이언트는 자신이 불렛을 생성했으므로 따로 생성정보를 보내주지 않아도됨 
+			if (client->m_id == n_bldata->bull_data.master_id) continue;
+			if (client->GetIsAI() == true || client->GetConnectState() == false) continue;
+		
+			client->SendPacket(reinterpret_cast<Packet*>(&stc_attack));	
+		}
+
+		if (g_bullobj->GetIsFirstBullet())
+			g_bullobj->SetIsFirstBullet(false);
 
 		g_bullets.emplace_back(g_bullobj);
 
-		//불렛을 쏜 캐릭터의 공격애니메이션을 다른 클라이언트에게도 보내준다
-		//STC_CharAnimation stc_charani;
-		//stc_charani.id = g_bullobj->GetBulletMasterID();
-		//stc_charani.ani_state = Ani_State::Attack;
+		*/
 
-		//불렛이 생성된 위치를 나 말고도 상대방도 알고 있어야함. //상대방 클라이언트에게 내 불렛 생성위치를 보냄
-		//for (auto client : g_clients)
-		//{
-		//	//불렛을 쏜 클라이언트는 자신이 불렛을 생성했으므로 따로 생성정보를 보내주지 않아도됨 
-		//	if (client->m_id == n_bldata->bull_data.master_id) continue;
-		//	if (client->GetIsAI() == true || client->GetConnectState() == false) continue;
-		//
-		//	client->SendPacket(reinterpret_cast<Packet*>(&stc_charani));
-		//
-		//}
 		//if (n_bldata->bull_data.type == BULLET_TYPE::protocol_LightBullet)
 		//	g_timer_queue.AddEvent(n_bldata->bull_data.myID, 0, LIGHT_BULLET, true, n_bldata->bull_data.Master_ID);
 		//if (n_bldata->bull_data.type == BULLET_TYPE::protocol_HeavyBullet)
@@ -551,7 +553,8 @@ void CPlayerObject::ProcessPacket(Packet * packet)
 			if (client->GetIsAI() == true || client->GetConnectState() == false) continue;
 
 			client->SendPacket(reinterpret_cast<Packet*>(&stc_cani));
-		}
+			cout << "Client Number " << client->m_id << "Animation : " << static_cast<int>(ani->ani_state) << "\n";
+		} 
 	}
 	break;
 
@@ -560,25 +563,47 @@ void CPlayerObject::ProcessPacket(Packet * packet)
 		if (m_state == DEAD)
 			break;
 
-		auto data = reinterpret_cast<STC_SKILL_SHIELD*>(packet);
+		auto data = reinterpret_cast<CTS_SKILL_SHIELD*>(packet);
 
 		STC_SKILL_SHIELD stc_skill_shield;
-		stc_skill_shield.skill_data.alive = true;
 		stc_skill_shield.skill_data.master_id = data->skill_data.master_id;
 		stc_skill_shield.skill_data.my_id = data->skill_data.my_id;
+		stc_skill_shield.skill_data.alive = true;
 
-		if (m_skill_shield.once_flag)
+		m_skill_shield.data.curr_cooltime = high_resolution_clock::now();
+		if (m_skill_shield.data.first_op)
+			m_skill_shield.data.prev_cooltime = m_skill_shield.data.curr_cooltime;
+		
+		__int64 dur = duration_cast<microseconds>(m_skill_shield.data.curr_cooltime - m_skill_shield.data.prev_cooltime).count();
+		m_skill_shield.data.prev_cooltime = m_skill_shield.data.curr_cooltime;
+		double cool_time = dur / 1000000.0;
+
+		stc_skill_shield.cooltime = cool_time;
+
+		if (m_skill_shield.data.first_op == false && cool_time < SKILL_SHIELD_COOLTIME == true)
 		{
-			m_skill_shield.once_flag = false;
-			m_skill_shield.op_time = 0.0;
-			g_timer_queue.AddEvent(0, 0.0, SKILL_SHIELD, true, data->skill_data.master_id);
+			//Disconnect Client
+		}
 
-			for (auto client : g_clients)
+		cout << "Shield cool time: " << cool_time << "\n";
+
+		if (cool_time >= SKILL_SHIELD_COOLTIME | m_skill_shield.data.first_op)
+		{
+			m_skill_shield.data.first_op = false;
+		
+			if (m_skill_shield.data.once_flag)
 			{
-				if (client->m_id == data->skill_data.master_id) continue;
-				if (client->GetIsAI() == true || client->GetConnectState() == false) continue;
+				m_skill_shield.data.once_flag = false;
+				m_skill_shield.data.op_time = 0.0;
+				g_timer_queue.AddEvent(0, 0.0, SKILL_SHIELD, true, data->skill_data.master_id);
 
-				client->SendPacket(reinterpret_cast<Packet*>(&stc_skill_shield));
+				for (auto client : g_clients)
+				{
+					if (client->m_id == data->skill_data.master_id) continue;
+					if (client->GetIsAI() == true || client->GetConnectState() == false) continue;
+
+					client->SendPacket(reinterpret_cast<Packet*>(&stc_skill_shield));
+				}
 			}
 		}
 	}
@@ -588,43 +613,135 @@ void CPlayerObject::ProcessPacket(Packet * packet)
 	{
 		if (m_state == DEAD) break;
 
-		auto data = reinterpret_cast<STC_SKILL_WAVESHOCK*>(packet);
+		auto data = reinterpret_cast<CTS_SKILL_WAVESHOCK*>(packet);
 
 		STC_SKILL_WAVESHOCK stc_skill_waveshock;
 		stc_skill_waveshock.skill_data.master_id = data->skill_data.master_id;
 		stc_skill_waveshock.skill_data.my_id = data->skill_data.my_id;
 		stc_skill_waveshock.skill_data.alive = true;
+		stc_skill_waveshock.texture_number = data->texture_number;
 
-		if (m_skill_waveshock.once_flag)
+		m_skill_waveshock.data.curr_cooltime = high_resolution_clock::now();
+		if (m_skill_waveshock.data.first_op)
+			m_skill_waveshock.data.prev_cooltime = m_skill_waveshock.data.curr_cooltime;
+
+		__int64 dur = duration_cast<microseconds>(m_skill_waveshock.data.curr_cooltime - m_skill_waveshock.data.prev_cooltime).count();
+		m_skill_waveshock.data.prev_cooltime = m_skill_waveshock.data.curr_cooltime;
+		double cool_time = dur / 1000000.0;
+		
+		if (cool_time >= SKILL_WAVESHOCK_COOLTIME | m_skill_waveshock.data.first_op)
 		{
-			m_skill_waveshock.once_flag = false;
-			m_skill_waveshock.op_time = 0.0;
-			g_timer_queue.AddEvent(0, 0.0, SKILL_WAVESHOCK, true, data->skill_data.master_id);
-
-			for (auto client : g_clients)
+			m_skill_waveshock.data.first_op = false;
+			m_skill_waveshock.operated = true;
+			//stc_skill_waveshock.cooltime = 0.0;
+			if (m_skill_waveshock.data.once_flag)
 			{
-				if (client->m_id == data->skill_data.master_id) continue;
-				if (client->GetIsAI() == true || client->GetConnectState() == false) continue;
+				m_skill_waveshock.data.once_flag = false;
+				m_skill_waveshock.data.op_time = 0.0;
+				g_timer_queue.AddEvent(0, 0.0, SKILL_WAVESHOCK, true, data->skill_data.master_id);
 
-				client->SendPacket(reinterpret_cast<Packet*>(&stc_skill_waveshock));
+				for (auto client : g_clients)
+				{
+					if (client->m_id == data->skill_data.master_id) continue;
+					if (client->GetIsAI() == true || client->GetConnectState() == false) continue;
+
+					client->SendPacket(reinterpret_cast<Packet*>(&stc_skill_waveshock));
+				}
 			}
 		}
 
 	}
 	break;
 
+	case PACKET_PROTOCOL_TYPE::PLAYER_SKILL_DICESTRIKE:
+	{
+		if (m_state == PLAYER_STATE::DEAD)
+			break;
+
+		m_state = PLAYER_STATE::ATTACK;
+
+		auto data = reinterpret_cast<CTS_SKILL_DICESTRIKE*>(packet);
+
+		//----------------------------------------------------------------스킬 쿨타임-------------------------------------------------------//
+		if (data->is_firstdice)
+		{
+			m_skill_dicestrike.data.curr_cooltime = high_resolution_clock::now();
+			if (m_skill_dicestrike.data.first_op)
+			{
+				m_skill_dicestrike.data.prev_cooltime = m_skill_dicestrike.data.curr_cooltime;
+			}
+				
+			__int64 dur = duration_cast<microseconds>(m_skill_dicestrike.data.curr_cooltime - m_skill_dicestrike.data.prev_cooltime).count();
+			m_skill_dicestrike.data.prev_cooltime = m_skill_dicestrike.data.curr_cooltime;
+			double cool_time = dur / 1000000.0;
+
+
+			if (cool_time < SKILL_DICESTRIKE_COOLTIME & !m_skill_dicestrike.data.first_op)
+			{
+				cout << "Dicestrike skill cooltime Error \n";
+				m_skill_dicestrike.cooltime_error = true;
+				break;
+			}
+
+			if (cool_time >= SKILL_DICESTRIKE_COOLTIME & m_skill_dicestrike.cooltime_error)
+			{
+				cout << "Dicestrike skill cooltime Recovery \n";
+				m_skill_dicestrike.cooltime_error = false;
+			}
+
+			if (m_skill_dicestrike.data.first_op)
+				m_skill_dicestrike.data.first_op = false;
+
+		}
+
+		//----------------------------------------------------------------스킬 쿨타임-------------------------------------------------------//
+
+
+		//공격키를 눌렀을 시, 불렛 생성.
+		//불렛을 생성한 캐릭터 ID, 유도를 대비한 타겟 ID, 불렛 초기생성위치, 불렛 초기회전값, 불렛 생성시간, 불렛아이디
+		if (!m_skill_dicestrike.cooltime_error)
+		{
+			g_bullobj = new CBulletObject(data->bull_data.master_id, data->bull_data.my_id,
+				data->bull_data.pos4f, data->bull_data.rot4f, 0.f,
+				data->bull_data.vel3f, data->bull_data.type, data->bull_data.endpoint, data->bull_data.degree);
+
+			g_bullobj->SetDicestrikeOffLookvector(data->lookvector);
+
+			g_bullets.emplace_back(g_bullobj);
+		}
+
+		/*
+		STC_Attack stc_attack;
+		stc_attack.bull_data.pos4f = n_bldata->bull_data.pos4f;
+		stc_attack.bull_data.rot4f = n_bldata->bull_data.rot4f;
+		stc_attack.bull_data.endpoint = n_bldata->bull_data.endpoint;
+		stc_attack.bull_data.master_id = n_bldata->bull_data.master_id;
+		stc_attack.bull_data.my_id = n_bldata->bull_data.my_id;
+		stc_attack.bull_data.type = n_bldata->bull_data.type;
+		stc_attack.bull_data.alive = n_bldata->bull_data.alive;
+		stc_attack.bull_data.degree = n_bldata->bull_data.degree;
+
+		stc_attack.is_first = g_bullobj->GetIsFirstBullet();
+		//불렛이 생성된 위치를 나 말고도 상대방도 알고 있어야함. //상대방 클라이언트에게 내 불렛 생성위치를 보냄
+		for (auto client : g_clients)
+		{
+		//불렛을 쏜 클라이언트는 자신이 불렛을 생성했으므로 따로 생성정보를 보내주지 않아도됨
+		if (client->m_id == n_bldata->bull_data.master_id) continue;
+		if (client->GetIsAI() == true || client->GetConnectState() == false) continue;
+
+		client->SendPacket(reinterpret_cast<Packet*>(&stc_attack));
+		}
+
+		if (g_bullobj->GetIsFirstBullet())
+		g_bullobj->SetIsFirstBullet(false);
+
+		g_bullets.emplace_back(g_bullobj);
+		*/
 
 	}
-}
+	break;
 
-void CPlayerObject::GravitySystem(double deltime)
-{
-	GeneratorGravity gg;
-	gg.SetGravityAccel(XMFLOAT3(0, -100, 0));
 
-	if (m_fixed == false)
-	{
-		gg.Update(deltime, *pp);
 	}
 }
 
@@ -644,26 +761,6 @@ void CPlayerObject::Tick(double deltime, Position& pos4f)
 
 	UpdatePPosCenterPos();
 	
-}
-
-void CPlayerObject::AfterGravitySystem(double deltime)
-{
-	//cout << "AfterGravitySystem PosY: " << m_pos4f.y << "\n";
-
-	float ppy = pp->GetPosition().y;
-	float hby = pp->GetHalfBox().y;
-	if (ppy - hby < 0)
-	{
-		XMFLOAT4 gp = pp->GetPosition();
-		gp.y += hby - ppy;
-		*pp->CenterPos = gp;
-		UpdatePPosCenterPos();
-
-		auto v = pp->GetVelocity();
-		v.y = 0;
-		pp->SetVelocity(v);
-		m_airbone = false;
-	}
 }
 
 void CPlayerObject::Collision(vector<CPlayerObject*>* clients, double deltime)
@@ -712,8 +809,7 @@ void CPlayerObject::Collision(vector<CPlayerObject*>* clients, double deltime)
 
 void CPlayerObject::Collision(unordered_set<CStaticObject*>* sobjs, double deltime)
 {
-	//주인은 사람 - 충돌 대상은 스테틱오브젝트
-	
+	//주인은 사람 - 충돌 대상은 스테틱오브젝트	
 	for (auto iter = sobjs->begin(); iter != sobjs->end(); ++iter)
 	{
 		bool test = pp->CollisionTest(*(*iter)->GetPhysicsPoint(), m_Lookvector, m_Rightvector, m_Upvector,
@@ -794,12 +890,12 @@ void CPlayerObject::GetDamaged(int damage)
 {
 	if (m_godmode) return;
 
-	if (m_skill_shield.on_using)			//실드 스킬 사용 중일 시 데미지 1씩 뜸
+	if (m_skill_shield.data.on_using)			//실드 스킬 사용 중일 시 데미지 1씩 뜸
 	{
 		m_ability.curHP -= 1;
 	}
 		
-	if (m_ability.curHP > 0 && m_skill_shield.on_using == false)
+	if (m_ability.curHP > 0 && m_skill_shield.data.on_using == false)
 	{
 		//캐릭터 hp를 감소
 		m_ability.curHP -= damage;

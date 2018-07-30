@@ -6,6 +6,7 @@ CTimerWorker			g_timer_queue;
 CPhysicEngineWorker     g_physics_worker;
 
 vector<CPlayerObject*>	g_clients;
+vector<CNpcObject*>	g_npcs;
 
 list<CBulletObject*>	g_bullets;
 CBulletObject			*g_bullobj;
@@ -13,6 +14,10 @@ CBulletObject			*g_bullobj;
 unordered_set<CStaticObject*> g_staticobjs;
 unordered_set<RigidCubeObject*> g_rigidobjs;
 CStaticObject				 *g_staticobj;
+
+FSM							*g_fsm;
+CNpcObject					*g_npcobj;
+
 
 queue<char>					g_pdir_queue;
 

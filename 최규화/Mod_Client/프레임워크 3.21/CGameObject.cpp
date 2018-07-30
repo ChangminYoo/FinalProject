@@ -2,6 +2,8 @@
 #include "FSM.h"
 extern UINT CbvSrvDescriptorSize;
 
+int CGameObject::g_numofdice = 0;
+int CGameObject::npcID = -1;
 short CGameObject::myID = -1;
 list<short> CGameObject::BulletIDList = list<short>();
 
@@ -335,7 +337,6 @@ CCubeManObject::CCubeManObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 	TextureName = "Male White King";
 	TexOff = select;
 	
-	
 	//게임오브젝트마다 룩벡터와 라이트벡터가 다르므로 초기 오프셋 설정을 해준다.
 	//실제 룩벡터 등은 모두 UpdateLookVector에서 처리된다(라이트벡터도) 따라서 Tick함수에서 반드시 호출해야한다.
 	OffLookvector = XMFLOAT3(0, 0, -1);
@@ -424,7 +425,7 @@ void CCubeManObject::Tick(const GameTimer & gt)
 {
 	//적분기. 적분기란? 매 틱마다 힘! 에의해서 변화 되는 가속도/속도/위치를 갱신한다.
 	//이때 pp의 position과 CenterPos를 일치시켜야하므로 CenterPos의 포인터를 인자로 넘겨야 한다.
-	pp->integrate(gt.DeltaTime());
+	//pp->integrate(gt.DeltaTime());
 
 	if (ObjData.isAnimation == true)
 	{
@@ -535,6 +536,10 @@ void CCubeManObject::EndAnimation(int nAni)
 		SetAnimation((int)Ani_State::Idle);//대기상태로둔다.
 
 		m_end_attack = true;
+		
+
+		//여기가 문제
+		cout << "Client ID: " << m_player_data.id << "Attack Animation End \n";
 	}
 
 	if (nAni == Ani_State::Dead)//죽는모션이었으면
@@ -1848,6 +1853,7 @@ void Tetrike::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer& g
 
 DiceStrike::DiceStrike(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, CGameObject * master, XMFLOAT4& ori, float degree, CGameObject * lockon, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, cp)
 {
+	bool firstBullet = true;
 	if (CreateMesh == false)
 	{
 
@@ -1858,7 +1864,7 @@ DiceStrike::DiceStrike(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 		SetMesh(m_Device, commandlist);
 		SetMaterial(m_Device, commandlist);
 		CreateMesh = true;
-
+		firstBullet = false;
 	}
 	
 
@@ -1868,6 +1874,8 @@ DiceStrike::DiceStrike(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 	OffLookvector = XMFLOAT3(0, 0, 1);
 	OffRightvector = XMFLOAT3(1, 0, 0);
 	//인자로 발사방향으로 룩벡터가 될정도로 회전한 ori값을 받고, 현재 방향(아직은 0,0,0,1)과 곱해준다.
+
+	m_degree = degree;
 	Orient = QuaternionMultiply(Orient, ori);
 	XMFLOAT3 axis{ 0,1,0 };
 	auto q2 = QuaternionRotation(axis, degree);
@@ -1880,6 +1888,15 @@ DiceStrike::DiceStrike(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 	ObjData.isAnimation = 0;
 	ObjData.Scale = 2.0;
 	ObjData.SpecularParamater = 0.2f;//스페큘러를 낮게준다.
+
+	if (firstBullet)
+	{
+		++myID;
+		BulletIDList.push_back(myID);
+
+		m_bullet_data.my_id = myID;
+		m_bullet_data.master_id = master->m_player_data.id;
+	}
 
 									 //게임관련 데이터들
 	gamedata.MAXHP = 1;
@@ -1946,6 +1963,7 @@ void DiceStrike::SetMaterial(ID3D12Device * m_Device, ID3D12GraphicsCommandList 
 
 void DiceStrike::Tick(const GameTimer & gt)
 {
+	/*
 	pp->integrate(gt.DeltaTime());
 
 	Orient = QuaternionMultiply(Orient, QuaternionRotation(Lookvector, MMPE_PI * gt.DeltaTime()));
@@ -1955,6 +1973,7 @@ void DiceStrike::Tick(const GameTimer & gt)
 
 	if (LifeTime <= 0)
 		DelObj = true;
+	*/
 }
 
 void DiceStrike::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer & gt)
@@ -1975,6 +1994,10 @@ void DiceStrike::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer
 
 void DiceStrike::Collision(list<CGameObject*>* collist, float DeltaTime)
 {
+	//auto BulletParticles2 = new ParticleObject2(device, commandlist, ParticleList, this, 0.7f, XMFLOAT4(CenterPos.x, CenterPos.y, CenterPos.z, 0));
+	//ParticleList->push_back(BulletParticles2);
+
+	/*
 	CollisionList = collist;
 	//충돌리스트의 모든 요소와 충돌검사를 실시한다.
 	for (auto i = CollisionList->begin(); i != CollisionList->end(); i++)
@@ -2025,6 +2048,7 @@ void DiceStrike::Collision(list<CGameObject*>* collist, float DeltaTime)
 			}
 		}
 	}
+	*/
 }
 
 
@@ -2702,6 +2726,7 @@ void DiceObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * co
 void DiceObject::Tick(const GameTimer & gt)
 {
 	LifeTime -= gt.DeltaTime();
+
 	if (LifeTime <= 0)
 	{		
 		if (TexStart == 0)
@@ -2768,6 +2793,9 @@ void DiceObject::Tick(const GameTimer & gt)
 		tempori = XMQuaternionMultiply(tempori, ori2);
 		XMStoreFloat4(&ori, tempori);//최종 회전 방향
 
+		cout << "CGamObject Master Lookvector xyz: " << Master->Lookvector.x << " , " << Master->Lookvector.y << " , " << Master->Lookvector.z << "\n";
+		cout << "\n";
+
 		if (Dicedata == 1)
 			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist, Master, ori, 0, NULL, Master->CenterPos));
 
@@ -2798,7 +2826,13 @@ void DiceObject::Tick(const GameTimer & gt)
 			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist, Master, ori, -MMPE_PI / 6, NULL, Master->CenterPos));
 		}
 
+
 		DelObj = true;
+
+		//서버추가
+		//전역으로 현재 확정된 다이스갯수를 관리
+		g_numofdice = Dicedata;
+
 	}
 
 	dTime = rand()%11;	
@@ -3014,6 +3048,7 @@ RigidCubeObject::RigidCubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandL
 
 void RigidCubeObject::Tick(const GameTimer & gt)
 {
+	
 	/*
 	if (rb != NULL)
 		rb->integrate(gt.DeltaTime());
@@ -3718,6 +3753,10 @@ ParticleObject::ParticleObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 	Orient = QuaternionMultiply(Orient, q2);
 
 	UpdateLookVector();
+
+	cout << "Particle Orient xyz:  " << Orient.x << ", " << Orient.y << ", " << Orient.z << ", " << Orient.w << "\n";
+	cout << "Particle Lookvector xyz:  " << Lookvector.x << ", " << Lookvector.y << ", " << Lookvector.z << "\n";
+
 }
 
 void ParticleObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
@@ -4024,8 +4063,12 @@ ImpObject::ImpObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comman
 	}
 	TextureName = "imp";
 
-
-
+	//임프 오브젝트를 추가할 때마다 아이디 증가
+	if (CreateMesh)
+	{
+		isNPC = true;
+		m_npc_data.id = ++npcID;
+	}
 
 	//게임오브젝트마다 룩벡터와 라이트벡터가 다르므로 초기 오프셋 설정을 해준다.
 	//실제 룩벡터 등은 모두 UpdateLookVector에서 처리된다(라이트벡터도) 따라서 Tick함수에서 반드시 호출해야한다.
@@ -4374,7 +4417,7 @@ void RingObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer
 	*/
 
 	times += gt.DeltaTime();
-	ObjData.Scale += gt.DeltaTime() * 125;
+	ObjData.Scale += gt.DeltaTime() * 1000;
 
 	if (Textures.size() > 0)
 		SetTexture(commandlist, SrvDescriptorHeap, Textures[TextureName].get()->Resource.Get(), false, TexOff);

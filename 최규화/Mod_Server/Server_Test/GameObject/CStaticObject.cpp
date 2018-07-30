@@ -136,32 +136,12 @@ void CStaticObject::CreateGameObject()
 
 	for (auto sobj : g_staticobjs)
 		sobj->AfterGravitySystem(0);
-
-
 }
 
 void CStaticObject::StaticObjectLoop()
 {
 	MakeStaticObjectBasicData();
 	CreateGameObject();
-}
-
-void CStaticObject::AfterGravitySystem(double deltime)
-{
-	float ppy = pp->GetPosition().y;
-	float hby = pp->GetHalfBox().y;
-	if (ppy - hby < 0)
-	{
-		XMFLOAT4 gp = pp->GetPosition();
-		gp.y += hby - ppy;
-		*pp->CenterPos = gp;
-		UpdatePPosCenterPos();
-
-		auto v = pp->GetVelocity();
-		v.y = 0;
-		pp->SetVelocity(v);
-		m_airbone = false;
-	}
 }
 
 CStaticObject::~CStaticObject()
@@ -433,7 +413,7 @@ RigidCubeObject::RigidCubeObject(unsigned int id)
 	UpdateUpvector();
 
 	//XMFLOAT4 xmf4 = { m_pos4f.x, m_pos4f.y, m_pos4f.z, m_pos4f.w };
-	xmf4_pos = XMFLOAT4(m_sobj_bdata[id].pos.x, m_sobj_bdata[id].pos.y, m_sobj_bdata[id].pos.z, m_sobj_bdata[id].pos.w);
+	xmf4_pos = XMFLOAT4(m_sobj_bdata[id].pos.x, m_sobj_bdata[id].pos.y  , m_sobj_bdata[id].pos.z, m_sobj_bdata[id].pos.w);
 	rb->SetPosition(&xmf4_pos);
 	rb->SetHalfBox(10, 10, 10);
 	rb->SetDamping(0.5f, 0.38f);
@@ -446,7 +426,7 @@ RigidCubeObject::RigidCubeObject(unsigned int id)
 
 	//물리엔진 값을 이용한 pos 와 rot을 업데이트
 	UpdateRPosCenterPos();
-	m_rot4f.x = xmf4_rot.x; m_rot4f.y = xmf4_rot.y; m_rot4f.z = xmf4_rot.z; m_rot4f.w = xmf4_rot.w;
+	UpdateRRotatePos();
 
 	XMFLOAT3 testForce{ -5,-3,2 };
 	XMFLOAT3 testPoint{ -15, 5,-5 };
@@ -454,13 +434,16 @@ RigidCubeObject::RigidCubeObject(unsigned int id)
  	rb->AddForcePoint(testForce, testPoint);
 	rb->integrate(0.1);
 
+
 }
 
 void RigidCubeObject::AmendObject(XMFLOAT3 axis, float radian, CMonoObject * obj)
 {
 	XMFLOAT4 q = QuaternionRotation(axis, radian);
+	
 	obj->SetRotatePos4f(QuaternionMultiply(obj->GetRotatePos4f(), q));
 	obj->UpdateLookvector();
+	obj->UpdateUpvector();
 }
 
 void RigidCubeObject::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, double deltime, CMonoObject * obj)
@@ -634,7 +617,7 @@ void RigidCubeObject::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance,
 			//단 이게 double로 해도 0이아닌데 0이나오는경우가 생긴다.
 			//따라서 0일경우 그냥 충격량을 가해서 각도를 변경시킨다.
 
-			if (abs(stheta) <= MMPE_PI / 20 && abs(stheta) != 0 && abs(impurse) < obj->GetRigidBody()->GetMaxImpurse() && obj->GetRigidBody()->AmendTime <= 0)
+			if (abs(stheta) <= MMPE_PI / 20 && abs(stheta) != 0 && obj->GetRigidBody()->AmendTime <= 0)
 			{
 				//회전축을 구하고..
 				XMFLOAT3 mAxis = XMFloat4to3(Float4Cross(sV1, sV2));
@@ -647,7 +630,7 @@ void RigidCubeObject::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance,
 				obj->GetRigidBody()->SetAngularVelocity(0, 0, 0);
 
 			}
-			else if (abs(theta) <= MMPE_PI / 25 && abs(theta) != 0 && obj->GetRigidBody()->GetMaxImpurse() && obj->GetRigidBody()->AmendTime <= 0)
+			else if (abs(theta) <= MMPE_PI / 25 && abs(theta) != 0 && obj->GetRigidBody()->AmendTime <= 0)
 			{
 				//대략 5도 이하면 보정시킴.
 
@@ -954,6 +937,7 @@ void RigidCubeObject::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance,
 
 
 					//보정을 시킨다.
+					//여기 거치면 size = 4 인곳으로 이동됨 //velocity = 0, 0, 0
 					AmendObject(mAxis, theta, obj);
 					obj->GetRigidBody()->SetAngularVelocity(0, 0, 0);
 

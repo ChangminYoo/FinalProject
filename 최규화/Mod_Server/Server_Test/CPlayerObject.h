@@ -1,47 +1,12 @@
 #pragma once
 #include <vector>
-//#include "GameObject\CMonoObject.h"
 
-//#include "GameObject\CBulletObject.h"
-//#include "CScene.h"
-
-//class CScene;
-
-enum PLAYER_STATE
-{
-	DISCONNECT,
-	IDLE,
-	MOVE,
-	ROTATE,
-	ATTACK,
-	DEAD,
-};
-
-struct SKILL_SHIELD_DATA
-{
-	bool   once_flag;
-	bool   on_using;
-	double op_time;
-};
-
-struct SKILL_WAVESHOCK_DATA
-{
-	bool once_flag;
-	bool on_using;
-	bool operated;
-	double op_time;
-
-};
-
-class CPlayerObject : public CMonoObject
+class CPlayerObject : public CNpcObject
 {
 private:
 	boost::asio::ip::tcp::socket m_socket;
 
 	unsigned short		m_id;
-	char				m_connect{ false };
-	char				m_state{ IDLE };
-	unsigned char		m_ani;
 
 	wchar_t				m_loginID[MAX_BUFFER_SIZE / 4]{ L"Guest" };
 	wchar_t				m_loginPW[MAX_BUFFER_SIZE / 4]{ L"Guest" };
@@ -54,6 +19,7 @@ private:
 	float				m_elaspedtime{ 0 };
 	SKILL_SHIELD_DATA	m_skill_shield;
 	SKILL_WAVESHOCK_DATA m_skill_waveshock;
+	SKILL_DICESTRIKE_DATA m_skill_dicestrike;
 
 public:
 	unsigned int		m_curr_packet_size{ 0 };
@@ -62,7 +28,6 @@ public:
 	Player_Data			m_pdata;
 	mutex				m_mtx;
 
-	
 	//void				Lock() { m_mtx.lock(); }
 	//void				UnLock() { m_mtx.unlock(); }
 
@@ -98,6 +63,7 @@ public:
 	void Init_MonsterInfo();
 	void Init_PlayerInfo();
 	void InitData_To_Client();
+	void InitNPCData_To_Client();
 	void PlayerInput(double deltime);
 	
 	// ---------------------------------------------------------------------------------------
@@ -113,9 +79,6 @@ public:
 
 	void	SetConnectState(char flag) { m_connect = flag; }
 	bool	GetConnectState() const { return static_cast<bool>(m_connect); }
-
-	Packet* Get_DataBuf() { return m_databuf; }
-	Packet* Get_RecvBuf() { return m_recvbuf; }
 
 	void	GetDamaged(int damage);
 	bool    GetPlayerIsAlive() { return static_cast<bool>(m_alive); }
@@ -134,23 +97,23 @@ public:
 	void	SetPlayerAnimation(unsigned char ani) { m_ani = ani; }
 	unsigned char GetPlayerAnimation() const { return m_ani; }
 
-	bool	GetShieldState() const { return m_skill_shield.on_using; }
-	void	SetShieldState(bool flag) { m_skill_shield.on_using = flag; }
+	bool	GetShieldState() const { return m_skill_shield.data.on_using; }
+	void	SetShieldState(bool flag) { m_skill_shield.data.on_using = flag; }
 
-	bool    GetShieldOnceFlag() const { return m_skill_shield.once_flag; }
-	void	SetShieldOnceFlag(bool flag) { m_skill_shield.once_flag = flag; }
+	bool    GetShieldOnceFlag() const { return m_skill_shield.data.once_flag; }
+	void	SetShieldOnceFlag(bool flag) { m_skill_shield.data.once_flag = flag; }
 
-	double  GetShieldCurrtime() const { return m_skill_shield.op_time; }
-	void	SetShieldCurrtime(double time) { m_skill_shield.op_time = time; }
+	double  GetShieldCurrtime() const { return m_skill_shield.data.op_time; }
+	void	SetShieldCurrtime(double time) { m_skill_shield.data.op_time = time; }
 	
-	bool    GetWaveshockState() const { return m_skill_waveshock.on_using; }
-	void	SetWaveshockState(bool flag) { m_skill_waveshock.on_using = flag; }
+	bool    GetWaveshockState() const { return m_skill_waveshock.data.on_using; }
+	void	SetWaveshockState(bool flag) { m_skill_waveshock.data.on_using = flag; }
 
-	bool    GetWaveshockOnceFlag() const { return m_skill_waveshock.once_flag; }
-	void	SetWaveshockOnceFlag(bool flag) { m_skill_waveshock.once_flag = flag; }
+	bool    GetWaveshockOnceFlag() const { return m_skill_waveshock.data.once_flag; }
+	void	SetWaveshockOnceFlag(bool flag) { m_skill_waveshock.data.once_flag = flag; }
 
-	double  GetWaveshockCurrtime() const { return m_skill_waveshock.op_time; }
-	void    SetWaveshockCurrtime(double time) { m_skill_waveshock.op_time = time; }
+	double  GetWaveshockCurrtime() const { return m_skill_waveshock.data.op_time; }
+	void    SetWaveshockCurrtime(double time) { m_skill_waveshock.data.op_time = time; }
 	
 	
 	// ---------------------------------------------------------------------------------------
@@ -167,10 +130,8 @@ public:
 	//CScene				    *scene;
 
 public:
-	virtual void GravitySystem(double deltime) override;
 	virtual void Tick(double deltime) override;
 	virtual void Tick(double deltime, Position& pos4f) override;
-	virtual void AfterGravitySystem(double deltime) override;
 
 	void Collision(vector<CPlayerObject*>* clients, double deltime);
 	void Collision(unordered_set<CStaticObject*>* sobjs, double deltime);
