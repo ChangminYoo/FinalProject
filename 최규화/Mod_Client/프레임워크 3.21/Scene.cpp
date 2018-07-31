@@ -909,6 +909,7 @@ void Scene::SET_NPC_BY_SERVER_DATA(const unsigned short & id, const Npc_Data & d
 				{
 					GameObject->m_npc_data = move(data);
 
+					GameObject->n_Animation = data.ani;
 					GameObject->Orient = { data.rot.x , data.rot.y, data.rot.z, data.rot.w };
 					GameObject->CenterPos = { data.pos.x , data.pos.y , data.pos.z , data.pos.w };
 					GameObject->pp->SetPosition(&GameObject->CenterPos);
@@ -928,6 +929,29 @@ void Scene::SET_NPC_BY_SERVER_DATA(const unsigned short & id, const Npc_Data & d
 				break;
 			}
 		}
+	}
+}
+
+void Scene::SET_NPC_ATTACK_BY_SERVER_DATA(const unsigned short & id, const NPC_BulletObject_Info & data, unsigned char type, bool first_bullet)
+{
+	switch (type)
+	{
+		case BULLET_TYPE::protocol_NpcStoneBullet:
+		{
+			if (first_bullet)
+			{
+				BulletObject.emplace_back(new )
+			}
+
+			for (const auto& bullet : BulletObject)
+			{
+
+			}
+		}
+		break;
+
+	default:
+		break;
 	}
 }
 
@@ -1022,7 +1046,7 @@ void Scene::SET_BULLET_BY_SERVER_DATA(STC_BulletObject_Info & bulldata, const un
 			}
 		}
 
-		for (auto lbul : BulletObject)
+		for (auto& lbul : BulletObject)
 		{
 			if (bulldata.master_id == lbul->m_bullet_data.master_id && bulldata.my_id == lbul->m_bullet_data.my_id)
 			{

@@ -101,15 +101,26 @@ public:
 	int my_ClientID{ 0 };
 
 	void SET_PLAYER_BY_SEVER_DATA(const unsigned short& id, const Player_Data& playerdata, const unsigned char& packet_type);
+
 	void SET_NPC_BY_SERVER_DATA(const unsigned short& id, const Npc_Data& data, const unsigned char& monster_type, const unsigned char& packet_type);
+	void SET_NPC_ATTACK_BY_SERVER_DATA(const unsigned short& id, const NPC_BulletObject_Info& data, unsigned char type, bool first_bullet);
+
 	void SET_SOBJECT_BY_SERVER_DATA(const unsigned short& id, StaticObject_Info& sobjdata, const unsigned char& type);
+
 	void SET_RIGIDOBJECT_BY_SERVER_DATA(const unsigned int& id, RigidbodyData& rbobjdata, const unsigned char& type);
+
 	void SET_BULLET_BY_SERVER_DATA(STC_BulletObject_Info& bulldata, const unsigned char& packet_type, bool first_bullet, const XMFLOAT3& OffLookvector = { 0,0,0 });
+
 	void SET_PLAYER_ANIMATION_BY_SERVER_DATA(const unsigned short& id, const unsigned char& ani);
+
 	void Set_RemovePlayerData(const unsigned int& id, Player_Data& playerdata);
+
 	void SET_PLAYER_STATE_BY_SERVER_DATA(const Player_Data& playerdata);
+
 	void SET_PLAYER_SKILL(const unsigned int& id, const STC_SkillData& playerdata);
+
 	void SET_PLAYER_SKILL(const unsigned int& id, const STC_SkillData& playerdata, unsigned char texture_number);
+
 	
 	//서버에서 받은 PlayerData를 이용하면 이 함수는 없어도됨
 	//PlayerData를 기반으로 Player의 값이 달라질것이므로

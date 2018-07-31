@@ -292,6 +292,7 @@ public:
 //---------------------- 투 사 체 -----------------------------//
 class ParticleObject;
 class ParticleObject2;
+class ParticleObject3;
 class BulletCube : public CGameObject
 {
 public:
@@ -333,6 +334,34 @@ public:
 	float LifeTime = 10;//생존시간. 10초 후 제거됨
 	ParticleObject* BulletParticles = NULL;
 
+public:
+	static CMaterial Mat;
+	static bool CreateMesh;//최초로 false며 메쉬를 만든후 true가된다.
+	static unordered_map<string, unique_ptr<CTexture>> Textures;//텍스처들을 저장함
+	static CMesh Mesh;//오로지 한번만 만들어짐
+	static ComPtr<ID3D12DescriptorHeap> SrvDescriptorHeap;//텍스처 용 힙
+
+
+public:
+	virtual void SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist);//셋메시는 메시를 최종적으로 생성한다. 즉 메시를구성하는 정점과 삼각형을구성하는인덱스버퍼생성
+	virtual void SetMaterial(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist); //머테리얼 생성
+	virtual void Tick(const GameTimer& gt);
+	virtual void Render(ID3D12GraphicsCommandList* commandlist, const GameTimer& gt);
+	virtual void Collision(list<CGameObject*>* collist, float DeltaTime);
+
+};
+
+class StoneBullet : public CGameObject
+{
+public:
+	StoneBullet(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, CGameObject* master, XMFLOAT4& ori, CGameObject* lockon = NULL, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0), XMFLOAT4 pp = XMFLOAT4(0, 0, 0, 0));
+	~StoneBullet();
+	CGameObject* Master = NULL;//소유자
+	CGameObject* LockOn = NULL;//유도시사용됨
+	float LifeTime = 10;//생존시간. 10초 후 제거됨
+	ParticleObject3* BulletParticles = NULL;
+	XMFLOAT4 orgpluspos;//몬스터 중심에서 어느방향으로 떨어져있는지나타냄.
+	float tempangle = 0;//몬스터 주위로 회전할때 각도를 저장.
 public:
 	static CMaterial Mat;
 	static bool CreateMesh;//최초로 false며 메쉬를 만든후 true가된다.
@@ -813,6 +842,28 @@ class ParticleObject2 : public CGameObject
 {
 public:
 	ParticleObject2(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, CGameObject* master, float lifeTime, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
+	CGameObject* Master = NULL;
+	float LifeTime = 0.2f;
+	float ParticleTime = 0.0f;
+
+public:
+	static bool CreateMesh;//최초로 false며 메쉬를 만든후 true가된다.
+	static unordered_map<string, unique_ptr<CTexture>> Textures;//텍스처들을 저장함
+	static CMesh Mesh;//오로지 한번만 만들어짐
+	static ComPtr<ID3D12DescriptorHeap> SrvDescriptorHeap;//텍스처 용 힙
+
+
+public:
+	virtual void SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist);//셋메시는 메시를 최종적으로 생성한다. 즉 메시를구성하는 정점과 삼각형을구성하는인덱스버퍼생성
+	virtual void Tick(const GameTimer& gt);
+	virtual void Render(ID3D12GraphicsCommandList* commandlist, const GameTimer& gt);
+	virtual void Collision(list<CGameObject*>* collist, float DeltaTime) {}
+
+};
+class ParticleObject3 : public CGameObject
+{
+public:
+	ParticleObject3(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, CGameObject* master, float lifeTime, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
 	CGameObject* Master = NULL;
 	float LifeTime = 0.2f;
 	float ParticleTime = 0.0f;

@@ -25,15 +25,14 @@ struct AIdata
 	float timeout = 0.0f;
 	curState_State curstateEnum = s_Idle;
 	XMFLOAT3 collisionmove=XMFLOAT3(0,0,0);
-	int stack = 10;//요 스택이 의미하는것은 5스택 쌓으면 주변에 마법구슬을 만들어서 회전시킴.
+	int stack{ 0 };//요 스택이 의미하는것은 5스택 쌓으면 주변에 마법구슬을 만들어서 회전시킴.
 };
 
 class state
 {
 
-public:
-	
-	virtual state* Execute(float DeltaTime, CPlayerObject* master, AIdata& adata) { return NULL; }
+public:	
+	virtual state* Execute(double deltime, CNpcObject* master, AIdata& adata) { return NULL; }
 
 };
 
@@ -43,7 +42,7 @@ class state_attack : public state
 	state_attack() {}
 public:
 	static state* Instance();
-	//virtual state* Execute(float DeltaTime, CPlayerObject* master, AIdata& adata);
+	virtual state* Execute(double deltime, CNpcObject* master, AIdata& adata);
 
 };
 
@@ -53,7 +52,7 @@ class state_idle : public state
 	state_idle() {}
 public:
 	static state* Instance();
-	//virtual state* Execute(float DeltaTime, CPlayerObject* master, AIdata& adata);
+	virtual state* Execute(double deltime, CNpcObject* master, AIdata& adata);
 
 };
 
@@ -63,7 +62,7 @@ class state_trace : public state
 	state_trace() {}
 public:
 	static state* Instance();
-	//virtual state* Execute(float DeltaTime, CPlayerObject* master, AIdata& adata);
+	virtual state* Execute(double deltime, CNpcObject* master, AIdata& adata);
 
 };
 
@@ -74,7 +73,7 @@ class state_global: public state
 	state_global() {}
 public:
 	static state* Instance();
-	//virtual state* Execute(float DeltaTime, CPlayerObject* master, AIdata& adata);
+	virtual state* Execute(double deltime, CNpcObject* master, AIdata& adata);
 
 };
 
@@ -109,7 +108,7 @@ private:
 public:
 	void Update(double deltime);//업데이트에서 현재 상태와 글로벌상태를 처리함. 또 체크타겟을 해서 데이터를 수집함.
 	void ChangeState(state* st);//'현재 상태' 를 바꿈
-	void CheckTarget(float DeltaTime);
+	void CheckTarget(double deltime);
 
 	//FSM(CNpcObject* master,vector<CPlayerObject*>* pobjs, unordered_set<CStaticObject*>* sobjs, list<CBulletObject*>* bobjs);
 	FSM(CNpcObject* master);

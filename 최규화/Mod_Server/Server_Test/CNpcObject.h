@@ -31,8 +31,12 @@ public:
 	FSM *fsm{ nullptr };
 
 	void SetMyBasicPacketData();
+	virtual void	GetDamaged(int damage);
 	Npc_Data GetMyBasicPacketData() const;
 	//Npc_Data& GetMyBasicPacketData();
+	
+	virtual void SetMyAnimation(unsigned char curr_anim);
+	virtual unsigned char GetMyAnimation() const;
 
 	virtual void Tick(double deltime) override;
 	virtual void Tick(double deltime, Position& pos4f);

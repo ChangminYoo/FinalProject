@@ -56,6 +56,7 @@ enum PACKET_PROTOCOL_TYPE
 
 	PLAYER_CURR_STATE,		//플레이어의 현재 상태(모든 정보 저장)
 	NPC_MONSTER_CURR_STATE, //몬스터 npc의 현재 상태(모든 정보 저장)
+	NPC_MONSTER_IMP_ATTACK_STONEBULLET,
 
 	PLAYER_SKILL_SHIELD,
 	PLAYER_SKILL_WAVESHOCK,
@@ -80,7 +81,8 @@ enum BULLET_TYPE
 {
 	protocol_LightBullet = 0,
 	protocol_HeavyBullet,
-	protocol_DiceBullet
+	protocol_DiceBullet,
+	protocol_NpcStoneBullet
 };
 
 enum INSTALLED_OBJECT_TYPE
@@ -202,6 +204,15 @@ struct STC_BulletObject_Info
 	char						alive;					//1
 };
 
+struct NPC_BulletObject_Info
+{
+	Position					pos4f;
+	Rotation					rot4f;
+	unsigned short				master_id;
+	unsigned short				my_id;
+	unsigned char				type;
+	char						alive;
+};
 
 struct STC_SkillData
 {
@@ -394,7 +405,17 @@ typedef struct Server_To_Client_Curr_NpcMonsterState
 	unsigned char packet_size = sizeof(Npc_Data) + sizeof(unsigned char) + sizeof(unsigned char);
 	unsigned char packet_type = PACKET_PROTOCOL_TYPE::NPC_MONSTER_CURR_STATE;
 	Npc_Data   npc_data;
+
 }STC_NpcMonsterCurrState;
+
+typedef struct Server_To_Client_Curr_NpcMonsterAttackStoneBullet
+{
+	unsigned char packet_size = sizeof(NPC_BulletObject_Info) + sizeof(unsigned char) + sizeof(unsigned char);
+	unsigned char packet_type = PACKET_PROTOCOL_TYPE::NPC_MONSTER_IMP_ATTACK_STONEBULLET;
+	NPC_BulletObject_Info   npc_bulldata;
+
+}STC_NpcMonsterAttackStoneBullet;
+
 
 typedef struct Server_To_Client_Player_Test
 {

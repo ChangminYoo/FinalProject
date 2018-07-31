@@ -130,7 +130,7 @@ void CPlayerObject::Init_PlayerInfo()
 	else if (m_id == 1)
 		m_pos4f = { 300.f, -1000.f, 0.f, 0.f };
 
-
+	m_orgPos4f = m_pos4f;
 	//---------------------------- Orient를 이용한 Lookvector // Rightvector // Upvector 설정
 	//---------------------------- xmf4_rot -> m_rot4 끝
 
@@ -799,7 +799,7 @@ void CPlayerObject::Collision(vector<CPlayerObject*>* clients, double deltime)
 				UpdatePPosCenterPos();
 				(*iter)->UpdatePPosCenterPos();
 
-				cout << "사람과 충돌" << endl;
+				//cout << "사람과 충돌" << endl;
 
 			}
 		}
@@ -836,7 +836,7 @@ void CPlayerObject::Collision(unordered_set<CStaticObject*>* sobjs, double delti
 			UpdatePPosCenterPos();
 			(*iter)->UpdatePPosCenterPos();
 
-			cout << "스테틱 오브젝트와 충돌 " << endl;
+			//cout << "스테틱 오브젝트와 충돌 " << endl;
 
 		}
 	}
@@ -901,7 +901,7 @@ void CPlayerObject::GetDamaged(int damage)
 		m_ability.curHP -= damage;
 	}
 
-	if (m_pdata.status.cur_hp <= 0)
+	if (m_ability.curHP <= 0)
 	{
 		//캐릭터 m_alive를 false 로 바꿔준다
 		m_alive = false;

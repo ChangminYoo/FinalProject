@@ -19,6 +19,7 @@ protected:
 	char				m_fixed{ true };
 	char				m_alive{ true };
 	Position			m_pos4f;
+	Position			m_orgPos4f;
 	Rotation			m_rot4f;
 	char				m_dir;
 	char				m_ai;
@@ -46,7 +47,7 @@ protected:
 
 	__int64				m_prevtime{ 0 };
 	__int64				m_currtime{ 0 };
-	float				m_deltime{ 0 };
+	double				m_deltime{ 0 };
 
 
 public:
@@ -72,14 +73,20 @@ public:
 	void    SetIsFixed(bool flag) { m_fixed = flag; }
 	int     GetObjectType() const { return static_cast<int>(m_type); }
 	void    SetObjectType(int type) { m_type = type; }
-	void SetCenterPos4f(float x, float y, float z, float w) { m_pos4f.x = x; m_pos4f.y = y; m_pos4f.z = z; m_pos4f.w = w; }
-	void SetCenterPos3f(float x, float y, float z) { m_pos4f.x = x; m_pos4f.y = y; m_pos4f.z = z; }
-	void SetCenterPos4f(const XMFLOAT4& pos) { m_pos4f.x = pos.x; m_pos4f.y = pos.y; m_pos4f.z = pos.z; m_pos4f.w = pos.w; }
-	void SetCenterPos3f(const XMFLOAT3& pos) { m_pos4f.x = pos.x; m_pos4f.y = pos.y; m_pos4f.z = pos.z; }
-	void SetRotatePos4f(const XMFLOAT4& rot) { m_rot4f.x = rot.x; m_rot4f.y = rot.y; m_rot4f.z = rot.z; m_rot4f.w = rot.w; }
-	XMFLOAT4 GetRotatePos4f() const { return XMFLOAT4(m_rot4f.x, m_rot4f.y, m_rot4f.z, m_rot4f.w); }
-	XMFLOAT4 GetCenterPos4f() const { return XMFLOAT4(m_pos4f.x, m_pos4f.y, m_pos4f.z, m_pos4f.w); }
-	XMFLOAT3 GetCenterPos3f() const { return XMFLOAT3(m_pos4f.x, m_pos4f.y, m_pos4f.z); }
+	void	SetCenterPos4f(float x, float y, float z, float w) { m_pos4f.x = x; m_pos4f.y = y; m_pos4f.z = z; m_pos4f.w = w; }
+	void	SetCenterPos3f(float x, float y, float z) { m_pos4f.x = x; m_pos4f.y = y; m_pos4f.z = z; }
+	void	SetCenterPos4f(const XMFLOAT4& pos) { m_pos4f.x = pos.x; m_pos4f.y = pos.y; m_pos4f.z = pos.z; m_pos4f.w = pos.w; }
+	void	SetCenterPos3f(const XMFLOAT3& pos) { m_pos4f.x = pos.x; m_pos4f.y = pos.y; m_pos4f.z = pos.z; }
+	void	SetRotatePos4f(const XMFLOAT4& rot) { m_rot4f.x = rot.x; m_rot4f.y = rot.y; m_rot4f.z = rot.z; m_rot4f.w = rot.w; }
+	int		GetID() const { return m_id; }
+
+	virtual ObjectStatus GetMyBasicStatus() const;
+	//virtual void ToDead();
+	//virtual void ToDamage(float damage);
+	virtual XMFLOAT4 GetOriginCenterPos4f() const { return XMFLOAT4(m_orgPos4f.x, m_orgPos4f.y, m_orgPos4f.z, m_orgPos4f.w); }
+	virtual XMFLOAT4 GetRotatePos4f() const { return XMFLOAT4(m_rot4f.x, m_rot4f.y, m_rot4f.z, m_rot4f.w); }
+	virtual XMFLOAT4 GetCenterPos4f() const { return XMFLOAT4(m_pos4f.x, m_pos4f.y, m_pos4f.z, m_pos4f.w); }
+	virtual XMFLOAT3 GetCenterPos3f() const { return XMFLOAT3(m_pos4f.x, m_pos4f.y, m_pos4f.z); }
 
 public:
 	virtual void AfterGravitySystem(double deltime);
@@ -92,6 +99,7 @@ public:
 	virtual void UpdatePPosCenterPos();
 	virtual void UpdatePRotatePos();
 
+	virtual void UpdatePhysicsCenterPos();
 	virtual void UpdateRPosCenterPos();
 	virtual void UpdateRRotatePos();
 	virtual void UpdateRigidCenterPos();

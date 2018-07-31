@@ -43,6 +43,15 @@ switch (packet[1])
 		scene.SET_NPC_BY_SERVER_DATA(init_npcdata->npc_data.id, init_npcdata->npc_data, init_npcdata->npc_data.monster_type, packet[1]);
 	}
 	break;
+
+	case PACKET_PROTOCOL_TYPE::NPC_MONSTER_IMP_ATTACK_STONEBULLET:
+	{
+		auto npc_attack_stonebullet = reinterpret_cast<STC_NpcMonsterAttackStoneBullet*>(packet);
+
+		scene.SET_NPC_ATTACK_BY_SERVER_DATA(npc_attack_stonebullet->npc_bulldata.my_id, npc_attack_stonebullet->npc_bulldata, packet[1]);
+
+	}
+	break;
 	
 	case PACKET_PROTOCOL_TYPE::PLAYER_DISCONNECT:
 	{

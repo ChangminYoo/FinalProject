@@ -21,6 +21,7 @@ private:
 	SKILL_WAVESHOCK_DATA m_skill_waveshock;
 	SKILL_DICESTRIKE_DATA m_skill_dicestrike;
 
+	int					m_player_score{ 0 };
 public:
 	unsigned int		m_curr_packet_size{ 0 };
 	unsigned int		m_prev_packet_size{ 0 };
@@ -72,7 +73,9 @@ public:
 	Player_Data GetPlayerData() { return m_pdata; } const
 	void SetPlayerData(Player_Data& pdata) { m_pdata = move(pdata); }
 
-	int		GetID() const { return m_id; }
+	//int		GetID() const { return m_id; }
+	int		GetPlayerScore() const { return m_player_score; }
+	void	SetPlayerScore(int score) { m_player_score += score; }
 
 	void    SetState(int state) { m_state = state; }
 	int		GetState() const { return m_state; }
@@ -80,7 +83,7 @@ public:
 	void	SetConnectState(char flag) { m_connect = flag; }
 	bool	GetConnectState() const { return static_cast<bool>(m_connect); }
 
-	void	GetDamaged(int damage);
+	virtual void	GetDamaged(int damage) override;
 	bool    GetPlayerIsAlive() { return static_cast<bool>(m_alive); }
 	void    SetPlayerIsAlive(char flag) { m_alive = flag; }
 
@@ -114,8 +117,8 @@ public:
 
 	double  GetWaveshockCurrtime() const { return m_skill_waveshock.data.op_time; }
 	void    SetWaveshockCurrtime(double time) { m_skill_waveshock.data.op_time = time; }
-	
-	
+
+
 	// ---------------------------------------------------------------------------------------
 	// [5]. 물리효과 함수
 

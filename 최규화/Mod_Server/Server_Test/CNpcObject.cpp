@@ -17,7 +17,8 @@ CNpcObject::CNpcObject(int id, int type)
 	m_dir = 0;
 	m_airbone = false;
 	m_ai = true;
-	m_pos4f = { 0.f,0.f,0.f,0.f };
+	m_pos4f = { -200.f,0.f,0.f,0.f };
+	m_orgPos4f = m_pos4f;
 	m_rot4f = { 0.f, 0.f, 0.f, 1.f };
 	m_godmode = false;
 	m_fixed = false;
@@ -25,7 +26,7 @@ CNpcObject::CNpcObject(int id, int type)
 	m_type = OBJECT_TYPE::NPC_MONSTER_IMP;
 	m_connect = true;
 
-	m_ability.attack = 1000;
+	m_ability.attack = 20;
 	m_ability.orignHP = 5000;
 	m_ability.curHP = 5000;
 	m_ability.speed = 40;
@@ -93,9 +94,36 @@ void CNpcObject::SetMyBasicPacketData()
 
 }
 
+//NPC에 대한 데미지 주기
+void CNpcObject::GetDamaged(int damage)
+{
+	if (m_godmode) return;
+
+	if (m_ability.curHP > 0)
+	{
+		//NPC 몬스터 hp를 감소
+		m_ability.curHP -= damage;
+	}
+	else
+	{
+		m_alive = false;
+	}
+}
+
 Npc_Data CNpcObject::GetMyBasicPacketData() const
 {
 	return npc_data;
+}
+
+void CNpcObject::SetMyAnimation(unsigned char curr_anim)
+{
+	 m_ani = curr_anim;
+	 npc_data.ani = curr_anim; 
+}
+
+unsigned char CNpcObject::GetMyAnimation() const
+{
+	return m_ani; 
 }
 
 
@@ -108,6 +136,8 @@ void CNpcObject::Tick(double deltime)
 
 	if (fsm != nullptr)
 		fsm->Update(deltime);
+
+	//cout << "상태:" << static_cast<int>(m_ani) << "\n";
 }
 
 void CNpcObject::Tick(double deltime, Position & pos4f)
@@ -119,6 +149,7 @@ void CNpcObject::Tick(double deltime, Position & pos4f)
 
 	if (fsm != nullptr)
 		fsm->Update(deltime);
+	
 }
 
 void CNpcObject::Collision(vector<CPlayerObject*>* clients, double deltime)
@@ -191,6 +222,10 @@ void CNpcObject::Collision(vector<CPlayerObject*>* clients, double deltime)
 
 				//충돌해소 호출. 충돌해소 이후에 반드시 변경된 질점의 위치로 오브젝트위치를 일치시켜야한다.
 				pp->CollisionResolve(*(*iter)->pp, cn, deltime);//좀비는 튕기지 않는다.
+				UpdatePPosCenterPos();
+				(*iter)->UpdatePPosCenterPos();
+
+				//cout << "몬스터와 사람의 충돌" << "\n";
 
 			} //__ Collision Test 끝
 		
@@ -227,10 +262,9 @@ void CNpcObject::Collision(unordered_set<CStaticObject*>* sobjs, double deltime)
 				(*iter)->SetAirbone(false);
 			}
 
-			//고정된 물체가 아니면
+			//고정된 물체라면
 			XMFLOAT3 cn;
-			cn = XMFloat4to3(Float4Add(pp->GetPosition(), (*iter)->GetPhysicsPoint()->GetPosition(), false));
-			cn = Float3Normalize(cn);
+			cn = pp->pAxis;
 
 			// static object 및 rigidbody 충돌체크
 			if (((*iter)->GetObjectType() == Box || (*iter)->GetObjectType() == SmallWall || (*iter)->GetObjectType() == BigWall ||
@@ -263,16 +297,24 @@ void CNpcObject::Collision(unordered_set<CStaticObject*>* sobjs, double deltime)
 					XMVECTOR pv = XMLoadFloat3(&p);
 					pv = XMVector3Transform(pv, m);
 					XMStoreFloat3(&fsm->aidata.collisionmove, pv);
+					
 				}
 
 			}
 
 			//충돌해소 호출. 충돌해소 이후에 반드시 변경된 질점의 위치로 오브젝트위치를 일치시켜야한다.
 			pp->CollisionResolve(*(*iter)->GetPhysicsPoint(), cn, deltime);//좀비는 튕기지 않는다.
-		
+			UpdatePPosCenterPos();
+			(*iter)->UpdatePPosCenterPos();
+
+			//cout << "몬스터와 스테틱 오브젝트의 충돌" << "\n";
+
 		} //__ Collision Test 끝
 			
 
 	} //__ for문 끝
+
 }
+
+
 

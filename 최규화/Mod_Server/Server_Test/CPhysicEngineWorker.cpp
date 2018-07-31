@@ -92,42 +92,55 @@ void CPhysicEngineWorker::Update()
 		{
 			if ((*iter)->GetBulletIsAlive() == false)
 			{			
-				//서버->클라 불렛 구조체 
-				STC_BulletObject_Info stc_bullet;
-				stc_bullet.pos4f = (*iter)->m_bulldata.pos4f;
-				stc_bullet.rot4f = (*iter)->m_bulldata.rot4f;
-				stc_bullet.endpoint = (*iter)->m_bulldata.endpoint;
-				stc_bullet.master_id = (*iter)->m_bulldata.master_id;
-				stc_bullet.my_id = (*iter)->m_bulldata.my_id;
-				stc_bullet.type = (*iter)->m_bulldata.type;
-				stc_bullet.alive = (*iter)->m_bulldata.alive;
-				stc_bullet.degree = (*iter)->m_bulldata.degree;
-				//
-
-				if ((*iter)->m_bulldata.type == protocol_DiceBullet)
+				if ((*iter)->GetObjectType() == protocol_NpcStoneBullet)
 				{
-					STC_SKILL_DICESTRIKE stc_skill_dicestrike;
-					stc_skill_dicestrike.bull_data = move(stc_bullet);
-					stc_skill_dicestrike.is_first = (*iter)->GetIsFirstBullet();
-					stc_skill_dicestrike.lookvector = (*iter)->GetDicestrikeOffLookvector();
-
+					STC_NpcMonsterAttackStoneBullet stc_imp_bullet;
+					stc_imp_bullet.npc_bulldata = (*iter)->GetChangedNPCBulletState();
+					
 					for (auto client : g_clients)
 					{
-						client->SendPacket(reinterpret_cast<Packet*>(&stc_skill_dicestrike));
+						client->SendPacket(reinterpret_cast<Packet*>(&stc_imp_bullet));
 					}
 				}
 				else
 				{
-					STC_Attack stc_attack;
-					stc_attack.bull_data = move(stc_bullet);
-					stc_attack.is_first = (*iter)->GetIsFirstBullet();
+					//서버->클라 불렛 구조체 
+					//STC_BulletObject_Info stc_bullet;
+					//stc_bullet.pos4f = (*iter)->m_bulldata.pos4f;
+					//stc_bullet.rot4f = (*iter)->m_bulldata.rot4f;
+					//stc_bullet.endpoint = (*iter)->m_bulldata.endpoint;
+					//stc_bullet.master_id = (*iter)->m_bulldata.master_id;
+					//stc_bullet.my_id = (*iter)->m_bulldata.my_id;
+					//stc_bullet.type = (*iter)->m_bulldata.type;
+					//stc_bullet.alive = (*iter)->m_bulldata.alive;
+					//stc_bullet.degree = (*iter)->m_bulldata.degree;
+					//
 
-					for (auto client : g_clients)
+					if ((*iter)->m_bulldata.type == protocol_DiceBullet)
 					{
-						client->SendPacket(reinterpret_cast<Packet*>(&stc_attack));
+						STC_SKILL_DICESTRIKE stc_skill_dicestrike;
+						stc_skill_dicestrike.bull_data = move((*iter)->GetChangedBulletState());
+						stc_skill_dicestrike.is_first = (*iter)->GetIsFirstBullet();
+						stc_skill_dicestrike.lookvector = (*iter)->GetDicestrikeOffLookvector();
+
+						for (auto client : g_clients)
+						{
+							client->SendPacket(reinterpret_cast<Packet*>(&stc_skill_dicestrike));
+						}
+					}
+					else
+					{
+						STC_Attack stc_attack;
+						stc_attack.bull_data = move((*iter)->GetChangedBulletState());
+						stc_attack.is_first = (*iter)->GetIsFirstBullet();
+
+						for (auto client : g_clients)
+						{
+							client->SendPacket(reinterpret_cast<Packet*>(&stc_attack));
+						}
 					}
 				}
-	
+				
 				iter = g_bullets.erase(iter);
 			}
 			else
@@ -171,6 +184,7 @@ void CPhysicEngineWorker::CollisionSystem(double deltime)
 		if (bullet->GetBulletIsAlive() == true)
 		{
 			bullet->Collision(&g_clients, deltime);
+			bullet->Collision(&g_npcs, deltime);
 			bullet->Collision(&g_staticobjs, deltime);
 		}
 	}

@@ -198,6 +198,7 @@ void CTimerWorker::ProcessPacket(event_type * et)
 				if (bullet->GetBulletIsAlive() == true)
 				{
 					//서버->클라 불렛 구조체 
+					/*
 					STC_BulletObject_Info stc_bullet;
 					stc_bullet.pos4f = bullet->m_bulldata.pos4f;
 					stc_bullet.rot4f = bullet->m_bulldata.rot4f;
@@ -207,35 +208,50 @@ void CTimerWorker::ProcessPacket(event_type * et)
 					stc_bullet.type = bullet->m_bulldata.type;
 					stc_bullet.alive = bullet->m_bulldata.alive;
 					stc_bullet.degree = bullet->m_bulldata.degree;
+					*/
 					//
 
-					if (bullet->m_bulldata.type == protocol_DiceBullet && bullet->GetIsFirstBullet())
+					if (bullet->GetObjectType() == protocol_NpcStoneBullet)
 					{
-						STC_SKILL_DICESTRIKE stc_skill_dicestrike;
-						stc_skill_dicestrike.bull_data = move(stc_bullet);
-						stc_skill_dicestrike.is_first = bullet->GetIsFirstBullet();
-						stc_skill_dicestrike.lookvector = bullet->GetDicestrikeOffLookvector();
+						STC_NpcMonsterAttackStoneBullet stc_imp_bullet;
+						stc_imp_bullet.npc_bulldata = bullet->GetChangedNPCBulletState();
 
 						for (auto client : g_clients)
 						{
-							client->SendPacket(reinterpret_cast<Packet*>(&stc_skill_dicestrike));
+							client->SendPacket(reinterpret_cast<Packet*>(&stc_imp_bullet));
 						}
 					}
 					else
 					{
-						STC_Attack stc_attack;
-						stc_attack.bull_data = move(stc_bullet);
-						stc_attack.is_first = bullet->GetIsFirstBullet();
-
-						for (auto client : g_clients)
+						if (bullet->m_bulldata.type == protocol_DiceBullet && bullet->GetIsFirstBullet())
 						{
-							client->SendPacket(reinterpret_cast<Packet*>(&stc_attack));
+							STC_SKILL_DICESTRIKE stc_skill_dicestrike;
+							stc_skill_dicestrike.bull_data = move(bullet->GetChangedBulletState());
+							stc_skill_dicestrike.is_first = bullet->GetIsFirstBullet();
+							stc_skill_dicestrike.lookvector = bullet->GetDicestrikeOffLookvector();
+
+							for (auto client : g_clients)
+							{
+								client->SendPacket(reinterpret_cast<Packet*>(&stc_skill_dicestrike));
+							}
+						}
+						else
+						{
+							STC_Attack stc_attack;
+							stc_attack.bull_data = move(bullet->GetChangedBulletState());
+							stc_attack.is_first = bullet->GetIsFirstBullet();
+
+							for (auto client : g_clients)
+							{
+								client->SendPacket(reinterpret_cast<Packet*>(&stc_attack));
+							}
+
 						}
 
+						if (bullet->GetIsFirstBullet())
+							bullet->SetIsFirstBullet(false);
 					}
 
-					if (bullet->GetIsFirstBullet())
-						bullet->SetIsFirstBullet(false);
 				}
 			}			
 

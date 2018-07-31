@@ -36,6 +36,33 @@ void CMonoObject::Tick(double deltime, Position & pos4f)
 	UpdatePPosCenterPos();
 }
 
+ObjectStatus CMonoObject::GetMyBasicStatus() const
+{
+	return ObjectStatus(m_ability);
+}
+
+/*
+void CMonoObject::ToDead()
+{
+	m_alive = true;
+}
+*/
+
+/*
+void CMonoObject::ToDamage(float damage)
+{
+	if (damage >= 100)
+		damage = 1;
+
+	if (m_godmode == false)
+	{
+		m_ability.curHP -= fabsf(damage);
+		if (m_ability.curHP <= 0)
+			ToDead();
+	}
+}
+*/
+
 void CMonoObject::AfterGravitySystem(double deltime)
 {
 	float ppy = pp->GetPosition().y;
@@ -121,6 +148,12 @@ void CMonoObject::UpdatePRotatePos()
 
 }
 
+void CMonoObject::UpdatePhysicsCenterPos()
+{
+	xmf4_pos = XMFLOAT4(m_pos4f.x, m_pos4f.y, m_pos4f.z, m_pos4f.w);
+	pp->CenterPos = &xmf4_pos;
+}
+
 void CMonoObject::UpdateRPosCenterPos()
 {
 	m_pos4f.x = rb->GetPosition().x;
@@ -136,6 +169,8 @@ void CMonoObject::UpdateRRotatePos()
 	m_rot4f.z = rb->GetOrient().z;
 	m_rot4f.w = rb->GetOrient().w;
 }
+
+
 
 void CMonoObject::UpdateRigidCenterPos()
 {

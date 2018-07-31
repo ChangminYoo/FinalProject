@@ -7,22 +7,24 @@
 class CBulletObject : public CMonoObject
 {
 private: 
-	double m_lifetime{ 0 };
-
 	short m_id{ -1 };
 	unsigned short m_masterID;
+	Position3D m_dicestrike_offlookvector;
+
+protected:
 	Position3D m_savept;
 	Vel3f	   m_vel3f;
-
+	double	   m_lifetime{ 0 };
 	bool	   m_first_bullet;
-	Position3D m_dicestrike_offlookvector;
-	
+
 public:
-	__int64					      m_prevTime{ 0 };
-	__int64					      m_currTime{ 0 };
+	//__int64					      m_prevTime{ 0 };
+	//__int64					      m_currTime{ 0 };
 	CTS_BulletObject_Info         m_bulldata;
 
+
 public:
+	CBulletObject() {};
 	CBulletObject(const unsigned short& master_id, const unsigned short& my_id,
 		const Position& pos, const Rotation& rot, float bulltime,
 		Vel3f& vel, const unsigned char& type, const Position3D& endpt, const float& degree);
@@ -44,20 +46,53 @@ public:
 	XMFLOAT3		  GetLookvector() const { return m_Lookvector; }
 	Rotation		  GetBulletOldRot() const { return m_rot4f; }
 	void			  SetBulletRotatevalue(const XMFLOAT4& xmf4);
-	void			  SetChangedBulletState();
 
-	void			  SetIsFirstBullet(bool flag) { m_first_bullet = flag; }
-	bool			  GetIsFirstBullet() const { return m_first_bullet; }
 
 	Position3D		  GetDicestrikeOffLookvector() const { return m_dicestrike_offlookvector; }
 	void			  SetDicestrikeOffLookvector(const Position3D& pos3d) { m_dicestrike_offlookvector = move(pos3d); }
+	
+	STC_BulletObject_Info  GetChangedBulletState() const;
 
 public:
-	void AfterGravitySystem();
+	virtual NPC_BulletObject_Info GetChangedNPCBulletState() const = 0;
+
+	virtual void SetIsFirstBullet(bool flag) { m_first_bullet = flag; }
+	virtual bool GetIsFirstBullet() const { return m_first_bullet; }
+	
+	virtual void AfterGravitySystem();
+	virtual void SetChangedBulletState(); 
 	virtual void Tick(double deltime) override;
 
-	void Collision(vector<CPlayerObject*>* clients, double deltime);
-	void Collision(unordered_set<CStaticObject*>* sobjs, double deltime);
+	virtual void Collision(vector<CPlayerObject*>* clients, double deltime);
+	virtual void Collision(vector<CNpcObject*>* npcs, double deltime);
+	virtual void Collision(unordered_set<CStaticObject*>* sobjs, double deltime);
+};
+
+
+class CStoneBulletObject : public CBulletObject
+{
+private:
+	CNpcObject * m_npc_master;
+	XMFLOAT4 m_orgpluspos;
+	float	 m_tempangle{ 0 };
+	int	     m_npc_bulletID{ 0 };
+	int      m_masterID{ 0 };	//몬스터 NPC는 최대 65535마리를 넘지않음 - 각방 최대 3마리 
+											//5000명 동시접속 -> 5명씩 1000개의 방 -> 몬스터 최대 3000마리
+
+public:
+	NPC_BulletObject_Info m_npc_bulldata;
+
+public:
+	CStoneBulletObject(CNpcObject *master, const XMFLOAT4& in_pos4f, const XMFLOAT4& in_rot4f, XMFLOAT4& ori, const XMFLOAT4& opp);
+
+	static int g_npc_bulletID;
+
+	virtual NPC_BulletObject_Info GetChangedNPCBulletState() const;
+	virtual void AfterGravitySystem() override;
+	virtual void SetChangedBulletState() override;
+	virtual void Tick(double deltime) override;
+	virtual void Collision(vector<CPlayerObject*>* clients, double deltime) override;
+	virtual void Collision(unordered_set<CStaticObject*>* sobjs, double deltime) override;
 
 };
 
