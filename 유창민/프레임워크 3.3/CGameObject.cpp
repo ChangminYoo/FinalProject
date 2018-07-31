@@ -65,8 +65,8 @@ void CGameObject::SetShadowMatrix()
 	auto pos = XMLoadFloat4(&CenterPos);
 	auto quater = XMLoadFloat4(&Orient);
 
-	//wmatrix *= XMMatrixRotationQuaternion(quater);
-	wmatrix *= XMMatrixRotationY(0.5f*MMPE_PI);
+	wmatrix *= XMMatrixRotationQuaternion(quater);
+	//wmatrix *= XMMatrixRotationY(0.5f*MMPE_PI);
 	wmatrix *= XMMatrixScaling(1.0f, 1.5f, 1.0f);
 	wmatrix *= XMMatrixTranslationFromVector(pos);
 
@@ -436,7 +436,7 @@ CCubeManObject::CCubeManObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 	}
 	if (Shadow != NULL)
 	{
-		s = new ShadowObject(m_Device, commandlist, NULL, Shadow, this, XMFLOAT3(0, 0, 0), 0, XMFLOAT4(0, 0, 0, 1), CenterPos);
+		s = new ShadowObject(m_Device, commandlist, NULL, Shadow, this, XMFLOAT3(0, 0, 0), 0, MMPE_PI, CenterPos);
 		s->ObjData.Scale = 2.0f;
 		Shadow->push_back(s);
 	}
@@ -2213,7 +2213,7 @@ SphereObject::SphereObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * 
 		Mesh.Index = NULL;
 		Mesh.SubResource = NULL;
 
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "MapTex", L"textures/sky/snowcube1024.dds", true);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "MapTex", L"textures/sky/sunsetcube1024.dds", true);
 		SetMesh(m_Device, commandlist);
 		SetMaterial(m_Device, commandlist);
 		CreateMesh = true;
@@ -2349,7 +2349,7 @@ CubeObject::CubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 	
 	if (Shadow != NULL)
 	{
-		s = new ShadowObject(m_Device, commandlist, NULL, Shadow, this, XMFLOAT3(1, 1, 1), 1, XMFLOAT4(0, 0, 0, 1), CenterPos);
+		s = new ShadowObject(m_Device, commandlist, NULL, Shadow, this, XMFLOAT3(1, 1, 1), 1, degree, CenterPos);
 		s->ObjData.Scale = 10.0f;
 		Shadow->push_back(s);
 	}
@@ -2472,18 +2472,18 @@ MoveCubeObject::MoveCubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 	pp->SetBounce(false);//튕기지 않는다.
 	pp->SetMass(INFINITY);//고정된 물체는 무게가 무한이다.
 	
-	//if (Shadow != NULL)
-	//{
-	//	s = new ShadowObject(m_Device, commandlist, NULL, Shadow, this, XMFLOAT3(2, 1, 2), 1, CenterPos);
-	//	s->ObjData.Scale = 10.0f;
-	//	Shadow->push_back(s);
-	//}
+	if (Shadow != NULL)
+	{
+		s = new ShadowObject(m_Device, commandlist, NULL, Shadow, this, XMFLOAT3(2, 1, 2), 7, 0, CenterPos);
+		s->ObjData.Scale = 10.0f;
+		Shadow->push_back(s);
+	}
 }
 
 MoveCubeObject::~MoveCubeObject()
 {
-	//if (s != NULL)
-	//	s->DelObj = true;
+	if (s != NULL)
+		s->DelObj = true;
 }
 
 
@@ -2586,8 +2586,8 @@ GridObject::GridObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 
 		Mesh.Index = NULL;
 		Mesh.SubResource = NULL;
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "GridTex", L"textures/object/floor.dds", false,2,0);
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "GridNormalTex", L"textures/object/floorN.dds", false,2,1);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "GridTex", L"textures/object/1floor.dds", false,2,0);
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "GridNormalTex", L"textures/object/1floorN.dds", false,2,1);
 		SetMesh(m_Device, commandlist);
 		SetMaterial(m_Device, commandlist);
 		CreateMesh = true;
@@ -3544,18 +3544,18 @@ SmallWallObject::SmallWallObject(ID3D12Device * m_Device, ID3D12GraphicsCommandL
 	pp->SetBounce(false);//튕기지 않는다.
 	pp->SetMass(INFINITY);//고정된 물체는 무게가 무한이다.
 
-	//if (Shadow != NULL)
-	//{
-	//	s = new ShadowObject(m_Device, commandlist, NULL, Shadow, this, XMFLOAT3(40, 20, 10), 1, CenterPos);
-	//	s->ObjData.Scale = 12.0f;
-	//	Shadow->push_back(s);
-	//}
+	if (Shadow != NULL)
+	{
+		s = new ShadowObject(m_Device, commandlist, NULL, Shadow, this, XMFLOAT3(40, 20, 10), 4, degree, CenterPos);
+		s->ObjData.Scale = 5.5f;
+		Shadow->push_back(s);
+	}
 }
 
 SmallWallObject::~SmallWallObject()
 {
-	//if (s != NULL)
-	//	s->DelObj = true;
+	if (s != NULL)
+		s->DelObj = true;
 }
 
 void SmallWallObject::SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist)
@@ -3671,7 +3671,7 @@ BigWallObject::BigWallObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList 
 
 	//if (Shadow != NULL)
 	//{
-	//	s = new ShadowObject(m_Device, commandlist, NULL, Shadow, this, XMFLOAT3(700, 100, 10), 1, CenterPos);
+	//	s = new ShadowObject(m_Device, commandlist, NULL, Shadow, this, XMFLOAT3(700, 100, 10), 1, Orient, CenterPos);
 	//	s->ObjData.Scale = 2.0f;
 	//	Shadow->push_back(s);
 	//}
@@ -3795,11 +3795,18 @@ ColumnObject::ColumnObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * 
 	pp->SetBounce(false);//튕기지 않는다.
 	pp->SetMass(INFINITY);//고정된 물체는 무게가 무한이다.
 
+	if (Shadow != NULL)
+	{
+		s = new ShadowObject(m_Device, commandlist, NULL, Shadow, this, XMFLOAT3(30, 90, 30), 6, degree, CenterPos);
+		s->ObjData.Scale = 6.0f;
+		Shadow->push_back(s);
+	}
 }
 
 ColumnObject::~ColumnObject()
 {
-
+	if (s != NULL)
+		s->DelObj = true;
 }
 
 void ColumnObject::SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist)
@@ -3845,8 +3852,6 @@ BuildingObject::BuildingObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 		Mesh.Index = NULL;
 		Mesh.SubResource = NULL;
 		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "towerTex", L"textures/object/castle2.dds", false, 1, 0);
-		//LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "towerTex", L"textures/object/tower.dds", false, 2,0);
-		//LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "towerNTex", L"textures/object/towerN.dds", false, 2, 1);
 		
 		SetMesh(m_Device, commandlist);
 		SetMaterial(m_Device, commandlist);
@@ -3913,21 +3918,20 @@ BuildingObject::BuildingObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 
 	if (Shadow != NULL)
 	{
-		s = new ShadowObject(m_Device, commandlist, NULL, Shadow, this, XMFLOAT3(30, 90, 30), 1, CenterPos);
-		s->ObjData.Scale = 1.0f;
+		s = new ShadowObject(m_Device, commandlist, NULL, Shadow, this, XMFLOAT3(30, 90, 30), 5, degree, CenterPos);
+		s->ObjData.Scale = 22.0f;
 		Shadow->push_back(s);
 	}
 }
 
 BuildingObject::~BuildingObject()
 {
-	/*if (s != NULL)
-	s->DelObj = true;*/
+	if (s != NULL)
+	s->DelObj = true;
 }
 
 void BuildingObject::SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist)
 {
-	//CreateCube(&Mesh, 30, 90, 30);
 
 	//모델 로드
 	LoadMD5Model(L".\\플레이어메쉬들\\fcastle.MD5MESH", &Mesh, 0, 1);
@@ -4672,7 +4676,7 @@ ImpObject::ImpObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comman
 	}
 	if (Shadow != NULL)
 	{
-		s = new ShadowObject(m_Device, commandlist, NULL, Shadow, this, XMFLOAT3(0, 0, 0), 2, XMFLOAT4(0, 0, 0, 1), CenterPos);
+		s = new ShadowObject(m_Device, commandlist, NULL, Shadow, this, XMFLOAT3(0, 0, 0), 2, 0, CenterPos);
 		s->ObjData.Scale = 60.0f;
 		Shadow->push_back(s);
 	}
@@ -4980,7 +4984,7 @@ void RingObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer
 	Mesh.Render(commandlist);
 }
 
-ShadowObject::ShadowObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, list<CGameObject*>*shadow,  CGameObject * master, XMFLOAT3 size, int kinds, XMFLOAT4& ori, XMFLOAT4 cp) :CGameObject(m_Device, commandlist, Plist,shadow, cp)
+ShadowObject::ShadowObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, list<CGameObject*>*shadow,  CGameObject * master, XMFLOAT3 size, int kinds, float degree, XMFLOAT4 cp) :CGameObject(m_Device, commandlist, Plist,shadow, cp)
 {
 	//조인트가 저장될 배열.
 	jarr = new UploadBuffer<JointArr>(m_Device, 1, true);
@@ -4988,12 +4992,18 @@ ShadowObject::ShadowObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * 
 	Master = master;
 	Size = size;
 	Kinds = kinds;
-
 	OffLookvector = XMFLOAT3(0, 0, 1);
 	OffRightvector = XMFLOAT3(1, 0, 0);
+
+	auto q = XMLoadFloat4(&Orient);//방향을 degree만큼 돌리려 한다.
+	XMFLOAT3 axis{ 0,1,0 };
+	auto q2 = QuaternionRotation(axis, degree);
+	Orient = QuaternionMultiply(Orient, q2);
+
 	UpdateLookVector();
 
 	ObjData.BlendValue = 0.3f;
+
 
 	if (Master != NULL)
 	{
@@ -5011,19 +5021,27 @@ ShadowObject::ShadowObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * 
 		oMesh.SubResource = NULL;
 		iMesh.Index = NULL;
 		iMesh.SubResource = NULL;
+		smallwallMesh.Index = NULL;
+		smallwallMesh.SubResource = NULL;
+		towerMesh.Index = NULL;
+		towerMesh.SubResource = NULL;
+		columnMesh.Index = NULL;
+		columnMesh.SubResource = NULL;
+		elevatorMesh.Index = NULL;
+		elevatorMesh.SubResource = NULL;
+
 
 		SetMaterial(m_Device, commandlist);
 		CreateMesh = true;
 	}
 
 	SetMesh(m_Device, commandlist);
-	/*Orient = QuaternionMultiply(Orient, ori);
-	UpdateLookVector();*/
+	
 }
 
 void ShadowObject::SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist)
 {
-	if (Kinds == 0)
+	if (Kinds == Cubeman)
 	{
 		if (CreatecMesh == false)
 		{
@@ -5040,7 +5058,7 @@ void ShadowObject::SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* co
 			CreatecMesh = true;
 		}
 	}
-	else if (Kinds == 1)
+	else if (Kinds == Cube)
 	{
 		if (CreateoMesh == false)
 		{
@@ -5051,7 +5069,7 @@ void ShadowObject::SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* co
 			CreateoMesh = true;
 		}
 	}
-	else if (Kinds == 2)
+	else if (Kinds == Boss)
 	{
 		if (CreateiMesh == false)
 		{
@@ -5068,7 +5086,7 @@ void ShadowObject::SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* co
 			CreateiMesh = true;
 		}
 	}
-	else if (Kinds == 3)
+	else if (Kinds == Meteor)
 	{
 		if (CreatemMesh == false)
 		{
@@ -5077,6 +5095,59 @@ void ShadowObject::SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* co
 			mMesh.CreateVertexBuffer(m_Device, commandlist);
 			mMesh.CreateIndexBuffer(m_Device, commandlist);
 			CreatemMesh = true;
+		}
+	}
+	else if (Kinds == SmallWall)
+	{
+		if (CreateSmallwallMesh == false)
+		{
+			LoadMD5Model(L".\\플레이어메쉬들\\fence.MD5MESH", &smallwallMesh, 0, 1);
+			//
+			smallwallMesh.SetNormal(false);
+			smallwallMesh.CreateIndexBuffer(m_Device, commandlist);
+			smallwallMesh.CreateVertexBuffer(m_Device, commandlist);
+			CreateSmallwallMesh = true;		
+		}
+
+
+	}
+	else if(Kinds == tower)
+	{
+		if (CreateTowerMesh == false)
+		{
+			//모델 로드
+			LoadMD5Model(L".\\플레이어메쉬들\\fcastle.MD5MESH", &towerMesh, 0, 1);
+			//
+			towerMesh.SetNormal(false);
+			towerMesh.CreateVertexBuffer(m_Device, commandlist);
+			towerMesh.CreateIndexBuffer(m_Device, commandlist);
+
+			CreateTowerMesh = true;
+		}
+	}
+	else if(Kinds == column)
+	{ 
+		if (CreateColumnMesh == false)
+		{
+			LoadMD5Model(L".\\플레이어메쉬들\\mCol.MD5MESH", &columnMesh, 0, 1);
+			columnMesh.SetNormal(false);
+			columnMesh.CreateVertexBuffer(m_Device, commandlist);
+			columnMesh.CreateIndexBuffer(m_Device, commandlist);
+
+			CreateColumnMesh = true;
+		}
+	}
+	else if(Kinds == elevator)
+	{
+		if (CreateElevatorMesh == false)
+		{
+			CreateCube(&elevatorMesh, 2, 1, 2);
+
+			elevatorMesh.SetNormal(false);
+			elevatorMesh.CreateVertexBuffer(m_Device, commandlist);
+			elevatorMesh.CreateIndexBuffer(m_Device, commandlist);
+
+			CreateElevatorMesh = true;
 		}
 	}
 }
@@ -5130,14 +5201,22 @@ void ShadowObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTim
 	if(ObjData.isAnimation)
 		commandlist->SetGraphicsRootConstantBufferView(0, jarr->Resource()->GetGPUVirtualAddress());
 
-	if(CreatecMesh && Kinds == 0)
+	if(CreatecMesh && Kinds == Cubeman)
 		cMesh.Render(commandlist);
-	if (CreateoMesh && Kinds == 1)
+	if (CreateoMesh && Kinds == Cube)
 		oMesh.Render(commandlist);
-	if (CreateiMesh && Kinds == 2)
+	if (CreateiMesh && Kinds == Boss)
 		iMesh.Render(commandlist);
-	if (CreatemMesh && Kinds == 3)
+	if (CreatemMesh && Kinds == Meteor)
 		mMesh.Render(commandlist);
+	if (CreateSmallwallMesh && Kinds == SmallWall)
+		smallwallMesh.Render(commandlist);
+	if (CreateTowerMesh && Kinds == tower)
+		towerMesh.Render(commandlist);
+	if (CreateColumnMesh && Kinds == column)
+		columnMesh.Render(commandlist);
+	if (CreateElevatorMesh && Kinds == elevator)
+		elevatorMesh.Render(commandlist);
 }
 
 Floor2Object::Floor2Object(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, list<CGameObject*>* shadow, float size, XMFLOAT4 cp) :CGameObject(m_Device, commandlist, Plist, shadow, cp)
@@ -5585,7 +5664,7 @@ MeteorObject::MeteorObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * 
 
 	if (Shadow != NULL)
 	{
-		s = new ShadowObject(m_Device, commandlist, NULL, Shadow, this, XMFLOAT3(1, 1, 1), 3, XMFLOAT4(0, 0, 0, 1), CenterPos);
+		s = new ShadowObject(m_Device, commandlist, NULL, Shadow, this, XMFLOAT3(1, 1, 1), 3, 0, CenterPos);
 		s->ObjData.Scale = 50.0f;
 		Shadow->push_back(s);
 	}

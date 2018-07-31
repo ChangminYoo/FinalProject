@@ -191,7 +191,7 @@ float4 PS(VertexOut pin) : SV_Target
 				float attenuation = 1 / (denom * denom);
 
 				float pointintensity= max(dot(NormalVector, -normalize(gLights[i].Direction)), 0);
-				//pointintensity = smoothstep(0.25, 0.7, pointintensity)+0.15f;
+				pointintensity = smoothstep(0.25, 0.7, pointintensity)+0.15f;
 		
 				diffuseLight += CalcDiffuseLight(pin.Normal, PointLightDirection, gLights[i].DiffuseColor, pointintensity) * attenuation;
 
@@ -207,7 +207,7 @@ float4 PS(VertexOut pin) : SV_Target
 
 	}
 
-	finalcolor = (textureColor * diffuseLight) + litColor * textureColor * lightIntensity + gAmbientLight *textureColor+ specularLight*textureColor;
+	finalcolor = (textureColor * diffuseLight) + litColor * textureColor * lightIntensity + gAmbientLight *textureColor +specularLight*textureColor;
 	finalcolor.w = BlendValue;
 	
 	if (nLights > 0)
