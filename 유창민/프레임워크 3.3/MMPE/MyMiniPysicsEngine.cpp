@@ -129,7 +129,7 @@ XMFLOAT4 MiniPhysicsEngineG9::Float4Float(XMFLOAT4 & v, float v2)
 }
 
 //회전축과 각도를 주면 그 축으로 회전하는 쿼터니언을 반환
-XMFLOAT4 MiniPhysicsEngineG9::QuaternionRotation(XMFLOAT3 & Axis, float radian)
+XMFLOAT4 MiniPhysicsEngineG9::QuaternionRotation(XMFLOAT3 & Axis, double radian)
 {
 
 
@@ -140,7 +140,7 @@ XMFLOAT4 MiniPhysicsEngineG9::QuaternionRotation(XMFLOAT3 & Axis, float radian)
 		Result = XMFLOAT4(0, 0, 0, 1);
 	else
 	{
-		auto q = XMQuaternionRotationAxis(XMLoadFloat3(&Axis), radian);
+		auto q = XMQuaternionRotationAxis(XMLoadFloat3(&Axis), (float)radian);
 		XMStoreFloat4(&Result, q);
 	}
 	return Result;
@@ -189,7 +189,7 @@ PhysicsPoint::PhysicsPoint()
 {
 	InverseMass = 1;
 	Velocity = XMFLOAT3(0, 0, 0);
-	damping = 0.99;
+	damping = 0.99f;
 	TotalForce = XMFLOAT3(0, 0, 0);
 	Accel = XMFLOAT3(0, 0, 0);
 	Bounce = false;
@@ -264,7 +264,7 @@ void PhysicsPoint::integrate(float DeltaTime)
 void PhysicsPoint::SetMass(float M)
 {
 	assert(M != 0);
-	InverseMass = (1.0) / M;
+	InverseMass = (1.0f) / M;
 }
 
 float PhysicsPoint::GetMass(bool Inverse)
@@ -272,7 +272,7 @@ float PhysicsPoint::GetMass(bool Inverse)
 	if (Inverse)
 		return InverseMass;
 	else
-		return (1.0) / InverseMass;
+		return (1.0f) / InverseMass;
 }
 
 void PhysicsPoint::SetDamping(float D)
@@ -1001,8 +1001,8 @@ MiniPhysicsEngineG9::RigidBody::RigidBody()
 	InverseMass = 1;
 	Velocity = XMFLOAT3(0, 0, 0);
 	AngularVelocity = XMFLOAT3(0, 0, 0);
-	damping = 0.99;
-	Angulardamping = 0.99;
+	damping = 0.99f;
+	Angulardamping = 0.99f;
 	TotalForce = XMFLOAT3(0, 0, 0);
 	TotalTorque = XMFLOAT3(0, 0, 0);
 	Accel = XMFLOAT3(0, 0, 0);
@@ -1110,7 +1110,7 @@ void MiniPhysicsEngineG9::RigidBody::integrate(float DeltaTime)
 void MiniPhysicsEngineG9::RigidBody::SetMass(float M)
 {
 	assert(M != 0);
-	InverseMass = (1.0) / M;
+	InverseMass = (1.0f) / M;
 }
 
 float MiniPhysicsEngineG9::RigidBody::GetMass(bool Inverse)
@@ -1118,7 +1118,7 @@ float MiniPhysicsEngineG9::RigidBody::GetMass(bool Inverse)
 	if (Inverse)
 		return InverseMass;
 	else
-		return (1.0) / InverseMass;
+		return (1.0f) / InverseMass;
 }
 
 void MiniPhysicsEngineG9::RigidBody::SetIMoment(XMFLOAT4X4 & i)
@@ -2251,7 +2251,7 @@ void MiniPhysicsEngineG9::RigidBody::ResolveVelocity(RigidBody & rb2, XMFLOAT3 &
 		vn = Float3Normalize(vn);
 		vn = Float3Float(vn, i2);
 		AddForcePoint(XMFloat4to3(cn), CollisionPointVector[0].Pos, vn);
-		integrate(0.01);
+		integrate(0.01f);
 	}
 }
 
