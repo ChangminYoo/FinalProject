@@ -218,6 +218,26 @@ public:
 
 };
 
+class Rank1Object : public CGameObject
+{
+public:
+	Rank1Object(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, CGameObject* master, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
+	CGameObject* Master = NULL;//소유자
+public:
+	static bool CreateMesh;//최초로 false며 메쉬를 만든후 true가된다.
+	static unordered_map<string, unique_ptr<CTexture>> Textures;//텍스처들을 저장함
+	static CMesh Mesh;//오로지 한번만 만들어짐
+	static ComPtr<ID3D12DescriptorHeap> SrvDescriptorHeap;//텍스처 용 힙
+
+public:
+	virtual void SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist);//셋메시는 메시를 최종적으로 생성한다. 즉 메시를구성하는 정점과 삼각형을구성하는인덱스버퍼생성
+	virtual void Tick(const GameTimer& gt);
+	virtual void Render(ID3D12GraphicsCommandList* commandlist, const GameTimer& gt);
+	virtual void Collision(list<CGameObject*>* collist, float DeltaTime) {}
+
+
+};
+
 class DiceObject : public CGameObject
 {
 public:
@@ -261,6 +281,8 @@ public:
 	BarObject* Hpbar = NULL;
 	BarFrameObject* HPFrame = NULL;
 	ShadowObject* s = NULL;
+	Rank1Object* Rank1 = NULL;
+
 	int select = 0;
 	float reviveTime = 5.0f;
 
@@ -977,23 +999,43 @@ public:
 class ShadowObject : public CGameObject
 {
 public:
-	ShadowObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, CGameObject* master, XMFLOAT3 size, int kinds, XMFLOAT4& ori,  XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
+	ShadowObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, CGameObject* master, XMFLOAT3 size, int kinds, float degree,  XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
 	CGameObject* Master = NULL;
 	XMFLOAT3 Size = XMFLOAT3{ 10,10,10 };
 	int Kinds;
+	float Degree;
 
+	enum shadowKinds
+	{
+		Cubeman, //0
+		Cube, //1
+		Boss, //2
+		Meteor, //3
+		SmallWall, //4
+		tower, //5
+		column, //6
+		elevator //7
+	};
 public:
 	static bool CreateMesh ;//최초로 false며 메쉬를 만든후 true가된다.
 	static bool CreatecMesh;//최초로 false며 메쉬를 만든후 true가된다.
 	static bool CreateiMesh;//최초로 false며 메쉬를 만든후 true가된다.
 	static bool CreateoMesh;//최초로 false며 메쉬를 만든후 true가된다.
 	static bool CreatemMesh;//최초로 false며 메쉬를 만든후 true가된다.
+	static bool CreateSmallwallMesh;
+	static bool CreateTowerMesh;
+	static bool CreateColumnMesh;
+	static bool CreateElevatorMesh;
+	
+	static CMesh cMesh;//cubeman
+	static CMesh iMesh;//cube
+	static CMesh oMesh;//boss
+	static CMesh mMesh;//meteor
+	static CMesh smallwallMesh;
+	static CMesh towerMesh;
+	static CMesh columnMesh;
+	static CMesh elevatorMesh;
 
-
-	static CMesh cMesh;//오로지 한번만 만들어짐
-	static CMesh iMesh;//오로지 한번만 만들어짐
-	static CMesh oMesh;//오로지 한번만 만들어짐
-	static CMesh mMesh;//오로지 한번만 만들어짐
 	static CMaterial Mat;
 	static std::vector<ModelAnimation> cAnimations;//애니메이션 데이터 저장. 메쉬와 이거,텍스처는 한번만생성해서 공유하도록해야됨
 	static std::vector<ModelAnimation> iAnimations;//애니메이션 데이터 저장. 메쉬와 이거,텍스처는 한번만생성해서 공유하도록해야됨

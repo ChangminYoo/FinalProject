@@ -100,8 +100,9 @@ void MainFrameWork::GravitySystem(const GameTimer & gt)
 	//고정된 물체를 제외한 모든오브젝트에 중력을 가한다. 단 투사체는 제외한다.
 	for (auto i = scene->DynamicObject.begin(); i != scene->DynamicObject.end(); i++)
 	{
+		float t=gt.DeltaTime();
 		if((*i)->staticobject==false)
-		gg.Update(gt.DeltaTime(), *(*i)->pp);
+		gg.Update(t, *(*i)->pp);
 	}
 	for (auto i = scene->RigidObject.begin(); i != scene->RigidObject.end(); i++)
 	{
@@ -210,9 +211,9 @@ void MainFrameWork::FrameAdvance(const GameTimer& gt)
 	//현재 여기까지 연결된 파이프라인의 구성요소
 	// RS 뷰포트와 시저렉트 , OM의 렌더타겟과 뎁스스텐실 뷰
 	//앞으로 해야할것. 루트시그니처와 VS,PS등 PSO, 정점버퍼, 인덱스버퍼 , 상수버퍼뷰
+	Update(gt);
 
 	scene->SceneState();
-	Update(gt);
 	Draw(gt);
 
 	//여기까지 왔으면 PSO에 모든게 다 연결되어 있고, 다 그려져있는것이다.

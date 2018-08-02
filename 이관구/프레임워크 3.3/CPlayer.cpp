@@ -562,6 +562,8 @@ void CPlayer::Tick(float DeltaTime)
 			PlayerObject->gamedata.Speed = 75;
 			PlayerObject->gamedata.HP = PlayerObject->gamedata.HP + 800;
 			pointrank.Init = true;
+
+
 		}
 	}
 	else

@@ -85,6 +85,10 @@ void FSM::CheckTarget(float DeltaTime)
 		auto l = FloatLength(v1);
 		
 		bool blind = false;
+		//nv1dotLook은 몬스터의 룩벡터와 타겟-몬스터 벡터를 내적해서 사잇각을 얻는것이다.
+		//보통 이러한 사잇각이 특정 각도보다 작거나 같을때 볼수있다고 설정하지만
+		//알다시피 내적의 결과는 코사인 값으로 나오므로 0~90까지는 0에 가까울수록 큰값이나온다.
+		//따라서 이 내적한 결과가 특정한 각도보다 클경우 그 특정한 각도에 포함된다고 생각할수있다.
 		if (aidata.VisionLength >= l && nv1dotLook>1.53/2.0f)
 		{
 			////현재는 장애물을 이용하지 못한다. 이후에 추가할것
@@ -287,13 +291,21 @@ state * state_trace::Execute(float DeltaTime, CGameObject * master, AIdata & ada
 	if (fabs(d) <=adata.FireLength && adata.Target == NULL)
 		adata.LastPosition = master->OrgPos;//고유 초창기 위치로 ㄱㄱ
 
+	if (fabs(FloatLength(v2)) >= 75)//중앙에서 어느정도 멀어지면 
+	{
+		adata.LastPosition = master->OrgPos;//고유 초창기 위치로 ㄱㄱ
+	//	adata.Target = NULL;
+	}
 	if (adata.Target != NULL)
 	{
 		if(fabs(d) > adata.FireLength)//타겟이 존재하면 타겟을 공격할 수 있는 사정거리까지만 간다.
 			master->CenterPos = Float4Add(master->CenterPos, XMFloat3to4(Float3Float(v, master->gamedata.Speed)));
 	}
 	else//아니라면 그냥 해당 위치로 계속감.
+	{
+
 		master->CenterPos = Float4Add(master->CenterPos, XMFloat3to4(Float3Float(v, master->gamedata.Speed)));
+	}
 	if (FloatLength(v2) <= 20 && adata.Target == NULL) 
 		return state_idle::Instance();
 
