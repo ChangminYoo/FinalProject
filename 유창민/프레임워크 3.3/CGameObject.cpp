@@ -4727,6 +4727,13 @@ void ImpObject::Tick(const GameTimer & gt)
 {
 	//적분기. 적분기란? 매 틱마다 힘! 에의해서 변화 되는 가속도/속도/위치를 갱신한다.
 	//이때 pp의 position과 CenterPos를 일치시켜야하므로 CenterPos의 포인터를 인자로 넘겨야 한다.
+
+	//임프는 중력을 안받게 한다.
+	auto t = pp->GetTotalForce();
+	t.y = 0;
+	pp->ForceClear();
+	pp->AddForce(t);
+
 	pp->integrate(gt.DeltaTime());
 
 	if (ObjData.isAnimation == true)

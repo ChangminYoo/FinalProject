@@ -131,6 +131,11 @@ int FrameWork::Run()
 			{
 				CalculateFrameStats();
 				FrameAdvance(mTimer);
+				if (scene->FirstLoad == false && scene->ResetTime == false)
+				{
+					scene->ResetTime = true;
+					mTimer.Reset();
+				}
 			}
 			else
 			{

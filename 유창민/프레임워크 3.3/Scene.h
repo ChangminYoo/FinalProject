@@ -28,7 +28,7 @@ public:
 	int nShader;//세이더 갯수
 	int GAMESTATE = GS_START;//게임상태.
 	bool FirstLoad = false;//첫 로딩인가?
-
+	bool ResetTime = true;//첫 로딩후 시간 초기화해야하는가?
 	HWND hWnd;
 	ComPtr<ID3D12RootSignature> rootsg;//루트시그니처
 	array<const CD3DX12_STATIC_SAMPLER_DESC, 6> GetStaticSamplers();
