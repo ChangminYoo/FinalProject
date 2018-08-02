@@ -41,6 +41,8 @@ Scene::~Scene()
 		delete AimUI;
 	if (BackGround != NULL)
 		delete BackGround;
+	if (CharacterSelect != NULL)
+		delete CharacterSelect;
 	for (int i = 0; i < 4; i++)
 		if (SkillFrameUI[i] != NULL)
 			delete SkillFrameUI[i];
@@ -117,12 +119,71 @@ void Scene::SceneState()
 {
 	if (GAMESTATE == GS_START)//시작시 생성자에서 UI등 기본적인것은 거기서 로드함.
 	{
-		if (GetAsyncKeyState(VK_SPACE) & 0x8000&&GetFocus())
+		if (GetAsyncKeyState(VK_SPACE) & 0x8000 && GetFocus())
 		{
-			
 			SetGameState(GS_LOAD);
 		}
 
+		else if (GetAsyncKeyState(0x31) & 0x8000 && GetFocus())
+		{
+			CharacterSelect->CenterPos.x = -320;
+			CharacterSelect->CenterPos.y = 0;
+			CharacterSelect->ObjData.CustomData1.z = 1;
+		}
+		else if (GetAsyncKeyState(0x32) & 0x8000 && GetFocus())
+		{
+			CharacterSelect->CenterPos.x = -160;
+			CharacterSelect->CenterPos.y = 0;
+			CharacterSelect->ObjData.CustomData1.z = 2;
+		}
+		else if (GetAsyncKeyState(0x33) & 0x8000 && GetFocus())
+		{
+			CharacterSelect->CenterPos.x = 0;
+			CharacterSelect->CenterPos.y = 0;
+			CharacterSelect->ObjData.CustomData1.z = 3;
+		}
+		else if (GetAsyncKeyState(0x34) & 0x8000 && GetFocus())
+		{
+			CharacterSelect->CenterPos.x = 160;
+			CharacterSelect->CenterPos.y = 0;
+			CharacterSelect->ObjData.CustomData1.z = 4;
+		}
+		else if (GetAsyncKeyState(0x35) & 0x8000 && GetFocus())
+		{
+			CharacterSelect->CenterPos.x = 320;
+			CharacterSelect->CenterPos.y = 0;
+			CharacterSelect->ObjData.CustomData1.z = 5;
+		}
+		else if (GetAsyncKeyState(0x36) & 0x8000 && GetFocus())
+		{
+			CharacterSelect->CenterPos.x = -320;
+			CharacterSelect->CenterPos.y = -200;
+			CharacterSelect->ObjData.CustomData1.z = 6;
+		}
+		else if (GetAsyncKeyState(0x37) & 0x8000 && GetFocus())
+		{
+			CharacterSelect->CenterPos.x = -160;
+			CharacterSelect->CenterPos.y = -200;
+			CharacterSelect->ObjData.CustomData1.z = 7;
+		}
+		else if (GetAsyncKeyState(0x38) & 0x8000 && GetFocus())
+		{
+			CharacterSelect->CenterPos.x = 0;
+			CharacterSelect->CenterPos.y = -200;
+			CharacterSelect->ObjData.CustomData1.z = 8;
+		}
+		else if (GetAsyncKeyState(0x39) & 0x8000 && GetFocus())
+		{
+			CharacterSelect->CenterPos.x = 160;
+			CharacterSelect->CenterPos.y = -200;
+			CharacterSelect->ObjData.CustomData1.z = 9;
+		}
+		else if (GetAsyncKeyState(0x30) & 0x8000 && GetFocus())
+		{
+			CharacterSelect->CenterPos.x = 320;
+			CharacterSelect->CenterPos.y = -200;
+			CharacterSelect->ObjData.CustomData1.z = 10;
+		}
 	}
 	else if (GAMESTATE == GS_LOAD)
 	{
@@ -131,9 +192,9 @@ void Scene::SceneState()
 		{
 			CreateGameObject();
 			FirstLoad = false;
-			SetGameState(GS_PLAY);
 			ShowCursor(false);
-
+			ResetTime = false;
+			SetGameState(GS_PLAY);
 			Sound->PlaySoundBG();
 		}
 		else
@@ -288,10 +349,27 @@ void Scene::CreateGameObject()
 	DynamicObject.push_back(new CCubeManObject(device, commandlist,&BbObject, &Shadows, XMFLOAT4(0, 0, -240, 0)));
 	DynamicObject.push_back(new CCubeManObject(device, commandlist,&BbObject, &Shadows, XMFLOAT4(100, 0, 110, 0)));
 
-	CGameObject* imp = new ImpObject(device, commandlist, &BbObject, &Shadows, XMFLOAT4(0, 0, 220, 0));
+	CGameObject* imp = new ImpObject(device, commandlist, &BbObject, &Shadows, XMFLOAT4(0, 100, 0, 0));
 	((ImpObject*)imp)->fsm = new FSM(imp, &DynamicObject, &StaticObject, &BulletObject);
 	DynamicObject.push_back(imp);
 
+	//============2층=============
+	StaticObject.push_back(new Floor2Object(device, commandlist, &BbObject, &Shadows, 1, XMFLOAT4(0, 91, 0, 0)));
+	StaticObject.push_back(new SmallWallObject(device, commandlist, &BbObject, &Shadows, MMPE_PI *0.25, XMFLOAT4(30, 100, 90, 0)));
+	StaticObject.push_back(new SmallWallObject(device, commandlist, &BbObject, &Shadows, MMPE_PI *0.25, XMFLOAT4(90, 100, 30, 0)));
+	StaticObject.push_back(new SmallWallObject(device, commandlist, &BbObject, &Shadows, -MMPE_PI *0.25, XMFLOAT4(-30, 100, 90, 0)));
+	StaticObject.push_back(new SmallWallObject(device, commandlist, &BbObject, &Shadows, -MMPE_PI *0.25, XMFLOAT4(-90, 100, 30, 0)));
+	StaticObject.push_back(new SmallWallObject(device, commandlist, &BbObject, &Shadows, -MMPE_PI *0.25, XMFLOAT4(30, 100, -90, 0)));
+	StaticObject.push_back(new SmallWallObject(device, commandlist, &BbObject, &Shadows, -MMPE_PI *0.25, XMFLOAT4(90, 100, -30, 0)));
+	StaticObject.push_back(new SmallWallObject(device, commandlist, &BbObject, &Shadows, MMPE_PI *0.25, XMFLOAT4(-30, 100, -90, 0)));
+	StaticObject.push_back(new SmallWallObject(device, commandlist, &BbObject, &Shadows, MMPE_PI *0.25, XMFLOAT4(-90, 100, -30, 0)));
+
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, &Shadows, 0, XMFLOAT4(50, 101, 50, 0)));
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, &Shadows, 0, XMFLOAT4(50, 101, -50, 0)));
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, &Shadows, 0, XMFLOAT4(-50, 111, 50, 0)));
+	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, &Shadows, 0, XMFLOAT4(-50, 111, -50, 0)));
+
+	//============1층=============
 	//MoveCube
 	StaticObject.push_back(new MoveCubeObject(device, commandlist, &BbObject, &Shadows, 50.0f, XMFLOAT4(0, 25, 145, 0)));
 	StaticObject.push_back(new MoveCubeObject(device, commandlist, &BbObject, &Shadows, 50.0f, XMFLOAT4(0, 52, -150, 0)));
@@ -451,18 +529,18 @@ void Scene::CreateGameObject()
 
 
 	//RigidObject
-	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, &Shadows, XMFLOAT4(0, 50, 290, 0)));
-	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, &Shadows, XMFLOAT4(0, 100, 290, 0)));
-	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, &Shadows, XMFLOAT4(-270, 50, 60, 0)));
-	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, &Shadows, XMFLOAT4(270, 100, 60, 0)));
+	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, &Shadows, XMFLOAT4(-5, 50, 290, 0)));
+	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, &Shadows, XMFLOAT4(20, 100, 290, 0)));
+	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, &Shadows, XMFLOAT4(-270, 250, 60, 0)));
+	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, &Shadows, XMFLOAT4(300, 100, 90, 0)));
 	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, &Shadows, XMFLOAT4(-210, 390, -200, 0)));
 	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, &Shadows, XMFLOAT4(200, 440, -180, 0)));
-	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, &Shadows, XMFLOAT4(180, 310, -30, 0)));
-	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, &Shadows, XMFLOAT4(-231, 50, 160, 0)));
-	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, &Shadows, XMFLOAT4(-231, 100, 160, 0)));
-	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, &Shadows, XMFLOAT4(-190, 370, -340, 0)));
-	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, &Shadows, XMFLOAT4(-70, 40, -155, 0)));
-	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, &Shadows, XMFLOAT4(-70, 90, -155, 0)));
+	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, &Shadows, XMFLOAT4(170, 310, -30, 0)));
+	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, &Shadows, XMFLOAT4(-251, 150, 170, 0)));
+	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, &Shadows, XMFLOAT4(-201, 100, 140, 0)));
+	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, &Shadows, XMFLOAT4(-170, 370, -340, 0)));
+	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, &Shadows, XMFLOAT4(-50, 40, -145, 0)));
+	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, &Shadows, XMFLOAT4(-90, 90, -155, 0)));
 	
 
 
@@ -470,22 +548,6 @@ void Scene::CreateGameObject()
 	Player->SetPlayer(DynamicObject.front());
 	Player->PlayerObject->Blending = false;
 
-	//============2층=============
-
-	StaticObject.push_back(new Floor2Object(device, commandlist, &BbObject, &Shadows, 1, XMFLOAT4(0, 91, 0, 0)));
-	StaticObject.push_back(new SmallWallObject(device, commandlist, &BbObject, &Shadows, MMPE_PI *0.25, XMFLOAT4(30, 100, 90, 0)));
-	StaticObject.push_back(new SmallWallObject(device, commandlist, &BbObject, &Shadows, MMPE_PI *0.25, XMFLOAT4(90, 100, 30, 0)));
-	StaticObject.push_back(new SmallWallObject(device, commandlist, &BbObject, &Shadows, -MMPE_PI *0.25, XMFLOAT4(-30, 100, 90, 0)));
-	StaticObject.push_back(new SmallWallObject(device, commandlist, &BbObject, &Shadows, -MMPE_PI *0.25, XMFLOAT4(-90, 100, 30, 0)));
-	StaticObject.push_back(new SmallWallObject(device, commandlist, &BbObject, &Shadows, -MMPE_PI *0.25, XMFLOAT4(30, 100, -90, 0)));
-	StaticObject.push_back(new SmallWallObject(device, commandlist, &BbObject, &Shadows, -MMPE_PI *0.25, XMFLOAT4(90, 100, -30, 0)));
-	StaticObject.push_back(new SmallWallObject(device, commandlist, &BbObject, &Shadows, MMPE_PI *0.25, XMFLOAT4(-30, 100, -90, 0)));
-	StaticObject.push_back(new SmallWallObject(device, commandlist, &BbObject, &Shadows, MMPE_PI *0.25, XMFLOAT4(-90, 100, -30, 0)));
-
-	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, &Shadows, 0, XMFLOAT4(30, 101, -40, 0)));
-	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, &Shadows, 0, XMFLOAT4(-40, 101, 30, 0)));
-	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, &Shadows, 0, XMFLOAT4(30, 111, -40, 0)));
-	StaticObject.push_back(new CubeObject(device, commandlist, &BbObject, &Shadows, 0, XMFLOAT4(-40, 111, 30, 0)));
 }
 
 void Scene::CreateUI()
@@ -494,6 +556,8 @@ void Scene::CreateUI()
 	AimUI = new AimObject(device,commandlist,NULL, NULL);
 	
 	BackGround = new BackGroundObject(device, commandlist, NULL, NULL, XMFLOAT4(0, 0,0,0));
+
+	CharacterSelect = new CharacterSelectObject(device, commandlist, NULL, NULL, XMFLOAT4(0, 0, 0, 0));
 
 	SelectBar = new SelectBarObject(device, commandlist, NULL, NULL, XMFLOAT4(0 * 100 - 150, 0.9*-mHeight / 2, 0, 0));
 
@@ -618,6 +682,7 @@ void Scene::Render(const GameTimer& gt)
 			{
 				Player->Camera.UpdateConstantBufferOrtho(commandlist);
 				Shaders->SetBillboardShader(commandlist);
+				CharacterSelect->Render(commandlist, gt);
 				BackGround->Render(commandlist, gt);
 				Player->Camera.UpdateConstantBuffer(commandlist);
 			}

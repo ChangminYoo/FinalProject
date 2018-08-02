@@ -163,7 +163,11 @@ bool BarFrameObject::CreateMesh = false;
 unordered_map<string, unique_ptr<CTexture>> BarFrameObject::Textures;//텍스처들을 저장함
 CMesh  BarFrameObject::Mesh;//나중에 메쉬는 static으로 둬야함
 ComPtr<ID3D12DescriptorHeap> BarFrameObject::SrvDescriptorHeap;//텍스처 용 힙
-
+//--------------------------------------------------------------------------------------
+bool Rank1Object::CreateMesh = false;
+unordered_map<string, unique_ptr<CTexture>> Rank1Object::Textures;//텍스처들을 저장함
+CMesh  Rank1Object::Mesh;//나중에 메쉬는 static으로 둬야함
+ComPtr<ID3D12DescriptorHeap> Rank1Object::SrvDescriptorHeap;//텍스처 용 힙
 //--------------------------------------------------------------------------------------
 bool SelectBarObject::CreateMesh = false;
 unordered_map<string, unique_ptr<CTexture>> SelectBarObject::Textures;//텍스처들을 저장함
@@ -175,6 +179,12 @@ bool CoolBarObject::CreateMesh = false;
 unordered_map<string, unique_ptr<CTexture>> CoolBarObject::Textures;//텍스처들을 저장함
 CMesh  CoolBarObject::Mesh;//나중에 메쉬는 static으로 둬야함
 ComPtr<ID3D12DescriptorHeap> CoolBarObject::SrvDescriptorHeap;//텍스처 용 힙
+//--------------------------------------------------------------------------------------
+bool CharacterSelectObject::CreateMesh = false;
+unordered_map<string, unique_ptr<CTexture>> CharacterSelectObject::Textures;//텍스처들을 저장함
+CMesh  CharacterSelectObject::Mesh;//나중에 메쉬는 static으로 둬야함
+ComPtr<ID3D12DescriptorHeap> CharacterSelectObject::SrvDescriptorHeap;//텍스처 용 힙
+
 
 //--------------------------------------------------------------------------------------
 bool DiceObject::CreateMesh = false;
@@ -232,10 +242,20 @@ bool ShadowObject::CreatemMesh = false;
 bool ShadowObject::CreatecMesh = false;
 bool ShadowObject::CreateiMesh = false;
 bool ShadowObject::CreateoMesh = false;
+bool ShadowObject::CreateSmallwallMesh = false;
+bool ShadowObject::CreateTowerMesh = false;
+bool ShadowObject::CreateColumnMesh = false;
+bool ShadowObject::CreateElevatorMesh = false;
+
 CMesh ShadowObject::cMesh;//나중에 메쉬는 static으로 둬야함
 CMesh ShadowObject::iMesh;//나중에 메쉬는 static으로 둬야함
 CMesh ShadowObject::oMesh;//나중에 메쉬는 static으로 둬야함
 CMesh ShadowObject::mMesh;//나중에 메쉬는 static으로 둬야함
+CMesh ShadowObject::smallwallMesh;
+CMesh ShadowObject::towerMesh;
+CMesh ShadowObject::columnMesh;
+CMesh ShadowObject::elevatorMesh;
+
 CMaterial ShadowObject::Mat;
 std::vector<ModelAnimation> ShadowObject::cAnimations;
 std::vector<ModelAnimation> ShadowObject::iAnimations;
