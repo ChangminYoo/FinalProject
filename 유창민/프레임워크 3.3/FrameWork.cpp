@@ -160,7 +160,7 @@ bool FrameWork::Initialize()
 	//처리될 수 있게됨.. 다시한번 빡치네
 	ThrowIfFailed(mCommandList->Reset(mDirectCmdListAlloc.Get(), nullptr));
 	if (scene == NULL)
-		scene = new Scene(hwnd,Device.Get(), mCommandList.Get(), (float)mClientWidth, (float)mClientHeight);
+		scene = new Scene(hwnd,Device.Get(), mCommandList.Get(),mClientWidth,mClientHeight);
 	
 	// Execute the initialization commands.
 	ThrowIfFailed(mCommandList->Close());
@@ -302,8 +302,8 @@ LRESULT FrameWork::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	//윈도우 사이즈가 바뀔때 마다 UI의 위치를 달리해야한다. 물론 틱함수를 만들어도 되지만, 굳이 매틱마다 불릴필요는 없으니까 이렇게 처리하자.
 		if (scene != NULL && scene->GetGameState()==GS_PLAY)
 		{
-			scene->mHeight = (float)mClientHeight;
-			scene->mWidth = (float)mClientWidth;
+			scene->mHeight = mClientHeight;
+			scene->mWidth = mClientWidth;
 
 			scene->resize = true;
 
@@ -312,26 +312,26 @@ LRESULT FrameWork::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				if (scene->SkillCoolBar[i] != NULL)
 				{
 		
-					scene->SkillCoolBar[i]->ObjData.Scale = (float)(mClientWidth / 10);
-					scene->SkillCoolBar[i]->CenterPos.x = (float)(i * mClientWidth / 8.0f - (mClientWidth / 8.0f)*1.5f);
-					scene->SkillCoolBar[i]->CenterPos.y = (float)(0.98f*-mClientHeight / 2.0f);
+					scene->SkillCoolBar[i]->ObjData.Scale = mClientWidth / 10;
+					scene->SkillCoolBar[i]->CenterPos.x = i * mClientWidth / 8 - (mClientWidth / 8)*1.5;
+					scene->SkillCoolBar[i]->CenterPos.y = 0.98*-mClientHeight / 2;
 
-					scene->SkillFrameUI[i]->ObjData.Scale = (float)(mClientWidth / 10.0f);
-					scene->SkillFrameUI[i]->CenterPos.x = (float)(i * mClientWidth / 8.0f - (mClientWidth / 8.0f)*1.5f);
-					scene->SkillFrameUI[i]->CenterPos.y = (float)(0.9f*-mClientHeight / 2.0f);
+					scene->SkillFrameUI[i]->ObjData.Scale = mClientWidth / 10;
+					scene->SkillFrameUI[i]->CenterPos.x = i * mClientWidth / 8 - (mClientWidth / 8)*1.5;
+					scene->SkillFrameUI[i]->CenterPos.y = 0.9*-mClientHeight / 2;
 					
 
-					scene->SkillUI[i]->ObjData.Scale = (float)(mClientWidth / 12.0f);
-					scene->SkillUI[i]->CenterPos.x = (float)(i * mClientWidth / 8.0f - (mClientWidth / 8.0f)*1.5f);
-					scene->SkillUI[i]->CenterPos.y = (float)(0.9f*-mClientHeight / 2.0f);
+					scene->SkillUI[i]->ObjData.Scale = mClientWidth / 12;
+					scene->SkillUI[i]->CenterPos.x = i * mClientWidth / 8 - (mClientWidth / 8)*1.5;
+					scene->SkillUI[i]->CenterPos.y = 0.9*-mClientHeight / 2;
 				}
 		}
 		else if (scene != NULL && scene->GetGameState() == (GS_START || GS_LOAD))
 		{
 			if (scene->BackGround != NULL)
 			{
-				scene->BackGround->ObjData.Scale = (float)mClientWidth;
-				scene->BackGround->ObjData.CustomData1.y = (float)mClientHeight;
+				scene->BackGround->ObjData.Scale = mClientWidth;
+				scene->BackGround->ObjData.CustomData1.y = mClientHeight;
 
 			}
 		}
@@ -470,7 +470,7 @@ void FrameWork::OnMouseDown(WPARAM btnState, int x, int y)
 		
 		//공격 애니메이션으로 전환
 		//scene->Player->PlayerObject->SetAnimation(2);
-		auto RAY = MousePicking((float)x, (float)y, scene->Player->Camera.CamData.EyePos, scene->Player->Camera.CamData.View, scene->Player->Camera.CamData.Proj);
+		auto RAY = MousePicking(x, y, scene->Player->Camera.CamData.EyePos, scene->Player->Camera.CamData.View, scene->Player->Camera.CamData.Proj);
 		XMFLOAT3 savepoint;
 
 		bool Shot = false;
@@ -569,7 +569,7 @@ void FrameWork::OnMouseMove(WPARAM btnState, int x, int y)
 {
 	if (scene->Player->MouseOn <=1)
 	{
-		scene->Player->TPSCameraSystem(x, y, 0.01f);
+		scene->Player->TPSCameraSystem(x, y, 0.01);
 
 		RECT rc, rc2;
 		POINT p1, p2;
@@ -588,8 +588,8 @@ void FrameWork::OnMouseMove(WPARAM btnState, int x, int y)
 
 		SetCursorPos((rc2.left + rc2.right) / 2, (rc2.top + rc2.bottom) / 2);
 		//움직이고나서 다시 제자리로돌아오니까 까딱까딱만 되잖ㅏㅇ아아아
-		scene->Player->ox = (float)(rc.left + rc.right) / 2;
-		scene->Player->oy = (float)(rc.top + rc.bottom) / 2;
+		scene->Player->ox = (rc.left + rc.right) / 2;
+		scene->Player->oy = (rc.top + rc.bottom) / 2;
 		
 		// 마우스가 움직일때마다 예상 도착점을 찾아야 할경우 사용됨. 단  플레이어와 땅바닥만 예상도착점을 표시한다.
 		//일반적으로 어떤 범위를 나타내거나 할때는 땅바닥정도만 포함하니까. 근데 왜 스테틱 오브젝트를 추가했냐면
@@ -601,7 +601,7 @@ void FrameWork::OnMouseMove(WPARAM btnState, int x, int y)
 		if (scene->Player->PlayerObject->gamedata.HP > 0 && scene->Player->MouseTrace)
 		{
 
-			auto RAY = MousePicking((float)x, (float)y, scene->Player->Camera.CamData.EyePos, scene->Player->Camera.CamData.View, scene->Player->Camera.CamData.Proj);
+			auto RAY = MousePicking(x, y, scene->Player->Camera.CamData.EyePos, scene->Player->Camera.CamData.View, scene->Player->Camera.CamData.Proj);
 			XMFLOAT3 savepoint;
 
 			bool Shot = false;

@@ -206,7 +206,7 @@ bool LoadMD5Model(std::wstring filename, CMesh* MD5Model, int numberofMesh, floa
 				}
 				if (qi == numberofMesh)
 				{
-					for (UINT i = 0; i < MD5Model->nVertex; ++i)
+					for (int i = 0; i < MD5Model->nVertex; ++i)
 					{
 						//여기서 정점의 위치를 계산함.
 
@@ -231,7 +231,7 @@ bool LoadMD5Model(std::wstring filename, CMesh* MD5Model, int numberofMesh, floa
 							tempVert.V.z += (tempJoint.pos.z + rotatedPoint.z) * tempWeight.bias;
 
 							
-							MD5Model->SubResource[i].JointID[j] = (float)tempWeight.jointID;
+							MD5Model->SubResource[i].JointID[j] = tempWeight.jointID;
 							
 							switch (j)
 							{
@@ -479,10 +479,10 @@ void UpdateMD5Model(ID3D12GraphicsCommandList* m_DC, CMesh* MD5Model, CGameObjec
 	float currentFrame = obj->currAnimTime * av[animation].frameRate; //현재 프레임 계산 예를들어 5.36가 나오면 5번프레임과 6번프레임의 중간프레임이다.
 
 
-	float frame0 = floorf(currentFrame); //5번프레임과 6번프레임일때 5번프레임
-	float frame1 = frame0 + 1; // 5번과 6번일때 6번프레임
-	if (frame0 == av[animation].numFrames - 1.0f) //마지막프레임 이상이면 
-		frame1 = 0.0f; //0번프레임으로
+	int frame0 = floorf(currentFrame); //5번프레임과 6번프레임일때 5번프레임
+	int frame1 = frame0 + 1; // 5번과 6번일때 6번프레임
+	if (frame0 == av[animation].numFrames - 1) //마지막프레임 이상이면 
+		frame1 = 0; //0번프레임으로
 	float interpolation = currentFrame - frame0; //선형보간하자
 	std::vector<Joint> interpolatedSkeleton; // 보간된 프레임을 임시적으로 저장할공간
 	for (int i = 0; i < av[animation].numJoints; i++)

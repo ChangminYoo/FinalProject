@@ -29,8 +29,8 @@ void CPlayer::TPSCameraSystem(int mx, int my,float DeltaTime)
 			float playerYtheta = 0;
 			if (ox == -1 ||oy == -1)//마우스 좌표를 먼저 저장한다. 초기화임
 			{
-				ox = (float)mx;
-				oy = (float)my;
+				ox = mx;
+				oy = my;
 			}
 			else
 			{
@@ -41,10 +41,10 @@ void CPlayer::TPSCameraSystem(int mx, int my,float DeltaTime)
 					if (dx > 10)
 						dx = 10;
 
-						ytheta += (float)((dx/10) * MMPE_PI* 180 / 180)*DeltaTime;
+						ytheta += ((dx/10) * MMPE_PI* 180 / 180)*DeltaTime;
 
-						playerYtheta = (float)((dx / 10) * MMPE_PI * 180 / 180)*DeltaTime;
-						ox = (float)mx;
+						playerYtheta = ((dx / 10) * MMPE_PI * 180 / 180)*DeltaTime;
+						ox = mx;
 						rotate = true;
 				
 					
@@ -55,16 +55,16 @@ void CPlayer::TPSCameraSystem(int mx, int my,float DeltaTime)
 					if (dx > 10)
 						dx = 10;
 
-					ytheta += (float)((-dx/10) * MMPE_PI*180 / 180)*DeltaTime;
-					playerYtheta = (float)((-dx / 10) * MMPE_PI * 180 / 180)*DeltaTime;
-					ox = (float)mx;
+					ytheta += ((-dx/10) * MMPE_PI*180 / 180)*DeltaTime;
+					playerYtheta = ((-dx / 10) * MMPE_PI * 180 / 180)*DeltaTime;
+					ox = mx;
 					rotate = true;
 				
 				}
 				else
 				{
 
-					ox = (float)mx;
+					ox = mx;
 				}
 
 
@@ -74,13 +74,13 @@ void CPlayer::TPSCameraSystem(int mx, int my,float DeltaTime)
 					float dy = fabsf(my - oy);
 					if (dy > 10)
 						dy = 10;
-						xtheta += (float)((dy/10) * MMPE_PI*100 / 180)*DeltaTime;
+						xtheta += ((dy/10) * MMPE_PI*100 / 180)*DeltaTime;
 						if (xtheta >= (85 * 3.14 / 180))
-							xtheta = (float)(85 * 3.14 / 180);
+							xtheta = (85 * 3.14 / 180);
 
 
 
-						oy = (float)my;
+						oy = my;
 					
 				}
 				else if (my- oy<-1)//위로이동
@@ -90,18 +90,18 @@ void CPlayer::TPSCameraSystem(int mx, int my,float DeltaTime)
 					if (dy > 10)
 						dy = 10;
 
-					xtheta += (float)((-dy / 10) * MMPE_PI * 100 / 180)*DeltaTime;
+					xtheta += ((-dy / 10) * MMPE_PI * 100 / 180)*DeltaTime;
 
 						if (xtheta <= (-65 * 3.14 / 180))
-							xtheta = (float)(-65 * 3.14 / 180);
+							xtheta = (-65 * 3.14 / 180);
 
-						oy = (float)my;
+						oy = my;
 
 				}
 				else
 				{
 
-					oy = (float)my;
+					oy = my;
 				}
 				//ytheta = 0;
 				

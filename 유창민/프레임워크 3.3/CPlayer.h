@@ -5,7 +5,7 @@
 class Scene;
 //발사 스킬은 마우스다운에서 처리되고(크리에이트 불릿)
 //생존기는 플레이어인풋에서 처리된다.
-struct SkillData
+typedef struct SkillData
 {
 
 	//현재 선택한 스킬인덱스. 0~3까지 값만 가진다. Skills의 인덱스다.

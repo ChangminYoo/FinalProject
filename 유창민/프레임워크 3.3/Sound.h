@@ -5,8 +5,8 @@
 #include <conio.h>
 #include <string>
 
-#pragma comment(lib, "./fmod/lib/fmod64_vc.lib")
-#pragma comment(lib, "./fmod/lib/fmodL64_vc.lib")
+#pragma comment(lib, "fmod/lib/fmod_vc.lib")
+#pragma comment(lib, "fmod/lib/fmodL_vc.lib")
 
 using namespace std;
 

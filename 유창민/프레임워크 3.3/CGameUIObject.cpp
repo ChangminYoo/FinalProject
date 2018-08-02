@@ -42,7 +42,7 @@ void AimObject::SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* comma
 
 
 	//여기서 좌표를 일괄적으로 설정 할 수 있다
-	for (UINT i = 0; i < numOfitem; ++i)
+	for (int i = 0; i < numOfitem; ++i)
 	{
 
 		Mesh.SubResource[i].V = XMFLOAT3(0, 0, 0);
@@ -133,7 +133,7 @@ void CoolBarObject::SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* c
 
 
 	//여기서 좌표를 일괄적으로 설정 할 수 있다
-	for (UINT i = 0; i < numOfitem; ++i)
+	for (int i = 0; i < numOfitem; ++i)
 	{
 		Mesh.SubResource[i].V = XMFLOAT3(0, 0, 0);
 
@@ -215,7 +215,7 @@ void SkillFrameUIObject::SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandLi
 
 
 	//여기서 좌표를 일괄적으로 설정 할 수 있다
-	for (UINT i = 0; i < numOfitem; ++i)
+	for (int i = 0; i < numOfitem; ++i)
 	{
 
 		Mesh.SubResource[i].V = XMFLOAT3(0, 0, 0);
@@ -324,7 +324,7 @@ void SkillUIObject::SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* c
 
 
 	//여기서 좌표를 일괄적으로 설정 할 수 있다
-	for (UINT i = 0; i < numOfitem; ++i)
+	for (int i = 0; i < numOfitem; ++i)
 	{
 
 		Mesh.SubResource[i].V = XMFLOAT3(0, 0, 0);
@@ -412,7 +412,7 @@ void SelectBarObject::SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList*
 
 
 	//여기서 좌표를 일괄적으로 설정 할 수 있다
-	for (UINT i = 0; i < numOfitem; ++i)
+	for (int i = 0; i < numOfitem; ++i)
 	{
 		Mesh.SubResource[i].V = XMFLOAT3(0, 0, 0);
 
@@ -498,7 +498,7 @@ void BackGroundObject::SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList
 
 
 	//여기서 좌표를 일괄적으로 설정 할 수 있다
-	for (UINT i = 0; i < numOfitem; ++i)
+	for (int i = 0; i < numOfitem; ++i)
 	{
 
 		Mesh.SubResource[i].V = XMFLOAT3(0, 0, 0);
@@ -588,7 +588,7 @@ void CharacterSelectObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsComma
 
 
 	//여기서 좌표를 일괄적으로 설정 할 수 있다
-	for (UINT i = 0; i < numOfitem; ++i)
+	for (int i = 0; i < numOfitem; ++i)
 	{
 
 		Mesh.SubResource[i].V = XMFLOAT3(0, 0, 0);

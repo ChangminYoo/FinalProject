@@ -336,7 +336,7 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 		//------------- 여기가 가장 중요한 분기 -----------------//
 
 		//------------- size 가 1/2/4/그외 일때 로 나눠서 처리 ------------------//
-		int size = (int)contactpoint.size();
+		int size = contactpoint.size();
 		if (size == 1)
 		{
 			//size가 1이면 뭘해야할까? 바로 정점 2개가 맞부딪힐수있도록 회전시켜야한다.
@@ -444,7 +444,7 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 				XMFLOAT3 mAxis = XMFloat4to3(Float4Cross(sV1, sV2));
 				mAxis = Float3Normalize(mAxis);
 				//보정을 시킨다.
-				AmendObject(mAxis, (float)stheta, obj);
+				AmendObject(mAxis, stheta, obj);
 
 				//그리고 재귀 시킨다. 왜냐하면 보정이되었으면 allpoint,tempcollisionpoint,contactpoint , penetration 모두 다 바뀌어야 하기 때문이다.
 				//재귀 후 아마 2가지 경우의수가 있다. 충돌이 일어나거나, 아니면 살짝 떠있거나.. 어쨌든 잘 해결 된다.
@@ -457,7 +457,7 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 				XMFLOAT3 mAxis = XMFloat4to3(Float4Cross(V1, V2));
 				mAxis = Float3Normalize(mAxis);
 				//보정을 시킨다.
-				AmendObject(mAxis, (float)theta, obj);
+				AmendObject(mAxis, theta, obj);
 
 				//그리고 재귀 시킨다. 왜냐하면 보정이되었으면 allpoint,tempcollisionpoint,contactpoint , penetration 모두 다 바뀌어야 하기 때문이다.
 				//재귀 후 아마 2가지 경우의수가 있다. 충돌이 일어나거나, 아니면 살짝 떠있거나.. 어쨌든 잘 해결 된다.
@@ -482,9 +482,9 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 
 
 
-					Jm.x *= obj->rb->GetMass()*(impurse + (float)ratioImpurse);
-					Jm.y *= obj->rb->GetMass()*(impurse + (float)ratioImpurse);
-					Jm.z *= obj->rb->GetMass()*(impurse + (float)ratioImpurse);
+					Jm.x *= obj->rb->GetMass()*(impurse + ratioImpurse);
+					Jm.y *= obj->rb->GetMass()*(impurse + ratioImpurse);
+					Jm.z *= obj->rb->GetMass()*(impurse + ratioImpurse);
 
 
 
@@ -493,7 +493,7 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 					auto W = obj->rb->GetAngularVelocity();
 					XMVECTOR rxi = XMLoadFloat3(&XMFloat4to3(Float4Add(fp.Pos, obj->CenterPos, false)));
 					rxi = XMVector3Cross(rxi, XMLoadFloat3(&Normal));
-					rxi *= (float)(ratioImpurse);
+					rxi *= (ratioImpurse);
 					rxi = XMVector3Transform(rxi, XMLoadFloat4x4(&obj->rb->GetIMoment()));
 
 					XMFLOAT3 ia;
@@ -632,7 +632,7 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 					XMFLOAT3 mAxis = XMFloat4to3(Float4Cross(V2, V3));
 					mAxis = Float3Normalize(mAxis);
 					//보정을 시킨다.
-					AmendObject(mAxis, (float)theta, obj);
+					AmendObject(mAxis, theta, obj);
 
 					//그리고 재귀 시킨다. 왜냐하면 보정이되었으면 allpoint,tempcollisionpoint,contactpoint , penetration 모두 다 바뀌어야 하기 때문이다.
 					//재귀 후 아마 2가지 경우의수가 있다. 충돌이 일어나거나, 아니면 살짝 떠있거나.. 어쨌든 잘 해결 된다.
@@ -675,7 +675,7 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 						XMFLOAT3 mAxis = XMFloat4to3(Float4Cross(V2, V3));
 						mAxis = Float3Normalize(mAxis);
 						//보정을 시킨다.
-						AmendObject(mAxis, (float)theta, obj);
+						AmendObject(mAxis, theta, obj);
 
 						//그리고 재귀 시킨다. 왜냐하면 보정이되었으면 allpoint,tempcollisionpoint,contactpoint , penetration 모두 다 바뀌어야 하기 때문이다.
 						//재귀 후 아마 2가지 경우의수가 있다. 충돌이 일어나거나, 아니면 살짝 떠있거나.. 어쨌든 잘 해결 된다.
@@ -699,9 +699,9 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 
 
 
-						Jm.x *= obj->rb->GetMass()*(impurse + (float)ratioImpurse);
-						Jm.y *= obj->rb->GetMass()*(impurse + (float)ratioImpurse);
-						Jm.z *= obj->rb->GetMass()*(impurse + (float)ratioImpurse);
+						Jm.x *= obj->rb->GetMass()*(impurse + ratioImpurse);
+						Jm.y *= obj->rb->GetMass()*(impurse + ratioImpurse);
+						Jm.z *= obj->rb->GetMass()*(impurse + ratioImpurse);
 
 
 
@@ -710,7 +710,7 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 						auto W = obj->rb->GetAngularVelocity();
 						XMVECTOR rxi = XMLoadFloat3(&XMFloat4to3(Float4Add(fp.Pos, obj->CenterPos, false)));
 						rxi = XMVector3Cross(rxi, XMLoadFloat3(&Normal));
-						rxi *= (float)(ratioImpurse);
+						rxi *= (ratioImpurse);
 						rxi = XMVector3Transform(rxi, XMLoadFloat4x4(&obj->rb->GetIMoment()));
 
 						XMFLOAT3 ia;
@@ -780,7 +780,7 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 
 
 					//보정을 시킨다.
-					AmendObject(mAxis, (float)theta, obj);
+					AmendObject(mAxis, theta, obj);
 					obj->rb->SetAngularVelocity(0, 0, 0);
 
 				}
@@ -808,7 +808,7 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 
 			//땅에 닿았으니 현재 속도의 y는 반감되어야 한다. 원래는 탄성계수가 있지만.. 그냥 절반 감소시킨후 부호를 -로 하자.
 			auto d = obj->rb->GetVelocity();
-			d.y = (float)-0.01 * d.y;
+			d.y = -0.01 * d.y;
 			obj->rb->SetVelocity(d);
 			obj->rb->SetAccel(0, 0, 0);
 
@@ -826,7 +826,7 @@ void MainFrameWork::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, C
 
 			//땅에 닿았으니 현재 속도의 y는 반감되어야 한다. 원래는 탄성계수가 있지만.. 그냥 절반 감소시킨후 부호를 -로 하자.
 			auto d = obj->rb->GetVelocity();
-			d.y = (float)-0.01 * d.y;
+			d.y = -0.01 * d.y;
 			obj->rb->SetVelocity(d);
 			obj->rb->SetAccel(0, 0, 0);
 

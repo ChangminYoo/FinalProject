@@ -420,7 +420,7 @@ CCubeManObject::CCubeManObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 	pp = new PhysicsPoint();
 	pp->SetPosition(&CenterPos);//이 값은 항상 갱신되야한다.
 	pp->SetHalfBox(3, 10, 3);//충돌 박스의 x,y,z 크기
-	pp->SetDamping(0.45f);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
+	pp->SetDamping(0.45);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
 	pp->SetBounce(false);//튕기지 않는다.
 	
 	isShieldOn = false;
@@ -436,7 +436,7 @@ CCubeManObject::CCubeManObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 	}
 	if (Shadow != NULL)
 	{
-		s = new ShadowObject(m_Device, commandlist, NULL, Shadow, this, XMFLOAT3(0, 0, 0), 0, (float)MMPE_PI, CenterPos);
+		s = new ShadowObject(m_Device, commandlist, NULL, Shadow, this, XMFLOAT3(0, 0, 0), 0, MMPE_PI, CenterPos);
 		s->ObjData.Scale = 2.0f;
 		Shadow->push_back(s);
 	}
@@ -488,15 +488,15 @@ void CCubeManObject::Tick(const GameTimer & gt)
 	//이때 pp의 position과 CenterPos를 일치시켜야하므로 CenterPos의 포인터를 인자로 넘겨야 한다.
 	pp->integrate(gt.DeltaTime());
 
-	if (ObjData.isAnimation == 1)
+	if (ObjData.isAnimation == true)
 	{
 
 		//애니메이션 업데이트 애니메이션은 24프레임으로 구성됨. 문제는 FPS가 24프레임이 아님. 그보다 큰 프레임. 따라서 24프레임으로 해당프레임을 나눠 보정.
 		if(n_Animation!=Attack)
-			UpdateMD5Model(commandlist, &Mesh, this, gt.DeltaTime()*60.0f / 24.0f, n_Animation, animations, jarr);
+			UpdateMD5Model(commandlist, &Mesh, this, gt.DeltaTime()*60.0 / 24.0, n_Animation, animations, jarr);
 		else
 		{
-			UpdateMD5Model(commandlist, &Mesh, this, 2*gt.DeltaTime()*60.0f / 24.0f, n_Animation, animations, jarr);
+			UpdateMD5Model(commandlist, &Mesh, this, 2*gt.DeltaTime()*60.0 / 24.0, n_Animation, animations, jarr);
 		}
 
 	}
@@ -1875,7 +1875,7 @@ Tetrike::~Tetrike()
 void Tetrike::SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist)
 {
 
-	CreateCube(&Mesh, 120, 0.01f, 120);
+	CreateCube(&Mesh, 120, 0.01, 120);
 
 	Mesh.SetNormal(false);
 	Mesh.CreateVertexBuffer(m_Device, commandlist);
@@ -1908,8 +1908,8 @@ void Tetrike::Tick(const GameTimer & gt)
 		for (int i = 0; i < c; i++)
 		{
 			auto pos = CenterPos;
-			float  n = (float)(abs((abs(rand())*(int)(fabsf(gt.TotalTime()) * 31430)) % 90) - 45.0f);
-			float n2 = (float)(abs((abs(rand())*(int)(fabsf(gt.TotalTime()) * 12340)) % 90) - 45.0f);
+			float  n = abs((abs(rand())*(int)(fabsf(gt.TotalTime()) * 31430)) % 90) - 45;
+			float n2 = abs((abs(rand())*(int)(fabsf(gt.TotalTime()) * 12340)) % 90) - 45;
 
 			/*float b = sqrt(n*n + n2 * n2);
 
@@ -2289,7 +2289,7 @@ CubeObject::CubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 		SetMaterial(m_Device, commandlist);
 
 		CreateMesh = true;
-		srand((unsigned)time(NULL));
+		srand(time(NULL));
 	}
 
 	//게임오브젝트마다 룩벡터와 라이트벡터가 다르므로 초기 오프셋 설정을 해준다.
@@ -2309,7 +2309,7 @@ CubeObject::CubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 	ObjData.SpecularParamater = 0.2f;//스페큘러를 낮게준다.
 
 
-	ObjData.CustomData1.w = (float)(rand() % 400 + 100);
+	ObjData.CustomData1.w = rand() % 400 + 100;
 	obs = Static;
 
 	//게임관련 데이터들
@@ -2437,7 +2437,7 @@ MoveCubeObject::MoveCubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 
 	Len = len;
 
-	n = (float)(rand() % 30);
+	n = rand() % 30;
 
 	//게임오브젝트마다 룩벡터와 라이트벡터가 다르므로 초기 오프셋 설정을 해준다.
 	//실제 룩벡터 등은 모두 UpdateLookVector에서 처리된다(라이트벡터도) 따라서 Tick함수에서 반드시 호출해야한다.
@@ -2510,7 +2510,7 @@ void MoveCubeObject::Tick(const GameTimer & gt)
 {
 	n += gt.DeltaTime();
 
-	CenterPos.y = Len * sinf((float)MMPE_PI * n * 0.15f)+ 50.0f;
+	CenterPos.y = Len * sinf(MMPE_PI * n * 0.15f)+ 50;
 
 }
 
@@ -2695,7 +2695,7 @@ void BarObject::SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* comma
 
 
 	//여기서 좌표를 일괄적으로 설정 할 수 있다
-	for (UINT i = 0; i < numOfitem; ++i)
+	for (int i = 0; i < numOfitem; ++i)
 	{
 		Mesh.SubResource[i].V = XMFLOAT3(0, 0, 0);
 
@@ -2794,7 +2794,7 @@ void BarFrameObject::SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* 
 
 
 	//여기서 좌표를 일괄적으로 설정 할 수 있다
-	for (UINT i = 0; i < numOfitem; ++i)
+	for (int i = 0; i < numOfitem; ++i)
 	{
 		Mesh.SubResource[i].V = XMFLOAT3(0, 0, 0);
 
@@ -2885,7 +2885,7 @@ void Rank1Object::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * c
 
 
 	//여기서 좌표를 일괄적으로 설정 할 수 있다
-	for (UINT i = 0; i < numOfitem; ++i)
+	for (int i = 0; i < numOfitem; ++i)
 	{
 		Mesh.SubResource[i].V = XMFLOAT3(0, 0, 0);
 
@@ -2982,7 +2982,7 @@ void DiceObject::SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* comm
 
 
 	//여기서 좌표를 일괄적으로 설정 할 수 있다
-	for (UINT i = 0; i < numOfitem; ++i)
+	for (int i = 0; i < numOfitem; ++i)
 	{
 		Mesh.SubResource[i].V = XMFLOAT3(0, 0, 0);
 		Mesh.Index[i] = i;
@@ -3073,29 +3073,29 @@ void DiceObject::Tick(const GameTimer & gt)
 
 		else if (Dicedata == 2)
 		{
-			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist,NULL, Master, ori, (float)MMPE_PI / 18, NULL, Master->CenterPos));
-			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist,NULL, Master, ori, (float)-MMPE_PI / 18, NULL, Master->CenterPos));
+			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist,NULL, Master, ori, MMPE_PI / 18, NULL, Master->CenterPos));
+			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist,NULL, Master, ori, -MMPE_PI / 18, NULL, Master->CenterPos));
 		}
 		else if (Dicedata == 3)
 		{
 			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist,NULL, Master, ori, 0, NULL, Master->CenterPos));
-			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist,NULL, Master, ori, (float)MMPE_PI / 9, NULL, Master->CenterPos));
-			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist,NULL, Master, ori, (float)-MMPE_PI / 9, NULL, Master->CenterPos));
+			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist,NULL, Master, ori, MMPE_PI / 9, NULL, Master->CenterPos));
+			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist,NULL, Master, ori, -MMPE_PI / 9, NULL, Master->CenterPos));
 		}
 		else if (Dicedata == 4)
 		{
-			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist,NULL, Master, ori, (float)MMPE_PI / 18, NULL, Master->CenterPos));
-			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist,NULL, Master, ori, (float)-MMPE_PI / 18, NULL, Master->CenterPos));
-			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist,NULL, Master, ori, (float)MMPE_PI / 9, NULL, Master->CenterPos));
-			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist,NULL, Master, ori, (float)-MMPE_PI / 9, NULL, Master->CenterPos));
+			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist,NULL, Master, ori, MMPE_PI / 18, NULL, Master->CenterPos));
+			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist,NULL, Master, ori, -MMPE_PI / 18, NULL, Master->CenterPos));
+			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist,NULL, Master, ori, MMPE_PI / 9, NULL, Master->CenterPos));
+			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist,NULL, Master, ori, -MMPE_PI / 9, NULL, Master->CenterPos));
 		}
 		else if (Dicedata == 5)
 		{
 			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist,NULL, Master, ori, 0, NULL, Master->CenterPos));
-			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist,NULL, Master, ori, (float)MMPE_PI / 18, NULL, Master->CenterPos));
-			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist,NULL, Master, ori, (float)-MMPE_PI / 18, NULL, Master->CenterPos));
-			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist,NULL, Master, ori, (float)MMPE_PI / 9, NULL, Master->CenterPos));
-			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist, NULL, Master,ori, (float)-MMPE_PI / 9, NULL, Master->CenterPos));
+			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist,NULL, Master, ori, MMPE_PI / 18, NULL, Master->CenterPos));
+			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist,NULL, Master, ori, -MMPE_PI / 18, NULL, Master->CenterPos));
+			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist,NULL, Master, ori, MMPE_PI / 9, NULL, Master->CenterPos));
+			Bulletlist->push_back(new DiceStrike(Device, Commandlist, plist, NULL, Master,ori, -MMPE_PI / 9, NULL, Master->CenterPos));
 		}
 
 		DelObj = true;
@@ -3147,7 +3147,7 @@ DamageObject::DamageObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * 
 	ObjData.Scale = 15.0f;
 	ObjData.SpecularParamater = 0.0f;//스페큘러를 낮게준다.
 
-	damaged = (int)Damaged;
+	damaged = Damaged;
 	//게임관련 데이터들
 	gamedata.MAXHP = 0;
 	gamedata.HP = 0;
@@ -3193,7 +3193,7 @@ void DamageObject::SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* co
 
 
 	//여기서 좌표를 일괄적으로 설정 할 수 있다
-	for (UINT i = 0; i < numOfitem; ++i)
+	for (int i = 0; i < numOfitem; ++i)
 	{
 
 		Mesh.SubResource[i].V = XMFLOAT3(0, 0, 0);
@@ -3613,7 +3613,7 @@ BigWallObject::BigWallObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList 
 
 	}
 	Blending = true;
-	ObjData.BlendValue = 0.45f;
+	ObjData.BlendValue = 0.45;
 	//게임오브젝트마다 룩벡터와 라이트벡터가 다르므로 초기 오프셋 설정을 해준다.
 	//실제 룩벡터 등은 모두 UpdateLookVector에서 처리된다(라이트벡터도) 따라서 Tick함수에서 반드시 호출해야한다.
 	OffLookvector = XMFLOAT3(0, 0, 1);
@@ -3752,7 +3752,7 @@ ColumnObject::ColumnObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * 
 	ObjData.SpecularParamater = 0.0f;//스페큘러를 낮게준다.
 
 
-	ObjData.CustomData1.w = (float)(rand() % 400 + 100);
+	ObjData.CustomData1.w = rand() % 400 + 100;
 
 	//게임관련 데이터들
 	gamedata.MAXHP = 100;
@@ -4111,7 +4111,7 @@ RangeObject::RangeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * co
 
 void RangeObject::SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist)
 {
-	CreateCube(&Mesh, 60, 0.01f, 60);
+	CreateCube(&Mesh, 60, 0.01, 60);
 
 	Mesh.SetNormal(false);
 	Mesh.CreateVertexBuffer(m_Device, commandlist);
@@ -4203,9 +4203,9 @@ ParticleObject::ParticleObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 	XMFLOAT3 axis = { 0,1,0 };
 	XMFLOAT4 q2;
 	if (Lookvector.z >0)
-		q2 = QuaternionRotation(axis, (float)MMPE_PI / 2 * Lookvector.x);
+		q2 = QuaternionRotation(axis, MMPE_PI / 2 * Lookvector.x);
 	else if (Lookvector.z <0)
-		q2 = QuaternionRotation(axis, (float)MMPE_PI / 2 * -Lookvector.x);
+		q2 = QuaternionRotation(axis, MMPE_PI / 2 * -Lookvector.x);
 
 	Orient = QuaternionMultiply(Orient, q2);
 
@@ -4229,16 +4229,16 @@ void ParticleObject::SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* 
 
 
 	//여기서 좌표를 일괄적으로 설정 할 수 있다
-	for (UINT i = 0; i < numOfParticle; ++i)
+	for (int i = 0; i < numOfParticle; ++i)
 	{
 
 		Mesh.SubResource[i].V.x = 0;
 		Mesh.SubResource[i].V.y = 0;
 		Mesh.SubResource[i].V.z = 0;
 
-		Mesh.SubResource[i].N.x = 0 + cosf((float)MMPE_PI / 180 * i*(rand() % 10000));
-		Mesh.SubResource[i].N.y = 0 + sinf((float)MMPE_PI / 180 * i*(rand() % 10000));
-		Mesh.SubResource[i].N.z = cosf((float)MMPE_PI / 180 * i*(rand() % 10000));
+		Mesh.SubResource[i].N.x = 0 + (cosf(MMPE_PI / 180 * i*(float)(rand() % 10000)));
+		Mesh.SubResource[i].N.y = 0 + (sinf(MMPE_PI / 180 * i*(float)(rand() % 10000)));
+		Mesh.SubResource[i].N.z = (cosf(MMPE_PI / 180 * i*(float)(rand() % 10000)));
 		Mesh.SubResource[i].N.w = (float)(rand() % 100);
 		Mesh.Index[i] = i;
 
@@ -4348,16 +4348,16 @@ void ParticleObject2::SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList*
 
 
 	//여기서 좌표를 일괄적으로 설정 할 수 있다
-	for (UINT i = 0; i < numOfParticle; ++i)
+	for (int i = 0; i < numOfParticle; ++i)
 	{
 
 		Mesh.SubResource[i].V.x = 0;
 		Mesh.SubResource[i].V.y = 0;
 		Mesh.SubResource[i].V.z = 0;
 
-		Mesh.SubResource[i].N.x = cosf((float)MMPE_PI / 180 * i*(rand() % 10000));
-		Mesh.SubResource[i].N.y = 0;// (float)+(sinf(MMPE_PI / 180 * i*(float)(rand() % 10000)));
-		Mesh.SubResource[i].N.z = cosf((float)MMPE_PI / 180 * i*(rand() % 10000));
+		Mesh.SubResource[i].N.x = 0 + (cosf(MMPE_PI / 180 * i*(float)(rand() % 10000)));
+		Mesh.SubResource[i].N.y = 0;// +(sinf(MMPE_PI / 180 * i*(float)(rand() % 10000)));
+		Mesh.SubResource[i].N.z = (cosf(MMPE_PI / 180 * i*(float)(rand() % 10000)));
 		Mesh.SubResource[i].N.w = (float)(rand() % 100);
 		Mesh.Index[i] = i;
 
@@ -4468,16 +4468,16 @@ void ParticleObject3::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList
 
 
 	//여기서 좌표를 일괄적으로 설정 할 수 있다
-	for (UINT i = 0; i < numOfParticle; ++i)
+	for (int i = 0; i < numOfParticle; ++i)
 	{
 
 		Mesh.SubResource[i].V.x = 0;
 		Mesh.SubResource[i].V.y = 0;
 		Mesh.SubResource[i].V.z = 0;
 
-		Mesh.SubResource[i].N.x = cosf((float)MMPE_PI / numOfParticle * i*(rand() % 10000));
-		Mesh.SubResource[i].N.y = sinf((float)MMPE_PI / numOfParticle * i*(rand() % 10000));
-		Mesh.SubResource[i].N.z = cosf((float)MMPE_PI / numOfParticle * i*(rand() % 10000));
+		Mesh.SubResource[i].N.x = 0 + (cosf(MMPE_PI / numOfParticle * i*(float)(rand() % 10000)));
+		Mesh.SubResource[i].N.y = 0 + (sinf(MMPE_PI / numOfParticle * i*(float)(rand() % 10000)));
+		Mesh.SubResource[i].N.z = (cosf(MMPE_PI / numOfParticle * i*(float)(rand() % 10000)));
 		Mesh.SubResource[i].N.w = (float)(rand() % numOfParticle);
 		Mesh.Index[i] = i;
 
@@ -4641,7 +4641,7 @@ ImpObject::ImpObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comman
 	auto q2 = QuaternionRotation(axis, MMPE_PI);
 	Orient = QuaternionMultiply(Orient, q2);
 	UpdateLookVector();
-	ObjData.isAnimation = 1;
+	ObjData.isAnimation = true;
 	ObjData.Scale = 60;
 	ObjData.SpecularParamater = 0.0f;//스페큘러를 낮게준다.
 
@@ -4729,10 +4729,10 @@ void ImpObject::Tick(const GameTimer & gt)
 	//이때 pp의 position과 CenterPos를 일치시켜야하므로 CenterPos의 포인터를 인자로 넘겨야 한다.
 	pp->integrate(gt.DeltaTime());
 
-	if (ObjData.isAnimation == 1)
+	if (ObjData.isAnimation == true)
 	{
 	
-		UpdateMD5Model(commandlist, &Mesh, this, gt.DeltaTime()*60.0f / 24.0f, n_Animation, animations, jarr);
+		UpdateMD5Model(commandlist, &Mesh, this, gt.DeltaTime()*60.0 / 24.0, n_Animation, animations, jarr);
 	}
 	if (fsm != NULL)
 		fsm->Update(gt.DeltaTime());
@@ -4904,7 +4904,7 @@ RingObject::RingObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 	
 	TexOff = selectColor;
 	Blending = true;
-	ObjData.BlendValue = 0.45f;
+	ObjData.BlendValue = 0.45;
 
 	//게임오브젝트마다 룩벡터와 라이트벡터가 다르므로 초기 오프셋 설정을 해준다.
 	//실제 룩벡터 등은 모두 UpdateLookVector에서 처리된다(라이트벡터도) 따라서 Tick함수에서 반드시 호출해야한다.
@@ -5009,7 +5009,7 @@ ShadowObject::ShadowObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * 
 	{
 		if (Master->obs == Dynamic)
 		{
-			ObjData.isAnimation = 1;
+			ObjData.isAnimation = true;
 		}
 	}
 
@@ -5170,22 +5170,22 @@ void ShadowObject::Tick(const GameTimer & gt)
 	CenterPos = Master->CenterPos;
 	
 
-	if (ObjData.isAnimation == 1)
+	if (ObjData.isAnimation == true)
 	{
 		if (CreatecMesh && Kinds == 0)
 		{
 			//애니메이션 업데이트 애니메이션은 24프레임으로 구성됨. 문제는 FPS가 24프레임이 아님. 그보다 큰 프레임. 따라서 24프레임으로 해당프레임을 나눠 보정.
 			if (Master->n_Animation != Attack)
 			{
-				UpdateMD5Model(commandlist, &cMesh, this, gt.DeltaTime()*60.0f / 24.0f, Master->n_Animation, cAnimations, jarr);
+				UpdateMD5Model(commandlist, &cMesh, this, gt.DeltaTime()*60.0 / 24.0, Master->n_Animation, cAnimations, jarr);
 			}
 			else
 			{
-				UpdateMD5Model(commandlist, &cMesh, this, 2.0f * gt.DeltaTime()*60.0f / 24.0f, Master->n_Animation, cAnimations, jarr);
+				UpdateMD5Model(commandlist, &cMesh, this, 2 * gt.DeltaTime()*60.0 / 24.0, Master->n_Animation, cAnimations, jarr);
 			}
 		}
 		else if(CreateiMesh && Kinds == 2)
-			UpdateMD5Model(commandlist, &iMesh, this, 0.8f*gt.DeltaTime()*60.0f / 24.0f, Master->n_Animation, iAnimations, jarr);
+			UpdateMD5Model(commandlist, &iMesh, this, 0.8*gt.DeltaTime()*60.0 / 24.0, Master->n_Animation, iAnimations, jarr);
 
 	}
 
@@ -5198,7 +5198,7 @@ void ShadowObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTim
 
 	Mat.UpdateConstantBuffer(commandlist);
 
-	if(ObjData.isAnimation = 1)
+	if(ObjData.isAnimation)
 		commandlist->SetGraphicsRootConstantBufferView(0, jarr->Resource()->GetGPUVirtualAddress());
 
 	if(CreatecMesh && Kinds == Cubeman)
@@ -5525,7 +5525,7 @@ void StoneBullet::Tick(const GameTimer & gt)
 
 	CenterPos = orgpluspos;
 
-	tempangle += (float)MMPE_PI / 4 * gt.DeltaTime();
+	tempangle += MMPE_PI / 4 * gt.DeltaTime();
 	XMFLOAT4 tempori = QuaternionRotation(XMFLOAT3(0, 1, 0), tempangle);
 
 	XMVECTOR to = XMLoadFloat4(&tempori);
@@ -5576,7 +5576,7 @@ void StoneBullet::Collision(list<CGameObject*>* collist, float DeltaTime)
 
 
 
-		
+				XMFLOAT3 cn;
 				//고정된 물체가 아니면
 				if ((*i)->staticobject == false)
 				{
@@ -5913,7 +5913,7 @@ void HammerBullet::Tick(const GameTimer & gt)
 
 	CenterPos = orgpluspos;
 
-	tempangle += (float)MMPE_PI / 3 * gt.DeltaTime();
+	tempangle += MMPE_PI / 3 * gt.DeltaTime();
 	XMFLOAT4 tempori = QuaternionRotation(XMFLOAT3(0, 1, 0), tempangle);
 
 	XMVECTOR to = XMLoadFloat4(&tempori);
@@ -5963,7 +5963,7 @@ void HammerBullet::Collision(list<CGameObject*>* collist, float DeltaTime)
 
 
 
-			
+				XMFLOAT3 cn;
 				//고정된 물체가 아니면
 				if ((*i)->staticobject == false)
 				{

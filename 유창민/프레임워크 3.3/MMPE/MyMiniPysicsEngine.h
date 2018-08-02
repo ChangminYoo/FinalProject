@@ -2,8 +2,8 @@
 #include<DirectXMath.h>
 #include<vector>
 using namespace DirectX;
-#define MMPE_EPSILON 0.001f
-#define MMPE_PI 3.14159287f
+#define MMPE_EPSILON 0.001
+#define MMPE_PI 3.14159287
 namespace MiniPhysicsEngineG9
 {
 	struct CollisionPoint
@@ -294,7 +294,7 @@ namespace MiniPhysicsEngineG9
 	XMFLOAT3 Float3Float(XMFLOAT3& v, float v2);
 	XMFLOAT4 Float4Float(XMFLOAT4& v, float v2);
 
-	XMFLOAT4 QuaternionRotation(XMFLOAT3& Axis, double radian);
+	XMFLOAT4 QuaternionRotation(XMFLOAT3& Axis, float radian);
 	XMFLOAT4 QuaternionMultiply(XMFLOAT4& q1, XMFLOAT4& q2);//ÄõÅÍ´Ï¾ðÀÇ °öÀÏ»Ó º¤ÅÍ¸¦ ³ÖÀ¸¸é ¾ÈµÇ¿ä Ã¢¹Î¾¾..
 
 	XMFLOAT3 Vector3Rotation(XMFLOAT3& Vec, XMFLOAT4& q1);
