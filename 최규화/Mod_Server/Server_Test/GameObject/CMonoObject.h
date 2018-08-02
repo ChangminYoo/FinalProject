@@ -2,6 +2,13 @@
 //#include "../PhysicsEngine/MyMiniPysicsEngine.h"
 //#include "../PhysicsEngine/PhysicalEffect.h"
 
+struct BasicInfo
+{
+	Position  pos;
+	double    degree;
+	INSTALLED_OBJECT_TYPE type;
+};
+
 struct ObjectStatus
 {
 	int orignHP{ 100 };
@@ -16,15 +23,15 @@ class CMonoObject
 {
 protected:
 	unsigned short		m_id{ 0 };
-	char				m_fixed{ true };
-	char				m_alive{ true };
+	char				m_fixed;
+	char				m_alive;
 	Position			m_pos4f;
 	Position			m_orgPos4f;
 	Rotation			m_rot4f;
 	char				m_dir;
 	char				m_ai;
-	char				m_godmode{ false };
-	char				m_airbone{ false };
+	char				m_godmode;
+	char				m_airbone;
 	unsigned char	    m_type;			//스테틱 오브젝트 종류(box, wall, building...)
 	float				m_degree;
 
@@ -49,10 +56,11 @@ protected:
 	__int64				m_currtime{ 0 };
 	double				m_deltime{ 0 };
 
-
 public:
 	CMonoObject();
 	virtual ~CMonoObject();
+
+	static map<int, BasicInfo> g_objectData;
 
 	XMFLOAT4 xmf4_pos;
 	XMFLOAT4 xmf4_rot;
@@ -104,5 +112,9 @@ public:
 	virtual void UpdateRRotatePos();
 	virtual void UpdateRigidCenterPos();
 	virtual void UpdateRigidRotatePos();
+
+	//패킷으로 보내기 위한 해당 오브젝트의 패킷데이터 업데이트
+	//순수 가상함수
+	virtual void UpdateDataForPacket() = 0;
 };
 

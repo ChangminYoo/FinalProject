@@ -67,11 +67,10 @@ CNpcObject::CNpcObject(int id, int type)
 	AfterGravitySystem(0);
 
 	//------------------------------
-	SetMyBasicPacketData();
+	UpdateDataForPacket();
 }
 
-
-void CNpcObject::SetMyBasicPacketData()
+void CNpcObject::UpdateDataForPacket()
 {
 	//npc_data.ai = m_ai;
 	npc_data.airbone = m_airbone;
@@ -91,7 +90,6 @@ void CNpcObject::SetMyBasicPacketData()
 	npc_data.status.level = m_ability.level;
 	npc_data.status.origin_hp = m_ability.orignHP;
 	npc_data.status.speed = m_ability.speed;
-
 }
 
 //NPC에 대한 데미지 주기

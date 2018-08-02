@@ -23,6 +23,8 @@ void CPhysicEngineWorker::Update()
 
 		// 0.00000028
 		//2838 
+		for (const auto& mvobj : g_moveobjs)
+			mvobj->Tick(m_deltime);
 	
 		if (!g_clients.empty())
 		{
@@ -32,7 +34,7 @@ void CPhysicEngineWorker::Update()
 				client->GravitySystem(m_deltime);
 				client->Tick(m_deltime);
 				client->AfterGravitySystem(m_deltime);
-				client->SetChangedPlayerState();
+				client->UpdateDataForPacket();
 
 				//cout << "PosY: " << client->m_pdata.pos.y << "\n";
 				//cout << "PosX: " << client->m_pdata.pos.x << "PosY: " << client->m_pdata.pos.y << "PosZ: " << client->m_pdata.pos.z << "\n";
@@ -50,7 +52,7 @@ void CPhysicEngineWorker::Update()
 			npc_monster->UpdateLookvector();
 			npc_monster->UpdateUpvector();
 
-			npc_monster->SetMyBasicPacketData();
+			npc_monster->UpdateDataForPacket();
 		}
 
 	
@@ -68,7 +70,7 @@ void CPhysicEngineWorker::Update()
 			rigid->UpdateLookvector();
 			rigid->UpdateUpvector();
 
-			rigid->SetUpdatedRigidybodyObject();
+			rigid->UpdateDataForPacket();
 			//cout << "PosX: " << rigid->GetCenterPos4f().x << "PosY: " << rigid->GetCenterPos4f().y << "PosZ: " << rigid->GetCenterPos4f().z << "PosW: " << rigid->GetCenterPos4f().w << "\n";
 		}
 		

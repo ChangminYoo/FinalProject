@@ -1,7 +1,4 @@
-//#include "CStaticObject.h"
 #include "../stdafx.h"
-
-map<int, BasicInfo> CStaticObject::m_sobj_bdata;
 
 CStaticObject::CStaticObject()
 {
@@ -20,120 +17,237 @@ void CStaticObject::MakeStaticObjectBasicData()
 
 	float BigWall_Rad1 = MMPE_PI / 5; //36degree
 
-	m_sobj_bdata =
+	g_objectData =
 	{
-		{ 0,{ { 40.f, 18.f, -70.f, 0.f },{ 0 },{ Box } } },
-		{ 1,{ { 50.f, 70.f, -80.f, 0.f },{ 0 },{ Box } } },
-		{ 2,{ { 35.f, 50.f, -70.f, 0.f },{ 0 },{ Box } } },
-		{ 3,{ { 118.f, 58.f, 47.f, 0.f },{ 0 },{ Box } } },
-		{ 4,{ { 102.f, 69.f, 81.f, 0.f },{ 0 },{ Box } } },
-		{ 5,{ { 58.f, 39.f,  78.f, 0.f },{ 0 },{ Box } } },
-		{ 6,{ { 65.f, 35.f,-110.f, 0.f },{ 0 },{ Box } } },
-		{ 7,{ { 92.f, 61.f,  60.f, 0.f },{ 0 },{ Box } } },
-		{ 8,{ { 103.f, 36.f, 15.f, 0.f },{ 0 },{ Box } } },
-		{ 9,{ { 65.f, 17.f, -65.f ,0.f },{ 0 },{ Box } } },
-		{ 10,{ { 82.f, 11.f, 34.f, 0.f },{ 0 },{ Box } } },
-		{ 11,{ { 72.f, 53.f, 41.f, 0.f },{ 0 },{ Box } } },
-		{ 12,{ { 24.f, 44.f, 40.f, 0.f },{ 0 },{ Box } } },
-		{ 13,{ { -20.f, 33.f, 51.f,0.f },{ 0 },{ Box } } },
-		{ 14,{ { 0.f, 24.f, 34.f ,0.f },{ 0 },{ Box } } },
-		{ 15,{ { 0.f, 58.f, -71.f, 0.f },{ 0 },{ Box } } },
-		{ 16,{ { -76.f, 53.f, 8.f, 0.f },{ 0 },{ Box } } },
-		{ 17,{ { -40.f, 10.f, 0.f, 0.f },{ 0 },{ Box } } },
-		{ 18,{ { -38.f, 48.f, -126.f, 0.f },{ 0 },{ Box } } },
-		{ 19,{ { -45.f, 30.f, -60.f, 0.f },{ 0 },{ Box } } },
-		{ 20,{ { -65.f, 40.f, -102.f, 0.f },{ 0 },{ Box } } },
-		{ 21,{ { -69.f, 62.f,  61.f, 0.f },{ 0 },{ Box } } },
-		{ 22,{ { -85.f, 42.f, -45.f, 0.f },{ 0 },{ Box } } },
-		{ 23,{ { -106.f, 40.f,  42.f, 0.f },{ 0 },{ Box } } },
-		{ 24,{ { -20.f, 5.f, 210.f, 0.f },{ 0 },{ Box } } },
-		{ 25,{ { -20.f, 15.f, 210.f ,0.f },{ 0 },{ Box } } },
-		{ 26,{ { -20.f, 25.f, 210.f, 0.f },{ 0 },{ Box } } },
-		{ 27,{ { -20.f, 35.f, 210.f, 0.f },{ 0 },{ Box } } },
-		{ 28,{ { -10.f, 35.f, 210.f, 0.f },{ 0 },{ Box } } },
-		{ 29,{ { 0.f, 35.f, 210.f,0.f },{ 0 },{ Box } } },
-		{ 30,{ { 10.f, 35.f, 210.f ,0.f },{ 0 },{ Box } } },
-		{ 31,{ { 10.f, 25.f, 210.f, 0.f },{ 0 },{ Box } } },
-		{ 32,{ { 10.f, 15.f, 210.f ,0.f },{ 0 },{ Box } } },
-		{ 33,{ { 10.f, 5.f, 210.f, 0.f },{ 0 },{ Box } } },
-		{ 34,{ { 260.f, 5.f,  -30.f, 0.f },{ 0 },{ Box } } },
-		{ 35,{ { 260.f, 15.f, -30.f, 0.f },{ 0 },{ Box } } },
-		{ 36,{ { 260.f, 25.f, -30.f, 0.f },{ 0 },{ Box } } },
-		{ 37,{ { 260.f, 35.f, -30.f, 0.f },{ 0 },{ Box } } },
-		{ 38,{ { 260.f, 35.f, -20.f, 0.f },{ 0 },{ Box } } },
-		{ 39,{ { 260.f, 35.f, -10.f, 0.f },{ 0 },{ Box } } },
-		{ 40,{ { 260.f, 35.f,  0.f, 0.f },{ 0 },{ Box } } },
-		{ 41,{ { 260.f, 25.f,  0.f, 0.f },{ 0 },{ Box } } },
-		{ 42,{ { 260.f, 15.f,  0.f, 0.f },{ 0 },{ Box } } },
-		{ 43,{ { 260.f,  5.f,  0.f, 0.f },{ 0 },{ Box } } },
-		{ 44,{ { -20.f,  5.f, -280.f, 0.f },{ 0 },{ Box } } },
-		{ 45,{ { -20.f, 15.f, -280.f, 0.f },{ 0 },{ Box } } },
-		{ 46,{ { -20.f, 25.f, -280.f, 0.f },{ 0 },{ Box } } },
-		{ 47,{ { -20.f, 35.f, -280.f, 0.f },{ 0 },{ Box } } },
-		{ 48,{ { -10.f, 35.f, -280.f, 0.f },{ 0 },{ Box } } },
-		{ 49,{ { 0.f,  35.f, -280.f, 0.f },{ 0 },{ Box } } },
-		{ 50,{ { 10.f,  35.f, -280.f, 0.f },{ 0 },{ Box } } },
-		{ 51,{ { 10.f,  25.f, -280.f, 0.f },{ 0 },{ Box } } },
-		{ 52,{ { 10.f,  15.f, -280.f, 0.f },{ 0 },{ Box } } },
-		{ 53,{ { 10.f,   5.f, -280.f, 0.f },{ 0 },{ Box } } },
-		{ 54,{ { -BigWall_X1 - 200, 0.f, 480 * cosf(0.4f * MMPE_PI), 0.f },{ MMPE_PI / 8 },{ SmallWall } } },
-		{ 55,{ { -BigWall_X1 - 140.f, 0.f, 400.f * cosf(0.4f * MMPE_PI), 0 },{ MMPE_PI / 8 },{ SmallWall } } },
-		{ 56,{ { -BigWall_X1 - 80, 0, 320 * cosf(0.4f * MMPE_PI), 0 },{ MMPE_PI / 8 },{ SmallWall } } },
-		{ 57,{ { 0, 0, 530, 0 },{ MMPE_PI / 2 },{ SmallWall } } },
-		{ 58,{ { 0, 0, 460, 0 },{ MMPE_PI / 2 },{ SmallWall } } },
-		{ 59,{ { 0, 0, 390, 0 },{ MMPE_PI / 2 },{ SmallWall } } },
-		{ 60,{ { BigWall_X1 + 200, 0, 480 * cosf(0.4f*MMPE_PI),0 },{ -MMPE_PI / 8 },{ SmallWall } } },
-		{ 61,{ { BigWall_X1 + 140, 0, 400 * cosf(0.4f*MMPE_PI),0 },{ -MMPE_PI / 8 },{ SmallWall } } },
-		{ 62,{ { BigWall_X1 + 80,  0, 320 * cosf(0.4f*MMPE_PI),0 },{ -MMPE_PI / 8 },{ SmallWall } } },
-		{ 63,{ { 520 * sinf(0.8f*MMPE_PI), 0, -500 * cosf(0.2f*MMPE_PI),0 },{ MMPE_PI / 3 },{ SmallWall } } },
-		{ 64,{ { 470 * sinf(0.8f*MMPE_PI), 0, -440 * cosf(0.2f*MMPE_PI),0 },{ MMPE_PI / 3 },{ SmallWall } } },
-		{ 65,{ { 420 * sinf(0.8f*MMPE_PI), 0, -380 * cosf(0.2f*MMPE_PI),0 },{ MMPE_PI / 3 },{ SmallWall } } },
-		{ 66,{ { -520 * sinf(0.8f*MMPE_PI), 0, -500 * cosf(0.2f*MMPE_PI),0 },{ -MMPE_PI / 3 },{ SmallWall } } },
-		{ 67,{ { -470 * sinf(0.8f*MMPE_PI), 0, -440 * cosf(0.2f*MMPE_PI),0 },{ -MMPE_PI / 3 },{ SmallWall } } },
-		{ 68,{ { -420 * sinf(0.8f*MMPE_PI), 0, -380 * cosf(0.2f*MMPE_PI),0 },{ -MMPE_PI / 3 },{ SmallWall } } },
-		{ 69,{ { -BigWall_X1, 0, BigWall_Z1, 0 },{ -BigWall_Rad1 },{ BigWall } } },
-		{ 70,{ { BigWall_X1, 0, BigWall_Z1, 0 },{ BigWall_Rad1 },{ BigWall } } },
-		{ 71,{ { BigWall_X2, 0, BigWall_Z2, 0 },{ -BigWall_Rad1 * 2 },{ BigWall } } },
-		{ 72,{ { 0,0,BigWall_Z3,0 },{ 0 },{ BigWall } } },
-		{ 73,{ { -BigWall_X2, 0, BigWall_Z2, 0 },{ BigWall_Rad1 * 2 },{ BigWall } } },
-		{ 74,{ { 90.f, 0.f, 60.f, 0.f },{ 0 },{ NormalBuilding } } },
-		{ 75,{ { -75.f, 0.f, 40.f, 0.f },{ 0 },{ NormalBuilding } } },
-		{ 76,{ { 0.f, 0.f, -100.f, 0.f },{ 0 },{ NormalBuilding } } },
-		{ 77, {{0.f, 200.0f, 290.0f, 0.0f},{0},{ Rigidbodybox }}},
-		//{ 78,{ {-270.f, 250.f, 60.f, 0.0f },{ 0 },{ Rigidbodybox } } },
-		//{ 79,{ { 270.f, 330.f, 60.f, 0.0f },{ 0 },{ Rigidbodybox } } },
-		//{ 80,{ { -210.f, 390.f, -200.f, 0.f },{ 0 },{ Rigidbodybox } } },
-		//{ 81,{ { 200.f, 180.0f, -180.0f, 0.f },{ 0 },{ Rigidbodybox } } },
-		//{ 82,{ { 80.f, 310.0f, -30.0f, 0.f },{ 0 },{ Rigidbodybox } } },
-		//{ 83,{ { -31.f, 250.0f, 160.0f, 0.f },{ 0 },{ Rigidbodybox } } },
-		//{ 84,{ { 90.f, 270.f, -340.f, 0.f },{ 0 },{ Rigidbodybox } } },
-		//{ 85,{ { -70.f, 220.f, -55.f, 0.f },{ 0 },{ Rigidbodybox } } },
+		//============2층=============
+		//1 - 8 - 4 = 13
+		{ 0,{ {   0.f,  91.f,   0.f, 0.f },				{ 0 },{ INSTALLED_OBJECT_TYPE::SecondFloor} } },
 
+		{ 1,{ {  30.f, 100.f,  90.f, 0.f },{ MMPE_PI * 0.25 },{ INSTALLED_OBJECT_TYPE::SmallWall  } } },
+		{ 2,{ {  90.f, 100.f,  30.f, 0.f },{ MMPE_PI * 0.25 },{ INSTALLED_OBJECT_TYPE::SmallWall  } } },
+		{ 3,{ { -30.f, 100.f,  90.f, 0.f },{ MMPE_PI * 0.25 },{ INSTALLED_OBJECT_TYPE::SmallWall  } } },
+		{ 4,{ { -90.f, 100.f,  30.f, 0.f },{ MMPE_PI * 0.25 },{ INSTALLED_OBJECT_TYPE::SmallWall  } } },
+		{ 5,{ {  30.f, 100.f, -90.f, 0.f },{ MMPE_PI * 0.25 },{ INSTALLED_OBJECT_TYPE::SmallWall  } } },
+		{ 6,{ {  90.f, 100.f, -30.f, 0.f },{ MMPE_PI * 0.25 },{ INSTALLED_OBJECT_TYPE::SmallWall  } } },
+		{ 7,{ { -30.f, 100.f, -90.f, 0.f },{ MMPE_PI * 0.25 },{ INSTALLED_OBJECT_TYPE::SmallWall  } } },
+		{ 8,{ { -90.f, 100.f, -30.f, 0.f },{ MMPE_PI * 0.25 },{ INSTALLED_OBJECT_TYPE::SmallWall  } } },
+
+		{ 9, { { 50.f, 101.f, 50.f, 0.f   },{ 0 },{ INSTALLED_OBJECT_TYPE::Box } } },
+		{ 10,{ { 50.f, 101.f, -50.f, 0.f  },{ 0 },{ INSTALLED_OBJECT_TYPE::Box } } },
+		{ 11,{ { -50.f, 111.f, 50.f, 0.f  },{ 0 },{ INSTALLED_OBJECT_TYPE::Box } } },
+		{ 12,{ { -50.f, 111.f, -50.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box } } },
+
+		//============1층=============
+		//MoveCube - 4 = 4
+		{ 13,{ { 0.f, 25.f, 145.f, 0.f   },{ 50.f },{ INSTALLED_OBJECT_TYPE::MoveCube } } },
+		{ 14,{ { 0.f, 52.f, -150.f, 0.f  },{ 50.f },{ INSTALLED_OBJECT_TYPE::MoveCube } } },
+		{ 15,{ { 145.f, 34.f, 0.f, 0.f   },{ 50.f },{ INSTALLED_OBJECT_TYPE::MoveCube } } },
+		{ 16,{ { -145.f, 96.f, 0.f, 0.f  },{ 50.f },{ INSTALLED_OBJECT_TYPE::MoveCube } } },
+
+		//Cube - 17 - 4 - 3 - 11 = 35
+		{ 17,{ { 40.f, 18.f, -70.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 18,{ { 68.f, 70.f, -93.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 19,{ { 35.f, 50.f, -70.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 20,{ { 128.f, 38.f, 27.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 21,{ { 102.f, 69.f, 81.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 22,{ { 58.f, 39.f,  78.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 23,{ { 65.f, 35.f,-110.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 24,{ { 92.f, 61.f,  60.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 25,{ { 103.f, 26.f, 35.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 26,{ { 65.f, 17.f, -65.f ,0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 27,{ { 82.f, 11.f, 34.f, 0.f  },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 28,{ { 72.f, 44.f, 41.f, 0.f  },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 29,{ {-32.f, 39.f, 51.f, 0.f  },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 30,{ {  0.f, 25.f, 34.f,0.f   },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 31,{ {  0.f, 38.f, -71.f ,0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 32,{ {  0.f, 15.f, 12.f, 0.f  },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 33,{ { 13.f, 33.f, -42.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+
+		{ 34,{ { 0.f, 24.f, 34.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 35,{ { 0.f, 38.f, -71.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 36,{ { 0.f, 15.f, 12.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 37,{ { 13.f, 33.f, -42.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+
+		{ 38,{ { -69.f, 62.f,  61.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 39,{ { -85.f, 42.f, -45.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 40,{ { -106.f, 40.f,  42.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+
+		{ 41,{ { -76.f, 53.f, 8.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 42,{ { -40.f, 10.f, -15.f ,0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 43,{ { -38.f, 25.f, -126.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 44,{ { -41.f, 50.f, -94.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 45,{ { -45.f, 30.f, -60.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 46,{ { -65.f, 40.f, -102,0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 47,{ { -69.f, 54.f, 61.f ,0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 48,{ { -85.f, 42.f, -45.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 49,{ { -106.f, 40.f, 42.f ,0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 50,{ { -104.f, 64.f, -62.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 51,{ { -87.f, 70.f,  82.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+
+		//door
+		//10 - 10 - 10 - 10 - 10 = 50
+		//좌상 ~반시계방향 ~우상
+		{ 52,{ { -170.f, 5.f, 200.f, 0.f },{ -BigWall_Rad1 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 53,{ { -170.f, 15.f,200.f, 0.f },{ -BigWall_Rad1 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 54,{ { -170.f, 25.f,200.f, 0.f },{ -BigWall_Rad1 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 55,{ { -170.f, 35.f,200.f, 0.f },{ -BigWall_Rad1 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 56,{ { -167.f, 35.f,212.f, 0.f },{  -BigWall_Rad1},{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 57,{ { -165.f, 35.f,223.f, 0.f },{  -BigWall_Rad1},{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 58,{ { -163.f, 35.f,234.f, 0.f },{  -BigWall_Rad1},{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 59,{ { -163.f, 25.f,234.f, 0.f },{  -BigWall_Rad1},{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 60,{ { -163.f,  15.f,234.f, 0.f },{ -BigWall_Rad1 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 61,{ { -163.f,  5.f, 234.f, 0.f },{ -BigWall_Rad1 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+
+		{ 62,{ { -270.f, 5.f,   -70.f, 0.f },{ BigWall_Rad1 * 2 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 63,{ { -270.f, 15.f,  -70.f, 0.f },{ BigWall_Rad1 * 2 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 64,{ { -270.f, 25.f,  -70.f, 0.f },{ BigWall_Rad1 * 2 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 65,{ { -270.f, 35.f,  -70.f, 0.f },{ BigWall_Rad1 * 2 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 66,{ { -265.f,  35.f, -80.f, 0.f },{ BigWall_Rad1 * 2 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 67,{ { -260.f,  35.f, -90.f, 0.f },{ BigWall_Rad1 * 2 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 68,{ { -255.f,  35.f, -100.f, 0.f },{ BigWall_Rad1 * 2 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 69,{ { -255.f,  25.f, -100.f, 0.f },{ BigWall_Rad1 * 2 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 70,{ { -255.f,  15.f, -100.f, 0.f },{ BigWall_Rad1 * 2 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 71,{ { -255.f,   5.f, -100.f, 0.f },{ BigWall_Rad1 * 2 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+
+		{ 72,{ { -20.f, 5.f,   -280.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 73,{ { -20.f, 15.f,  -280.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 74,{ { -20.f, 25.f,  -280.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 75,{ { -20.f, 35.f,  -280.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 76,{ { -10.f,  35.f, -280.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 77,{ {   0.f,  35.f, -280.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 78,{ {  10.f,  35.f, -280.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 79,{ {  10.f,  25.f, -280.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 80,{ {  10.f,  15.f, -280.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 81,{ {  10.f,   5.f, -280.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+
+		{ 82,{ { 270.f,  5.f, -70.f,  0.f  },{ -BigWall_Rad1 * 2 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 83,{ { 270.f, 15.f, -70.f,  0.f  },{ -BigWall_Rad1 * 2 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 84,{ { 270.f, 25.f, -70.f,  0.f  },{ -BigWall_Rad1 * 2 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 85,{ { 270.f, 35.f, -70.f,  0.f  },{ -BigWall_Rad1 * 2 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 86,{ { 265.f, 35.f, -80.f,  0.f  },{ -BigWall_Rad1 * 2 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 87,{ { 255.f, 35.f, -90.f,  0.f  },{ -BigWall_Rad1 * 2 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 88,{ { 255.f, 35.f, -100.f, 0.f  },{ -BigWall_Rad1 * 2 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 89,{ { 255.f, 25.f, -100.f, 0.f  },{ -BigWall_Rad1 * 2 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 90,{ { 255.f, 15.f, -100.f, 0.f  },{ -BigWall_Rad1 * 2 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 91,{ { 255.f,  5.f, -100.f, 0.f  },{ -BigWall_Rad1 * 2 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+
+		{ 92, { { 170.f,  5.f, 200.f,  0.f },{ BigWall_Rad1  },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 93, { { 170.f, 15.f, 200.f,  0.f },{ BigWall_Rad1  },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 94, { { 170.f, 25.f, 200.f,  0.f },{ BigWall_Rad1  },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 95, { { 170.f, 35.f, 200.f,  0.f },{ BigWall_Rad1  },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 96, { { 165.f, 35.f, 210.f,  0.f },{ BigWall_Rad1  },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 97, { { 160.f, 35.f, 220.f,  0.f },{ BigWall_Rad1  },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 98, { { 155.f, 35.f, 230.f, 0.f  },{ BigWall_Rad1  },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 99, { { 155.f, 25.f, 230.f, 0.f  },{ BigWall_Rad1  },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 100,{ { 155.f, 15.f, 230.f, 0.f  },{ BigWall_Rad1  },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 101,{ { 155.f,  5.f, 230.f, 0.f  },{ BigWall_Rad1  },{ INSTALLED_OBJECT_TYPE::Box  } } },
+
+		//Column
+		//4 = 4
+		{ 102,{ {  110.f,  0.f,   0.f,  0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Column } } },
+		{ 103,{ { -110.f,  0.f,   0.f,  0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Column } } },
+		{ 104,{ {    0.f,  0.f, -110.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Column } } },
+		{ 105,{ {    0.f,  0.f,  110.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Column } } },
+
+		//BrokenCart
+		//1 = 1
+		{ 106,{ {  -60.f,  0.f, -100.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::BrokenCart } } },
+
+		//BigWall = 5
+		{ 107,{ { -BigWall_X1, 0.f, BigWall_Z1, 0.f },{ -BigWall_Rad1 },	{ INSTALLED_OBJECT_TYPE::BigWall } } },
+		{ 108,{ {  BigWall_X1, 0.f, BigWall_Z1, 0.f },{  BigWall_Rad1 },	{ INSTALLED_OBJECT_TYPE::BigWall } } },
+		{ 109,{ {  BigWall_X2, 0.f, BigWall_Z2, 0.f },{ -BigWall_Rad1 * 2 },{ INSTALLED_OBJECT_TYPE::BigWall } } },
+		{ 110,{ {  0.f,        0.f, BigWall_Z3, 0.f },{  0 },				{ INSTALLED_OBJECT_TYPE::BigWall } } },
+		{ 111,{ { -BigWall_X2, 0.f, BigWall_Z2, 0.f },{  BigWall_Rad1 * 2 },{ INSTALLED_OBJECT_TYPE::BigWall } } },
+
+		//SmallWall
+		//좌상
+		{ 112,{ { -BigWall_X1 - 200,   0.f, 480.f  * cosf(0.4f * MMPE_PI), 0.f },{ MMPE_PI / 8 },{ INSTALLED_OBJECT_TYPE::SmallWall } } },
+		{ 113,{ { -BigWall_X1 - 140,   0.f, 400.f  * cosf(0.4f * MMPE_PI), 0.f },{ MMPE_PI / 8 },{ INSTALLED_OBJECT_TYPE::SmallWall } } },
+		{ 114,{ { -BigWall_X1 - 80,	   0.f, 320.f  * cosf(0.4f * MMPE_PI), 0.f },{ MMPE_PI / 8 },{ INSTALLED_OBJECT_TYPE::SmallWall } } },
+		
+		//중상
+		{ 115,{ { 0.f,  0.f, 530.f,  0.f },{ MMPE_PI / 2 },{ INSTALLED_OBJECT_TYPE::SmallWall } } },
+		{ 116,{ { 0.f,  0.f, 460.f,  0.f },{ MMPE_PI / 2 },{ INSTALLED_OBJECT_TYPE::SmallWall } } },
+		{ 117,{ { 0.f,  0.f, 390.f,  0.f },{ MMPE_PI / 2 },{ INSTALLED_OBJECT_TYPE::SmallWall } } },
+
+		//우상
+		{ 118,{ { BigWall_X1 + 200, 0.f, 480.f * cosf(0.4f * MMPE_PI) },{ -MMPE_PI / 8 },{ INSTALLED_OBJECT_TYPE::SmallWall } } },
+		{ 119,{ { BigWall_X1 + 140, 0.f, 400.f * cosf(0.4f * MMPE_PI) },{ -MMPE_PI / 8 },{ INSTALLED_OBJECT_TYPE::SmallWall } } },
+		{ 120,{ { BigWall_X1 + 80,  0.f, 320.f * cosf(0.4f * MMPE_PI) },{ -MMPE_PI / 8 },{ INSTALLED_OBJECT_TYPE::SmallWall } } },
+
+		//우하
+		{ 121,{ { 520.f * sinf(0.8f * MMPE_PI), 0.f, -500.f * cosf(0.2f * MMPE_PI) },{ MMPE_PI / 3 },{ INSTALLED_OBJECT_TYPE::SmallWall } } },
+		{ 122,{ { 470.f * sinf(0.8f * MMPE_PI), 0.f, -440.f * cosf(0.2f * MMPE_PI) },{ MMPE_PI / 3 },{ INSTALLED_OBJECT_TYPE::SmallWall } } },
+		{ 123,{ { 420.f * sinf(0.8f * MMPE_PI), 0.f, -380.f * cosf(0.2f * MMPE_PI) },{ MMPE_PI / 3 },{ INSTALLED_OBJECT_TYPE::SmallWall } } },
+
+		//좌하
+		{ 124,{ { -520.f * sinf(0.8f * MMPE_PI), 0.f, -500.f * cosf(0.2f * MMPE_PI) },{ -MMPE_PI / 3 },{ INSTALLED_OBJECT_TYPE::SmallWall } } },
+		{ 125,{ { -470.f * sinf(0.8f * MMPE_PI), 0.f, -440.f * cosf(0.2f * MMPE_PI) },{ -MMPE_PI / 3 },{ INSTALLED_OBJECT_TYPE::SmallWall } } },
+		{ 126,{ { -420.f * sinf(0.8f * MMPE_PI), 0.f, -380.f * cosf(0.2f * MMPE_PI) },{ -MMPE_PI / 3 },{ INSTALLED_OBJECT_TYPE::SmallWall } } },
+
+		//좌상 Building
+		{ 127,{ { -BigWall_X1 - 20,    0.f, 240.f  * cosf(0.4f * MMPE_PI), 0.f		},{ MMPE_PI / 8 },		{ INSTALLED_OBJECT_TYPE::NormalBuilding } } },
+		//중상 Building
+		{ 128,{ { 0.f,  0.f, 320.f,  0.f											},{ MMPE_PI / 2 },		{ INSTALLED_OBJECT_TYPE::NormalBuilding } } },
+		//우상 Building
+		{ 129,{ { BigWall_X1 + 20,  0.f, 240.f * cosf(0.4f * MMPE_PI)               },{ -MMPE_PI / 8 },		{ INSTALLED_OBJECT_TYPE::NormalBuilding } } },
+		//우하 Building
+		{ 130,{ { 370.f * sinf(0.8f * MMPE_PI), 0.f, -320.f * cosf(0.2f * MMPE_PI)  },{ MMPE_PI / 3 },      { INSTALLED_OBJECT_TYPE::NormalBuilding } } },
+		//좌하 Building
+		{ 131,{ { -370.f * sinf(0.8f * MMPE_PI), 0.f, -320.f * cosf(0.2f * MMPE_PI) },{ -MMPE_PI / 3 },     { INSTALLED_OBJECT_TYPE::NormalBuilding } } },
+
+		//RigidBody
+		{ 132,{ {    0.f, 200.f,  290.f, 0.f } , { 0 } , { INSTALLED_OBJECT_TYPE::Rigidbodybox } } },
+		{ 133,{ {    0.f, 100.f,  290.f, 0.f } , { 0 } , { INSTALLED_OBJECT_TYPE::Rigidbodybox } } },
+		{ 134,{ { -270.f,  50.f,   60.f, 0.f } , { 0 } , { INSTALLED_OBJECT_TYPE::Rigidbodybox } } },
+		{ 135,{ {  270.f, 100.f,   60.f, 0.f } , { 0 } , { INSTALLED_OBJECT_TYPE::Rigidbodybox } } },
+		{ 136,{ { -210.f, 390.f, -200.f, 0.f } , { 0 } , { INSTALLED_OBJECT_TYPE::Rigidbodybox } } },
+		{ 137,{ {  200.f, 440.f, -180.f, 0.f } , { 0 } , { INSTALLED_OBJECT_TYPE::Rigidbodybox } } },
+		{ 138,{ {  180.f, 310.f,  -30.f, 0.f } , { 0 } , { INSTALLED_OBJECT_TYPE::Rigidbodybox } } },
+		{ 139,{ { -231.f,  50.f, -160.f, 0.f } , { 0 } , { INSTALLED_OBJECT_TYPE::Rigidbodybox } } },
+		{ 140,{ { -231.f, 100.f, -160.f, 0.f } , { 0 } , { INSTALLED_OBJECT_TYPE::Rigidbodybox } } },
+		{ 141,{ { -190.f, 370.f, -340.f, 0.f } , { 0 } , { INSTALLED_OBJECT_TYPE::Rigidbodybox } } },
+		{ 142,{ {  -70.f,  40.f, -155.f, 0.f } , { 0 } , { INSTALLED_OBJECT_TYPE::Rigidbodybox } } },
+		{ 143,{ {  -70.f,  90.f, -155.f, 0.f } , { 0 } , { INSTALLED_OBJECT_TYPE::Rigidbodybox } } },
 	};
 }
 
 void CStaticObject::CreateGameObject()
 {
-	for (unsigned int i = 0; i < MAX_BOX_NUM; ++i)
-		g_staticobjs.insert(new NormalBoxObject(i));
-	
-	auto max_fsize = MAX_BOX_NUM + MAX_SMALL_WALL_NUM;
-	for (unsigned int i = MAX_BOX_NUM; i < max_fsize; ++i)
-		g_staticobjs.insert(new SmallWallObject(i));
-	
-	auto max_ssize = max_fsize + MAX_BIG_WALL_NUM;
-	for (unsigned int i = max_fsize; i < max_ssize; ++i)
-		g_staticobjs.insert(new BigWallObject(i));
-	
-	auto max_tsize = max_ssize + MAX_BULLDING_NUM;
-	for (unsigned int i = max_ssize; i < max_tsize; ++i)
-		g_staticobjs.insert(new Building(i));
-	
-	auto max_lsize = max_tsize + MAX_RIGIDBODY_NUM;
-	for (unsigned int i = max_tsize; i < max_lsize; ++i)
-		g_rigidobjs.insert(new RigidCubeObject(i));
+	for (unsigned int i = 0; i < 1; ++i)
+		g_staticobjs.insert(move(new CSecondFloorObject(i)));
 
+	for (unsigned int i = 1; i < 9; ++i)
+		g_staticobjs.insert(move(new CSmallWallObject(i)));
 
+	for (unsigned int i = 9; i < 13; ++i)
+		g_staticobjs.insert(move(new CNormalBoxObject(i)));
+
+	for (unsigned int i = 13; i < 17; ++i)
+		g_moveobjs.insert(move(new CMoveCubeObject(i, 50.f)));
+
+	for (unsigned int i = 17; i < 102; ++i)
+		g_staticobjs.insert(move(new CNormalBoxObject(i)));
+
+	for (unsigned int i = 102; i < 106; ++i)
+		g_staticobjs.insert(move(new CColumnObject(i)));
+	
+	for (unsigned int i = 106; i < 107; ++i)
+		g_staticobjs.insert(move(new CBrokenCartObject(i)));
+
+	for (unsigned int i = 107; i < 112; ++i)
+		g_staticobjs.insert(move(new CBigWallObject(i)));
+
+	for (unsigned int i = 112; i < 127; ++i)
+		g_staticobjs.insert(move(new CSmallWallObject(i)));
+
+	for (unsigned int i = 127; i < 132; ++i)
+		g_staticobjs.insert(move(new CBuildingObject(i)));
+
+	for (unsigned int i = 132; i < 144; ++i)
+		g_rigidobjs.insert(move(new CRigidCubeObject(i)));
+		
 	for (auto sobj : g_staticobjs)
 		sobj->AfterGravitySystem(0);
 }
@@ -144,6 +258,17 @@ void CStaticObject::StaticObjectLoop()
 	CreateGameObject();
 }
 
+void CStaticObject::UpdateDataForPacket()
+{
+	m_stc_sobjdata.ID = m_id;
+	m_stc_sobjdata.degree = m_degree;
+	m_stc_sobjdata.Fixed = m_fixed;
+	m_stc_sobjdata.Pos = m_pos4f;
+	m_stc_sobjdata.Rotate_status = m_rot4f;
+	m_stc_sobjdata.type = m_type;
+}
+
+
 CStaticObject::~CStaticObject()
 {
 	if (pp != nullptr)
@@ -153,39 +278,39 @@ CStaticObject::~CStaticObject()
 		delete rb;
 }
 
-NormalBoxObject::NormalBoxObject(unsigned int id)
+CNormalBoxObject::CNormalBoxObject(unsigned int id)
 {
+	//스테틱오브젝트 충돌 시, 회전된 스테틱오브젝트들은 Lookvector 와 Rightvector를 회전한 값에 따라 바꿔줘야한다
+	//그래야지 충돌처리할 때 Lookvector, Rightvector를 이용하는데, 바뀐 값이 적용되서 충돌처리를 한다 
+
 	pp = new PhysicsPoint();
-	
+
+	//---------------------오브젝트에 대한 기본 데이터값 업데이트---------------------//
+
 	m_id = id;
 	m_fixed = true;
-	m_alive = true;
-	m_pos4f = m_sobj_bdata[m_id].pos;
+	//m_alive = true;
+	//m_dir = 0;
+	//m_ai = true;
+	m_godmode = true;
+	//m_airbone = false;
+	m_degree = g_objectData[m_id].degree;
+
+	m_pos4f = g_objectData[m_id].pos;
 	m_rot4f = { 0.f, 0.f, 0.f, 1.f };
 
-	m_dir = 0;
-	m_ai = true;
-	m_godmode = true;
-	m_airbone = false;
-	m_type = Box;
+	m_type = INSTALLED_OBJECT_TYPE::Box;
 
-	m_ability.curHP = 100;
-	m_ability.orignHP = 100;
-	m_ability.attack = 0;
-	m_ability.speed = 0;
-	m_ability.level = 1;
-	m_ability.exp = 0;
-
-	m_degree = m_sobj_bdata[m_id].degree;
-
+	//----------rot, degree값을 이용한 Lookvector, Rightvector, Upvector 값 업데이트----------//
+	
 	m_OffLookvector = XMFLOAT3(0, 0, 1);
 	m_OffRightvector = XMFLOAT3(1, 0, 0);
 
 	UpdateLookvector();
 	UpdateUpvector();
 
-	//pp->SetPosition(m_pos4f.x, m_pos4f.y, m_pos4f.z);
-	//XMFLOAT4 xmf4_pos = { m_pos4f.x, m_pos4f.y, m_pos4f.z, m_pos4f.w };
+	//---------기타 물리효과 데이터 초기화(충돌박스, 댐핑계수, 바운스유무, 질량)---------//
+
 	xmf4_pos = { m_pos4f.x, m_pos4f.y, m_pos4f.z, m_pos4f.w };
 	pp->SetPosition(&xmf4_pos);
 	pp->SetHalfBox(5, 5, 5);
@@ -193,58 +318,51 @@ NormalBoxObject::NormalBoxObject(unsigned int id)
 	pp->SetBounce(false);
 	pp->SetMass(INFINITY);
 
-	//client 통신용 send packet에 들어갈 정보들
-	m_stc_sobjdata.ID = m_id;
-	m_stc_sobjdata.degree = m_degree;
-	m_stc_sobjdata.Fixed = m_fixed;
-	m_stc_sobjdata.Pos = m_pos4f;
-	m_stc_sobjdata.Rotate_status = m_rot4f;
-	m_stc_sobjdata.type = m_type;
-	//
+	//------------패킷 통신을 위한 StaticObject 패킷송신용데이터 업데이트---------------//
+	UpdateDataForPacket();
+
 }
 
-SmallWallObject::SmallWallObject(unsigned int id)
+CSmallWallObject::CSmallWallObject(unsigned int id)
 {
+	//스테틱오브젝트 충돌 시, 회전된 스테틱오브젝트들은 Lookvector 와 Rightvector를 회전한 값에 따라 바꿔줘야한다
+	//그래야지 충돌처리할 때 Lookvector, Rightvector를 이용하는데, 바뀐 값이 적용되서 충돌처리를 한다 
+
 	pp = new PhysicsPoint();
+
+	//---------------------오브젝트에 대한 기본 데이터값 업데이트---------------------//
 
 	m_id = id;
 	m_fixed = true;
-	m_alive = true;
-	m_pos4f = m_sobj_bdata[m_id].pos;
-	m_rot4f = { 0.f, 0.f, 0.f, 1.f };
-	m_dir = 0;
-	m_ai = true;
+	//m_alive = true;
+	//m_dir = 0;
+	//m_ai = true;
 	m_godmode = true;
-	m_airbone = false;
-	m_type = SmallWall;
+	//m_airbone = false;
+	m_degree = g_objectData[m_id].degree;
 
-	m_ability.curHP = 100;
-	m_ability.orignHP = 100;
-	m_ability.attack = 0;
-	m_ability.speed = 0;
-	m_ability.level = 1;
-	m_ability.exp = 0;
+	m_pos4f = g_objectData[m_id].pos;
+	m_rot4f = { 0.f, 0.f, 0.f, 1.f };
 
-	m_degree = m_sobj_bdata[m_id].degree;
+	m_type = INSTALLED_OBJECT_TYPE::SmallWall;
+
+	//----------rot, degree값을 이용한 Lookvector, Rightvector, Upvector 값 업데이트----------//
 
 	m_OffLookvector = XMFLOAT3(0, 0, 1);
 	m_OffRightvector = XMFLOAT3(1, 0, 0);
 
-	//XMFLOAT4 xmf4_rot{ m_rot4f.x, m_rot4f.y, m_rot4f.z, m_rot4f.w };
 	xmf4_rot = { m_rot4f.x, m_rot4f.y, m_rot4f.z, m_rot4f.w };
-
 	auto q = XMLoadFloat4(&xmf4_rot);
 	XMFLOAT3 axis{ 0,1,0 };
 	auto q2 = QuaternionRotation(axis, m_degree);
 	xmf4_rot = QuaternionMultiply(xmf4_rot, q2);
-
 	m_rot4f = { xmf4_rot.x, xmf4_rot.y, xmf4_rot.z, xmf4_rot.w };
 	
 	UpdateLookvector();
 	UpdateUpvector();
 
-	//pp->SetPosition(m_pos4f.x, m_pos4f.y, m_pos4f.z);
-	//XMFLOAT4 xmf4_pos = { m_pos4f.x, m_pos4f.y, m_pos4f.z, m_pos4f.w };
+	//---------기타 물리효과 데이터 초기화(충돌박스, 댐핑계수, 바운스유무, 질량)---------//
+
 	xmf4_pos = { m_pos4f.x, m_pos4f.y, m_pos4f.z, m_pos4f.w };
 	pp->SetPosition(&xmf4_pos);
 	pp->SetHalfBox(20, 10, 5);
@@ -252,137 +370,266 @@ SmallWallObject::SmallWallObject(unsigned int id)
 	pp->SetBounce(false);
 	pp->SetMass(INFINITY);
 
-	//client 통신용 send packet에 들어갈 정보들
-	m_stc_sobjdata.ID = m_id;
-	m_stc_sobjdata.degree = m_degree;
-	m_stc_sobjdata.Fixed = m_fixed;
-	m_stc_sobjdata.Pos = m_pos4f;
-	m_stc_sobjdata.Rotate_status = m_rot4f;
-	m_stc_sobjdata.type = m_type;
-	//
+	//------------패킷 통신을 위한 StaticObject 패킷송신용데이터 업데이트---------------//
+	UpdateDataForPacket();
 }
 
-BigWallObject::BigWallObject(unsigned int id)
+CBigWallObject::CBigWallObject(unsigned int id)
 {
+	//스테틱오브젝트 충돌 시, 회전된 스테틱오브젝트들은 Lookvector 와 Rightvector를 회전한 값에 따라 바꿔줘야한다
+	//그래야지 충돌처리할 때 Lookvector, Rightvector를 이용하는데, 바뀐 값이 적용되서 충돌처리를 한다 
+
 	pp = new PhysicsPoint();
+
+	//---------------------오브젝트에 대한 기본 데이터값 업데이트---------------------//
 
 	m_id = id;
 	m_fixed = true;
-	m_alive = true;
-	m_pos4f = m_sobj_bdata[m_id].pos;
-	m_rot4f = { 0.f, 0.f, 0.f, 1.f };
-	m_dir = 0;
-	m_ai = true;
+	//m_alive = true;
+	//m_dir = 0;
+	//m_ai = true;
 	m_godmode = true;
-	m_type = BigWall;
+	//m_airbone = false;
+	m_degree = g_objectData[m_id].degree;
 
-	m_ability.curHP = 100;
-	m_ability.orignHP = 100;
-	m_ability.attack = 0;
-	m_ability.speed = 0;
-	m_ability.level = 1;
-	m_ability.exp = 0;
+	m_pos4f = g_objectData[m_id].pos;
+	m_rot4f = { 0.f, 0.f, 0.f, 1.f };
 
-	m_degree = m_sobj_bdata[m_id].degree;
+	m_type = INSTALLED_OBJECT_TYPE::BigWall;
+
+	//----------rot, degree값을 이용한 Lookvector, Rightvector, Upvector 값 업데이트----------//
 
 	m_OffLookvector = XMFLOAT3(0, 0, 1);
 	m_OffRightvector = XMFLOAT3(1, 0, 0);
 
-	//XMFLOAT4 xmf4_rot{ m_rot4f.x, m_rot4f.y, m_rot4f.z, m_rot4f.w };
 	xmf4_rot = { m_rot4f.x, m_rot4f.y, m_rot4f.z, m_rot4f.w };
-
 	auto q = XMLoadFloat4(&xmf4_rot);
 	XMFLOAT3 axis{ 0,1,0 };
 	auto q2 = QuaternionRotation(axis, m_degree);
 	xmf4_rot = QuaternionMultiply(xmf4_rot, q2);
-
 	m_rot4f = { xmf4_rot.x, xmf4_rot.y, xmf4_rot.z, xmf4_rot.w };
 
 	UpdateLookvector();
 	UpdateUpvector();
 
-	//pp->SetPosition(m_pos4f.x, m_pos4f.y, m_pos4f.z);
-	//XMFLOAT4 xmf4_pos = { m_pos4f.x, m_pos4f.y, m_pos4f.z, m_pos4f.w };
-	xmf4_pos = { m_pos4f.x, m_pos4f.y, m_pos4f.z, m_pos4f.w };
+	//---------기타 물리효과 데이터 초기화(충돌박스, 댐핑계수, 바운스유무, 질량)---------//
 
+	xmf4_pos = { m_pos4f.x, m_pos4f.y, m_pos4f.z, m_pos4f.w };
 	pp->SetPosition(&xmf4_pos);
 	pp->SetHalfBox(350, 50, 5);
 	pp->SetDamping(0.5f);
 	pp->SetBounce(false);
 	pp->SetMass(INFINITY);
 
-	//client 통신용 send packet에 들어갈 정보들
-	m_stc_sobjdata.ID = m_id;
-	m_stc_sobjdata.degree = m_degree;
-	m_stc_sobjdata.Fixed = m_fixed;
-	m_stc_sobjdata.Pos = m_pos4f;
-	m_stc_sobjdata.Rotate_status = m_rot4f;
-	m_stc_sobjdata.type = m_type;
-	//
+	//------------패킷 통신을 위한 StaticObject 패킷송신용데이터 업데이트---------------//
+	UpdateDataForPacket();
 }
 
-Building::Building(unsigned int id)
+CBuildingObject::CBuildingObject(unsigned int id)
 {
+	//스테틱오브젝트 충돌 시, 회전된 스테틱오브젝트들은 Lookvector 와 Rightvector를 회전한 값에 따라 바꿔줘야한다
+	//그래야지 충돌처리할 때 Lookvector, Rightvector를 이용하는데, 바뀐 값이 적용되서 충돌처리를 한다 
+
 	pp = new PhysicsPoint();
+
+	//---------------------오브젝트에 대한 기본 데이터값 업데이트---------------------//
 
 	m_id = id;
 	m_fixed = true;
-	m_alive = true;
-	m_pos4f = m_sobj_bdata[m_id].pos;
-	m_rot4f = { 0.f, 0.f, 0.f, 1.f };
-	m_dir = 0;
-	m_ai = true;
+	//m_alive = true;
+	//m_dir = 0;
+	//m_ai = true;
 	m_godmode = true;
-	m_type = NormalBuilding;
+	//m_airbone = false;
+	m_degree = g_objectData[m_id].degree;
 
-	m_ability.curHP = 100;
-	m_ability.orignHP = 100;
-	m_ability.attack = 0;
-	m_ability.speed = 0;
-	m_ability.level = 1;
-	m_ability.exp = 0;
+	m_pos4f = g_objectData[m_id].pos;
+	m_rot4f = { 0.f, 0.f, 0.f, 1.f };
 
-	m_degree = m_sobj_bdata[m_id].degree;
+	m_type = INSTALLED_OBJECT_TYPE::NormalBuilding;
+
+	//----------rot, degree값을 이용한 Lookvector, Rightvector, Upvector 값 업데이트----------//
 
 	m_OffLookvector = XMFLOAT3(0, 0, 1);
 	m_OffRightvector = XMFLOAT3(1, 0, 0);
 
-	//XMFLOAT4 xmf4_rot{ m_rot4f.x, m_rot4f.y, m_rot4f.z, m_rot4f.w };
 	xmf4_rot = { m_rot4f.x, m_rot4f.y, m_rot4f.z, m_rot4f.w };
-
 	auto q = XMLoadFloat4(&xmf4_rot);
 	XMFLOAT3 axis{ 0,1,0 };
 	auto q2 = QuaternionRotation(axis, m_degree);
 	xmf4_rot = QuaternionMultiply(xmf4_rot, q2);
-
 	m_rot4f = { xmf4_rot.x, xmf4_rot.y, xmf4_rot.z, xmf4_rot.w };			
 	
-	//스테틱오브젝트 충돌 시, 회전된 스테틱오브젝트들은 Lookvector 와 Rightvector를 회전한 값에 따라 바꿔줘야한다
-	//그래야지 충돌처리할 때 Lookvector, Rightvector를 이용하는데, 바뀐 값이 적용되서 충돌처리를 한다 
 	UpdateLookvector();
 	UpdateUpvector();
 
-	//pp->SetPosition(m_pos4f.x, m_pos4f.y, m_pos4f.z);
-	//XMFLOAT4 xmf4_pos = { m_pos4f.x, m_pos4f.y, m_pos4f.z, m_pos4f.w };
-	xmf4_pos = { m_pos4f.x, m_pos4f.y, m_pos4f.z, m_pos4f.w };
+	//---------기타 물리효과 데이터 초기화(충돌박스, 댐핑계수, 바운스유무, 질량)---------//
 
+	xmf4_pos = { m_pos4f.x, m_pos4f.y, m_pos4f.z, m_pos4f.w };
 	pp->SetPosition(&xmf4_pos);
 	pp->SetHalfBox(15, 45, 15);
 	pp->SetDamping(0.5f);
 	pp->SetBounce(false);
 	pp->SetMass(INFINITY);
 
-	//client 통신용 send packet에 들어갈 정보들
-	m_stc_sobjdata.ID = m_id;
-	m_stc_sobjdata.degree = m_degree;
-	m_stc_sobjdata.Fixed = m_fixed;
-	m_stc_sobjdata.Pos = m_pos4f;
-	m_stc_sobjdata.Rotate_status = m_rot4f;
-	m_stc_sobjdata.type = m_type;
-	//
+	//------------패킷 통신을 위한 StaticObject 패킷송신용데이터 업데이트---------------//
+	UpdateDataForPacket();
 }
 
-RigidCubeObject::RigidCubeObject(unsigned int id)
+CSecondFloorObject::CSecondFloorObject(unsigned int id)
+{
+	//스테틱오브젝트 충돌 시, 회전된 스테틱오브젝트들은 Lookvector 와 Rightvector를 회전한 값에 따라 바꿔줘야한다
+	//그래야지 충돌처리할 때 Lookvector, Rightvector를 이용하는데, 바뀐 값이 적용되서 충돌처리를 한다 
+
+	pp = new PhysicsPoint();
+	
+	//---------------------오브젝트에 대한 기본 데이터값 업데이트---------------------//
+
+	m_id = id;
+	m_fixed = true;
+	//m_alive = true;
+	//m_dir = 0;
+	//m_ai = true;
+	m_godmode = true;
+	//m_airbone = false;
+	m_degree = g_objectData[m_id].degree;
+
+	m_pos4f = g_objectData[m_id].pos;
+	m_rot4f = { 0.f, 0.f, 0.f, 1.f };
+
+	m_type = INSTALLED_OBJECT_TYPE::SecondFloor;
+
+	//----------rot, degree값을 이용한 Lookvector, Rightvector, Upvector 값 업데이트----------//
+
+	m_OffLookvector = XMFLOAT3(0, 0, 1);
+	m_OffRightvector = XMFLOAT3(1, 0, 0);
+
+	xmf4_rot = { m_rot4f.x, m_rot4f.y, m_rot4f.z, m_rot4f.w };
+	auto q = XMLoadFloat4(&xmf4_rot);
+	XMFLOAT3 axis{ 0,1,0 };
+	auto q2 = QuaternionRotation(axis, MMPE_PI * 0.25);
+	xmf4_rot = QuaternionMultiply(xmf4_rot, q2);
+	m_rot4f = { xmf4_rot.x, xmf4_rot.y, xmf4_rot.z, xmf4_rot.w };
+
+	UpdateLookvector();
+	UpdateUpvector();
+
+	//---------기타 물리효과 데이터 초기화(충돌박스, 댐핑계수, 바운스유무, 질량)---------//
+
+	xmf4_pos = { m_pos4f.x, m_pos4f.y, m_pos4f.z, m_pos4f.w };
+	pp->SetPosition(&xmf4_pos);
+	pp->SetHalfBox(90, 0.5, 90);
+	pp->SetDamping(0.5f);
+	pp->SetBounce(false);
+	pp->SetMass(INFINITY);
+
+	//------------패킷 통신을 위한 StaticObject 패킷송신용데이터 업데이트---------------//
+	UpdateDataForPacket();
+}
+
+CColumnObject::CColumnObject(unsigned int id)
+{
+	//스테틱오브젝트 충돌 시, 회전된 스테틱오브젝트들은 Lookvector 와 Rightvector를 회전한 값에 따라 바꿔줘야한다
+	//그래야지 충돌처리할 때 Lookvector, Rightvector를 이용하는데, 바뀐 값이 적용되서 충돌처리를 한다 
+
+	pp = new PhysicsPoint();
+
+	//---------------------오브젝트에 대한 기본 데이터값 업데이트---------------------//
+
+	m_id = id;
+	m_fixed = true;
+	//m_alive = true;
+	//m_dir = 0;
+	//m_ai = true;
+	m_godmode = true;
+	//m_airbone = false;
+	m_degree = g_objectData[m_id].degree;
+
+	m_pos4f = g_objectData[m_id].pos;
+	m_rot4f = { 0.f, 0.f, 0.f, 1.f };
+	
+	m_type = INSTALLED_OBJECT_TYPE::Column;
+
+	//----------rot, degree값을 이용한 Lookvector, Rightvector, Upvector 값 업데이트----------//
+
+	m_OffLookvector = XMFLOAT3(0, 0, 1);
+	m_OffRightvector = XMFLOAT3(1, 0, 0);
+
+	xmf4_rot = { m_rot4f.x, m_rot4f.y, m_rot4f.z, m_rot4f.w };
+	auto q = XMLoadFloat4(&xmf4_rot);
+	XMFLOAT3 axis{ 0,1,0 };
+	auto q2 = QuaternionRotation(axis, m_degree);
+	xmf4_rot = QuaternionMultiply(xmf4_rot, q2);
+	m_rot4f = { xmf4_rot.x, xmf4_rot.y, xmf4_rot.z, xmf4_rot.w };
+
+	UpdateLookvector();
+	UpdateUpvector();
+
+	//---------기타 물리효과 데이터 초기화(충돌박스, 댐핑계수, 바운스유무, 질량)---------//
+
+	xmf4_pos = { m_pos4f.x, m_pos4f.y, m_pos4f.z, m_pos4f.w };
+	pp->SetPosition(&xmf4_pos);
+	pp->SetHalfBox(15, 45, 15);
+	pp->SetDamping(0.5f);
+	pp->SetBounce(false);
+	pp->SetMass(INFINITY);
+
+	//------------패킷 통신을 위한 StaticObject 패킷송신용데이터 업데이트---------------//
+	UpdateDataForPacket();
+}
+
+CBrokenCartObject::CBrokenCartObject(unsigned int id)
+{
+	//스테틱오브젝트 충돌 시, 회전된 스테틱오브젝트들은 Lookvector 와 Rightvector를 회전한 값에 따라 바꿔줘야한다
+	//그래야지 충돌처리할 때 Lookvector, Rightvector를 이용하는데, 바뀐 값이 적용되서 충돌처리를 한다 
+
+	pp = new PhysicsPoint();
+
+	//---------------------오브젝트에 대한 기본 데이터값 업데이트---------------------//
+
+	m_id = id;
+	m_fixed = true;
+	//m_alive = true;
+	//m_dir = 0;
+	//m_ai = true;
+	m_godmode = true;
+	//m_airbone = false;
+	m_degree = g_objectData[m_id].degree;
+
+	m_pos4f = g_objectData[m_id].pos;
+	m_rot4f = { 0.f, 0.f, 0.f, 1.f };
+
+	m_type = INSTALLED_OBJECT_TYPE::BrokenCart;
+
+	//----------rot값을 이용한 Lookvector, Rightvector, Upvector 값 업데이트----------//
+
+	m_OffLookvector = XMFLOAT3(0, 0, 1);
+	m_OffRightvector = XMFLOAT3(1, 0, 0);
+
+	xmf4_rot = { m_rot4f.x, m_rot4f.y, m_rot4f.z, m_rot4f.w };
+	auto q = XMLoadFloat4(&xmf4_rot);
+	XMFLOAT3 axis{ 0,1,0 };
+	auto q2 = QuaternionRotation(axis, m_degree);
+	xmf4_rot = QuaternionMultiply(xmf4_rot, q2);
+	m_rot4f = { xmf4_rot.x, xmf4_rot.y, xmf4_rot.z, xmf4_rot.w };
+
+	UpdateLookvector();
+	UpdateUpvector();
+
+	//---------기타 물리효과 데이터 초기화(충돌박스, 댐핑계수, 바운스유무, 질량)---------//
+
+	xmf4_pos = { m_pos4f.x, m_pos4f.y, m_pos4f.z, m_pos4f.w };
+	pp->SetPosition(&xmf4_pos);
+	pp->SetHalfBox(15, 8, 15);
+	pp->SetDamping(0.5f);
+	pp->SetBounce(false);
+	pp->SetMass(INFINITY);
+
+	//------------패킷 통신을 위한 StaticObject 패킷송신용데이터 업데이트---------------//
+	UpdateDataForPacket();
+}
+
+CRigidCubeObject::CRigidCubeObject(unsigned int id)
 {
 	rb = new RigidBody();
 	pp = new PhysicsPoint();
@@ -413,7 +660,7 @@ RigidCubeObject::RigidCubeObject(unsigned int id)
 	UpdateUpvector();
 
 	//XMFLOAT4 xmf4 = { m_pos4f.x, m_pos4f.y, m_pos4f.z, m_pos4f.w };
-	xmf4_pos = XMFLOAT4(m_sobj_bdata[id].pos.x, m_sobj_bdata[id].pos.y  , m_sobj_bdata[id].pos.z, m_sobj_bdata[id].pos.w);
+	xmf4_pos = XMFLOAT4(g_objectData[id].pos.x, g_objectData[id].pos.y  , g_objectData[id].pos.z, g_objectData[id].pos.w);
 	rb->SetPosition(&xmf4_pos);
 	rb->SetHalfBox(10, 10, 10);
 	rb->SetDamping(0.5f, 0.38f);
@@ -437,7 +684,7 @@ RigidCubeObject::RigidCubeObject(unsigned int id)
 
 }
 
-void RigidCubeObject::AmendObject(XMFLOAT3 axis, float radian, CMonoObject * obj)
+void CRigidCubeObject::AmendObject(XMFLOAT3 axis, float radian, CMonoObject * obj)
 {
 	XMFLOAT4 q = QuaternionRotation(axis, radian);
 	
@@ -446,7 +693,7 @@ void RigidCubeObject::AmendObject(XMFLOAT3 axis, float radian, CMonoObject * obj
 	obj->UpdateUpvector();
 }
 
-void RigidCubeObject::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, double deltime, CMonoObject * obj)
+void CRigidCubeObject::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance, double deltime, CMonoObject * obj)
 {
 	
 	if (obj->GetRigidBody() != nullptr)
@@ -1036,7 +1283,7 @@ void RigidCubeObject::RigidBodyCollisionPlane(XMFLOAT3 & Normal, float distance,
 	}
 }
 
-void RigidCubeObject::GravitySystem(double deltime)
+void CRigidCubeObject::GravitySystem(double deltime)
 {
 	GeneratorGravity gg;
 	gg.SetGravityAccel(XMFLOAT3(0, -100, 0));
@@ -1044,12 +1291,12 @@ void RigidCubeObject::GravitySystem(double deltime)
 	gg.Update(deltime, *rb);
 }
 
-void RigidCubeObject::AfterGravitySystem(double deltime)
+void CRigidCubeObject::AfterGravitySystem(double deltime)
 {
 	RigidBodyCollisionPlane(XMFLOAT3(0, 1, 0), 0, deltime,  this);
 }
 
-void RigidCubeObject::Tick(double deltime)
+void CRigidCubeObject::Tick(double deltime)
 {
 	if (rb != nullptr)
 		rb->integrate(deltime);
@@ -1059,7 +1306,7 @@ void RigidCubeObject::Tick(double deltime)
 	
 }
 
-void RigidCubeObject::SetUpdatedRigidybodyObject()
+void CRigidCubeObject::UpdateDataForPacket()
 {
 	m_stc_robjdata.id = m_id;
 	m_stc_robjdata.pos4f = m_pos4f;
@@ -1067,7 +1314,7 @@ void RigidCubeObject::SetUpdatedRigidybodyObject()
 	m_stc_robjdata.type = Rigidbodybox;
 }
 
-void RigidCubeObject::Collision(unordered_set<RigidCubeObject*>* rbobjs, double deltime)
+void CRigidCubeObject::Collision(unordered_set<CRigidCubeObject*>* rbobjs, double deltime)
 {
 	for (auto iter = rbobjs->begin(); iter != rbobjs->end(); ++iter)
 	{
@@ -1134,7 +1381,7 @@ void RigidCubeObject::Collision(unordered_set<RigidCubeObject*>* rbobjs, double 
 	}
 }
 
-void RigidCubeObject::Collision(unordered_set<CStaticObject*>* sobjs, double deltime)
+void CRigidCubeObject::Collision(unordered_set<CStaticObject*>* sobjs, double deltime)
 {
 	for (auto iter = sobjs->begin(); iter != sobjs->end(); ++iter)
 	{	
@@ -1177,7 +1424,7 @@ void RigidCubeObject::Collision(unordered_set<CStaticObject*>* sobjs, double del
 	}
 }
 
-void RigidCubeObject::Collision(vector<CPlayerObject*>* clients, double deltime)
+void CRigidCubeObject::Collision(vector<CPlayerObject*>* clients, double deltime)
 {
 	for (auto iter = clients->begin(); iter != clients->end(); ++iter)
 	{
@@ -1220,8 +1467,7 @@ void RigidCubeObject::Collision(vector<CPlayerObject*>* clients, double deltime)
 	}
 }
 
-
-void RigidCubeObject::Collision(list<CBulletObject*>* bullets, double deltime)
+void CRigidCubeObject::Collision(list<CBulletObject*>* bullets, double deltime)
 {
 	for (auto iter = bullets->begin(); iter != bullets->end(); ++iter)
 	{
@@ -1267,4 +1513,63 @@ void RigidCubeObject::Collision(list<CBulletObject*>* bullets, double deltime)
 
 
 	}
+}
+
+CMoveCubeObject::CMoveCubeObject(unsigned int id, float len)
+{
+	m_selectedColor = rand() % 7;
+	m_len = len;
+	m_n = rand() % 30;
+
+	pp = new PhysicsPoint();
+
+	//---------------------오브젝트에 대한 기본 데이터값 업데이트---------------------//
+
+	m_id = id;
+	m_fixed = false;
+	m_alive = true;
+	m_pos4f = g_objectData[m_id].pos;
+	m_rot4f = { 0.f, 0.f, 0.f, 1.f };
+	m_dir = 0;
+	m_ai = true;
+	m_godmode = true;
+	m_type = INSTALLED_OBJECT_TYPE::MoveCube;
+	m_degree = 0;
+
+	//----------rot값을 이용한 Lookvector, Rightvector, Upvector 값 업데이트----------//
+
+	m_OffLookvector = XMFLOAT3(0, 0, 1);
+	m_OffRightvector = XMFLOAT3(1, 0, 0);
+
+	UpdateLookvector();
+	UpdateUpvector();
+
+	//---------기타 물리효과 데이터 초기화(충돌박스, 댐핑계수, 바운스유무, 질량)---------//
+
+	xmf4_pos = { m_pos4f.x, m_pos4f.y, m_pos4f.z, m_pos4f.w };
+	pp->SetPosition(&xmf4_pos);
+	pp->SetHalfBox(10, 5, 10);
+	pp->SetDamping(0.5f);
+	pp->SetBounce(false);
+	pp->SetMass(INFINITY);
+
+	//------------패킷 통신을 위한 StaticObject 패킷송신용데이터 업데이트---------------//
+	UpdateDataForPacket();
+}
+
+void CMoveCubeObject::Tick(double deltime)
+{
+	m_n += deltime;
+
+	m_pos4f.y = m_len * sinf(MMPE_PI * m_n * 0.15f ) + 50;
+
+	m_stc_mvobjdata.pos4f = move(m_pos4f);
+}
+
+void CMoveCubeObject::UpdateDataForPacket()
+{
+	m_stc_mvobjdata.id = m_id;
+	m_stc_mvobjdata.pos4f = m_pos4f;
+	m_stc_mvobjdata.rot4f = m_rot4f;
+	m_stc_mvobjdata.texture_color = m_selectedColor;
 }

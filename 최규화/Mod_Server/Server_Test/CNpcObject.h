@@ -30,7 +30,7 @@ public:
 	CNpcObject();
 	FSM *fsm{ nullptr };
 
-	void SetMyBasicPacketData();
+	virtual void    UpdateDataForPacket() override;
 	virtual void	GetDamaged(int damage);
 	Npc_Data GetMyBasicPacketData() const;
 	//Npc_Data& GetMyBasicPacketData();

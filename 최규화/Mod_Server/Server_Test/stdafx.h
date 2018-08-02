@@ -18,14 +18,27 @@
 const char SERVERIP[] = "127.0.0.1";
 const unsigned short PORT = 31400;
 
-#define MAX_BOX_NUM 54
-#define MAX_SMALL_WALL_NUM 15
-#define MAX_BIG_WALL_NUM 5
-#define MAX_BULLDING_NUM 3
-//#define MAX_RIGIDBODY_NUM 9
-#define MAX_RIGIDBODY_NUM 1
+//----------------------------¸Ê 2Ãþ ¿ÀºêÁ§Æ® ¼ö----------------------------//
+#define MAX_SECOND_FLOOR_NUM 1
+#define MAX_SECOND_SMALLWALL_NUM 8
+#define MAX_SECOND_BOX_NUM 4
 
-#define MAX_TOTAL_STATIC_OBJECT (MAX_BOX_NUM + MAX_SMALL_WALL_NUM + MAX_BIG_WALL_NUM + MAX_BULLDING_NUM + MAX_RIGIDBODY_NUM)
+//----------------------------¸Ê 1Ãþ ¿ÀºêÁ§Æ® ¼ö----------------------------//
+#define MAX_FIRST_MOVEOBJECT_NUM 4
+#define MAX_FIRST_BOX_NUM (35 + 50)
+#define MAX_FIRST_COLUMN_NUM 4
+#define MAX_FIRST_BROKENCART_NUM 1
+#define MAX_FIRST_BIGWALL_NUM 5
+#define MAX_FIRST_SMALLWALL_NUM 15
+#define MAX_FIRST_BULLDING_NUM 5
+#define MAX_RIGIDBODY_NUM 12
+
+#define TOTAL_SECOND_FLOOR_STATIC_OBJECT (MAX_SECOND_FLOOR_NUM + MAX_SECOND_SMALL_WALL_NUM + MAX_SECOND_BOX_NUM);
+#define TOTAL_FIRST_FLOOR_STATIC_OBEJCT (MAX_FIRST_BOX_NUM + MAX_FIRST_COLUMN_NUM + MAX_FIRST_BROKENCART_NUM + MAX_FIRST_BIGWALL_NUM + MAX_FIRST_SMALLWALL_NUM + MAX_FIRST_BULLDING_NUM);
+#define TOTAL_STATIC_OBJECT (TOTAL_SECOND_FLOOR_STATIC_OBJECT + TOTAL_FIRST_FLOOR_STATIC_OBEJCT);
+
+#define TOTAL_RIGIDBODY_OBJECT (MAX_RIGIDBODY_NUM);
+#define TOTAL_MOVE_OBJECT (MAX_FIRST_MOVEOBJECT_NUM);
 
 using namespace std;
 using namespace chrono;
@@ -52,7 +65,9 @@ extern list<CBulletObject*> g_bullets;
 extern CBulletObject		*g_bullobj;
 
 extern unordered_set<CStaticObject*> g_staticobjs;
-extern unordered_set<RigidCubeObject*> g_rigidobjs;
+extern unordered_set<CRigidCubeObject*> g_rigidobjs;
+extern unordered_set<CMoveCubeObject*> g_moveobjs;
+
 extern CStaticObject				*g_staticobj;
 
 extern FSM							*g_fsm;

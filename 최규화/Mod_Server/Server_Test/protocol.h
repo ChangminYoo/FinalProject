@@ -56,6 +56,7 @@ enum PACKET_PROTOCOL_TYPE
 	PLAYER_ATTACK,		    //플레이어 공격
 	STATIC_OBJECT,			//고정된 물체,
 	RIGIDBODY_OBJECT,		//물리효과가 적용된 물체
+	MOVE_OBJECT,			//움직이는 물체
 	PLAYER_ANIMATION,
 
 	PLAYER_CURR_STATE,		//플레이어의 현재 상태(모든 정보 저장)
@@ -93,12 +94,17 @@ enum INSTALLED_OBJECT_TYPE
 {
 	BasicObject,
 	Map,
+	SecondFloor,
 	Box,
 	SmallWall,
 	BigWall,
 	NormalBuilding,
+	MoveCube,
+	Column,
+	BrokenCart,
 	Rigidbodybox
 };
+
 
 enum OBJECT_TYPE
 {
@@ -115,6 +121,8 @@ enum NPC_MONSTER_TYPE
 
 enum PLAYERS { NO_PLAYER, LUNA, CMETRA, RONDO, DONALD };
 
+//-------------------------------기본데이터-------------------------------//
+
 struct Time
 {
 	float c_time{ 0.f };
@@ -122,26 +130,18 @@ struct Time
 	float t_time{ 0.f };
 };
 
-struct Position3D
-{
-	float	x{ 0.f };
-	float	y{ 0.f };
-	float	z{ 0.f };
-};
-
-struct Rotation
-{
-	float		x{ 0.0f };
-	float		y{ 0.0f };
-	float		z{ 0.0f };
-	float		w{ 0.0f };
-};
-
 struct Vel3f
 {
 	float x{ 0.f };
 	float y{ 0.f };
 	float z{ 0.f };
+};
+
+struct Position3D
+{
+	float	x{ 0.f };
+	float	y{ 0.f };
+	float	z{ 0.f };
 };
 
 struct Position
@@ -152,26 +152,24 @@ struct Position
 	float		w{ 0.0f };			           //4
 };
 
-//16
 
+struct Rotation
+{
+	float		x{ 0.0f };
+	float		y{ 0.0f };
+	float		z{ 0.0f };
+	float		w{ 0.0f };
+};
 
+// MAX_BUFFER_SIZE = 255 -> 총 크기: 252바이트
 struct Player_LoginDB
 {
 	wchar_t name[MAX_BUFFER_SIZE / 4]{ L"Guest" };
 	wchar_t password[MAX_BUFFER_SIZE / 4]{ L"Guest" };
 };
-// MAX_BUFFER_SIZE = 255 -> 총 크기: 252바이트
 
-struct PlayerStatus
-{
-	unsigned short			attack{ 50 };       //2
-	unsigned short			speed{ 50 };        //2
-	unsigned short			origin_hp{ 100 };   //2
-	unsigned short   		cur_hp{ 100 };      //2
-	unsigned short			exp{ 0 };           //2
-	unsigned char			level{ 1 };		    //1 
-};
-// 12 + 1 = 13
+
+//-------------------------------패킷용오브젝트데이터-------------------------------//
 
 struct StaticObject_Info
 {
@@ -182,6 +180,24 @@ struct StaticObject_Info
 	char						Fixed{ true };			//1
 	unsigned char				type;
 };
+
+struct RigidbodyData
+{
+	Position       pos4f;
+	Rotation	   rot4f;
+	unsigned short id;
+	unsigned char  type;
+};
+
+struct MoveObjectData
+{
+	Position pos4f;
+	Rotation rot4f;
+	unsigned short id;
+	unsigned char texture_color;
+};
+
+//-------------------------------패킷용불렛데이터-------------------------------//
 
 struct CTS_BulletObject_Info
 {
@@ -218,6 +234,8 @@ struct NPC_BulletObject_Info
 	char						create_first;
 };
 
+//-------------------------------패킷용스킬데이터-------------------------------//
+
 struct STC_SkillData
 {
 	unsigned short master_id;   //스킬을 사용한 플레이어
@@ -225,18 +243,21 @@ struct STC_SkillData
 	char		   alive;
 };
 
-struct RigidbodyData
-{
-	Position       pos4f;
-	Rotation	   rot4f;
-	unsigned short id;
-	unsigned char  type;
+//-------------------------------캐릭터 - NPC 데이터-------------------------------//
 
+struct PlayerStatus
+{
+	unsigned short			attack{ 50 };       //2
+	unsigned short			speed{ 50 };        //2
+	unsigned short			origin_hp{ 100 };   //2
+	unsigned short   		cur_hp{ 100 };      //2
+	unsigned short			exp{ 0 };           //2
+	unsigned char			level{ 1 };		    //1 
 };
+// 12 + 1 = 13
 
 
 #pragma pack (push, 1)
-
 struct Player_Data
 {
 	Position		pos;						//16
@@ -266,8 +287,9 @@ struct Npc_Data
 	unsigned char	monster_type;				//1
 	char			alive;						//1
 };
-
 #pragma pack (pop)
+
+//-------------------------------//-------------------------------//
 
 
 #pragma pack (push, 1)		//push 시작부터 1바이트씩 데이터를 잘라 캐시에 저장한다(캐시라인 문제 때문에) - pop에서 멈춘다
@@ -326,7 +348,6 @@ typedef struct Server_To_Client_Player_Direction_Changed
 
 }STC_ChangedDir;
 
-
 typedef struct Server_To_Client_Player_Rotate
 {
 	unsigned char packet_size = sizeof(Rotation) + sizeof(unsigned char) + sizeof(unsigned char) + sizeof(unsigned short);
@@ -352,6 +373,13 @@ typedef struct Server_To_Client_Rigidbody_Object
 
 }STC_RigidbodyObject;
 
+typedef struct Server_To_Client_Move_Object
+{
+	unsigned char packet_size = sizeof(MoveObjectData) + sizeof(unsigned char) + sizeof(unsigned char);
+	unsigned char pack_type = PACKET_PROTOCOL_TYPE::MOVE_OBJECT;
+	MoveObjectData mvobj_data;
+
+}STC_MoveObject;
 
 typedef struct Client_To_Server_Attack_Info
 {

@@ -142,6 +142,17 @@ void CTimerWorker::ProcessPacket(event_type * et)
 			m_currtime = m_prevtime;
 
 			//------------- 1초에 18번정도 보냄 - 20번x, 시간누적오차 때문에 ---------------//
+			STC_MoveObject stc_move_object;
+			for (const auto& mvobj : g_moveobjs)
+			{
+				stc_move_object.mvobj_data = move(mvobj->GetMoveObjectData());
+				for (const auto& client : g_clients)
+				{
+					if (client->GetIsAI()) continue;
+					if (!client->GetConnectState()) continue;
+					client->SendPacket(reinterpret_cast<Packet*>(&stc_move_object));
+				}
+			}
 
 
 			//0. 1초에 20번씩 서버에서 업데이트된 리즈드바디 오브젝트의 정보를 보냄 
@@ -150,7 +161,7 @@ void CTimerWorker::ProcessPacket(event_type * et)
 			{
 				for (auto rigid : g_rigidobjs)
 				{
-					stc_rigidbody_object.rbobj_data = move(rigid->m_stc_robjdata);
+					stc_rigidbody_object.rbobj_data = move(rigid->GetRigidbodyData());
 					client->SendPacket(reinterpret_cast<Packet*>(&stc_rigidbody_object));
 
 					//cout << "RigidybodyObject ID: " << rigid->m_stc_robjdata.id << "PosX: " << rigid->m_stc_robjdata.pos4f.x << "PosY: "

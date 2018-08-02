@@ -1,7 +1,4 @@
 #pragma once
-//#include "stdafx.h"
-//#include "ShareHeader.h"
-//#include "CScene.h"
 
 class CAccpetPlayer
 {

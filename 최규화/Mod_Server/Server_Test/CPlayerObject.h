@@ -94,7 +94,6 @@ public:
 	void	SetPlayerData_Pos(const XMFLOAT4& xmf4) { m_pos4f.x = xmf4.x; m_pos4f.y = xmf4.y; m_pos4f.z = xmf4.z; m_pos4f.w = xmf4.w; }
 	void    SetPlayerData_Pos(const float& x, const float& y, const float& z, const float& w) { m_pos4f.x = x; m_pos4f.y = y; m_pos4f.z = z; m_pos4f.w = w; }
 
-	void    SetChangedPlayerState();
 	void    SetPlayerDirection(char dir) { m_dir = dir; }
 	char	GetPlayerDirection() const   { return m_dir; }
 	void	SetPlayerAnimation(unsigned char ani) { m_ani = ani; }
@@ -133,6 +132,8 @@ public:
 	//CScene				    *scene;
 
 public:
+	virtual void UpdateDataForPacket() override;
+
 	virtual void Tick(double deltime) override;
 	virtual void Tick(double deltime, Position& pos4f) override;
 

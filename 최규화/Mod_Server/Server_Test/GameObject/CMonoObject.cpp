@@ -1,10 +1,23 @@
-//#include "CMonoObject.h"
 #include "../stdafx.h"
 
+map<int, BasicInfo> CMonoObject::g_objectData = map<int, BasicInfo>();
 
 CMonoObject::CMonoObject()
 {
+	m_fixed = true;
+	m_alive = true;
+	m_dir = 0;
+	m_ai = true;
+	m_godmode = false;
+	m_airbone = false;
 	m_degree = 0.f;
+
+	m_ability.curHP = 100;
+	m_ability.orignHP = 100;
+	m_ability.attack = 0;
+	m_ability.speed = 0;
+	m_ability.level = 1;
+	m_ability.exp = 0;
 }
 
 
@@ -181,6 +194,10 @@ void CMonoObject::UpdateRigidCenterPos()
 void CMonoObject::UpdateRigidRotatePos()
 {
 	rb->Orient = &XMFLOAT4(m_rot4f.x, m_rot4f.y, m_rot4f.z, m_rot4f.w);
+}
+
+void CMonoObject::UpdateDataForPacket()
+{
 }
 
 

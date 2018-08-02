@@ -2,7 +2,7 @@
 //#include "CMonoObject.h"
 #define MAX_LIGHT_BULLET_TIME 2
 #define MAX_HEAVY_BULLET_TIME 3.5
-#define MAX_DICE_BULLET_TIME 3.5
+#define MAX_DICE_BULLET_TIME 5.5
 
 class CBulletObject : public CMonoObject
 {
@@ -54,14 +54,15 @@ public:
 	STC_BulletObject_Info  GetChangedBulletState() const;
 
 public:
-	virtual NPC_BulletObject_Info GetChangedNPCBulletState() const = 0;
+	virtual NPC_BulletObject_Info GetChangedNPCBulletState() const; //이 클래스는 안쓰는 함수
 
 	virtual void SetIsFirstBullet(bool flag) { m_first_bullet = flag; }
 	virtual bool GetIsFirstBullet() const { return m_first_bullet; }
 	
-	virtual void AfterGravitySystem();
-	virtual void SetChangedBulletState(); 
+	virtual void UpdateDataForPacket() override;
+
 	virtual void Tick(double deltime) override;
+	virtual void AfterGravitySystem();
 
 	virtual void Collision(vector<CPlayerObject*>* clients, double deltime);
 	virtual void Collision(vector<CNpcObject*>* npcs, double deltime);
@@ -87,10 +88,13 @@ public:
 
 	static int g_npc_bulletID;
 
-	virtual NPC_BulletObject_Info GetChangedNPCBulletState() const;
-	virtual void AfterGravitySystem() override;
-	virtual void SetChangedBulletState() override;
+	virtual NPC_BulletObject_Info GetChangedNPCBulletState() const override;
+
+	virtual void UpdateDataForPacket() override;
+
 	virtual void Tick(double deltime) override;
+	virtual void AfterGravitySystem() override;
+
 	virtual void Collision(vector<CPlayerObject*>* clients, double deltime) override;
 	virtual void Collision(unordered_set<CStaticObject*>* sobjs, double deltime) override;
 

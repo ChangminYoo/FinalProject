@@ -120,7 +120,7 @@ CBulletObject::CBulletObject(const unsigned short & master_id, const unsigned sh
 		m_ability.attack = 20;
 	}
 	
-	SetChangedBulletState();
+	UpdateDataForPacket();
 
 	//--------------------------------------------------------------------------------------------
 
@@ -153,6 +153,19 @@ STC_BulletObject_Info CBulletObject::GetChangedBulletState() const
 
 
 	return STC_BulletObject_Info(stc_bullet);
+}
+
+void CBulletObject::UpdateDataForPacket()
+{
+	m_bulldata.alive = m_alive;
+	m_bulldata.endpoint = m_savept;
+	m_bulldata.master_id = m_masterID;
+	m_bulldata.my_id = m_id;
+	m_bulldata.pos4f = m_pos4f;
+	m_bulldata.rot4f = m_rot4f;
+	m_bulldata.type = m_type;
+	m_bulldata.vel3f = m_vel3f;
+	m_bulldata.degree = m_degree;
 }
 
 void CBulletObject::AfterGravitySystem()
@@ -341,19 +354,6 @@ void CBulletObject::SetBulletRotatevalue(const XMFLOAT4 & xmf4)
 	//m_bulldata.Rotate_status = m_rot4f;
 }
 
-void CBulletObject::SetChangedBulletState()
-{
-	m_bulldata.alive = m_alive;
-	m_bulldata.endpoint = m_savept;
-	m_bulldata.master_id = m_masterID;
-	m_bulldata.my_id = m_id;
-	m_bulldata.pos4f = m_pos4f;
-	m_bulldata.rot4f = m_rot4f;
-	m_bulldata.type = m_type;
-	m_bulldata.vel3f = m_vel3f;
-	m_bulldata.degree = m_degree;
-}
-
 CBulletObject::~CBulletObject()
 {
 	//if (pp != nullptr)
@@ -409,7 +409,20 @@ CStoneBulletObject::CStoneBulletObject(CNpcObject *master, const XMFLOAT4 & in_p
 	UpdatePPosCenterPos();
 
 	//패킷으로 보낼 CStornBullet 데이터 초기화
-	SetChangedBulletState();
+	UpdateDataForPacket();
+}
+
+NPC_BulletObject_Info CBulletObject::GetChangedNPCBulletState() const
+{
+	NPC_BulletObject_Info stc_imp_bullet;
+	stc_imp_bullet.alive = false;
+	stc_imp_bullet.master_id = 0;
+	stc_imp_bullet.my_id = 0;
+	stc_imp_bullet.pos4f = { 0.f,0.f,0.f,0.f };
+	stc_imp_bullet.rot4f = { 0.f,0.f,0.f,1.0f };
+	stc_imp_bullet.create_first = true;
+
+	return NPC_BulletObject_Info(stc_imp_bullet);
 }
 
 NPC_BulletObject_Info CStoneBulletObject::GetChangedNPCBulletState() const
@@ -434,7 +447,7 @@ void CStoneBulletObject::AfterGravitySystem()
 	}
 }
 
-void CStoneBulletObject::SetChangedBulletState()
+void CStoneBulletObject::UpdateDataForPacket()
 {
 	m_npc_bulldata.alive = m_alive;
 	m_npc_bulldata.master_id = m_masterID;

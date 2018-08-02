@@ -12,7 +12,9 @@ list<CBulletObject*>	g_bullets;
 CBulletObject			*g_bullobj;
 
 unordered_set<CStaticObject*> g_staticobjs;
-unordered_set<RigidCubeObject*> g_rigidobjs;
+unordered_set<CRigidCubeObject*> g_rigidobjs;
+unordered_set<CMoveCubeObject*> g_moveobjs;
+
 CStaticObject				 *g_staticobj;
 
 FSM							*g_fsm;

@@ -305,7 +305,7 @@ void CPlayerObject::SendStaticObjectPacket(const unordered_set<CStaticObject*>& 
 
 	for (auto sobj : sobjs)
 	{
-		stc_set_sobjs.sobj_data = move(sobj->m_stc_sobjdata);
+		stc_set_sobjs.sobj_data = move(sobj->GetStaticObjectInfo());
 		g_clients[m_id]->SendPacket(reinterpret_cast<Packet*>(&stc_set_sobjs));
 	}
 }
@@ -745,6 +745,29 @@ void CPlayerObject::ProcessPacket(Packet * packet)
 	}
 }
 
+void CPlayerObject::UpdateDataForPacket()
+{
+	m_pdata.ai = m_ai;
+	m_pdata.airbone = m_airbone;
+	//m_pdata.ani = m_ani;		//애니메이션은 패킷받자마자 처리
+	m_pdata.connect = m_connect;
+	//m_pdata.dir = m_dir;
+	m_pdata.godmode = m_godmode;
+	m_pdata.id = m_id;
+	m_pdata.pos = m_pos4f;
+	//m_pdata.rot = m_rot4f;	//회전은 패킷받자마자 처리
+
+	m_pdata.status.attack = m_ability.attack;
+	m_pdata.status.cur_hp = m_ability.curHP;
+	m_pdata.status.exp = m_ability.exp;
+	m_pdata.status.level = m_ability.level;
+	m_pdata.status.origin_hp = m_ability.orignHP;
+	m_pdata.status.speed = m_ability.speed;
+
+	*pp->CenterPos = { m_pos4f.x, m_pos4f.y, m_pos4f.z, m_pos4f.w };
+	//pp->SetPosition(m_pos4f.x, m_pos4f.y, m_pos4f.z);
+}
+
 void CPlayerObject::Tick(double deltime)
 {
 	*pp->CenterPos = { m_pos4f.x, m_pos4f.y, m_pos4f.z, m_pos4f.w };
@@ -907,29 +930,6 @@ void CPlayerObject::GetDamaged(int damage)
 		m_alive = false;
 	}
 
-}
-
-void CPlayerObject::SetChangedPlayerState()
-{
-	m_pdata.ai = m_ai;
-	m_pdata.airbone = m_airbone;
-	//m_pdata.ani = m_ani;		//애니메이션은 패킷받자마자 처리
-	m_pdata.connect = m_connect;
-	//m_pdata.dir = m_dir;
-	m_pdata.godmode = m_godmode;
-	m_pdata.id = m_id;
-	m_pdata.pos = m_pos4f;
-	//m_pdata.rot = m_rot4f;	//회전은 패킷받자마자 처리
-
-	m_pdata.status.attack = m_ability.attack;
-	m_pdata.status.cur_hp = m_ability.curHP;
-	m_pdata.status.exp = m_ability.exp;
-	m_pdata.status.level = m_ability.level;
-	m_pdata.status.origin_hp = m_ability.orignHP;
-	m_pdata.status.speed = m_ability.speed;
-
-	*pp->CenterPos = { m_pos4f.x, m_pos4f.y, m_pos4f.z, m_pos4f.w };
-	//pp->SetPosition(m_pos4f.x, m_pos4f.y, m_pos4f.z);
 }
 
 void CPlayerObject::PlayerInput(double deltime)
