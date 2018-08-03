@@ -940,7 +940,7 @@ void Scene::SET_NPC_ATTACK_BY_SERVER_DATA(const unsigned short & id, const NPC_B
 		{
 			if (first_bullet)
 			{
-				BulletObject.emplace_back(new )
+				//BulletObject.emplace_back(new )
 			}
 
 			for (const auto& bullet : BulletObject)

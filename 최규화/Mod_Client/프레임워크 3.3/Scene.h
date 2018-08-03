@@ -109,6 +109,7 @@ public:
 
 	void SET_SOBJECT_BY_SERVER_DATA(const unsigned short& id, StaticObject_Info& sobjdata, const unsigned char& type);
 	void SET_MOVEOBJECT_BY_SERVER_DATA(const unsigned int& id, MoveObjectData& mvobjdata);
+	void SET_MOVEOBJECT_NOCREATE_BY_SERVER_DATA(const unsigned int&id, MoveObjectData_NoCreate& nomvobjdata);
 	void SET_RIGIDOBJECT_BY_SERVER_DATA(const unsigned int& id, RigidbodyData& rbobjdata, const unsigned char& type);
 
 	void SET_BULLET_BY_SERVER_DATA(STC_BulletObject_Info& bulldata, const unsigned char& packet_type, bool first_bullet, const XMFLOAT3& OffLookvector = { 0,0,0 });

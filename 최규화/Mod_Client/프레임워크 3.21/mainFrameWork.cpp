@@ -20,7 +20,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE prevInstance,
 
 		//srand((unsigned)time(nullptr));
 
-		auto a = theApp.Run();
+		auto RunApp = theApp.Run();
 		f_thread->join();
 		delete f_thread;
 

@@ -84,13 +84,15 @@ private:
 	int m_selectedColor;
 
 protected:
-	int m_n;
+	double m_n;
 	float m_len;
 	MoveObjectData m_stc_mvobjdata;
 
 public:
 	CMoveCubeObject(unsigned int id, float len);
 	MoveObjectData GetMoveObjectData() const { return m_stc_mvobjdata; }
+
+	void UpdateCreateFirstPacketData(bool flag) { m_stc_mvobjdata.create_first = flag; }
 
 	virtual void Tick(double deltime) override;
 

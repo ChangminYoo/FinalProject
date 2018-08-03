@@ -17,6 +17,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE prevInstance,
 			return 0;
 
 		thread* f_thread = new thread([]() {g_io_service.run(); });
+
+		auto RunApp = theApp.Run();
+
 		f_thread->join();
 		delete f_thread;
 

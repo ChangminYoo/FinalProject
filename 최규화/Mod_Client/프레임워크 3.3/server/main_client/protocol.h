@@ -57,6 +57,7 @@ enum PACKET_PROTOCOL_TYPE
 	STATIC_OBJECT,			//고정된 물체,
 	RIGIDBODY_OBJECT,		//물리효과가 적용된 물체
 	MOVE_OBJECT,			//움직이는 물체
+	MOVE_OBJECT_NOCREATE,
 	PLAYER_ANIMATION,
 
 	PLAYER_CURR_STATE,		//플레이어의 현재 상태(모든 정보 저장)
@@ -104,6 +105,7 @@ enum INSTALLED_OBJECT_TYPE
 	BrokenCart,
 	Rigidbodybox
 };
+
 
 enum OBJECT_TYPE
 {
@@ -188,12 +190,22 @@ struct RigidbodyData
 	unsigned char  type;
 };
 
+struct MoveObjectData_NoCreate
+{
+	Position	   pos4f;
+	Rotation	   rot4f;
+	unsigned short id;
+};
+
 struct MoveObjectData
 {
-	Position pos4f;
-	Rotation rot4f;
+	Position	   pos4f;
+	Rotation	   rot4f;
 	unsigned short id;
-	unsigned char texture_color;
+	unsigned char  texture_color;
+	float          len;
+	float		   n;
+	char		   create_first;
 };
 
 //-------------------------------패킷용불렛데이터-------------------------------//
@@ -379,6 +391,14 @@ typedef struct Server_To_Client_Move_Object
 	MoveObjectData mvobj_data;
 
 }STC_MoveObject;
+
+typedef struct Server_To_Client_Move_Object_NoCreate
+{
+	unsigned char packet_size = sizeof(MoveObjectData_NoCreate) + sizeof(unsigned char) + sizeof(unsigned char);
+	unsigned char pack_type = PACKET_PROTOCOL_TYPE::MOVE_OBJECT;
+	MoveObjectData_NoCreate mvobj_data;
+
+}STC_MoveObject_NoCreate;
 
 typedef struct Client_To_Server_Attack_Info
 {

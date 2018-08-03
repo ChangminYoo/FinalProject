@@ -15,7 +15,6 @@ protected:
 	Position3D m_savept;
 	Vel3f	   m_vel3f;
 	double	   m_lifetime{ 0 };
-	bool	   m_first_bullet;
 
 public:
 	//__int64					      m_prevTime{ 0 };
@@ -56,9 +55,6 @@ public:
 public:
 	virtual NPC_BulletObject_Info GetChangedNPCBulletState() const; //이 클래스는 안쓰는 함수
 
-	virtual void SetIsFirstBullet(bool flag) { m_first_bullet = flag; }
-	virtual bool GetIsFirstBullet() const { return m_first_bullet; }
-	
 	virtual void UpdateDataForPacket() override;
 
 	virtual void Tick(double deltime) override;

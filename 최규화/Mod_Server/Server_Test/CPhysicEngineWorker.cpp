@@ -24,7 +24,12 @@ void CPhysicEngineWorker::Update()
 		// 0.00000028
 		//2838 
 		for (const auto& mvobj : g_moveobjs)
+		{
 			mvobj->Tick(m_deltime);
+			mvobj->AfterGravitySystem(m_deltime);
+
+			mvobj->UpdateDataForPacket();
+		}
 	
 		if (!g_clients.empty())
 		{
@@ -122,7 +127,7 @@ void CPhysicEngineWorker::Update()
 					{
 						STC_SKILL_DICESTRIKE stc_skill_dicestrike;
 						stc_skill_dicestrike.bull_data = move((*iter)->GetChangedBulletState());
-						stc_skill_dicestrike.is_first = (*iter)->GetIsFirstBullet();
+						stc_skill_dicestrike.is_first = (*iter)->GetIsCreateFirst();
 						stc_skill_dicestrike.lookvector = (*iter)->GetDicestrikeOffLookvector();
 
 						for (auto client : g_clients)
@@ -134,7 +139,7 @@ void CPhysicEngineWorker::Update()
 					{
 						STC_Attack stc_attack;
 						stc_attack.bull_data = move((*iter)->GetChangedBulletState());
-						stc_attack.is_first = (*iter)->GetIsFirstBullet();
+						stc_attack.is_first = (*iter)->GetIsCreateFirst();
 
 						for (auto client : g_clients)
 						{

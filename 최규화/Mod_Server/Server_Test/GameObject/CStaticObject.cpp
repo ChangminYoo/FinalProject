@@ -54,162 +54,154 @@ void CStaticObject::MakeStaticObjectBasicData()
 		{ 23,{ { 65.f, 35.f,-110.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
 		{ 24,{ { 92.f, 61.f,  60.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
 		{ 25,{ { 103.f, 26.f, 35.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
-		{ 26,{ { 65.f, 17.f, -65.f ,0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 26,{ { 65.f, 17.f, -65.f ,0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } }, //10
 		{ 27,{ { 82.f, 11.f, 34.f, 0.f  },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
 		{ 28,{ { 72.f, 44.f, 41.f, 0.f  },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
 		{ 29,{ {-32.f, 39.f, 51.f, 0.f  },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
-		{ 30,{ {  0.f, 25.f, 34.f,0.f   },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+
+		{ 30,{ {  0.f, 24.f,  34.f, 0.f   },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
 		{ 31,{ {  0.f, 38.f, -71.f ,0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
-		{ 32,{ {  0.f, 15.f, 12.f, 0.f  },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
-		{ 33,{ { 13.f, 33.f, -42.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 32,{ {  0.f, 15.f,  12.f, 0.f  },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 33,{ { 13.f, 33.f, -42.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },  //17
 
-		{ 34,{ { 0.f, 24.f, 34.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
-		{ 35,{ { 0.f, 38.f, -71.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
-		{ 36,{ { 0.f, 15.f, 12.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
-		{ 37,{ { 13.f, 33.f, -42.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
-
-		{ 38,{ { -69.f, 62.f,  61.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
-		{ 39,{ { -85.f, 42.f, -45.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
-		{ 40,{ { -106.f, 40.f,  42.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
-
-		{ 41,{ { -76.f, 53.f, 8.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
-		{ 42,{ { -40.f, 10.f, -15.f ,0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
-		{ 43,{ { -38.f, 25.f, -126.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
-		{ 44,{ { -41.f, 50.f, -94.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
-		{ 45,{ { -45.f, 30.f, -60.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
-		{ 46,{ { -65.f, 40.f, -102,0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
-		{ 47,{ { -69.f, 54.f, 61.f ,0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
-		{ 48,{ { -85.f, 42.f, -45.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
-		{ 49,{ { -106.f, 40.f, 42.f ,0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
-		{ 50,{ { -104.f, 64.f, -62.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
-		{ 51,{ { -87.f, 70.f,  82.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 34,{ { -76.f, 53.f, 8.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 35,{ { -40.f, 10.f, -15.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 36,{ { 38.f, 48.f, -126.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },   //20
+		{ 37,{ { -41.f, 50.f, -94.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 38,{ { -45.f, 30.f, -60.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 39,{ { -65.f, 40.f, -102,0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 40,{ { -69.f, 54.f, 61.f ,0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 41,{ { -85.f, 42.f, -45.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 42,{ { -106.f, 40.f, 42.f ,0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 43,{ { -104.f, 64.f, -62.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 44,{ { -87.f, 70.f,  82.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },    //28
 
 		//door
 		//10 - 10 - 10 - 10 - 10 = 50
 		//좌상 ~반시계방향 ~우상
-		{ 52,{ { -170.f, 5.f, 200.f, 0.f },{ -BigWall_Rad1 },{ INSTALLED_OBJECT_TYPE::Box  } } },
-		{ 53,{ { -170.f, 15.f,200.f, 0.f },{ -BigWall_Rad1 },{ INSTALLED_OBJECT_TYPE::Box  } } },
-		{ 54,{ { -170.f, 25.f,200.f, 0.f },{ -BigWall_Rad1 },{ INSTALLED_OBJECT_TYPE::Box  } } },
-		{ 55,{ { -170.f, 35.f,200.f, 0.f },{ -BigWall_Rad1 },{ INSTALLED_OBJECT_TYPE::Box  } } },
-		{ 56,{ { -167.f, 35.f,212.f, 0.f },{  -BigWall_Rad1},{ INSTALLED_OBJECT_TYPE::Box  } } },
-		{ 57,{ { -165.f, 35.f,223.f, 0.f },{  -BigWall_Rad1},{ INSTALLED_OBJECT_TYPE::Box  } } },
-		{ 58,{ { -163.f, 35.f,234.f, 0.f },{  -BigWall_Rad1},{ INSTALLED_OBJECT_TYPE::Box  } } },
-		{ 59,{ { -163.f, 25.f,234.f, 0.f },{  -BigWall_Rad1},{ INSTALLED_OBJECT_TYPE::Box  } } },
-		{ 60,{ { -163.f,  15.f,234.f, 0.f },{ -BigWall_Rad1 },{ INSTALLED_OBJECT_TYPE::Box  } } },
-		{ 61,{ { -163.f,  5.f, 234.f, 0.f },{ -BigWall_Rad1 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 45,{ { -170.f,  5.f, 200.f, 0.f },{ -BigWall_Rad1 },{ INSTALLED_OBJECT_TYPE::Box  } } }, //29
+		{ 46,{ { -170.f, 15.f, 200.f, 0.f },{ -BigWall_Rad1 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 47,{ { -170.f, 25.f, 200.f, 0.f },{ -BigWall_Rad1 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 48,{ { -170.f, 35.f, 200.f, 0.f },{ -BigWall_Rad1 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 49,{ { -167.f, 35.f, 212.f, 0.f },{  -BigWall_Rad1},{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 50,{ { -165.f, 35.f, 223.f, 0.f },{  -BigWall_Rad1},{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 51,{ { -163.f, 35.f, 234.f, 0.f },{  -BigWall_Rad1},{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 52,{ { -163.f, 25.f, 234.f, 0.f },{  -BigWall_Rad1},{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 53,{ { -163.f, 15.f, 234.f, 0.f },{ -BigWall_Rad1 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 54,{ { -163.f,  5.f, 234.f, 0.f },{ -BigWall_Rad1 },{ INSTALLED_OBJECT_TYPE::Box  } } }, //38
 
-		{ 62,{ { -270.f, 5.f,   -70.f, 0.f },{ BigWall_Rad1 * 2 },{ INSTALLED_OBJECT_TYPE::Box  } } },
-		{ 63,{ { -270.f, 15.f,  -70.f, 0.f },{ BigWall_Rad1 * 2 },{ INSTALLED_OBJECT_TYPE::Box  } } },
-		{ 64,{ { -270.f, 25.f,  -70.f, 0.f },{ BigWall_Rad1 * 2 },{ INSTALLED_OBJECT_TYPE::Box  } } },
-		{ 65,{ { -270.f, 35.f,  -70.f, 0.f },{ BigWall_Rad1 * 2 },{ INSTALLED_OBJECT_TYPE::Box  } } },
-		{ 66,{ { -265.f,  35.f, -80.f, 0.f },{ BigWall_Rad1 * 2 },{ INSTALLED_OBJECT_TYPE::Box  } } },
-		{ 67,{ { -260.f,  35.f, -90.f, 0.f },{ BigWall_Rad1 * 2 },{ INSTALLED_OBJECT_TYPE::Box  } } },
-		{ 68,{ { -255.f,  35.f, -100.f, 0.f },{ BigWall_Rad1 * 2 },{ INSTALLED_OBJECT_TYPE::Box  } } },
-		{ 69,{ { -255.f,  25.f, -100.f, 0.f },{ BigWall_Rad1 * 2 },{ INSTALLED_OBJECT_TYPE::Box  } } },
-		{ 70,{ { -255.f,  15.f, -100.f, 0.f },{ BigWall_Rad1 * 2 },{ INSTALLED_OBJECT_TYPE::Box  } } },
-		{ 71,{ { -255.f,   5.f, -100.f, 0.f },{ BigWall_Rad1 * 2 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 55,{ { -270.f,   5.f,  -70.f, 0.f },{ BigWall_Rad1 * 2 },{ INSTALLED_OBJECT_TYPE::Box  } } }, //39
+		{ 56,{ { -270.f,  15.f,  -70.f, 0.f },{ BigWall_Rad1 * 2 },{ INSTALLED_OBJECT_TYPE::Box  } } }, //40
+		{ 57,{ { -270.f,  25.f,  -70.f, 0.f },{ BigWall_Rad1 * 2 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 58,{ { -270.f,  35.f,  -70.f, 0.f },{ BigWall_Rad1 * 2 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 59,{ { -265.f,  35.f,  -80.f, 0.f },{ BigWall_Rad1 * 2 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 60,{ { -260.f,  35.f,  -90.f, 0.f },{ BigWall_Rad1 * 2 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 61,{ { -255.f,  35.f, -100.f, 0.f },{ BigWall_Rad1 * 2 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 62,{ { -255.f,  25.f, -100.f, 0.f },{ BigWall_Rad1 * 2 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 63,{ { -255.f,  15.f, -100.f, 0.f },{ BigWall_Rad1 * 2 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 64,{ { -255.f,   5.f, -100.f, 0.f },{ BigWall_Rad1 * 2 },{ INSTALLED_OBJECT_TYPE::Box  } } }, //48
 
-		{ 72,{ { -20.f, 5.f,   -280.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
-		{ 73,{ { -20.f, 15.f,  -280.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
-		{ 74,{ { -20.f, 25.f,  -280.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
-		{ 75,{ { -20.f, 35.f,  -280.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
-		{ 76,{ { -10.f,  35.f, -280.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
-		{ 77,{ {   0.f,  35.f, -280.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
-		{ 78,{ {  10.f,  35.f, -280.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
-		{ 79,{ {  10.f,  25.f, -280.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
-		{ 80,{ {  10.f,  15.f, -280.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
-		{ 81,{ {  10.f,   5.f, -280.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 65,{ { -20.f,   5.f, -280.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 66,{ { -20.f,  15.f, -280.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 67,{ { -20.f,  25.f, -280.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 68,{ { -20.f,  35.f, -280.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 69,{ { -10.f,  35.f, -280.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 70,{ {   0.f,  35.f, -280.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 71,{ {  10.f,  35.f, -280.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 72,{ {  10.f,  25.f, -280.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 73,{ {  10.f,  15.f, -280.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 74,{ {  10.f,   5.f, -280.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Box  } } },					 //58
 
-		{ 82,{ { 270.f,  5.f, -70.f,  0.f  },{ -BigWall_Rad1 * 2 },{ INSTALLED_OBJECT_TYPE::Box  } } },
-		{ 83,{ { 270.f, 15.f, -70.f,  0.f  },{ -BigWall_Rad1 * 2 },{ INSTALLED_OBJECT_TYPE::Box  } } },
-		{ 84,{ { 270.f, 25.f, -70.f,  0.f  },{ -BigWall_Rad1 * 2 },{ INSTALLED_OBJECT_TYPE::Box  } } },
-		{ 85,{ { 270.f, 35.f, -70.f,  0.f  },{ -BigWall_Rad1 * 2 },{ INSTALLED_OBJECT_TYPE::Box  } } },
-		{ 86,{ { 265.f, 35.f, -80.f,  0.f  },{ -BigWall_Rad1 * 2 },{ INSTALLED_OBJECT_TYPE::Box  } } },
-		{ 87,{ { 255.f, 35.f, -90.f,  0.f  },{ -BigWall_Rad1 * 2 },{ INSTALLED_OBJECT_TYPE::Box  } } },
-		{ 88,{ { 255.f, 35.f, -100.f, 0.f  },{ -BigWall_Rad1 * 2 },{ INSTALLED_OBJECT_TYPE::Box  } } },
-		{ 89,{ { 255.f, 25.f, -100.f, 0.f  },{ -BigWall_Rad1 * 2 },{ INSTALLED_OBJECT_TYPE::Box  } } },
-		{ 90,{ { 255.f, 15.f, -100.f, 0.f  },{ -BigWall_Rad1 * 2 },{ INSTALLED_OBJECT_TYPE::Box  } } },
-		{ 91,{ { 255.f,  5.f, -100.f, 0.f  },{ -BigWall_Rad1 * 2 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 75,{ { 270.f,  5.f,  -70.f,  0.f  },{ -BigWall_Rad1 * 2 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 76,{ { 270.f, 15.f,  -70.f,  0.f  },{ -BigWall_Rad1 * 2 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 77,{ { 270.f, 25.f,  -70.f,  0.f  },{ -BigWall_Rad1 * 2 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 78,{ { 270.f, 35.f,  -70.f,  0.f  },{ -BigWall_Rad1 * 2 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 79,{ { 265.f, 35.f,  -80.f,  0.f  },{ -BigWall_Rad1 * 2 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 80,{ { 260.f, 35.f,  -90.f,  0.f  },{ -BigWall_Rad1 * 2 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 81,{ { 255.f, 35.f, -100.f,  0.f  },{ -BigWall_Rad1 * 2 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 82,{ { 255.f, 25.f, -100.f,  0.f  },{ -BigWall_Rad1 * 2 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 83,{ { 255.f, 15.f, -100.f,  0.f  },{ -BigWall_Rad1 * 2 },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 84,{ { 255.f,  5.f, -100.f,  0.f  },{ -BigWall_Rad1 * 2 },{ INSTALLED_OBJECT_TYPE::Box  } } },  //68
 
-		{ 92, { { 170.f,  5.f, 200.f,  0.f },{ BigWall_Rad1  },{ INSTALLED_OBJECT_TYPE::Box  } } },
-		{ 93, { { 170.f, 15.f, 200.f,  0.f },{ BigWall_Rad1  },{ INSTALLED_OBJECT_TYPE::Box  } } },
-		{ 94, { { 170.f, 25.f, 200.f,  0.f },{ BigWall_Rad1  },{ INSTALLED_OBJECT_TYPE::Box  } } },
-		{ 95, { { 170.f, 35.f, 200.f,  0.f },{ BigWall_Rad1  },{ INSTALLED_OBJECT_TYPE::Box  } } },
-		{ 96, { { 165.f, 35.f, 210.f,  0.f },{ BigWall_Rad1  },{ INSTALLED_OBJECT_TYPE::Box  } } },
-		{ 97, { { 160.f, 35.f, 220.f,  0.f },{ BigWall_Rad1  },{ INSTALLED_OBJECT_TYPE::Box  } } },
-		{ 98, { { 155.f, 35.f, 230.f, 0.f  },{ BigWall_Rad1  },{ INSTALLED_OBJECT_TYPE::Box  } } },
-		{ 99, { { 155.f, 25.f, 230.f, 0.f  },{ BigWall_Rad1  },{ INSTALLED_OBJECT_TYPE::Box  } } },
-		{ 100,{ { 155.f, 15.f, 230.f, 0.f  },{ BigWall_Rad1  },{ INSTALLED_OBJECT_TYPE::Box  } } },
-		{ 101,{ { 155.f,  5.f, 230.f, 0.f  },{ BigWall_Rad1  },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 85, { { 170.f,  5.f, 200.f,  0.f },{ BigWall_Rad1  },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 86, { { 170.f, 15.f, 200.f,  0.f },{ BigWall_Rad1  },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 87, { { 170.f, 25.f, 200.f,  0.f },{ BigWall_Rad1  },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 88, { { 170.f, 35.f, 200.f,  0.f },{ BigWall_Rad1  },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 89, { { 165.f, 35.f, 210.f,  0.f },{ BigWall_Rad1  },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 90, { { 160.f, 35.f, 220.f,  0.f },{ BigWall_Rad1  },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 91, { { 155.f, 35.f, 230.f, 0.f  },{ BigWall_Rad1  },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 92, { { 155.f, 25.f, 230.f, 0.f  },{ BigWall_Rad1  },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 93, { { 155.f, 15.f, 230.f, 0.f  },{ BigWall_Rad1  },{ INSTALLED_OBJECT_TYPE::Box  } } },
+		{ 94, { { 155.f,  5.f, 230.f, 0.f  },{ BigWall_Rad1  },{ INSTALLED_OBJECT_TYPE::Box  } } },		   //78
 
 		//Column
 		//4 = 4
-		{ 102,{ {  110.f,  0.f,   0.f,  0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Column } } },
-		{ 103,{ { -110.f,  0.f,   0.f,  0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Column } } },
-		{ 104,{ {    0.f,  0.f, -110.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Column } } },
-		{ 105,{ {    0.f,  0.f,  110.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Column } } },
+		{ 95,{ {  110.f,  0.f,   0.f,  0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Column } } },			       //79
+		{ 96,{ { -110.f,  0.f,   0.f,  0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Column } } },
+		{ 97,{ {    0.f,  0.f, -110.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Column } } },
+		{ 98,{ {    0.f,  0.f,  110.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::Column } } },				   //82
 
 		//BrokenCart
 		//1 = 1
-		{ 106,{ {  -60.f,  0.f, -100.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::BrokenCart } } },
+		{ 99,{ {  -60.f,  0.f, -100.f, 0.f },{ 0 },{ INSTALLED_OBJECT_TYPE::BrokenCart } } },		       //83
 
 		//BigWall = 5
-		{ 107,{ { -BigWall_X1, 0.f, BigWall_Z1, 0.f },{ -BigWall_Rad1 },	{ INSTALLED_OBJECT_TYPE::BigWall } } },
-		{ 108,{ {  BigWall_X1, 0.f, BigWall_Z1, 0.f },{  BigWall_Rad1 },	{ INSTALLED_OBJECT_TYPE::BigWall } } },
-		{ 109,{ {  BigWall_X2, 0.f, BigWall_Z2, 0.f },{ -BigWall_Rad1 * 2 },{ INSTALLED_OBJECT_TYPE::BigWall } } },
-		{ 110,{ {  0.f,        0.f, BigWall_Z3, 0.f },{  0 },				{ INSTALLED_OBJECT_TYPE::BigWall } } },
-		{ 111,{ { -BigWall_X2, 0.f, BigWall_Z2, 0.f },{  BigWall_Rad1 * 2 },{ INSTALLED_OBJECT_TYPE::BigWall } } },
+		{ 100,{ { -BigWall_X1, 0.f, BigWall_Z1, 0.f },{ -BigWall_Rad1 },	{ INSTALLED_OBJECT_TYPE::BigWall } } },
+		{ 101,{ {  BigWall_X1, 0.f, BigWall_Z1, 0.f },{  BigWall_Rad1 },	{ INSTALLED_OBJECT_TYPE::BigWall } } },
+		{ 102,{ {  BigWall_X2, 0.f, BigWall_Z2, 0.f },{ -BigWall_Rad1 * 2 },{ INSTALLED_OBJECT_TYPE::BigWall } } },
+		{ 103,{ {  0.f,        0.f, BigWall_Z3, 0.f },{  0 },				{ INSTALLED_OBJECT_TYPE::BigWall } } },
+		{ 104,{ { -BigWall_X2, 0.f, BigWall_Z2, 0.f },{  BigWall_Rad1 * 2 },{ INSTALLED_OBJECT_TYPE::BigWall } } },
 
 		//SmallWall
 		//좌상
-		{ 112,{ { -BigWall_X1 - 200,   0.f, 480.f  * cosf(0.4f * MMPE_PI), 0.f },{ MMPE_PI / 8 },{ INSTALLED_OBJECT_TYPE::SmallWall } } },
-		{ 113,{ { -BigWall_X1 - 140,   0.f, 400.f  * cosf(0.4f * MMPE_PI), 0.f },{ MMPE_PI / 8 },{ INSTALLED_OBJECT_TYPE::SmallWall } } },
-		{ 114,{ { -BigWall_X1 - 80,	   0.f, 320.f  * cosf(0.4f * MMPE_PI), 0.f },{ MMPE_PI / 8 },{ INSTALLED_OBJECT_TYPE::SmallWall } } },
+		{ 105,{ { -BigWall_X1 - 200,   0.f, 480.f  * cosf(0.4f * MMPE_PI), 0.f },{ MMPE_PI / 8 },{ INSTALLED_OBJECT_TYPE::SmallWall } } },
+		{ 106,{ { -BigWall_X1 - 140,   0.f, 400.f  * cosf(0.4f * MMPE_PI), 0.f },{ MMPE_PI / 8 },{ INSTALLED_OBJECT_TYPE::SmallWall } } },
+		{ 107,{ { -BigWall_X1 - 80,	   0.f, 320.f  * cosf(0.4f * MMPE_PI), 0.f },{ MMPE_PI / 8 },{ INSTALLED_OBJECT_TYPE::SmallWall } } },
 		
 		//중상
-		{ 115,{ { 0.f,  0.f, 530.f,  0.f },{ MMPE_PI / 2 },{ INSTALLED_OBJECT_TYPE::SmallWall } } },
-		{ 116,{ { 0.f,  0.f, 460.f,  0.f },{ MMPE_PI / 2 },{ INSTALLED_OBJECT_TYPE::SmallWall } } },
-		{ 117,{ { 0.f,  0.f, 390.f,  0.f },{ MMPE_PI / 2 },{ INSTALLED_OBJECT_TYPE::SmallWall } } },
+		{ 108,{ { 0.f,  0.f, 530.f,  0.f },{ MMPE_PI / 2 },{ INSTALLED_OBJECT_TYPE::SmallWall } } },
+		{ 109,{ { 0.f,  0.f, 460.f,  0.f },{ MMPE_PI / 2 },{ INSTALLED_OBJECT_TYPE::SmallWall } } },
+		{ 110,{ { 0.f,  0.f, 390.f,  0.f },{ MMPE_PI / 2 },{ INSTALLED_OBJECT_TYPE::SmallWall } } },
 
 		//우상
-		{ 118,{ { BigWall_X1 + 200, 0.f, 480.f * cosf(0.4f * MMPE_PI) },{ -MMPE_PI / 8 },{ INSTALLED_OBJECT_TYPE::SmallWall } } },
-		{ 119,{ { BigWall_X1 + 140, 0.f, 400.f * cosf(0.4f * MMPE_PI) },{ -MMPE_PI / 8 },{ INSTALLED_OBJECT_TYPE::SmallWall } } },
-		{ 120,{ { BigWall_X1 + 80,  0.f, 320.f * cosf(0.4f * MMPE_PI) },{ -MMPE_PI / 8 },{ INSTALLED_OBJECT_TYPE::SmallWall } } },
+		{ 111,{ { BigWall_X1 + 200, 0.f, 480.f * cosf(0.4f * MMPE_PI) },{ -MMPE_PI / 8 },{ INSTALLED_OBJECT_TYPE::SmallWall } } },
+		{ 112,{ { BigWall_X1 + 140, 0.f, 400.f * cosf(0.4f * MMPE_PI) },{ -MMPE_PI / 8 },{ INSTALLED_OBJECT_TYPE::SmallWall } } },
+		{ 113,{ { BigWall_X1 + 80,  0.f, 320.f * cosf(0.4f * MMPE_PI) },{ -MMPE_PI / 8 },{ INSTALLED_OBJECT_TYPE::SmallWall } } },
 
 		//우하
-		{ 121,{ { 520.f * sinf(0.8f * MMPE_PI), 0.f, -500.f * cosf(0.2f * MMPE_PI) },{ MMPE_PI / 3 },{ INSTALLED_OBJECT_TYPE::SmallWall } } },
-		{ 122,{ { 470.f * sinf(0.8f * MMPE_PI), 0.f, -440.f * cosf(0.2f * MMPE_PI) },{ MMPE_PI / 3 },{ INSTALLED_OBJECT_TYPE::SmallWall } } },
-		{ 123,{ { 420.f * sinf(0.8f * MMPE_PI), 0.f, -380.f * cosf(0.2f * MMPE_PI) },{ MMPE_PI / 3 },{ INSTALLED_OBJECT_TYPE::SmallWall } } },
+		{ 114,{ { 520.f * sinf(0.8f * MMPE_PI), 0.f, -500.f * cosf(0.2f * MMPE_PI) },{ MMPE_PI / 3 },{ INSTALLED_OBJECT_TYPE::SmallWall } } },
+		{ 115,{ { 470.f * sinf(0.8f * MMPE_PI), 0.f, -440.f * cosf(0.2f * MMPE_PI) },{ MMPE_PI / 3 },{ INSTALLED_OBJECT_TYPE::SmallWall } } },
+		{ 116,{ { 420.f * sinf(0.8f * MMPE_PI), 0.f, -380.f * cosf(0.2f * MMPE_PI) },{ MMPE_PI / 3 },{ INSTALLED_OBJECT_TYPE::SmallWall } } },
 
 		//좌하
-		{ 124,{ { -520.f * sinf(0.8f * MMPE_PI), 0.f, -500.f * cosf(0.2f * MMPE_PI) },{ -MMPE_PI / 3 },{ INSTALLED_OBJECT_TYPE::SmallWall } } },
-		{ 125,{ { -470.f * sinf(0.8f * MMPE_PI), 0.f, -440.f * cosf(0.2f * MMPE_PI) },{ -MMPE_PI / 3 },{ INSTALLED_OBJECT_TYPE::SmallWall } } },
-		{ 126,{ { -420.f * sinf(0.8f * MMPE_PI), 0.f, -380.f * cosf(0.2f * MMPE_PI) },{ -MMPE_PI / 3 },{ INSTALLED_OBJECT_TYPE::SmallWall } } },
+		{ 117,{ { -520.f * sinf(0.8f * MMPE_PI), 0.f, -500.f * cosf(0.2f * MMPE_PI) },{ -MMPE_PI / 3 },{ INSTALLED_OBJECT_TYPE::SmallWall } } },
+		{ 118,{ { -470.f * sinf(0.8f * MMPE_PI), 0.f, -440.f * cosf(0.2f * MMPE_PI) },{ -MMPE_PI / 3 },{ INSTALLED_OBJECT_TYPE::SmallWall } } },
+		{ 119,{ { -420.f * sinf(0.8f * MMPE_PI), 0.f, -380.f * cosf(0.2f * MMPE_PI) },{ -MMPE_PI / 3 },{ INSTALLED_OBJECT_TYPE::SmallWall } } },
 
 		//좌상 Building
-		{ 127,{ { -BigWall_X1 - 20,    0.f, 240.f  * cosf(0.4f * MMPE_PI), 0.f		},{ MMPE_PI / 8 },		{ INSTALLED_OBJECT_TYPE::NormalBuilding } } },
+		{ 120,{ { -BigWall_X1 - 20,    0.f, 240.f  * cosf(0.4f * MMPE_PI), 0.f		},{ MMPE_PI / 8 },		{ INSTALLED_OBJECT_TYPE::NormalBuilding } } },
 		//중상 Building
-		{ 128,{ { 0.f,  0.f, 320.f,  0.f											},{ MMPE_PI / 2 },		{ INSTALLED_OBJECT_TYPE::NormalBuilding } } },
+		{ 121,{ { 0.f,  0.f, 320.f,  0.f											},{ MMPE_PI / 2 },		{ INSTALLED_OBJECT_TYPE::NormalBuilding } } },
 		//우상 Building
-		{ 129,{ { BigWall_X1 + 20,  0.f, 240.f * cosf(0.4f * MMPE_PI)               },{ -MMPE_PI / 8 },		{ INSTALLED_OBJECT_TYPE::NormalBuilding } } },
+		{ 122,{ { BigWall_X1 + 20,  0.f, 240.f * cosf(0.4f * MMPE_PI)               },{ -MMPE_PI / 8 },		{ INSTALLED_OBJECT_TYPE::NormalBuilding } } },
 		//우하 Building
-		{ 130,{ { 370.f * sinf(0.8f * MMPE_PI), 0.f, -320.f * cosf(0.2f * MMPE_PI)  },{ MMPE_PI / 3 },      { INSTALLED_OBJECT_TYPE::NormalBuilding } } },
+		{ 123,{ { 370.f * sinf(0.8f * MMPE_PI), 0.f, -320.f * cosf(0.2f * MMPE_PI)  },{ MMPE_PI / 3 },      { INSTALLED_OBJECT_TYPE::NormalBuilding } } },
 		//좌하 Building
-		{ 131,{ { -370.f * sinf(0.8f * MMPE_PI), 0.f, -320.f * cosf(0.2f * MMPE_PI) },{ -MMPE_PI / 3 },     { INSTALLED_OBJECT_TYPE::NormalBuilding } } },
+		{ 124,{ { -370.f * sinf(0.8f * MMPE_PI), 0.f, -320.f * cosf(0.2f * MMPE_PI) },{ -MMPE_PI / 3 },     { INSTALLED_OBJECT_TYPE::NormalBuilding } } },
 
 		//RigidBody
-		{ 132,{ {    0.f, 200.f,  290.f, 0.f } , { 0 } , { INSTALLED_OBJECT_TYPE::Rigidbodybox } } },
-		{ 133,{ {    0.f, 100.f,  290.f, 0.f } , { 0 } , { INSTALLED_OBJECT_TYPE::Rigidbodybox } } },
-		{ 134,{ { -270.f,  50.f,   60.f, 0.f } , { 0 } , { INSTALLED_OBJECT_TYPE::Rigidbodybox } } },
-		{ 135,{ {  270.f, 100.f,   60.f, 0.f } , { 0 } , { INSTALLED_OBJECT_TYPE::Rigidbodybox } } },
-		{ 136,{ { -210.f, 390.f, -200.f, 0.f } , { 0 } , { INSTALLED_OBJECT_TYPE::Rigidbodybox } } },
-		{ 137,{ {  200.f, 440.f, -180.f, 0.f } , { 0 } , { INSTALLED_OBJECT_TYPE::Rigidbodybox } } },
-		{ 138,{ {  180.f, 310.f,  -30.f, 0.f } , { 0 } , { INSTALLED_OBJECT_TYPE::Rigidbodybox } } },
-		{ 139,{ { -231.f,  50.f, -160.f, 0.f } , { 0 } , { INSTALLED_OBJECT_TYPE::Rigidbodybox } } },
-		{ 140,{ { -231.f, 100.f, -160.f, 0.f } , { 0 } , { INSTALLED_OBJECT_TYPE::Rigidbodybox } } },
-		{ 141,{ { -190.f, 370.f, -340.f, 0.f } , { 0 } , { INSTALLED_OBJECT_TYPE::Rigidbodybox } } },
-		{ 142,{ {  -70.f,  40.f, -155.f, 0.f } , { 0 } , { INSTALLED_OBJECT_TYPE::Rigidbodybox } } },
-		{ 143,{ {  -70.f,  90.f, -155.f, 0.f } , { 0 } , { INSTALLED_OBJECT_TYPE::Rigidbodybox } } },
+		{ 125,{ {    0.f, 200.f,  290.f, 0.f } , { 0 } , { INSTALLED_OBJECT_TYPE::Rigidbodybox } } },
+		{ 126,{ {    0.f, 100.f,  290.f, 0.f } , { 0 } , { INSTALLED_OBJECT_TYPE::Rigidbodybox } } },
+		{ 127,{ { -270.f,  50.f,   60.f, 0.f } , { 0 } , { INSTALLED_OBJECT_TYPE::Rigidbodybox } } },
+		{ 128,{ {  270.f, 100.f,   60.f, 0.f } , { 0 } , { INSTALLED_OBJECT_TYPE::Rigidbodybox } } },
+		{ 129,{ { -210.f, 390.f, -200.f, 0.f } , { 0 } , { INSTALLED_OBJECT_TYPE::Rigidbodybox } } },
+		{ 130,{ {  200.f, 440.f, -180.f, 0.f } , { 0 } , { INSTALLED_OBJECT_TYPE::Rigidbodybox } } },
+		{ 131,{ {  180.f, 310.f,  -30.f, 0.f } , { 0 } , { INSTALLED_OBJECT_TYPE::Rigidbodybox } } },
+		{ 132,{ { -231.f,  50.f, -160.f, 0.f } , { 0 } , { INSTALLED_OBJECT_TYPE::Rigidbodybox } } },
+		{ 133,{ { -231.f, 100.f, -160.f, 0.f } , { 0 } , { INSTALLED_OBJECT_TYPE::Rigidbodybox } } },
+		{ 134,{ { -190.f, 370.f, -340.f, 0.f } , { 0 } , { INSTALLED_OBJECT_TYPE::Rigidbodybox } } },
+		{ 135,{ {  -70.f,  40.f, -155.f, 0.f } , { 0 } , { INSTALLED_OBJECT_TYPE::Rigidbodybox } } },
+		{ 136,{ {  -70.f,  90.f, -155.f, 0.f } , { 0 } , { INSTALLED_OBJECT_TYPE::Rigidbodybox } } },
 	};
 }
 
@@ -227,29 +219,32 @@ void CStaticObject::CreateGameObject()
 	for (unsigned int i = 13; i < 17; ++i)
 		g_moveobjs.insert(move(new CMoveCubeObject(i, 50.f)));
 
-	for (unsigned int i = 17; i < 102; ++i)
+	for (unsigned int i = 17; i < 95; ++i)
 		g_staticobjs.insert(move(new CNormalBoxObject(i)));
 
-	for (unsigned int i = 102; i < 106; ++i)
+	for (unsigned int i = 95; i < 99; ++i)
 		g_staticobjs.insert(move(new CColumnObject(i)));
 	
-	for (unsigned int i = 106; i < 107; ++i)
+	for (unsigned int i = 99; i < 100; ++i)
 		g_staticobjs.insert(move(new CBrokenCartObject(i)));
 
-	for (unsigned int i = 107; i < 112; ++i)
+	for (unsigned int i = 100; i < 105; ++i)
 		g_staticobjs.insert(move(new CBigWallObject(i)));
 
-	for (unsigned int i = 112; i < 127; ++i)
+	for (unsigned int i = 105; i < 120; ++i)
 		g_staticobjs.insert(move(new CSmallWallObject(i)));
 
-	for (unsigned int i = 127; i < 132; ++i)
+	for (unsigned int i = 120; i < 125; ++i)
 		g_staticobjs.insert(move(new CBuildingObject(i)));
 
-	for (unsigned int i = 132; i < 144; ++i)
+	for (unsigned int i = 125; i < 137; ++i)
 		g_rigidobjs.insert(move(new CRigidCubeObject(i)));
 		
 	for (auto sobj : g_staticobjs)
 		sobj->AfterGravitySystem(0);
+
+	for (const auto& sobj : g_staticobjs)
+		sobj->UpdateDataForPacket();
 }
 
 void CStaticObject::StaticObjectLoop()
@@ -1536,6 +1531,8 @@ CMoveCubeObject::CMoveCubeObject(unsigned int id, float len)
 	m_type = INSTALLED_OBJECT_TYPE::MoveCube;
 	m_degree = 0;
 
+	m_createfirst = true;
+
 	//----------rot값을 이용한 Lookvector, Rightvector, Upvector 값 업데이트----------//
 
 	m_OffLookvector = XMFLOAT3(0, 0, 1);
@@ -1554,6 +1551,14 @@ CMoveCubeObject::CMoveCubeObject(unsigned int id, float len)
 	pp->SetMass(INFINITY);
 
 	//------------패킷 통신을 위한 StaticObject 패킷송신용데이터 업데이트---------------//
+	//1. 고정 데이터
+	m_stc_mvobjdata.id = m_id;
+	m_stc_mvobjdata.texture_color = m_selectedColor;
+	m_stc_mvobjdata.len = m_len;
+	m_stc_mvobjdata.n = m_n;
+	m_stc_mvobjdata.create_first = m_createfirst;
+
+	//2. 업데이트되는 데이터
 	UpdateDataForPacket();
 }
 
@@ -1563,13 +1568,11 @@ void CMoveCubeObject::Tick(double deltime)
 
 	m_pos4f.y = m_len * sinf(MMPE_PI * m_n * 0.15f ) + 50;
 
-	m_stc_mvobjdata.pos4f = move(m_pos4f);
+	m_stc_mvobjdata.pos4f.y = m_pos4f.y;
 }
 
 void CMoveCubeObject::UpdateDataForPacket()
 {
-	m_stc_mvobjdata.id = m_id;
 	m_stc_mvobjdata.pos4f = m_pos4f;
 	m_stc_mvobjdata.rot4f = m_rot4f;
-	m_stc_mvobjdata.texture_color = m_selectedColor;
 }

@@ -56,6 +56,8 @@ protected:
 	__int64				m_currtime{ 0 };
 	double				m_deltime{ 0 };
 
+	bool				m_createfirst;
+
 public:
 	CMonoObject();
 	virtual ~CMonoObject();
@@ -87,6 +89,8 @@ public:
 	void	SetCenterPos3f(const XMFLOAT3& pos) { m_pos4f.x = pos.x; m_pos4f.y = pos.y; m_pos4f.z = pos.z; }
 	void	SetRotatePos4f(const XMFLOAT4& rot) { m_rot4f.x = rot.x; m_rot4f.y = rot.y; m_rot4f.z = rot.z; m_rot4f.w = rot.w; }
 	int		GetID() const { return m_id; }
+	void	SetIsCreateFirst(bool flag) { m_createfirst = flag; }
+	bool	GetIsCreateFirst() const { return m_createfirst; }
 
 	virtual ObjectStatus GetMyBasicStatus() const;
 	//virtual void ToDead();
@@ -116,5 +120,6 @@ public:
 	//패킷으로 보내기 위한 해당 오브젝트의 패킷데이터 업데이트
 	//순수 가상함수
 	virtual void UpdateDataForPacket() = 0;
+
 };
 

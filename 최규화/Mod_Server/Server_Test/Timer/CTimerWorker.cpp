@@ -142,20 +142,47 @@ void CTimerWorker::ProcessPacket(event_type * et)
 			m_currtime = m_prevtime;
 
 			//------------- 1초에 18번정도 보냄 - 20번x, 시간누적오차 때문에 ---------------//
-			STC_MoveObject stc_move_object;
+
+			//0. MoveObject 
 			for (const auto& mvobj : g_moveobjs)
 			{
-				stc_move_object.mvobj_data = move(mvobj->GetMoveObjectData());
-				for (const auto& client : g_clients)
+				if (mvobj->GetIsCreateFirst())
 				{
-					if (client->GetIsAI()) continue;
-					if (!client->GetConnectState()) continue;
-					client->SendPacket(reinterpret_cast<Packet*>(&stc_move_object));
+					STC_MoveObject stc_move_object;
+					stc_move_object.mvobj_data = move(mvobj->GetMoveObjectData());
+
+					for (const auto& client : g_clients)
+					{
+						if (client->GetIsAI()) continue;
+						//if (!client->GetConnectState()) continue;
+
+						client->SendPacket(reinterpret_cast<Packet*>(&stc_move_object));
+					}
+
+					if (mvobj->GetIsCreateFirst())
+					{
+						mvobj->SetIsCreateFirst(false);
+						mvobj->UpdateCreateFirstPacketData(false);
+					}
 				}
+				else
+				{
+					STC_MoveObject_NoCreate stc_move_object_no_create;
+					stc_move_object_no_create.mvobj_data.id = mvobj->GetMoveObjectData().id;
+					stc_move_object_no_create.mvobj_data.pos4f = mvobj->GetMoveObjectData().pos4f;
+					stc_move_object_no_create.mvobj_data.rot4f = mvobj->GetMoveObjectData().rot4f;
+
+					for (const auto& client : g_clients)
+					{
+						if (client->GetIsAI()) continue;
+						//if (!client->GetConnectState()) continue;
+
+						client->SendPacket(reinterpret_cast<Packet*>(&stc_move_object_no_create));
+					}
+				}			
 			}
 
-
-			//0. 1초에 20번씩 서버에서 업데이트된 리즈드바디 오브젝트의 정보를 보냄 
+			//1. RigidbodyObject
 			STC_RigidbodyObject stc_rigidbody_object;
 			for (auto client : g_clients)
 			{
@@ -170,7 +197,7 @@ void CTimerWorker::ProcessPacket(event_type * et)
 			}
 
 
-			//1. 1초에 20번씩 서버에서 업데이트된 클라이언트의 모든정보를 보냄
+			//2. All Clients (Player)
 			STC_CharCurrState stc_char_state;
 			for(auto myclient : g_clients)
 			{
@@ -184,7 +211,7 @@ void CTimerWorker::ProcessPacket(event_type * et)
 				
 			}
 
-			//2. 1초에 20번씩 서버에서 업데이트된 Monster NPC의 모든정보를 클라이언트로 보냄
+			//3. All NPCs (Non-Player)
 			STC_NpcMonsterCurrState stc_mnpcs_state;
 			for (auto npc_monster : g_npcs)
 			{
@@ -199,7 +226,7 @@ void CTimerWorker::ProcessPacket(event_type * et)
 			}
 
 
-			//3. 불렛 데이터도 1초에 20번씩 클라이언트로 보냄 
+			//4. All Bullets (LightBullet // HeavyBullet // DiceBullet)
 			for (auto bullet : g_bullets)
 			{
 				//cout << "Bullet ID: " << bullet->GetBulletID() << "Bullet MID: " << bullet->GetBulletMasterID() <<
@@ -234,11 +261,11 @@ void CTimerWorker::ProcessPacket(event_type * et)
 					}
 					else
 					{
-						if (bullet->m_bulldata.type == protocol_DiceBullet && bullet->GetIsFirstBullet())
+						if (bullet->m_bulldata.type == protocol_DiceBullet && bullet->GetIsCreateFirst())
 						{
 							STC_SKILL_DICESTRIKE stc_skill_dicestrike;
 							stc_skill_dicestrike.bull_data = move(bullet->GetChangedBulletState());
-							stc_skill_dicestrike.is_first = bullet->GetIsFirstBullet();
+							stc_skill_dicestrike.is_first = bullet->GetIsCreateFirst();
 							stc_skill_dicestrike.lookvector = bullet->GetDicestrikeOffLookvector();
 
 							for (auto client : g_clients)
@@ -250,7 +277,7 @@ void CTimerWorker::ProcessPacket(event_type * et)
 						{
 							STC_Attack stc_attack;
 							stc_attack.bull_data = move(bullet->GetChangedBulletState());
-							stc_attack.is_first = bullet->GetIsFirstBullet();
+							stc_attack.is_first = bullet->GetIsCreateFirst();
 
 							for (auto client : g_clients)
 							{
@@ -259,8 +286,8 @@ void CTimerWorker::ProcessPacket(event_type * et)
 
 						}
 
-						if (bullet->GetIsFirstBullet())
-							bullet->SetIsFirstBullet(false);
+						if (bullet->GetIsCreateFirst())
+							bullet->SetIsCreateFirst(false);
 					}
 
 				}

@@ -92,6 +92,14 @@ switch (packet[1])
 	}
 	break;
 
+	case PACKET_PROTOCOL_TYPE::MOVE_OBJECT_NOCREATE:
+	{
+		auto mynomvobjdata = reinterpret_cast<STC_MoveObject_NoCreate*>(packet);
+
+		scene.SET_MOVEOBJECT_NOCREATE_BY_SERVER_DATA(mynomvobjdata->mvobj_data.id, mynomvobjdata->mvobj_data);
+	}
+	break;
+
 	case PACKET_PROTOCOL_TYPE::RIGIDBODY_OBJECT:
 	{
 		auto myrbobjdata = reinterpret_cast<STC_RigidbodyObject*>(packet);

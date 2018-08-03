@@ -2480,6 +2480,7 @@ MoveCubeObject::MoveCubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 		CreateMesh = true;
 
 	}
+	
 	selectColor = rand() % 7 + 0;
 	if (selectColor == 0)
 		TextureName = "redTex"; 

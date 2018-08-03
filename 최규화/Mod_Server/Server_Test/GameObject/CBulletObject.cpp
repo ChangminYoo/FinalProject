@@ -26,7 +26,7 @@ CBulletObject::CBulletObject(const unsigned short & master_id, const unsigned sh
 
 	m_degree = degree;
 
-	m_first_bullet = true;
+	m_createfirst = true;
 
 	/*
 	if (m_type == protocol_DiceBullet)
@@ -363,7 +363,7 @@ CBulletObject::~CBulletObject()
 
 CStoneBulletObject::CStoneBulletObject(CNpcObject *master, const XMFLOAT4 & in_pos4f, const XMFLOAT4 & in_rot4f,  XMFLOAT4& ori, const XMFLOAT4& opp)
 {
-	m_first_bullet = true;
+	m_createfirst = true;
 
 	m_npc_master = master;
 	m_masterID = master->GetID();
@@ -433,7 +433,7 @@ NPC_BulletObject_Info CStoneBulletObject::GetChangedNPCBulletState() const
 	stc_imp_bullet.my_id = m_npc_bulletID;
 	stc_imp_bullet.pos4f = m_pos4f;
 	stc_imp_bullet.rot4f = m_rot4f;
-	stc_imp_bullet.create_first = m_first_bullet;
+	stc_imp_bullet.create_first = m_createfirst;
 
 	return NPC_BulletObject_Info(stc_imp_bullet);
 }

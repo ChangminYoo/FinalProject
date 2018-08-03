@@ -18,6 +18,8 @@ CMonoObject::CMonoObject()
 	m_ability.speed = 0;
 	m_ability.level = 1;
 	m_ability.exp = 0;
+
+	m_createfirst = true;
 }
 
 
