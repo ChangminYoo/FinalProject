@@ -222,6 +222,8 @@ struct CTS_BulletObject_Info
 	unsigned short				my_id;					//2
 	unsigned char				type;					//1
 	char						alive;					//1
+	char						show_damage;			//1
+	unsigned short				damage;					//2
 };
 
 struct STC_BulletObject_Info
@@ -234,16 +236,20 @@ struct STC_BulletObject_Info
 	unsigned short				my_id;					//2
 	unsigned char				type;					//1
 	char						alive;					//1
+	char						show_damage;			//1
+	unsigned short				damage;					//2
 };
 
 struct NPC_BulletObject_Info
 {
-	Position					pos4f;
-	Rotation					rot4f;
-	unsigned short				master_id;
-	unsigned short				my_id;
-	char						alive;
-	char						create_first;
+	Position					pos4f;					//16
+	Rotation					rot4f;					//16
+	unsigned short				master_id;				//2
+	unsigned short				my_id;					//2
+	char						alive;					//1
+	char						create_first;			//1
+	char						show_damage;			//1
+	unsigned short				damage;					//2
 };
 
 //-------------------------------패킷용스킬데이터-------------------------------//

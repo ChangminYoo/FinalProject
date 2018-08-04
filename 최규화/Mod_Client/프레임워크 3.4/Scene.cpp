@@ -1180,10 +1180,10 @@ void Scene::SET_NPC_ATTACK_BY_SERVER_DATA(const unsigned short & id, const NPC_B
 				}
 
 				/*
-			XMFLOAT4 t_pos4f = { data.pos4f.x ,data.pos4f.y, data.pos4f.z, data.pos4f.w };
-			BulletObject.emplace_back(new StoneBullet(master_npc->device, master_npc->commandlist, master_npc->ParticleList,
+				XMFLOAT4 t_pos4f = { data.pos4f.x ,data.pos4f.y, data.pos4f.z, data.pos4f.w };
+				BulletObject.emplace_back(new StoneBullet(master_npc->device, master_npc->commandlist, master_npc->ParticleList,
 								      NULL, master_npc, XMFLOAT4(0, 0, 0, 1), NULL, t_pos4f, xmf4_pos));
-			*/
+				*/
 				BulletObject.emplace_back(new StoneBullet(master_npc->device, master_npc->commandlist, master_npc->ParticleList,
 										 NULL, master_npc, XMFLOAT4(0, 0, 0, 1), NULL, master_npc->CenterPos, xmf4_pos));
 
@@ -1199,6 +1199,15 @@ void Scene::SET_NPC_ATTACK_BY_SERVER_DATA(const unsigned short & id, const NPC_B
 					if (!data.alive)
 					{
 						bullet->DelObj = true;
+
+						if (data.show_damage)
+						{
+							if (bullet->ParticleList != NULL)
+							{
+								bullet->ParticleList->push_back(new DamageObject(device, commandlist, bullet->ParticleList, NULL, data.damage, XMFLOAT4(data.pos4f.x, data.pos4f.y + 11, data.pos4f.z, 0)));
+							}
+						}
+
 						break;
 					}
 
@@ -1394,8 +1403,19 @@ void Scene::SET_BULLET_BY_SERVER_DATA(STC_BulletObject_Info & bulldata, const un
 				{
 					lbul->DelObj = true;
 
-					//cout << "Bullet ID " << lbul->myID << "소멸 \n";
-				
+					//불렛과 충돌하여 데미지를 띄워야하는 객체들 = 데미지 파티클을 띄운다(플레이어, 몬스터)
+					if (bulldata.show_damage)
+					{
+						if (lbul->ParticleList != NULL)
+						{
+							lbul->ParticleList->push_back(new DamageObject(device, commandlist, lbul->ParticleList, NULL, bulldata.damage, XMFLOAT4(bulldata.pos4f.x, bulldata.pos4f.y + 11, bulldata.pos4f.z, 0)));
+						}
+					}
+		
+					//불렛이 사라지면서 생기는 파티클 = 모든 불렛은 이 파티클을 띄워야한다
+					auto BulletParticles2 = new ParticleObject2(device, commandlist, lbul->ParticleList, NULL, lbul, 0.7f, 100, XMFLOAT4(bulldata.pos4f.x, bulldata.pos4f.y, bulldata.pos4f.z, 0));
+					lbul->ParticleList->push_back(BulletParticles2);
+
 					//cout << "Bullet ID: " << bulldata.my_id << "Bullet MID: " << bulldata.master_id <<
 					//	"Position: " << bulldata.pos4f.x << ", " << bulldata.pos4f.y << ", " << bulldata.pos4f.z << ", " << bulldata.pos4f.w <<
 					//	"IsAlive: " << static_cast<bool>(bulldata.alive) << endl;
