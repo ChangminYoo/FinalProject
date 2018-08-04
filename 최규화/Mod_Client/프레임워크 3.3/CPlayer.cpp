@@ -628,7 +628,7 @@ void CPlayer::CreateBullet(ID3D12Device* Device, ID3D12GraphicsCommandList* cl,X
 
 		m_async_client->SendPacket(reinterpret_cast<Packet*>(&cts_attack));
 
-
+		cout << "SavePoint: " << Goal.x << "," << Goal.y << "," << Goal.z << "\n";
 		//
 
 		break;
@@ -801,14 +801,14 @@ void CPlayer::CreateOtherClientBullet(ID3D12Device * Device, ID3D12GraphicsComma
 		case protocol_HeavyBullet:
 		{
 			//2018.07.25 - ori를 구하는 작업을 결국 해야지 particle의 방향이 맞게 생성된다
-		//이걸 서버에서 작업해서 Orient값을 업데이트해서 보내지만, 결국 클라에서 그 작업을 같이 해줘야함
-		//이 작업은 불렛이 한번 생성될 때만 하면된다.
-		//[1]ori값을 불렛생성시 클라->서버->클라 이 과정을 한번 진행하는것이 성능상 이점인가 아니면 [2]클라에서 이렇게 한번해주는게 이점인가
-		//클라 -> 서버로 갈 때 degree와 ori에 의해 업데이트 된 rotation값이 전달되므로 
-		//서버에서 아래의 작업은 진행하지 않음 
-		//[2]가 더 효율적인것 같음
-		//[1]을 하면, 전달패킷의 크기가 늘어나 패킷사이즈가 증가 -> 서버부하로 발생,
-		//           클라이언트는 cpu보다 성능이 좋은 gpu를 이용, 이 작업을 추가한다고해서 부하가 발생되지 않음
+			//이걸 서버에서 작업해서 Orient값을 업데이트해서 보내지만, 결국 클라에서 그 작업을 같이 해줘야함
+			//이 작업은 불렛이 한번 생성될 때만 하면된다.
+			//[1]ori값을 불렛생성시 클라->서버->클라 이 과정을 한번 진행하는것이 성능상 이점인가 아니면 [2]클라에서 이렇게 한번해주는게 이점인가
+			//클라 -> 서버로 갈 때 degree와 ori에 의해 업데이트 된 rotation값이 전달되므로 
+			//서버에서 아래의 작업은 진행하지 않음 
+			//[2]가 더 효율적인것 같음
+			//[1]을 하면, 전달패킷의 크기가 늘어나 패킷사이즈가 증가 -> 서버부하로 발생,
+			//           클라이언트는 cpu보다 성능이 좋은 gpu를 이용, 이 작업을 추가한다고해서 부하가 발생되지 않음
 
 			auto v = Float3Add(xmf3_pos, XMFloat4to3(xmf4_pos), false);
 
@@ -839,14 +839,14 @@ void CPlayer::CreateOtherClientBullet(ID3D12Device * Device, ID3D12GraphicsComma
 			auto ori = QuaternionRotation(Axis, d);
 
 			//진짜 룩벡터를 구했으니 이제 진짜 Right벡터를 구한다. 진짜 Up은 진짜 룩과 진짜 라이트를 외적만하면됨.
-		//회전을 보정해준다. 회전축에서 룩벡터를 외적하면 진짜 Right벡터가 나온다.
-		//이때 오차가 있는 RightVector를 진짜 RightVector의 사잇각을 계산하고
-		//룩벡터를 회전축으로 돌려준다. 왜 회전축에 오차가 생기는가?
-		//간단하다 기존 룩벡터와 발사방향을 룩벡터의 회전축과
-		//기존 RightVector와 발사방향을 회전축을하면 서로 다르게 나온다.
-		//문제는 만약 그냥 이대로 넘어가게 되면 RightVector와 진짜 RightVector의 각도만큼 오차가 생기므로
-		//이렇게되면 나중에 Up을 구할때도 문제가 생긴다.
-		//사실 X축 Y축 Z축 순서대로 곱을하면 이러한 문제는 거의없지만, 특정축을 기반으로 회전할때 생기는 문제다.
+			//회전을 보정해준다. 회전축에서 룩벡터를 외적하면 진짜 Right벡터가 나온다.
+			//이때 오차가 있는 RightVector를 진짜 RightVector의 사잇각을 계산하고
+			//룩벡터를 회전축으로 돌려준다. 왜 회전축에 오차가 생기는가?
+			//간단하다 기존 룩벡터와 발사방향을 룩벡터의 회전축과
+			//기존 RightVector와 발사방향을 회전축을하면 서로 다르게 나온다.
+			//문제는 만약 그냥 이대로 넘어가게 되면 RightVector와 진짜 RightVector의 각도만큼 오차가 생기므로
+			//이렇게되면 나중에 Up을 구할때도 문제가 생긴다.
+			//사실 X축 Y축 Z축 순서대로 곱을하면 이러한 문제는 거의없지만, 특정축을 기반으로 회전할때 생기는 문제다.
 
 			auto wmatrix = XMMatrixIdentity();
 			auto quater = XMLoadFloat4(&ori);
@@ -870,7 +870,11 @@ void CPlayer::CreateOtherClientBullet(ID3D12Device * Device, ID3D12GraphicsComma
 			tempori = XMQuaternionMultiply(tempori, ori2);
 			XMStoreFloat4(&ori, tempori);//최종 회전 방향
 
-			bul = new BulletCube(Device, cl, PlayerObject->ParticleList, NULL, PlayerObject, ori, lock, PlayerObject->CenterPos, true);
+			if (server_bulldata.type == protocol_LightBullet)
+				bul = new BulletCube(Device, cl, PlayerObject->ParticleList, NULL, PlayerObject, ori, lock, PlayerObject->CenterPos, true);
+
+			if (server_bulldata.type == protocol_HeavyBullet)
+				bul = new HeavyBulletCube(Device, cl, PlayerObject->ParticleList, NULL, PlayerObject, ori, lock, PlayerObject->CenterPos, true);
 
 		}
 		break;

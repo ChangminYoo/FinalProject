@@ -4,7 +4,8 @@
 extern UINT CbvSrvDescriptorSize;
 
 int CGameObject::g_numofdice = 0;
-int CGameObject::npcID = -1;
+int CGameObject::g_npcID = -1;
+int CGameObject::g_npcBulletID = -1;
 short CGameObject::myID = -1;
 list<short> CGameObject::BulletIDList = list<short>();
 
@@ -4708,12 +4709,13 @@ ImpObject::ImpObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comman
 	}
 	TextureName = "imp";
 
-	//임프 오브젝트를 추가할 때마다 아이디 증가
-	if (CreateMesh)
-	{
-		isNPC = true;
-		m_npc_data.id = ++npcID;
-	}
+
+	isNPC = true;
+
+	//몬스터 NPC는 65535의 수를 넘으면 안됨
+	this->myNPCID = ++g_npcID;
+	this->m_npc_data.id = this->myNPCID;
+
 
 	//게임오브젝트마다 룩벡터와 라이트벡터가 다르므로 초기 오프셋 설정을 해준다.
 	//실제 룩벡터 등은 모두 UpdateLookVector에서 처리된다(라이트벡터도) 따라서 Tick함수에서 반드시 호출해야한다.
@@ -4813,10 +4815,8 @@ void ImpObject::Tick(const GameTimer & gt)
 	//pp->integrate(gt.DeltaTime());
 
 	if (ObjData.isAnimation == 1)
-	{
-	
 		UpdateMD5Model(commandlist, &Mesh, this, gt.DeltaTime()*60.0f / 24.0f, n_Animation, animations, jarr);
-	}
+	
 
 	//if (fsm != NULL)
 	//	fsm->Update(gt.DeltaTime());
@@ -4940,11 +4940,13 @@ void ImpObject::EndAnimation(int nAni)
 	{
 		SetAnimation((int)Ani_State::Idle);//대기상태로둔다.
 
+		m_end_npc_attack = true;
 	}
 
 	if (nAni == Ani_State::Dead)//죽는모션이었으면
 	{
 		DelObj = true;
+		m_end_npc_die = true;
 	}
 }
 

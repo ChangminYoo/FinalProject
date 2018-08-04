@@ -46,9 +46,11 @@ switch (packet[1])
 
 	case PACKET_PROTOCOL_TYPE::NPC_MONSTER_IMP_ATTACK_STONEBULLET:
 	{
-		auto npc_attack_stonebullet = reinterpret_cast<STC_NpcMonsterAttackStoneBullet*>(packet);
+		auto imp_att = reinterpret_cast<STC_NpcMonsterAttackStoneBullet*>(packet);
 
-		scene.SET_NPC_ATTACK_BY_SERVER_DATA(npc_attack_stonebullet->npc_bulldata.my_id, npc_attack_stonebullet->npc_bulldata, packet[1], npc_attack_stonebullet->npc_bulldata.create_first);
+		XMFLOAT4 t_pos4f = { imp_att->stone_rnpos.x, imp_att->stone_rnpos.y, imp_att->stone_rnpos.z, imp_att->stone_rnpos.w };
+
+		scene.SET_NPC_ATTACK_BY_SERVER_DATA(imp_att->npc_bulldata.my_id, imp_att->npc_bulldata, packet[1], imp_att->npc_bulldata.create_first, t_pos4f);
 
 	}
 	break;
@@ -91,6 +93,7 @@ switch (packet[1])
 		scene.SET_MOVEOBJECT_BY_SERVER_DATA(mymvobjdata->mvobj_data.id, mymvobjdata->mvobj_data);
 	}
 	break;
+
 
 	case PACKET_PROTOCOL_TYPE::MOVE_OBJECT_NOCREATE:
 	{
@@ -147,10 +150,10 @@ switch (packet[1])
 	case PACKET_PROTOCOL_TYPE::PLAYER_ANIMATION:
 	{
 		auto mycharani = reinterpret_cast<STC_CharAnimation*>(packet);
-		
+
 		Player_Data new_anidata;
 		new_anidata.ani = mycharani->ani_state;
-	
+
 		RgCkInfo.AniCheck.AniState = static_cast<Ani_State>(mycharani->ani_state);
 
 		scene.SET_PLAYER_BY_SEVER_DATA(mycharani->id, new_anidata, packet[1]);
@@ -168,14 +171,15 @@ switch (packet[1])
 	case PACKET_PROTOCOL_TYPE::NPC_MONSTER_CURR_STATE:
 	{
 		auto npc_curr_state = reinterpret_cast<STC_NpcMonsterCurrState*>(packet);
-		
+
 		scene.SET_NPC_BY_SERVER_DATA(npc_curr_state->npc_data.id, npc_curr_state->npc_data, npc_curr_state->npc_data.monster_type, packet[1]);
 	}
 	break;
 }
+}
 	
 
-}
+
 
 void AsyncClient::SendPacketRegular(CGameObject& gobj, const GameTimer& gt)
 {

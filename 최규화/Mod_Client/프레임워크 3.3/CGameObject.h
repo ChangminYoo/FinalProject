@@ -170,23 +170,37 @@ public:
 public:
 	//서버 추가
 	static int g_numofdice;
-	static int npcID;
+
+	static int g_npcID;
+	static int g_npcBulletID;
 	bool   isNPC{ false };
 
 	//bullet ID
 	static short myID;
 	static list<short> BulletIDList;
 
+	//서버->클라 관리용 캐릭터 데이터(GameObject에 넣어둬야함)
 	Player_Data			 m_player_data;
+
+	//서버->클라 관리용 NPC 데이터
 	Npc_Data			 m_npc_data;
+
+	//서버->클라 관리용 StaticObject 데이터
 	StaticObject_Info	 m_sobj_data;
+
+	//서버->클라 관리용 MoveStaticObject 데이터
 	MoveObjectData       m_mvobj_data;
+
+	//서버->클라 관리용 RigidbodyObject 데이터
 	RigidbodyData		 m_rigidbody_data;
+
+	//서버->클라 관리용 BulletObject 데이터
 	STC_BulletObject_Info	 m_bullet_data;
 
 	CPlayer* m_player{ nullptr };
 
 	bool m_end_attack{ false }, m_end_die{ false };
+	bool m_end_npc_attack{ false }, m_end_npc_die{ false };
 
 	//서버추가
 	float	m_degree;
@@ -418,6 +432,11 @@ public:
 	virtual void Tick(const GameTimer& gt);
 	virtual void Render(ID3D12GraphicsCommandList* commandlist, const GameTimer& gt);
 	virtual void Collision(list<CGameObject*>* collist, float DeltaTime);
+
+public:
+	//서버 추가
+
+	int myNPC_StoneBulletID;		//stonebullet 아이디
 
 };
 
@@ -1125,6 +1144,9 @@ public:
 	virtual void Collision(list<CGameObject*>* collist, float DeltaTime);
 	virtual void EndAnimation(int nAni);
 
+public:
+	//서버 추가
+	int					 myNPCID;
 };
 
 

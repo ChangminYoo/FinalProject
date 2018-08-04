@@ -134,6 +134,18 @@ void MainFrameWork::GravitySystem(const GameTimer & gt)
 void MainFrameWork::AfterGravitySystem(const GameTimer & gt)
 {
 	//아무 일도 안함
+	//투사체는 y가 0보다 작으면 제거된다.
+	for (auto i = scene->BulletObject.begin(); i != scene->BulletObject.end(); i++)
+	{
+		if ((*i)->CenterPos.y <= 0)
+		{
+			auto BulletParticles2 = new ParticleObject2(Device.Get(), mCommandList.Get(), &scene->BbObject, &scene->Shadows, NULL, 0.7f, 100, XMFLOAT4((*i)->CenterPos.x, (*i)->CenterPos.y, (*i)->CenterPos.z, 0));
+			scene->BbObject.push_back(BulletParticles2);
+
+			(*i)->DelObj = true;
+
+		}
+	}
 
 	/*
 	static bool StaticProcess = false;
@@ -158,18 +170,7 @@ void MainFrameWork::AfterGravitySystem(const GameTimer & gt)
 		}
 	}
 
-	//투사체는 y가 0보다 작으면 제거된다.
-	for (auto i = scene->BulletObject.begin(); i != scene->BulletObject.end(); i++)
-	{
-		if ((*i)->CenterPos.y <= 0)
-		{
-			auto BulletParticles2 = new ParticleObject2(Device.Get(), mCommandList.Get(), &scene->BbObject, &scene->Shadows, NULL, 0.7f, 100, XMFLOAT4((*i)->CenterPos.x, (*i)->CenterPos.y, (*i)->CenterPos.z, 0));
-			scene->BbObject.push_back(BulletParticles2);
 
-			(*i)->DelObj = true;
-
-		}
-	}
 
 	if (StaticProcess == false)//고정된 물체는 한번만 제대로된 위치로 올려둔다.
 	{

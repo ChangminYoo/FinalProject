@@ -807,6 +807,29 @@ void Scene::Tick(const GameTimer & gt)
 			}
 
 			(*b)->Tick(gt);
+
+			if ((*b)->m_end_npc_attack)
+			{
+				STC_MyNPCAnim cts_npcanim;
+				cts_npcanim.npc_anim = Ani_State::Idle;
+				cts_npcanim.id = (*b)->m_npc_data.id;
+
+				Player->m_async_client->SendPacket(reinterpret_cast<Packet*>(&cts_npcanim));
+				(*b)->m_end_npc_attack = false;
+
+			}
+
+			/*
+			if ((*b)->m_end_npc_die)
+			{
+			STC_MyNPCAnim cts_npcanim;
+			cts_npcanim.npc_anim = Ani_State::Dead;
+			cts_npcanim.id = (*b)->m_npc_data.id;
+
+			Player->m_async_client->SendPacket(reinterpret_cast<Packet*>(&cts_npcanim));
+			(*b)->m_end_npc_die = false;
+			}
+			*/
 		}
 
 		for (auto b = StaticObject.begin(); b != StaticObject.end(); b++)
@@ -1078,7 +1101,7 @@ void Scene::SET_NPC_BY_SERVER_DATA(const unsigned short & id, const Npc_Data & d
 	{
 		if (!GameObject->isNPC) continue;
 
-		if (GameObject->m_npc_data.id == id)
+		if (GameObject->m_npc_data.id == id)	//dynamic_cast<ImpObject*>(GameObject)->myNPCID == id
 		{
 			switch (packet_type)
 			{
@@ -1096,11 +1119,17 @@ void Scene::SET_NPC_BY_SERVER_DATA(const unsigned short & id, const Npc_Data & d
 				GameObject->gamedata.Speed = move(data.status.speed);
 
 				GameObject->AirBone = data.airbone;
+
+				GameObject->n_Animation = static_cast<int>(data.ani);
 			}
 			break;
 
 			case PACKET_PROTOCOL_TYPE::NPC_MONSTER_CURR_STATE:
 			{
+				if (!data.alive)
+					GameObject->DelObj = true;
+
+
 				GameObject->m_npc_data = move(data);
 
 				GameObject->n_Animation = data.ani;
@@ -1115,6 +1144,8 @@ void Scene::SET_NPC_BY_SERVER_DATA(const unsigned short & id, const Npc_Data & d
 
 				GameObject->AirBone = data.airbone;
 
+				GameObject->n_Animation = static_cast<int>(data.ani);
+
 			}
 			break;
 
@@ -1126,23 +1157,67 @@ void Scene::SET_NPC_BY_SERVER_DATA(const unsigned short & id, const Npc_Data & d
 	}
 }
 
-void Scene::SET_NPC_ATTACK_BY_SERVER_DATA(const unsigned short & id, const NPC_BulletObject_Info & data, unsigned char type, bool first_bullet)
+void Scene::SET_NPC_ATTACK_BY_SERVER_DATA(const unsigned short& id, const NPC_BulletObject_Info& data, unsigned char type, bool first_bullet, const XMFLOAT4& xmf4_pos)
 {
 	switch (type)
 	{
-	case BULLET_TYPE::protocol_NpcStoneBullet:
-	{
-		//if (first_bullet)
-		//{
-		//	BulletObject.emplace_back()
-		//}
-
-		for (const auto& bullet : BulletObject)
+		case PACKET_PROTOCOL_TYPE::NPC_MONSTER_IMP_ATTACK_STONEBULLET:
 		{
+			//넘어온 NPC 임프의 스톤불렛이 첫 불렛일 때 = 생성작업
+			if (first_bullet)
+			{
+				CGameObject * master_npc{ nullptr };
+				for (const auto& find_npc : DynamicObject)
+				{
+					if (!find_npc->isNPC) continue;
+					if (find_npc->m_npc_data.id == data.master_id)
+					{
+						master_npc = find_npc;
+						break;
+					}
+				}
 
+				/*
+				XMFLOAT4 t_pos4f = { data.pos4f.x ,data.pos4f.y, data.pos4f.z, data.pos4f.w };
+				BulletObject.emplace_back(new StoneBullet(master_npc->device, master_npc->commandlist, master_npc->ParticleList,
+				NULL, master_npc, XMFLOAT4(0, 0, 0, 1), NULL, t_pos4f, xmf4_pos));
+				*/
+				BulletObject.emplace_back(new StoneBullet(master_npc->device, master_npc->commandlist, master_npc->ParticleList,
+					NULL, master_npc, XMFLOAT4(0, 0, 0, 1), NULL, master_npc->CenterPos, xmf4_pos));
+
+				cout << "StoneBullet ID: " << data.my_id << "Create First \n";
+
+			}
+
+			for (auto& bullet : BulletObject)
+			{
+				//서버에서 날라온 불릿아이디와 클라관리 불릿아이디가 같고 그들의 주인 ID가 같을 때
+				if (bullet->m_npc_data.id == data.master_id && dynamic_cast<StoneBullet*>(bullet)->myNPC_StoneBulletID == data.my_id)
+				{
+					if (!data.alive)
+					{
+						bullet->DelObj = true;
+						break;
+					}
+
+					bullet->m_bullet_data.alive = data.alive;
+					bullet->m_bullet_data.pos4f = data.pos4f;
+					bullet->m_bullet_data.rot4f = data.rot4f;
+					bullet->m_bullet_data.master_id = data.master_id;
+					bullet->m_bullet_data.my_id = data.my_id;
+
+					bullet->CenterPos = { data.pos4f.x, data.pos4f.y, data.pos4f.z, data.pos4f.w };
+					bullet->pp->SetPosition(&bullet->CenterPos);
+
+					bullet->Orient = { data.rot4f.x, data.rot4f.y, data.rot4f.z, data.rot4f.w };
+					bullet->UpdateLookVector();
+
+					break;
+				}
+
+			}
 		}
-	}
-	break;
+		break;
 
 	default:
 		break;
@@ -1317,6 +1392,8 @@ void Scene::SET_BULLET_BY_SERVER_DATA(STC_BulletObject_Info & bulldata, const un
 				{
 					lbul->DelObj = true;
 
+					//cout << "Bullet ID " << lbul->myID << "소멸 \n";
+
 					//cout << "Bullet ID: " << bulldata.my_id << "Bullet MID: " << bulldata.master_id <<
 					//	"Position: " << bulldata.pos4f.x << ", " << bulldata.pos4f.y << ", " << bulldata.pos4f.z << ", " << bulldata.pos4f.w <<
 					//	"IsAlive: " << static_cast<bool>(bulldata.alive) << endl;
@@ -1332,7 +1409,7 @@ void Scene::SET_BULLET_BY_SERVER_DATA(STC_BulletObject_Info & bulldata, const un
 				lbul->Orient = { bulldata.rot4f.x, bulldata.rot4f.y, bulldata.rot4f.z, bulldata.rot4f.w };
 				lbul->UpdateLookVector();
 
-
+				//cout << "Bullet ID: " << lbul->myID << "PosX: " << lbul->CenterPos.x << ", " << lbul->CenterPos.y << ", " << lbul->CenterPos.z << ", " << lbul->CenterPos.w << "\n";
 				//cout << "Bullet ID: " << lbul->myID << "Orient: " << lbul->Orient.x << ", " << lbul->Orient.y << ", " << lbul->Orient.z << ", " << lbul->Orient.w << "\n";
 				//cout << "Bullet ID: " << lbul->myID << "Lookxyz: " << lbul->Lookvector.x << ", " << lbul->Lookvector.y << ", " << lbul->Lookvector.z << "\n";
 				//cout << "Bullet ID: " << lbul->myID << "Rightxyz: " << lbul->Rightvector.x << ", " << lbul->Rightvector.y << ", " << lbul->Rightvector.z << "\n";
@@ -1410,25 +1487,25 @@ void Scene::SET_PLAYER_SKILL(const unsigned int & id, const STC_SkillData & play
 			switch (playerdata.my_id)
 			{
 				// 실드를 따로 생성해서 Centerpos를 패킷으로 받은 아이디를 가진 플레이어값으로 지정한다 
-			case CHAR_SKILL::SHIELD:
-			{
-				if (playerdata.alive)
+				case CHAR_SKILL::SHIELD:
 				{
-					NoCollObject.push_back(new ShieldArmor(device, commandlist, &BbObject, &Shadows, GameObject, GameObject->CenterPos));
-				}
-				else
-				{
-					for (auto object : NoCollObject)
+					if (playerdata.alive)
 					{
-						if (id == object->m_player_data.id)
+						NoCollObject.push_back(new ShieldArmor(device, commandlist, &BbObject, &Shadows, GameObject, GameObject->CenterPos));
+					}
+					else
+					{
+						for (auto object : NoCollObject)
 						{
-							object->DelObj = true;
-							break;
+							if (id == object->m_player_data.id)
+							{
+								object->DelObj = true;
+								break;
+							}
 						}
 					}
 				}
-			}
-			break;
+				break;
 
 			default:
 				break;

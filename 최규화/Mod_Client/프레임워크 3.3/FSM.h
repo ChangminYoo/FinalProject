@@ -24,7 +24,7 @@ struct AIdata
 	float timeout = 0.0f;
 	curState_State curstateEnum = s_Idle;
 	XMFLOAT3 collisionmove=XMFLOAT3(0,0,0);
-	int stack = 10;//요 스택이 의미하는것은 5스택 쌓으면 주변에 마법구슬을 만들어서 회전시킴.
+	int stack = 0;//요 스택이 의미하는것은 5스택 쌓으면 주변에 마법구슬을 만들어서 회전시킴.
 };
 
 class state
