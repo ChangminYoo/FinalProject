@@ -76,7 +76,7 @@ void CMesh::Render(ID3D12GraphicsCommandList* commandlist)
 
 void CMesh::SetNormal(bool PlayerMesh,bool particle)//이녀석은 반드시 정점과 인덱스를 다 값을 채운뒤, 호출하며 버퍼생성전에 호출!
 {
-	for (UINT i = 0; i<(nindex / 3); i++)
+	for (int i = 0; i<(nindex / 3); i++)
 	{
 		int i0 = Index[i * 3 + 0];
 		int i1 = Index[i * 3 + 1];
@@ -121,7 +121,7 @@ void CMesh::SetNormal(bool PlayerMesh,bool particle)//이녀석은 반드시 정점과 인�
 
 	//이후 각정점의 노멀을 단위화 하면됨.
 
-	for (UINT i = 0; i<nVertex; i++)
+	for (int i = 0; i<nVertex; i++)
 	{
 		
 		XMVECTOR N = XMLoadFloat4(&SubResource[i].N);
@@ -156,7 +156,7 @@ void CMesh::SetNormal(bool PlayerMesh,bool particle)//이녀석은 반드시 정점과 인�
 
 void CMesh::SetTangent()
 {
-	for (UINT i = 0; i<(nVertex / 4); i++)
+	for (int i = 0; i<(nVertex / 4); i++)
 	{
 		int i0 = 4*i+0;
 		int i1 = 4*i+1;
@@ -225,7 +225,7 @@ void CMesh::SetTangent()
 
 	//이후 각정점의 탄젠트를 단위화 하면됨.
 
-	for (UINT i = 0; i<nVertex; i++)
+	for (int i = 0; i<nVertex; i++)
 	{
 
 		XMVECTOR T = XMLoadFloat3(&SubResource[i].Tangent);

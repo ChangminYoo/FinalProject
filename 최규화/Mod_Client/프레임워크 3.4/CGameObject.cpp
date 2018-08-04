@@ -93,13 +93,13 @@ void CGameObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTime
 
 }
 
-void CGameObject::ToDamage(int Damage)
+void CGameObject::ToDamage(float Damage)
 {
 	if (Damage >= 100)
 		Damage = 1;
 	if (gamedata.GodMode == false)
 	{
-		gamedata.HP -= abs(Damage);
+		gamedata.HP -= fabsf(Damage);
 		if (gamedata.HP <= 0)
 			ToDead();
 	}
@@ -425,7 +425,7 @@ CCubeManObject::CCubeManObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 	pp = new PhysicsPoint();
 	pp->SetPosition(&CenterPos);//이 값은 항상 갱신되야한다.
 	pp->SetHalfBox(3, 10, 3);//충돌 박스의 x,y,z 크기
-	pp->SetDamping(0.45f);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
+	pp->SetDamping(0.45);//마찰력 대신 사용되는 댐핑계수. 매 틱마다 0.5배씩 속도감속
 	pp->SetBounce(false);//튕기지 않는다.
 	
 	isShieldOn = false;
@@ -493,15 +493,15 @@ void CCubeManObject::Tick(const GameTimer & gt)
 	//이때 pp의 position과 CenterPos를 일치시켜야하므로 CenterPos의 포인터를 인자로 넘겨야 한다.
 	//pp->integrate(gt.DeltaTime());
 
-	if (ObjData.isAnimation == 1)
+	if (ObjData.isAnimation == true)
 	{
 
 		//애니메이션 업데이트 애니메이션은 24프레임으로 구성됨. 문제는 FPS가 24프레임이 아님. 그보다 큰 프레임. 따라서 24프레임으로 해당프레임을 나눠 보정.
 		if(n_Animation!=Attack)
-			UpdateMD5Model(commandlist, &Mesh, this, gt.DeltaTime()*60.0f / 24.0f, n_Animation, animations, jarr);
+			UpdateMD5Model(commandlist, &Mesh, this, gt.DeltaTime()*60.0 / 24.0, n_Animation, animations, jarr);
 		else
 		{
-			UpdateMD5Model(commandlist, &Mesh, this, 2*gt.DeltaTime()*60.0f / 24.0f, n_Animation, animations, jarr);
+			UpdateMD5Model(commandlist, &Mesh, this, 2*gt.DeltaTime()*60.0 / 24.0, n_Animation, animations, jarr);
 		}
 
 	}
@@ -1921,7 +1921,7 @@ Tetrike::~Tetrike()
 void Tetrike::SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist)
 {
 
-	CreateCube(&Mesh, 120, 0.01f, 120);
+	CreateCube(&Mesh, 120, 0.01, 120);
 
 	Mesh.SetNormal(false);
 	Mesh.CreateVertexBuffer(m_Device, commandlist);
@@ -1954,8 +1954,8 @@ void Tetrike::Tick(const GameTimer & gt)
 		for (int i = 0; i < c; i++)
 		{
 			auto pos = CenterPos;
-			int  n = abs((abs(rand())*(int)(fabsf(gt.TotalTime()) * 31430)) % 90) - 45;
-			int n2 = abs((abs(rand())*(int)(fabsf(gt.TotalTime()) * 12340)) % 90) - 45;
+			float  n = abs((abs(rand())*(int)(fabsf(gt.TotalTime()) * 31430)) % 90) - 45;
+			float n2 = abs((abs(rand())*(int)(fabsf(gt.TotalTime()) * 12340)) % 90) - 45;
 
 			/*float b = sqrt(n*n + n2 * n2);
 
@@ -1969,8 +1969,8 @@ void Tetrike::Tick(const GameTimer & gt)
 			}
 			*/
 
-			pos.x += (float)n;
-			pos.z += (float)n2;
+			pos.x += n;
+			pos.z += n2;
 			pos.y += abs((abs(rand())*(int)(fabsf(gt.TotalTime()) * 12340)) % 5) - 5;
 
 			int g = (rand()*(int)(gt.TotalTime() * 32524)) % 4;
@@ -2353,7 +2353,7 @@ CubeObject::CubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 		SetMaterial(m_Device, commandlist);
 
 		CreateMesh = true;
-		srand((unsigned)time(NULL));
+		srand(time(NULL));
 	}
 
 	//게임오브젝트마다 룩벡터와 라이트벡터가 다르므로 초기 오프셋 설정을 해준다.
@@ -2373,7 +2373,7 @@ CubeObject::CubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 	ObjData.SpecularParamater = 0.2f;//스페큘러를 낮게준다.
 
 
-	ObjData.CustomData1.w = (float)(rand() % 400 + 100);
+	ObjData.CustomData1.w = rand() % 400 + 100;
 	obs = Static;
 
 	//게임관련 데이터들
@@ -2503,12 +2503,8 @@ MoveCubeObject::MoveCubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 
 	Len = len;
 
-<<<<<<< HEAD
 	n = rand() % 30;
 	
-=======
-	n = (float)(rand() % 30);
->>>>>>> 3987bc74fb35aec8ad335da173b238b1a8da5b59
 
 	//게임오브젝트마다 룩벡터와 라이트벡터가 다르므로 초기 오프셋 설정을 해준다.
 	//실제 룩벡터 등은 모두 UpdateLookVector에서 처리된다(라이트벡터도) 따라서 Tick함수에서 반드시 호출해야한다.
@@ -2725,7 +2721,7 @@ BarObject::BarObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comman
 	ObjData.isAnimation = 0;
 	ObjData.Scale = size;
 	ObjData.SpecularParamater = 0.0f;//스페큘러를 낮게준다.
-	ObjData.CustomData1.x = 1.0f;
+	ObjData.CustomData1.x = 1;
 
 	Master = master;
 	ObjData.CustomData1.y = Master->gamedata.HP;
@@ -2767,7 +2763,7 @@ void BarObject::SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* comma
 
 
 	//여기서 좌표를 일괄적으로 설정 할 수 있다
-	for (UINT i = 0; i < numOfitem; ++i)
+	for (int i = 0; i < numOfitem; ++i)
 	{
 		Mesh.SubResource[i].V = XMFLOAT3(0, 0, 0);
 
@@ -2866,7 +2862,7 @@ void BarFrameObject::SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* 
 
 
 	//여기서 좌표를 일괄적으로 설정 할 수 있다
-	for (UINT i = 0; i < numOfitem; ++i)
+	for (int i = 0; i < numOfitem; ++i)
 	{
 		Mesh.SubResource[i].V = XMFLOAT3(0, 0, 0);
 
@@ -2957,7 +2953,7 @@ void Rank1Object::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * c
 
 
 	//여기서 좌표를 일괄적으로 설정 할 수 있다
-	for (UINT i = 0; i < numOfitem; ++i)
+	for (int i = 0; i < numOfitem; ++i)
 	{
 		Mesh.SubResource[i].V = XMFLOAT3(0, 0, 0);
 
@@ -3054,7 +3050,7 @@ void DiceObject::SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* comm
 
 
 	//여기서 좌표를 일괄적으로 설정 할 수 있다
-	for (UINT i = 0; i < numOfitem; ++i)
+	for (int i = 0; i < numOfitem; ++i)
 	{
 		Mesh.SubResource[i].V = XMFLOAT3(0, 0, 0);
 		Mesh.Index[i] = i;
@@ -3222,7 +3218,7 @@ void DiceObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer
 }
 
 
-DamageObject::DamageObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, int Damaged, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist,shadow, cp)
+DamageObject::DamageObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, float Damaged, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist,shadow, cp)
 {
 	ObjData.isAnimation = 0;
 	ObjData.Scale = 15.0f;
@@ -3274,7 +3270,7 @@ void DamageObject::SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* co
 
 
 	//여기서 좌표를 일괄적으로 설정 할 수 있다
-	for (UINT i = 0; i < numOfitem; ++i)
+	for (int i = 0; i < numOfitem; ++i)
 	{
 
 		Mesh.SubResource[i].V = XMFLOAT3(0, 0, 0);
@@ -3696,7 +3692,7 @@ BigWallObject::BigWallObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList 
 
 	}
 	Blending = true;
-	ObjData.BlendValue = 0.45f;
+	ObjData.BlendValue = 0.45;
 	//게임오브젝트마다 룩벡터와 라이트벡터가 다르므로 초기 오프셋 설정을 해준다.
 	//실제 룩벡터 등은 모두 UpdateLookVector에서 처리된다(라이트벡터도) 따라서 Tick함수에서 반드시 호출해야한다.
 	OffLookvector = XMFLOAT3(0, 0, 1);
@@ -3835,7 +3831,7 @@ ColumnObject::ColumnObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * 
 	ObjData.SpecularParamater = 0.0f;//스페큘러를 낮게준다.
 
 	//노멀매핑
-	ObjData.CustomData1.w = (float)(rand() % 400 + 100);
+	ObjData.CustomData1.w = rand() % 400 + 100;
 
 	//게임관련 데이터들
 	gamedata.MAXHP = 100;
@@ -4194,7 +4190,7 @@ RangeObject::RangeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * co
 
 void RangeObject::SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist)
 {
-	CreateCube(&Mesh, 60, 0.01f, 60);
+	CreateCube(&Mesh, 60, 0.01, 60);
 
 	Mesh.SetNormal(false);
 	Mesh.CreateVertexBuffer(m_Device, commandlist);
@@ -4312,7 +4308,7 @@ void ParticleObject::SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* 
 
 
 	//여기서 좌표를 일괄적으로 설정 할 수 있다
-	for (UINT i = 0; i < numOfParticle; ++i)
+	for (int i = 0; i < numOfParticle; ++i)
 	{
 
 		Mesh.SubResource[i].V.x = 0;
@@ -4431,7 +4427,7 @@ void ParticleObject2::SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList*
 
 
 	//여기서 좌표를 일괄적으로 설정 할 수 있다
-	for (UINT i = 0; i < numOfParticle; ++i)
+	for (int i = 0; i < numOfParticle; ++i)
 	{
 
 		Mesh.SubResource[i].V.x = 0;
@@ -4551,7 +4547,7 @@ void ParticleObject3::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList
 
 
 	//여기서 좌표를 일괄적으로 설정 할 수 있다
-	for (UINT i = 0; i < numOfParticle; ++i)
+	for (int i = 0; i < numOfParticle; ++i)
 	{
 
 		Mesh.SubResource[i].V.x = 0;
@@ -4822,16 +4818,8 @@ void ImpObject::Tick(const GameTimer & gt)
 	//이때 pp의 position과 CenterPos를 일치시켜야하므로 CenterPos의 포인터를 인자로 넘겨야 한다.
 	//pp->integrate(gt.DeltaTime());
 
-<<<<<<< HEAD
 	if (ObjData.isAnimation == true)
 		UpdateMD5Model(commandlist, &Mesh, this, gt.DeltaTime()*60.0 / 24.0, n_Animation, animations, jarr);
-=======
-	if (ObjData.isAnimation == 1)
-	{
-	
-		UpdateMD5Model(commandlist, &Mesh, this, gt.DeltaTime()*60.0f / 24.0f, n_Animation, animations, jarr);
-	}
->>>>>>> 3987bc74fb35aec8ad335da173b238b1a8da5b59
 
 	//if (fsm != NULL)
 	//	fsm->Update(gt.DeltaTime());
@@ -4915,7 +4903,7 @@ void ImpObject::Collision(list<CGameObject*>* collist, float DeltaTime)
 
 					if (Float3Cross(v, p).y > 0)//-80도정도로 p를 회전시켜야함.
 					{
-						auto r = QuaternionRotation(XMFLOAT3(0, 1, 0), -MMPE_PI / 2.5f);
+						auto r = QuaternionRotation(XMFLOAT3(0, 1, 0), -MMPE_PI / 2.5);
 						auto m = XMMatrixRotationQuaternion(XMLoadFloat4(&r));
 
 						XMVECTOR pv = XMLoadFloat3(&p);
@@ -4925,7 +4913,7 @@ void ImpObject::Collision(list<CGameObject*>* collist, float DeltaTime)
 					}
 					else//80도정도 회전
 					{
-						auto r = QuaternionRotation(XMFLOAT3(0, -1, 0), -MMPE_PI / 2.5f);
+						auto r = QuaternionRotation(XMFLOAT3(0, -1, 0), -MMPE_PI / 2.5);
 						auto m = XMMatrixRotationQuaternion(XMLoadFloat4(&r));
 
 						XMVECTOR pv = XMLoadFloat3(&p);
@@ -5005,7 +4993,7 @@ RingObject::RingObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 	
 	TexOff = selectColor;
 	Blending = true;
-	ObjData.BlendValue = 0.45f;
+	ObjData.BlendValue = 0.45;
 
 	//게임오브젝트마다 룩벡터와 라이트벡터가 다르므로 초기 오프셋 설정을 해준다.
 	//실제 룩벡터 등은 모두 UpdateLookVector에서 처리된다(라이트벡터도) 따라서 Tick함수에서 반드시 호출해야한다.
@@ -5275,22 +5263,22 @@ void ShadowObject::Tick(const GameTimer & gt)
 	CenterPos = Master->CenterPos;
 	
 
-	if (ObjData.isAnimation == 1)
+	if (ObjData.isAnimation == true)
 	{
 		if (CreatecMesh && Kinds == 0)
 		{
 			//애니메이션 업데이트 애니메이션은 24프레임으로 구성됨. 문제는 FPS가 24프레임이 아님. 그보다 큰 프레임. 따라서 24프레임으로 해당프레임을 나눠 보정.
 			if (Master->n_Animation != Attack)
 			{
-				UpdateMD5Model(commandlist, &cMesh, this, gt.DeltaTime()*60.0f / 24.0f, Master->n_Animation, cAnimations, jarr);
+				UpdateMD5Model(commandlist, &cMesh, this, gt.DeltaTime()*60.0 / 24.0, Master->n_Animation, cAnimations, jarr);
 			}
 			else
 			{
-				UpdateMD5Model(commandlist, &cMesh, this, 2 * gt.DeltaTime()*60.0f / 24.0f, Master->n_Animation, cAnimations, jarr);
+				UpdateMD5Model(commandlist, &cMesh, this, 2 * gt.DeltaTime()*60.0 / 24.0, Master->n_Animation, cAnimations, jarr);
 			}
 		}
 		else if(CreateiMesh && Kinds == 2)
-			UpdateMD5Model(commandlist, &iMesh, this, 0.8f*gt.DeltaTime()*60.0f / 24.0f, Master->n_Animation, iAnimations, jarr);
+			UpdateMD5Model(commandlist, &iMesh, this, 0.8*gt.DeltaTime()*60.0 / 24.0, Master->n_Animation, iAnimations, jarr);
 
 	}
 
@@ -5687,6 +5675,8 @@ void StoneBullet::Collision(list<CGameObject*>* collist, float DeltaTime)
 					gamedata.Damage = 100; //100 이지만 1만뜸 텍스쳐 stride때문에 100이라고 설정하고 ToDamage에서 1로 설정
 
 
+
+				XMFLOAT3 cn;
 				//고정된 물체가 아니면
 				if ((*i)->staticobject == false)
 				{
@@ -6072,6 +6062,8 @@ void HammerBullet::Collision(list<CGameObject*>* collist, float DeltaTime)
 					gamedata.Damage = 100; //100 이지만 1만뜸 텍스쳐 stride때문에 100이라고 설정하고 ToDamage에서 1로 설정
 
 
+
+				XMFLOAT3 cn;
 				//고정된 물체가 아니면
 				if ((*i)->staticobject == false)
 				{

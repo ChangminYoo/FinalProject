@@ -3,9 +3,9 @@
 //-------------------------------------물체 만들기------------------------------------------------
 void CreateCube(CMesh * Mesh, float sizex, float sizey, float sizez)
 {
-	float halfx = 0.5f * sizex;
-	float halfy = 0.5f * sizey;
-	float halfz = 0.5f * sizez;
+	float halfx = 0.5 * sizex;
+	float halfy = 0.5 * sizey;
+	float halfz = 0.5 * sizez;
 
 	Mesh->SubResource = new CVertex[24];
 	Mesh->nVertex = 24;
@@ -107,7 +107,7 @@ void CreateCube(CMesh * Mesh, float sizex, float sizey, float sizez)
 
 void CreatePentagon(CMesh* Mesh, float size, float ypos)
 {
-	float half = 0.5f * size;
+	float half = 0.5 * size;
 	float y = ypos;
 
 	float s1 = half * sinf(0.4f * MMPE_PI);
@@ -186,9 +186,9 @@ void CreatePentagon(CMesh* Mesh, float size, float ypos)
 
 void CreateTetrisL(CMesh * Mesh, float sizex, float sizey, float sizez)
 {
-	float halfx = 0.5f * sizex;
-	float halfy = 0.5f * sizey;
-	float halfz = 0.5f * sizez;
+	float halfx = 0.5 * sizex;
+	float halfy = 0.5 * sizey;
+	float halfz = 0.5 * sizez;
 
 	Mesh->SubResource = new CVertex[48];
 	Mesh->nVertex = 48;
@@ -372,9 +372,9 @@ void CreateTetrisL(CMesh * Mesh, float sizex, float sizey, float sizez)
 
 void CreateTetrisㅗ(CMesh * Mesh, float sizex, float sizey, float sizez)
 {
-	float halfx = 0.5f * sizex;
-	float halfy = 0.5f * sizey;
-	float halfz = 0.5f * sizez;
+	float halfx = 0.5 * sizex;
+	float halfy = 0.5 * sizey;
+	float halfz = 0.5 * sizez;
 
 	Mesh->SubResource = new CVertex[48];
 	Mesh->nVertex = 48;
