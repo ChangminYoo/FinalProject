@@ -2,8 +2,8 @@
 #include<DirectXMath.h>
 #include<vector>
 using namespace DirectX;
-#define MMPE_EPSILON 0.001
-#define MMPE_PI 3.14159287
+#define MMPE_EPSILON 0.001f
+#define MMPE_PI 3.14159287f
 namespace MiniPhysicsEngineG9
 {
 	struct CollisionPoint

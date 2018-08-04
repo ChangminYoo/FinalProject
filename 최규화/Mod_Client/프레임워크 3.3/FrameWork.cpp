@@ -160,7 +160,7 @@ bool FrameWork::Initialize()
 	//처리될 수 있게됨.. 다시한번 빡치네
 	ThrowIfFailed(mCommandList->Reset(mDirectCmdListAlloc.Get(), nullptr));
 	if (scene == NULL)
-		scene = new Scene(hwnd,Device.Get(), mCommandList.Get(),mClientWidth,mClientHeight);
+		scene = new Scene(hwnd,Device.Get(), mCommandList.Get(), (float)mClientWidth, (float)mClientHeight);
 	
 	// Execute the initialization commands.
 	ThrowIfFailed(mCommandList->Close());
@@ -302,8 +302,8 @@ LRESULT FrameWork::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	//윈도우 사이즈가 바뀔때 마다 UI의 위치를 달리해야한다. 물론 틱함수를 만들어도 되지만, 굳이 매틱마다 불릴필요는 없으니까 이렇게 처리하자.
 		if (scene != NULL && scene->GetGameState()==GS_PLAY)
 		{
-			scene->mHeight = mClientHeight;
-			scene->mWidth = mClientWidth;
+			scene->mHeight = (float)mClientHeight;
+			scene->mWidth =  (float)mClientWidth;
 
 			scene->resize = true;
 
@@ -312,26 +312,26 @@ LRESULT FrameWork::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				if (scene->SkillCoolBar[i] != NULL)
 				{
 		
-					scene->SkillCoolBar[i]->ObjData.Scale = mClientWidth / 10;
-					scene->SkillCoolBar[i]->CenterPos.x = i * mClientWidth / 8 - (mClientWidth / 8)*1.5;
-					scene->SkillCoolBar[i]->CenterPos.y = 0.98*-mClientHeight / 2;
+					scene->SkillCoolBar[i]->ObjData.Scale = mClientWidth / 10.0f;
+					scene->SkillCoolBar[i]->CenterPos.x = i * mClientWidth / 8.0f - (mClientWidth / 8.0f)*1.5f;
+					scene->SkillCoolBar[i]->CenterPos.y = 0.98f*-mClientHeight / 2.0f;
 
-					scene->SkillFrameUI[i]->ObjData.Scale = mClientWidth / 10;
-					scene->SkillFrameUI[i]->CenterPos.x = i * mClientWidth / 8 - (mClientWidth / 8)*1.5;
-					scene->SkillFrameUI[i]->CenterPos.y = 0.9*-mClientHeight / 2;
+					scene->SkillFrameUI[i]->ObjData.Scale = mClientWidth / 10.0f;
+					scene->SkillFrameUI[i]->CenterPos.x = i * mClientWidth / 8.0f - (mClientWidth / 8.0f)*1.5f;
+					scene->SkillFrameUI[i]->CenterPos.y = 0.9f*-mClientHeight / 2.0f;
 					
 
-					scene->SkillUI[i]->ObjData.Scale = mClientWidth / 12;
-					scene->SkillUI[i]->CenterPos.x = i * mClientWidth / 8 - (mClientWidth / 8)*1.5;
-					scene->SkillUI[i]->CenterPos.y = 0.9*-mClientHeight / 2;
+					scene->SkillUI[i]->ObjData.Scale = mClientWidth / 12.0f;
+					scene->SkillUI[i]->CenterPos.x = i * mClientWidth / 8.0f - (mClientWidth / 8.0f)*1.5f;
+					scene->SkillUI[i]->CenterPos.y = 0.9f*-mClientHeight / 2.0f;
 				}
 		}
 		else if (scene != NULL && scene->GetGameState() == (GS_START || GS_LOAD))
 		{
 			if (scene->BackGround != NULL)
 			{
-				scene->BackGround->ObjData.Scale = mClientWidth;
-				scene->BackGround->ObjData.CustomData1.y = mClientHeight;
+				scene->BackGround->ObjData.Scale = (float)mClientWidth;
+				scene->BackGround->ObjData.CustomData1.y = (float)mClientHeight;
 
 			}
 		}
@@ -579,7 +579,7 @@ void FrameWork::OnMouseMove(WPARAM btnState, int x, int y)
 {
 	if (scene->Player->MouseOn <=1)
 	{
-		scene->Player->TPSCameraSystem(x, y, 0.01);
+		scene->Player->TPSCameraSystem(x, y, 0.01f);
 
 		RECT rc, rc2;
 		POINT p1, p2;
@@ -1022,12 +1022,12 @@ D3D12_CPU_DESCRIPTOR_HANDLE FrameWork::DepthStencilView()const
 
 
 
-Ray FrameWork::MousePicking(float mx, float my, XMFLOAT3& eye, XMFLOAT4X4& ViewM, XMFLOAT4X4& ProjM)
+Ray FrameWork::MousePicking(int mx, int my, XMFLOAT3& eye, XMFLOAT4X4& ViewM, XMFLOAT4X4& ProjM)
 {
 
 
 	XMVECTOR M;
-	XMFLOAT4 Mouse = XMFLOAT4(mx, my, 1, 1);//픽셀좌표계
+	XMFLOAT4 Mouse = XMFLOAT4((float)mx, (float)my, 1.0f, 1.0f);//픽셀좌표계
 
 											//마우스 벡터는 현재 화면 좌표계다. 이것을 월드좌표계로 나타내려면 다음과 같다.
 

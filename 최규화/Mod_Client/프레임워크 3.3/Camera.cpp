@@ -7,7 +7,7 @@ CCamera::CCamera(HWND hwnd,ID3D12Device* Device, ID3D12GraphicsCommandList* comm
 	
 	hWnd = hwnd;
 	aspect = asp;
-	SetLens(0.25f*3.141592, aspect, 1.0f, 1200.0f);
+	SetLens(0.25f*3.141592f, aspect, 1.0f, 1200.0f);
 
 	CamData.EyePos = e;
 	CamData.At = a;
@@ -54,7 +54,7 @@ void CCamera::UpdateConstantBuffer(ID3D12GraphicsCommandList* commandlist)
 	//매번 새로운 카메라 행렬 계산. 이는 카메라가 움직였을때 바뀌어야할 행렬을 갱신해줌
 	XMStoreFloat4x4(&CamData.View, tempView);
 	//마찬가지로 투영행렬도 갱신해줌. Resizing할때 해도되는데 카메라 행렬은 어처피 하나이므로 이거해줘도 성능무리XX
-	SetLens(0.25f*3.141592, aspect,mNearZ,mFarZ);
+	SetLens(0.25f*3.141592f, aspect,mNearZ,mFarZ);
 
 	//전치행렬화 해서 연결하기 위해 tempCamData를 이용한다.
 	tempCamData = CamData;
@@ -90,7 +90,7 @@ void CCamera::UpdateConstantBufferOrtho(ID3D12GraphicsCommandList * commandlist)
 	XMStoreFloat4x4(&CamData.View, XMMatrixIdentity());
 
 	//투영행렬을 직교투영으로
-	auto tempProj = XMMatrixOrthographicLH(rc.right - rc.left, rc.bottom - rc.top, 0, 1);
+	auto tempProj = XMMatrixOrthographicLH((float)(rc.right - rc.left), (float)(rc.bottom - rc.top), 0, 1);
 
 	XMStoreFloat4x4(&CamData.Proj, tempProj);
 

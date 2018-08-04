@@ -58,7 +58,7 @@ struct GameData //게임캐릭터의 정보 흔히 알고있는 체력, 데미지, 스피드가 있다.
 {
 	float MAXHP=0;
 	float HP=0;
-	float Damage=0;
+	int Damage=0;
 	float Speed=0;
 	bool GodMode = false;
 	
@@ -152,7 +152,7 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList* commandlist, const GameTimer& gt);
 	virtual void Collision(list<CGameObject*>* collist, float DeltaTime)=0;
 	
-	virtual void ToDamage(float Damage);
+	virtual void ToDamage(int Damage);
 	virtual void ToDead();
 	
 	
@@ -1080,7 +1080,7 @@ public:
 class DamageObject : public CGameObject
 {
 public:
-	DamageObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist , list<CGameObject*>*Plist, list<CGameObject*>*shadow, float damaged, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
+	DamageObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist , list<CGameObject*>*Plist, list<CGameObject*>*shadow, int damaged, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
 	float LifeTime = 1.5f;
 	int damaged = 0;
 

@@ -8,7 +8,7 @@ class Scene;
 
 //발사 스킬은 마우스다운에서 처리되고(크리에이트 불릿)
 //생존기는 플레이어인풋에서 처리된다.
-typedef struct SkillData
+struct SkillData
 {
 
 	//현재 선택한 스킬인덱스. 0~3까지 값만 가진다. Skills의 인덱스다.
@@ -63,8 +63,8 @@ public:
 	CGameObject* PlayerObject;
 
 	//카메라 회전관련 데이터들
-	float ox = -1;//이전마우스 x좌표
-	float oy = -1;//이전마우스 y좌표
+	int ox = -1;//이전마우스 x좌표
+	int oy = -1;//이전마우스 y좌표
 	float xtheta = 0;
 	float ytheta = 0;
 

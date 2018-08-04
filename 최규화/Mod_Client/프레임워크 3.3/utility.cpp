@@ -206,7 +206,7 @@ bool LoadMD5Model(std::wstring filename, CMesh* MD5Model, int numberofMesh, floa
 				}
 				if (qi == numberofMesh)
 				{
-					for (int i = 0; i < MD5Model->nVertex; ++i)
+					for (UINT i = 0; i < MD5Model->nVertex; ++i)
 					{
 						//여기서 정점의 위치를 계산함.
 

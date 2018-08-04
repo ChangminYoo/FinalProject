@@ -37,7 +37,7 @@ void CPlayer::TPSCameraSystem(int mx, int my,float DeltaTime)
 				if (mx- ox >1)//오른쪽으로 이동
 				{
 					//차이가 클수록 더 빨리 회전한다. 즉 차이가 작으면 별로 안움직이므로 흔들림이 보정된다.
-					float dx = fabsf(mx - ox);
+					int dx = abs(mx - ox);
 					if (dx > 10)
 						dx = 10;
 
@@ -51,7 +51,7 @@ void CPlayer::TPSCameraSystem(int mx, int my,float DeltaTime)
 				}
 				else if (mx- ox<-1)//왼쪽으로 이동
 				{
-					float dx = fabsf(mx - ox);
+					int dx = abs(mx - ox);
 					if (dx > 10)
 						dx = 10;
 
@@ -71,12 +71,12 @@ void CPlayer::TPSCameraSystem(int mx, int my,float DeltaTime)
 
 				if (my- oy > 1)//아래로이동
 				{
-					float dy = fabsf(my - oy);
+					int dy = abs(my - oy);
 					if (dy > 10)
 						dy = 10;
 						xtheta += ((dy/10) * MMPE_PI*100 / 180)*DeltaTime;
-						if (xtheta >= (85 * 3.14 / 180))
-							xtheta = (85 * 3.14 / 180);
+						if (xtheta >= (85 * 3.14f / 180))
+							xtheta = (85 * 3.14f / 180);
 
 
 
@@ -86,14 +86,14 @@ void CPlayer::TPSCameraSystem(int mx, int my,float DeltaTime)
 				else if (my- oy<-1)//위로이동
 				{
 
-					float dy = fabsf(my - oy);
+					int dy = abs(my - oy);
 					if (dy > 10)
 						dy = 10;
 
 					xtheta += ((-dy / 10) * MMPE_PI * 100 / 180)*DeltaTime;
 
-						if (xtheta <= (-65 * 3.14 / 180))
-							xtheta = (-65 * 3.14 / 180);
+						if (xtheta <= (-65 * 3.14f / 180))
+							xtheta = (-65 * 3.14f / 180);
 
 						oy = my;
 

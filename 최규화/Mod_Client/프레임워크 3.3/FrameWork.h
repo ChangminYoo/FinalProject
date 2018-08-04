@@ -141,6 +141,6 @@ public:
 	virtual bool Initialize();//초기화
 	virtual LRESULT MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);//메시지처리부분
 
-	Ray MousePicking(float mx, float my,XMFLOAT3& at, XMFLOAT4X4& ViewM, XMFLOAT4X4& ProjM);
+	Ray MousePicking(int mx, int my,XMFLOAT3& at, XMFLOAT4X4& ViewM, XMFLOAT4X4& ProjM);
 
 };
