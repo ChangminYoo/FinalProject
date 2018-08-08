@@ -17,7 +17,7 @@ class CStaticObject : public CMonoObject
 {
 protected:
 	StaticObject_Info m_stc_sobjdata;
-
+	int				  m_textureNumber{ 0 };
 public:
 	CStaticObject();
 	virtual ~CStaticObject();

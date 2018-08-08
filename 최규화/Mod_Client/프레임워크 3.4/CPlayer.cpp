@@ -18,7 +18,7 @@ CPlayer::CPlayer(HWND hWnd,ID3D12Device* Device, ID3D12GraphicsCommandList* comm
 	//	스킬넘버링 6 : 해머불렛
 	//	스킬넘버링 7 : 메테오
 		
-
+	//이 수들을 바꾸면 스킬이 달라짐 
 	skilldata.Skills[0] = 0;
 	skilldata.Skills[1] = 4; //1
 	skilldata.Skills[2] = 5; //2

@@ -4,6 +4,9 @@ CStaticObject::CStaticObject()
 {
 }
 
+//큐브 랜덤 색상 텍스쳐
+//ObjData.CustomData1.w = rand() % 400 + 100; 
+
 void CStaticObject::MakeStaticObjectBasicData()
 {
 	//여기다 물체 배치에 대한 상수들 넣는다.
@@ -261,6 +264,7 @@ void CStaticObject::UpdateDataForPacket()
 	m_stc_sobjdata.Pos = m_pos4f;
 	m_stc_sobjdata.Rotate_status = m_rot4f;
 	m_stc_sobjdata.type = m_type;
+	m_stc_sobjdata.TextureColor = m_textureNumber;
 }
 
 
@@ -295,6 +299,8 @@ CNormalBoxObject::CNormalBoxObject(unsigned int id)
 	m_rot4f = { 0.f, 0.f, 0.f, 1.f };
 
 	m_type = INSTALLED_OBJECT_TYPE::Box;
+
+	m_textureNumber = rand() % 400 + 100;
 
 	//----------rot, degree값을 이용한 Lookvector, Rightvector, Upvector 값 업데이트----------//
 	
@@ -392,6 +398,7 @@ CBigWallObject::CBigWallObject(unsigned int id)
 
 	m_type = INSTALLED_OBJECT_TYPE::BigWall;
 
+
 	//----------rot, degree값을 이용한 Lookvector, Rightvector, Upvector 값 업데이트----------//
 
 	m_OffLookvector = XMFLOAT3(0, 0, 1);
@@ -443,6 +450,8 @@ CBuildingObject::CBuildingObject(unsigned int id)
 
 	m_type = INSTALLED_OBJECT_TYPE::NormalBuilding;
 
+	m_textureNumber = rand() % 400 + 100;
+
 	//----------rot, degree값을 이용한 Lookvector, Rightvector, Upvector 값 업데이트----------//
 
 	m_OffLookvector = XMFLOAT3(0, 0, 1);
@@ -462,7 +471,7 @@ CBuildingObject::CBuildingObject(unsigned int id)
 
 	xmf4_pos = { m_pos4f.x, m_pos4f.y, m_pos4f.z, m_pos4f.w };
 	pp->SetPosition(&xmf4_pos);
-	pp->SetHalfBox(15, 45, 15);
+	pp->SetHalfBox(15, 35, 15);
 	pp->SetDamping(0.5f);
 	pp->SetBounce(false);
 	pp->SetMass(INFINITY);
@@ -544,6 +553,8 @@ CColumnObject::CColumnObject(unsigned int id)
 	m_rot4f = { 0.f, 0.f, 0.f, 1.f };
 	
 	m_type = INSTALLED_OBJECT_TYPE::Column;
+
+	m_textureNumber = rand() % 400 + 100;
 
 	//----------rot, degree값을 이용한 Lookvector, Rightvector, Upvector 값 업데이트----------//
 

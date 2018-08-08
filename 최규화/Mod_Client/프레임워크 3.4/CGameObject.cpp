@@ -855,6 +855,7 @@ void BulletCube::Collision(list<CGameObject*>* collist, float DeltaTime)
 
 void BulletCube::Collision(int coll_type, int damage, const XMFLOAT4& bullet_pos, const XMFLOAT4& target_pos)
 {
+	//isHit~ = 타격음 
 	switch (coll_type)
 	{
 		case AFTER_COLLISION_EFFECT::EMPTY:
@@ -4294,7 +4295,7 @@ BuildingObject::BuildingObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 	ObjData.isAnimation = 0;
 	ObjData.Scale = 22.0f;
 	ObjData.SpecularParamater = 16.31f;//스페큘러를 낮게준다.
-	//ObjData.CustomData1.w = 1234;
+	ObjData.CustomData1.w = 1234;
 
 
 									   //게임관련 데이터들

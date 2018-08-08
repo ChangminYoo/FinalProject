@@ -123,8 +123,6 @@ enum NPC_MONSTER_TYPE
 
 enum AFTER_COLLISION_EFFECT { EMPTY, BOOM, DAMAGE, DAMAGE_AND_BOOM };
 
-enum PLAYERS { NO_PLAYER, LUNA, CMETRA, RONDO, DONALD };
-
 //-------------------------------기본데이터-------------------------------//
 
 struct Time
@@ -177,12 +175,14 @@ struct Player_LoginDB
 
 struct StaticObject_Info
 {
-	Position					Pos;					//16
+	Position					Pos;										//16
 	Rotation				    Rotate_status{ 0.f,0.f,0.f,1.0f };			//16
-	double						degree{ 0 };					//4
-	unsigned short				ID{ 0 };				//2
-	char						Fixed{ true };			//1
-	unsigned char				type;
+	double						degree{ 0 };								//4
+	unsigned short				ID{ 0 };									//2
+	unsigned short				TextureColor;
+	char						Fixed{ true };								//1
+	unsigned char				type;										//1
+
 };
 
 struct RigidbodyData
@@ -238,7 +238,7 @@ struct STC_BulletObject_Info
 	unsigned short				my_id;					//2
 	unsigned char				type;					//1
 	char						alive;					//1
-	char						after_coll;				//1
+	char						after_coll;			//1
 	unsigned short				damage;					//2
 };
 

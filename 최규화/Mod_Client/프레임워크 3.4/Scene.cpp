@@ -1250,6 +1250,10 @@ void Scene::SET_SOBJECT_BY_SERVER_DATA(const unsigned short & id, StaticObject_I
 			{
 				if (sobj->m_sobj_data.ID == sobjdata.ID)
 				{
+					//상자, 컬럼 오브젝트의 텍스쳐를 서버에서 관리함. 이 랜덤데이터를 받아 텍스쳐값재정의
+					if(type == INSTALLED_OBJECT_TYPE::Box || INSTALLED_OBJECT_TYPE::Column)
+						sobj->ObjData.CustomData1.w = sobjdata.TextureColor;
+
 					sobj->m_sobj_data = move(sobjdata);
 
 					sobj->Orient = { sobjdata.Rotate_status.x , sobjdata.Rotate_status.y , sobjdata.Rotate_status.z, sobjdata.Rotate_status.w };
@@ -1260,6 +1264,7 @@ void Scene::SET_SOBJECT_BY_SERVER_DATA(const unsigned short & id, StaticObject_I
 					sobj->m_sobj_data.type = sobjdata.type;
 
 					sobj->pp->SetPosition(&sobj->CenterPos);
+					
 					break;
 				}
 			}
