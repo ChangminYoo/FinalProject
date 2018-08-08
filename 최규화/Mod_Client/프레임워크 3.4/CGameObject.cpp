@@ -673,6 +673,7 @@ BulletCube::BulletCube(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 
 			m_bullet_data.my_id = myID;
 			m_bullet_data.master_id = master->m_player_data.id;
+			m_bullet_data.alive = true;
 		}
 	}
 
@@ -852,6 +853,64 @@ void BulletCube::Collision(list<CGameObject*>* collist, float DeltaTime)
 	}
 }
 
+void BulletCube::Collision(int coll_type, int damage, const XMFLOAT4& bullet_pos, const XMFLOAT4& target_pos)
+{
+	switch (coll_type)
+	{
+		case AFTER_COLLISION_EFFECT::EMPTY:
+		{
+			isHit1 = false;
+			//불렛과 대상 충돌후 아무런 추가이펙트가 발생하지 않음
+			//1. 몬스터 공격 -> 상자
+
+		}
+		break;
+
+		case AFTER_COLLISION_EFFECT::BOOM:
+		{
+			//겹치는 부분을 제거할필요가 없는게 투사체는 어처피 사라지니까.
+			//1. 플레이어 공격 -> 상자
+			auto BulletParticles2 = new ParticleObject2(device, commandlist, ParticleList, NULL, this, 0.7f, 100, XMFLOAT4(bullet_pos.x, bullet_pos.y, bullet_pos.z, 0));
+			ParticleList->push_back(BulletParticles2);
+		}
+		break;
+
+		case AFTER_COLLISION_EFFECT::DAMAGE:
+		{
+			isHit1 = true; //타격 사운드1
+			// 파티클리스트에 데미지 오브젝트를 생성해서 넣음. 파티클을 띄운다.
+			//3. 몬스터 공격 -> 플레이어
+			if (ParticleList != NULL)
+			{
+				ParticleList->push_back(new DamageObject(device, commandlist, ParticleList, NULL, damage, XMFLOAT4(target_pos.x, target_pos.y + 11, target_pos.z, 0)));
+			}
+		}
+		break;
+
+		case AFTER_COLLISION_EFFECT::DAMAGE_AND_BOOM:
+		{
+			isHit1 = true; //타격 사운드1
+			// 파티클리스트에 데미지 오브젝트를 생성해서 넣음. 파티클을 띄운다.
+			//1. 플레이어 공격 -> 플레이어
+			//2. 플레이어 공격 -> 몬스터
+			if (ParticleList != NULL)
+			{
+				ParticleList->push_back(new DamageObject(device, commandlist, ParticleList, NULL, damage, XMFLOAT4(target_pos.x, target_pos.y + 11, target_pos.z, 0)));
+			}
+
+			//겹치는 부분을 제거할필요가 없는게 투사체는 어처피 사라지니까.
+			auto BulletParticles2 = new ParticleObject2(device, commandlist, ParticleList, NULL, this, 0.7f, 100, XMFLOAT4(bullet_pos.x, bullet_pos.y, bullet_pos.z, 0));
+			ParticleList->push_back(BulletParticles2);
+		}
+		break;
+
+	default:
+		break;
+	}
+
+	DelObj = true;
+}
+
 
 
 HeavyBulletCube::HeavyBulletCube(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, CGameObject* master, XMFLOAT4& ori, CGameObject* lockon, XMFLOAT4 cp, bool IsMine) : CGameObject(m_Device, commandlist, Plist, shadow, cp)
@@ -906,6 +965,7 @@ HeavyBulletCube::HeavyBulletCube(ID3D12Device * m_Device, ID3D12GraphicsCommandL
 
 			m_bullet_data.my_id = myID;
 			m_bullet_data.master_id = master->m_player_data.id;
+			m_bullet_data.alive = true;
 		}
 	}
 
@@ -941,7 +1001,6 @@ HeavyBulletCube::~HeavyBulletCube()
 
 void HeavyBulletCube::SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist)
 {
-
 
 	CreateCube(&Mesh, 4, 4, 4);
 	//
@@ -1076,6 +1135,61 @@ void HeavyBulletCube::Collision(list<CGameObject*>* collist, float DeltaTime)
 	}
 }
 
+void HeavyBulletCube::Collision(int coll_type, int damage, const XMFLOAT4& bullet_pos, const XMFLOAT4& target_pos)
+{
+	switch (coll_type)
+	{
+		case AFTER_COLLISION_EFFECT::EMPTY:
+		{
+			//불렛과 대상 충돌후 아무런 추가이펙트가 발생하지 않음
+			//1. 몬스터 공격 -> 상자
+
+		}
+		break;
+
+		case AFTER_COLLISION_EFFECT::BOOM:
+		{
+			//겹치는 부분을 제거할필요가 없는게 투사체는 어처피 사라지니까.
+			//1. 플레이어 공격 -> 상자
+			auto BulletParticles2 = new ParticleObject2(device, commandlist, ParticleList, NULL, this, 0.7f, 100, XMFLOAT4(bullet_pos.x, bullet_pos.y, bullet_pos.z, 0));
+			ParticleList->push_back(BulletParticles2);
+		}
+		break;
+
+		case AFTER_COLLISION_EFFECT::DAMAGE:
+		{
+			// 파티클리스트에 데미지 오브젝트를 생성해서 넣음. 파티클을 띄운다.
+			//3. 몬스터 공격 -> 플레이어
+			if (ParticleList != NULL)
+			{
+				ParticleList->push_back(new DamageObject(device, commandlist, ParticleList, NULL, damage, XMFLOAT4(target_pos.x, target_pos.y + 11, target_pos.z, 0)));
+			}
+		}
+		break;
+
+		case AFTER_COLLISION_EFFECT::DAMAGE_AND_BOOM:
+		{
+			// 파티클리스트에 데미지 오브젝트를 생성해서 넣음. 파티클을 띄운다.
+			//1. 플레이어 공격 -> 플레이어
+			//2. 플레이어 공격 -> 몬스터
+			if (ParticleList != NULL)
+			{
+				ParticleList->push_back(new DamageObject(device, commandlist, ParticleList, NULL, damage, XMFLOAT4(target_pos.x, target_pos.y + 11, target_pos.z, 0)));
+			}
+
+			//겹치는 부분을 제거할필요가 없는게 투사체는 어처피 사라지니까.
+			auto BulletParticles2 = new ParticleObject2(device, commandlist, ParticleList, NULL, this, 0.7f, 100, XMFLOAT4(bullet_pos.x, bullet_pos.y, bullet_pos.z, 0));
+			ParticleList->push_back(BulletParticles2);
+		}
+		break;
+
+	default:
+		break;
+	}
+
+	DelObj = true;
+}
+
 //-------------------- 테트라이크 ---------------------------------//
 
 Tetris1::Tetris1(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, CGameObject* master, CGameObject* lockon, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist,shadow, cp)
@@ -1093,6 +1207,8 @@ Tetris1::Tetris1(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlis
 		CreateMesh = true;
 
 	}
+
+	m_bullet_data.alive = true;
 
 	//게임오브젝트마다 룩벡터와 라이트벡터가 다르므로 초기 오프셋 설정을 해준다.
 	//실제 룩벡터 등은 모두 UpdateLookVector에서 처리된다(라이트벡터도) 따라서 Tick함수에서 반드시 호출해야한다.
@@ -1277,6 +1393,61 @@ void Tetris1::Collision(list<CGameObject*>* collist, float DeltaTime)
 	}
 }
 
+void Tetris1::Collision(int coll_type, int damage, const XMFLOAT4& bullet_pos, const XMFLOAT4& target_pos)
+{
+	switch (coll_type)
+	{
+		case AFTER_COLLISION_EFFECT::EMPTY:
+		{
+			//불렛과 대상 충돌후 아무런 추가이펙트가 발생하지 않음
+			//1. 몬스터 공격 -> 상자
+
+		}
+		break;
+
+		case AFTER_COLLISION_EFFECT::BOOM:
+		{
+			//겹치는 부분을 제거할필요가 없는게 투사체는 어처피 사라지니까.
+			//1. 플레이어 공격 -> 상자
+			auto BulletParticles2 = new ParticleObject2(device, commandlist, ParticleList, NULL, this, 0.7f, 100, XMFLOAT4(bullet_pos.x, bullet_pos.y, bullet_pos.z, 0));
+			ParticleList->push_back(BulletParticles2);
+		}
+		break;
+
+		case AFTER_COLLISION_EFFECT::DAMAGE:
+		{
+			// 파티클리스트에 데미지 오브젝트를 생성해서 넣음. 파티클을 띄운다.
+			//3. 몬스터 공격 -> 플레이어
+			if (ParticleList != NULL)
+			{
+				ParticleList->push_back(new DamageObject(device, commandlist, ParticleList, NULL, damage, XMFLOAT4(target_pos.x, target_pos.y + 11, target_pos.z, 0)));
+			}
+		}
+		break;
+
+		case AFTER_COLLISION_EFFECT::DAMAGE_AND_BOOM:
+		{
+			// 파티클리스트에 데미지 오브젝트를 생성해서 넣음. 파티클을 띄운다.
+			//1. 플레이어 공격 -> 플레이어
+			//2. 플레이어 공격 -> 몬스터
+			if (ParticleList != NULL)
+			{
+				ParticleList->push_back(new DamageObject(device, commandlist, ParticleList, NULL, damage, XMFLOAT4(target_pos.x, target_pos.y + 11, target_pos.z, 0)));
+			}
+
+			//겹치는 부분을 제거할필요가 없는게 투사체는 어처피 사라지니까.
+			auto BulletParticles2 = new ParticleObject2(device, commandlist, ParticleList, NULL, this, 0.7f, 100, XMFLOAT4(bullet_pos.x, bullet_pos.y, bullet_pos.z, 0));
+			ParticleList->push_back(BulletParticles2);
+		}
+		break;
+
+	default:
+		break;
+	}
+
+	DelObj = true;
+}
+
 Tetris2::Tetris2(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, CGameObject* master, CGameObject* lockon, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist,shadow, cp)
 {
 
@@ -1292,6 +1463,8 @@ Tetris2::Tetris2(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlis
 		CreateMesh = true;
 
 	}
+
+	m_bullet_data.alive = true;
 
 	//게임오브젝트마다 룩벡터와 라이트벡터가 다르므로 초기 오프셋 설정을 해준다.
 	//실제 룩벡터 등은 모두 UpdateLookVector에서 처리된다(라이트벡터도) 따라서 Tick함수에서 반드시 호출해야한다.
@@ -1476,6 +1649,61 @@ void Tetris2::Collision(list<CGameObject*>* collist, float DeltaTime)
 	}
 }
 
+void Tetris2::Collision(int coll_type, int damage, const XMFLOAT4& bullet_pos, const XMFLOAT4& target_pos)
+{
+	switch (coll_type)
+	{
+		case AFTER_COLLISION_EFFECT::EMPTY:
+		{
+			//불렛과 대상 충돌후 아무런 추가이펙트가 발생하지 않음
+			//1. 몬스터 공격 -> 상자
+
+		}
+		break;
+
+		case AFTER_COLLISION_EFFECT::BOOM:
+		{
+			//겹치는 부분을 제거할필요가 없는게 투사체는 어처피 사라지니까.
+			//1. 플레이어 공격 -> 상자
+			auto BulletParticles2 = new ParticleObject2(device, commandlist, ParticleList, NULL, this, 0.7f, 100, XMFLOAT4(bullet_pos.x, bullet_pos.y, bullet_pos.z, 0));
+			ParticleList->push_back(BulletParticles2);
+		}
+		break;
+
+		case AFTER_COLLISION_EFFECT::DAMAGE:
+		{
+			// 파티클리스트에 데미지 오브젝트를 생성해서 넣음. 파티클을 띄운다.
+			//3. 몬스터 공격 -> 플레이어
+			if (ParticleList != NULL)
+			{
+				ParticleList->push_back(new DamageObject(device, commandlist, ParticleList, NULL, damage, XMFLOAT4(target_pos.x, target_pos.y + 11, target_pos.z, 0)));
+			}
+		}
+		break;
+
+		case AFTER_COLLISION_EFFECT::DAMAGE_AND_BOOM:
+		{
+			// 파티클리스트에 데미지 오브젝트를 생성해서 넣음. 파티클을 띄운다.
+			//1. 플레이어 공격 -> 플레이어
+			//2. 플레이어 공격 -> 몬스터
+			if (ParticleList != NULL)
+			{
+				ParticleList->push_back(new DamageObject(device, commandlist, ParticleList, NULL, damage, XMFLOAT4(target_pos.x, target_pos.y + 11, target_pos.z, 0)));
+			}
+
+			//겹치는 부분을 제거할필요가 없는게 투사체는 어처피 사라지니까.
+			auto BulletParticles2 = new ParticleObject2(device, commandlist, ParticleList, NULL, this, 0.7f, 100, XMFLOAT4(bullet_pos.x, bullet_pos.y, bullet_pos.z, 0));
+			ParticleList->push_back(BulletParticles2);
+		}
+		break;
+
+	default:
+		break;
+	}
+
+	DelObj = true;
+}
+
 Tetris3::Tetris3(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, CGameObject* master, CGameObject* lockon, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist,shadow, cp)
 {
 
@@ -1491,6 +1719,8 @@ Tetris3::Tetris3(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlis
 		CreateMesh = true;
 
 	}
+
+	m_bullet_data.alive = true;
 
 	//게임오브젝트마다 룩벡터와 라이트벡터가 다르므로 초기 오프셋 설정을 해준다.
 	//실제 룩벡터 등은 모두 UpdateLookVector에서 처리된다(라이트벡터도) 따라서 Tick함수에서 반드시 호출해야한다.
@@ -1673,6 +1903,61 @@ void Tetris3::Collision(list<CGameObject*>* collist, float DeltaTime)
 	}
 }
 
+void Tetris3::Collision(int coll_type, int damage, const XMFLOAT4& bullet_pos, const XMFLOAT4& target_pos)
+{
+	switch (coll_type)
+	{
+		case AFTER_COLLISION_EFFECT::EMPTY:
+		{
+			//불렛과 대상 충돌후 아무런 추가이펙트가 발생하지 않음
+			//1. 몬스터 공격 -> 상자
+
+		}
+		break;
+
+		case AFTER_COLLISION_EFFECT::BOOM:
+		{
+			//겹치는 부분을 제거할필요가 없는게 투사체는 어처피 사라지니까.
+			//1. 플레이어 공격 -> 상자
+			auto BulletParticles2 = new ParticleObject2(device, commandlist, ParticleList, NULL, this, 0.7f, 100, XMFLOAT4(bullet_pos.x, bullet_pos.y, bullet_pos.z, 0));
+			ParticleList->push_back(BulletParticles2);
+		}
+		break;
+
+		case AFTER_COLLISION_EFFECT::DAMAGE:
+		{
+			// 파티클리스트에 데미지 오브젝트를 생성해서 넣음. 파티클을 띄운다.
+			//3. 몬스터 공격 -> 플레이어
+			if (ParticleList != NULL)
+			{
+				ParticleList->push_back(new DamageObject(device, commandlist, ParticleList, NULL, damage, XMFLOAT4(target_pos.x, target_pos.y + 11, target_pos.z, 0)));
+			}
+		}
+		break;
+
+		case AFTER_COLLISION_EFFECT::DAMAGE_AND_BOOM:
+		{
+			// 파티클리스트에 데미지 오브젝트를 생성해서 넣음. 파티클을 띄운다.
+			//1. 플레이어 공격 -> 플레이어
+			//2. 플레이어 공격 -> 몬스터
+			if (ParticleList != NULL)
+			{
+				ParticleList->push_back(new DamageObject(device, commandlist, ParticleList, NULL, damage, XMFLOAT4(target_pos.x, target_pos.y + 11, target_pos.z, 0)));
+			}
+
+			//겹치는 부분을 제거할필요가 없는게 투사체는 어처피 사라지니까.
+			auto BulletParticles2 = new ParticleObject2(device, commandlist, ParticleList, NULL, this, 0.7f, 100, XMFLOAT4(bullet_pos.x, bullet_pos.y, bullet_pos.z, 0));
+			ParticleList->push_back(BulletParticles2);
+		}
+		break;
+
+	default:
+		break;
+	}
+
+	DelObj = true;
+}
+
 
 Tetris4::Tetris4(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, CGameObject* master, CGameObject* lockon, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist,shadow, cp)
 {
@@ -1689,6 +1974,8 @@ Tetris4::Tetris4(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlis
 		CreateMesh = true;
 
 	}
+
+	m_bullet_data.alive = true;
 
 	//게임오브젝트마다 룩벡터와 라이트벡터가 다르므로 초기 오프셋 설정을 해준다.
 	//실제 룩벡터 등은 모두 UpdateLookVector에서 처리된다(라이트벡터도) 따라서 Tick함수에서 반드시 호출해야한다.
@@ -1868,6 +2155,61 @@ void Tetris4::Collision(list<CGameObject*>* collist, float DeltaTime)
 			}
 		}
 	}
+}
+
+void Tetris4::Collision(int coll_type, int damage, const XMFLOAT4& bullet_pos, const XMFLOAT4& target_pos)
+{
+	switch (coll_type)
+	{
+		case AFTER_COLLISION_EFFECT::EMPTY:
+		{
+			//불렛과 대상 충돌후 아무런 추가이펙트가 발생하지 않음
+			//1. 몬스터 공격 -> 상자
+
+		}
+		break;
+
+		case AFTER_COLLISION_EFFECT::BOOM:
+		{
+			//겹치는 부분을 제거할필요가 없는게 투사체는 어처피 사라지니까.
+			//1. 플레이어 공격 -> 상자
+			auto BulletParticles2 = new ParticleObject2(device, commandlist, ParticleList, NULL, this, 0.7f, 100, XMFLOAT4(bullet_pos.x, bullet_pos.y, bullet_pos.z, 0));
+			ParticleList->push_back(BulletParticles2);
+		}
+		break;
+
+		case AFTER_COLLISION_EFFECT::DAMAGE:
+		{
+			// 파티클리스트에 데미지 오브젝트를 생성해서 넣음. 파티클을 띄운다.
+			//3. 몬스터 공격 -> 플레이어
+			if (ParticleList != NULL)
+			{
+				ParticleList->push_back(new DamageObject(device, commandlist, ParticleList, NULL, damage, XMFLOAT4(target_pos.x, target_pos.y + 11, target_pos.z, 0)));
+			}
+		}
+		break;
+
+		case AFTER_COLLISION_EFFECT::DAMAGE_AND_BOOM:
+		{
+			// 파티클리스트에 데미지 오브젝트를 생성해서 넣음. 파티클을 띄운다.
+			//1. 플레이어 공격 -> 플레이어
+			//2. 플레이어 공격 -> 몬스터
+			if (ParticleList != NULL)
+			{
+				ParticleList->push_back(new DamageObject(device, commandlist, ParticleList, NULL, damage, XMFLOAT4(target_pos.x, target_pos.y + 11, target_pos.z, 0)));
+			}
+
+			//겹치는 부분을 제거할필요가 없는게 투사체는 어처피 사라지니까.
+			auto BulletParticles2 = new ParticleObject2(device, commandlist, ParticleList, NULL, this, 0.7f, 100, XMFLOAT4(bullet_pos.x, bullet_pos.y, bullet_pos.z, 0));
+			ParticleList->push_back(BulletParticles2);
+		}
+		break;
+
+	default:
+		break;
+	}
+
+	DelObj = true;
 }
 
 Tetrike::Tetrike(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, list<CGameObject*>*Bulletlist, CGameObject* master, CGameObject* lockon, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist,shadow, cp)
@@ -2372,7 +2714,7 @@ CubeObject::CubeObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 	ObjData.Scale = 3.2f;
 	ObjData.SpecularParamater = 0.2f;//스페큘러를 낮게준다.
 
-
+	//큐브 색깔 랜덤 배치 //큐브만 있음
 	ObjData.CustomData1.w = rand() % 400 + 100;
 	obs = Static;
 
@@ -4386,7 +4728,7 @@ ParticleObject2::ParticleObject2(ID3D12Device * m_Device, ID3D12GraphicsCommandL
 	staticobject = true;
 	obs = UI;
 
-	if (CreateMesh == false)
+	if (CreateMesh == false)	
 	{
 		Mesh.Index = NULL;
 		Mesh.SubResource = NULL;
@@ -5535,6 +5877,7 @@ StoneBullet::StoneBullet(ID3D12Device * m_Device, ID3D12GraphicsCommandList * co
 		g_npcBulletID = -1;
 
 	this->myNPC_StoneBulletID = ++g_npcBulletID;
+	m_bullet_data.alive = true;
 
 	orgpluspos = opp;
 	//게임오브젝트마다 룩벡터와 라이트벡터가 다르므로 초기 오프셋 설정을 해준다.
@@ -5701,6 +6044,61 @@ void StoneBullet::Collision(list<CGameObject*>* collist, float DeltaTime)
 		}
 	}
 
+}
+
+void StoneBullet::Collision(int coll_type, int damage, const XMFLOAT4& bullet_pos, const XMFLOAT4& target_pos)
+{
+	switch (coll_type)
+	{
+		case AFTER_COLLISION_EFFECT::EMPTY:
+		{
+			//불렛과 대상 충돌후 아무런 추가이펙트가 발생하지 않음
+			//1. 몬스터 공격 -> 상자
+
+		}
+		break;
+
+		case AFTER_COLLISION_EFFECT::BOOM:
+		{
+			//겹치는 부분을 제거할필요가 없는게 투사체는 어처피 사라지니까.
+			//1. 플레이어 공격 -> 상자
+			auto BulletParticles2 = new ParticleObject2(device, commandlist, ParticleList, NULL, this, 0.7f, 100, XMFLOAT4(bullet_pos.x, bullet_pos.y, bullet_pos.z, 0));
+			ParticleList->push_back(BulletParticles2);
+		}
+		break;
+
+		case AFTER_COLLISION_EFFECT::DAMAGE:
+		{
+			// 파티클리스트에 데미지 오브젝트를 생성해서 넣음. 파티클을 띄운다.
+			//3. 몬스터 공격 -> 플레이어
+			if (ParticleList != NULL)
+			{
+				ParticleList->push_back(new DamageObject(device, commandlist, ParticleList, NULL, damage, XMFLOAT4(target_pos.x, target_pos.y + 11, target_pos.z, 0)));
+			}
+		}
+		break;
+
+		case AFTER_COLLISION_EFFECT::DAMAGE_AND_BOOM:
+		{
+			// 파티클리스트에 데미지 오브젝트를 생성해서 넣음. 파티클을 띄운다.
+			//1. 플레이어 공격 -> 플레이어
+			//2. 플레이어 공격 -> 몬스터
+			if (ParticleList != NULL)
+			{
+				ParticleList->push_back(new DamageObject(device, commandlist, ParticleList, NULL, damage, XMFLOAT4(target_pos.x, target_pos.y + 11, target_pos.z, 0)));
+			}
+
+			//겹치는 부분을 제거할필요가 없는게 투사체는 어처피 사라지니까.
+			auto BulletParticles2 = new ParticleObject2(device, commandlist, ParticleList, NULL, this, 0.7f, 100, XMFLOAT4(bullet_pos.x, bullet_pos.y, bullet_pos.z, 0));
+			ParticleList->push_back(BulletParticles2);
+		}
+		break;
+
+	default:
+		break;
+	}
+
+	DelObj = true;
 }
 
 MeteorObject::MeteorObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, list<CGameObject*>* shadow, CGameObject* master, XMFLOAT4& ori, XMFLOAT4 cp) :CGameObject(m_Device, commandlist, Plist, shadow, cp)
@@ -5929,7 +6327,9 @@ HammerBullet::HammerBullet(ID3D12Device* m_Device, ID3D12GraphicsCommandList* co
 		CreateMesh = true;
 
 	}
-	 
+	
+	m_bullet_data.alive = true;
+
 	offsetPos = cp;
 	orgpluspos = opp;
 	//게임오브젝트마다 룩벡터와 라이트벡터가 다르므로 초기 오프셋 설정을 해준다.
@@ -6115,5 +6515,61 @@ void HammerBullet::Collision(list<CGameObject*>* collist, float DeltaTime)
 			}
 		}
 	}
+
+}
+
+void HammerBullet::Collision(int coll_type, int damage, const XMFLOAT4& bullet_pos, const XMFLOAT4& target_pos)
+{
+	switch (coll_type)
+	{
+		case AFTER_COLLISION_EFFECT::EMPTY:
+		{
+			//불렛과 대상 충돌후 아무런 추가이펙트가 발생하지 않음
+			//1. 몬스터 공격 -> 상자
+
+		}
+		break;
+
+		case AFTER_COLLISION_EFFECT::BOOM:
+		{
+			//겹치는 부분을 제거할필요가 없는게 투사체는 어처피 사라지니까.
+			//1. 플레이어 공격 -> 상자
+			auto BulletParticles2 = new ParticleObject2(device, commandlist, ParticleList, NULL, this, 0.7f, 100, XMFLOAT4(bullet_pos.x, bullet_pos.y, bullet_pos.z, 0));
+			ParticleList->push_back(BulletParticles2);
+		}
+		break;
+
+		case AFTER_COLLISION_EFFECT::DAMAGE:
+		{
+			// 파티클리스트에 데미지 오브젝트를 생성해서 넣음. 파티클을 띄운다.
+			//3. 몬스터 공격 -> 플레이어
+			if (ParticleList != NULL)
+			{
+				ParticleList->push_back(new DamageObject(device, commandlist, ParticleList, NULL, damage, XMFLOAT4(target_pos.x, target_pos.y + 11, target_pos.z, 0)));
+			}
+		}
+		break;
+
+		case AFTER_COLLISION_EFFECT::DAMAGE_AND_BOOM:
+		{
+			// 파티클리스트에 데미지 오브젝트를 생성해서 넣음. 파티클을 띄운다.
+			//1. 플레이어 공격 -> 플레이어
+			//2. 플레이어 공격 -> 몬스터
+			if (ParticleList != NULL)
+			{
+				ParticleList->push_back(new DamageObject(device, commandlist, ParticleList, NULL, damage, XMFLOAT4(target_pos.x, target_pos.y + 11, target_pos.z, 0)));
+			}
+
+			//겹치는 부분을 제거할필요가 없는게 투사체는 어처피 사라지니까.
+			auto BulletParticles2 = new ParticleObject2(device, commandlist, ParticleList, NULL, this, 0.7f, 100, XMFLOAT4(bullet_pos.x, bullet_pos.y, bullet_pos.z, 0));
+			ParticleList->push_back(BulletParticles2);
+		}
+		break;
+
+	default:
+		break;
+	}
+
+	DelObj = true;
 
 }

@@ -24,7 +24,7 @@ void FSM::Update(double deltime)
 		{
 			//쿨타임을 줄이자
 			aidata.cooltime -= deltime;
-			if (aidata.cooltime <= 0 && Master->GetMyAnimation() != Ani_State::Attack)
+			if (aidata.cooltime <= 0 && static_cast<unsigned int>(Master->GetMyAnimation()) != Ani_State::Attack)
 			{
 				//공격가능해진 타이밍이면 데미지를 입힐 수있는 지연타임을 0초로 초기화하고 쿨타임도 0으로초기화하고 공격가능으로 바꿈.
 				aidata.damagetime = 0;
@@ -151,7 +151,6 @@ state * state_idle::Execute(double deltime, CNpcObject* master, AIdata& adata)
 			if (FloatLength(v2) > 50)
 				 return state_trace::Instance();
 		}
-		//master->SetAnimation(Ani_State::Idle);
 		master->SetMyAnimation(Ani_State::Idle);
 
 	}
@@ -193,8 +192,6 @@ state * state_global::Execute(double deltime, CNpcObject* master, AIdata& adata)
 			adata.stack = 0;
 		}
 
-
-
 		float l;
 		XMFLOAT4 v1;
 
@@ -204,6 +201,7 @@ state * state_global::Execute(double deltime, CNpcObject* master, AIdata& adata)
 			v1.y = 0;
 			l = FloatLength(v1);
 		}
+
 		//타겟이 존재하고, 해당 타겟이 사거리 안에 있으면 공격 상태로 전환한다.
 		if (adata.Target != NULL && l <= adata.FireLength && adata.FireOn)
 			return state_attack::Instance();
@@ -228,12 +226,10 @@ state * state_attack::Instance()
 state * state_attack::Execute(double deltime, CNpcObject* master, AIdata & adata)
 {
 	adata.curstateEnum = s_Attack;
-	if (adata.FireOn)
-	{
-		//master->SetAnimation(Ani_State::Attack);
-		master->SetMyAnimation(Ani_State::Attack);
-	}
 
+	if (adata.FireOn)
+		master->SetMyAnimation(Ani_State::Attack);
+	
 	if (adata.damagetime >= 0.2f && adata.FireOn==true)
 	{
 		if (adata.Target != NULL)
@@ -253,7 +249,7 @@ state * state_attack::Execute(double deltime, CNpcObject* master, AIdata & adata
 	
 	//공격 모션이 끝나면 아이들 애니메이션일테므로 아이들 상태로 변경가능
 
-	if (master->GetMyAnimation() == Ani_State::Idle)
+	if (static_cast<unsigned int>(master->GetMyAnimation()) == Ani_State::Idle)
 		return state_idle::Instance();
 	
 	return nullptr;
@@ -274,8 +270,6 @@ state * state_trace::Instance()
 state * state_trace::Execute(double deltime, CNpcObject* master, AIdata& adata)
 {
 	adata.curstateEnum = s_Trace;
-
-	//master->SetAnimation(Ani_State::Run);
 	master->SetMyAnimation(Ani_State::Run);
 
 	auto v = XMFloat4to3(Float4Add(adata.LastPosition, master->GetCenterPos4f(), false));
@@ -291,6 +285,11 @@ state * state_trace::Execute(double deltime, CNpcObject* master, AIdata& adata)
 
 	if (fabs(d) <= adata.FireLength && adata.Target == NULL)
 		adata.LastPosition = master->GetOriginCenterPos4f();//고유 초창기 위치로 ㄱㄱ
+
+	if (fabs(FloatLength(v2)) >= 75)		//중앙에서 어느정도 멀어지면 
+	{
+		adata.LastPosition = master->GetOriginCenterPos4f();
+	}
 
 	if (adata.Target != NULL)
 	{

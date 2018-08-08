@@ -151,6 +151,7 @@ public:
 	virtual void Tick(const GameTimer& gt);
 	virtual void Render(ID3D12GraphicsCommandList* commandlist, const GameTimer& gt);
 	virtual void Collision(list<CGameObject*>* collist, float DeltaTime)=0;
+	virtual void Collision(int coll_type, int damage, const XMFLOAT4& bullet_pos, const XMFLOAT4& target_pos) = 0;
 	
 	virtual void ToDamage(float Damage);
 	virtual void ToDead();
@@ -201,8 +202,10 @@ public:
 
 	bool m_end_attack{ false }, m_end_die{ false };
 	bool m_end_npc_attack{ false }, m_end_npc_die{ false };
+	
+	//불렛 파티클 타입
+	int m_particle_type;
 
-	//서버추가
 	float	m_degree;
 };
 
@@ -234,7 +237,7 @@ public:
 	virtual void Tick(const GameTimer& gt);
 	virtual void Render(ID3D12GraphicsCommandList* commandlist, const GameTimer& gt);
 	virtual void Collision(list<CGameObject*>* collist, float DeltaTime) {}
-
+	virtual void Collision(int coll_type, int damage, const XMFLOAT4& bullet_pos, const XMFLOAT4& target_pos) {}
 };
 
 class BarFrameObject : public CGameObject
@@ -255,7 +258,7 @@ public:
 	virtual void Tick(const GameTimer& gt);
 	virtual void Render(ID3D12GraphicsCommandList* commandlist, const GameTimer& gt);
 	virtual void Collision(list<CGameObject*>* collist, float DeltaTime) {}
-
+	virtual void Collision(int coll_type, int damage, const XMFLOAT4& bullet_pos, const XMFLOAT4& target_pos) {}
 };
 
 class Rank1Object : public CGameObject
@@ -274,7 +277,7 @@ public:
 	virtual void Tick(const GameTimer& gt);
 	virtual void Render(ID3D12GraphicsCommandList* commandlist, const GameTimer& gt);
 	virtual void Collision(list<CGameObject*>* collist, float DeltaTime) {}
-
+	virtual void Collision(int coll_type, int damage, const XMFLOAT4& bullet_pos, const XMFLOAT4& target_pos) {}
 
 };
 
@@ -305,7 +308,7 @@ public:
 	virtual void Tick(const GameTimer& gt);
 	virtual void Render(ID3D12GraphicsCommandList* commandlist, const GameTimer& gt);
 	virtual void Collision(list<CGameObject*>* collist, float DeltaTime) {};
-
+	virtual void Collision(int coll_type, int damage, const XMFLOAT4& bullet_pos, const XMFLOAT4& target_pos) {}
 
 };
 
@@ -342,6 +345,7 @@ public:
 	virtual void Tick(const GameTimer& gt);
 	virtual void Render(ID3D12GraphicsCommandList* commandlist, const GameTimer& gt);
 	virtual void Collision(list<CGameObject*>* collist, float DeltaTime);
+	virtual void Collision(int coll_type, int damage, const XMFLOAT4& bullet_pos, const XMFLOAT4& target_pos) {}
 	virtual void EndAnimation(int nAni);
 
 };
@@ -375,7 +379,7 @@ public:
 	virtual void Tick(const GameTimer& gt);
 	virtual void Render(ID3D12GraphicsCommandList* commandlist, const GameTimer& gt);
 	virtual void Collision(list<CGameObject*>* collist, float DeltaTime);
-
+	virtual void Collision(int coll_type, int damage, const XMFLOAT4& bullet_pos, const XMFLOAT4& target_pos);
 	//서버용
 	short		 GetBulletID() const { return myID; }
 };
@@ -405,6 +409,7 @@ public:
 	virtual void Tick(const GameTimer& gt);
 	virtual void Render(ID3D12GraphicsCommandList* commandlist, const GameTimer& gt);
 	virtual void Collision(list<CGameObject*>* collist, float DeltaTime);
+	virtual void Collision(int coll_type, int damage, const XMFLOAT4& bullet_pos, const XMFLOAT4& target_pos);
 
 };
 class StoneBullet : public CGameObject
@@ -430,6 +435,7 @@ public:
 	virtual void Tick(const GameTimer& gt);
 	virtual void Render(ID3D12GraphicsCommandList* commandlist, const GameTimer& gt);
 	virtual void Collision(list<CGameObject*>* collist, float DeltaTime);
+	virtual void Collision(int coll_type, int damage, const XMFLOAT4& bullet_pos, const XMFLOAT4& target_pos);
 
 public:
 	//서버 추가
@@ -465,7 +471,7 @@ public:
 	virtual void Tick(const GameTimer& gt);
 	virtual void Render(ID3D12GraphicsCommandList* commandlist, const GameTimer& gt);
 	virtual void Collision(list<CGameObject*>* collist, float DeltaTime);
-
+	virtual void Collision(int coll_type, int damage, const XMFLOAT4& bullet_pos, const XMFLOAT4& target_pos);
 };
 
 //사각형모양
@@ -494,7 +500,7 @@ public:
 	virtual void Tick(const GameTimer& gt);
 	virtual void Render(ID3D12GraphicsCommandList* commandlist, const GameTimer& gt);
 	virtual void Collision(list<CGameObject*>* collist, float DeltaTime);
-
+	virtual void Collision(int coll_type, int damage, const XMFLOAT4& bullet_pos, const XMFLOAT4& target_pos);
 };
 
 // l 자 모양
@@ -523,7 +529,7 @@ public:
 	virtual void Tick(const GameTimer& gt);
 	virtual void Render(ID3D12GraphicsCommandList* commandlist, const GameTimer& gt);
 	virtual void Collision(list<CGameObject*>* collist, float DeltaTime);
-
+	virtual void Collision(int coll_type, int damage, const XMFLOAT4& bullet_pos, const XMFLOAT4& target_pos);
 };
 
 // l 자 모양
@@ -552,7 +558,7 @@ public:
 	virtual void Tick(const GameTimer& gt);
 	virtual void Render(ID3D12GraphicsCommandList* commandlist, const GameTimer& gt);
 	virtual void Collision(list<CGameObject*>* collist, float DeltaTime);
-
+	virtual void Collision(int coll_type, int damage, const XMFLOAT4& bullet_pos, const XMFLOAT4& target_pos);
 };
 
 // ㅗ 자 모양
@@ -581,7 +587,7 @@ public:
 	virtual void Tick(const GameTimer& gt);
 	virtual void Render(ID3D12GraphicsCommandList* commandlist, const GameTimer& gt);
 	virtual void Collision(list<CGameObject*>* collist, float DeltaTime);
-
+	virtual void Collision(int coll_type, int damage, const XMFLOAT4& bullet_pos, const XMFLOAT4& target_pos);
 };
 
 
@@ -610,7 +616,7 @@ public:
 	virtual void Tick(const GameTimer& gt);
 	virtual void Render(ID3D12GraphicsCommandList* commandlist, const GameTimer& gt);
 	virtual void Collision(list<CGameObject*>* collist, float DeltaTime) {}
-
+	virtual void Collision(int coll_type, int damage, const XMFLOAT4& bullet_pos, const XMFLOAT4& target_pos) {}
 };
 
 class DiceStrike : public CGameObject
@@ -637,7 +643,7 @@ public:
 	virtual void Tick(const GameTimer& gt);
 	virtual void Render(ID3D12GraphicsCommandList* commandlist, const GameTimer& gt);
 	virtual void Collision(list<CGameObject*>* collist, float DeltaTime);
-
+	virtual void Collision(int coll_type, int damage, const XMFLOAT4& bullet_pos, const XMFLOAT4& target_pos) {}
 
 };
 
@@ -661,7 +667,7 @@ public:
 	virtual void Tick(const GameTimer& gt);
 	virtual void Render(ID3D12GraphicsCommandList* commandlist, const GameTimer& gt);
 	virtual void Collision(list<CGameObject*>* collist, float DeltaTime) {}
-
+	virtual void Collision(int coll_type, int damage, const XMFLOAT4& bullet_pos, const XMFLOAT4& target_pos) {}
 };
 
 
@@ -683,7 +689,7 @@ public:
 	virtual void SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist);//셋메시는 메시를 최종적으로 생성한다. 즉 메시를구성하는 정점과 삼각형을구성하는인덱스버퍼생성
 	virtual void Render(ID3D12GraphicsCommandList* commandlist, const GameTimer& gt);
 	virtual void Collision(list<CGameObject*>* collist, float DeltaTime){}
-
+	virtual void Collision(int coll_type, int damage, const XMFLOAT4& bullet_pos, const XMFLOAT4& target_pos) {}
 };
 
 class CubeObject : public CGameObject
@@ -706,7 +712,7 @@ public:
 	virtual void SetMaterial(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist); //머테리얼 생성
 	virtual void Render(ID3D12GraphicsCommandList* commandlist, const GameTimer& gt);
 	virtual void Collision(list<CGameObject*>* collist, float DeltaTime){}
-
+	virtual void Collision(int coll_type, int damage, const XMFLOAT4& bullet_pos, const XMFLOAT4& target_pos) {}
 };
 
 class MoveCubeObject : public CGameObject
@@ -732,7 +738,7 @@ public:
 	virtual void SetMaterial(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist); //머테리얼 생성
 	virtual void Render(ID3D12GraphicsCommandList* commandlist, const GameTimer& gt);
 	virtual void Collision(list<CGameObject*>* collist, float DeltaTime);
-
+	virtual void Collision(int coll_type, int damage, const XMFLOAT4& bullet_pos, const XMFLOAT4& target_pos) {}
 };
 
 class RigidCubeObject : public CGameObject
@@ -755,7 +761,7 @@ public:
 	virtual void SetMaterial(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist); //머테리얼 생성
 	virtual void Render(ID3D12GraphicsCommandList* commandlist, const GameTimer& gt);
 	virtual void Collision(list<CGameObject*>* collist, float DeltaTime);
-
+	virtual void Collision(int coll_type, int damage, const XMFLOAT4& bullet_pos, const XMFLOAT4& target_pos) {}
 };
 
 class GridObject : public CGameObject
@@ -775,7 +781,7 @@ public:
 	virtual void SetMaterial(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist); //머테리얼 생성
 	virtual void Render(ID3D12GraphicsCommandList* commandlist, const GameTimer& gt);
 	virtual void Collision(list<CGameObject*>* collist, float DeltaTime){}
-
+	virtual void Collision(int coll_type, int damage, const XMFLOAT4& bullet_pos, const XMFLOAT4& target_pos) {}
 };
 
 class Floor2Object : public CGameObject
@@ -795,6 +801,7 @@ public:
 	virtual void SetMaterial(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist); //머테리얼 생성
 	virtual void Render(ID3D12GraphicsCommandList* commandlist, const GameTimer& gt);
 	virtual void Collision(list<CGameObject*>* collist, float DeltaTime) {}
+	virtual void Collision(int coll_type, int damage, const XMFLOAT4& bullet_pos, const XMFLOAT4& target_pos) {}
 };
 
 class SmallWallObject : public CGameObject
@@ -816,7 +823,7 @@ public:
 	virtual void SetMaterial(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist); //머테리얼 생성
 	virtual void Render(ID3D12GraphicsCommandList* commandlist, const GameTimer& gt);
 	virtual void Collision(list<CGameObject*>* collist, float DeltaTime) {}
-
+	virtual void Collision(int coll_type, int damage, const XMFLOAT4& bullet_pos, const XMFLOAT4& target_pos) {}
 };
 
 class BigWallObject : public CGameObject
@@ -837,7 +844,7 @@ public:
 	virtual void SetMaterial(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist); //머테리얼 생성
 	virtual void Render(ID3D12GraphicsCommandList* commandlist, const GameTimer& gt);
 	virtual void Collision(list<CGameObject*>* collist, float DeltaTime) {}
-
+	virtual void Collision(int coll_type, int damage, const XMFLOAT4& bullet_pos, const XMFLOAT4& target_pos) {}
 };
 
 class BuildingObject : public CGameObject
@@ -859,7 +866,7 @@ public:
 	virtual void SetMaterial(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist); //머테리얼 생성
 	virtual void Render(ID3D12GraphicsCommandList* commandlist, const GameTimer& gt);
 	virtual void Collision(list<CGameObject*>* collist, float DeltaTime) {}
-
+	virtual void Collision(int coll_type, int damage, const XMFLOAT4& bullet_pos, const XMFLOAT4& target_pos) {}
 };
 
 class ColumnObject : public CGameObject
@@ -881,6 +888,7 @@ public:
 	virtual void SetMaterial(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist); //머테리얼 생성
 	virtual void Render(ID3D12GraphicsCommandList* commandlist, const GameTimer& gt);
 	virtual void Collision(list<CGameObject*>* collist, float DeltaTime) {}
+	virtual void Collision(int coll_type, int damage, const XMFLOAT4& bullet_pos, const XMFLOAT4& target_pos) {}
 
 };
 class BreakCartObject : public CGameObject
@@ -902,6 +910,7 @@ public:
 	virtual void SetMaterial(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist); //머테리얼 생성
 	virtual void Render(ID3D12GraphicsCommandList* commandlist, const GameTimer& gt);
 	virtual void Collision(list<CGameObject*>* collist, float DeltaTime) {}
+	virtual void Collision(int coll_type, int damage, const XMFLOAT4& bullet_pos, const XMFLOAT4& target_pos) {}
 
 };
 
@@ -923,6 +932,7 @@ public:
 	virtual void SetMaterial(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist); //머테리얼 생성
 	virtual void Render(ID3D12GraphicsCommandList* commandlist, const GameTimer& gt);
 	virtual void Collision(list<CGameObject*>* collist, float DeltaTime) {}
+	virtual void Collision(int coll_type, int damage, const XMFLOAT4& bullet_pos, const XMFLOAT4& target_pos) {}
 
 };
 
@@ -945,6 +955,7 @@ public:
 	virtual void SetMaterial(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist); //머테리얼 생성
 	virtual void Render(ID3D12GraphicsCommandList* commandlist, const GameTimer& gt);
 	virtual void Collision(list<CGameObject*>* collist, float DeltaTime) {}
+	virtual void Collision(int coll_type, int damage, const XMFLOAT4& bullet_pos, const XMFLOAT4& target_pos) {}
 
 };
 
@@ -968,6 +979,7 @@ public:
 	virtual void SetMaterial(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist); //머테리얼 생성
 	virtual void Render(ID3D12GraphicsCommandList* commandlist, const GameTimer& gt);
 	virtual void Collision(list<CGameObject*>* collist, float DeltaTime) {}
+	virtual void Collision(int coll_type, int damage, const XMFLOAT4& bullet_pos, const XMFLOAT4& target_pos) {};
 
 };
 
@@ -993,6 +1005,7 @@ public:
 	virtual void Tick(const GameTimer& gt);
 	virtual void Render(ID3D12GraphicsCommandList* commandlist, const GameTimer& gt);
 	virtual void Collision(list<CGameObject*>* collist, float DeltaTime){}
+	virtual void Collision(int coll_type, int damage, const XMFLOAT4& bullet_pos, const XMFLOAT4& target_pos) {}
 
 };
 
@@ -1016,6 +1029,7 @@ public:
 	virtual void Tick(const GameTimer& gt);
 	virtual void Render(ID3D12GraphicsCommandList* commandlist, const GameTimer& gt);
 	virtual void Collision(list<CGameObject*>* collist, float DeltaTime) {}
+	virtual void Collision(int coll_type, int damage, const XMFLOAT4& bullet_pos, const XMFLOAT4& target_pos) {}
 
 };
 class ParticleObject3 : public CGameObject
@@ -1038,8 +1052,10 @@ public:
 	virtual void Tick(const GameTimer& gt);
 	virtual void Render(ID3D12GraphicsCommandList* commandlist, const GameTimer& gt);
 	virtual void Collision(list<CGameObject*>* collist, float DeltaTime) {}
+	virtual void Collision(int coll_type, int damage, const XMFLOAT4& bullet_pos, const XMFLOAT4& target_pos) {}
 
 };
+
 class ShadowObject : public CGameObject
 {
 public:
@@ -1090,6 +1106,8 @@ public:
 	virtual void Tick(const GameTimer& gt);
 	virtual void Render(ID3D12GraphicsCommandList* commandlist, const GameTimer& gt);	
 	virtual void Collision(list<CGameObject*>* collist, float DeltaTime) {}
+	virtual void Collision(int coll_type, int damage, const XMFLOAT4& bullet_pos, const XMFLOAT4& target_pos) {}
+
 };
 
 
@@ -1112,6 +1130,7 @@ public:
 	virtual void Tick(const GameTimer& gt);
 	virtual void Render(ID3D12GraphicsCommandList* commandlist, const GameTimer& gt);
 	virtual void Collision(list<CGameObject*>* collist, float DeltaTime){}
+	virtual void Collision(int coll_type, int damage, const XMFLOAT4& bullet_pos, const XMFLOAT4& target_pos) {}
 
 };
 
@@ -1139,6 +1158,7 @@ public:
 	virtual void Tick(const GameTimer& gt);
 	virtual void Render(ID3D12GraphicsCommandList* commandlist, const GameTimer& gt);
 	virtual void Collision(list<CGameObject*>* collist, float DeltaTime);
+	virtual void Collision(int coll_type, int damage, const XMFLOAT4& bullet_pos, const XMFLOAT4& target_pos) {}
 	virtual void EndAnimation(int nAni);
 
 public:
@@ -1170,5 +1190,6 @@ public:
 	virtual void Tick(const GameTimer& gt);
 	virtual void Render(ID3D12GraphicsCommandList* commandlist, const GameTimer& gt);
 	virtual void Collision(list<CGameObject*>* collist, float DeltaTime);
+	virtual void Collision(int coll_type, int damage, const XMFLOAT4& bullet_pos, const XMFLOAT4& target_pos) {}
 
 };

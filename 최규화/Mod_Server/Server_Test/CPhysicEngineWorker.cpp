@@ -81,7 +81,7 @@ void CPhysicEngineWorker::Update()
 		
 		for (auto bullet : g_bullets)
 		{
-			if (!bullet->GetBulletIsAlive()) continue;
+			if (!bullet->GetAlive()) continue;
 
 			bullet->Tick(m_deltime);
 			bullet->AfterGravitySystem();
@@ -97,7 +97,7 @@ void CPhysicEngineWorker::Update()
 		// alive 가 false인 오브젝트들 지워주기 	
 		for (auto iter = g_bullets.begin(); iter != g_bullets.end();)
 		{
-			if ((*iter)->GetBulletIsAlive() == false)
+			if (!(*iter)->GetAlive())
 			{			
 				if ((*iter)->GetObjectType() == protocol_NpcStoneBullet)
 				{
@@ -166,6 +166,7 @@ void CPhysicEngineWorker::CollisionSystem(double deltime)
 		{
 			client->Collision(&g_clients, deltime);
 			client->Collision(&g_staticobjs, deltime);
+			client->Collision(&g_moveobjs, deltime);
 			client->Collision_With_Waveshock();
 		}
 	}
@@ -188,7 +189,7 @@ void CPhysicEngineWorker::CollisionSystem(double deltime)
 
 	for (auto bullet : g_bullets)
 	{
-		if (bullet->GetBulletIsAlive() == true)
+		if (bullet->GetAlive())
 		{
 			bullet->Collision(&g_clients, deltime);
 			bullet->Collision(&g_npcs, deltime);

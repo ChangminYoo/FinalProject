@@ -15,6 +15,7 @@ protected:
 	Position3D m_savept;
 	Vel3f	   m_vel3f;
 	double	   m_lifetime{ 0 };
+	char	   m_after_collision;	//0: 없음 1: 데미지 & 별표
 
 public:
 	//__int64					      m_prevTime{ 0 };
@@ -35,12 +36,11 @@ public:
 
 	CTS_BulletObject_Info GetBulletInfo() { return m_bulldata; }
 	Position		  GetBulletOldPos() const { return m_pos4f; }
-	short			  GetBulletID() const { return m_id; }
-	unsigned short    GetBulletMasterID() const { return m_masterID; }
+
 	void			  SetBulletNewPos(float x, float y, float z, float w) { m_pos4f.x = x; m_pos4f.y = y; m_pos4f.z = z; m_pos4f.w = w; }
 	void			  SetBulletNewPos(const XMFLOAT4& xmf4) { m_pos4f.x = xmf4.x; m_pos4f.y = xmf4.y; m_pos4f.z = xmf4.z; m_pos4f.w = xmf4.w; }
 	void			  DestroyBullet() { m_alive = false; }
-	char			  GetBulletIsAlive() { return static_cast<bool>(m_alive); }
+	//virtual bool	  GetBulletIsAlive() { return static_cast<bool>(m_alive); }
 
 	XMFLOAT3		  GetLookvector() const { return m_Lookvector; }
 	Rotation		  GetBulletOldRot() const { return m_rot4f; }
@@ -54,6 +54,9 @@ public:
 
 public:
 	virtual NPC_BulletObject_Info GetChangedNPCBulletState() const; //이 클래스는 안쓰는 함수
+
+	short			  GetBulletID() const { return m_id; }
+	unsigned short    GetBulletMasterID() const { return m_masterID; }
 
 	virtual void UpdateDataForPacket() override;
 
@@ -75,7 +78,6 @@ private:
 	int	     m_npc_bulletID{ 0 };
 	int      m_masterID{ 0 };	//몬스터 NPC는 최대 65535마리를 넘지않음 - 각방 최대 3마리 
 											//5000명 동시접속 -> 5명씩 1000개의 방 -> 몬스터 최대 3000마리
-
 public:
 	NPC_BulletObject_Info m_npc_bulldata;
 
@@ -83,6 +85,7 @@ public:
 	CStoneBulletObject(CNpcObject *master, const XMFLOAT4& in_pos4f, const XMFLOAT4& in_rot4f, XMFLOAT4& ori, const XMFLOAT4& opp);
 
 	static int g_npc_bulletID;
+	const XMFLOAT4& GetOrgPlusPos() const { return m_orgpluspos; }
 
 	virtual NPC_BulletObject_Info GetChangedNPCBulletState() const override;
 
@@ -92,6 +95,7 @@ public:
 	virtual void AfterGravitySystem() override;
 
 	virtual void Collision(vector<CPlayerObject*>* clients, double deltime) override;
+	virtual void Collision(vector<CNpcObject*>* npcs, double deltime) override;
 	virtual void Collision(unordered_set<CStaticObject*>* sobjs, double deltime) override;
 
 };

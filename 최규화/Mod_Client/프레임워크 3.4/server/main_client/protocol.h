@@ -121,6 +121,8 @@ enum NPC_MONSTER_TYPE
 	IMP
 };
 
+enum AFTER_COLLISION_EFFECT { EMPTY, BOOM, DAMAGE, DAMAGE_AND_BOOM };
+
 enum PLAYERS { NO_PLAYER, LUNA, CMETRA, RONDO, DONALD };
 
 //-------------------------------기본데이터-------------------------------//
@@ -222,7 +224,7 @@ struct CTS_BulletObject_Info
 	unsigned short				my_id;					//2
 	unsigned char				type;					//1
 	char						alive;					//1
-	char						show_damage;			//1
+	char						after_coll;			//1
 	unsigned short				damage;					//2
 };
 
@@ -236,7 +238,7 @@ struct STC_BulletObject_Info
 	unsigned short				my_id;					//2
 	unsigned char				type;					//1
 	char						alive;					//1
-	char						show_damage;			//1
+	char						after_coll;				//1
 	unsigned short				damage;					//2
 };
 
@@ -248,7 +250,7 @@ struct NPC_BulletObject_Info
 	unsigned short				my_id;					//2
 	char						alive;					//1
 	char						create_first;			//1
-	char						show_damage;			//1
+	char						after_coll;			//1
 	unsigned short				damage;					//2
 };
 

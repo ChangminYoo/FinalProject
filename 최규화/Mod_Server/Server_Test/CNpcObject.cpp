@@ -57,14 +57,14 @@ CNpcObject::CNpcObject(int id, int type)
 	pp->SetBounce(false);
 	pp->SetMass(500);
 
-
 	//------------------------------ 물리효과 적용
 	GravitySystem(0);
 
 	pp->integrate(0);
-	m_pos4f = { xmf4_pos.x, xmf4_pos.y, xmf4_pos.z, xmf4_pos.w };
 
 	AfterGravitySystem(0);
+
+	UpdatePPosCenterPos();
 
 	//------------------------------
 	UpdateDataForPacket();
@@ -102,9 +102,14 @@ void CNpcObject::GetDamaged(int damage)
 		//NPC 몬스터 hp를 감소
 		m_ability.curHP -= damage;
 	}
-	else
+	
+	if (m_ability.curHP <= 0)
 	{
 		m_alive = false;
+		m_ani = Ani_State::Dead;
+		npc_data.alive = false;
+		npc_data.ani = Ani_State::Dead;
+		
 	}
 }
 
@@ -127,6 +132,11 @@ unsigned char CNpcObject::GetMyAnimation() const
 
 void CNpcObject::Tick(double deltime)
 {
+	auto t = pp->GetTotalForce();
+	t.y = 0;
+	pp->ForceClear();
+	pp->AddForce(t);
+
 	*pp->CenterPos = { m_pos4f.x, m_pos4f.y, m_pos4f.z, m_pos4f.w };
 	pp->integrate(deltime);
 
@@ -140,6 +150,11 @@ void CNpcObject::Tick(double deltime)
 
 void CNpcObject::Tick(double deltime, Position & pos4f)
 {
+	auto t = pp->GetTotalForce();
+	t.y = 0;
+	pp->ForceClear();
+	pp->AddForce(t);
+
 	*pp->CenterPos = { pos4f.x, pos4f.y, pos4f.z, pos4f.w };
 	pp->integrate(deltime);
 

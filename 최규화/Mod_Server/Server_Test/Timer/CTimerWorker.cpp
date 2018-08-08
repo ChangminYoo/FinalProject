@@ -146,7 +146,21 @@ void CTimerWorker::ProcessPacket(event_type * et)
 			//0. MoveObject 
 			for (const auto& mvobj : g_moveobjs)
 			{
-				if (mvobj->GetIsCreateFirst())
+				//if (!mvobj->GetIsCreateFirst())
+				//{
+					STC_MoveObject_NoCreate stc_move_object_no_create;
+					stc_move_object_no_create.mvobj_data.id = mvobj->GetMoveObjectData().id;
+					stc_move_object_no_create.mvobj_data.pos4f = mvobj->GetMoveObjectData().pos4f;
+					stc_move_object_no_create.mvobj_data.rot4f = mvobj->GetMoveObjectData().rot4f;
+
+					for (const auto& client : g_clients)
+					{
+						if (client->GetIsAI()) continue;
+						client->SendPacket(reinterpret_cast<Packet*>(&stc_move_object_no_create));
+					}
+				//}
+
+				/*if (mvobj->GetIsCreateFirst())
 				{
 					STC_MoveObject stc_move_object;
 					stc_move_object.mvobj_data = move(mvobj->GetMoveObjectData());
@@ -157,29 +171,18 @@ void CTimerWorker::ProcessPacket(event_type * et)
 						//if (!client->GetConnectState()) continue;
 
 						client->SendPacket(reinterpret_cast<Packet*>(&stc_move_object));
-					}
 
-					if (mvobj->GetIsCreateFirst())
-					{
-						mvobj->SetIsCreateFirst(false);
-						mvobj->UpdateCreateFirstPacketData(false);
+						if (mvobj->GetIsCreateFirst())
+						{
+							mvobj->SetIsCreateFirst(false);
+							mvobj->UpdateCreateFirstPacketData(false);
+						}
 					}
 				}
 				else
 				{
-					STC_MoveObject_NoCreate stc_move_object_no_create;
-					stc_move_object_no_create.mvobj_data.id = mvobj->GetMoveObjectData().id;
-					stc_move_object_no_create.mvobj_data.pos4f = mvobj->GetMoveObjectData().pos4f;
-					stc_move_object_no_create.mvobj_data.rot4f = mvobj->GetMoveObjectData().rot4f;
-
-					for (const auto& client : g_clients)
-					{
-						if (client->GetIsAI()) continue;
-						//if (!client->GetConnectState()) continue;
-
-						client->SendPacket(reinterpret_cast<Packet*>(&stc_move_object_no_create));
-					}
-				}			
+				}
+				*/							
 			}
 
 			//1. RigidbodyObject
@@ -201,8 +204,23 @@ void CTimerWorker::ProcessPacket(event_type * et)
 			STC_CharCurrState stc_char_state;
 			for(auto myclient : g_clients)
 			{
-				if (myclient->GetIsAI() == true || myclient->GetConnectState() == false) continue;
+				if (myclient->GetIsAI()) continue;
 				
+				if (!myclient->GetFirstMoveObjects())
+				{
+					for (const auto& mvobj : g_moveobjs)
+					{
+						STC_MoveObject stc_move_object;
+						stc_move_object.mvobj_data = move(mvobj->GetMoveObjectData());
+						myclient->SendPacket(reinterpret_cast<Packet*>(&stc_move_object));
+						//mvobj->SetIsCreateFirst(false);
+						//mvobj->UpdateCreateFirstPacketData(false);
+					}
+				}
+				myclient->SetFirstMoveObjects(true);
+
+				if (!myclient->GetConnectState()) continue;
+
 				for (auto otherclient : g_clients)
 				{
 					stc_char_state.player_data = move(otherclient->m_pdata);
@@ -216,7 +234,7 @@ void CTimerWorker::ProcessPacket(event_type * et)
 			for (auto npc_monster : g_npcs)
 			{
 				if (!npc_monster->GetMyBasicPacketData().connect) continue;
-				if (!npc_monster->GetAlive()) continue;
+				//if (!npc_monster->GetAlive()) continue;
 
 				for (auto client : g_clients)
 				{
@@ -233,7 +251,7 @@ void CTimerWorker::ProcessPacket(event_type * et)
 				//	"Position: " << bullet->m_bulldata.pos4f.x << ", " << bullet->m_bulldata.pos4f.y << ", " << bullet->m_bulldata.pos4f.z <<
 				//	"LifeTime: " << bullet->GetBulletLifeTime() <<" " << "IsAlive:" << static_cast<int>(bullet->GetBulletIsAlive()) << endl;
 
-				if (bullet->GetBulletIsAlive() == true)
+				if (bullet->GetAlive())
 				{
 					//서버->클라 불렛 구조체 
 					/*
@@ -253,6 +271,13 @@ void CTimerWorker::ProcessPacket(event_type * et)
 					{
 						STC_NpcMonsterAttackStoneBullet stc_imp_bullet;
 						stc_imp_bullet.npc_bulldata = bullet->GetChangedNPCBulletState();
+						
+
+						auto stone_rnpos = dynamic_cast<CStoneBulletObject*>(bullet)->GetOrgPlusPos();
+						stc_imp_bullet.stone_rnpos = { stone_rnpos.x, stone_rnpos.y, stone_rnpos.z, stone_rnpos.w };
+
+						//cout << "NPC Bullet ID: " << stc_imp_bullet.npc_bulldata.my_id << ", " << "PosXYZW: " << stc_imp_bullet.npc_bulldata.pos4f.x << ", "
+						//	<< stc_imp_bullet.npc_bulldata.pos4f.y << ", " << stc_imp_bullet.npc_bulldata.pos4f.z << ", " << stc_imp_bullet.npc_bulldata.pos4f.w << "\n";
 
 						for (auto client : g_clients)
 						{
@@ -285,10 +310,10 @@ void CTimerWorker::ProcessPacket(event_type * et)
 							}
 
 						}
-
-						if (bullet->GetIsCreateFirst())
-							bullet->SetIsCreateFirst(false);
 					}
+
+					if (bullet->GetIsCreateFirst())
+						bullet->SetIsCreateFirst(false);
 
 				}
 			}			

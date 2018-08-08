@@ -6,11 +6,22 @@ CPlayer::CPlayer(HWND hWnd,ID3D12Device* Device, ID3D12GraphicsCommandList* comm
 	//벽대신 다른 오브젝트를 추가할것.
 	TraceObject = new RangeObject(Device, commandlist, NULL, NULL, XMFLOAT4(-10000, -10000, -10000, 1));
 	PlayerObject = NULL;
-
+	
+	
+	
+	//스킬넘버링 0 : 라이트 큐브
+	//	스킬넘버링 1 : 헤비 큐브
+	//	스킬넘버링 2 : 테트라이크
+	//	스킬넘버링 3 : 다이스트라이크
+	//	스킬넘버링 4 : 파동파
+	//	스킬넘버링 5 : 실드
+	//	스킬넘버링 6 : 해머불렛
+	//	스킬넘버링 7 : 메테오
+		
 
 	skilldata.Skills[0] = 0;
-	skilldata.Skills[1] = 1; //1
-	skilldata.Skills[2] = 2; //2
+	skilldata.Skills[1] = 4; //1
+	skilldata.Skills[2] = 5; //2
 	skilldata.Skills[3] = 3;
 }
 

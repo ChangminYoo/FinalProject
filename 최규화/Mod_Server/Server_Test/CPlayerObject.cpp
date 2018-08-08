@@ -41,6 +41,7 @@ bool CPlayerObject::CheckPlayerInfo()
 	return true;
 }
 
+/*
 void CPlayerObject::Init_MonsterInfo()
 {
 	m_state = IDLE;
@@ -100,13 +101,14 @@ void CPlayerObject::Init_MonsterInfo()
 
 	//------------------------------
 }
+*/
 
 void CPlayerObject::Init_PlayerInfo()
 {
 	m_state = IDLE;
 
+	m_set_first_moveobjs = false;
 	//-------------------------- 기본 데이터설정
-
 	m_ani = Ani_State::Idle;
 	m_connect = true;
 	m_dir = 0;
@@ -409,6 +411,22 @@ void CPlayerObject::ProcessPacket(Packet * packet)
 
 	switch (packet[1])
 	{
+	case PACKET_PROTOCOL_TYPE::NPC_MONSTER_ANIM:
+	{
+		auto data = reinterpret_cast<STC_MyNPCAnim*>(packet);
+
+		for (auto& npc : g_npcs)
+		{
+			if (npc->GetID() == data->id)
+			{
+				npc->SetMyAnimation(data->npc_anim);
+				//cout << "NPC ID: " << static_cast<int>(data->id) << "의 애니메이션은 " << static_cast<int>(npc->GetMyAnimation()) << "입니다.\n";
+				break;
+			}
+		}
+	}
+	break;
+
 	case PACKET_PROTOCOL_TYPE::PLAYER_MOVE:
 	{
 		if (m_state == PLAYER_STATE::DEAD)
@@ -417,7 +435,7 @@ void CPlayerObject::ProcessPacket(Packet * packet)
 		auto mdata = reinterpret_cast<STC_CharMove*>(packet);
 		m_dir = mdata->dir;
 
-		cout << "Direction: " << static_cast<int>(m_dir) << "\n";
+		//cout << "Direction: " << static_cast<int>(m_dir) << "\n";
 
 	}
 	break;
@@ -474,40 +492,6 @@ void CPlayerObject::ProcessPacket(Packet * packet)
 			n_bldata->bull_data.vel3f, n_bldata->bull_data.type, n_bldata->bull_data.endpoint, n_bldata->bull_data.degree);
 
 		g_bullets.emplace_back(g_bullobj);
-
-		/*
-		STC_Attack stc_attack;
-		stc_attack.bull_data.pos4f = n_bldata->bull_data.pos4f;
-		stc_attack.bull_data.rot4f = n_bldata->bull_data.rot4f;
-		stc_attack.bull_data.endpoint = n_bldata->bull_data.endpoint;
-		stc_attack.bull_data.master_id = n_bldata->bull_data.master_id;
-		stc_attack.bull_data.my_id = n_bldata->bull_data.my_id;
-		stc_attack.bull_data.type = n_bldata->bull_data.type;
-		stc_attack.bull_data.alive = n_bldata->bull_data.alive;
-		stc_attack.bull_data.degree = n_bldata->bull_data.degree;
-
-		stc_attack.is_first = g_bullobj->GetIsFirstBullet();
-		//불렛이 생성된 위치를 나 말고도 상대방도 알고 있어야함. //상대방 클라이언트에게 내 불렛 생성위치를 보냄
-		for (auto client : g_clients)
-		{
-			//불렛을 쏜 클라이언트는 자신이 불렛을 생성했으므로 따로 생성정보를 보내주지 않아도됨 
-			if (client->m_id == n_bldata->bull_data.master_id) continue;
-			if (client->GetIsAI() == true || client->GetConnectState() == false) continue;
-		
-			client->SendPacket(reinterpret_cast<Packet*>(&stc_attack));	
-		}
-
-		if (g_bullobj->GetIsFirstBullet())
-			g_bullobj->SetIsFirstBullet(false);
-
-		g_bullets.emplace_back(g_bullobj);
-
-		*/
-
-		//if (n_bldata->bull_data.type == BULLET_TYPE::protocol_LightBullet)
-		//	g_timer_queue.AddEvent(n_bldata->bull_data.myID, 0, LIGHT_BULLET, true, n_bldata->bull_data.Master_ID);
-		//if (n_bldata->bull_data.type == BULLET_TYPE::protocol_HeavyBullet)
-		//	g_timer_queue.AddEvent(n_bldata->bull_data.myID, 0, HEAVY_BULLET, true, n_bldata->bull_data.Master_ID);
 	}
 	break;
 
@@ -710,34 +694,6 @@ void CPlayerObject::ProcessPacket(Packet * packet)
 			g_bullets.emplace_back(g_bullobj);
 		}
 
-		/*
-		STC_Attack stc_attack;
-		stc_attack.bull_data.pos4f = n_bldata->bull_data.pos4f;
-		stc_attack.bull_data.rot4f = n_bldata->bull_data.rot4f;
-		stc_attack.bull_data.endpoint = n_bldata->bull_data.endpoint;
-		stc_attack.bull_data.master_id = n_bldata->bull_data.master_id;
-		stc_attack.bull_data.my_id = n_bldata->bull_data.my_id;
-		stc_attack.bull_data.type = n_bldata->bull_data.type;
-		stc_attack.bull_data.alive = n_bldata->bull_data.alive;
-		stc_attack.bull_data.degree = n_bldata->bull_data.degree;
-
-		stc_attack.is_first = g_bullobj->GetIsFirstBullet();
-		//불렛이 생성된 위치를 나 말고도 상대방도 알고 있어야함. //상대방 클라이언트에게 내 불렛 생성위치를 보냄
-		for (auto client : g_clients)
-		{
-		//불렛을 쏜 클라이언트는 자신이 불렛을 생성했으므로 따로 생성정보를 보내주지 않아도됨
-		if (client->m_id == n_bldata->bull_data.master_id) continue;
-		if (client->GetIsAI() == true || client->GetConnectState() == false) continue;
-
-		client->SendPacket(reinterpret_cast<Packet*>(&stc_attack));
-		}
-
-		if (g_bullobj->GetIsFirstBullet())
-		g_bullobj->SetIsFirstBullet(false);
-
-		g_bullets.emplace_back(g_bullobj);
-		*/
-
 	}
 	break;
 
@@ -864,6 +820,42 @@ void CPlayerObject::Collision(unordered_set<CStaticObject*>* sobjs, double delti
 		}
 	}
 	
+}
+
+
+void CPlayerObject::Collision(unordered_set<CMoveCubeObject*>* mvobjs, double deltime)
+{
+	for (auto iter = mvobjs->begin(); iter != mvobjs->end(); ++iter)
+	{
+		bool test = pp->CollisionTest(*(*iter)->GetPhysicsPoint(), m_Lookvector, m_Rightvector, m_Upvector,
+			(*iter)->GetLookVector(), (*iter)->GetRightVector(), (*iter)->GetUpVector());
+
+		if (test)
+		{
+			if (pp->pAxis.y > 0)
+			{
+				pp->SetVelocity(pp->GetVelocity().x, 0, pp->GetVelocity().z);
+				m_airbone = false;
+			}
+
+			if (pp->pAxis.y < 0)
+			{
+				(*iter)->GetPhysicsPoint()->SetVelocity((*iter)->GetPhysicsPoint()->GetVelocity().x, 0, (*iter)->GetPhysicsPoint()->GetVelocity().z);
+				(*iter)->SetAirbone(false);
+			}
+
+			XMFLOAT3 cn;
+			cn = XMFloat4to3(Float4Add(pp->GetPosition(), (*(*iter)->GetPhysicsPoint()).GetPosition(), false));
+			cn = Float3Normalize(cn);
+
+			pp->CollisionResolve(*(*iter)->GetPhysicsPoint(), cn, deltime);
+			UpdatePPosCenterPos();
+			(*iter)->UpdatePPosCenterPos();
+
+			//cout << "스테틱 오브젝트와 충돌 " << endl;
+
+		}
+	}
 }
 
 void CPlayerObject::Collision_With_Waveshock()

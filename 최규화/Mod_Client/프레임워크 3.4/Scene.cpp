@@ -594,8 +594,8 @@ void Scene::CreateUI()
 			break;
 
 		case 4: // 파동파
-			ct = ct = Player->skilldata.SkillsMaxCoolTime[Player->skilldata.Skills[i]];
-
+			ct = Player->skilldata.SkillsMaxCoolTime[Player->skilldata.Skills[i]];
+			break;
 		case 5: //실드
 			ct = Player->skilldata.SkillsMaxCoolTime[Player->skilldata.Skills[i]];
 
@@ -730,6 +730,11 @@ void Scene::Tick(const GameTimer & gt)
 
 			if ((*i)->DelObj == true)
 			{
+				if ((*i)->isHit1)
+				{
+					Sound->PlaySoundEffect(CSound::SoundType::HIT1);
+				}
+
 				delete *i;//실제 게임오브젝트의 메모리 해제
 				i = BulletObject.erase(i);//리스트상에서 해당 요소를 지움
 
@@ -800,11 +805,7 @@ void Scene::Tick(const GameTimer & gt)
 		//--------------------------------------------------------------
 		for (auto b = DynamicObject.begin(); b != DynamicObject.end(); b++)
 		{
-			if ((*b)->isHit1)
-			{
-				Sound->PlaySoundEffect(CSound::SoundType::HIT1);
-				(*b)->isHit1 = false;
-			}
+		
 
 			(*b)->Tick(gt);
 
@@ -838,7 +839,9 @@ void Scene::Tick(const GameTimer & gt)
 
 		//불렛
 		for (auto b = BulletObject.begin(); b != BulletObject.end(); b++)
+		{
 			(*b)->Tick(gt);
+		}
 
 
 		for (auto b = BbObject.begin(); b != BbObject.end(); b++)
@@ -1159,7 +1162,7 @@ void Scene::SET_NPC_BY_SERVER_DATA(const unsigned short & id, const Npc_Data & d
 	}
 }
 
-void Scene::SET_NPC_ATTACK_BY_SERVER_DATA(const unsigned short & id, const NPC_BulletObject_Info & data, unsigned char type, bool first_bullet, const XMFLOAT4& xmf4_pos)
+void Scene::SET_NPC_ATTACK_BY_SERVER_DATA(const unsigned short & id, const NPC_BulletObject_Info & bulldata, unsigned char type, bool first_bullet, const XMFLOAT4& xmf4_pos)
 {
 	switch (type)
 	{
@@ -1172,7 +1175,7 @@ void Scene::SET_NPC_ATTACK_BY_SERVER_DATA(const unsigned short & id, const NPC_B
 				for (const auto& find_npc : DynamicObject)
 				{
 					if (!find_npc->isNPC) continue;
-					if (find_npc->m_npc_data.id == data.master_id)
+					if (find_npc->m_npc_data.id == bulldata.master_id)
 					{
 						master_npc = find_npc;
 						break;
@@ -1187,40 +1190,34 @@ void Scene::SET_NPC_ATTACK_BY_SERVER_DATA(const unsigned short & id, const NPC_B
 				BulletObject.emplace_back(new StoneBullet(master_npc->device, master_npc->commandlist, master_npc->ParticleList,
 										 NULL, master_npc, XMFLOAT4(0, 0, 0, 1), NULL, master_npc->CenterPos, xmf4_pos));
 
-				cout << "StoneBullet ID: " << data.my_id << "Create First \n";
+				cout << "StoneBullet ID: " << bulldata.my_id << "Create First \n";
 
 			}
 
 			for (auto& bullet : BulletObject)
 			{
 				//서버에서 날라온 불릿아이디와 클라관리 불릿아이디가 같고 그들의 주인 ID가 같을 때
-				if (bullet->m_npc_data.id == data.master_id && dynamic_cast<StoneBullet*>(bullet)->myNPC_StoneBulletID == data.my_id)
+				if (bullet->m_npc_data.id == bulldata.master_id && dynamic_cast<StoneBullet*>(bullet)->myNPC_StoneBulletID == bulldata.my_id)
 				{
-					if (!data.alive)
+					if (!bulldata.alive)
 					{
 						bullet->DelObj = true;
 
-						if (data.show_damage)
-						{
-							if (bullet->ParticleList != NULL)
-							{
-								bullet->ParticleList->push_back(new DamageObject(device, commandlist, bullet->ParticleList, NULL, data.damage, XMFLOAT4(data.pos4f.x, data.pos4f.y + 11, data.pos4f.z, 0)));
-							}
-						}
-
+						//불렛과 대상 충돌 후 파티클 작업
+						bullet->Collision(bulldata.after_coll, bulldata.damage, XMFLOAT4(bulldata.pos4f.x, bulldata.pos4f.y, bulldata.pos4f.z, bulldata.pos4f.w), XMFLOAT4(bulldata.pos4f.x, bulldata.pos4f.y, bulldata.pos4f.z, bulldata.pos4f.w));		
 						break;
 					}
 
-					bullet->m_bullet_data.alive = data.alive;
-					bullet->m_bullet_data.pos4f = data.pos4f;
-					bullet->m_bullet_data.rot4f = data.rot4f;
-					bullet->m_bullet_data.master_id = data.master_id;
-					bullet->m_bullet_data.my_id = data.my_id;
+					bullet->m_bullet_data.alive = bulldata.alive;
+					bullet->m_bullet_data.pos4f = bulldata.pos4f;
+					bullet->m_bullet_data.rot4f = bulldata.rot4f;
+					bullet->m_bullet_data.master_id = bulldata.master_id;
+					bullet->m_bullet_data.my_id = bulldata.my_id;
 					
-					bullet->CenterPos = { data.pos4f.x, data.pos4f.y, data.pos4f.z, data.pos4f.w };
+					bullet->CenterPos = { bulldata.pos4f.x, bulldata.pos4f.y, bulldata.pos4f.z, bulldata.pos4f.w };
 					bullet->pp->SetPosition(&bullet->CenterPos);
 
-					bullet->Orient = { data.rot4f.x, data.rot4f.y, data.rot4f.z, data.rot4f.w };
+					bullet->Orient = { bulldata.rot4f.x, bulldata.rot4f.y, bulldata.rot4f.z, bulldata.rot4f.w };
 					bullet->UpdateLookVector();
 
 					break;
@@ -1389,41 +1386,43 @@ void Scene::SET_BULLET_BY_SERVER_DATA(STC_BulletObject_Info & bulldata, const un
 					Player->CreateOtherClientDicestrikeSkill(device, commandlist, bulldata.endpoint, nullptr, &BulletObject, bulldata, OffLookvector);
 				else
 					Player->CreateOtherClientBullet(device, commandlist, bulldata.endpoint, nullptr, &BulletObject, bulldata);
-
 				//break;
 			}
 		}
 
-		for (auto& lbul : BulletObject)
+		for (auto lbul : BulletObject)
 		{
 			if (bulldata.master_id == lbul->m_bullet_data.master_id && bulldata.my_id == lbul->m_bullet_data.my_id)
 			{
 				//불렛이 소멸됨 -> 삭제
 				if (!bulldata.alive)
-				{
-					lbul->DelObj = true;
+				{				
+					lbul->m_bullet_data = move(bulldata);
 
-					//불렛과 충돌하여 데미지를 띄워야하는 객체들 = 데미지 파티클을 띄운다(플레이어, 몬스터)
-					if (bulldata.show_damage)
-					{
-						if (lbul->ParticleList != NULL)
-						{
-							lbul->ParticleList->push_back(new DamageObject(device, commandlist, lbul->ParticleList, NULL, bulldata.damage, XMFLOAT4(bulldata.pos4f.x, bulldata.pos4f.y + 11, bulldata.pos4f.z, 0)));
-						}
-					}
-		
-					//불렛이 사라지면서 생기는 파티클 = 모든 불렛은 이 파티클을 띄워야한다
-					auto BulletParticles2 = new ParticleObject2(device, commandlist, lbul->ParticleList, NULL, lbul, 0.7f, 100, XMFLOAT4(bulldata.pos4f.x, bulldata.pos4f.y, bulldata.pos4f.z, 0));
-					lbul->ParticleList->push_back(BulletParticles2);
+					lbul->CenterPos = { bulldata.pos4f.x, bulldata.pos4f.y, bulldata.pos4f.z, bulldata.pos4f.w };
+					lbul->pp->SetPosition(&lbul->CenterPos);
 
-					//cout << "Bullet ID: " << bulldata.my_id << "Bullet MID: " << bulldata.master_id <<
-					//	"Position: " << bulldata.pos4f.x << ", " << bulldata.pos4f.y << ", " << bulldata.pos4f.z << ", " << bulldata.pos4f.w <<
-					//	"IsAlive: " << static_cast<bool>(bulldata.alive) << endl;
+					lbul->Orient = { bulldata.rot4f.x, bulldata.rot4f.y, bulldata.rot4f.z, bulldata.rot4f.w };
+					lbul->UpdateLookVector();
 
+					lbul->m_particle_type = bulldata.after_coll;
+					
+					//불렛과 대상 충돌 후 파티클 작업
+					//lbul->Collision(bulldata.after_coll, bulldata.damage, XMFLOAT4(bulldata.pos4f.x, bulldata.pos4f.y, bulldata.pos4f.z, bulldata.pos4f.w), XMFLOAT4(bulldata.pos4f.x, bulldata.pos4f.y, bulldata.pos4f.z, bulldata.pos4f.w));
+				
+					//lbul->DelObj = true;
+					/*
+					cout << "Bullet ID: " << bulldata.my_id << "Bullet MID: " << bulldata.master_id <<
+						"Position: " << bulldata.pos4f.x << ", " << bulldata.pos4f.y << ", " << bulldata.pos4f.z << ", " << bulldata.pos4f.w <<
+						"IsAlive: " << static_cast<bool>(bulldata.alive) << endl;
+					
+					*/
+					
 					break;
 				}
 
 				lbul->m_bullet_data = move(bulldata);
+				lbul->m_bullet_data.alive = true;
 
 				lbul->CenterPos = { bulldata.pos4f.x, bulldata.pos4f.y, bulldata.pos4f.z, bulldata.pos4f.w };
 				lbul->pp->SetPosition(&lbul->CenterPos);
@@ -1431,11 +1430,12 @@ void Scene::SET_BULLET_BY_SERVER_DATA(STC_BulletObject_Info & bulldata, const un
 				lbul->Orient = { bulldata.rot4f.x, bulldata.rot4f.y, bulldata.rot4f.z, bulldata.rot4f.w };
 				lbul->UpdateLookVector();
 
-				//cout << "Bullet ID: " << lbul->myID << "PosX: " << lbul->CenterPos.x << ", " << lbul->CenterPos.y << ", " << lbul->CenterPos.z << ", " << lbul->CenterPos.w << "\n";
-				//cout << "Bullet ID: " << lbul->myID << "Orient: " << lbul->Orient.x << ", " << lbul->Orient.y << ", " << lbul->Orient.z << ", " << lbul->Orient.w << "\n";
-				//cout << "Bullet ID: " << lbul->myID << "Lookxyz: " << lbul->Lookvector.x << ", " << lbul->Lookvector.y << ", " << lbul->Lookvector.z << "\n";
-				//cout << "Bullet ID: " << lbul->myID << "Rightxyz: " << lbul->Rightvector.x << ", " << lbul->Rightvector.y << ", " << lbul->Rightvector.z << "\n";
-
+				/*
+				cout << "Bullet ID: " << lbul->myID << "PosX: " << lbul->CenterPos.x << ", " << lbul->CenterPos.y << ", " << lbul->CenterPos.z << ", " << lbul->CenterPos.w << "\n";
+				cout << "Bullet ID: " << lbul->myID << "Orient: " << lbul->Orient.x << ", " << lbul->Orient.y << ", " << lbul->Orient.z << ", " << lbul->Orient.w << "\n";
+				cout << "Bullet ID: " << lbul->myID << "Lookxyz: " << lbul->Lookvector.x << ", " << lbul->Lookvector.y << ", " << lbul->Lookvector.z << "\n";
+				cout << "Bullet ID: " << lbul->myID << "Rightxyz: " << lbul->Rightvector.x << ", " << lbul->Rightvector.y << ", " << lbul->Rightvector.z << "\n";
+				*/
 
 				break;
 			}

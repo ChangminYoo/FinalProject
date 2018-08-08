@@ -28,6 +28,9 @@ CBulletObject::CBulletObject(const unsigned short & master_id, const unsigned sh
 
 	m_createfirst = true;
 
+	m_after_collision = AFTER_COLLISION_EFFECT::EMPTY;		//기본은 충돌 후 파티클 생성x
+
+
 	/*
 	if (m_type == protocol_DiceBullet)
 	{
@@ -120,6 +123,7 @@ CBulletObject::CBulletObject(const unsigned short & master_id, const unsigned sh
 		m_ability.attack = 20;
 	}
 	
+	m_bulldata.damage = m_ability.attack;
 	UpdateDataForPacket();
 
 	//--------------------------------------------------------------------------------------------
@@ -150,7 +154,8 @@ STC_BulletObject_Info CBulletObject::GetChangedBulletState() const
 	stc_bullet.pos4f = m_pos4f;
 	stc_bullet.rot4f = m_rot4f;
 	stc_bullet.type = m_type;
-
+	stc_bullet.after_coll = m_after_collision;
+	stc_bullet.damage = m_bulldata.damage;
 
 	return STC_BulletObject_Info(stc_bullet);
 }
@@ -166,6 +171,7 @@ void CBulletObject::UpdateDataForPacket()
 	m_bulldata.type = m_type;
 	m_bulldata.vel3f = m_vel3f;
 	m_bulldata.degree = m_degree;
+	m_bulldata.after_coll = m_after_collision;
 }
 
 void CBulletObject::AfterGravitySystem()
@@ -232,14 +238,27 @@ void CBulletObject::Collision(vector<CPlayerObject*>* clients, double deltime)
 {
 	for (auto iter = clients->begin(); iter != clients->end(); ++iter)
 	{
-		if ((*iter)->GetPhysicsPoint() != nullptr && (*iter)->GetID() != m_masterID)
+		//클라이언트 아이디 == 불렛의 주인아이디 -> 충돌x
+		if ((*iter)->GetID() == m_masterID) continue;
+
+		if ((*iter)->GetPhysicsPoint() != nullptr)
 		{
 			bool test = pp->CollisionTest(*(*iter)->GetPhysicsPoint(), m_Lookvector, m_Rightvector, m_Upvector,
 				(*iter)->GetLookVector(), (*iter)->GetRightVector(), (*iter)->GetUpVector());
 
 			if (test)
 			{
+				//player 와 불렛이 부딪혔을 경우 데미지 파티클을 띄워야함
+				m_after_collision = AFTER_COLLISION_EFFECT::DAMAGE_AND_BOOM;
+				m_bulldata.after_coll = m_after_collision;
+
 				(*iter)->GetDamaged(m_ability.attack);
+
+				//해당 불렛을 맞은 플레이어가 쉴드 상태일경우 // 데미지 1 파티클이 뜨도록 클라에보내야됨
+				if ((*iter)->GetShieldState())
+					m_bulldata.damage = 1;
+				else
+					m_bulldata.damage = m_ability.attack;
 
 				//고정된 물체가 아니면
 				// 불렛을 맞은 상대가 죽었을 경우, 그 상대가 플레이어일 경우 점수를 올린다
@@ -273,20 +292,28 @@ void CBulletObject::Collision(vector<CNpcObject*>* npcs, double deltime)
 {
 	for (auto iter = npcs->begin(); iter != npcs->end(); ++iter)
 	{
+		//불렛(플레이어 불렛, npc 불렛)과 그들의 주인(npc)와 충돌x
 		if ((*iter)->GetPhysicsPoint() != nullptr)
 		{
+			//해당 불렛이 임프가 쏜 불렛인 경우 스킵
+			if (!(*iter)->GetAlive()) continue;
+			if (this->GetObjectType() == protocol_NpcStoneBullet) continue;
+
 			bool test = pp->CollisionTest(*(*iter)->GetPhysicsPoint(), m_Lookvector, m_Rightvector, m_Upvector,
 				(*iter)->GetLookVector(), (*iter)->GetRightVector(), (*iter)->GetUpVector());
 
 			if (test)
 			{
+				//NPC 와 불렛이 부딪혔을 경우 데미지 파티클을 띄워야함
+				m_after_collision = AFTER_COLLISION_EFFECT::DAMAGE_AND_BOOM;
+				m_bulldata.after_coll = m_after_collision;
+
 				(*iter)->GetDamaged(m_ability.attack);
 
 				//npc 몬스터인 경우 -> 총알 방향을 보도록한다
 				if ((*iter)->GetMyBasicPacketData().monster_type == IMP)
-				{
 					(*iter)->fsm->aidata.LastPosition = this->GetCenterPos4f();
-				}
+				
 
 				//플레이어가 쏜 불렛에 맞고 임프(IMP)몬스터의 체력이 0이하가 되어 죽었음
 				//해당 불렛의 주인ID를 가진 플레이어가 살아있다면 점수를 올린다
@@ -303,7 +330,6 @@ void CBulletObject::Collision(vector<CNpcObject*>* npcs, double deltime)
 				XMFLOAT3 cn;
 				cn = XMFloat4to3(Float4Add(pp->GetPosition(), (*(*iter)->GetPhysicsPoint()).GetPosition(), false));
 				cn = Float3Normalize(cn);
-
 				(*iter)->GetPhysicsPoint()->SetBounce(true);
 
 				pp->ResolveVelocity(*(*iter)->GetPhysicsPoint(), cn, deltime);
@@ -330,6 +356,10 @@ void CBulletObject::Collision(unordered_set<CStaticObject*>* sobjs, double delti
 
 			if (test)
 			{
+				//StaticObject 와 불렛이 부딪혔을 경우 데미지 파티클을 띄우지 말아야함
+				m_after_collision = AFTER_COLLISION_EFFECT::BOOM;
+				m_bulldata.after_coll = m_after_collision;
+
 				//고정된 물체면
 				XMFLOAT3 cn;
 				cn = pp->pAxis;
@@ -393,7 +423,6 @@ CStoneBulletObject::CStoneBulletObject(CNpcObject *master, const XMFLOAT4 & in_p
 	m_ability.attack = 40;
 	m_ability.speed = 0;
 	m_godmode = false;
-	m_deltime = 10;
 	m_lifetime = 10;
 
 	pp = new PhysicsPoint();
@@ -414,6 +443,7 @@ CStoneBulletObject::CStoneBulletObject(CNpcObject *master, const XMFLOAT4 & in_p
 
 NPC_BulletObject_Info CBulletObject::GetChangedNPCBulletState() const
 {
+	//사용하지 않음. 기본으로 초기화. 상속 대상인 STONEBULLET에서 사용하기 위해 상속부모인 BULLET에 그냥 만들어둠
 	NPC_BulletObject_Info stc_imp_bullet;
 	stc_imp_bullet.alive = false;
 	stc_imp_bullet.master_id = 0;
@@ -421,6 +451,8 @@ NPC_BulletObject_Info CBulletObject::GetChangedNPCBulletState() const
 	stc_imp_bullet.pos4f = { 0.f,0.f,0.f,0.f };
 	stc_imp_bullet.rot4f = { 0.f,0.f,0.f,1.0f };
 	stc_imp_bullet.create_first = true;
+	stc_imp_bullet.after_coll = AFTER_COLLISION_EFFECT::EMPTY;
+	stc_imp_bullet.damage = m_ability.attack;
 
 	return NPC_BulletObject_Info(stc_imp_bullet);
 }
@@ -434,6 +466,8 @@ NPC_BulletObject_Info CStoneBulletObject::GetChangedNPCBulletState() const
 	stc_imp_bullet.pos4f = m_pos4f;
 	stc_imp_bullet.rot4f = m_rot4f;
 	stc_imp_bullet.create_first = m_createfirst;
+	stc_imp_bullet.after_coll = m_after_collision;
+	stc_imp_bullet.damage = m_npc_bulldata.damage;
 
 	return NPC_BulletObject_Info(stc_imp_bullet);
 }
@@ -454,12 +488,13 @@ void CStoneBulletObject::UpdateDataForPacket()
 	m_npc_bulldata.my_id = m_npc_bulletID;
 	m_npc_bulldata.pos4f = m_pos4f;
 	m_npc_bulldata.rot4f = m_rot4f;
+	m_npc_bulldata.after_coll = m_after_collision;
 }
 
 void CStoneBulletObject::Tick(double deltime)
 {
-	UpdateLookvector();
-	UpdateUpvector();
+	//UpdateLookvector();
+	//UpdateUpvector();
 
 	xmf4_rot = { m_rot4f.x, m_rot4f.y, m_rot4f.z, m_rot4f.w };
 	xmf4_rot = QuaternionMultiply(xmf4_rot, QuaternionRotation(m_Upvector, MMPE_PI * deltime));
@@ -477,14 +512,13 @@ void CStoneBulletObject::Tick(double deltime)
 	xmf4_pos = Float4Add(xmf4_pos, m_npc_master->GetCenterPos4f());
 
 	m_pos4f = { xmf4_pos.x, xmf4_pos.y, xmf4_pos.z, xmf4_pos.w };
+	UpdateLookvector();
 
 	m_lifetime -= deltime;
 
 	if (m_lifetime <= 0)
-		m_alive = true;
+		m_alive = false;
 	
-
-
 }
 
 void CStoneBulletObject::Collision(vector<CPlayerObject*>* clients, double deltime)
@@ -498,20 +532,27 @@ void CStoneBulletObject::Collision(vector<CPlayerObject*>* clients, double delti
 
 			if (test)
 			{
-				/*
-				if ((*iter)->GetShieldState())
-					m_ability.attack = 1;
-				else
-					m_ability.attack = 40;
+				//Player 와 임프의 스톤불렛이 부딪혔을 경우 데미지 파티클을 띄워야함
+				m_after_collision = AFTER_COLLISION_EFFECT::DAMAGE;
+				m_npc_bulldata.after_coll = m_after_collision;
 
-				(*iter)->ToDamage(m_ability.attack);
-				*/
 				(*iter)->GetDamaged(m_ability.attack);
 
-				m_alive = true;
+				if ((*iter)->GetShieldState())
+					m_npc_bulldata.damage = 1;
+				else
+					m_npc_bulldata.damage = m_ability.attack;
+
+				m_alive = false;
 			}
 		}
 	}
+}
+
+void CStoneBulletObject::Collision(vector<CNpcObject*>* npcs, double deltime)
+{
+	//하는 일 없음
+	return;
 }
 
 void CStoneBulletObject::Collision(unordered_set<CStaticObject*>* sobjs, double deltime)
@@ -520,11 +561,19 @@ void CStoneBulletObject::Collision(unordered_set<CStaticObject*>* sobjs, double 
 	{
 		if ((*iter)->GetPhysicsPoint() != nullptr)
 		{
+
 			bool test = pp->CollisionTest(*(*iter)->GetPhysicsPoint(), m_Lookvector, m_Rightvector, m_Upvector,
 				(*iter)->GetLookVector(), (*iter)->GetRightVector(), (*iter)->GetUpVector());
 
-			if (test)		
-				m_alive = true;
+			if (test)
+			{
+				//StaticObject 와 임프의 스톤불렛이 부딪혔을 경우 데미지 파티클을 띄우지 말아야함
+				m_after_collision = AFTER_COLLISION_EFFECT::EMPTY;
+				m_npc_bulldata.after_coll = m_after_collision;
+
+				m_alive = false;
+			
+			}
 			
 		}
 	}

@@ -6,7 +6,7 @@ class CPlayerObject : public CNpcObject
 private:
 	boost::asio::ip::tcp::socket m_socket;
 
-	unsigned short		m_id;
+	//unsigned short		m_id;
 
 	wchar_t				m_loginID[MAX_BUFFER_SIZE / 4]{ L"Guest" };
 	wchar_t				m_loginPW[MAX_BUFFER_SIZE / 4]{ L"Guest" };
@@ -22,6 +22,7 @@ private:
 	SKILL_DICESTRIKE_DATA m_skill_dicestrike;
 
 	int					m_player_score{ 0 };
+	bool				m_set_first_moveobjs{ false };
 public:
 	unsigned int		m_curr_packet_size{ 0 };
 	unsigned int		m_prev_packet_size{ 0 };
@@ -33,7 +34,7 @@ public:
 	//void				UnLock() { m_mtx.unlock(); }
 
 public:
-	CPlayerObject(const unsigned short& count, boost::asio::ip::tcp::socket socket) : m_id(count), m_socket(move(socket)) {};
+	CPlayerObject(const unsigned short& count, boost::asio::ip::tcp::socket socket) : m_socket(move(socket)) { m_id = count;  };
 	~CPlayerObject();
 
 	// ---------------------------------------------------------------------------------------
@@ -61,7 +62,7 @@ public:
 
 	// [3]. 서버에서 클라이언트의 정보를 처리할 때 사용하는 함수들
 	// 1. 초기화 (1. 몬스터정보 초기화 2. 플레이어정보 초기화 3. 초기화정보를 접속한 클라이언트로 보냄)
-	void Init_MonsterInfo();
+	//void Init_MonsterInfo();
 	void Init_PlayerInfo();
 	void InitData_To_Client();
 	void InitNPCData_To_Client();
@@ -117,6 +118,8 @@ public:
 	double  GetWaveshockCurrtime() const { return m_skill_waveshock.data.op_time; }
 	void    SetWaveshockCurrtime(double time) { m_skill_waveshock.data.op_time = time; }
 
+	bool	GetFirstMoveObjects() const { return m_set_first_moveobjs; }
+	void    SetFirstMoveObjects(bool flag) { m_set_first_moveobjs = flag; }
 
 	// ---------------------------------------------------------------------------------------
 	// [5]. 물리효과 함수
@@ -139,6 +142,7 @@ public:
 
 	void Collision(vector<CPlayerObject*>* clients, double deltime);
 	void Collision(unordered_set<CStaticObject*>* sobjs, double deltime);
+	void Collision(unordered_set<CMoveCubeObject*>* mvobjs, double deltime);
 	void Collision_With_Waveshock();
 
 };

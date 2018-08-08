@@ -63,6 +63,7 @@ enum PACKET_PROTOCOL_TYPE
 	PLAYER_CURR_STATE,		//플레이어의 현재 상태(모든 정보 저장)
 	NPC_MONSTER_CURR_STATE, //몬스터 npc의 현재 상태(모든 정보 저장)
 	NPC_MONSTER_IMP_ATTACK_STONEBULLET,
+	NPC_MONSTER_ANIM,
 
 	PLAYER_SKILL_SHIELD,
 	PLAYER_SKILL_WAVESHOCK,
@@ -119,6 +120,8 @@ enum NPC_MONSTER_TYPE
 {
 	IMP
 };
+
+enum AFTER_COLLISION_EFFECT {EMPTY, BOOM, DAMAGE, DAMAGE_AND_BOOM};
 
 enum PLAYERS { NO_PLAYER, LUNA, CMETRA, RONDO, DONALD };
 
@@ -221,6 +224,8 @@ struct CTS_BulletObject_Info
 	unsigned short				my_id;					//2
 	unsigned char				type;					//1
 	char						alive;					//1
+	char						after_coll;			//1
+	unsigned short				damage;					//2
 };
 
 struct STC_BulletObject_Info
@@ -233,16 +238,20 @@ struct STC_BulletObject_Info
 	unsigned short				my_id;					//2
 	unsigned char				type;					//1
 	char						alive;					//1
+	char						after_coll;			//1
+	unsigned short				damage;					//2
 };
 
 struct NPC_BulletObject_Info
 {
-	Position					pos4f;
-	Rotation					rot4f;
-	unsigned short				master_id;
-	unsigned short				my_id;
-	char						alive;
-	char						create_first;
+	Position					pos4f;					//16
+	Rotation					rot4f;					//16
+	unsigned short				master_id;				//2
+	unsigned short				my_id;					//2
+	char						alive;					//1
+	char						create_first;			//1
+	char						after_coll;			//1
+	unsigned short				damage;					//2
 };
 
 //-------------------------------패킷용스킬데이터-------------------------------//
@@ -329,6 +338,15 @@ typedef struct Server_To_Client_NPC_Info
 	Npc_Data npc_data;
 
 }STC_SetMyNPC;
+
+typedef struct Server_To_Client_NPC_Anim
+{
+	unsigned char pack_size = sizeof(unsigned short) + sizeof(unsigned char) + sizeof(unsigned char) + sizeof(unsigned char);
+	unsigned char pack_type = PACKET_PROTOCOL_TYPE::NPC_MONSTER_ANIM;
+	unsigned char npc_anim;
+	unsigned short id;
+
+}STC_MyNPCAnim;
 
 typedef struct Server_To_Client_Player_Disconnected_Info
 {
@@ -461,9 +479,10 @@ typedef struct Server_To_Client_Curr_NpcMonsterState
 
 typedef struct Server_To_Client_Curr_NpcMonsterAttackStoneBullet
 {
-	unsigned char packet_size = sizeof(NPC_BulletObject_Info) + sizeof(unsigned char) + sizeof(unsigned char);
+	unsigned char packet_size = sizeof(NPC_BulletObject_Info) + sizeof(Position) + sizeof(unsigned char) + sizeof(unsigned char);
 	unsigned char packet_type = PACKET_PROTOCOL_TYPE::NPC_MONSTER_IMP_ATTACK_STONEBULLET;
 	NPC_BulletObject_Info   npc_bulldata;
+	Position                stone_rnpos;
 
 }STC_NpcMonsterAttackStoneBullet;
 
