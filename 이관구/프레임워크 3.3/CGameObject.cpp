@@ -172,6 +172,8 @@ void CGameObject::CreateConstBuffer(ID3D12Device * m_Device)
 	//commandlist->SetGraphicsRootConstantBufferView(상수버퍼인덱스,GetGPUVIRTUALADDRESS()); 이런거 해주면끝
 
 
+
+
 	ConstBuffer = new UploadBuffer<ObjectData>(m_Device, 1, true);
 
 }
