@@ -633,8 +633,13 @@ void Scene::UITick(const GameTimer & gt)
 
 	if (GetGameState() == GS_PLAY)
 	{
-
-		Time3->TexStride += gt.DeltaTime();
+		((TimerObject3*)Time3)->times += gt.DeltaTime();
+		if (((TimerObject3*)Time3)->times >= 1)
+		{
+			float t = 1 - ((TimerObject3*)Time3)->times;
+			Time3->TexStride += 1;
+			((TimerObject3*)Time3)->times = t;
+		}
 		if (Time3->TexStride > 9.9f)
 		{
 			Time3->TexStride = 0;
