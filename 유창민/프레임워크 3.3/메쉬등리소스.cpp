@@ -193,6 +193,22 @@ CMesh  DiceObject::Mesh;//나중에 메쉬는 static으로 둬야함
 ComPtr<ID3D12DescriptorHeap> DiceObject::SrvDescriptorHeap;//텍스처 용 힙
 
 //--------------------------------------------------------------------------------------
+bool TimerObject1::CreateMesh = false;
+unordered_map<string, unique_ptr<CTexture>> TimerObject1::Textures;//텍스처들을 저장함
+CMesh TimerObject1::Mesh;//나중에 메쉬는 static으로 둬야함
+ComPtr<ID3D12DescriptorHeap> TimerObject1::SrvDescriptorHeap;//텍스처 용 힙
+//--------------------------------------------------------------------------------------
+bool TimerObject2::CreateMesh = false;
+unordered_map<string, unique_ptr<CTexture>> TimerObject2::Textures;//텍스처들을 저장함
+CMesh  TimerObject2::Mesh;//나중에 메쉬는 static으로 둬야함
+ComPtr<ID3D12DescriptorHeap> TimerObject2::SrvDescriptorHeap;//텍스처 용 힙
+//--------------------------------------------------------------------------------------
+bool TimerObject3::CreateMesh = false;
+unordered_map<string, unique_ptr<CTexture>> TimerObject3::Textures;//텍스처들을 저장함
+CMesh  TimerObject3::Mesh;//나중에 메쉬는 static으로 둬야함
+ComPtr<ID3D12DescriptorHeap> TimerObject3::SrvDescriptorHeap;//텍스처 용 힙
+
+//--------------------------------------------------------------------------------------
 
 CMaterial SmallWallObject::Mat;
 bool SmallWallObject::CreateMesh;//최초로 false며 메쉬를 만든후 true가된다.

@@ -43,6 +43,14 @@ Scene::~Scene()
 		delete BackGround;
 	if (CharacterSelect != NULL)
 		delete CharacterSelect;
+
+	if (Time1 != NULL)
+		delete Time1;
+	if (Time2 != NULL)
+		delete Time2;
+	if (Time3 != NULL)
+		delete Time3;
+
 	for (int i = 0; i < 4; i++)
 		if (SkillFrameUI[i] != NULL)
 			delete SkillFrameUI[i];
@@ -126,13 +134,13 @@ void Scene::SceneState()
 
 		else if (GetAsyncKeyState(0x31) & 0x8000 && GetFocus())
 		{
-			CharacterSelect->CenterPos.x = -320;
+			CharacterSelect->CenterPos.x = 0.8f * (-mWidth * 0.5f);
 			CharacterSelect->CenterPos.y = 0;
 			CharacterSelect->ObjData.CustomData1.z = 1;
 		}
 		else if (GetAsyncKeyState(0x32) & 0x8000 && GetFocus())
 		{
-			CharacterSelect->CenterPos.x = -160;
+			CharacterSelect->CenterPos.x = 0.4f * (-mWidth * 0.5f);
 			CharacterSelect->CenterPos.y = 0;
 			CharacterSelect->ObjData.CustomData1.z = 2;
 		}
@@ -144,50 +152,49 @@ void Scene::SceneState()
 		}
 		else if (GetAsyncKeyState(0x34) & 0x8000 && GetFocus())
 		{
-			CharacterSelect->CenterPos.x = 160;
+			CharacterSelect->CenterPos.x = 0.4f * (mWidth* 0.5f);
 			CharacterSelect->CenterPos.y = 0;
 			CharacterSelect->ObjData.CustomData1.z = 4;
 		}
 		else if (GetAsyncKeyState(0x35) & 0x8000 && GetFocus())
 		{
-			CharacterSelect->CenterPos.x = 320;
+			CharacterSelect->CenterPos.x = 0.8f * (mWidth* 0.5f);
 			CharacterSelect->CenterPos.y = 0;
 			CharacterSelect->ObjData.CustomData1.z = 5;
 		}
 		else if (GetAsyncKeyState(0x36) & 0x8000 && GetFocus())
 		{
-			CharacterSelect->CenterPos.x = -320;
-			CharacterSelect->CenterPos.y = -200;
+			CharacterSelect->CenterPos.x = 0.8f * (-mWidth* 0.5f);
+			CharacterSelect->CenterPos.y = (-mHeight * 1 / 3);
 			CharacterSelect->ObjData.CustomData1.z = 6;
 		}
 		else if (GetAsyncKeyState(0x37) & 0x8000 && GetFocus())
 		{
-			CharacterSelect->CenterPos.x = -160;
-			CharacterSelect->CenterPos.y = -200;
+			CharacterSelect->CenterPos.x = 0.4f * (-mWidth* 0.5f);
+			CharacterSelect->CenterPos.y = (-mHeight * 1 / 3);
 			CharacterSelect->ObjData.CustomData1.z = 7;
 		}
 		else if (GetAsyncKeyState(0x38) & 0x8000 && GetFocus())
 		{
 			CharacterSelect->CenterPos.x = 0;
-			CharacterSelect->CenterPos.y = -200;
+			CharacterSelect->CenterPos.y = (-mHeight * 1 / 3);
 			CharacterSelect->ObjData.CustomData1.z = 8;
 		}
 		else if (GetAsyncKeyState(0x39) & 0x8000 && GetFocus())
 		{
-			CharacterSelect->CenterPos.x = 160;
-			CharacterSelect->CenterPos.y = -200;
+			CharacterSelect->CenterPos.x = 0.4f * (mWidth* 0.5f);
+			CharacterSelect->CenterPos.y = (-mHeight * 1 / 3);
 			CharacterSelect->ObjData.CustomData1.z = 9;
 		}
 		else if (GetAsyncKeyState(0x30) & 0x8000 && GetFocus())
 		{
-			CharacterSelect->CenterPos.x = 320;
-			CharacterSelect->CenterPos.y = -200;
-			CharacterSelect->ObjData.CustomData1.z = 10;
+			CharacterSelect->CenterPos.x = 0.8f * (mWidth* 0.5f);
+			CharacterSelect->CenterPos.y = (-mHeight * 2 / 3);
+			CharacterSelect->ObjData.CustomData1.z = 10; 
 		}
 	}
 	else if (GAMESTATE == GS_LOAD)
-	{
-		
+	{	
 		if (FirstLoad == true)
 		{
 			CreateGameObject();
@@ -347,7 +354,7 @@ void Scene::CreateGameObject()
 	LandObject.push_back(new GridObject(device, commandlist, &BbObject, &Shadows,1, XMFLOAT4(0, -0.5f, 0, 0))); //1Ãþ
 
 	DynamicObject.push_back(new CCubeManObject(device, commandlist,&BbObject, &Shadows, XMFLOAT4(0, 0, -240, 0)));
-	DynamicObject.push_back(new CCubeManObject(device, commandlist,&BbObject, &Shadows, XMFLOAT4(100, 0, 110, 0)));
+	DynamicObject.push_back(new CCubeManObject(device, commandlist,&BbObject, &Shadows, XMFLOAT4(40, 0, -240, 0)));
 
 	CGameObject* imp = new ImpObject(device, commandlist, &BbObject, &Shadows, XMFLOAT4(0, 100, 0, 0));
 	((ImpObject*)imp)->fsm = new FSM(imp, &DynamicObject, &StaticObject, &BulletObject);
@@ -559,7 +566,7 @@ void Scene::CreateUI()
 
 	CharacterSelect = new CharacterSelectObject(device, commandlist, NULL, NULL, XMFLOAT4(0, 0, 0, 0));
 
-	SelectBar = new SelectBarObject(device, commandlist, NULL, NULL, XMFLOAT4(0 * 100 - 150, 0.9*-mHeight / 2, 0, 0));
+	SelectBar = new SelectBarObject(device, commandlist, NULL, NULL, XMFLOAT4(0 * 100 - 150, 0.9f*-mHeight / 2, 0, 0));
 
 	
 	for (int i = 0; i < 4; i++)
@@ -596,6 +603,10 @@ void Scene::CreateUI()
 		SkillCoolBar[i] = new CoolBarObject(device, commandlist, NULL, NULL, ct, Player->PlayerObject, XMFLOAT4(i*100-150,0.98*-mHeight / 2, 0, 0));
 		SkillFrameUI[i] = new SkillFrameUIObject(device, commandlist, NULL, NULL, Player->skilldata.Skills[i], XMFLOAT4(i * 100 - 150, 0.9*-mHeight / 2, 0, 0));
 		SkillUI[i] = new SkillUIObject(device, commandlist, NULL, NULL, Player->skilldata.Skills[i], XMFLOAT4(i * 100 - 150, 0.9*-mHeight / 2, 0, 0));
+	
+		Time1 = new TimerObject1(device, commandlist, NULL, NULL, XMFLOAT4(-30, 0.90f*mHeight / 2, 0, 0));
+		Time2 = new TimerObject2(device, commandlist, NULL, NULL, XMFLOAT4(10,  0.90f*mHeight / 2, 0, 0));
+		Time3 = new TimerObject3(device, commandlist, NULL, NULL, XMFLOAT4(50,  0.90f*mHeight / 2, 0, 0));
 	}
 
 }
@@ -615,9 +626,27 @@ void Scene::UITick(const GameTimer & gt)
 		if (resize)
 		{
 			SelectBar->ObjData.Scale = mWidth / 10;
+			CharacterSelect->ObjData.Scale = mWidth *0.2f;
 			resize = false;
 		}
 	}
+
+	if (GetGameState() == GS_PLAY)
+	{
+
+		Time3->TexStride += gt.DeltaTime();
+		if (Time3->TexStride > 9.9f)
+		{
+			Time3->TexStride = 0;
+			Time2->TexStride += 1;
+		}
+		if (Time2->TexStride > 9.9f)
+		{
+			Time2->TexStride = 0;
+			Time1->TexStride += 1;
+		}
+	}
+
 }
 
 void Scene::Render(const GameTimer& gt)
@@ -673,8 +702,10 @@ void Scene::Render(const GameTimer& gt)
 				for (int i = 0; i < 4; i++)
 					SkillFrameUI[i]->Render(commandlist, gt);
 
+				Time1->Render(commandlist, gt);
+				Time2->Render(commandlist, gt);
+				Time3->Render(commandlist, gt);
 
-			
 				//´Ù½Ã ¿ø»óÅÂ·Î ¹Ù²ãÁÜ. ÀÌ°É ¾ÈÇÏ¸é ÇÇÅ·ÀÌ ¾û¸ÁÀÌµÊ. 
 				Player->Camera.UpdateConstantBuffer(commandlist);
 			}

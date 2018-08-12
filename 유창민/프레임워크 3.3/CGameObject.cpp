@@ -336,7 +336,7 @@ CCubeManObject::CCubeManObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 		CreateMesh = true;
 	
 	}
-	select = rand() % 10;
+	select = 5;//rand() % 10;
 	if (select == 0)
 	{
 		TextureName = "Female Brown Casual";
@@ -486,21 +486,38 @@ void CCubeManObject::Tick(const GameTimer & gt)
 {
 	//적분기. 적분기란? 매 틱마다 힘! 에의해서 변화 되는 가속도/속도/위치를 갱신한다.
 	//이때 pp의 position과 CenterPos를 일치시켜야하므로 CenterPos의 포인터를 인자로 넘겨야 한다.
-	pp->integrate(gt.DeltaTime());
-
-	if (ObjData.isAnimation == true)
+	if (DrawObject)
 	{
+		pp->integrate(gt.DeltaTime());
 
-		//애니메이션 업데이트 애니메이션은 24프레임으로 구성됨. 문제는 FPS가 24프레임이 아님. 그보다 큰 프레임. 따라서 24프레임으로 해당프레임을 나눠 보정.
-		if(n_Animation!=Attack)
-			UpdateMD5Model(commandlist, &Mesh, this, gt.DeltaTime()*60.0 / 24.0, n_Animation, animations, jarr);
-		else
+		if (ObjData.isAnimation == true)
 		{
-			UpdateMD5Model(commandlist, &Mesh, this, 2*gt.DeltaTime()*60.0 / 24.0, n_Animation, animations, jarr);
+
+			//애니메이션 업데이트 애니메이션은 24프레임으로 구성됨. 문제는 FPS가 24프레임이 아님. 그보다 큰 프레임. 따라서 24프레임으로 해당프레임을 나눠 보정.
+			if (n_Animation != Attack)
+				UpdateMD5Model(commandlist, &Mesh, this, gt.DeltaTime()*60.0 / 24.0, n_Animation, animations, jarr);
+			else
+			{
+				UpdateMD5Model(commandlist, &Mesh, this, 2 * gt.DeltaTime()*60.0 / 24.0, n_Animation, animations, jarr);
+			}
+
+		}
+	}
+
+	else if (DrawObject == false)
+	{
+		RespawnTime += gt.DeltaTime();
+		if (RespawnTime >= 3.0f)
+		{
+			RespawnTime = 0.f;
+			gamedata.HP = 100;
+			SetAnimation(Ani_State::Idle);
+
+			DrawObject = true;
+
 		}
 
 	}
-
 
 }
 
@@ -513,26 +530,27 @@ void CCubeManObject::Render(ID3D12GraphicsCommandList * commandlist, const GameT
 {
 	//게임오브젝트의 렌더링은 간단하다. 
 	//텍스처를 연결하고, 월드행렬을 연결한다.
-
-
-	if (Textures.size() > 0)
+	if (DrawObject)
 	{
-		SetTexture(commandlist, SrvDescriptorHeap, Textures[TextureName].get()->Resource.Get(), 0, TexOff);
-		SetTexture(commandlist, SrvDescriptorHeap, Textures[NTextureName].get()->Resource.Get(), 2, NTexOff);
+
+		if (Textures.size() > 0)
+		{
+			SetTexture(commandlist, SrvDescriptorHeap, Textures[TextureName].get()->Resource.Get(), 0, TexOff);
+			SetTexture(commandlist, SrvDescriptorHeap, Textures[NTextureName].get()->Resource.Get(), 2, NTexOff);
+		}
+
+
+		UpdateConstBuffer(commandlist, false);
+
+		Mat.UpdateConstantBuffer(commandlist);
+
+		//틱함수에서 업데이트한 애니메이션된 조인트를 연결함.
+
+		commandlist->SetGraphicsRootConstantBufferView(0, jarr->Resource()->GetGPUVirtualAddress());
+		//이후 그린다.
+
+		Mesh.Render(commandlist);
 	}
-
-
-	UpdateConstBuffer(commandlist, false);
-
-	Mat.UpdateConstantBuffer(commandlist);
-
-	//틱함수에서 업데이트한 애니메이션된 조인트를 연결함.
-
-	commandlist->SetGraphicsRootConstantBufferView(0, jarr->Resource()->GetGPUVirtualAddress());
-	//이후 그린다.
-
-	Mesh.Render(commandlist);
-
 }
 
 //충돌기. 충돌검출과 충돌해소를 맡는다.
@@ -602,7 +620,8 @@ void CCubeManObject::EndAnimation(int nAni)
 
 	if (nAni == Ani_State::Dead)//죽는모션이었으면
 	{
-		DelObj = true;
+		DrawObject = false;
+		//DelObj = true;
 	}
 }
 
@@ -4542,7 +4561,7 @@ ShieldArmor::ShieldArmor(ID3D12Device * m_Device, ID3D12GraphicsCommandList * co
 	ObjData.Scale = 1.0f;
 	ObjData.SpecularParamater = 0.3f;//스페큘러를 낮게준다.
 	Blending = true;
-	ObjData.BlendValue = 0.3f;
+	ObjData.BlendValue = 0.6f;
 	Master = master;
 
 	//게임관련 데이터들
@@ -5208,7 +5227,7 @@ void ShadowObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTim
 	if(ObjData.isAnimation)
 		commandlist->SetGraphicsRootConstantBufferView(0, jarr->Resource()->GetGPUVirtualAddress());
 
-	if(CreatecMesh && Kinds == Cubeman)
+	if(CreatecMesh && Kinds == Cubeman && Master->DrawObject == true)
 		cMesh.Render(commandlist);
 	if (CreateoMesh && Kinds == Cube)
 		oMesh.Render(commandlist);

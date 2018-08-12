@@ -27,6 +27,7 @@ public:
 	//게임오브젝트, 카메라,세이더오브젝트,라이트,샘플러 포함해야댐	
 	int nShader;//세이더 갯수
 	int GAMESTATE = GS_START;//게임상태.
+	int t;
 	bool FirstLoad = false;//첫 로딩인가?
 	bool ResetTime = true;//첫 로딩후 시간 초기화해야하는가?
 	HWND hWnd;
@@ -78,6 +79,10 @@ public:
 	CGameObject* SkillFrameUI[4] = { NULL };
 	CGameObject* SkillCoolBar[4] = { NULL };
 	CGameObject* SelectBar = NULL; //스킬선택
+	CGameObject* Time1 = NULL;
+	CGameObject* Time2 = NULL;
+	CGameObject* Time3 = NULL;
+
 private:
 	//여기다 물체 배치에 대한 상수들 넣는다.
 	float BigWall_X1 = 300 * sinf(0.4f * MMPE_PI);

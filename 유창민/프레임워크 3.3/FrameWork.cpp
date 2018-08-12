@@ -312,23 +312,22 @@ LRESULT FrameWork::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 			scene->resize = true;
 
-			
 			for(int i=0;i<4;i++)
 				if (scene->SkillCoolBar[i] != NULL)
 				{
 		
 					scene->SkillCoolBar[i]->ObjData.Scale = mClientWidth / 10;
-					scene->SkillCoolBar[i]->CenterPos.x = i * mClientWidth / 8 - (mClientWidth / 8)*1.5;
-					scene->SkillCoolBar[i]->CenterPos.y = 0.98*-mClientHeight / 2;
+					scene->SkillCoolBar[i]->CenterPos.x = i * mClientWidth / 8 - (mClientWidth / 8)*1.5f;
+					scene->SkillCoolBar[i]->CenterPos.y = 0.98f*-mClientHeight / 2;
 
 					scene->SkillFrameUI[i]->ObjData.Scale = mClientWidth / 10;
-					scene->SkillFrameUI[i]->CenterPos.x = i * mClientWidth / 8 - (mClientWidth / 8)*1.5;
-					scene->SkillFrameUI[i]->CenterPos.y = 0.9*-mClientHeight / 2;
+					scene->SkillFrameUI[i]->CenterPos.x = i * mClientWidth / 8 - (mClientWidth / 8)*1.5f;
+					scene->SkillFrameUI[i]->CenterPos.y = 0.9f*-mClientHeight / 2;
 					
 
 					scene->SkillUI[i]->ObjData.Scale = mClientWidth / 12;
 					scene->SkillUI[i]->CenterPos.x = i * mClientWidth / 8 - (mClientWidth / 8)*1.5;
-					scene->SkillUI[i]->CenterPos.y = 0.9*-mClientHeight / 2;
+					scene->SkillUI[i]->CenterPos.y = 0.9f*-mClientHeight / 2;
 				}
 		}
 		else if (scene != NULL && scene->GetGameState() == (GS_START || GS_LOAD))

@@ -11,7 +11,7 @@ CPlayer::CPlayer(HWND hWnd,ID3D12Device* Device, ID3D12GraphicsCommandList* comm
 	skilldata.Skills[0] = 0;
 	skilldata.Skills[1] = 1; //1
 	skilldata.Skills[2] = 2; //2
-	skilldata.Skills[3] = 3;
+	skilldata.Skills[3] = 5;
 }
 
 
@@ -558,9 +558,9 @@ void CPlayer::Tick(float DeltaTime)
 			((CCubeManObject*)PlayerObject)->s->ObjData.Scale = 3.0f;
 			((CCubeManObject*)PlayerObject)->Hpbar->YPos = 16;
 			((CCubeManObject*)PlayerObject)->HPFrame->YPos = 16;
-			PlayerObject->gamedata.MAXHP = 1000;
+			PlayerObject->gamedata.MAXHP = 700;
 			PlayerObject->gamedata.Speed = 75;
-			PlayerObject->gamedata.HP = PlayerObject->gamedata.HP + 800;
+			PlayerObject->gamedata.HP = PlayerObject->gamedata.HP + 600;
 			pointrank.Init = true;
 
 
@@ -582,6 +582,9 @@ void CPlayer::Tick(float DeltaTime)
 			((CCubeManObject*)PlayerObject)->s->ObjData.Scale = 2.0f;
 			((CCubeManObject*)PlayerObject)->Hpbar->YPos = 10;
 			((CCubeManObject*)PlayerObject)->HPFrame->YPos = 10;
+			PlayerObject->gamedata.MAXHP = 100;
+			PlayerObject->gamedata.Speed = 50;
+			PlayerObject->gamedata.HP = PlayerObject->gamedata.HP + 90;
 		}
 	}
 

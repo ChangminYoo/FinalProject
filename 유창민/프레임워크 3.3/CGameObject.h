@@ -113,17 +113,21 @@ public:
 	int n_Animation = 0;//몇번째 애니메이션을 쓸건가?
 	float currAnimTime = 0;//현재애니메이션시간
 	int TickValue =0;//애니메이션 호출 프레임
+
+	float RespawnTime = 0.f;
 	UploadBuffer<JointArr>* jarr = NULL;//계산된 조인트들이 저장되는 상수버퍼. 왜이게 스테틱이 아니냐면
 	//1번 오브젝트가 애니메이션을 업데이트를 한뒤 연결을 한다음, 2번 오브젝트가 애니메이션을 다시 업데이트하면
 	//2번 오브젝트가 가지는 애니메이션이 최종적인 jarr가되므로 그걸 그리게 된다. 따라서 각자 갖게해야함.
 
+	float TexStride = 0.f;
 
 	//기타 공용 데이터들
 	bool DelObj = false;//이게 참이면 실제로 제거된다.
 	bool Blending = false;
 	bool PrevCool = false;
 	bool isShieldOn = false;
-	bool isHit1 = false;
+	bool DrawObject = true;
+	bool isHit1 = false; //hit사운드를 위한 변수
 
 	//벽들에 굳이 마우스를 움직일때마다 체크할 필요는 없으므로 추가함. 또 벽은 또 벽대로 뭔가 처리할게 있을것같음.
 	Obj_State obs = Dynamic;

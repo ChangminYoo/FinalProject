@@ -56,7 +56,10 @@ void MainFrameWork::CollisionSystem(const GameTimer& gt)
 	for (auto i = scene->RigidObject.begin(); i != scene->RigidObject.end(); i++)
 	{
 		(*i)->Collision(&scene->RigidObject, gt.DeltaTime());
-		(*i)->Collision(&scene->DynamicObject, gt.DeltaTime());
+		
+		if ((*i)->DrawObject)
+			(*i)->Collision(&scene->DynamicObject, gt.DeltaTime());
+		
 		(*i)->Collision(&scene->StaticObject, gt.DeltaTime());
 		(*i)->Collision(&scene->BulletObject, gt.DeltaTime());
 
@@ -70,7 +73,9 @@ void MainFrameWork::CollisionSystem(const GameTimer& gt)
 		//이 목록을 가지고 충돌검사를 하도록함.
 
 		//투사체끼리는 검사 X 투사체는 반드시 다이나믹오브젝트 들을 검사해야함.
-		(*i)->Collision(&scene->DynamicObject, gt.DeltaTime());
+		if((*i)->DrawObject)
+			(*i)->Collision(&scene->DynamicObject, gt.DeltaTime());
+		
 		(*i)->Collision(&scene->StaticObject, gt.DeltaTime());
 	}
 
@@ -80,9 +85,11 @@ void MainFrameWork::CollisionSystem(const GameTimer& gt)
 		//FindCollisionObject 함수를 나중에 만들어야함. 현재는 그냥 DynamicObject를 준다.
 		//해당 객체가 충돌처리 검사를 할 목록을 저장함.
 		//이 목록을 가지고 충돌검사를 하도록함.
-
-		(*i)->Collision(&scene->DynamicObject, gt.DeltaTime());
-		(*i)->Collision(&scene->StaticObject, gt.DeltaTime());
+		if ((*i)->DrawObject)
+		{
+			(*i)->Collision(&scene->DynamicObject, gt.DeltaTime());
+			(*i)->Collision(&scene->StaticObject, gt.DeltaTime());
+		}
 
 	}
 
