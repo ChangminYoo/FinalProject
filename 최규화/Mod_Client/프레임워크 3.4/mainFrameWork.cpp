@@ -78,17 +78,11 @@ void MainFrameWork::CollisionSystem(const GameTimer& gt)
 	//반드시 투사체가 가장먼저 상대를 검사한다.
 	for (auto i = scene->BulletObject.begin(); i != scene->BulletObject.end(); i++)
 	{
-		//FindCollisionObject 함수를 나중에 만들어야함. 현재는 그냥 DynamicObject를 준다.
-		//해당 객체가 충돌처리 검사를 할 목록을 저장함.
-		//이 목록을 가지고 충돌검사를 하도록함.
 		if ((*i)->DelObj) continue;
 
 		if (!(*i)->m_bullet_data.alive)
 			(*i)->Collision((*i)->m_particle_type, (*i)->m_bullet_data.damage, (*i)->CenterPos, (*i)->CenterPos);
-	
-		//투사체끼리는 검사 X 투사체는 반드시 다이나믹오브젝트 들을 검사해야함.
-		//(*i)->Collision(&scene->DynamicObject, gt.DeltaTime());
-		//(*i)->Collision(&scene->StaticObject, gt.DeltaTime());
+
 	}
 
 	//고정된 객체를 제외한 모든 오브젝트를 충돌검사를 하도록 함.

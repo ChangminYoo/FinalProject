@@ -133,7 +133,7 @@ switch (packet[1])
 	{
 		auto myskilldata = reinterpret_cast<STC_SKILL_WAVESHOCK*>(packet);
 
-		scene.SET_PLAYER_SKILL(myskilldata->skill_data.master_id, myskilldata->skill_data, myskilldata->texture_number);
+		scene.SET_PLAYER_SKILL(myskilldata->skill_data.master_id, myskilldata->skill_data);
 	}
 	break;
 
@@ -143,6 +143,14 @@ switch (packet[1])
 
 		XMFLOAT3 xmf3_offlookvector{ myskilldata->lookvector.x, myskilldata->lookvector.y, myskilldata->lookvector.z };
 		scene.SET_BULLET_BY_SERVER_DATA(myskilldata->bull_data, myskilldata->bull_data.type, myskilldata->is_first, xmf3_offlookvector);
+	}
+	break;
+
+	case PACKET_PROTOCOL_TYPE::PLAYER_SKILL_HAMMER:
+	{
+		auto myskilldata = reinterpret_cast<STC_SKILL_HAMMERBULLET*>(packet);
+
+		scene.SET_PLAYER_SKILL(myskilldata->skill_data);
 	}
 	break;
 

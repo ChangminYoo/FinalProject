@@ -4,16 +4,21 @@
 extern UINT CbvSrvDescriptorSize;
 
 int CGameObject::g_numofdice = 0;
+
 int CGameObject::g_npcID = -1;
 int CGameObject::g_npcBulletID = -1;
-short CGameObject::myID = -1;
-list<short> CGameObject::BulletIDList = list<short>();
+
+unsigned short CGameObject::myID = 0;
+list<unsigned short> CGameObject::BulletIDList = list<unsigned short>();
+bool CGameObject::m_IsBulletFirstCount = true;
+
+unsigned short CGameObject::m_hmBulletID = 0;
+bool CGameObject::m_hmBulletFirstCount = true;
 
 CGameObject::CGameObject()
 {
 
 }
-
 
 CGameObject::~CGameObject()
 {
@@ -668,7 +673,12 @@ BulletCube::BulletCube(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 		//CreateBullet 함수 호출 - 내 클라이언트에서 키를 눌러서 불렛을 생성했음 
 		if (IsMine)
 		{
-			++myID;
+			if (m_IsBulletFirstCount)
+			{
+				myID = 0; m_IsBulletFirstCount = false;
+			}
+			else { ++myID; }
+
 			BulletIDList.push_back(myID);
 
 			m_bullet_data.my_id = myID;
@@ -676,7 +686,7 @@ BulletCube::BulletCube(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 			m_bullet_data.alive = true;
 		}
 	}
-
+	m_bullet_type = BULLET_TYPE::protocol_LightBullet;
 
 	//광선충돌 검사용 육면체
 	XMFLOAT3 rx(1, 0, 0);
@@ -961,7 +971,12 @@ HeavyBulletCube::HeavyBulletCube(ID3D12Device * m_Device, ID3D12GraphicsCommandL
 		//CreateBullet 함수 호출 - 내 클라이언트에서 키를 눌러서 불렛을 생성했음 
 		if (IsMine)
 		{
-			++myID;
+			if (m_IsBulletFirstCount)
+			{
+				myID = 0; m_IsBulletFirstCount = false;
+			}
+			else { ++myID; }
+
 			BulletIDList.push_back(myID);
 
 			m_bullet_data.my_id = myID;
@@ -969,6 +984,7 @@ HeavyBulletCube::HeavyBulletCube(ID3D12Device * m_Device, ID3D12GraphicsCommandL
 			m_bullet_data.alive = true;
 		}
 	}
+	m_bullet_type = BULLET_TYPE::protocol_HeavyBullet;
 
 	//광선충돌 검사용 육면체
 	XMFLOAT3 rx(1, 0, 0);
@@ -2429,13 +2445,18 @@ DiceStrike::DiceStrike(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comm
 
 	if (firstBullet)
 	{
-		++myID;
+		if (m_IsBulletFirstCount)
+		{
+			myID = 0; m_IsBulletFirstCount = false;
+		}
+		else { ++myID; }
 		BulletIDList.push_back(myID);
 
 		m_bullet_data.my_id = myID;
 		m_bullet_data.master_id = master->m_player_data.id;
+		m_bullet_data.alive = true;
 	}
-
+	m_bullet_type = BULLET_TYPE::protocol_DiceBullet;
 									 //게임관련 데이터들
 	gamedata.MAXHP = 1;
 	gamedata.HP = 1;
@@ -2605,6 +2626,64 @@ void DiceStrike::Collision(list<CGameObject*>* collist, float DeltaTime)
 		}
 	}
 	*/
+}
+
+void DiceStrike::Collision(int coll_type, int damage, const XMFLOAT4 & bullet_pos, const XMFLOAT4 & target_pos)
+{
+	switch (coll_type)
+	{
+		case AFTER_COLLISION_EFFECT::EMPTY:
+		{
+			isHit1 = false;
+			//불렛과 대상 충돌후 아무런 추가이펙트가 발생하지 않음
+			//1. 몬스터 공격 -> 상자
+
+		}
+		break;
+
+		case AFTER_COLLISION_EFFECT::BOOM:
+		{
+			//겹치는 부분을 제거할필요가 없는게 투사체는 어처피 사라지니까.
+			//1. 플레이어 공격 -> 상자
+			auto BulletParticles2 = new ParticleObject2(device, commandlist, ParticleList, NULL, this, 0.7f, 100, XMFLOAT4(bullet_pos.x, bullet_pos.y, bullet_pos.z, 0));
+			ParticleList->push_back(BulletParticles2);
+		}
+		break;
+
+		case AFTER_COLLISION_EFFECT::DAMAGE:
+		{
+			isHit1 = true; //타격 사운드1
+						   // 파티클리스트에 데미지 오브젝트를 생성해서 넣음. 파티클을 띄운다.
+						   //3. 몬스터 공격 -> 플레이어
+			if (ParticleList != NULL)
+			{
+				ParticleList->push_back(new DamageObject(device, commandlist, ParticleList, NULL, damage, XMFLOAT4(target_pos.x, target_pos.y + 11, target_pos.z, 0)));
+			}
+		}
+		break;
+
+		case AFTER_COLLISION_EFFECT::DAMAGE_AND_BOOM:
+		{
+			isHit1 = true; //타격 사운드1
+						   // 파티클리스트에 데미지 오브젝트를 생성해서 넣음. 파티클을 띄운다.
+						   //1. 플레이어 공격 -> 플레이어
+						   //2. 플레이어 공격 -> 몬스터
+			if (ParticleList != NULL)
+			{
+				ParticleList->push_back(new DamageObject(device, commandlist, ParticleList, NULL, damage, XMFLOAT4(target_pos.x, target_pos.y + 11, target_pos.z, 0)));
+			}
+
+			//겹치는 부분을 제거할필요가 없는게 투사체는 어처피 사라지니까.
+			auto BulletParticles2 = new ParticleObject2(device, commandlist, ParticleList, NULL, this, 0.7f, 100, XMFLOAT4(bullet_pos.x, bullet_pos.y, bullet_pos.z, 0));
+			ParticleList->push_back(BulletParticles2);
+		}
+		break;
+
+	default:
+		break;
+	}
+
+	DelObj = true;
 }
 
 
@@ -5063,7 +5142,6 @@ ImpObject::ImpObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comman
 	this->myNPCID = ++g_npcID;
 	this->m_npc_data.id = this->myNPCID;
 
-
 	//게임오브젝트마다 룩벡터와 라이트벡터가 다르므로 초기 오프셋 설정을 해준다.
 	//실제 룩벡터 등은 모두 UpdateLookVector에서 처리된다(라이트벡터도) 따라서 Tick함수에서 반드시 호출해야한다.
 	OffLookvector = XMFLOAT3(0, 0, -1);
@@ -5296,45 +5374,28 @@ void ImpObject::EndAnimation(int nAni)
 	}
 }
 
-RingObject::RingObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, list<CGameObject*>*shadow, XMFLOAT4 cp):CGameObject(m_Device,commandlist,Plist,shadow,cp)
+RingObject::RingObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, list<CGameObject*>*shadow, CGameObject* master, XMFLOAT4 cp):CGameObject(m_Device,commandlist,Plist,shadow,cp)
 {
+	if (CreateMesh)
+		m_player_data.id = master->m_player_data.id;
+
 	if (CreateMesh == false)
 	{
-
 		Mesh.Index = NULL;
 		Mesh.SubResource = NULL;
-
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "redTex", L"textures/object/Red.dds", false, 7, 0);
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "orangeTex", L"textures/object/orange.dds", false, 7, 1);
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "yellowTex", L"textures/object/yellow.dds", false, 7, 2);
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "pinkTex", L"textures/object/pink.dds", false, 7, 3);
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "whiteTex", L"textures/object/white.dds", false, 7, 4);
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "blueTex", L"textures/object/blue.dds", false, 7, 5);
-		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "greenTex", L"textures/object/green.dds", false, 7, 6);
-
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "whiteTex", L"textures/object/white.dds", false, 1, 0);
+		
 		SetMesh(m_Device, commandlist);
 		SetMaterial(m_Device, commandlist);
 
 		CreateMesh = true;
-
 	}
-	selectColor = rand() % 7 + 0;
-	if (selectColor == 0)
-		TextureName = "redTex";
-	else if (selectColor == 1)
-		TextureName = "orangeTex";
-	else if (selectColor == 2)
-		TextureName = "yellowTex";
-	else if (selectColor == 3)
-		TextureName = "pinkTex";
-	else if (selectColor == 4)
-		TextureName = "whiteTex";
-	else if (selectColor == 5)
-		TextureName = "blueTex";
-	else if (selectColor == 6)
-		TextureName = "greenTex";
+
+	TextureName = "whiteTex";
+
 	
-	TexOff = selectColor;
+	TexOff = 0;
+
 	Blending = true;
 	ObjData.BlendValue = 0.45;
 
@@ -5395,20 +5456,17 @@ void RingObject::SetMaterial(ID3D12Device * m_Device, ID3D12GraphicsCommandList 
 
 void RingObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer & gt)
 {
-	/*
 	if (times >= 0.125f)
 	{
 		DelObj = true;
 	}
 	else
-
 	{
 		times += gt.DeltaTime();
 		ObjData.Scale += gt.DeltaTime() *1000;
 	}
-	*/
-	times += gt.DeltaTime();
-	ObjData.Scale += gt.DeltaTime() * 1000;
+
+	//cout << "Times:" << times << "\n";
 
 	if (Textures.size() > 0)
 		SetTexture(commandlist, SrvDescriptorHeap, Textures[TextureName].get()->Resource.Get(), 0, TexOff);
@@ -5880,6 +5938,8 @@ StoneBullet::StoneBullet(ID3D12Device * m_Device, ID3D12GraphicsCommandList * co
 	this->myNPC_StoneBulletID = ++g_npcBulletID;
 	m_bullet_data.alive = true;
 
+	m_bullet_type = BULLET_TYPE::protocol_NpcStoneBullet;
+
 	orgpluspos = opp;
 	//게임오브젝트마다 룩벡터와 라이트벡터가 다르므로 초기 오프셋 설정을 해준다.
 	//실제 룩벡터 등은 모두 UpdateLookVector에서 처리된다(라이트벡터도) 따라서 Tick함수에서 반드시 호출해야한다.
@@ -6316,6 +6376,7 @@ void MeteorObject::Collision(list<CGameObject*>* collist, float DeltaTime)
 
 HammerBullet::HammerBullet(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, list<CGameObject*>* bulletlist,int count, CGameObject* master, XMFLOAT4& ori, CGameObject* lockon, XMFLOAT4 cp , XMFLOAT4 opp) :CGameObject(m_Device, commandlist, Plist, shadow, cp)
 {
+	bool firstBullet = true;
 	if (CreateMesh == false)
 	{
 
@@ -6326,10 +6387,31 @@ HammerBullet::HammerBullet(ID3D12Device* m_Device, ID3D12GraphicsCommandList* co
 		SetMesh(m_Device, commandlist);
 		SetMaterial(m_Device, commandlist);
 		CreateMesh = true;
+		firstBullet = false;
 
 	}
-	
-	m_bullet_data.alive = true;
+
+	if (firstBullet)
+	{
+		//서버데이터로 바꾸지 않아도 되는 것
+		m_bullet_data.master_id = master->m_player_data.id;
+		m_bullet_data.alive = true;
+
+		//서버 데이터로 바꿔야 되는 것
+		if (m_hmBulletFirstCount)
+		{
+			m_hmBulletID = 0;
+			m_hmBulletFirstCount = false;
+		}
+		else
+		{ 
+			++m_hmBulletID; 
+		}
+
+		m_bullet_data.my_id = m_hmBulletID;
+	}
+
+	m_bullet_type = BULLET_TYPE::protocol_HammerBullet;
 
 	offsetPos = cp;
 	orgpluspos = opp;
@@ -6410,7 +6492,7 @@ void HammerBullet::SetMaterial(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 
 void HammerBullet::Tick(const GameTimer & gt)
 {
-	Orient = QuaternionMultiply(Orient, QuaternionRotation(GetUpvector(), MMPE_PI * gt.DeltaTime()));
+	/*Orient = QuaternionMultiply(Orient, QuaternionRotation(GetUpvector(), MMPE_PI * gt.DeltaTime()));
 
 	CenterPos = orgpluspos;
 
@@ -6429,6 +6511,7 @@ void HammerBullet::Tick(const GameTimer & gt)
 
 	if (LifeTime <= 0)
 		DelObj = true;
+	*/
 }
 
 void HammerBullet::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer & gt)
@@ -6447,6 +6530,7 @@ void HammerBullet::Render(ID3D12GraphicsCommandList * commandlist, const GameTim
 
 void HammerBullet::Collision(list<CGameObject*>* collist, float DeltaTime)
 {
+	/*
 	CollisionList = collist;
 	//충돌리스트의 모든 요소와 충돌검사를 실시한다.
 	for (auto i = CollisionList->begin(); i != CollisionList->end(); i++)
@@ -6516,7 +6600,7 @@ void HammerBullet::Collision(list<CGameObject*>* collist, float DeltaTime)
 			}
 		}
 	}
-
+	*/
 }
 
 void HammerBullet::Collision(int coll_type, int damage, const XMFLOAT4& bullet_pos, const XMFLOAT4& target_pos)

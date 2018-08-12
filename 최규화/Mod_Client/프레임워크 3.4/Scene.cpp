@@ -314,7 +314,7 @@ void Scene::CreateGameObject()
 	delete resource;
 	resource = new RigidCubeObject(device, commandlist, &BbObject, &Shadows, XMFLOAT4(0, 0, 0, 0));
 	delete resource;
-	resource = new RingObject(device, commandlist, &BbObject, &Shadows, XMFLOAT4(0, 0, 0, 0));
+	resource = new RingObject(device, commandlist, &BbObject, &Shadows, NULL,  XMFLOAT4(0, 0, 0, 0));
 	delete resource;
 	resource = new ShieldArmor(device, commandlist, &BbObject, &Shadows,NULL, XMFLOAT4(0, 0, 0, 0));
 	delete resource;
@@ -996,6 +996,7 @@ Player_Data * Scene::Get_MonsterServerData(const unsigned int & id)
 
 void Scene::SET_PLAYER_BY_SEVER_DATA(const unsigned short & id, const Player_Data & playerdata, const unsigned char & packet_type)
 {
+	bool cal_rank = false;
 	for (auto GameObject : DynamicObject)
 	{
 		if (GameObject->isNPC) continue;
@@ -1003,100 +1004,117 @@ void Scene::SET_PLAYER_BY_SEVER_DATA(const unsigned short & id, const Player_Dat
 		{
 			switch (packet_type)
 			{
-			case PACKET_PROTOCOL_TYPE::INIT_OTHER_CLIENT:
-			{
-				GameObject->m_player_data = move(playerdata);
+				case PACKET_PROTOCOL_TYPE::INIT_OTHER_CLIENT:
+				{
+					GameObject->m_player_data = move(playerdata);
 
-				GameObject->Orient = { playerdata.rot.x , playerdata.rot.y, playerdata.rot.z, playerdata.rot.w };
-				GameObject->CenterPos = { playerdata.pos.x , playerdata.pos.y , playerdata.pos.z , playerdata.pos.w };
-				GameObject->pp->SetPosition(&GameObject->CenterPos);
+					GameObject->Orient = { playerdata.rot.x , playerdata.rot.y, playerdata.rot.z, playerdata.rot.w };
+					GameObject->CenterPos = { playerdata.pos.x , playerdata.pos.y , playerdata.pos.z , playerdata.pos.w };
+					GameObject->pp->SetPosition(&GameObject->CenterPos);
 
-				GameObject->gamedata.Damage = move(playerdata.status.attack);
-				GameObject->gamedata.HP = move(playerdata.status.cur_hp);
-				GameObject->gamedata.MAXHP = move(playerdata.status.origin_hp);
-				GameObject->gamedata.Speed = move(playerdata.status.speed);
+					GameObject->gamedata.Damage = move(playerdata.status.attack);
+					GameObject->gamedata.HP = move(playerdata.status.cur_hp);
+					GameObject->gamedata.MAXHP = move(playerdata.status.origin_hp);
+					GameObject->gamedata.Speed = move(playerdata.status.speed);
 
-				GameObject->AirBone = playerdata.airbone;
+					GameObject->AirBone = playerdata.airbone;
 
-			}
-			break;
+				}
+				break;
 
-			case PACKET_PROTOCOL_TYPE::INIT_CLIENT:
-			{
-				GameObject->m_player_data = move(playerdata);
+				case PACKET_PROTOCOL_TYPE::INIT_CLIENT:
+				{
+					GameObject->m_player_data = move(playerdata);
 
-				GameObject->Orient = { playerdata.rot.x , playerdata.rot.y, playerdata.rot.z, playerdata.rot.w };
-				GameObject->CenterPos = { playerdata.pos.x , playerdata.pos.y , playerdata.pos.z , playerdata.pos.w };
-				GameObject->pp->SetPosition(&GameObject->CenterPos);
+					GameObject->Orient = { playerdata.rot.x , playerdata.rot.y, playerdata.rot.z, playerdata.rot.w };
+					GameObject->CenterPos = { playerdata.pos.x , playerdata.pos.y , playerdata.pos.z , playerdata.pos.w };
+					GameObject->pp->SetPosition(&GameObject->CenterPos);
 
-				GameObject->gamedata.Damage = move(playerdata.status.attack);
-				GameObject->gamedata.HP = move(playerdata.status.cur_hp);
-				GameObject->gamedata.MAXHP = move(playerdata.status.origin_hp);
-				GameObject->gamedata.Speed = move(playerdata.status.speed);
+					GameObject->gamedata.Damage = move(playerdata.status.attack);
+					GameObject->gamedata.HP = move(playerdata.status.cur_hp);
+					GameObject->gamedata.MAXHP = move(playerdata.status.origin_hp);
+					GameObject->gamedata.Speed = move(playerdata.status.speed);
 
-				GameObject->AirBone = playerdata.airbone;
+					GameObject->AirBone = playerdata.airbone;
 
-				if (GameObject->m_player_data.id == my_ClientID)
-					Player->SetPlayer(GameObject);
-			}
-			break;
+					if (GameObject->m_player_data.id == my_ClientID)
+						Player->SetPlayer(GameObject);
 
-			case PACKET_PROTOCOL_TYPE::PLAYER_CURR_STATE:
-			{
-				GameObject->m_player_data.ai = playerdata.ai;
-				GameObject->m_player_data.airbone = playerdata.airbone;
-				GameObject->m_player_data.connect = playerdata.connect;
-				GameObject->m_player_data.dir = playerdata.dir;
-				GameObject->m_player_data.godmode = playerdata.godmode;
-				GameObject->m_player_data.id = playerdata.id;
-				GameObject->m_player_data.pos = playerdata.pos;
-				GameObject->m_player_data.status = playerdata.status;
+				}
+				break;
 
-				GameObject->CenterPos = { playerdata.pos.x , playerdata.pos.y , playerdata.pos.z , playerdata.pos.w };
-				GameObject->pp->SetPosition(&GameObject->CenterPos);
+				case PACKET_PROTOCOL_TYPE::PLAYER_CURR_STATE:
+				{
+					GameObject->m_player_data.ai = playerdata.ai;
+					GameObject->m_player_data.airbone = playerdata.airbone;
+					GameObject->m_player_data.connect = playerdata.connect;
+					GameObject->m_player_data.dir = playerdata.dir;
+					GameObject->m_player_data.godmode = playerdata.godmode;
+					GameObject->m_player_data.id = playerdata.id;
+					GameObject->m_player_data.pos = playerdata.pos;
+					GameObject->m_player_data.status = playerdata.status;
 
-				GameObject->gamedata.Damage = move(playerdata.status.attack);
-				GameObject->gamedata.HP = move(playerdata.status.cur_hp);
-				GameObject->gamedata.MAXHP = move(playerdata.status.origin_hp);
-				GameObject->gamedata.Speed = move(playerdata.status.speed);
+					GameObject->CenterPos = { playerdata.pos.x , playerdata.pos.y , playerdata.pos.z , playerdata.pos.w };
+					GameObject->pp->SetPosition(&GameObject->CenterPos);
 
-				GameObject->AirBone = playerdata.airbone;
-			}
-			break;
+					GameObject->gamedata.Damage = playerdata.status.attack;
+					GameObject->gamedata.HP = playerdata.status.cur_hp;
+					GameObject->gamedata.MAXHP = playerdata.status.origin_hp;
+					GameObject->gamedata.Speed = playerdata.status.speed;
 
-			case PACKET_PROTOCOL_TYPE::PLAYER_DISCONNECT:
-			{
-				//client 내 flag를 false로
-			}
-			break;
+					//플레이어 스코어 , 킬 , 데스 , 포인트 관리
+		
+					GameObject->AirBone = playerdata.airbone;
+					
+					cal_rank = true;
+				}
+				break;
 
-			case PACKET_PROTOCOL_TYPE::PLAYER_ROTATE:
-			{
-				GameObject->m_player_data.rot = move(playerdata.rot);
+				case PACKET_PROTOCOL_TYPE::PLAYER_DISCONNECT:
+				{
+					//client 내 flag를 false로
 
-				GameObject->Orient = { playerdata.rot.x , playerdata.rot.y, playerdata.rot.z, playerdata.rot.w };
-			}
-			break;
+				}
+				break;
 
-			case PACKET_PROTOCOL_TYPE::PLAYER_ANIMATION:
-			{
-				//GameObject->ObjData.isAnimation = true;
+				case PACKET_PROTOCOL_TYPE::PLAYER_ROTATE:
+				{
+					GameObject->m_player_data.rot = move(playerdata.rot);
 
-				GameObject->currAnimTime = 0.f;
+					GameObject->Orient = { playerdata.rot.x , playerdata.rot.y, playerdata.rot.z, playerdata.rot.w };
 
-				GameObject->m_player_data.ani = playerdata.ani;
+				}
+				break;
 
-				GameObject->n_Animation = static_cast<int>(playerdata.ani);
+				case PACKET_PROTOCOL_TYPE::PLAYER_ANIMATION:
+				{
+					//GameObject->ObjData.isAnimation = true;
 
-			}
-			break;
+					GameObject->currAnimTime = 0.f;
+
+					GameObject->m_player_data.ani = playerdata.ani;
+
+					GameObject->n_Animation = static_cast<int>(playerdata.ani);
+
+				}
+				break;
 
 			default:
 				break;
 
 			}
 
+			break;
 		}
+	}
+
+	if (cal_rank)
+	{
+		sort(DynamicObject.begin(), DynamicObject.end(), 
+			[&](const CGameObject& c1, const CGameObject& c2) 
+		    {
+				if (c1.)
+		    });
 	}
 }
 
@@ -1411,6 +1429,8 @@ void Scene::SET_BULLET_BY_SERVER_DATA(STC_BulletObject_Info & bulldata, const un
 					lbul->UpdateLookVector();
 
 					lbul->m_particle_type = bulldata.after_coll;
+
+					cout << "Bullet Type: " << static_cast<int>(bulldata.type) << "\n";
 					
 					//불렛과 대상 충돌 후 파티클 작업
 					//lbul->Collision(bulldata.after_coll, bulldata.damage, XMFLOAT4(bulldata.pos4f.x, bulldata.pos4f.y, bulldata.pos4f.z, bulldata.pos4f.w), XMFLOAT4(bulldata.pos4f.x, bulldata.pos4f.y, bulldata.pos4f.z, bulldata.pos4f.w));
@@ -1508,31 +1528,35 @@ void Scene::SET_PLAYER_SKILL(const unsigned int & id, const STC_SkillData & play
 {
 	for (auto GameObject : DynamicObject)
 	{
+		//NPC 체크가 필요없으면 반드시 if(GameObject->isNPC) continue를 넣어준다 
+		if (GameObject->isNPC) continue;
+
 		// 사용스킬에 대한 패킷을 보낸 ID == 현재 이 클라이언트의 아이디
 		if (id == GameObject->m_player_data.id)
 		{
 			switch (playerdata.my_id)
 			{
 				// 실드를 따로 생성해서 Centerpos를 패킷으로 받은 아이디를 가진 플레이어값으로 지정한다 
-			case CHAR_SKILL::SHIELD:
-			{
-				if (playerdata.alive)
+				case CHAR_SKILL::SHIELD:
 				{
-					NoCollObject.push_back(new ShieldArmor(device, commandlist, &BbObject, &Shadows, GameObject, GameObject->CenterPos));
-				}
-				else
-				{
-					for (auto object : NoCollObject)
+					cout << "Using Skill Master ID: " << id << "\t" << "m_player_data ID: " << static_cast<int>(GameObject->m_player_data.id) << "\n";
+					if (playerdata.alive)
 					{
-						if (id == object->m_player_data.id)
+						NoCollObject.push_back(new ShieldArmor(device, commandlist, &BbObject, &Shadows, GameObject, GameObject->CenterPos));
+					}
+					else
+					{
+						for (auto object : NoCollObject)
 						{
-							object->DelObj = true;
-							break;
+							if (id == object->m_player_data.id)
+							{
+								object->DelObj = true;
+								break;
+							}
 						}
 					}
 				}
-			}
-			break;
+				break;
 
 			default:
 				break;
@@ -1546,59 +1570,106 @@ void Scene::SET_PLAYER_SKILL(const unsigned int & id, const STC_SkillData & play
 {
 	for (auto GameObject : DynamicObject)
 	{
-		// 사용스킬에 대한 패킷을 보낸 ID == 현재 이 클라이언트의 아이디
+		if (GameObject->isNPC) continue;
+
+		// 사용스킬에 대한 패킷을 보낸 ID == 클라이언트 리스트의 아이디들
 		if (id == GameObject->m_player_data.id)
 		{
+			//사용한 스킬의 아이디 = 파동파
 			switch (playerdata.my_id)
 			{
-			case CHAR_SKILL::WAVE_SHOCK:
-			{
-				if (playerdata.alive)
+				case CHAR_SKILL::WAVE_SHOCK:
 				{
-					StaticObject.push_back(new RingObject(device, commandlist, &BbObject, &Shadows, GameObject->CenterPos));
-					auto iter = StaticObject.back();
-					switch (texture_number)
+					//파동파 스킬이 살아있는지 아닌지
+					if (playerdata.alive)
 					{
-					case 0:
-						iter->TextureName = "redTex";
-						break;
-					case 1:
-						iter->TextureName = "orangeTex";
-						break;
-					case 2:
-						iter->TextureName = "yellowTex";
-						break;
-					case 3:
-						iter->TextureName = "pinkTex";
-						break;
-					case 4:
-						iter->TextureName = "whiteTex";
-						break;
-					case 5:
-						iter->TextureName = "blueTex";
-						break;
-					case 6:
-						iter->TextureName = "greenTex";
-						break;
-					default:
-						break;
+						//다른 클라이언트만 접근
+						StaticObject.push_back(new RingObject(device, commandlist, &BbObject, &Shadows, GameObject, GameObject->CenterPos));			
 					}
 				}
-				else
-				{
-					for (auto object : StaticObject)
-					{
-						if (id == object->m_player_data.id)
-						{
-							object->DelObj = true;
-							break;
-						}
-					}
-				}
-			}
-			break;
+				break;
 
 			}
 		}
 	}
 }
+
+void Scene::SET_PLAYER_SKILL(const STC_HammerSkillInfo & hammer_bullet)
+{
+	STC_HammerSkillInfo hmdata = hammer_bullet;
+
+	// 1.create_first = true 와 headBullet = true는 Create 할 필요없음 
+	// 2.create_first = true 와 headBullet = false 로 날아올거임
+	// 3.create_first = false 와 headBullet은 이제 상관없음 
+	// [*] 내클라 -> 내 클라  
+	// [*] 내클라 -> 니 클라 
+	
+	// 내클라 -> 니 클라 (create_first == true 처리랑 데이터 업데이트)
+	// 죄다 create_first는 처음에 true로 옴
+	if (hmdata.master_id != Player->PlayerObject->m_player_data.id)
+	{
+		if (hmdata.create_first)
+		{
+			for (const auto& client : DynamicObject)
+			{
+				if (client->m_player_data.id == hmdata.master_id)
+				{
+					XMFLOAT4 ori = XMFLOAT4(hmdata.rot4f.x, hmdata.rot4f.y, hmdata.rot4f.z, hmdata.rot4f.w);
+					XMFLOAT4 CenterPos = XMFLOAT4(hmdata.pos4f.x, hmdata.pos4f.y, hmdata.pos4f.z, hmdata.pos4f.w);
+					XMFLOAT4 opp = XMFLOAT4(hmdata.opp_pos4f.x, hmdata.opp_pos4f.y, hmdata.opp_pos4f.z, hmdata.opp_pos4f.w);
+
+					CGameObject *hammer = new HammerBullet(device, commandlist, client->ParticleList, NULL, NULL, 0, client, ori, NULL, CenterPos, opp);
+					BulletObject.push_back(hammer);
+				}
+			}
+		}
+	}
+	
+	if (hmdata.master_id == Player->PlayerObject->m_player_data.id)
+	{
+		//if (hmdata.create_first == true && hmdata.headBullet == true) 는 처리하지 않음 (내클라에서 내클라로 보내진 head hammer 데이터이므로)
+		if (hmdata.create_first == true && hmdata.headBullet == false)
+		{
+			XMFLOAT4 ori = XMFLOAT4(hmdata.rot4f.x, hmdata.rot4f.y, hmdata.rot4f.z, hmdata.rot4f.w);
+			XMFLOAT4 CenterPos = XMFLOAT4(hmdata.pos4f.x, hmdata.pos4f.y, hmdata.pos4f.z, hmdata.pos4f.w);
+			XMFLOAT4 opp = XMFLOAT4(hmdata.opp_pos4f.x, hmdata.opp_pos4f.y, hmdata.opp_pos4f.z, hmdata.opp_pos4f.w);
+
+			CGameObject *hammer = new HammerBullet(device, commandlist, Player->PlayerObject->ParticleList, NULL, NULL, 0, Player->PlayerObject, ori, NULL, CenterPos, opp);
+			BulletObject.push_back(hammer);
+		}
+	}
+	
+	//같은 경우 - 불렛 데이터 업데이트
+	for (auto bullet : BulletObject)
+	{
+		if (bullet->m_bullet_type == BULLET_TYPE::protocol_HammerBullet &&
+			bullet->m_bullet_data.master_id == hmdata.master_id &&
+			bullet->m_bullet_data.my_id == hmdata.my_id)
+		{
+			if (!hmdata.alive)
+			{
+				bullet->m_bullet_data.alive = false;
+				bullet->m_bullet_data.damage = hmdata.damage;
+
+				bullet->CenterPos = { hmdata.pos4f.x, hmdata.pos4f.y, hmdata.pos4f.z, hmdata.pos4f.w };
+				bullet->pp->SetPosition(&bullet->CenterPos);
+
+				bullet->Orient = { hmdata.rot4f.x, hmdata.rot4f.y, hmdata.rot4f.z, hmdata.rot4f.w };
+				bullet->UpdateLookVector();
+
+				bullet->m_particle_type = hmdata.after_coll;
+				break;
+			}
+
+			bullet->m_bullet_data.alive = true;
+			bullet->CenterPos = { hmdata.pos4f.x, hmdata.pos4f.y, hmdata.pos4f.z, hmdata.pos4f.w };
+			bullet->pp->SetPosition(&bullet->CenterPos);
+
+			bullet->Orient = { hmdata.rot4f.x, hmdata.rot4f.y, hmdata.rot4f.z, hmdata.rot4f.w };
+			bullet->UpdateLookVector();
+			break;
+		}
+	}
+}
+
+

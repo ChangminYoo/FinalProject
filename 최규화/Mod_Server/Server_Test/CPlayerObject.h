@@ -21,8 +21,15 @@ private:
 	SKILL_WAVESHOCK_DATA m_skill_waveshock;
 	SKILL_DICESTRIKE_DATA m_skill_dicestrike;
 
-	int					m_player_score{ 0 };
 	bool				m_set_first_moveobjs{ false };
+
+	//플레이어 점수 관련 데이터
+	int					m_player_score{ 0 };
+	int					m_killCount;
+	int					m_deathCount;
+	float				m_score_for_rankcheck;
+	int                 m_myRank;
+
 public:
 	unsigned int		m_curr_packet_size{ 0 };
 	unsigned int		m_prev_packet_size{ 0 };
@@ -121,6 +128,14 @@ public:
 	bool	GetFirstMoveObjects() const { return m_set_first_moveobjs; }
 	void    SetFirstMoveObjects(bool flag) { m_set_first_moveobjs = flag; }
 
+	int     GetMyCharacterKillCount() const { return m_killCount; }
+	void    SetMyCharacterKillCount(int count = 1) { m_killCount += count; }
+
+	int     GetMyCharacterDeathCount() const { return m_deathCount; }
+	void    SetMyCharacterDeathCount(int count = 1) { m_deathCount += count; }
+
+	void    CalculatePlayerScoreForRanking();
+	float   GetMyScoreForRanking() const { return m_score_for_rankcheck; }
 	// ---------------------------------------------------------------------------------------
 	// [5]. 물리효과 함수
 
@@ -142,7 +157,6 @@ public:
 
 	void Collision(vector<CPlayerObject*>* clients, double deltime);
 	void Collision(unordered_set<CStaticObject*>* sobjs, double deltime);
-	void Collision(unordered_set<CMoveCubeObject*>* mvobjs, double deltime);
 	void Collision_With_Waveshock();
 
 };

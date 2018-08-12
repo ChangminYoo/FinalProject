@@ -93,6 +93,7 @@ public:
 	MoveObjectData GetMoveObjectData() const { return m_stc_mvobjdata; }
 
 	void UpdateCreateFirstPacketData(bool flag) { m_stc_mvobjdata.create_first = flag; }
+	virtual void Collision(vector<CPlayerObject*>* clients, double deltime);
 
 	virtual void Tick(double deltime) override;
 

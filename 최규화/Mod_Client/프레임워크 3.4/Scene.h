@@ -124,6 +124,8 @@ public:
 
 	void SET_PLAYER_SKILL(const unsigned int& id, const STC_SkillData& playerdata, unsigned char texture_number);
 
+	void SET_PLAYER_SKILL(const STC_HammerSkillInfo& hammer_bullet);
+
 
 	//서버에서 받은 PlayerData를 이용하면 이 함수는 없어도됨
 	//PlayerData를 기반으로 Player의 값이 달라질것이므로

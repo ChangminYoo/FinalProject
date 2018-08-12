@@ -30,3 +30,9 @@ struct SKILL_DICESTRIKE_DATA
 	SKILL_BASIC_DATA data;
 	bool cooltime_error{ false };
 };
+
+//3.(주사위불렛)스킬과 관련된 정보
+struct SKILL_HAMMERBULLET_DATA
+{
+	SKILL_BASIC_DATA data;
+};

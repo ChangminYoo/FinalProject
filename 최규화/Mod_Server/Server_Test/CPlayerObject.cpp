@@ -108,7 +108,13 @@ void CPlayerObject::Init_PlayerInfo()
 	m_state = IDLE;
 
 	m_set_first_moveobjs = false;
+
 	//-------------------------- 기본 데이터설정
+	m_killCount = 0;
+	m_deathCount = 0;
+	m_player_score = 0;
+	m_myRank = MAX_PLAYER;
+
 	m_ani = Ani_State::Idle;
 	m_connect = true;
 	m_dir = 0;
@@ -196,6 +202,10 @@ void CPlayerObject::InitData_To_Client()
 	m_pdata.status.cur_hp = m_ability.curHP;
 	m_pdata.status.exp = m_ability.exp;
 	m_pdata.status.level = m_ability.level;
+	m_pdata.killcount = m_killCount;
+	m_pdata.deathcount = m_deathCount;
+	m_pdata.score = m_player_score;
+	m_pdata.rank = m_myRank;
 
 	stc_init.player_data = move(m_pdata);
 
@@ -600,10 +610,7 @@ void CPlayerObject::ProcessPacket(Packet * packet)
 		auto data = reinterpret_cast<CTS_SKILL_WAVESHOCK*>(packet);
 
 		STC_SKILL_WAVESHOCK stc_skill_waveshock;
-		stc_skill_waveshock.skill_data.master_id = data->skill_data.master_id;
-		stc_skill_waveshock.skill_data.my_id = data->skill_data.my_id;
-		stc_skill_waveshock.skill_data.alive = true;
-		stc_skill_waveshock.texture_number = data->texture_number;
+		stc_skill_waveshock.skill_data = data->skill_data;
 
 		m_skill_waveshock.data.curr_cooltime = high_resolution_clock::now();
 		if (m_skill_waveshock.data.first_op)
@@ -628,7 +635,7 @@ void CPlayerObject::ProcessPacket(Packet * packet)
 				{
 					if (client->m_id == data->skill_data.master_id) continue;
 					if (client->GetIsAI() == true || client->GetConnectState() == false) continue;
-
+				
 					client->SendPacket(reinterpret_cast<Packet*>(&stc_skill_waveshock));
 				}
 			}
@@ -697,8 +704,40 @@ void CPlayerObject::ProcessPacket(Packet * packet)
 	}
 	break;
 
+	case PACKET_PROTOCOL_TYPE::PLAYER_SKILL_HAMMER:
+	{
+		if (m_state == PLAYER_STATE::DEAD)
+			break;
+
+		m_state = PLAYER_STATE::ATTACK;
+
+		auto data = reinterpret_cast<CTS_SKILL_HAMMERBULLET*>(packet);
+
+		//----------------------------------------------------------------스킬 쿨타임-------------------------------------------------------//
+
+
+
+	
+		//----------------------------------------------------------------스킬 쿨타임-------------------------------------------------------//
+
+		XMFLOAT4 inOpp = { data->skill_data.opp_pos4f.x, data->skill_data.opp_pos4f.y, data->skill_data.opp_pos4f.z, data->skill_data.opp_pos4f.w };
+		g_bullobj = new CHammerBulletObject(data->skill_data.master_id, data->skill_data.my_id, data->skill_data.pos4f,
+									        data->skill_data.rot4f, data->skill_data.weapon_num, inOpp);
+
+		g_bullets.emplace_back(g_bullobj);
+	}
+	break;
+
 
 	}
+}
+
+void CPlayerObject::CalculatePlayerScoreForRanking()
+{
+	//플레이어의 랭킹을 매기기위한 스코어를 계산한다
+	//1. 스코어 2. 킬 수 3. 데스 수 를 합산한 결과를 기준으로 랭킹체크
+	m_score_for_rankcheck = static_cast<float>(m_player_score) + static_cast<float>(m_killCount) * 3.8f - static_cast<float>(m_deathCount) * 1.8f;
+
 }
 
 void CPlayerObject::UpdateDataForPacket()
@@ -722,6 +761,11 @@ void CPlayerObject::UpdateDataForPacket()
 
 	*pp->CenterPos = { m_pos4f.x, m_pos4f.y, m_pos4f.z, m_pos4f.w };
 	//pp->SetPosition(m_pos4f.x, m_pos4f.y, m_pos4f.z);
+
+	m_pdata.killcount = m_killCount;
+	m_pdata.deathcount = m_deathCount;
+	m_pdata.score = m_player_score;
+	m_pdata.rank = m_myRank;
 }
 
 void CPlayerObject::Tick(double deltime)
@@ -822,41 +866,6 @@ void CPlayerObject::Collision(unordered_set<CStaticObject*>* sobjs, double delti
 	
 }
 
-
-void CPlayerObject::Collision(unordered_set<CMoveCubeObject*>* mvobjs, double deltime)
-{
-	for (auto iter = mvobjs->begin(); iter != mvobjs->end(); ++iter)
-	{
-		bool test = pp->CollisionTest(*(*iter)->GetPhysicsPoint(), m_Lookvector, m_Rightvector, m_Upvector,
-			(*iter)->GetLookVector(), (*iter)->GetRightVector(), (*iter)->GetUpVector());
-
-		if (test)
-		{
-			if (pp->pAxis.y > 0)
-			{
-				pp->SetVelocity(pp->GetVelocity().x, 0, pp->GetVelocity().z);
-				m_airbone = false;
-			}
-
-			if (pp->pAxis.y < 0)
-			{
-				(*iter)->GetPhysicsPoint()->SetVelocity((*iter)->GetPhysicsPoint()->GetVelocity().x, 0, (*iter)->GetPhysicsPoint()->GetVelocity().z);
-				(*iter)->SetAirbone(false);
-			}
-
-			XMFLOAT3 cn;
-			cn = XMFloat4to3(Float4Add(pp->GetPosition(), (*(*iter)->GetPhysicsPoint()).GetPosition(), false));
-			cn = Float3Normalize(cn);
-
-			pp->CollisionResolve(*(*iter)->GetPhysicsPoint(), cn, deltime);
-			UpdatePPosCenterPos();
-			(*iter)->UpdatePPosCenterPos();
-
-			//cout << "스테틱 오브젝트와 충돌 " << endl;
-
-		}
-	}
-}
 
 void CPlayerObject::Collision_With_Waveshock()
 {

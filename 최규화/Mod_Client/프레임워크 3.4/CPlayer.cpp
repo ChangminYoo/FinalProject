@@ -434,12 +434,11 @@ void CPlayer::PlayerInput(float DeltaTime, Scene* scene)
 				cts_skill_waveshock.skill_data.alive = true;
 
 				//고리생성
-				scene->StaticObject.push_back(new RingObject(scene->device, scene->commandlist,&scene->BbObject, &scene->Shadows, PlayerObject->CenterPos));
+				scene->StaticObject.push_back(new RingObject(scene->device, scene->commandlist, &scene->BbObject, &scene->Shadows, PlayerObject, PlayerObject->CenterPos));
 				skilldata.SkillsCoolTime[skilldata.SellectBulletIndex] = skilldata.SkillsMaxCoolTime[skilldata.Skills[skilldata.SellectBulletIndex]];
 				skilldata.isSkillOn[skilldata.SellectBulletIndex] = false;
 				skilldata.SellectBulletIndex = 0;//스킬 시전후 가장 첫번째 스킬로 변경함
 
-				cts_skill_waveshock.texture_number = scene->StaticObject.back()->TexOff;
 				scene->Player->m_async_client->SendPacket(reinterpret_cast<Packet*>(&cts_skill_waveshock));
 
 			}
@@ -756,8 +755,22 @@ void CPlayer::CreateBullet(ID3D12Device* Device, ID3D12GraphicsCommandList* cl,X
 		skilldata.SkillsCoolTime[skilldata.SellectBulletIndex] = skilldata.SkillsMaxCoolTime[skilldata.Skills[skilldata.SellectBulletIndex]];
 		skilldata.isSkillOn[skilldata.SellectBulletIndex] = false;
 
-		bulletlist->push_back(new HammerBullet(Device, cl, PlayerObject->ParticleList, NULL,NULL,3, PlayerObject, XMFLOAT4(0,0,0,1),NULL, PlayerObject->CenterPos,XMFLOAT4(0,0,20,0)));
+		CGameObject *hammer = new HammerBullet(Device, cl, PlayerObject->ParticleList, NULL,NULL,3, PlayerObject, XMFLOAT4(0,0,0,1),NULL, PlayerObject->CenterPos,XMFLOAT4(0,0,20,0));
+		bulletlist->push_back(hammer);
 		
+		//서버로 해머불렛 생성에 대한 초기값 패킷 전달
+		CTS_HammerSkillInfo cts_hammer_skill_info;
+		cts_hammer_skill_info.pos4f = { PlayerObject->CenterPos.x, PlayerObject->CenterPos.y, PlayerObject->CenterPos.z, PlayerObject->CenterPos.w };
+		cts_hammer_skill_info.rot4f = { 0, 0, 0, 1 };	//초기 rot는 ori 값 0 0 0 1
+		cts_hammer_skill_info.master_id = PlayerObject->m_player_data.id;
+		cts_hammer_skill_info.my_id = hammer->m_bullet_data.my_id;
+		cts_hammer_skill_info.weapon_num = 3;
+		cts_hammer_skill_info.opp_pos4f = { 0.f, 0.f, 20.f, 0.f };
+
+		CTS_SKILL_HAMMERBULLET cts_hammer_skill_packet;
+		cts_hammer_skill_packet.skill_data = cts_hammer_skill_info;
+		
+		m_async_client->SendPacket(reinterpret_cast<Packet*>(&cts_hammer_skill_packet));
 
 		break;
 	}

@@ -99,6 +99,7 @@ void CPhysicEngineWorker::Update()
 		{
 			if (!(*iter)->GetAlive())
 			{			
+				//1. NPC Bullet
 				if ((*iter)->GetObjectType() == protocol_NpcStoneBullet)
 				{
 					STC_NpcMonsterAttackStoneBullet stc_imp_bullet;
@@ -111,19 +112,19 @@ void CPhysicEngineWorker::Update()
 				}
 				else
 				{
-					//서버->클라 불렛 구조체 
-					//STC_BulletObject_Info stc_bullet;
-					//stc_bullet.pos4f = (*iter)->m_bulldata.pos4f;
-					//stc_bullet.rot4f = (*iter)->m_bulldata.rot4f;
-					//stc_bullet.endpoint = (*iter)->m_bulldata.endpoint;
-					//stc_bullet.master_id = (*iter)->m_bulldata.master_id;
-					//stc_bullet.my_id = (*iter)->m_bulldata.my_id;
-					//stc_bullet.type = (*iter)->m_bulldata.type;
-					//stc_bullet.alive = (*iter)->m_bulldata.alive;
-					//stc_bullet.degree = (*iter)->m_bulldata.degree;
-					//
+					//2. Player Bullet
+					if ((*iter)->GetObjectType() == protocol_HammerBullet)
+					{
+						(*iter)->UpdateDataForPacket();
+						STC_SKILL_HAMMERBULLET stc_skill_hammer_bullet;
+						stc_skill_hammer_bullet.skill_data = (*iter)->GetChangedHammerBulletState();
 
-					if ((*iter)->m_bulldata.type == protocol_DiceBullet)
+						for (auto client : g_clients)
+						{
+							client->SendPacket(reinterpret_cast<Packet*>(&stc_skill_hammer_bullet));
+						}
+					}
+					else if ((*iter)->m_bulldata.type == protocol_DiceBullet)
 					{
 						STC_SKILL_DICESTRIKE stc_skill_dicestrike;
 						stc_skill_dicestrike.bull_data = move((*iter)->GetChangedBulletState());
@@ -162,13 +163,17 @@ void CPhysicEngineWorker::CollisionSystem(double deltime)
 {
 	for (auto client : g_clients)
 	{
-		if (client->GetPlayerIsAlive() == true)
+		if (client->GetAlive())
 		{
 			client->Collision(&g_clients, deltime);
 			client->Collision(&g_staticobjs, deltime);
-			client->Collision(&g_moveobjs, deltime);
 			client->Collision_With_Waveshock();
 		}
+	}
+
+	for (auto mvobj : g_moveobjs)
+	{
+		mvobj->Collision(&g_clients, deltime);
 	}
 
 	for (auto npc_monster : g_npcs)

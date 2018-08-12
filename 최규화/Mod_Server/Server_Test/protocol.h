@@ -26,7 +26,7 @@
 #define SKILL_SHIELD_OP_TIME 5.0
 #define SKILL_SHIELD_COOLTIME 20.0
 
-#define SKILL_WAVESHOCK_OP_TIME 0.085
+#define SKILL_WAVESHOCK_OP_TIME 0.0125
 #define SKILL_WAVESHOCK_COOLTIME 20.0
 
 #define RegularPacketExchangeTime  (1.0 / 20.0) // 1초에 20번 패킷을 교환(morpg 형식)
@@ -68,6 +68,7 @@ enum PACKET_PROTOCOL_TYPE
 	PLAYER_SKILL_SHIELD,
 	PLAYER_SKILL_WAVESHOCK,
 	PLAYER_SKILL_DICESTRIKE,
+	PLAYER_SKILL_HAMMER,
 	TEST					//테스트용 패킷
 };
 
@@ -89,6 +90,7 @@ enum BULLET_TYPE
 	protocol_LightBullet = 0,
 	protocol_HeavyBullet,
 	protocol_DiceBullet,
+	protocol_HammerBullet,
 	protocol_NpcStoneBullet
 };
 
@@ -224,7 +226,7 @@ struct CTS_BulletObject_Info
 	unsigned short				my_id;					//2
 	unsigned char				type;					//1
 	char						alive;					//1
-	char						after_coll;			//1
+	char						after_coll;				//1
 	unsigned short				damage;					//2
 };
 
@@ -253,6 +255,34 @@ struct NPC_BulletObject_Info
 	char						after_coll;			//1
 	unsigned short				damage;					//2
 };
+
+
+struct STC_HammerSkillInfo
+{
+	Position					pos4f;					//16
+	Position					opp_pos4f;				//16
+	Rotation					rot4f;					//16
+	unsigned short				master_id;				//2
+	unsigned short				my_id;					//2
+	unsigned short				damage;					//2
+	unsigned char				weapon_num;				//1
+	char						after_coll;				//1
+	char						create_first;			//1
+	char						alive;					//1
+	char					    headBullet;				//1  해머스킬을 시전할때 마다 생긴 첫번째 해머
+};
+
+
+struct CTS_HammerSkillInfo
+{
+	Position					pos4f;					//16
+	Position					opp_pos4f;				//16
+	Rotation					rot4f;					//16
+	unsigned short				master_id;				//2
+	unsigned short				my_id;					//2
+	unsigned char				weapon_num;				//1
+}; 
+
 
 //-------------------------------패킷용스킬데이터-------------------------------//
 
@@ -291,6 +321,10 @@ struct Player_Data
 	char			godmode{ false };			//1
 	char			airbone{ false };			//1
 												//Player_LoginDB  LoginData;
+	char			killcount;
+	char			deathcount;
+	unsigned short  score;
+	unsigned char   rank;
 };
 // 18 + 16 + 2 + 1 + 1 + 1 + 1 + 16 = 58  pragma pack 할시
 
@@ -510,25 +544,23 @@ typedef struct Client_To_Server_Skill_Shield
 	unsigned char packet_size = sizeof(STC_SkillData) + sizeof(unsigned char) + sizeof(unsigned char);
 	unsigned char packet_type = PACKET_PROTOCOL_TYPE::PLAYER_SKILL_SHIELD;
 	STC_SkillData skill_data;
+	int			  ringobjectID;
 
 }CTS_SKILL_SHIELD;
 
 typedef struct Server_To_Client_Skill_WaveShock
 {
-	unsigned char packet_size = sizeof(STC_SkillData) + sizeof(double) + sizeof(unsigned char) + sizeof(unsigned char) + sizeof(unsigned char);
+	unsigned char packet_size = sizeof(STC_SkillData) + sizeof(unsigned char) + sizeof(unsigned char);
 	unsigned char packet_type = PACKET_PROTOCOL_TYPE::PLAYER_SKILL_WAVESHOCK;
 	STC_SkillData skill_data;
-	double		  cooltime;
-	unsigned char texture_number;
 
 }STC_SKILL_WAVESHOCK;
 
 typedef struct Client_To_Server_Skill_WaveShock
 {
-	unsigned char packet_size = sizeof(STC_SkillData) + sizeof(unsigned char) + sizeof(unsigned char) + sizeof(unsigned char);
+	unsigned char packet_size = sizeof(STC_SkillData) + sizeof(unsigned char) + sizeof(unsigned char);
 	unsigned char packet_type = PACKET_PROTOCOL_TYPE::PLAYER_SKILL_WAVESHOCK;
 	STC_SkillData skill_data;
-	unsigned char texture_number;
 
 }CTS_SKILL_WAVESHOCK;
 
@@ -551,5 +583,21 @@ typedef struct Client_To_Server_DiceSkillAttack_Info
     char				  is_firstdice;
 
 }CTS_SKILL_DICESTRIKE;
+
+typedef struct Client_To_Server_HammerSkill_Info
+{
+	unsigned char pack_size = sizeof(CTS_HammerSkillInfo) + sizeof(unsigned char) + sizeof(unsigned char);
+	unsigned char pack_type = PACKET_PROTOCOL_TYPE::PLAYER_SKILL_HAMMER;
+	CTS_HammerSkillInfo   skill_data;
+
+}CTS_SKILL_HAMMERBULLET;
+
+typedef struct Server_To_Client_HammerSkill_Info
+{
+	unsigned char pack_size = sizeof(STC_HammerSkillInfo) + sizeof(unsigned char) + sizeof(unsigned char);
+	unsigned char pack_type = PACKET_PROTOCOL_TYPE::PLAYER_SKILL_HAMMER;
+	STC_HammerSkillInfo   skill_data;
+
+}STC_SKILL_HAMMERBULLET;
 
 #pragma pack (pop)

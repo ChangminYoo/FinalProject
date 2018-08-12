@@ -1,6 +1,4 @@
 #pragma once
-//#include "../PhysicsEngine/MyMiniPysicsEngine.h"
-//#include "../PhysicsEngine/PhysicalEffect.h"
 
 struct BasicInfo
 {
@@ -89,7 +87,7 @@ public:
 	void	SetCenterPos3f(const XMFLOAT3& pos) { m_pos4f.x = pos.x; m_pos4f.y = pos.y; m_pos4f.z = pos.z; }
 	void	SetRotatePos4f(const XMFLOAT4& rot) { m_rot4f.x = rot.x; m_rot4f.y = rot.y; m_rot4f.z = rot.z; m_rot4f.w = rot.w; }
 	int		GetID() const { return m_id; }
-	void	SetIsCreateFirst(bool flag) { m_createfirst = flag; }
+	void	SetIsCreateFirst(bool flag) { m_createfirst = flag; } //mutex mtx.lock(); mutex mtx.unlock(); ÇÊ¿ä
 	bool	GetIsCreateFirst() const { return m_createfirst; }
 
 	virtual ObjectStatus GetMyBasicStatus() const;

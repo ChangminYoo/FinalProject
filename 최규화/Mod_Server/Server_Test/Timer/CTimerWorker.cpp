@@ -95,6 +95,8 @@ void CTimerWorker::ProcessPacket(event_type * et)
 			if (!g_clients[et->master_id]->GetWaveshockState())
 				g_clients[et->master_id]->SetWaveshockState(true);
 
+			m_prevtime = high_resolution_clock::now();
+
 			if (g_clients[et->master_id]->GetWaveshockCurrtime() < SKILL_WAVESHOCK_OP_TIME)
 			{
 				AddEvent(et->id, SKILL_WAVESHOCK_OP_TIME, SKILL_WAVESHOCK, true, et->master_id);
@@ -105,7 +107,8 @@ void CTimerWorker::ProcessPacket(event_type * et)
 				g_clients[et->master_id]->SetWaveshockOnceFlag(true);
 				g_clients[et->master_id]->SetWaveshockState(false);
 				g_clients[et->master_id]->SetWaveshockCurrtime(0.0);
-
+				
+				/*
 				STC_SKILL_WAVESHOCK stc_skill_waveshock;
 				stc_skill_waveshock.skill_data.alive = false;
 				stc_skill_waveshock.skill_data.master_id = et->master_id;
@@ -117,6 +120,7 @@ void CTimerWorker::ProcessPacket(event_type * et)
 					
 					client->SendPacket(reinterpret_cast<Packet*>(&stc_skill_waveshock));
 				}
+				*/
 			}
 		}
 		break;
@@ -200,12 +204,17 @@ void CTimerWorker::ProcessPacket(event_type * et)
 			}
 
 
+			//* All Clients 에 대한 Rank 올림차순으로 소트
+			//sort(g_clients.begin(), g_clients.end(), [](const CPlayerObject& c1, const CPlayerObject& c2) {return c1.GetMyScoreForRanking() > c2.GetMyScoreForRanking(); });
+
+
 			//2. All Clients (Player)
 			STC_CharCurrState stc_char_state;
 			for(auto myclient : g_clients)
 			{
-				if (myclient->GetIsAI()) continue;
-				
+				if (!myclient->GetConnectState()) continue;
+
+				//내 클라 
 				if (!myclient->GetFirstMoveObjects())
 				{
 					for (const auto& mvobj : g_moveobjs)
@@ -213,13 +222,9 @@ void CTimerWorker::ProcessPacket(event_type * et)
 						STC_MoveObject stc_move_object;
 						stc_move_object.mvobj_data = move(mvobj->GetMoveObjectData());
 						myclient->SendPacket(reinterpret_cast<Packet*>(&stc_move_object));
-						//mvobj->SetIsCreateFirst(false);
-						//mvobj->UpdateCreateFirstPacketData(false);
 					}
 				}
 				myclient->SetFirstMoveObjects(true);
-
-				if (!myclient->GetConnectState()) continue;
 
 				for (auto otherclient : g_clients)
 				{
@@ -228,6 +233,7 @@ void CTimerWorker::ProcessPacket(event_type * et)
 				}
 				
 			}
+
 
 			//3. All NPCs (Non-Player)
 			STC_NpcMonsterCurrState stc_mnpcs_state;
@@ -267,17 +273,19 @@ void CTimerWorker::ProcessPacket(event_type * et)
 					*/
 					//
 
+					//1. NPC Bullet
 					if (bullet->GetObjectType() == protocol_NpcStoneBullet)
 					{
 						STC_NpcMonsterAttackStoneBullet stc_imp_bullet;
 						stc_imp_bullet.npc_bulldata = bullet->GetChangedNPCBulletState();
 						
-
 						auto stone_rnpos = dynamic_cast<CStoneBulletObject*>(bullet)->GetOrgPlusPos();
 						stc_imp_bullet.stone_rnpos = { stone_rnpos.x, stone_rnpos.y, stone_rnpos.z, stone_rnpos.w };
 
-						//cout << "NPC Bullet ID: " << stc_imp_bullet.npc_bulldata.my_id << ", " << "PosXYZW: " << stc_imp_bullet.npc_bulldata.pos4f.x << ", "
-						//	<< stc_imp_bullet.npc_bulldata.pos4f.y << ", " << stc_imp_bullet.npc_bulldata.pos4f.z << ", " << stc_imp_bullet.npc_bulldata.pos4f.w << "\n";
+						/*
+						cout << "NPC Bullet ID: " << stc_imp_bullet.npc_bulldata.my_id << ", " << "PosXYZW: " << stc_imp_bullet.npc_bulldata.pos4f.x << ", "
+							<< stc_imp_bullet.npc_bulldata.pos4f.y << ", " << stc_imp_bullet.npc_bulldata.pos4f.z << ", " << stc_imp_bullet.npc_bulldata.pos4f.w << "\n";
+						*/
 
 						for (auto client : g_clients)
 						{
@@ -286,7 +294,18 @@ void CTimerWorker::ProcessPacket(event_type * et)
 					}
 					else
 					{
-						if (bullet->m_bulldata.type == protocol_DiceBullet && bullet->GetIsCreateFirst())
+						//2. Player Bullet
+						if (bullet->GetObjectType() == protocol_HammerBullet)
+						{
+							STC_SKILL_HAMMERBULLET stc_skill_hammer_bullet;
+							stc_skill_hammer_bullet.skill_data = bullet->GetChangedHammerBulletState();
+
+							for (auto client : g_clients)
+							{
+								client->SendPacket(reinterpret_cast<Packet*>(&stc_skill_hammer_bullet));
+							}
+						}
+						else if (bullet->m_bulldata.type == protocol_DiceBullet && bullet->GetIsCreateFirst())
 						{
 							STC_SKILL_DICESTRIKE stc_skill_dicestrike;
 							stc_skill_dicestrike.bull_data = move(bullet->GetChangedBulletState());

@@ -1573,11 +1573,46 @@ CMoveCubeObject::CMoveCubeObject(unsigned int id, float len)
 	UpdateDataForPacket();
 }
 
+void CMoveCubeObject::Collision(vector<CPlayerObject*>* clients, double deltime)
+{
+	for (auto iter = clients->begin(); iter != clients->end(); ++iter)
+	{
+		if ((*iter)->GetAlive())
+		{
+			bool test = pp->CollisionTest(*(*iter)->GetPhysicsPoint(), m_Lookvector, m_Rightvector, m_Upvector,
+				(*iter)->GetLookVector(), (*iter)->GetRightVector(), (*iter)->GetUpVector());
+
+			if (test)
+			{
+				if (pp->pAxis.y > 0)
+				{
+					pp->SetVelocity(pp->GetVelocity().x, 0, pp->GetVelocity().z);
+					m_airbone = false;
+				}
+
+				if (pp->pAxis.y < 0)
+				{
+					(*iter)->GetPhysicsPoint()->SetVelocity((*iter)->GetPhysicsPoint()->GetVelocity().x, 0, (*iter)->GetPhysicsPoint()->GetVelocity().z);
+					(*iter)->SetAirbone(false);
+				}
+
+				XMFLOAT3 cn;
+				cn = pp->pAxis;
+
+				pp->CollisionResolve(*(*iter)->GetPhysicsPoint(), cn, deltime);
+				UpdatePPosCenterPos();
+				(*iter)->UpdatePPosCenterPos();
+			}
+		}
+	}
+}
+
 void CMoveCubeObject::Tick(double deltime)
 {
 	m_n += deltime;
 
 	m_pos4f.y = m_len * sinf(MMPE_PI * m_n * 0.15f ) + 50;
+	UpdatePhysicsCenterPos();
 
 	m_stc_mvobjdata.pos4f.y = m_pos4f.y;
 }

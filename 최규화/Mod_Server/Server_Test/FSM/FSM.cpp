@@ -83,7 +83,7 @@ void FSM::CheckTarget(double deltime)
 		//	continue;
 
 		auto v1 = Float4Add((*iter)->GetCenterPos4f(), Master->GetCenterPos4f(), false);
-		v1.y = 0;
+		//v1.y = 0;
 		auto nv1 = Float4Normalize(v1);
 		float nv1dotLook = nv1.x*Master->GetLookVector().x + nv1.y*Master->GetLookVector().y + nv1.z*Master->GetLookVector().z;
 		auto l = FloatLength(v1);
@@ -175,6 +175,7 @@ state * state_global::Execute(double deltime, CNpcObject* master, AIdata& adata)
 	if (master != NULL)
 	{
 		//if (adata.stack >= 5)
+		/*
 		if (adata.stack >= 1)
 		{
 			g_bullets.emplace_back(new CStoneBulletObject(master, master->GetCenterPos4f(), XMFLOAT4(0, 0, 0, 1), XMFLOAT4(0, 0, 0, 1), XMFLOAT4(30, 0, 0, 0)));
@@ -189,8 +190,9 @@ state * state_global::Execute(double deltime, CNpcObject* master, AIdata& adata)
 			((ImpObject*)master)->fsm->BulletObj->push_back(new StoneBullet(master->device, master->commandlist, master->ParticleList, NULL, master, XMFLOAT4(0, 0, 0, 1), NULL, master->CenterPos, XMFLOAT4(0, 0, -30, 0)));
 			*/
 
-			adata.stack = 0;
-		}
+			//adata.stack = 0;
+		//}
+		
 
 		float l;
 		XMFLOAT4 v1;
@@ -235,6 +237,14 @@ state * state_attack::Execute(double deltime, CNpcObject* master, AIdata & adata
 		if (adata.Target != NULL)
 		{
 			adata.Target->GetDamaged(master->GetMyBasicStatus().attack);
+	
+			//몬스터 NPC인 IMP의 할퀴기 공격에 플레이어가 맞아 체력이 0이된 경우 -> 데스카운트 +1
+			if (adata.Target->GetMyCurrHP() <= 0)
+			{
+				adata.Target->SetMyCharacterDeathCount();
+				adata.Target->CalculatePlayerScoreForRanking();
+			}
+
 			adata.stack += 1;
 		}
 

@@ -17,7 +17,7 @@ CNpcObject::CNpcObject(int id, int type)
 	m_dir = 0;
 	m_airbone = false;
 	m_ai = true;
-	m_pos4f = { -200.f,0.f,0.f,0.f };
+	m_pos4f = { 0.f,100.f,0.f,0.f };
 	m_orgPos4f = m_pos4f;
 	m_rot4f = { 0.f, 0.f, 0.f, 1.f };
 	m_godmode = false;

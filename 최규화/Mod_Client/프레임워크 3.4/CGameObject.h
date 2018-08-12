@@ -174,11 +174,17 @@ public:
 	
 	static int g_npcID;
 	static int g_npcBulletID;
-	bool   isNPC{ false };
+	bool	   isNPC{ false };
 
 	//bullet ID
-	static short myID;
-	static list<short> BulletIDList;
+	static unsigned short myID;
+	static bool			  m_IsBulletFirstCount;
+	static list<unsigned short>    BulletIDList;
+	int							   m_bullet_type;
+
+	//HammerBullet ID - 따로 관리 - 기존 불렛과는 다르게 서버에서 해당 불렛 아이디를 변경시킬 수 있으므로
+	static unsigned short m_hmBulletID;
+	static bool			  m_hmBulletFirstCount;
 
 	//서버->클라 관리용 캐릭터 데이터(GameObject에 넣어둬야함)
 	Player_Data			 m_player_data;
@@ -207,6 +213,10 @@ public:
 	int m_particle_type;
 
 	float	m_degree;
+
+	//파동파 스킬 마스터 아이디 - 서버연동 용
+	int m_waveMasterID{ -1 };
+
 };
 
 void SetTexture(ID3D12GraphicsCommandList * commandlist, ComPtr<ID3D12DescriptorHeap>& SrvDescriptorHeap, ID3D12Resource* texture, int texMap = 0, int Offset = 0);
@@ -238,6 +248,7 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList* commandlist, const GameTimer& gt);
 	virtual void Collision(list<CGameObject*>* collist, float DeltaTime) {}
 	virtual void Collision(int coll_type, int damage, const XMFLOAT4& bullet_pos, const XMFLOAT4& target_pos) {}
+
 };
 
 class BarFrameObject : public CGameObject
@@ -643,7 +654,7 @@ public:
 	virtual void Tick(const GameTimer& gt);
 	virtual void Render(ID3D12GraphicsCommandList* commandlist, const GameTimer& gt);
 	virtual void Collision(list<CGameObject*>* collist, float DeltaTime);
-	virtual void Collision(int coll_type, int damage, const XMFLOAT4& bullet_pos, const XMFLOAT4& target_pos) {}
+	virtual void Collision(int coll_type, int damage, const XMFLOAT4& bullet_pos, const XMFLOAT4& target_pos);
 
 };
 
@@ -962,7 +973,7 @@ public:
 class RingObject : public CGameObject
 {
 public:
-	RingObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
+	RingObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, CGameObject* master, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
 	int selectColor;
 	XMFLOAT4 DummyPos;
 	float times = 0;
