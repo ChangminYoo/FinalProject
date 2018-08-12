@@ -137,60 +137,75 @@ void Scene::SceneState()
 			CharacterSelect->CenterPos.x = 0.8f * (-mWidth * 0.5f);
 			CharacterSelect->CenterPos.y = 0;
 			CharacterSelect->ObjData.CustomData1.z = 1;
+			
 		}
 		else if (GetAsyncKeyState(0x32) & 0x8000 && GetFocus())
 		{
 			CharacterSelect->CenterPos.x = 0.4f * (-mWidth * 0.5f);
 			CharacterSelect->CenterPos.y = 0;
 			CharacterSelect->ObjData.CustomData1.z = 2;
+		
 		}
 		else if (GetAsyncKeyState(0x33) & 0x8000 && GetFocus())
 		{
 			CharacterSelect->CenterPos.x = 0;
 			CharacterSelect->CenterPos.y = 0;
 			CharacterSelect->ObjData.CustomData1.z = 3;
+	
 		}
 		else if (GetAsyncKeyState(0x34) & 0x8000 && GetFocus())
 		{
 			CharacterSelect->CenterPos.x = 0.4f * (mWidth* 0.5f);
 			CharacterSelect->CenterPos.y = 0;
 			CharacterSelect->ObjData.CustomData1.z = 4;
+
 		}
 		else if (GetAsyncKeyState(0x35) & 0x8000 && GetFocus())
 		{
 			CharacterSelect->CenterPos.x = 0.8f * (mWidth* 0.5f);
 			CharacterSelect->CenterPos.y = 0;
 			CharacterSelect->ObjData.CustomData1.z = 5;
+
+		
 		}
 		else if (GetAsyncKeyState(0x36) & 0x8000 && GetFocus())
 		{
 			CharacterSelect->CenterPos.x = 0.8f * (-mWidth* 0.5f);
 			CharacterSelect->CenterPos.y = (-mHeight * 1 / 3);
 			CharacterSelect->ObjData.CustomData1.z = 6;
+
 		}
 		else if (GetAsyncKeyState(0x37) & 0x8000 && GetFocus())
 		{
 			CharacterSelect->CenterPos.x = 0.4f * (-mWidth* 0.5f);
 			CharacterSelect->CenterPos.y = (-mHeight * 1 / 3);
 			CharacterSelect->ObjData.CustomData1.z = 7;
+
+		
 		}
 		else if (GetAsyncKeyState(0x38) & 0x8000 && GetFocus())
 		{
 			CharacterSelect->CenterPos.x = 0;
 			CharacterSelect->CenterPos.y = (-mHeight * 1 / 3);
 			CharacterSelect->ObjData.CustomData1.z = 8;
+
+		
 		}
 		else if (GetAsyncKeyState(0x39) & 0x8000 && GetFocus())
 		{
 			CharacterSelect->CenterPos.x = 0.4f * (mWidth* 0.5f);
 			CharacterSelect->CenterPos.y = (-mHeight * 1 / 3);
 			CharacterSelect->ObjData.CustomData1.z = 9;
+
+			
 		}
 		else if (GetAsyncKeyState(0x30) & 0x8000 && GetFocus())
 		{
 			CharacterSelect->CenterPos.x = 0.8f * (mWidth* 0.5f);
-			CharacterSelect->CenterPos.y = (-mHeight * 2 / 3);
+			CharacterSelect->CenterPos.y = (-mHeight * 1 / 3);
 			CharacterSelect->ObjData.CustomData1.z = 10; 
+
+		
 		}
 	}
 	else if (GAMESTATE == GS_LOAD)
@@ -555,6 +570,86 @@ void Scene::CreateGameObject()
 	Player->SetPlayer(DynamicObject.front());
 	Player->PlayerObject->Blending = false;
 
+	if (CharacterSelect->ObjData.CustomData1.z == 1)
+	{
+		Player->PlayerObject->TextureName = "Female Brown Casual";
+		Player->PlayerObject->NTextureName = "Female Brown Casual N";
+		Player->PlayerObject->TexOff = CharacterSelect->ObjData.CustomData1.z - 1;
+		Player->PlayerObject->NTexOff = Player->PlayerObject->TexOff + 10;
+	}
+	else if (CharacterSelect->ObjData.CustomData1.z == 2)
+	{
+		Player->PlayerObject->TextureName = "Female Black Knight";
+		Player->PlayerObject->NTextureName = "Female Black Knight N";
+		Player->PlayerObject->TexOff = CharacterSelect->ObjData.CustomData1.z - 1;
+		Player->PlayerObject->NTexOff = Player->PlayerObject->TexOff + 10;
+	}
+	else if (CharacterSelect->ObjData.CustomData1.z == 3)
+	{
+		Player->PlayerObject->TextureName = "Female Brown Sorceress";
+		Player->PlayerObject->NTextureName = "Female Brown Sorceress N";
+		Player->PlayerObject->TexOff = CharacterSelect->ObjData.CustomData1.z - 1;
+		Player->PlayerObject->NTexOff = Player->PlayerObject->TexOff + 10;
+	
+	}
+	else if (CharacterSelect->ObjData.CustomData1.z == 4)
+	{
+		Player->PlayerObject->TextureName = "Female White Knight";
+		Player->PlayerObject->NTextureName = "Female White Knight N";
+		Player->PlayerObject->TexOff = CharacterSelect->ObjData.CustomData1.z - 1;
+		Player->PlayerObject->NTexOff = Player->PlayerObject->TexOff + 10;
+	}
+	else if (CharacterSelect->ObjData.CustomData1.z == 5)
+	{
+		Player->PlayerObject->TextureName = "Female White Barbarian";
+		Player->PlayerObject->NTextureName = "Female White Barbarian N";
+
+		Player->PlayerObject->TexOff = CharacterSelect->ObjData.CustomData1.z - 1;
+		Player->PlayerObject->NTexOff = Player->PlayerObject->TexOff + 10;
+	}
+	else if (CharacterSelect->ObjData.CustomData1.z == 6)
+	{
+
+		Player->PlayerObject->TextureName = "Male Black Knight";
+		Player->PlayerObject->NTextureName = "Male Black Knight N";
+
+		Player->PlayerObject->TexOff = CharacterSelect->ObjData.CustomData1.z - 1;
+		Player->PlayerObject->NTexOff = Player->PlayerObject->TexOff + 10;
+	}
+	else if (CharacterSelect->ObjData.CustomData1.z == 7)
+	{
+		Player->PlayerObject->TextureName = "Male White Wizard";
+		Player->PlayerObject->NTextureName = "Male White Wizard N";
+
+		Player->PlayerObject->TexOff = CharacterSelect->ObjData.CustomData1.z - 1;
+		Player->PlayerObject->NTexOff = Player->PlayerObject->TexOff + 10;
+	}
+	else if (CharacterSelect->ObjData.CustomData1.z == 8)
+	{
+		Player->PlayerObject->TextureName = "Male Black Archer";
+		Player->PlayerObject->NTextureName = "Male Black Archer N";
+		Player->PlayerObject->TexOff = CharacterSelect->ObjData.CustomData1.z - 1;
+		Player->PlayerObject->NTexOff = Player->PlayerObject->TexOff + 10;
+	}
+	else if (CharacterSelect->ObjData.CustomData1.z == 9)
+	{
+		Player->PlayerObject->TextureName = "Male Fire";
+		Player->PlayerObject->NTextureName = "Male Fire N";
+		Player->PlayerObject->TexOff = CharacterSelect->ObjData.CustomData1.z - 1;
+		Player->PlayerObject->NTexOff = Player->PlayerObject->TexOff + 10;
+	}
+	else if (CharacterSelect->ObjData.CustomData1.z == 10)
+	{
+		Player->PlayerObject->TextureName = "Male White King";
+		Player->PlayerObject->NTextureName = "Male White King N";
+		Player->PlayerObject->TexOff = CharacterSelect->ObjData.CustomData1.z - 1;
+		Player->PlayerObject->NTexOff = Player->PlayerObject->TexOff + 10;
+	}
+
+
+
+
+
 }
 
 void Scene::CreateUI()
@@ -718,7 +813,10 @@ void Scene::Render(const GameTimer& gt)
 			{
 				Player->Camera.UpdateConstantBufferOrtho(commandlist);
 				Shaders->SetBillboardShader(commandlist);
-				CharacterSelect->Render(commandlist, gt);
+
+				if(GetGameState() == GS_START)
+					CharacterSelect->Render(commandlist, gt);
+
 				BackGround->Render(commandlist, gt);
 				Player->Camera.UpdateConstantBuffer(commandlist);
 			}

@@ -133,7 +133,6 @@ class CharacterSelectObject : public CGameObject
 {
 public:
 	CharacterSelectObject(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist, list<CGameObject*>*Plist, list<CGameObject*>*shadow, XMFLOAT4 cp = XMFLOAT4(0, 0, 0, 0));
-	int TexStart = 0;
 
 public:
 	static bool CreateMesh;//최초로 false며 메쉬를 만든후 true가된다.

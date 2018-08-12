@@ -80,7 +80,7 @@ void CLight::UpdateConstantBuffer(ID3D12GraphicsCommandList* commandlist)
 	//LData.light[9].SpecularPower = 32.0f;
 	//LData.nLight = 10;
 	
-	LData.AmbientLight = { 0.5305248f, 0.5305249f, 0.5305244f, 0.8f };
+	LData.AmbientLight = { 0.4305248f, 0.4305249f, 0.4305244f, 0.8f };
 
 	ConstBuffer->CopyData(0, LData);
 	commandlist->SetGraphicsRootConstantBufferView(3, ConstBuffer->Resource()->GetGPUVirtualAddress());

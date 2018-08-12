@@ -605,7 +605,7 @@ void CharacterSelectObject::Render(ID3D12GraphicsCommandList * commandlist, cons
 {
 	//TexStart = 서버랑 연동
 
-	ObjData.TexClamp = XMFLOAT4(0.0f + (0.2f*TexStart), 0.2f + (0.2f*TexStart), 0, 0);
+	ObjData.TexClamp = XMFLOAT4(0.0f + (0.2f*TexStride), 0.2f + (0.2f*TexStride), 0, 0);
 
 	//텍스처가 사이즈가 0 이상이면 연결
 	if (Textures.size()>0)
@@ -642,7 +642,7 @@ void CharacterSelectObject::Render(ID3D12GraphicsCommandList * commandlist, cons
 TimerObject1::TimerObject1(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, list<CGameObject*>* shadow, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, shadow, cp)
 {
 	ObjData.isAnimation = 0;
-	ObjData.Scale = 30.0f;
+	ObjData.Scale = 45.0f;
 	ObjData.CustomData1.y = 45.0f;
 	ObjData.SpecularParamater = 0.5f;//스페큘러를 낮게준다.
 	ObjData.CustomData1.x = 5;
@@ -731,7 +731,7 @@ void TimerObject1::Render(ID3D12GraphicsCommandList * commandlist, const GameTim
 TimerObject2::TimerObject2(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, list<CGameObject*>* shadow, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, shadow, cp)
 {
 	ObjData.isAnimation = 0;
-	ObjData.Scale = 30.0f;
+	ObjData.Scale = 45.0f;
 	ObjData.CustomData1.y = 45.0f;
 	ObjData.SpecularParamater = 0.5f;//스페큘러를 낮게준다.
 	ObjData.CustomData1.x = 5;
@@ -819,7 +819,7 @@ void TimerObject2::Render(ID3D12GraphicsCommandList * commandlist, const GameTim
 TimerObject3::TimerObject3(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, list<CGameObject*>* shadow, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, shadow, cp)
 {
 	ObjData.isAnimation = 0;
-	ObjData.Scale = 30.0f;
+	ObjData.Scale = 45.0f;
 	ObjData.CustomData1.y = 45.0f;
 	ObjData.SpecularParamater = 0.5f;//스페큘러를 낮게준다.
 	ObjData.CustomData1.x = 5;

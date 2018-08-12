@@ -336,57 +336,11 @@ CCubeManObject::CCubeManObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 		CreateMesh = true;
 	
 	}
-	select = 5;//rand() % 10;
-	if (select == 0)
-	{
-		TextureName = "Female Brown Casual";
-		NTextureName = "Female Brown Casual N";
-	}
-	else if (select == 1)
-	{
-		TextureName = "Female Black Knight";
-		NTextureName = "Female Black Knight N";
-	}
-	else if (select == 2)
-	{
-		TextureName = "Female Brown Sorceress";
-		NTextureName = "Female Brown Sorceress N";
-	}
-	else if (select == 3)
-	{
-		TextureName = "Female White Knight";
-		NTextureName = "Female White Knight N";
-	}
-	else if (select == 4)
-	{
-		TextureName = "Female White Barbarian";
-		NTextureName = "Female White Barbarian N";
-	}
-	else if (select == 5)
-	{
-		TextureName = "Male Black Knight";
-		NTextureName = "Male Black Knight N";
-	}
-	else if (select == 6)
-	{
-		TextureName = "Male White Wizard";
-		NTextureName = "Male White Wizard N";
-	}
-	else if (select == 7)
-	{
-		TextureName = "Male Black Archer";
-		NTextureName = "Male Black Archer N";
-	}
-	else if (select == 8)
-	{
-		TextureName = "Male Fire";
-		NTextureName = "Male Fire N";
-	}
-	else if (select == 9)
-	{
-		TextureName = "Male White King";
-		NTextureName = "Male White King N";
-	}
+	select = 9;//rand() % 10;
+
+	TextureName =  "Female Brown Casual";
+	NTextureName = "Female Brown Casual N";
+	
 	TexOff = select;
 	NTexOff = TexOff + 10;
 	
