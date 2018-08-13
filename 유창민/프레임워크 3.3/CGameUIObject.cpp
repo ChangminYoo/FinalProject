@@ -546,7 +546,7 @@ CharacterSelectObject::CharacterSelectObject(ID3D12Device * m_Device, ID3D12Grap
 
 	ObjData.isAnimation = 0;
 	ObjData.Scale = 160.0f;
-	ObjData.CustomData1.y = 200.0f;
+	ObjData.CustomData1.y = 210.0f;
 	ObjData.SpecularParamater = 0.5f;//Ω∫∆‰≈ß∑Ø∏¶ ≥∑∞‘¡ÿ¥Ÿ.
 	ObjData.CustomData1.x = 5;
 	MinDepth = true;

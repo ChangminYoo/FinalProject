@@ -10,6 +10,7 @@ struct VertexIn
 struct VertexOut
 {
 	float4 Pos : POSITION;
+	float4 PosW : POSITIONWORLD;
 	float4 Normal : NORMAL;
 };
 
@@ -26,7 +27,7 @@ struct GeoOut
 	float3 PosW : POSITION;
 	float3 Normal : NORMAL;
 	float2 Tex : TEXTURE;
-
+	bool Clipping : CLIPPING;
 };
 
 
@@ -38,6 +39,7 @@ VertexOut VS(VertexIn vin)
 	VertexOut vout;
 
 	vout.Pos = mul(float4(vin.Pos, 1), gWorld);
+	vout.PosW = vout.Pos;
 	vout.Normal = vin.Normal;
 	//반드시 월드변환 이후에 해야함. 
 	if (CustomData1.x == 2)//총알 파티클
@@ -92,7 +94,7 @@ VertexOut VS(VertexIn vin)
 [maxvertexcount(4)]
 void GS(point VertexOut gin[1], inout TriangleStream<GeoOut> triStream)
 {
-
+	bool Clip =false;
 	float halfWidth;
 	float halfHeight;
 
@@ -139,6 +141,13 @@ void GS(point VertexOut gin[1], inout TriangleStream<GeoOut> triStream)
 	}
 	else if (CustomData1.x == 2)//총알 파티클
 	{
+		//파티클과 카메라 사이 길이가 150보다 크면 쿼드형이 아니라 정점형으로 처리.
+		float4 distV = gin[0].Pos - float4(gEyePos, 1);
+		float dist = dot(distV, distV);
+		dist = sqrt(dist);
+		if (dist > 150)
+			Clip = true;
+
 		halfWidth = 0.5f * Scale;
 		halfHeight = 0.5f * Scale;
 
@@ -252,13 +261,10 @@ void GS(point VertexOut gin[1], inout TriangleStream<GeoOut> triStream)
 
 
 	float2 tex[4];
-
-
 	tex[0] = float2(TexClamp.x, 1.0f);
 	tex[1] = float2(TexClamp.x, 0.0f);
 	tex[2] = float2(TexClamp.y, 1.0f);
 	tex[3] = float2(TexClamp.y, 0.0f);
-
 
 
 	GeoOut gout;
@@ -266,12 +272,21 @@ void GS(point VertexOut gin[1], inout TriangleStream<GeoOut> triStream)
 	for (int i = 0; i < 4; ++i)
 	{
 		gout.PosH = mul(v[i], gProj);
-		gout.PosW = v[i].xyz;
+		gout.PosW = gin[0].PosW.xyz;
 		gout.Normal = float3(0, 1, 0);
 		gout.Tex = tex[i];
 		gout.PrevNormal = gin[0].Normal;
+		if(Clip==false)
+			gout.Clipping = false;
+		else
+		{
+			if (i == 0)
+				gout.Clipping = false;
+			else
+				gout.Clipping = true;
+		}
 		triStream.Append(gout);
-
+		
 	}
 }
 
@@ -324,6 +339,8 @@ float4 PS2(GeoOut pin) : SV_TARGET
 	//알파테스트 실행
 	clip(textureColor.a - 0.1f);
 
+	if(pin.Clipping)
+		discard;
 	
 	//pout.Depth = 1.0f;
 	if (CustomData1.x == 2)
@@ -341,6 +358,7 @@ float4 PS2(GeoOut pin) : SV_TARGET
 		textureColor.z = cos(PTime * 5 * pin.PrevNormal.w / 650) + 0.25;
 	
 	}
+	
 
 	return  textureColor;
 
