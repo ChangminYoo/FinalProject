@@ -37,6 +37,15 @@ enum Ani_State
 };
 */
 
+typedef struct PointRank
+{
+	int Point = 0; //현재 점수
+	int Rank = 5;  //현재 랭킹
+	int KillCount{ 0 };
+	int DeathCount{ 0 };
+	bool TopMode = false;//1위일때 탑모드. 현재 체력 + 800 / 크기 1.3배 / 이속 1.5배
+	bool Init = false;//1위하면 1위모드로 초기화 해야함.
+}PointRank;
 
 struct ObjectData
 {
@@ -94,6 +103,8 @@ protected:
 	UploadBuffer<ObjectData>* ConstBuffer=NULL;	//월드행렬과 커스텀데이터를 저장하기위한 버퍼
 
 public:
+	//서버에서 1등이라고 넘겨주면 능력치 강화.
+	PointRank pointrank;
 
 	//위치와 회전정보
 	XMFLOAT4 CenterPos;//중점
@@ -128,6 +139,8 @@ public:
 	bool PrevCool = false;
 	bool isShieldOn = false;
 	bool isHit1 = false;
+
+	float TexStride = 0.f;
 
 	//벽들에 굳이 마우스를 움직일때마다 체크할 필요는 없으므로 추가함. 또 벽은 또 벽대로 뭔가 처리할게 있을것같음.
 	Obj_State obs = Dynamic;

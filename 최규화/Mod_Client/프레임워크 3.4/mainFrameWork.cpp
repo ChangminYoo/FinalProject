@@ -231,8 +231,8 @@ void MainFrameWork::FrameAdvance(const GameTimer& gt)
 	// RS 뷰포트와 시저렉트 , OM의 렌더타겟과 뎁스스텐실 뷰
 	//앞으로 해야할것. 루트시그니처와 VS,PS등 PSO, 정점버퍼, 인덱스버퍼 , 상수버퍼뷰
 
-	scene->SceneState();
 	Update(gt);
+	scene->SceneState();
 
 	if (scene->Player->PlayerObject != nullptr)
 		scene->Player->m_async_client->SendPacketRegular(*scene->Player->PlayerObject, gt);

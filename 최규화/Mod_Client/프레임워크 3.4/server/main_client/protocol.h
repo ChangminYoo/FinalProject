@@ -50,6 +50,7 @@ enum PACKET_PROTOCOL_TYPE
 	CHANGED_PLAYER_POSITION,
 	CHANGED_PLAYER_DIRECTION,
 
+	PLAYER_LOGIN,
 	PLAYER_DISCONNECT,		//연결끊어짐
 	PLAYER_ROTATE,			//플레이어 회전
 	PLAYER_JUMP,
@@ -283,6 +284,20 @@ struct CTS_HammerSkillInfo
 	unsigned char				weapon_num;				//1
 };
 
+struct STC_LoginData
+{
+	unsigned short				my_id;
+};
+
+struct CTS_LoginData
+{
+	//unsigned short				my_id;
+	unsigned char				texture_id;
+	char						isReady;
+	//wchar_t				        name[MAX_BUFFER_SIZE / 4]{ L"Guest" };
+
+};
+
 
 //-------------------------------패킷용스킬데이터-------------------------------//
 
@@ -291,6 +306,8 @@ struct STC_SkillData
 	unsigned short master_id;   //스킬을 사용한 플레이어
 	char		   my_id;		//스킬 넘버
 	char		   alive;
+
+
 };
 
 //-------------------------------캐릭터 - NPC 데이터-------------------------------//
@@ -325,6 +342,7 @@ struct Player_Data
 	char			deathcount;
 	unsigned short  score;
 	unsigned char   rank;
+	char			topRank;
 };
 // 18 + 16 + 2 + 1 + 1 + 1 + 1 + 16 = 58  pragma pack 할시
 
@@ -472,7 +490,7 @@ typedef struct Server_To_Client_Attack_Info
 
 typedef struct Server_To_Client_CharAnimation
 {
-	unsigned char pack_size = sizeof(unsigned char) + sizeof(unsigned char) + sizeof(unsigned char) + sizeof(unsigned short);;
+	unsigned char pack_size = sizeof(unsigned char) + sizeof(unsigned char) + sizeof(unsigned char) + sizeof(unsigned short);
 	unsigned char pack_type = PACKET_PROTOCOL_TYPE::PLAYER_ANIMATION;
 	unsigned short id;
 	unsigned char ani_state;
