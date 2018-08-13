@@ -23,7 +23,7 @@ void CPhysicEngineWorker::Update()
 
 		// 0.00000028
 		//2838 
-		for (const auto& mvobj : g_moveobjs)
+		for (auto& mvobj : g_moveobjs)
 		{
 			mvobj->Tick(m_deltime);
 			mvobj->AfterGravitySystem(m_deltime);
@@ -33,20 +33,22 @@ void CPhysicEngineWorker::Update()
 	
 		if (!g_clients.empty())
 		{
-			for (auto client : g_clients)
-			{
+			for (auto& client : g_clients)
+			{	
+				//if (!client->GetIsReadyToPlay()) continue;
+
 				client->PlayerInput(m_deltime);
 				client->GravitySystem(m_deltime);
 				client->Tick(m_deltime);
 				client->AfterGravitySystem(m_deltime);
 				client->UpdateDataForPacket();
-
+				
 				//cout << "PosY: " << client->m_pdata.pos.y << "\n";
 				//cout << "PosX: " << client->m_pdata.pos.x << "PosY: " << client->m_pdata.pos.y << "PosZ: " << client->m_pdata.pos.z << "\n";
 			}
 		}
 		
-		for (auto npc_monster : g_npcs)
+		for (auto& npc_monster : g_npcs)
 		{
 			if (!npc_monster->GetAlive()) continue;
 
@@ -61,7 +63,7 @@ void CPhysicEngineWorker::Update()
 		}
 
 	
-		for (auto rigid : g_rigidobjs)
+		for (auto& rigid : g_rigidobjs)
 		{
 			rigid->GravitySystem(m_deltime);
 			//cout << "PosX: " << rigid->GetCenterPos4f().x << "PosY: " << rigid->GetCenterPos4f().y << "PosZ: " << rigid->GetCenterPos4f().z << "PosW: " << rigid->GetCenterPos4f().w << "\n";
@@ -79,7 +81,7 @@ void CPhysicEngineWorker::Update()
 			//cout << "PosX: " << rigid->GetCenterPos4f().x << "PosY: " << rigid->GetCenterPos4f().y << "PosZ: " << rigid->GetCenterPos4f().z << "PosW: " << rigid->GetCenterPos4f().w << "\n";
 		}
 		
-		for (auto bullet : g_bullets)
+		for (auto& bullet : g_bullets)
 		{
 			if (!bullet->GetAlive()) continue;
 
@@ -161,8 +163,9 @@ void CPhysicEngineWorker::Update()
 
 void CPhysicEngineWorker::CollisionSystem(double deltime)
 {
-	for (auto client : g_clients)
+	for (auto& client : g_clients)
 	{
+		//if (client->GetAlive() && client->GetIsReadyToPlay())
 		if (client->GetAlive())
 		{
 			client->Collision(&g_clients, deltime);
@@ -171,12 +174,12 @@ void CPhysicEngineWorker::CollisionSystem(double deltime)
 		}
 	}
 
-	for (auto mvobj : g_moveobjs)
+	for (auto& mvobj : g_moveobjs)
 	{
 		mvobj->Collision(&g_clients, deltime);
 	}
 
-	for (auto npc_monster : g_npcs)
+	for (auto& npc_monster : g_npcs)
 	{
 		if (!npc_monster->GetAlive()) continue;
 
@@ -184,7 +187,7 @@ void CPhysicEngineWorker::CollisionSystem(double deltime)
 		npc_monster->Collision(&g_staticobjs, deltime);
 	}
 
-	for (auto rigid : g_rigidobjs)
+	for (auto& rigid : g_rigidobjs)
 	{
 		rigid->Collision(&g_rigidobjs, deltime);
 		rigid->Collision(&g_staticobjs, deltime);
@@ -192,7 +195,7 @@ void CPhysicEngineWorker::CollisionSystem(double deltime)
 		rigid->Collision(&g_bullets, deltime);
 	}
 
-	for (auto bullet : g_bullets)
+	for (auto& bullet : g_bullets)
 	{
 		if (bullet->GetAlive())
 		{

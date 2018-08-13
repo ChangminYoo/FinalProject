@@ -28,8 +28,16 @@ private:
 	int					m_killCount;
 	int					m_deathCount;
 	float				m_score_for_rankcheck;
-	int                 m_myRank;
+	int                 m_myCurrRank;
+	int					m_myOldRank;
+	bool                m_isTopRanker;
+	int				    m_topRankerID{ -1 };
 
+	//플레이어 로그인 관련데이터(플레이어 텍스쳐 아이디, 아이디, 레디유무)
+	int					m_myTextureID;
+	bool				m_isReady;
+
+	bool				m_isReadyToPlay;
 public:
 	unsigned int		m_curr_packet_size{ 0 };
 	unsigned int		m_prev_packet_size{ 0 };
@@ -37,11 +45,11 @@ public:
 	Player_Data			m_pdata;
 	mutex				m_mtx;
 
-	//void				Lock() { m_mtx.lock(); }
-	//void				UnLock() { m_mtx.unlock(); }
+	void				Lock() { m_mtx.lock(); }
+	void				UnLock() { m_mtx.unlock(); }
 
 public:
-	CPlayerObject(const unsigned short& count, boost::asio::ip::tcp::socket socket) : m_socket(move(socket)) { m_id = count;  };
+	CPlayerObject(const unsigned short& count, boost::asio::ip::tcp::socket socket) : m_socket(move(socket)) { m_id = count; m_isReadyToPlay = true; };
 	~CPlayerObject();
 
 	// ---------------------------------------------------------------------------------------
@@ -64,6 +72,7 @@ public:
 
 	// 1. DB 로그인정보 체크
 	bool CheckPlayerInfo();
+	void CheckMyClient();
 
 	// ---------------------------------------------------------------------------------------
 
@@ -136,6 +145,21 @@ public:
 
 	void    CalculatePlayerScoreForRanking();
 	float   GetMyScoreForRanking() const { return m_score_for_rankcheck; }
+
+	void    SetMyCharacterCurrRank(int _newrank) { m_myCurrRank = _newrank; }
+	int		GetMyCharacterCurrRank() const    { return m_myCurrRank; }
+
+	void    SetMyCharacterOldRank(int _oldrank) { m_myOldRank = _oldrank; }
+	int     GetMyCharacterOldRank() const       { return m_myOldRank; }
+
+	void    SetIsTopRanker(bool flag) { m_isTopRanker = flag; }
+	bool    GetIsTopRanker() const { return m_isTopRanker; }
+
+	void    SetCurrTopRankerID(int _id) { m_topRankerID = _id; }
+	int 	GetCurrTopRankerID() const { return m_topRankerID; }
+
+	void    SetIsReadyToPlay(bool flag) { m_isReadyToPlay = flag; }
+	bool	GetIsReadyToPlay() const { return m_isReadyToPlay; }
 	// ---------------------------------------------------------------------------------------
 	// [5]. 물리효과 함수
 

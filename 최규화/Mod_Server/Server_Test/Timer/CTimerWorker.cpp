@@ -148,7 +148,7 @@ void CTimerWorker::ProcessPacket(event_type * et)
 			//------------- 1초에 18번정도 보냄 - 20번x, 시간누적오차 때문에 ---------------//
 
 			//0. MoveObject 
-			for (const auto& mvobj : g_moveobjs)
+			for (auto& mvobj : g_moveobjs)
 			{
 				//if (!mvobj->GetIsCreateFirst())
 				//{
@@ -191,9 +191,9 @@ void CTimerWorker::ProcessPacket(event_type * et)
 
 			//1. RigidbodyObject
 			STC_RigidbodyObject stc_rigidbody_object;
-			for (auto client : g_clients)
+			for (const auto& client : g_clients)
 			{
-				for (auto rigid : g_rigidobjs)
+				for (const auto& rigid : g_rigidobjs)
 				{
 					stc_rigidbody_object.rbobj_data = move(rigid->GetRigidbodyData());
 					client->SendPacket(reinterpret_cast<Packet*>(&stc_rigidbody_object));
@@ -205,8 +205,53 @@ void CTimerWorker::ProcessPacket(event_type * et)
 
 
 			//* All Clients 에 대한 Rank 올림차순으로 소트
-			//sort(g_clients.begin(), g_clients.end(), [](const CPlayerObject& c1, const CPlayerObject& c2) {return c1.GetMyScoreForRanking() > c2.GetMyScoreForRanking(); });
+			int local_rank = 0;
+			vector<CPlayerObject*> temp_clients;
+			temp_clients.reserve(g_clients.size());
+			copy(g_clients.begin(), g_clients.end(), back_inserter(temp_clients));
 
+			sort(temp_clients.begin(), temp_clients.end(), [&](CPlayerObject* c1, CPlayerObject* c2) {return c1->GetMyScoreForRanking() > c2->GetMyScoreForRanking(); });
+			for (auto& temp_client : temp_clients)
+				temp_client->SetMyCharacterCurrRank(++local_rank);
+
+			bool local_flag = false;
+			for (auto& client : g_clients)
+			{
+				client->SetIsTopRanker(false);
+				client->m_pdata.topRank = false;
+
+				for (auto& temp_client : temp_clients)
+				{
+					if (client->GetID() == temp_client->GetID())
+					{
+						client->SetMyCharacterCurrRank(temp_client->GetMyCharacterCurrRank());
+				
+						//이 클라이언트의 등수가 1등이면 toprank를 true로, 단 가장 먼저 선언된 애가 1등
+						if (client->GetMyCharacterCurrRank() == 1 && client->GetPlayerScore() >= 30)
+						{
+							client->SetIsTopRanker(true);
+							client->m_pdata.topRank = true;
+
+							if (client->GetCurrTopRankerID() != client->GetID() )
+							{
+								client->SetCurrTopRankerID(client->GetID());
+
+								client->GetPhysicsPoint()->SetHalfBox(4, 13, 4);			//초기한번생성, 그 뒤로 안바뀜
+								client->SetMyOriginalHP(700);								//초기한번생성, 그 뒤로 안바뀜
+
+								client->SetMyCurrSpeed(client->GetMyCurrSpeed() + 50);		//초기한번생성, 그 뒤로 안바뀜
+								client->SetMyCurrHP(client->GetMyCurrHP() + 600);			//초기한번생성, 그 뒤로 안바뀜
+							}
+
+							//cout << "ID: " << client->GetID() << "\t HP: " << client->GetMyCurrHP() << " , " << client->GetMyOriginalHP() << " \n";
+							break;
+						}
+
+						client->m_pdata.rank = client->GetMyCharacterCurrRank();
+						break;
+					}
+				}
+			}
 
 			//2. All Clients (Player)
 			STC_CharCurrState stc_char_state;

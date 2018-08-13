@@ -52,8 +52,8 @@ public:
 	STC_BulletObject_Info  GetChangedBulletState() const;
 
 public:
-	virtual NPC_BulletObject_Info GetChangedNPCBulletState() const {};	  //¾È¾¸ 
-	virtual STC_HammerSkillInfo   GetChangedHammerBulletState() const {}; //¾È¾¸
+	virtual NPC_BulletObject_Info GetChangedNPCBulletState() const { NPC_BulletObject_Info fuck_you; return (fuck_you); } //¾È¾¸ 
+	virtual STC_HammerSkillInfo   GetChangedHammerBulletState() const { STC_HammerSkillInfo fuck_you; return (fuck_you); }//¾È¾¸
 
 	unsigned short	  GetBulletID() const { return m_id; }
 	unsigned short    GetBulletMasterID() const { return m_masterID; }

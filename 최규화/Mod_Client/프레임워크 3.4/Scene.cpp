@@ -127,63 +127,78 @@ void Scene::SceneState()
 
 		else if (GetAsyncKeyState(0x31) & 0x8000 && GetFocus())
 		{
-			CharacterSelect->CenterPos.x = -320;
+			CharacterSelect->CenterPos.x = 0.8f * (-mWidth * 0.5f);
 			CharacterSelect->CenterPos.y = 0;
 			CharacterSelect->ObjData.CustomData1.z = 1;
+
 		}
 		else if (GetAsyncKeyState(0x32) & 0x8000 && GetFocus())
 		{
-			CharacterSelect->CenterPos.x = -160;
+			CharacterSelect->CenterPos.x = 0.4f * (-mWidth * 0.5f);
 			CharacterSelect->CenterPos.y = 0;
 			CharacterSelect->ObjData.CustomData1.z = 2;
+
 		}
 		else if (GetAsyncKeyState(0x33) & 0x8000 && GetFocus())
 		{
 			CharacterSelect->CenterPos.x = 0;
 			CharacterSelect->CenterPos.y = 0;
 			CharacterSelect->ObjData.CustomData1.z = 3;
+
 		}
 		else if (GetAsyncKeyState(0x34) & 0x8000 && GetFocus())
 		{
-			CharacterSelect->CenterPos.x = 160;
+			CharacterSelect->CenterPos.x = 0.4f * (mWidth* 0.5f);
 			CharacterSelect->CenterPos.y = 0;
 			CharacterSelect->ObjData.CustomData1.z = 4;
+
 		}
 		else if (GetAsyncKeyState(0x35) & 0x8000 && GetFocus())
 		{
-			CharacterSelect->CenterPos.x = 320;
+			CharacterSelect->CenterPos.x = 0.8f * (mWidth* 0.5f);
 			CharacterSelect->CenterPos.y = 0;
 			CharacterSelect->ObjData.CustomData1.z = 5;
+
+
 		}
 		else if (GetAsyncKeyState(0x36) & 0x8000 && GetFocus())
 		{
-			CharacterSelect->CenterPos.x = -320;
-			CharacterSelect->CenterPos.y = -200;
+			CharacterSelect->CenterPos.x = 0.8f * (-mWidth * 0.5f);
+			CharacterSelect->CenterPos.y = (-mHeight * 1 / 3);
 			CharacterSelect->ObjData.CustomData1.z = 6;
+
 		}
 		else if (GetAsyncKeyState(0x37) & 0x8000 && GetFocus())
 		{
-			CharacterSelect->CenterPos.x = -160;
-			CharacterSelect->CenterPos.y = -200;
+			CharacterSelect->CenterPos.x = 0.4f * (-mWidth * 0.5f);
+			CharacterSelect->CenterPos.y = (-mHeight * 1 / 3);
 			CharacterSelect->ObjData.CustomData1.z = 7;
+
+
 		}
 		else if (GetAsyncKeyState(0x38) & 0x8000 && GetFocus())
 		{
 			CharacterSelect->CenterPos.x = 0;
-			CharacterSelect->CenterPos.y = -200;
+			CharacterSelect->CenterPos.y = (-mHeight * 1 / 3);
 			CharacterSelect->ObjData.CustomData1.z = 8;
+
+
 		}
 		else if (GetAsyncKeyState(0x39) & 0x8000 && GetFocus())
 		{
-			CharacterSelect->CenterPos.x = 160;
-			CharacterSelect->CenterPos.y = -200;
+			CharacterSelect->CenterPos.x = 0.4f * (mWidth* 0.5f);
+			CharacterSelect->CenterPos.y = (-mHeight * 1 / 3);
 			CharacterSelect->ObjData.CustomData1.z = 9;
+
+
 		}
 		else if (GetAsyncKeyState(0x30) & 0x8000 && GetFocus())
 		{
-			CharacterSelect->CenterPos.x = 320;
-			CharacterSelect->CenterPos.y = -200;
+			CharacterSelect->CenterPos.x = 0.8f * (mWidth* 0.5f);
+			CharacterSelect->CenterPos.y = (-mHeight * 1 / 3);
 			CharacterSelect->ObjData.CustomData1.z = 10;
+
+
 		}
 	}
 	else if (GAMESTATE == GS_LOAD)
@@ -191,12 +206,18 @@ void Scene::SceneState()
 		
 		if (FirstLoad == true)
 		{
-			//CreateGameObject();
+		   //CreateGameObject();
 			FirstLoad = false;
 			SetGameState(GS_PLAY);
 			ShowCursor(false);
 
 			Sound->PlaySoundBG();
+
+			//CTS_LoginData cts_logindata;
+			//cts_logindata.isReady = true;
+			//cts_logindata.texture_id = Player->PlayerObject->TexOff;
+
+			//Player->m_async_client->SendPacket();
 		}
 		else
 		{
@@ -561,6 +582,81 @@ void Scene::CreateGameObject()
 	Player->SetPlayer(DynamicObject.front());
 	Player->PlayerObject->Blending = false;
 
+	if (CharacterSelect->ObjData.CustomData1.z == 1)
+	{
+		Player->PlayerObject->TextureName = "Female Brown Casual";
+		Player->PlayerObject->NTextureName = "Female Brown Casual N";
+		Player->PlayerObject->TexOff = CharacterSelect->ObjData.CustomData1.z - 1;
+		Player->PlayerObject->NTexOff = Player->PlayerObject->TexOff + 10;
+	}
+	else if (CharacterSelect->ObjData.CustomData1.z == 2)
+	{
+		Player->PlayerObject->TextureName = "Female Black Knight";
+		Player->PlayerObject->NTextureName = "Female Black Knight N";
+		Player->PlayerObject->TexOff = CharacterSelect->ObjData.CustomData1.z - 1;
+		Player->PlayerObject->NTexOff = Player->PlayerObject->TexOff + 10;
+	}
+	else if (CharacterSelect->ObjData.CustomData1.z == 3)
+	{
+		Player->PlayerObject->TextureName = "Female Brown Sorceress";
+		Player->PlayerObject->NTextureName = "Female Brown Sorceress N";
+		Player->PlayerObject->TexOff = CharacterSelect->ObjData.CustomData1.z - 1;
+		Player->PlayerObject->NTexOff = Player->PlayerObject->TexOff + 10;
+
+	}
+	else if (CharacterSelect->ObjData.CustomData1.z == 4)
+	{
+		Player->PlayerObject->TextureName = "Female White Knight";
+		Player->PlayerObject->NTextureName = "Female White Knight N";
+		Player->PlayerObject->TexOff = CharacterSelect->ObjData.CustomData1.z - 1;
+		Player->PlayerObject->NTexOff = Player->PlayerObject->TexOff + 10;
+	}
+	else if (CharacterSelect->ObjData.CustomData1.z == 5)
+	{
+		Player->PlayerObject->TextureName = "Female White Barbarian";
+		Player->PlayerObject->NTextureName = "Female White Barbarian N";
+
+		Player->PlayerObject->TexOff = CharacterSelect->ObjData.CustomData1.z - 1;
+		Player->PlayerObject->NTexOff = Player->PlayerObject->TexOff + 10;
+	}
+	else if (CharacterSelect->ObjData.CustomData1.z == 6)
+	{
+
+		Player->PlayerObject->TextureName = "Male Black Knight";
+		Player->PlayerObject->NTextureName = "Male Black Knight N";
+
+		Player->PlayerObject->TexOff = CharacterSelect->ObjData.CustomData1.z - 1;
+		Player->PlayerObject->NTexOff = Player->PlayerObject->TexOff + 10;
+	}
+	else if (CharacterSelect->ObjData.CustomData1.z == 7)
+	{
+		Player->PlayerObject->TextureName = "Male White Wizard";
+		Player->PlayerObject->NTextureName = "Male White Wizard N";
+
+		Player->PlayerObject->TexOff = CharacterSelect->ObjData.CustomData1.z - 1;
+		Player->PlayerObject->NTexOff = Player->PlayerObject->TexOff + 10;
+	}
+	else if (CharacterSelect->ObjData.CustomData1.z == 8)
+	{
+		Player->PlayerObject->TextureName = "Male Black Archer";
+		Player->PlayerObject->NTextureName = "Male Black Archer N";
+		Player->PlayerObject->TexOff = CharacterSelect->ObjData.CustomData1.z - 1;
+		Player->PlayerObject->NTexOff = Player->PlayerObject->TexOff + 10;
+	}
+	else if (CharacterSelect->ObjData.CustomData1.z == 9)
+	{
+		Player->PlayerObject->TextureName = "Male Fire";
+		Player->PlayerObject->NTextureName = "Male Fire N";
+		Player->PlayerObject->TexOff = CharacterSelect->ObjData.CustomData1.z - 1;
+		Player->PlayerObject->NTexOff = Player->PlayerObject->TexOff + 10;
+	}
+	else if (CharacterSelect->ObjData.CustomData1.z == 10)
+	{
+		Player->PlayerObject->TextureName = "Male White King";
+		Player->PlayerObject->NTextureName = "Male White King N";
+		Player->PlayerObject->TexOff = CharacterSelect->ObjData.CustomData1.z - 1;
+		Player->PlayerObject->NTexOff = Player->PlayerObject->TexOff + 10;
+	}
 }
 
 void Scene::CreateUI()
@@ -695,7 +791,8 @@ void Scene::Render(const GameTimer& gt)
 			{
 				Player->Camera.UpdateConstantBufferOrtho(commandlist);
 				Shaders->SetBillboardShader(commandlist);
-				CharacterSelect->Render(commandlist, gt);
+				if (GetGameState() == GS_START)
+					CharacterSelect->Render(commandlist, gt);
 				BackGround->Render(commandlist, gt);
 				Player->Camera.UpdateConstantBuffer(commandlist);
 			}
@@ -996,8 +1093,7 @@ Player_Data * Scene::Get_MonsterServerData(const unsigned int & id)
 
 void Scene::SET_PLAYER_BY_SEVER_DATA(const unsigned short & id, const Player_Data & playerdata, const unsigned char & packet_type)
 {
-	bool cal_rank = false;
-	for (auto GameObject : DynamicObject)
+	for (auto& GameObject : DynamicObject)
 	{
 		if (GameObject->isNPC) continue;
 		if (GameObject->m_player_data.id == id)
@@ -1017,6 +1113,12 @@ void Scene::SET_PLAYER_BY_SEVER_DATA(const unsigned short & id, const Player_Dat
 					GameObject->gamedata.MAXHP = move(playerdata.status.origin_hp);
 					GameObject->gamedata.Speed = move(playerdata.status.speed);
 
+					//플레이어 스코어 , 킬 , 데스 , 포인트 관리
+					GameObject->pointrank.DeathCount = playerdata.deathcount;
+					GameObject->pointrank.KillCount = playerdata.killcount;
+					GameObject->pointrank.Point = playerdata.score;
+					GameObject->pointrank.Rank = playerdata.rank;
+
 					GameObject->AirBone = playerdata.airbone;
 
 				}
@@ -1035,6 +1137,11 @@ void Scene::SET_PLAYER_BY_SEVER_DATA(const unsigned short & id, const Player_Dat
 					GameObject->gamedata.MAXHP = move(playerdata.status.origin_hp);
 					GameObject->gamedata.Speed = move(playerdata.status.speed);
 
+					//플레이어 스코어 , 킬 , 데스 , 포인트 관리
+					GameObject->pointrank.DeathCount = playerdata.deathcount;
+					GameObject->pointrank.KillCount = playerdata.killcount;
+					GameObject->pointrank.Point = playerdata.score;
+					GameObject->pointrank.Rank = playerdata.rank;
 					GameObject->AirBone = playerdata.airbone;
 
 					if (GameObject->m_player_data.id == my_ClientID)
@@ -1062,11 +1169,33 @@ void Scene::SET_PLAYER_BY_SEVER_DATA(const unsigned short & id, const Player_Dat
 					GameObject->gamedata.MAXHP = playerdata.status.origin_hp;
 					GameObject->gamedata.Speed = playerdata.status.speed;
 
-					//플레이어 스코어 , 킬 , 데스 , 포인트 관리
-		
 					GameObject->AirBone = playerdata.airbone;
+
+					//플레이어 스코어 , 킬 , 데스 , 포인트 관리
+					GameObject->pointrank.DeathCount = playerdata.deathcount;
+					GameObject->pointrank.KillCount = playerdata.killcount;
+					GameObject->pointrank.Point = playerdata.score;
+					GameObject->pointrank.Rank = playerdata.rank;
 					
-					cal_rank = true;
+					if (playerdata.topRank)
+					{
+						GameObject->pointrank.TopMode = true;
+						GameObject->ObjData.Scale = 4;
+						XMFLOAT3 rx(4, 0, 0);
+						XMFLOAT3 ry(0, 13, 0);
+						XMFLOAT3 rz(0, 0, 4);
+						GameObject->rco.SetPlane(rx, ry, rz);
+						GameObject->pp->SetHalfBox(4, 13, 4);//충돌 박스의 x,y,z 크기
+
+						dynamic_cast<CCubeManObject*>(GameObject)->s->ObjData.Scale = 3.0f;
+						dynamic_cast<CCubeManObject*>(GameObject)->Hpbar->YPos = 16;
+						dynamic_cast<CCubeManObject*>(GameObject)->HPFrame->YPos = 16;
+						GameObject->gamedata.MAXHP = 700;
+						GameObject->gamedata.Speed = 75;
+						GameObject->gamedata.HP = GameObject->gamedata.HP + 600;
+
+					}
+
 				}
 				break;
 
@@ -1108,14 +1237,11 @@ void Scene::SET_PLAYER_BY_SEVER_DATA(const unsigned short & id, const Player_Dat
 		}
 	}
 
-	if (cal_rank)
-	{
-		sort(DynamicObject.begin(), DynamicObject.end(), 
-			[&](const CGameObject& c1, const CGameObject& c2) 
-		    {
-				if (c1.)
-		    });
-	}
+	//m_score_for_rankcheck = static_cast<float>(m_player_score) + static_cast<float>(m_killCount) * 3.8f - static_cast<float>(m_deathCount) * 1.8f;
+
+	
+
+	//	100번째 방 누가 바뀌었나 for (auto i = 0; v[100].size(); ++i) { ~ }  //이
 }
 
 void Scene::SET_NPC_BY_SERVER_DATA(const unsigned short & id, const Npc_Data & data, const unsigned char & monster_type, const unsigned char & packet_type)

@@ -346,60 +346,19 @@ CCubeManObject::CCubeManObject(ID3D12Device * m_Device, ID3D12GraphicsCommandLis
 		CreateMesh = true;
 	
 	}
-	select = rand() % 10;
-	if (select == 0)
-	{
-		TextureName = "Female Brown Casual";
-		NTextureName = "Female Brown Casual N";
-	}
-	else if (select == 1)
-	{
-		TextureName = "Female Black Knight";
-		NTextureName = "Female Black Knight N";
-	}
-	else if (select == 2)
-	{
-		TextureName = "Female Brown Sorceress";
-		NTextureName = "Female Brown Sorceress N";
-	}
-	else if (select == 3)
-	{
-		TextureName = "Female White Knight";
-		NTextureName = "Female White Knight N";
-	}
-	else if (select == 4)
-	{
-		TextureName = "Female White Barbarian";
-		NTextureName = "Female White Barbarian N";
-	}
-	else if (select == 5)
-	{
-		TextureName = "Male Black Knight";
-		NTextureName = "Male Black Knight N";
-	}
-	else if (select == 6)
-	{
-		TextureName = "Male White Wizard";
-		NTextureName = "Male White Wizard N";
-	}
-	else if (select == 7)
-	{
-		TextureName = "Male Black Archer";
-		NTextureName = "Male Black Archer N";
-	}
-	else if (select == 8)
-	{
-		TextureName = "Male Fire";
-		NTextureName = "Male Fire N";
-	}
-	else if (select == 9)
-	{
-		TextureName = "Male White King";
-		NTextureName = "Male White King N";
-	}
+	select = 9;
+	
+	TextureName = "Male White King";
+	NTextureName = "Male White King N";
 	TexOff = select;
 	NTexOff = TexOff + 10;
-	
+
+	pointrank.DeathCount = 0;
+	pointrank.KillCount = 0;
+	pointrank.Point = 0;
+	pointrank.TopMode = false;
+	pointrank.Rank = MAX_PLAYER;
+
 	//게임오브젝트마다 룩벡터와 라이트벡터가 다르므로 초기 오프셋 설정을 해준다.
 	//실제 룩벡터 등은 모두 UpdateLookVector에서 처리된다(라이트벡터도) 따라서 Tick함수에서 반드시 호출해야한다.
 	OffLookvector = XMFLOAT3(0, 0, -1);
@@ -809,20 +768,6 @@ void BulletCube::Collision(list<CGameObject*>* collist, float DeltaTime)
 					isboss = true;
 				}
 
-				//만약 상대가 죽었다면 점수를 추가한다.
-				if ((*i)->gamedata.HP <= 0)
-				{
-					if (((CCubeManObject*)Master)->player != NULL)
-					{
-						if (isboss)
-							((CCubeManObject*)Master)->player->pointrank.Point += 100;
-						else
-							((CCubeManObject*)Master)->player->pointrank.Point += 10;
-					}
-				}
-
-
-
 				XMFLOAT3 cn;
 				//고정된 물체가 아니면
 				if ((*i)->staticobject == false)
@@ -1104,18 +1049,6 @@ void HeavyBulletCube::Collision(list<CGameObject*>* collist, float DeltaTime)
 					isboss = true;
 				}
 
-				//만약 상대가 죽었다면 점수를 추가한다.
-				if ((*i)->gamedata.HP <= 0)
-				{
-					if (((CCubeManObject*)Master)->player != NULL)
-					{
-						if (isboss)
-							((CCubeManObject*)Master)->player->pointrank.Point += 100;
-						else
-							((CCubeManObject*)Master)->player->pointrank.Point += 10;
-					}
-				}
-
 				XMFLOAT3 cn;
 				//고정된 물체가 아니면
 				if ((*i)->staticobject == false)
@@ -1364,18 +1297,6 @@ void Tetris1::Collision(list<CGameObject*>* collist, float DeltaTime)
 					isboss = true;
 				}
 
-				//만약 상대가 죽었다면 점수를 추가한다.
-				if ((*i)->gamedata.HP <= 0)
-				{
-					if (((CCubeManObject*)Master)->player != NULL)
-					{
-						if (isboss)
-							((CCubeManObject*)Master)->player->pointrank.Point += 100;
-						else
-							((CCubeManObject*)Master)->player->pointrank.Point += 10;
-					}
-				}
-
 				XMFLOAT3 cn;
 				//고정된 물체가 아니면
 				if ((*i)->staticobject == false)
@@ -1617,18 +1538,6 @@ void Tetris2::Collision(list<CGameObject*>* collist, float DeltaTime)
 				{
 					((ImpObject*)*i)->fsm->aidata.LastPosition = this->CenterPos;
 					isboss = true;
-				}
-
-				//만약 상대가 죽었다면 점수를 추가한다.
-				if ((*i)->gamedata.HP <= 0)
-				{
-					if (((CCubeManObject*)Master)->player != NULL)
-					{
-						if (isboss)
-							((CCubeManObject*)Master)->player->pointrank.Point += 100;
-						else
-							((CCubeManObject*)Master)->player->pointrank.Point += 10;
-					}
 				}
 
 				XMFLOAT3 cn;
@@ -1874,19 +1783,6 @@ void Tetris3::Collision(list<CGameObject*>* collist, float DeltaTime)
 					isboss = true;
 				}
 
-				//만약 상대가 죽었다면 점수를 추가한다.
-				if ((*i)->gamedata.HP <= 0)
-				{
-					if (((CCubeManObject*)Master)->player != NULL)
-					{
-						if (isboss)
-							((CCubeManObject*)Master)->player->pointrank.Point += 100;
-						else
-							((CCubeManObject*)Master)->player->pointrank.Point += 10;
-					}
-				}
-
-
 				XMFLOAT3 cn;
 				//고정된 물체가 아니면
 				if ((*i)->staticobject == false)
@@ -2126,19 +2022,6 @@ void Tetris4::Collision(list<CGameObject*>* collist, float DeltaTime)
 					((ImpObject*)*i)->fsm->aidata.LastPosition = this->CenterPos;
 					isboss = true;
 				}
-
-				//만약 상대가 죽었다면 점수를 추가한다.
-				if ((*i)->gamedata.HP <= 0)
-				{
-					if (((CCubeManObject*)Master)->player != NULL)
-					{
-						if (isboss)
-							((CCubeManObject*)Master)->player->pointrank.Point += 100;
-						else
-							((CCubeManObject*)Master)->player->pointrank.Point += 10;
-					}
-				}
-
 
 				XMFLOAT3 cn;
 				//고정된 물체가 아니면
@@ -6320,18 +6203,6 @@ void MeteorObject::Collision(list<CGameObject*>* collist, float DeltaTime)
 				{
 					((ImpObject*)*i)->fsm->aidata.LastPosition = this->CenterPos;
 					isboss = true;
-				}
-
-				//만약 상대가 죽었다면 점수를 추가한다.
-				if ((*i)->gamedata.HP <= 0)
-				{
-					if (((CCubeManObject*)Master)->player != NULL)
-					{
-						if (isboss)
-							((CCubeManObject*)Master)->player->pointrank.Point += 100;
-						else
-							((CCubeManObject*)Master)->player->pointrank.Point += 10;
-					}
 				}
 
 				XMFLOAT3 cn;

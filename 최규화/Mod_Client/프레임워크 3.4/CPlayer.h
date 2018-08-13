@@ -40,14 +40,6 @@ typedef struct SkillData
 	
 };
 
-typedef struct PointRank
-{
-	int Point=0;//현재 점수
-	int Rank=5;//현재 랭킹
-	bool TopMode = false;//1위일때 탑모드. 현재 체력 + 800 / 크기 1.3배 / 이속 1.5배
-	bool Init = false;//1위하면 1위모드로 초기화 해야함.
-}PointRank;
-
 class CPlayer
 {
 public:
@@ -75,10 +67,6 @@ public:
 	void CreateBullet(ID3D12Device* Device,ID3D12GraphicsCommandList* cl, XMFLOAT3& Goal, CGameObject* lock, list<CGameObject*>* bulletlist);
 	void CheckTraceSkill();//현재 선택한 스킬넘버링이 추적데이터가 존재해야하는지 검사하고, 검사한 결과를 MouseTrace에 입힌다. 
 	bool MouseTrace = false;
-
-
-	//서버에서 1등이라고 넘겨주면 능력치 강화.
-	PointRank pointrank;
 
 public:
 	//서버용

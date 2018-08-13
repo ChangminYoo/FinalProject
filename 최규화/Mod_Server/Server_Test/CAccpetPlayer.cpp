@@ -79,6 +79,11 @@ void CAccpetPlayer::AcceptEvent()
 
 			CPlayerObject* pNewSession = new CPlayerObject(m_playerIndex, move(m_socket));
 		
+			//pNewSession->RecvPacket();
+
+			//g_clients.emplace_back(pNewSession);
+
+			//pNewSession->
 			if (pNewSession->CheckPlayerInfo())
 			{
 				//1. Client 정보 초기화 및 Client 정보를 담은 벡터에 데이터 추가

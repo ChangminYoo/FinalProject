@@ -1434,6 +1434,8 @@ void CRigidCubeObject::Collision(vector<CPlayerObject*>* clients, double deltime
 {
 	for (auto iter = clients->begin(); iter != clients->end(); ++iter)
 	{
+		//if (!(*iter)->GetIsReadyToPlay()) continue;
+
 		if ((*iter)->GetPhysicsPoint() != nullptr)
 		{
 			RigidBody ppConvertrb;
@@ -1577,6 +1579,8 @@ void CMoveCubeObject::Collision(vector<CPlayerObject*>* clients, double deltime)
 {
 	for (auto iter = clients->begin(); iter != clients->end(); ++iter)
 	{
+		//if (!(*iter)->GetIsReadyToPlay()) continue;
+
 		if ((*iter)->GetAlive())
 		{
 			bool test = pp->CollisionTest(*(*iter)->GetPhysicsPoint(), m_Lookvector, m_Rightvector, m_Upvector,

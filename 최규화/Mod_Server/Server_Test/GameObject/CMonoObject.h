@@ -77,6 +77,11 @@ public:
 	bool    GetAlive() const { return m_alive; }
 	int		GetMyCurrHP() const { return m_ability.curHP; }
 	void	SetMyCurrHP(int currhp) { m_ability.curHP = currhp; }
+	void    SetMyOriginalHP(int ori_hp) { m_ability.orignHP = ori_hp; }
+	int		GetMyOriginalHP() const { return m_ability.orignHP; }
+	void    SetMyCurrSpeed(double _speed) { m_ability.speed = _speed; }
+	double  GetMyCurrSpeed() const { return m_ability.speed; }
+
 	bool	GetIsFixed() const { return m_fixed; }
 	void    SetIsFixed(bool flag) { m_fixed = flag; }
 	int     GetObjectType() const { return static_cast<int>(m_type); }

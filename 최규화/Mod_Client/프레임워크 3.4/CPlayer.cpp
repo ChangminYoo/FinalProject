@@ -214,8 +214,6 @@ void CPlayer::SetPlayer(CGameObject * obj)
 	PlayerObject = obj;
 	((CCubeManObject*)obj)->player = this;
 	PlayerCameraReLocate();
-	pointrank.Rank = 1;
-	pointrank.Point = 40;
 }
 
 //여기서 중요한점은 키보드 누른 즉시 충돌검사를 한번 해줘야한다.
@@ -499,6 +497,7 @@ void CPlayer::Tick(float DeltaTime)
 		}
 	}
 
+	/*
 	if (pointrank.Rank == 1 && pointrank.Point>=50)
 	{
 		if (pointrank.Init == false)
@@ -539,7 +538,7 @@ void CPlayer::Tick(float DeltaTime)
 			((CCubeManObject*)PlayerObject)->HPFrame->YPos = 10;
 		}
 	}
-
+	*/
 
 }
 

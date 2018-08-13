@@ -41,6 +41,11 @@ bool CPlayerObject::CheckPlayerInfo()
 	return true;
 }
 
+void CPlayerObject::CheckMyClient()
+{
+
+}
+
 /*
 void CPlayerObject::Init_MonsterInfo()
 {
@@ -113,7 +118,9 @@ void CPlayerObject::Init_PlayerInfo()
 	m_killCount = 0;
 	m_deathCount = 0;
 	m_player_score = 0;
-	m_myRank = MAX_PLAYER;
+	m_myCurrRank = MAX_PLAYER;
+	m_myOldRank = MAX_PLAYER;
+	m_isTopRanker = false;
 
 	m_ani = Ani_State::Idle;
 	m_connect = true;
@@ -137,6 +144,9 @@ void CPlayerObject::Init_PlayerInfo()
 		m_pos4f = { -100.f, -1000.f, 0.f, 0.f };
 	else if (m_id == 1)
 		m_pos4f = { 300.f, -1000.f, 0.f, 0.f };
+
+	if (m_id == 1)
+		m_player_score = 100;
 
 	m_orgPos4f = m_pos4f;
 	//---------------------------- Orient를 이용한 Lookvector // Rightvector // Upvector 설정
@@ -178,6 +188,7 @@ void CPlayerObject::Init_PlayerInfo()
 
 	//------------------------------
 
+	CalculatePlayerScoreForRanking();
 	//wcscpy(m_pdata.LoginData.name, m_loginID);
 	//wcscpy(m_pdata.LoginData.password, m_loginPW);
 }
@@ -205,7 +216,8 @@ void CPlayerObject::InitData_To_Client()
 	m_pdata.killcount = m_killCount;
 	m_pdata.deathcount = m_deathCount;
 	m_pdata.score = m_player_score;
-	m_pdata.rank = m_myRank;
+	m_pdata.rank = m_myCurrRank;
+	m_pdata.topRank = false;
 
 	stc_init.player_data = move(m_pdata);
 
@@ -421,6 +433,14 @@ void CPlayerObject::ProcessPacket(Packet * packet)
 
 	switch (packet[1])
 	{
+	case PACKET_PROTOCOL_TYPE::PLAYER_LOGIN:
+	{
+		auto data = reinterpret_cast<CTS_LoginData*>(packet);
+
+
+	}
+	break;
+
 	case PACKET_PROTOCOL_TYPE::NPC_MONSTER_ANIM:
 	{
 		auto data = reinterpret_cast<STC_MyNPCAnim*>(packet);
@@ -442,6 +462,8 @@ void CPlayerObject::ProcessPacket(Packet * packet)
 		if (m_state == PLAYER_STATE::DEAD)
 			break;
 
+		//if (!m_isReadyToPlay) break;
+
 		auto mdata = reinterpret_cast<STC_CharMove*>(packet);
 		m_dir = mdata->dir;
 
@@ -454,6 +476,8 @@ void CPlayerObject::ProcessPacket(Packet * packet)
 	{
 		if (m_state == PLAYER_STATE::DEAD)
 			break;
+
+		//if (!m_isReadyToPlay) break;
 
 		m_state = PLAYER_STATE::ROTATE;
 
@@ -491,6 +515,8 @@ void CPlayerObject::ProcessPacket(Packet * packet)
 		if (m_state == PLAYER_STATE::DEAD)
 			break;
 
+		//if (!m_isReadyToPlay) break;
+
 		m_state = PLAYER_STATE::ATTACK;
 
 		auto n_bldata = reinterpret_cast<CTS_Attack*>(packet);
@@ -510,6 +536,8 @@ void CPlayerObject::ProcessPacket(Packet * packet)
 		if (m_state == DEAD)
 			break;
 
+		//if (!m_isReadyToPlay) break;
+
 		auto test_data = reinterpret_cast<STC_Test*>(packet);
 
 		cout << "ID: " << test_data->player_data.id << "ElaspedTime: " << test_data->time.t_time << "------"
@@ -522,6 +550,8 @@ void CPlayerObject::ProcessPacket(Packet * packet)
 	{
 		if (m_state == DEAD)
 			break;
+
+		//if (!m_isReadyToPlay) break;
 
 		auto ani = reinterpret_cast<STC_CharAnimation*>(packet);
 
@@ -556,6 +586,8 @@ void CPlayerObject::ProcessPacket(Packet * packet)
 	{
 		if (m_state == DEAD)
 			break;
+
+		//if (!m_isReadyToPlay) break;
 
 		auto data = reinterpret_cast<CTS_SKILL_SHIELD*>(packet);
 
@@ -607,6 +639,8 @@ void CPlayerObject::ProcessPacket(Packet * packet)
 	{
 		if (m_state == DEAD) break;
 
+		//if (!m_isReadyToPlay) break;
+
 		auto data = reinterpret_cast<CTS_SKILL_WAVESHOCK*>(packet);
 
 		STC_SKILL_WAVESHOCK stc_skill_waveshock;
@@ -648,6 +682,8 @@ void CPlayerObject::ProcessPacket(Packet * packet)
 	{
 		if (m_state == PLAYER_STATE::DEAD)
 			break;
+
+		//if (!m_isReadyToPlay) break;
 
 		m_state = PLAYER_STATE::ATTACK;
 
@@ -709,6 +745,8 @@ void CPlayerObject::ProcessPacket(Packet * packet)
 		if (m_state == PLAYER_STATE::DEAD)
 			break;
 
+		//if (!m_isReadyToPlay) break;
+
 		m_state = PLAYER_STATE::ATTACK;
 
 		auto data = reinterpret_cast<CTS_SKILL_HAMMERBULLET*>(packet);
@@ -765,7 +803,7 @@ void CPlayerObject::UpdateDataForPacket()
 	m_pdata.killcount = m_killCount;
 	m_pdata.deathcount = m_deathCount;
 	m_pdata.score = m_player_score;
-	m_pdata.rank = m_myRank;
+	m_pdata.rank = m_myCurrRank;
 }
 
 void CPlayerObject::Tick(double deltime)
