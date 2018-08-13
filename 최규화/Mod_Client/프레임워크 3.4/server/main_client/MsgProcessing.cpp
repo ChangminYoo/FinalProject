@@ -44,6 +44,15 @@ switch (packet[1])
 	}
 	break;
 
+	case PACKET_PROTOCOL_TYPE::PLAYER_LOGIN:
+	{
+		auto login_data = reinterpret_cast<STC_PLAYER_LOGIN*>(packet);
+
+		scene.SET_LOGIN_BY_SERVER_DATA(login_data->logindata);
+
+	}
+	break;
+
 	case PACKET_PROTOCOL_TYPE::NPC_MONSTER_IMP_ATTACK_STONEBULLET:
 	{
 		auto imp_att = reinterpret_cast<STC_NpcMonsterAttackStoneBullet*>(packet);
@@ -190,7 +199,6 @@ switch (packet[1])
 void AsyncClient::SendPacketRegular(CGameObject& gobj, const GameTimer& gt)
 {
 	//클라이언트에서 매 프레임마다 정기적으로 보내줘야할 데이터 패킷
-
 	m_totalTime += gt.DeltaTime();
 
 	//클라이언트에서 플레이어의 공격 모션이 끝났을 때 바로 IDLE 모션을 서버로 전송해야한다
@@ -214,9 +222,29 @@ void AsyncClient::SendPacketRegular(CGameObject& gobj, const GameTimer& gt)
 	}
 
 
+	
+	if (m_totalTime > RegularPacketExchangeTime && m_mySkipLogin == false)
+	{
+		m_totalTime -= RegularPacketExchangeTime;
+
+		CTS_LoginData cts_logindata;
+		cts_logindata.isReady = m_myClientReady;
+		cts_logindata.texture_id = gobj.TexOff;
+
+		SendPacket(reinterpret_cast<Packet*>(&cts_logindata));
+
+		//CTS_LoginData cts_logindata;
+		//cts_logindata.isReady = true;
+		//cts_logindata.texture_id = Player->PlayerObject->TexOff;
+
+		//Player->m_async_client->SendPacket();
+	}
+
+
+
+
 	// 1.서버에서 담고있는 캐릭터회전정보를 주기적으로 0.2초마다 검사 및 패킷송신
 	RgCkInfo.AniCheck.t.t_time += gt.DeltaTime();
-
 	if (RgCkInfo.AniCheck.t.t_time > RegularPacketExchangeTime)
 	{
 		RgCkInfo.AniCheck.t.p_time = RgCkInfo.AniCheck.t.t_time - RegularPacketExchangeTime;

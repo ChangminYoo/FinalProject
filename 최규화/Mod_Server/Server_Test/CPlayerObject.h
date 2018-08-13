@@ -49,7 +49,7 @@ public:
 	void				UnLock() { m_mtx.unlock(); }
 
 public:
-	CPlayerObject(const unsigned short& count, boost::asio::ip::tcp::socket socket) : m_socket(move(socket)) { m_id = count; m_isReadyToPlay = true; };
+	CPlayerObject(const unsigned short& count, boost::asio::ip::tcp::socket socket) : m_socket(move(socket)) { m_id = count; m_isReadyToPlay = false; };
 	~CPlayerObject();
 
 	// ---------------------------------------------------------------------------------------
@@ -160,6 +160,9 @@ public:
 
 	void    SetIsReadyToPlay(bool flag) { m_isReadyToPlay = flag; }
 	bool	GetIsReadyToPlay() const { return m_isReadyToPlay; }
+
+	void    SetIsReady(bool flag) { m_isReady = flag; }
+	bool    GetIsReady() const    { return m_isReady; }
 	// ---------------------------------------------------------------------------------------
 	// [5]. 물리효과 함수
 

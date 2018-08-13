@@ -91,6 +91,9 @@ public:
 	CGameObject* SkillFrameUI[4] = { NULL };
 	CGameObject* SkillCoolBar[4] = { NULL };
 	CGameObject* SelectBar = NULL; //스킬선택
+	CGameObject* Time1 = NULL;
+	CGameObject* Time2 = NULL;
+	CGameObject* Time3 = NULL;
 
 	CGameObject* EmptyObject = nullptr;
 
@@ -126,6 +129,7 @@ public:
 
 	void SET_PLAYER_SKILL(const STC_HammerSkillInfo& hammer_bullet);
 
+	void SET_LOGIN_BY_SERVER_DATA(const STC_LoginData& playerdata);
 
 	//서버에서 받은 PlayerData를 이용하면 이 함수는 없어도됨
 	//PlayerData를 기반으로 Player의 값이 달라질것이므로

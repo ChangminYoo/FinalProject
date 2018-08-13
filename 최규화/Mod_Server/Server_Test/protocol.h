@@ -40,6 +40,7 @@ using Packet = unsigned char;
 
 enum PACKET_PROTOCOL_TYPE
 {
+	SCENE_STATE_CHANGE,
 	// 캐릭터 정보 초기화
 	INIT_CLIENT,
 	INIT_OTHER_CLIENT,
@@ -287,15 +288,32 @@ struct CTS_HammerSkillInfo
 struct STC_LoginData
 {
 	unsigned short				my_id;
+	unsigned char               texture_id;
+	char                        isReady;
+	char                        skip_login;
 };
 
 struct CTS_LoginData
 {
-	//unsigned short				my_id;
+	//unsigned short			my_id;
 	unsigned char				texture_id;
 	char						isReady;
-	//wchar_t				        name[MAX_BUFFER_SIZE / 4]{ L"Guest" };
+    //wchar_t				    name[MAX_BUFFER_SIZE / 4]{ L"Guest" };
 
+};
+
+struct STC_ChangeScene
+{
+	unsigned short				my_id;
+	unsigned char				my_currScene;
+	char						my_currSceneReady;
+};
+
+struct CTS_ChangeScene
+{
+	unsigned short				my_id;
+	unsigned char				my_currScene;
+	char						my_currSceneReady;
 };
 
 
@@ -617,5 +635,38 @@ typedef struct Server_To_Client_HammerSkill_Info
 	STC_HammerSkillInfo   skill_data;
 
 }STC_SKILL_HAMMERBULLET;
+
+typedef struct Server_To_Client_LoginServer_Info
+{
+	unsigned char pack_size = sizeof(STC_LoginData) + sizeof(unsigned char) + sizeof(unsigned char);
+	unsigned char pack_type = PACKET_PROTOCOL_TYPE::PLAYER_LOGIN;
+	STC_LoginData logindata;
+
+}STC_PLAYER_LOGIN;
+
+typedef struct Client_To_Client_LoginServer_Info
+{
+	unsigned char pack_size = sizeof(CTS_LoginData) + sizeof(unsigned char) + sizeof(unsigned char);
+	unsigned char pack_type = PACKET_PROTOCOL_TYPE::PLAYER_LOGIN;
+	CTS_LoginData logindata;
+
+}CTS_PLAYER_LOGIN;
+
+
+typedef struct Server_To_Client_SceneState_Info
+{
+	unsigned char pack_size = sizeof(STC_ChangeScene) + sizeof(unsigned char) + sizeof(unsigned char);
+	unsigned char pack_type = PACKET_PROTOCOL_TYPE::SCENE_STATE_CHANGE;
+	STC_ChangeScene state;
+
+}STC_CHANGE_SCENE;
+
+typedef struct Client_To_Server_SceneState_Info
+{
+	unsigned char pack_size = sizeof(CTS_ChangeScene) + sizeof(unsigned char) + sizeof(unsigned char);
+	unsigned char pack_type = PACKET_PROTOCOL_TYPE::SCENE_STATE_CHANGE;
+	CTS_ChangeScene state;
+
+}CTS_CHANGE_SCENE;
 
 #pragma pack (pop)

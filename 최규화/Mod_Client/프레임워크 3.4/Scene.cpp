@@ -24,7 +24,6 @@ Scene::Scene(HWND hwnd,ID3D12Device * m_Device, ID3D12GraphicsCommandList * m_DC
 	Shaders->player = Player;//이제 플레이어도 설정되야 한다.
 	light = new CLight(m_Device, m_DC);
 	CreateUI();
-	CreateGameObject();
 
 	Sound = new CSound();
 
@@ -52,7 +51,12 @@ Scene::~Scene()
 			delete SkillUI[i];
 	if (SelectBar != NULL)
 		delete SelectBar;
-
+	if (Time1 != NULL)
+		delete Time1;
+	if (Time2 != NULL)
+		delete Time2;
+	if (Time3 != NULL)
+		delete Time3;
 	for (int i = 0; i < 4; i++)
 		if(SkillCoolBar[i]!=NULL)
 			delete SkillCoolBar[i];
@@ -122,7 +126,9 @@ void Scene::SceneState()
 	{
 		if (GetAsyncKeyState(VK_SPACE) & 0x8000 && GetFocus())
 		{
-			SetGameState(GS_LOAD);
+			//SetGameState(GS_LOAD);
+
+			Player->m_async_client->m_myClientReady = true;
 		}
 
 		else if (GetAsyncKeyState(0x31) & 0x8000 && GetFocus())
@@ -203,21 +209,24 @@ void Scene::SceneState()
 	}
 	else if (GAMESTATE == GS_LOAD)
 	{
-		
 		if (FirstLoad == true)
 		{
-		   //CreateGameObject();
+			CreateGameObject();
+
+			//서버 추가
+			STC_CHANGE_SCENE stc_change_scene;
+			stc_change_scene.state.my_currScene = GS_LOAD;
+			stc_change_scene.state.my_currSceneReady = true;
+			stc_change_scene.state.my_id = Player->PlayerObject->m_player_data.id;
+
+			Player->m_async_client->SendPacket(reinterpret_cast<Packet*>(&stc_change_scene));
+
+
 			FirstLoad = false;
 			SetGameState(GS_PLAY);
 			ShowCursor(false);
 
 			Sound->PlaySoundBG();
-
-			//CTS_LoginData cts_logindata;
-			//cts_logindata.isReady = true;
-			//cts_logindata.texture_id = Player->PlayerObject->TexOff;
-
-			//Player->m_async_client->SendPacket();
 		}
 		else
 		{
@@ -554,6 +563,7 @@ void Scene::CreateGameObject()
 	RigidObject.push_back(new RigidCubeObject(device, commandlist, &BbObject, &Shadows, XMFLOAT4(-70, 90, -155, 0)));
 	
 
+	/*
 	int player_num = 0;
 	for (auto obj : DynamicObject)
 	{
@@ -562,8 +572,9 @@ void Scene::CreateGameObject()
 		obj->m_player_data.id = player_num;
 		++player_num;
 	}
+	*/
 
-	player_num = 0;
+	int player_num = 0;
 	for (auto sobj : StaticObject)
 	{
 		sobj->m_sobj_data.ID = player_num;
@@ -705,6 +716,10 @@ void Scene::CreateUI()
 		SkillCoolBar[i] = new CoolBarObject(device, commandlist, NULL, NULL, ct, Player->PlayerObject, XMFLOAT4(i*100-150,0.98*-mHeight / 2, 0, 0));
 		SkillFrameUI[i] = new SkillFrameUIObject(device, commandlist, NULL, NULL, Player->skilldata.Skills[i], XMFLOAT4(i * 100 - 150, 0.9*-mHeight / 2, 0, 0));
 		SkillUI[i] = new SkillUIObject(device, commandlist, NULL, NULL, Player->skilldata.Skills[i], XMFLOAT4(i * 100 - 150, 0.9*-mHeight / 2, 0, 0));
+		Time1 = new TimerObject1(device, commandlist, NULL, NULL, XMFLOAT4(-30, 0.90f*mHeight / 2, 0, 0));
+		Time2 = new TimerObject2(device, commandlist, NULL, NULL, XMFLOAT4(10, 0.90f*mHeight / 2, 0, 0));
+		Time3 = new TimerObject3(device, commandlist, NULL, NULL, XMFLOAT4(50, 0.90f*mHeight / 2, 0, 0));
+
 	}
 
 }
@@ -725,6 +740,28 @@ void Scene::UITick(const GameTimer & gt)
 		{
 			SelectBar->ObjData.Scale = mWidth / 10;
 			resize = false;
+		}
+
+	}
+
+	if (GetGameState() == GS_PLAY)
+	{
+		((TimerObject3*)Time3)->times += gt.DeltaTime();
+		if (((TimerObject3*)Time3)->times >= 1)
+		{
+			float t = 1 - ((TimerObject3*)Time3)->times;
+			Time3->TexStride += 1;
+			((TimerObject3*)Time3)->times = t;
+		}
+		if (Time3->TexStride > 9.9f)
+		{
+			Time3->TexStride = 0;
+			Time2->TexStride += 1;
+		}
+		if (Time2->TexStride > 9.9f)
+		{
+			Time2->TexStride = 0;
+			Time1->TexStride += 1;
 		}
 	}
 }
@@ -783,6 +820,9 @@ void Scene::Render(const GameTimer& gt)
 					SkillFrameUI[i]->Render(commandlist, gt);
 
 
+				Time1->Render(commandlist, gt);
+				Time2->Render(commandlist, gt);
+				Time3->Render(commandlist, gt);
 			
 				//다시 원상태로 바꿔줌. 이걸 안하면 피킹이 엉망이됨. 
 				Player->Camera.UpdateConstantBuffer(commandlist);
@@ -1096,6 +1136,7 @@ void Scene::SET_PLAYER_BY_SEVER_DATA(const unsigned short & id, const Player_Dat
 	for (auto& GameObject : DynamicObject)
 	{
 		if (GameObject->isNPC) continue;
+
 		if (GameObject->m_player_data.id == id)
 		{
 			switch (packet_type)
@@ -1796,6 +1837,22 @@ void Scene::SET_PLAYER_SKILL(const STC_HammerSkillInfo & hammer_bullet)
 			break;
 		}
 	}
+}
+
+void Scene::SET_LOGIN_BY_SERVER_DATA(const STC_LoginData & playerdata)
+{
+	//이게 실행됐다는 것은 해당 방의 인원이 모두 레디를 눌러서 플레이를 한다는 것
+
+	for (auto& GameObject : DynamicObject)
+	{
+		if (GameObject->isNPC) continue;
+
+		GameObject->m_player_data.id = playerdata.my_id;
+		GameObject->TexOff = playerdata.texture_id;
+	}
+
+	SetGameState(GS_LOAD);
+
 }
 
 

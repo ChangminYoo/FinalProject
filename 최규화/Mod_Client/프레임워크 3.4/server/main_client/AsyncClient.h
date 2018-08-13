@@ -56,6 +56,9 @@ public:
 	AsyncClient() : m_socket(g_io_service) {};
 	~AsyncClient();
 
+	bool m_myClientReady{ false };
+	bool m_mySkipLogin{ false };
+
 	void Init(CGameObject* obj, Scene* scene);
 
 	void Connect(boost::asio::ip::tcp::endpoint& endpoint);

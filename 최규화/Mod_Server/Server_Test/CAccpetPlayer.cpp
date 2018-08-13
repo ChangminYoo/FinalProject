@@ -78,18 +78,23 @@ void CAccpetPlayer::AcceptEvent()
 			cout << "PORT = " << m_socket.remote_endpoint().port() << endl;
 
 			CPlayerObject* pNewSession = new CPlayerObject(m_playerIndex, move(m_socket));
-		
-			//pNewSession->RecvPacket();
 
-			//g_clients.emplace_back(pNewSession);
+			g_clients.emplace_back(pNewSession);
 
-			//pNewSession->
+			g_clients[m_playerIndex]->RecvPacket();
+
+			if (m_server_shutdown == false)
+			{
+				AcceptEvent();
+			}
+
+			/*
 			if (pNewSession->CheckPlayerInfo())
 			{
 				//1. Client 정보 초기화 및 Client 정보를 담은 벡터에 데이터 추가
 				pNewSession->Init_PlayerInfo();
 
-				g_clients.emplace_back(pNewSession);
+				//g_clients.emplace_back(pNewSession);
 
 				//2. Static Object 초기화 
 				g_clients[m_playerIndex]->SendStaticObjectPacket(g_staticobjs);
@@ -101,7 +106,7 @@ void CAccpetPlayer::AcceptEvent()
 				g_clients[m_playerIndex]->InitNPCData_To_Client();
 
 				//5.accept -> recv 순으로 해서 클라이언트로 부터 패킷을 받을 준비를 한다
-				g_clients[m_playerIndex]->RecvPacket();
+				//g_clients[m_playerIndex]->RecvPacket();
 
 				cout << "클라이언트 [ " << m_playerIndex << " ] 데이터할당 완료. " << endl;
 				++m_playerIndex;
@@ -112,18 +117,21 @@ void CAccpetPlayer::AcceptEvent()
 					m_start_timer = false;
 
 				}
+				
 			}
 			else
 			{
 				cout << "클라이언트 [ " << m_playerIndex << " ] 데이터할당 오류. " << endl;
 			}
-
+			*/
 		}
 
+		/*
 		if (m_server_shutdown == false)
 		{
 			AcceptEvent();
 		}
+		*/
 	});
 
 }
