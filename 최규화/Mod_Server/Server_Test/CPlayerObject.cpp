@@ -1,5 +1,6 @@
 #include "stdafx.h"
 
+
 CPlayerObject::~CPlayerObject()
 {
 	//if (scene != nullptr)
@@ -435,9 +436,81 @@ void CPlayerObject::ProcessPacket(Packet * packet)
 	{
 	case PACKET_PROTOCOL_TYPE::PLAYER_LOGIN:
 	{
-		auto data = reinterpret_cast<CTS_LoginData*>(packet);
+		auto data = reinterpret_cast<CTS_PLAYER_LOGIN*>(packet);
+		m_isReady = data->logindata.isReady;
+		m_myTextureID = data->logindata.texture_id;
 
+		auto ready_flag = false;
+		for (auto& client : g_clients)
+		{
+			if (client->m_isReady)
+				ready_flag = true;
+			else
+				ready_flag = false;
+		}
 
+		if (g_clients.size() >= 1 && ready_flag) // 2명 이상 레디를 눌렀을 시 게임 스타트
+		{
+			STC_LoginData stc_logindata;
+			stc_logindata.isReady = true;
+			stc_logindata.skip_login = true;
+
+			for (auto& client : g_clients)
+			{
+				if (!client->m_connect) continue;
+
+				stc_logindata.my_id = client->m_id;
+				stc_logindata.texture_id = client->m_myTextureID;
+
+				client->SendPacket(reinterpret_cast<Packet*>(&stc_logindata));
+			}
+		}
+
+	}
+	break;
+
+	case PACKET_PROTOCOL_TYPE::SCENE_STATE_CHANGE:
+	{
+		auto data = reinterpret_cast<STC_CHANGE_SCENE*>(packet);
+
+		//씬이 로딩씬이고 로딩씬 레디가 되었을 경우
+		//해당 레디된 클라이언트 초기화
+		if (data->state.my_currScene == GS_LOAD && data->state.my_currSceneReady == true)
+		{
+			g_clients[data->state.my_id]->Init_PlayerInfo();
+
+			g_clients[data->state.my_id]->SendStaticObjectPacket(g_staticobjs);
+
+			g_clients[data->state.my_id]->InitData_To_Client();
+
+			g_clients[data->state.my_id]->InitNPCData_To_Client();
+
+			g_clients[data->state.my_id]->SetIsReadyToPlay(true);
+		}
+
+		/*for (auto& client : g_clients)
+		{
+
+			//1. Client 정보 초기화 및 Client 정보를 담은 벡터에 데이터 추가
+			client->Init_PlayerInfo();
+
+			//2. Static Object 초기화
+			client->SendStaticObjectPacket(g_staticobjs);
+
+			//3. 초기화된 정보를 연결된 클라이언트로 보낸다.
+			client->InitData_To_Client();
+
+			//4. 초기화된 몬스터정보를 연결된 클라이언트로 보낸다.
+			client->InitNPCData_To_Client();
+
+			client->SetIsReadyToPlay(true);
+		}
+		*/
+
+		//클라이언트에 관련된 모든 정보를 초기화 및 클라로 전달함
+		//서버 진행
+		g_timer_queue.AddEvent(0, 0, REGULAR_PACKET_EXCHANGE, true, 0);
+		
 	}
 	break;
 
@@ -462,7 +535,7 @@ void CPlayerObject::ProcessPacket(Packet * packet)
 		if (m_state == PLAYER_STATE::DEAD)
 			break;
 
-		//if (!m_isReadyToPlay) break;
+		if (!m_isReadyToPlay) break;
 
 		auto mdata = reinterpret_cast<STC_CharMove*>(packet);
 		m_dir = mdata->dir;
@@ -477,7 +550,7 @@ void CPlayerObject::ProcessPacket(Packet * packet)
 		if (m_state == PLAYER_STATE::DEAD)
 			break;
 
-		//if (!m_isReadyToPlay) break;
+		if (!m_isReadyToPlay) break;
 
 		m_state = PLAYER_STATE::ROTATE;
 
@@ -515,7 +588,7 @@ void CPlayerObject::ProcessPacket(Packet * packet)
 		if (m_state == PLAYER_STATE::DEAD)
 			break;
 
-		//if (!m_isReadyToPlay) break;
+		if (!m_isReadyToPlay) break;
 
 		m_state = PLAYER_STATE::ATTACK;
 
@@ -536,7 +609,7 @@ void CPlayerObject::ProcessPacket(Packet * packet)
 		if (m_state == DEAD)
 			break;
 
-		//if (!m_isReadyToPlay) break;
+		if (!m_isReadyToPlay) break;
 
 		auto test_data = reinterpret_cast<STC_Test*>(packet);
 
@@ -551,7 +624,7 @@ void CPlayerObject::ProcessPacket(Packet * packet)
 		if (m_state == DEAD)
 			break;
 
-		//if (!m_isReadyToPlay) break;
+		if (!m_isReadyToPlay) break;
 
 		auto ani = reinterpret_cast<STC_CharAnimation*>(packet);
 
@@ -587,7 +660,7 @@ void CPlayerObject::ProcessPacket(Packet * packet)
 		if (m_state == DEAD)
 			break;
 
-		//if (!m_isReadyToPlay) break;
+		if (!m_isReadyToPlay) break;
 
 		auto data = reinterpret_cast<CTS_SKILL_SHIELD*>(packet);
 
@@ -639,7 +712,7 @@ void CPlayerObject::ProcessPacket(Packet * packet)
 	{
 		if (m_state == DEAD) break;
 
-		//if (!m_isReadyToPlay) break;
+		if (!m_isReadyToPlay) break;
 
 		auto data = reinterpret_cast<CTS_SKILL_WAVESHOCK*>(packet);
 
@@ -683,7 +756,7 @@ void CPlayerObject::ProcessPacket(Packet * packet)
 		if (m_state == PLAYER_STATE::DEAD)
 			break;
 
-		//if (!m_isReadyToPlay) break;
+		if (!m_isReadyToPlay) break;
 
 		m_state = PLAYER_STATE::ATTACK;
 
@@ -745,7 +818,7 @@ void CPlayerObject::ProcessPacket(Packet * packet)
 		if (m_state == PLAYER_STATE::DEAD)
 			break;
 
-		//if (!m_isReadyToPlay) break;
+		if (!m_isReadyToPlay) break;
 
 		m_state = PLAYER_STATE::ATTACK;
 

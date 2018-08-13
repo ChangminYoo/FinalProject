@@ -23,11 +23,16 @@ CNpcObject					*g_npcobj;
 
 queue<char>					g_pdir_queue;
 
+//bool						g_start_timer;
+
 int main()
 {
 	try
 	{
 		_wsetlocale(LC_ALL, L"korean");
+
+		//g_start_timer = false;
+
 		CAccpetPlayer server;
 	}
 	catch (const exception& e)

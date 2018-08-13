@@ -35,7 +35,7 @@ void CPhysicEngineWorker::Update()
 		{
 			for (auto& client : g_clients)
 			{	
-				//if (!client->GetIsReadyToPlay()) continue;
+				if (!client->GetIsReadyToPlay()) continue;
 
 				client->PlayerInput(m_deltime);
 				client->GravitySystem(m_deltime);
@@ -165,8 +165,8 @@ void CPhysicEngineWorker::CollisionSystem(double deltime)
 {
 	for (auto& client : g_clients)
 	{
-		//if (client->GetAlive() && client->GetIsReadyToPlay())
-		if (client->GetAlive())
+		//if (client->GetAlive())
+		if (client->GetAlive() && client->GetIsReadyToPlay())
 		{
 			client->Collision(&g_clients, deltime);
 			client->Collision(&g_staticobjs, deltime);

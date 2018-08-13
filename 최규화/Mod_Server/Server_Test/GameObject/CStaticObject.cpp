@@ -1434,7 +1434,7 @@ void CRigidCubeObject::Collision(vector<CPlayerObject*>* clients, double deltime
 {
 	for (auto iter = clients->begin(); iter != clients->end(); ++iter)
 	{
-		//if (!(*iter)->GetIsReadyToPlay()) continue;
+		if (!(*iter)->GetIsReadyToPlay()) continue;
 
 		if ((*iter)->GetPhysicsPoint() != nullptr)
 		{
@@ -1579,7 +1579,7 @@ void CMoveCubeObject::Collision(vector<CPlayerObject*>* clients, double deltime)
 {
 	for (auto iter = clients->begin(); iter != clients->end(); ++iter)
 	{
-		//if (!(*iter)->GetIsReadyToPlay()) continue;
+		if (!(*iter)->GetIsReadyToPlay()) continue;
 
 		if ((*iter)->GetAlive())
 		{

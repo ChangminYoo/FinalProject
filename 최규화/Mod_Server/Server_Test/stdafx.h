@@ -40,6 +40,11 @@ const unsigned short PORT = 31400;
 #define TOTAL_RIGIDBODY_OBJECT (MAX_RIGIDBODY_NUM);
 #define TOTAL_MOVE_OBJECT (MAX_FIRST_MOVEOBJECT_NUM);
 
+#define GS_START	1//시작상태
+#define GS_LOAD		2//로딩상태
+#define GS_PLAY		3//플레이 상태
+#define GS_END		4//엔딩 상태
+
 using namespace std;
 using namespace chrono;
 
@@ -77,6 +82,9 @@ extern queue<char>					g_pdir_queue;
 //io_service는 IO와 통신을 위해서사용 - 전역 하나만 있어도 된다
 extern boost::asio::io_service g_io_service;
 
+//vector<int, int>				g_RoomData;
+//int								g_currRoomCnt;
+//extern bool						  g_start_timer;
 
 
 
