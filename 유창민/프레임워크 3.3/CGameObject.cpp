@@ -67,7 +67,7 @@ void CGameObject::SetShadowMatrix()
 
 	wmatrix *= XMMatrixRotationQuaternion(quater);
 	//wmatrix *= XMMatrixRotationY(0.5f*MMPE_PI);
-	wmatrix *= XMMatrixScaling(1.0f, 1.0f, 1.0f);
+	wmatrix *= XMMatrixScaling(1.0f, 1.5f, 1.0f);
 	wmatrix *= XMMatrixTranslationFromVector(pos);
 
 
