@@ -300,3 +300,13 @@ CMaterial MeteorObject::Mat;
 unordered_map<string, unique_ptr<CTexture>> MeteorObject::Textures;//텍스처들을 저장함
 CMesh MeteorObject::Mesh;//오로지 한번만 만들어짐
 ComPtr<ID3D12DescriptorHeap> MeteorObject::SrvDescriptorHeap;//텍스처 용 힙
+// --------------------------------------------------------------------------------------
+bool TitleObject::CreateMesh;//최초로 false며 메쉬를 만든후 true가된다.
+unordered_map<string, unique_ptr<CTexture>> TitleObject::Textures;//텍스처들을 저장함
+CMesh TitleObject::Mesh;//오로지 한번만 만들어짐
+ComPtr<ID3D12DescriptorHeap> TitleObject::SrvDescriptorHeap;//텍스처 용 힙
+//--------------------------------------------------------------------------------------
+bool PointObject1::CreateMesh = false;
+unordered_map<string, unique_ptr<CTexture>> PointObject1::Textures;
+CMesh PointObject1::Mesh;
+ComPtr<ID3D12DescriptorHeap> PointObject1::SrvDescriptorHeap;

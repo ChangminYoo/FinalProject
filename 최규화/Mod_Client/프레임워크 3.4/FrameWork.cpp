@@ -300,7 +300,7 @@ LRESULT FrameWork::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		
 
 	//윈도우 사이즈가 바뀔때 마다 UI의 위치를 달리해야한다. 물론 틱함수를 만들어도 되지만, 굳이 매틱마다 불릴필요는 없으니까 이렇게 처리하자.
-		if (scene != NULL && scene->GetGameState()==GS_PLAY)
+		if (scene != NULL)
 		{
 			scene->mHeight = mClientHeight;
 			scene->mWidth = mClientWidth;
@@ -314,25 +314,126 @@ LRESULT FrameWork::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		
 					scene->SkillCoolBar[i]->ObjData.Scale = mClientWidth / 10;
 					scene->SkillCoolBar[i]->CenterPos.x = i * mClientWidth / 8 - (mClientWidth / 8)*1.5;
-					scene->SkillCoolBar[i]->CenterPos.y = 0.98*-mClientHeight / 2;
+					scene->SkillCoolBar[i]->CenterPos.y = 0.98f*-mClientHeight / 2;
 
 					scene->SkillFrameUI[i]->ObjData.Scale = mClientWidth / 10;
 					scene->SkillFrameUI[i]->CenterPos.x = i * mClientWidth / 8 - (mClientWidth / 8)*1.5;
-					scene->SkillFrameUI[i]->CenterPos.y = 0.9*-mClientHeight / 2;
+					scene->SkillFrameUI[i]->CenterPos.y = 0.9f*-mClientHeight / 2;
 					
 
 					scene->SkillUI[i]->ObjData.Scale = mClientWidth / 12;
 					scene->SkillUI[i]->CenterPos.x = i * mClientWidth / 8 - (mClientWidth / 8)*1.5;
-					scene->SkillUI[i]->CenterPos.y = 0.9*-mClientHeight / 2;
+					scene->SkillUI[i]->CenterPos.y = 0.9f*-mClientHeight / 2;
 				}
-		}
-		else if (scene != NULL && scene->GetGameState() == (GS_START || GS_LOAD))
-		{
+			scene->AimUI->ObjData.Scale = mClientWidth / 40.0f;
+
+			scene->Time1->ObjData.Scale = mClientWidth / 15;
+			scene->Time1->ObjData.CustomData1.y = mClientHeight / 15;
+			scene->Time1->CenterPos.x = mClientWidth / 8 - mClientWidth / 8 * 1.5f;
+			scene->Time1->CenterPos.y = 0.93f*mClientHeight / 2;
+
+			scene->Time2->ObjData.Scale = mClientWidth / 15;
+			scene->Time2->ObjData.CustomData1.y = mClientHeight / 15;
+			scene->Time2->CenterPos.x = mClientWidth / 8 - mClientWidth / 8 * 1.0f;
+			scene->Time2->CenterPos.y = 0.93f*mClientHeight / 2;
+
+			scene->Time3->ObjData.Scale = mClientWidth / 15;
+			scene->Time3->ObjData.CustomData1.y = mClientHeight / 15;
+			scene->Time3->CenterPos.x = mClientWidth / 8 - mClientWidth / 8 * 0.5f;
+			scene->Time3->CenterPos.y = 0.93f*mClientHeight / 2;
+
+			scene->MyPoint1->ObjData.Scale = mClientWidth / 30;
+			scene->MyPoint1->ObjData.CustomData1.y = mClientHeight / 10;
+			scene->MyPoint1->CenterPos.x = -(mClientWidth / 2)*0.0625 - (mClientWidth / 2)*0.625;
+			scene->MyPoint1->CenterPos.y = -0.9f*mClientHeight / 2;
+
+			scene->MyPoint2->ObjData.Scale = mClientWidth / 30;
+			scene->MyPoint2->ObjData.CustomData1.y = mClientHeight / 10;
+			scene->MyPoint2->CenterPos.x = -(mClientWidth / 2)*0.625;
+			scene->MyPoint2->CenterPos.y = -0.9f*mClientHeight / 2;
+
+			scene->MyPoint3->ObjData.Scale = mClientWidth / 30;
+			scene->MyPoint3->ObjData.CustomData1.y = mClientHeight / 10;
+			scene->MyPoint3->CenterPos.x = (mClientWidth / 2)*0.0625 - (mClientWidth / 2)*0.625;
+			scene->MyPoint3->CenterPos.y = -0.9f*mClientHeight / 2;
+
+
+
+
 			if (scene->BackGround != NULL)
 			{
 				scene->BackGround->ObjData.Scale = mClientWidth;
 				scene->BackGround->ObjData.CustomData1.y = mClientHeight;
 
+				scene->CharacterSelect->ObjData.Scale = mClientWidth / 5;
+				scene->CharacterSelect->ObjData.CustomData1.y = mClientHeight * 0.333f;
+
+				if (scene->CharacterSelect->ObjData.CustomData1.z = 1)
+				{
+					scene->CharacterSelect->CenterPos.x = 0.4f * (-mClientWidth * 0.5f);
+					scene->CharacterSelect->CenterPos.y = 0;
+
+				}
+				else if (scene->CharacterSelect->ObjData.CustomData1.z = 2)
+				{
+					scene->CharacterSelect->CenterPos.x = 0.2f * (-mClientWidth * 0.5f);
+					scene->CharacterSelect->CenterPos.y = 0;
+
+				}
+				else if (scene->CharacterSelect->ObjData.CustomData1.z = 3)
+				{
+					scene->CharacterSelect->CenterPos.x = 0;
+					scene->CharacterSelect->CenterPos.y = 0;
+
+				}
+				else if (scene->CharacterSelect->ObjData.CustomData1.z = 4)
+				{
+					scene->CharacterSelect->CenterPos.x = 0.4f * (mClientWidth* 0.5f);
+					scene->CharacterSelect->CenterPos.y = 0;
+
+				}
+				else if (scene->CharacterSelect->ObjData.CustomData1.z = 5)
+				{
+					scene->CharacterSelect->CenterPos.x = 0.8f * (mClientWidth* 0.5f);
+					scene->CharacterSelect->CenterPos.y = 0;
+
+				}
+				else if (scene->CharacterSelect->ObjData.CustomData1.z = 6)
+				{
+					scene->CharacterSelect->CenterPos.x = 0.8f * (-mClientWidth * 0.5f);
+					scene->CharacterSelect->CenterPos.y = (-mClientHeight * 1 / 3);
+
+				}
+				else if (scene->CharacterSelect->ObjData.CustomData1.z = 7)
+				{
+					scene->CharacterSelect->CenterPos.x = 0.4f * (-mClientWidth * 0.5f);
+					scene->CharacterSelect->CenterPos.y = (-mClientHeight * 1 / 3);
+
+				}
+				else if (scene->CharacterSelect->ObjData.CustomData1.z = 8)
+				{
+					scene->CharacterSelect->CenterPos.x = 0;
+					scene->CharacterSelect->CenterPos.y = (-mClientHeight * 1 / 3);
+
+				}
+				else if (scene->CharacterSelect->ObjData.CustomData1.z = 9)
+				{
+					scene->CharacterSelect->CenterPos.x = 0.4f * (mClientWidth* 0.5f);
+					scene->CharacterSelect->CenterPos.y = (-mClientHeight * 1 / 3);
+
+				}
+				else if (scene->CharacterSelect->ObjData.CustomData1.z = 10)
+				{
+					scene->CharacterSelect->CenterPos.x = 0.8f * (mClientWidth* 0.5f);
+					scene->CharacterSelect->CenterPos.y = (-mClientHeight * 1 / 3);
+
+				}
+
+			}
+			if (scene->Title != NULL)
+			{
+				scene->Title->ObjData.Scale = mClientWidth;
+				scene->Title->ObjData.CustomData1.y = mClientHeight;
 			}
 		}
 		if (Device)

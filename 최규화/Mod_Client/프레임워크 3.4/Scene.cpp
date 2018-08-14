@@ -41,10 +41,17 @@ Scene::~Scene()
 		delete AimUI;
 	if (BackGround != NULL)
 		delete BackGround;
+	
 	if (CharacterSelect != NULL)
 		delete CharacterSelect;
+	//while(CharacterSelect.size())
+	//{
+	//	delete CharacterSelect.back();
+	//	CharacterSelect.pop_back();
+	//}
 
-		delete CharacterSelect;
+	if (Title != NULL)
+		delete Title;
 	for (int i = 0; i < 4; i++)
 		if (SkillFrameUI[i] != NULL)
 			delete SkillFrameUI[i];
@@ -59,6 +66,14 @@ Scene::~Scene()
 		delete Time2;
 	if (Time3 != NULL)
 		delete Time3;
+
+	if (MyPoint1 != NULL)
+		delete MyPoint1;
+	if (MyPoint2 != NULL)
+		delete MyPoint2;
+	if (MyPoint3 != NULL)
+		delete MyPoint3;
+
 	for (int i = 0; i < 4; i++)
 		if(SkillCoolBar[i]!=NULL)
 			delete SkillCoolBar[i];
@@ -124,6 +139,15 @@ Scene::~Scene()
 
 void Scene::SceneState()
 {
+	if (GAMESTATE == GS_TITLE)
+	{
+		if (Title->TexStride >= 4.0f)
+		{
+			SetGameState(GS_START);
+		}
+
+	}
+
 	if (GAMESTATE == GS_START)//시작시 생성자에서 UI등 기본적인것은 거기서 로드함.
 	{
 		if (GetAsyncKeyState(VK_SPACE) & 0x8000 && GetFocus())
@@ -207,14 +231,14 @@ void Scene::SceneState()
 	
 		//Player->m_async_client->m_lobbyData는 구조체 vector
 		//Player->m_async_client->m_lobbyData에 id 랑 texture_id(	CharacterSelect->ObjData.CustomData1.z (0 ~ 9) 값이 들어있음)
-		/*
-		if (!Player->m_async_client->m_lobbyData.empty())
+		
+		/*if (!Player->m_async_client->m_lobbyData.empty())
 		{
 			for (auto& data : Player->m_async_client->m_lobbyData)
 			{
-				for (auto& select : CharacterSelectVector)
+				for (auto& select : CharacterSelect)
 				{
-					if (data.my_id == select.id)
+					if (data.my_id == select->TexStride)
 					{
 						switch (data.textureID + 1)
 						{
@@ -226,8 +250,8 @@ void Scene::SceneState()
 					}
 				}
 			}
-		}
-		*/
+		}*/
+		
 
 	}
 	else if (GAMESTATE == GS_LOAD)
@@ -627,6 +651,18 @@ void Scene::CreateGameObject()
 	//플레이어의 오브젝트 설정. 이건 나중에 바꿔야함.
 	Player->SetPlayer(DynamicObject.front());
 	Player->PlayerObject->Blending = false;
+	
+	
+	//Peasant:  light, shield, padong, dice
+	//Peggy : heavy, padong, shield, hammer
+	//Ms.White : light, heavy, shield, dice
+	//Purple : light, padong, dice, hammer
+	//Lara : heavy, padong, shield, hammer
+	//Jack : light, padong, shield, hammer
+	//Miner : light, shield, dice, hammer
+	//Robin : light, heavy, padong, dice
+	//Blazer : heavy, shield, dice, hammer
+	//Ronney : light, heavy, shield, hammer
 
 	if (CharacterSelect->ObjData.CustomData1.z == 1)
 	{
@@ -634,6 +670,12 @@ void Scene::CreateGameObject()
 		Player->PlayerObject->NTextureName = "Female Brown Casual N";
 		Player->PlayerObject->TexOff = CharacterSelect->ObjData.CustomData1.z - 1;
 		Player->PlayerObject->NTexOff = Player->PlayerObject->TexOff + 10;
+
+		//Player->skilldata.Skills[0] = 0;
+		//Player->skilldata.Skills[1] = 5;
+		//Player->skilldata.Skills[2] = 4;
+		//Player->skilldata.Skills[3] = 3;
+
 	}
 	else if (CharacterSelect->ObjData.CustomData1.z == 2)
 	{
@@ -641,6 +683,11 @@ void Scene::CreateGameObject()
 		Player->PlayerObject->NTextureName = "Female Black Knight N";
 		Player->PlayerObject->TexOff = CharacterSelect->ObjData.CustomData1.z - 1;
 		Player->PlayerObject->NTexOff = Player->PlayerObject->TexOff + 10;
+
+		//Player->skilldata.Skills[0] = 1;
+		//Player->skilldata.Skills[1] = 4;
+		//Player->skilldata.Skills[2] = 5;
+		//Player->skilldata.Skills[3] = 6;
 	}
 	else if (CharacterSelect->ObjData.CustomData1.z == 3)
 	{
@@ -649,6 +696,11 @@ void Scene::CreateGameObject()
 		Player->PlayerObject->TexOff = CharacterSelect->ObjData.CustomData1.z - 1;
 		Player->PlayerObject->NTexOff = Player->PlayerObject->TexOff + 10;
 
+		//Player->skilldata.Skills[0] = 0;
+		//Player->skilldata.Skills[1] = 1;
+		//Player->skilldata.Skills[2] = 5;
+		//Player->skilldata.Skills[3] = 3;
+
 	}
 	else if (CharacterSelect->ObjData.CustomData1.z == 4)
 	{
@@ -656,6 +708,11 @@ void Scene::CreateGameObject()
 		Player->PlayerObject->NTextureName = "Female White Knight N";
 		Player->PlayerObject->TexOff = CharacterSelect->ObjData.CustomData1.z - 1;
 		Player->PlayerObject->NTexOff = Player->PlayerObject->TexOff + 10;
+
+		//Player->skilldata.Skills[0] = 0;
+		//Player->skilldata.Skills[1] = 4;
+		//Player->skilldata.Skills[2] = 3;
+		//Player->skilldata.Skills[3] = 6;
 	}
 	else if (CharacterSelect->ObjData.CustomData1.z == 5)
 	{
@@ -664,6 +721,11 @@ void Scene::CreateGameObject()
 
 		Player->PlayerObject->TexOff = CharacterSelect->ObjData.CustomData1.z - 1;
 		Player->PlayerObject->NTexOff = Player->PlayerObject->TexOff + 10;
+
+		//Player->skilldata.Skills[0] = 1;
+		//Player->skilldata.Skills[1] = 4;
+		//Player->skilldata.Skills[2] = 5;
+		//Player->skilldata.Skills[3] = 6;
 	}
 	else if (CharacterSelect->ObjData.CustomData1.z == 6)
 	{
@@ -673,6 +735,11 @@ void Scene::CreateGameObject()
 
 		Player->PlayerObject->TexOff = CharacterSelect->ObjData.CustomData1.z - 1;
 		Player->PlayerObject->NTexOff = Player->PlayerObject->TexOff + 10;
+
+		//Player->skilldata.Skills[0] = 0;
+		//Player->skilldata.Skills[1] = 4;
+		//Player->skilldata.Skills[2] = 5;
+		//Player->skilldata.Skills[3] = 6;
 	}
 	else if (CharacterSelect->ObjData.CustomData1.z == 7)
 	{
@@ -681,6 +748,12 @@ void Scene::CreateGameObject()
 
 		Player->PlayerObject->TexOff = CharacterSelect->ObjData.CustomData1.z - 1;
 		Player->PlayerObject->NTexOff = Player->PlayerObject->TexOff + 10;
+
+		//Player->skilldata.Skills[0] = 0;
+		//Player->skilldata.Skills[1] = 5;
+		//Player->skilldata.Skills[2] = 3;
+		//Player->skilldata.Skills[3] = 6;
+
 	}
 	else if (CharacterSelect->ObjData.CustomData1.z == 8)
 	{
@@ -688,6 +761,11 @@ void Scene::CreateGameObject()
 		Player->PlayerObject->NTextureName = "Male Black Archer N";
 		Player->PlayerObject->TexOff = CharacterSelect->ObjData.CustomData1.z - 1;
 		Player->PlayerObject->NTexOff = Player->PlayerObject->TexOff + 10;
+
+		//Player->skilldata.Skills[0] = 0;
+		//Player->skilldata.Skills[1] = 1;
+		//Player->skilldata.Skills[2] = 4;
+		//Player->skilldata.Skills[3] = 3;
 	}
 	else if (CharacterSelect->ObjData.CustomData1.z == 9)
 	{
@@ -695,6 +773,11 @@ void Scene::CreateGameObject()
 		Player->PlayerObject->NTextureName = "Male Fire N";
 		Player->PlayerObject->TexOff = CharacterSelect->ObjData.CustomData1.z - 1;
 		Player->PlayerObject->NTexOff = Player->PlayerObject->TexOff + 10;
+
+		//Player->skilldata.Skills[0] = 1;
+		//Player->skilldata.Skills[1] = 5;
+		//Player->skilldata.Skills[2] = 3;
+		//Player->skilldata.Skills[3] = 6;
 	}
 	else if (CharacterSelect->ObjData.CustomData1.z == 10)
 	{
@@ -702,7 +785,18 @@ void Scene::CreateGameObject()
 		Player->PlayerObject->NTextureName = "Male White King N";
 		Player->PlayerObject->TexOff = CharacterSelect->ObjData.CustomData1.z - 1;
 		Player->PlayerObject->NTexOff = Player->PlayerObject->TexOff + 10;
+
+		//Player->skilldata.Skills[0] = 0;
+		//Player->skilldata.Skills[1] = 1;
+		//Player->skilldata.Skills[2] = 5;
+		//Player->skilldata.Skills[3] = 6;
 	}
+
+	//for (int i = 0; i < 4; i++)
+	//{
+	//	SkillUI[i]->TexOff = Player->skilldata.Skills[i];
+	//	((CoolBarObject*)SkillCoolBar[i])->MaxCoolTime = Player->skilldata.SkillsMaxCoolTime[Player->skilldata.Skills[i]];
+	//}
 }
 
 void Scene::CreateUI()
@@ -714,8 +808,9 @@ void Scene::CreateUI()
 
 	CharacterSelect = new CharacterSelectObject(device, commandlist, NULL, NULL, XMFLOAT4(0, 0, 0, 0));
 
-
 	SelectBar = new SelectBarObject(device, commandlist, NULL, NULL, XMFLOAT4(0 * 100 - 150, 0.9*-mHeight / 2, 0, 0));
+	
+	Title = new TitleObject(device, commandlist, NULL, NULL, XMFLOAT4(0, 0, 0, 0));
 
 	
 	for (int i = 0; i < 4; i++)
@@ -756,6 +851,17 @@ void Scene::CreateUI()
 		Time2 = new TimerObject2(device, commandlist, NULL, NULL, XMFLOAT4(10, 0.90f*mHeight / 2, 0, 0));
 		Time3 = new TimerObject3(device, commandlist, NULL, NULL, XMFLOAT4(50, 0.90f*mHeight / 2, 0, 0));
 
+		MyPoint1 = new PointObject1(device, commandlist, NULL, NULL, XMFLOAT4(-25 - (mWidth / 2)*0.625, -0.9f*mHeight / 2, 0, 0));
+		MyPoint1->ObjData.Scale = mWidth / 30;
+		MyPoint1->ObjData.CustomData1.y = mHeight / 10;
+		MyPoint2 = new PointObject1(device, commandlist, NULL, NULL, XMFLOAT4(-(mWidth / 2)*0.625, -0.9f*mHeight / 2, 0, 0));
+		MyPoint2->ObjData.Scale = mWidth / 30;
+		MyPoint2->ObjData.CustomData1.y = mHeight / 10;
+
+		MyPoint3 = new PointObject1(device, commandlist, NULL, NULL, XMFLOAT4(25 - (mWidth / 2)*0.625, -0.9f*mHeight / 2, 0, 0));
+		MyPoint3->ObjData.Scale = mWidth / 30;
+		MyPoint3->ObjData.CustomData1.y = mHeight / 10;
+
 	}
 
 }
@@ -775,6 +881,7 @@ void Scene::UITick(const GameTimer & gt)
 		if (resize)
 		{
 			SelectBar->ObjData.Scale = mWidth / 10;
+			CharacterSelect->ObjData.Scale = mWidth * 0.2f;
 			resize = false;
 		}
 
@@ -806,6 +913,12 @@ void Scene::UITick(const GameTimer & gt)
 			Time1->TexStride += 1;
 		}
 		*/
+
+
+
+		//포인트 증가 
+		//MyPoint2->TexStride = (Player->pointrank.Point % 100) / 10;
+		//MyPoint1->TexStride = (Player->pointrank.Point / 100);
 	}
 }
 
@@ -870,16 +983,21 @@ void Scene::Render(const GameTimer& gt)
 				//다시 원상태로 바꿔줌. 이걸 안하면 피킹이 엉망이됨. 
 				Player->Camera.UpdateConstantBuffer(commandlist);
 			}
-			else if (GetGameState() == GS_START || GetGameState()==GS_LOAD)
+			else if (GetGameState() == GS_TITLE || GetGameState() == GS_START || GetGameState() == GS_LOAD)
 			{
 				Player->Camera.UpdateConstantBufferOrtho(commandlist);
 				Shaders->SetBillboardShader(commandlist);
-				if (GetGameState() == GS_START)
-				{
-					CharacterSelect->Render(commandlist, gt);
 
+				if (GetGameState() == GS_START || GetGameState() == GS_LOAD)
+				{
+					if (GetGameState() == GS_START)
+						CharacterSelect->Render(commandlist, gt);
+
+					BackGround->Render(commandlist, gt);
 				}
-				BackGround->Render(commandlist, gt);
+				if (GetGameState() == GS_TITLE)
+					Title->Render(commandlist, gt);
+
 				Player->Camera.UpdateConstantBuffer(commandlist);
 			}
 	}

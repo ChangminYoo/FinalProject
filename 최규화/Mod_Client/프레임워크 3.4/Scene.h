@@ -9,6 +9,7 @@
 using Microsoft::WRL::ComPtr;
 
 #define LIGHT_MAX 10
+#define GS_TITLE 0 
 #define GS_START 1//시작상태
 #define GS_LOAD 2//로딩상태
 #define GS_PLAY 3//플레이 상태
@@ -39,7 +40,7 @@ public:
 
 	//게임오브젝트, 카메라,세이더오브젝트,라이트,샘플러 포함해야댐	
 	int nShader;//세이더 갯수
-	int GAMESTATE = GS_START;//게임상태.
+	int GAMESTATE = GS_TITLE;//게임상태.
 	bool FirstLoad = false;//첫 로딩인가?
 
 	HWND hWnd;
@@ -96,6 +97,11 @@ public:
 	CGameObject* Time1 = NULL;
 	CGameObject* Time2 = NULL;
 	CGameObject* Time3 = NULL;
+	CGameObject* Title = NULL;
+
+	CGameObject* MyPoint1 = NULL;
+	CGameObject* MyPoint2 = NULL;
+	CGameObject* MyPoint3 = NULL;
 
 	CGameObject* EmptyObject = nullptr;
 
