@@ -29,6 +29,7 @@ public:
 	CNpcObject(int id, int type);
 	CNpcObject();
 	FSM *fsm{ nullptr };
+	bool            m_respawn_state{ false };
 
 	virtual void    UpdateDataForPacket() override;
 	virtual void	GetDamaged(int damage);

@@ -125,9 +125,34 @@ void CTimerWorker::ProcessPacket(event_type * et)
 		}
 		break;
 
-		case DEAD_TO_ALIVE:
+		case PLAYER_RESPAWN:
 		{
+			//캐릭터 m_alive = false가 되어 죽으면 5초뒤에 리스폰 상태를 다루는 이곳에 진입한다.
+			auto my_id = et->master_id;
 
+			g_clients[my_id]->SetCenterPos4f(g_clients[my_id]->GetOriginCenterPos4f());
+			g_clients[my_id]->xmf4_pos = g_clients[my_id]->GetOriginCenterPos4f();
+			g_clients[my_id]->UpdatePhysicsCenterPos();
+
+			g_clients[my_id]->GetPhysicsPoint()->SetVelocity(0.f, 0.f, 0.f);
+			g_clients[my_id]->SetMyAbility({ 100, 100, 10, 0, 1, 100.0 });
+			g_clients[my_id]->SetMyAnimation(Ani_State::Idle);
+			g_clients[my_id]->SetAlive(true);
+			
+			g_clients[my_id]->m_respawn_state = false;
+			g_clients[my_id]->UpdateDataForPacket();
+			
+			STC_RESPAWN_DRAW stc_draw_state;
+			stc_draw_state.stc_draw_state.drawobj = true;
+			stc_draw_state.stc_draw_state.my_id = my_id;
+
+			cout << "Respawn ID: " << static_cast<int>(my_id) << "\n";
+			for (auto& client : g_clients)
+			{ 
+				if (!client->GetConnectState()) continue;
+				client->SendPacket(reinterpret_cast<Packet*>(&stc_draw_state));
+			}
+				
 		}
 		break;
 
@@ -148,7 +173,7 @@ void CTimerWorker::ProcessPacket(event_type * et)
 			//------------- 1초에 18번정도 보냄 - 20번x, 시간누적오차 때문에 ---------------//
 
 			//0. MoveObject 
-			for (auto& mvobj : g_moveobjs)
+			for (const auto& mvobj : g_moveobjs)
 			{
 				//if (!mvobj->GetIsCreateFirst())
 				//{
@@ -159,7 +184,8 @@ void CTimerWorker::ProcessPacket(event_type * et)
 
 					for (const auto& client : g_clients)
 					{
-						if (client->GetIsAI()) continue;
+						if (!client->GetConnectState()) continue;
+
 						client->SendPacket(reinterpret_cast<Packet*>(&stc_move_object_no_create));
 					}
 				//}
@@ -193,6 +219,9 @@ void CTimerWorker::ProcessPacket(event_type * et)
 			STC_RigidbodyObject stc_rigidbody_object;
 			for (const auto& client : g_clients)
 			{
+				//클라이언트가 접속이 끊겼으면 정보를 보내지 않는다 (리즈드 바디 오브젝트)
+				if (!client->GetConnectState()) continue;
+
 				for (const auto& rigid : g_rigidobjs)
 				{
 					stc_rigidbody_object.rbobj_data = move(rigid->GetRigidbodyData());
@@ -253,13 +282,69 @@ void CTimerWorker::ProcessPacket(event_type * et)
 				}
 			}
 
-			//2. All Clients (Player)
+			//2. All Clients (Player)  // 캐릭터에게 스테이지 시간정보 및 리스폰 정보를 보냄
+			STC_STAGE_TIMER   stc_stage_timer;
 			STC_CharCurrState stc_char_state;
-			for(auto myclient : g_clients)
+			for (const auto& my_client : g_clients)
 			{
-				if (!myclient->GetConnectState()) continue;
+				//클라이언트가 접속이 끊겼으면 정보를 보내지 않는다(MOVE_OBJECT, CLIENT)
+				if (!my_client->GetConnectState()) continue;
 
-				//내 클라 
+				//----------------------------------Character Respawn Data---------------------------------------//
+		
+				if (my_client->GetAlive() == false && my_client->m_respawn_state == false)
+				{
+					my_client->m_respawn_state = true;
+					my_client->SetMyAnimation(Ani_State::Dead);
+
+					//server to client packet data
+					my_client->m_pdata.ani = Ani_State::Dead;
+					my_client->m_pdata.respawn_cnt = 1;				//respawn_cnt 가 1일 때만 실행
+
+					g_timer_queue.AddEvent(et->id, Player_RespawnTime, PLAYER_RESPAWN, false, my_client->GetID());
+				}
+
+				//--------------------My Client Data to Other Client (Including My Client data)------------------//
+
+				for (const auto& other_client : g_clients)
+				{
+					stc_char_state.player_data = move(my_client->m_pdata);
+					other_client->SendPacket(reinterpret_cast<Packet*>(&stc_char_state));
+				}
+
+				//---------------------------------------------------------------Move Object--------------------//
+
+				if (!my_client->GetFirstMoveObjects())
+				{
+					for (const auto& mvobj : g_moveobjs)
+					{
+						STC_MoveObject stc_move_object;
+						stc_move_object.mvobj_data = move(mvobj->GetMoveObjectData());
+						my_client->SendPacket(reinterpret_cast<Packet*>(&stc_move_object));
+					}
+				}
+				my_client->SetFirstMoveObjects(true);
+
+				//-------------------------------------------------------------------Stage Timer----------------//
+
+				stc_stage_timer.data.stage_time = m_deltime;
+				my_client->SendPacket(reinterpret_cast<Packet*>(&stc_stage_timer));
+
+				if (my_client->m_pdata.respawn_cnt == 1)
+					my_client->m_pdata.respawn_cnt = 0;
+
+			}
+
+
+			//2. All Clients (Player)  // 캐릭터 상태 및 스테이지 타이머 패킷을 주기적으로 보냄
+		/*	STC_CharCurrState stc_char_state;
+			for(const auto& myclient : g_clients)
+			{
+				//클라이언트가 접속이 끊겼으면 정보를 보내지 않는다(MOVE_OBJECT, CLIENT)
+				if (!myclient->GetConnectState()) continue;
+				
+				//---------------------------------------------------------------Move Object--------------------//
+
 				if (!myclient->GetFirstMoveObjects())
 				{
 					for (const auto& mvobj : g_moveobjs)
@@ -271,24 +356,29 @@ void CTimerWorker::ProcessPacket(event_type * et)
 				}
 				myclient->SetFirstMoveObjects(true);
 
-				for (auto otherclient : g_clients)
+				//---------------------------------------------------------------Move Object--------------------//
+
+				//------------------------------------------------------All Client Data to My Client----------//
+				for (const auto& otherclient : g_clients)
 				{
 					stc_char_state.player_data = move(otherclient->m_pdata);
 					myclient->SendPacket(reinterpret_cast<Packet*>(&stc_char_state));
 				}
-				
+
+				//------------------------------------------------------My Client data to Other Client----------//
 			}
+			*/
 
 
 			//3. All NPCs (Non-Player)
 			STC_NpcMonsterCurrState stc_mnpcs_state;
-			for (auto npc_monster : g_npcs)
+			for (const auto& npc_monster : g_npcs)
 			{
-				if (!npc_monster->GetMyBasicPacketData().connect) continue;
-				//if (!npc_monster->GetAlive()) continue;
-
-				for (auto client : g_clients)
+				for (const auto& client : g_clients)
 				{
+					//클라이언트가 접속이 끊겼으면 정보를 보내지 않는다(NPC)
+					if (!client->GetConnectState()) continue;
+
 					stc_mnpcs_state.npc_data = move(npc_monster->GetMyBasicPacketData());
 					client->SendPacket(reinterpret_cast<Packet*>(&stc_mnpcs_state));
 				}
@@ -304,20 +394,7 @@ void CTimerWorker::ProcessPacket(event_type * et)
 
 				if (bullet->GetAlive())
 				{
-					//서버->클라 불렛 구조체 
-					/*
-					STC_BulletObject_Info stc_bullet;
-					stc_bullet.pos4f = bullet->m_bulldata.pos4f;
-					stc_bullet.rot4f = bullet->m_bulldata.rot4f;
-					stc_bullet.endpoint = bullet->m_bulldata.endpoint;
-					stc_bullet.master_id = bullet->m_bulldata.master_id;
-					stc_bullet.my_id = bullet->m_bulldata.my_id;
-					stc_bullet.type = bullet->m_bulldata.type;
-					stc_bullet.alive = bullet->m_bulldata.alive;
-					stc_bullet.degree = bullet->m_bulldata.degree;
-					*/
-					//
-
+			
 					//1. NPC Bullet
 					if (bullet->GetObjectType() == protocol_NpcStoneBullet)
 					{
@@ -332,8 +409,10 @@ void CTimerWorker::ProcessPacket(event_type * et)
 							<< stc_imp_bullet.npc_bulldata.pos4f.y << ", " << stc_imp_bullet.npc_bulldata.pos4f.z << ", " << stc_imp_bullet.npc_bulldata.pos4f.w << "\n";
 						*/
 
-						for (auto client : g_clients)
+						for (const auto& client : g_clients)
 						{
+							if (!client->GetConnectState()) continue;
+
 							client->SendPacket(reinterpret_cast<Packet*>(&stc_imp_bullet));
 						}
 					}
@@ -345,8 +424,10 @@ void CTimerWorker::ProcessPacket(event_type * et)
 							STC_SKILL_HAMMERBULLET stc_skill_hammer_bullet;
 							stc_skill_hammer_bullet.skill_data = bullet->GetChangedHammerBulletState();
 
-							for (auto client : g_clients)
+							for (const auto& client : g_clients)
 							{
+								if (!client->GetConnectState()) continue;
+
 								client->SendPacket(reinterpret_cast<Packet*>(&stc_skill_hammer_bullet));
 							}
 						}
@@ -357,8 +438,10 @@ void CTimerWorker::ProcessPacket(event_type * et)
 							stc_skill_dicestrike.is_first = bullet->GetIsCreateFirst();
 							stc_skill_dicestrike.lookvector = bullet->GetDicestrikeOffLookvector();
 
-							for (auto client : g_clients)
+							for (const auto& client : g_clients)
 							{
+								if (!client->GetConnectState()) continue;
+
 								client->SendPacket(reinterpret_cast<Packet*>(&stc_skill_dicestrike));
 							}
 						}
@@ -368,8 +451,10 @@ void CTimerWorker::ProcessPacket(event_type * et)
 							stc_attack.bull_data = move(bullet->GetChangedBulletState());
 							stc_attack.is_first = bullet->GetIsCreateFirst();
 
-							for (auto client : g_clients)
+							for (const auto& client : g_clients)
 							{
+								if (!client->GetConnectState()) continue;
+
 								client->SendPacket(reinterpret_cast<Packet*>(&stc_attack));
 							}
 

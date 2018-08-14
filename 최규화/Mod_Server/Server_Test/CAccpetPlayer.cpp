@@ -83,6 +83,7 @@ void CAccpetPlayer::AcceptEvent()
 
 			g_clients[m_playerIndex]->RecvPacket();
 
+			++m_playerIndex;
 			if (m_server_shutdown == false)
 			{
 				AcceptEvent();
@@ -150,15 +151,12 @@ void CAccpetPlayer::MainLogic()
 	//2. 물리효과와 충돌처리를 하는 물리엔진관련 작업을 하는 Physics_Thread
 	m_pWorkerThread.emplace_back(new thread{ [&]()
 	{ 
-		g_physics_worker.CheckPrevTime();
 		g_physics_worker.Update();   
 	} });
 
 	//3. 주기적으로 작업이 필요한 것들을 처리하는 Timer_Thread 
 	m_pWorkerThread.emplace_back(new thread{ [&]()
 	{ 
-		g_timer_queue.CheckPrevTime();
-		g_timer_queue.AddEvent(0, 0, REGULAR_PACKET_EXCHANGE, true, 0);
 		g_timer_queue.TimerThread(); 
 
 	} });

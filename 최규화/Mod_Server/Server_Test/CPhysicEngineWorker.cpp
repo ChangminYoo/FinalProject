@@ -16,6 +16,8 @@ void CPhysicEngineWorker::Update()
 
 	while (true)
 	{
+		if (!g_start_physics) continue;
+
 		m_currtime = high_resolution_clock::now();
 		__int64 local_deltime = duration_cast<microseconds>(m_currtime - m_prevtime).count(); // 10의 -6
 		m_deltime = local_deltime / 1000000.0;
@@ -23,6 +25,7 @@ void CPhysicEngineWorker::Update()
 
 		// 0.00000028
 		//2838 
+		
 		for (auto& mvobj : g_moveobjs)
 		{
 			mvobj->Tick(m_deltime);
@@ -36,6 +39,7 @@ void CPhysicEngineWorker::Update()
 			for (auto& client : g_clients)
 			{	
 				if (!client->GetIsReadyToPlay()) continue;
+				if (!client->GetConnectState()) continue;
 
 				client->PlayerInput(m_deltime);
 				client->GravitySystem(m_deltime);
@@ -84,6 +88,7 @@ void CPhysicEngineWorker::Update()
 		for (auto& bullet : g_bullets)
 		{
 			if (!bullet->GetAlive()) continue;
+			if (!g_clients[bullet->GetBulletMasterID()]->GetAlive()) continue;
 
 			bullet->Tick(m_deltime);
 			bullet->AfterGravitySystem();
@@ -99,7 +104,7 @@ void CPhysicEngineWorker::Update()
 		// alive 가 false인 오브젝트들 지워주기 	
 		for (auto iter = g_bullets.begin(); iter != g_bullets.end();)
 		{
-			if (!(*iter)->GetAlive())
+			if ((*iter)->GetAlive() == false || g_clients[(*iter)->GetBulletMasterID()]->GetAlive() == false)
 			{			
 				//1. NPC Bullet
 				if ((*iter)->GetObjectType() == protocol_NpcStoneBullet)
@@ -165,7 +170,6 @@ void CPhysicEngineWorker::CollisionSystem(double deltime)
 {
 	for (auto& client : g_clients)
 	{
-		//if (client->GetAlive())
 		if (client->GetAlive() && client->GetIsReadyToPlay())
 		{
 			client->Collision(&g_clients, deltime);

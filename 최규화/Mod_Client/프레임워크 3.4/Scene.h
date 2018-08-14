@@ -86,7 +86,9 @@ public:
 
 	CGameObject* AimUI = NULL;
 	CGameObject* BackGround = NULL;
+
 	CGameObject* CharacterSelect = NULL;
+
 	CGameObject* SkillUI[4] = {NULL};
 	CGameObject* SkillFrameUI[4] = { NULL };
 	CGameObject* SkillCoolBar[4] = { NULL };
@@ -104,6 +106,10 @@ public:
 	Player_Data * Get_PlayerServerData(const unsigned int& id);
 	Player_Data* Get_MonsterServerData(const unsigned int& id);
 	int my_ClientID{ 0 };
+	
+	void SET_STAGET_TIMER_BY_SERVER_DATA(const STC_StageTimer& timer);
+	void SET_SELECTED_CHARACTER_LOADSCENE_BY_SERVER_DATA(const unsigned short& id, const STC_ShowSelectCharacter& data);
+	void SET_DRAW_STATE_BY_DEATH_BY_SERVER_DATA(const unsigned short& id, const STC_DrawState& data);
 
 	void SET_PLAYER_BY_SEVER_DATA(const unsigned short& id, const Player_Data& playerdata, const unsigned char& packet_type);
 

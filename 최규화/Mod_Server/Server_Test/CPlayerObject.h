@@ -35,9 +35,11 @@ private:
 
 	//플레이어 로그인 관련데이터(플레이어 텍스쳐 아이디, 아이디, 레디유무)
 	int					m_myTextureID;
-	bool				m_isReady;
+	bool				m_isReady{ false };
 
-	bool				m_isReadyToPlay;
+	bool				m_isReadyToPlay{false};
+	bool                m_isLoadSceneReady{ false };
+
 public:
 	unsigned int		m_curr_packet_size{ 0 };
 	unsigned int		m_prev_packet_size{ 0 };
@@ -163,6 +165,9 @@ public:
 
 	void    SetIsReady(bool flag) { m_isReady = flag; }
 	bool    GetIsReady() const    { return m_isReady; }
+
+	void    SetIsLoadSceneReady(bool  flag) { m_isLoadSceneReady = flag; }
+	bool    GetIsLoadSceneReady() const { return m_isLoadSceneReady; }
 	// ---------------------------------------------------------------------------------------
 	// [5]. 물리효과 함수
 

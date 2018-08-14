@@ -71,6 +71,8 @@ public:
 	XMFLOAT3 GetRightVector() const { return m_Rightvector; }
 	XMFLOAT3 GetLookVector() const { return m_Lookvector; }
 	XMFLOAT3 GetUpVector() const { return m_Upvector; }
+
+	void    SetMyAbility(const ObjectStatus& _ability);					//virtual 
 	bool	GetAirbone() const { return m_airbone; }
 	void	SetAirbone(bool flag) { m_airbone = flag; }
 	void    SetAlive(bool flag) { m_alive = flag; }

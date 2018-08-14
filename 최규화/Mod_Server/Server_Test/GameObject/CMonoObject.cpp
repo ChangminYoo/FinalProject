@@ -208,5 +208,15 @@ CMonoObject::~CMonoObject()
 	if (pp != nullptr)
 		delete pp;
 
+}
+
+void CMonoObject::SetMyAbility(const ObjectStatus & _ability)
+{
+	m_ability.attack = _ability.attack;
+	m_ability.curHP = _ability.curHP;
+	m_ability.exp = _ability.exp;
+	m_ability.level = _ability.level;
+	m_ability.orignHP = _ability.orignHP;
+	m_ability.speed = _ability.speed;
 
 }

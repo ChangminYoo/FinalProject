@@ -20,10 +20,9 @@ CStaticObject				 *g_staticobj;
 FSM							*g_fsm;
 CNpcObject					*g_npcobj;
 
-
 queue<char>					g_pdir_queue;
 
-//bool						g_start_timer;
+bool                        g_start_physics;
 
 int main()
 {
@@ -31,7 +30,7 @@ int main()
 	{
 		_wsetlocale(LC_ALL, L"korean");
 
-		//g_start_timer = false;
+		g_start_physics = false;
 
 		CAccpetPlayer server;
 	}

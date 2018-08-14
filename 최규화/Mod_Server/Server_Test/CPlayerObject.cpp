@@ -146,7 +146,7 @@ void CPlayerObject::Init_PlayerInfo()
 	else if (m_id == 1)
 		m_pos4f = { 300.f, -1000.f, 0.f, 0.f };
 
-	if (m_id == 1)
+	if (m_id == 0)
 		m_player_score = 100;
 
 	m_orgPos4f = m_pos4f;
@@ -219,6 +219,8 @@ void CPlayerObject::InitData_To_Client()
 	m_pdata.score = m_player_score;
 	m_pdata.rank = m_myCurrRank;
 	m_pdata.topRank = false;
+	m_pdata.alive = m_alive;
+	m_pdata.respawn_cnt = 0;				//0 : 무 
 
 	stc_init.player_data = move(m_pdata);
 
@@ -267,38 +269,6 @@ void CPlayerObject::InitNPCData_To_Client()
 
 	}
 }
-
-/*
-void CPlayerObject::RegularUpdate()
-{
-	
-	auto local_prevTime = high_resolution_clock::now();
-	while (true)
-	{
-		//1. 0.05초 뒤 업데이트된 불렛 정보 보내기
-		auto local_durTime = high_resolution_clock::now() - local_prevTime;
-		auto local_durTime_to_ms = duration_cast<milliseconds>(local_durTime).count();
-
-		m_elaspedtime = (local_durTime_to_ms / 1000.f) + m_prevtime;
-
-		if (m_elaspedtime > RegularPacketExchangeTime)
-		{
-			for (auto bullet : g_bullets)
-			{
-				STC_Attack stc_attack;
-				stc_attack.pack_size = sizeof(STC_Attack);
-				stc_attack.pack_type = PACKET_PROTOCOL_TYPE::PLAYER_ATTACK;
-				stc_attack.bull_data = move(bullet->GetBulletInfo());
-
-				SendPacket(reinterpret_cast<Packet*>(&stc_attack));
-			}
-
-			m_prevtime = m_elaspedtime - RegularPacketExchangeTime;
-		}
-	}
-	
-}
-*/
 
 void CPlayerObject::SendPacket(Packet * packet)
 {
@@ -434,35 +404,58 @@ void CPlayerObject::ProcessPacket(Packet * packet)
 
 	switch (packet[1])
 	{
+	case PACKET_PROTOCOL_TYPE::LOAD_SCENE_SELECT_CHARACTER:
+	{
+		auto data = reinterpret_cast<STC_CHAR_NUMBER_LOAD_SCENE*>(packet);
+
+		STC_CHAR_NUMBER_LOAD_SCENE stc_number;
+		stc_number.show_char_number.sel_id = data->show_char_number.sel_id;
+
+		for (auto& client : g_clients)
+		{
+			stc_number.show_char_number.my_id = client->GetID();
+			client->SendPacket(reinterpret_cast<Packet*>(&stc_number));
+		}
+
+	}
+	break;
+
 	case PACKET_PROTOCOL_TYPE::PLAYER_LOGIN:
 	{
 		auto data = reinterpret_cast<CTS_PLAYER_LOGIN*>(packet);
+
+		auto ready_flag = false;
+		int curr_access_cnt = 0;
+
 		m_isReady = data->logindata.isReady;
 		m_myTextureID = data->logindata.texture_id;
 
-		auto ready_flag = false;
 		for (auto& client : g_clients)
 		{
-			if (client->m_isReady)
-				ready_flag = true;
+			if (client->GetIsReady())
+				++curr_access_cnt;
 			else
-				ready_flag = false;
+				--curr_access_cnt;
 		}
 
-		if (g_clients.size() >= 1 && ready_flag) // 2명 이상 레디를 눌렀을 시 게임 스타트
-		{
-			STC_LoginData stc_logindata;
-			stc_logindata.isReady = true;
-			stc_logindata.skip_login = true;
+		if (curr_access_cnt == g_clients.size())
+			ready_flag = true;
+		
 
+		if (g_clients.size() >=  2 && ready_flag) // 2명 이상 레디를 눌렀을 시 게임 스타트
+		{
+			STC_PLAYER_LOGIN stc_player_login;
+	
 			for (auto& client : g_clients)
 			{
-				if (!client->m_connect) continue;
+				for (auto& other_client : g_clients)
+				{
+					stc_player_login.logindata.my_id = other_client->m_id;
+					stc_player_login.logindata.texture_id = other_client->m_myTextureID;
 
-				stc_logindata.my_id = client->m_id;
-				stc_logindata.texture_id = client->m_myTextureID;
+					client->SendPacket(reinterpret_cast<Packet*>(&stc_player_login));
+				}
 
-				client->SendPacket(reinterpret_cast<Packet*>(&stc_logindata));
 			}
 		}
 
@@ -475,6 +468,50 @@ void CPlayerObject::ProcessPacket(Packet * packet)
 
 		//씬이 로딩씬이고 로딩씬 레디가 되었을 경우
 		//해당 레디된 클라이언트 초기화
+		m_isLoadSceneReady = data->state.my_currSceneReady;
+
+		auto ready_flag = false;
+		int curr_access_cnt = 0;
+		for (auto& client : g_clients)
+		{
+			if (client->GetIsLoadSceneReady())
+				++curr_access_cnt;
+			else
+				--curr_access_cnt;
+		}
+
+		if (curr_access_cnt == g_clients.size())
+			ready_flag = true;
+
+		if (ready_flag)
+		{
+			for (auto& client : g_clients)
+			{
+				client->Init_PlayerInfo();
+
+				client->SendStaticObjectPacket(g_staticobjs);
+
+				client->InitData_To_Client();
+
+				client->InitNPCData_To_Client();
+
+				client->SetIsReadyToPlay(true);
+			}
+		}
+
+		//모든 클라이언트가 로딩씬으로 넘어가 세팅이완료됐을 경우, timer_thread // physics_thread 시작
+		if (ready_flag)
+		{
+			//1. 물리엔진 스레드 시작
+			g_physics_worker.CheckPrevTime();
+			g_start_physics = true;
+
+			//2. 타이머 스레드 시작
+			g_timer_queue.CheckPrevTime();
+			g_timer_queue.AddEvent(0, 0, REGULAR_PACKET_EXCHANGE, true, 0);
+		}
+
+		/*
 		if (data->state.my_currScene == GS_LOAD && data->state.my_currSceneReady == true)
 		{
 			g_clients[data->state.my_id]->Init_PlayerInfo();
@@ -488,29 +525,27 @@ void CPlayerObject::ProcessPacket(Packet * packet)
 			g_clients[data->state.my_id]->SetIsReadyToPlay(true);
 		}
 
-		/*for (auto& client : g_clients)
+		auto is_allReady = false;
+		for (auto& client : g_clients)
 		{
+			if (client->GetIsReadyToPlay())
+				is_allReady = true;
+			else
+				is_allReady = false;
+		}
 
-			//1. Client 정보 초기화 및 Client 정보를 담은 벡터에 데이터 추가
-			client->Init_PlayerInfo();
+		//모든 클라이언트가 로딩씬으로 넘어가 세팅이완료됐을 경우, timer_thread 시작
+		if (is_allReady)
+		{
+			//1. 물리엔진 스레드 시작
+			g_physics_worker.CheckPrevTime();
+			g_start_physics = true;
 
-			//2. Static Object 초기화
-			client->SendStaticObjectPacket(g_staticobjs);
-
-			//3. 초기화된 정보를 연결된 클라이언트로 보낸다.
-			client->InitData_To_Client();
-
-			//4. 초기화된 몬스터정보를 연결된 클라이언트로 보낸다.
-			client->InitNPCData_To_Client();
-
-			client->SetIsReadyToPlay(true);
+			//2. 타이머 스레드 시작
+			g_timer_queue.CheckPrevTime();
+			g_timer_queue.AddEvent(0, 0, REGULAR_PACKET_EXCHANGE, true, 0);
 		}
 		*/
-
-		//클라이언트에 관련된 모든 정보를 초기화 및 클라로 전달함
-		//서버 진행
-		g_timer_queue.AddEvent(0, 0, REGULAR_PACKET_EXCHANGE, true, 0);
-		
 	}
 	break;
 
@@ -877,10 +912,13 @@ void CPlayerObject::UpdateDataForPacket()
 	m_pdata.deathcount = m_deathCount;
 	m_pdata.score = m_player_score;
 	m_pdata.rank = m_myCurrRank;
+	m_pdata.alive = m_alive;
 }
 
 void CPlayerObject::Tick(double deltime)
 {
+	if (!m_alive) return;
+
 	*pp->CenterPos = { m_pos4f.x, m_pos4f.y, m_pos4f.z, m_pos4f.w };
 	pp->integrate(deltime);
 	
@@ -890,6 +928,8 @@ void CPlayerObject::Tick(double deltime)
 
 void CPlayerObject::Tick(double deltime, Position& pos4f)
 {
+	if (!m_alive) return;
+
 	*pp->CenterPos = { pos4f.x, pos4f.y, pos4f.z, pos4f.w };
 	pp->integrate(deltime);
 
@@ -1046,6 +1086,8 @@ void CPlayerObject::GetDamaged(int damage)
 
 void CPlayerObject::PlayerInput(double deltime)
 {
+	if (!m_alive) return;
+
 	switch (m_dir)
 	{
 		case CHAR_MOVE::FRONT_MOVE:

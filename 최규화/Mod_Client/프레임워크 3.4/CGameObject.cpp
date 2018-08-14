@@ -467,10 +467,7 @@ void CCubeManObject::Tick(const GameTimer & gt)
 		{
 			UpdateMD5Model(commandlist, &Mesh, this, 2*gt.DeltaTime()*60.0 / 24.0, n_Animation, animations, jarr);
 		}
-
 	}
-
-
 }
 
 void CCubeManObject::ToDead()
@@ -483,24 +480,26 @@ void CCubeManObject::Render(ID3D12GraphicsCommandList * commandlist, const GameT
 	//게임오브젝트의 렌더링은 간단하다. 
 	//텍스처를 연결하고, 월드행렬을 연결한다.
 
-
-	if (Textures.size() > 0)
+	if (DrawObj)
 	{
-		SetTexture(commandlist, SrvDescriptorHeap, Textures[TextureName].get()->Resource.Get(), 0, TexOff);
-		SetTexture(commandlist, SrvDescriptorHeap, Textures[NTextureName].get()->Resource.Get(), 2, NTexOff);
+		if (Textures.size() > 0)
+		{
+			SetTexture(commandlist, SrvDescriptorHeap, Textures[TextureName].get()->Resource.Get(), 0, TexOff);
+			SetTexture(commandlist, SrvDescriptorHeap, Textures[NTextureName].get()->Resource.Get(), 2, NTexOff);
+		}
+
+
+		UpdateConstBuffer(commandlist, false);
+
+		Mat.UpdateConstantBuffer(commandlist);
+
+		//틱함수에서 업데이트한 애니메이션된 조인트를 연결함.
+
+		commandlist->SetGraphicsRootConstantBufferView(0, jarr->Resource()->GetGPUVirtualAddress());
+		//이후 그린다.
+
+		Mesh.Render(commandlist);
 	}
-
-
-	UpdateConstBuffer(commandlist, false);
-
-	Mat.UpdateConstantBuffer(commandlist);
-
-	//틱함수에서 업데이트한 애니메이션된 조인트를 연결함.
-
-	commandlist->SetGraphicsRootConstantBufferView(0, jarr->Resource()->GetGPUVirtualAddress());
-	//이후 그린다.
-
-	Mesh.Render(commandlist);
 
 }
 
@@ -571,15 +570,18 @@ void CCubeManObject::EndAnimation(int nAni)
 
 
 		//여기가 문제
-		cout << "Client ID: " << m_player_data.id << "Attack Animation End \n";
+		//cout << "Client ID: " << m_player_data.id << "Attack Animation End \n";
 
 	}
 
 	if (nAni == Ani_State::Dead)//죽는모션이었으면
 	{
-		DelObj = true;
+		DrawObj = false;
 
-		m_end_die = true;
+		Hpbar->DrawObj = false;
+		HPFrame->DrawObj = false;
+
+		nAni = Ani_State::Idle;
 	}
 }
 
@@ -3089,33 +3091,37 @@ void BarObject::Tick(const GameTimer & gt)
 
 	ObjData.CustomData1.y = Master->gamedata.HP / Master->gamedata.MAXHP;
 	CenterPos.x = Master->CenterPos.x; CenterPos.y = Master->CenterPos.y + YPos; CenterPos.z = Master->CenterPos.z;
+
+	//cout << "CumstomData1.y: " << ObjData.CustomData1.y << "\n";
 }
 
 void BarObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer & gt)
 {
-	if (Textures.size()>0)
-		SetTexture(commandlist, SrvDescriptorHeap, Textures["HPTex"].get()->Resource.Get());
-	UpdateConstBuffer(commandlist, false);
+	if (DrawObj)
+	{
+		if (Textures.size()>0)
+			SetTexture(commandlist, SrvDescriptorHeap, Textures["HPTex"].get()->Resource.Get());
+		UpdateConstBuffer(commandlist, false);
+
+		D3D12_VERTEX_BUFFER_VIEW vbv;
+
+		vbv.BufferLocation = Mesh.VertexBuffer->GetGPUVirtualAddress();
+		vbv.StrideInBytes = Mesh.nStride;
+		vbv.SizeInBytes = Mesh.nStride *  Mesh.nVertex;
+
+		commandlist->IASetVertexBuffers(0, 1, &vbv);
+
+		D3D12_INDEX_BUFFER_VIEW ibv;
+		ibv.BufferLocation = Mesh.IndexBuffer->GetGPUVirtualAddress();
+		ibv.Format = DXGI_FORMAT_R16_UINT;
+		ibv.SizeInBytes = Mesh.nisize *  Mesh.nindex;
+
+		commandlist->IASetIndexBuffer(&ibv);
+		commandlist->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
 
 
-	D3D12_VERTEX_BUFFER_VIEW vbv;
-
-	vbv.BufferLocation = Mesh.VertexBuffer->GetGPUVirtualAddress();
-	vbv.StrideInBytes = Mesh.nStride;
-	vbv.SizeInBytes = Mesh.nStride *  Mesh.nVertex;
-
-	commandlist->IASetVertexBuffers(0, 1, &vbv);
-
-	D3D12_INDEX_BUFFER_VIEW ibv;
-	ibv.BufferLocation = Mesh.IndexBuffer->GetGPUVirtualAddress();
-	ibv.Format = DXGI_FORMAT_R16_UINT;
-	ibv.SizeInBytes = Mesh.nisize *  Mesh.nindex;
-
-	commandlist->IASetIndexBuffer(&ibv);
-	commandlist->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
-
-
-	commandlist->DrawIndexedInstanced(Mesh.nindex, 1, Mesh.nioffset, Mesh.nOffset, 0);
+		commandlist->DrawIndexedInstanced(Mesh.nindex, 1, Mesh.nioffset, Mesh.nOffset, 0);
+	}
 }
 
 
@@ -3185,29 +3191,32 @@ void BarFrameObject::Tick(const GameTimer & gt)
 
 void BarFrameObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer & gt)
 {
-	if (Textures.size()>0)
-		SetTexture(commandlist, SrvDescriptorHeap, Textures["HPFrameTex"].get()->Resource.Get());
-	UpdateConstBuffer(commandlist, false);
+	if (DrawObj)
+	{
+		if (Textures.size()>0)
+			SetTexture(commandlist, SrvDescriptorHeap, Textures["HPFrameTex"].get()->Resource.Get());
+		UpdateConstBuffer(commandlist, false);
 
 
-	D3D12_VERTEX_BUFFER_VIEW vbv;
+		D3D12_VERTEX_BUFFER_VIEW vbv;
 
-	vbv.BufferLocation = Mesh.VertexBuffer->GetGPUVirtualAddress();
-	vbv.StrideInBytes = Mesh.nStride;
-	vbv.SizeInBytes = Mesh.nStride *  Mesh.nVertex;
+		vbv.BufferLocation = Mesh.VertexBuffer->GetGPUVirtualAddress();
+		vbv.StrideInBytes = Mesh.nStride;
+		vbv.SizeInBytes = Mesh.nStride *  Mesh.nVertex;
 
-	commandlist->IASetVertexBuffers(0, 1, &vbv);
+		commandlist->IASetVertexBuffers(0, 1, &vbv);
 
-	D3D12_INDEX_BUFFER_VIEW ibv;
-	ibv.BufferLocation = Mesh.IndexBuffer->GetGPUVirtualAddress();
-	ibv.Format = DXGI_FORMAT_R16_UINT;
-	ibv.SizeInBytes = Mesh.nisize *  Mesh.nindex;
+		D3D12_INDEX_BUFFER_VIEW ibv;
+		ibv.BufferLocation = Mesh.IndexBuffer->GetGPUVirtualAddress();
+		ibv.Format = DXGI_FORMAT_R16_UINT;
+		ibv.SizeInBytes = Mesh.nisize *  Mesh.nindex;
 
-	commandlist->IASetIndexBuffer(&ibv);
-	commandlist->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
+		commandlist->IASetIndexBuffer(&ibv);
+		commandlist->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
 
 
-	commandlist->DrawIndexedInstanced(Mesh.nindex, 1, Mesh.nioffset, Mesh.nOffset, 0);
+		commandlist->DrawIndexedInstanced(Mesh.nindex, 1, Mesh.nioffset, Mesh.nOffset, 0);
+	}
 }
 
 
@@ -5578,7 +5587,7 @@ void ShadowObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTim
 	if(ObjData.isAnimation)
 		commandlist->SetGraphicsRootConstantBufferView(0, jarr->Resource()->GetGPUVirtualAddress());
 
-	if(CreatecMesh && Kinds == Cubeman)
+	if(CreatecMesh && Kinds == Cubeman && Master->DrawObj == true)
 		cMesh.Render(commandlist);
 	if (CreateoMesh && Kinds == Cube)
 		oMesh.Render(commandlist);

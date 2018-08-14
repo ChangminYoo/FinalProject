@@ -172,6 +172,7 @@ void CNpcObject::Collision(vector<CPlayerObject*>* clients, double deltime)
 	for (auto iter = clients->begin(); iter != clients->end(); ++iter)
 	{
 		if (!(*iter)->GetIsReadyToPlay()) continue;
+		if (!(*iter)->GetAlive()) continue;
 
 		if (*iter != this)
 		{

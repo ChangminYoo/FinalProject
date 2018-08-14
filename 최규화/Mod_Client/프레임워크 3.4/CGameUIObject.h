@@ -165,7 +165,7 @@ public:
 	static unordered_map<string, unique_ptr<CTexture>> Textures;//텍스처들을 저장함
 	static CMesh Mesh;//오로지 한번만 만들어짐
 	static ComPtr<ID3D12DescriptorHeap> SrvDescriptorHeap;//텍스처 용 힙
-
+	float times{ 0 };
 
 public:
 	virtual void SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist);//셋메시는 메시를 최종적으로 생성한다. 즉 메시를구성하는 정점과 삼각형을구성하는인덱스버퍼생성
@@ -186,7 +186,7 @@ public:
 	static unordered_map<string, unique_ptr<CTexture>> Textures;//텍스처들을 저장함
 	static CMesh Mesh;//오로지 한번만 만들어짐
 	static ComPtr<ID3D12DescriptorHeap> SrvDescriptorHeap;//텍스처 용 힙
-
+	float times{ 0 };
 
 public:
 	virtual void SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist);//셋메시는 메시를 최종적으로 생성한다. 즉 메시를구성하는 정점과 삼각형을구성하는인덱스버퍼생성
@@ -210,7 +210,7 @@ public:
 
 
 public:
-	float times = 0;
+	float times{ 0 };
 	virtual void SetMesh(ID3D12Device* m_Device, ID3D12GraphicsCommandList* commandlist);//셋메시는 메시를 최종적으로 생성한다. 즉 메시를구성하는 정점과 삼각형을구성하는인덱스버퍼생성
 	virtual void Render(ID3D12GraphicsCommandList* commandlist, const GameTimer& gt);
 	virtual void Collision(list<CGameObject*>* collist, float DeltaTime) {}

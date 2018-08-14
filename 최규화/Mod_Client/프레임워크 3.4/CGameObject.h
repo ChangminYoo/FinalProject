@@ -135,6 +135,7 @@ public:
 
 	//기타 공용 데이터들
 	bool DelObj = false;//이게 참이면 실제로 제거된다.
+	bool DrawObj = true;
 	bool Blending = false;
 	bool PrevCool = false;
 	bool isShieldOn = false;

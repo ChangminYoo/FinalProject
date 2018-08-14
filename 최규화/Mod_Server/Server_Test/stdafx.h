@@ -82,8 +82,10 @@ extern queue<char>					g_pdir_queue;
 //io_service는 IO와 통신을 위해서사용 - 전역 하나만 있어도 된다
 extern boost::asio::io_service g_io_service;
 
-//vector<int, int>				g_RoomData;
-//int								g_currRoomCnt;
+extern bool                         g_start_physics;
+
+//vector<int, int>				      g_RoomData;
+//int								  g_currRoomCnt;
 //extern bool						  g_start_timer;
 
 

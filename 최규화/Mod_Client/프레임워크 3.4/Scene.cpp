@@ -43,6 +43,8 @@ Scene::~Scene()
 		delete BackGround;
 	if (CharacterSelect != NULL)
 		delete CharacterSelect;
+
+		delete CharacterSelect;
 	for (int i = 0; i < 4; i++)
 		if (SkillFrameUI[i] != NULL)
 			delete SkillFrameUI[i];
@@ -127,10 +129,12 @@ void Scene::SceneState()
 		if (GetAsyncKeyState(VK_SPACE) & 0x8000 && GetFocus())
 		{
 			//SetGameState(GS_LOAD);
-
 			Player->m_async_client->m_myClientReady = true;
-		}
+			Player->m_async_client->m_myTextureID = CharacterSelect->ObjData.CustomData1.z - 1;
+			Player->m_async_client->m_selCharacterComplete = true;
+			//return;
 
+		}
 		else if (GetAsyncKeyState(0x31) & 0x8000 && GetFocus())
 		{
 			CharacterSelect->CenterPos.x = 0.8f * (-mWidth * 0.5f);
@@ -179,33 +183,52 @@ void Scene::SceneState()
 			CharacterSelect->CenterPos.x = 0.4f * (-mWidth * 0.5f);
 			CharacterSelect->CenterPos.y = (-mHeight * 1 / 3);
 			CharacterSelect->ObjData.CustomData1.z = 7;
-
-
 		}
 		else if (GetAsyncKeyState(0x38) & 0x8000 && GetFocus())
 		{
 			CharacterSelect->CenterPos.x = 0;
 			CharacterSelect->CenterPos.y = (-mHeight * 1 / 3);
 			CharacterSelect->ObjData.CustomData1.z = 8;
-
-
 		}
 		else if (GetAsyncKeyState(0x39) & 0x8000 && GetFocus())
 		{
 			CharacterSelect->CenterPos.x = 0.4f * (mWidth* 0.5f);
 			CharacterSelect->CenterPos.y = (-mHeight * 1 / 3);
 			CharacterSelect->ObjData.CustomData1.z = 9;
-
-
 		}
 		else if (GetAsyncKeyState(0x30) & 0x8000 && GetFocus())
 		{
 			CharacterSelect->CenterPos.x = 0.8f * (mWidth* 0.5f);
 			CharacterSelect->CenterPos.y = (-mHeight * 1 / 3);
 			CharacterSelect->ObjData.CustomData1.z = 10;
-
-
 		}
+
+		Player->m_async_client->m_myTextureID = CharacterSelect->ObjData.CustomData1.z - 1;
+	
+		//Player->m_async_client->m_lobbyData는 구조체 vector
+		//Player->m_async_client->m_lobbyData에 id 랑 texture_id(	CharacterSelect->ObjData.CustomData1.z (0 ~ 9) 값이 들어있음)
+		/*
+		if (!Player->m_async_client->m_lobbyData.empty())
+		{
+			for (auto& data : Player->m_async_client->m_lobbyData)
+			{
+				for (auto& select : CharacterSelectVector)
+				{
+					if (data.my_id == select.id)
+					{
+						switch (data.textureID + 1)
+						{
+						case 1:
+							select->CenterPos.x = 0.8f * (-mWidth * 0.5f);
+							select->CenterPos.y = 0;
+							break;
+						}
+					}
+				}
+			}
+		}
+		*/
+
 	}
 	else if (GAMESTATE == GS_LOAD)
 	{
@@ -213,6 +236,19 @@ void Scene::SceneState()
 		{
 			CreateGameObject();
 
+			auto local_count = 0;
+			for (auto& GameObject : DynamicObject)
+			{
+				if (GameObject->isNPC) continue;
+				GameObject->m_player_data.id = Player->m_async_client->m_clientsID[local_count].my_id;
+				GameObject->TexOff = Player->m_async_client->m_clientsID[local_count].textureID;
+
+				++local_count;
+
+				if (local_count == Player->m_async_client->m_clientsID.size())
+					break;
+			}
+			
 			//서버 추가
 			STC_CHANGE_SCENE stc_change_scene;
 			stc_change_scene.state.my_currScene = GS_LOAD;
@@ -220,7 +256,6 @@ void Scene::SceneState()
 			stc_change_scene.state.my_id = Player->PlayerObject->m_player_data.id;
 
 			Player->m_async_client->SendPacket(reinterpret_cast<Packet*>(&stc_change_scene));
-
 
 			FirstLoad = false;
 			SetGameState(GS_PLAY);
@@ -679,6 +714,7 @@ void Scene::CreateUI()
 
 	CharacterSelect = new CharacterSelectObject(device, commandlist, NULL, NULL, XMFLOAT4(0, 0, 0, 0));
 
+
 	SelectBar = new SelectBarObject(device, commandlist, NULL, NULL, XMFLOAT4(0 * 100 - 150, 0.9*-mHeight / 2, 0, 0));
 
 	
@@ -746,7 +782,13 @@ void Scene::UITick(const GameTimer & gt)
 
 	if (GetGameState() == GS_PLAY)
 	{
-		((TimerObject3*)Time3)->times += gt.DeltaTime();
+		float crtime = static_cast<float>(Player->m_async_client->m_myClient_StageTime);
+
+		((TimerObject3*)Time3)->TexStride = (static_cast<int>(crtime) % 100) % 10;
+		((TimerObject2*)Time2)->TexStride = (static_cast<int>(crtime) % 100) / 10;
+		((TimerObject1*)Time1)->TexStride = (static_cast<int>(crtime) / 100);
+
+		/*
 		if (((TimerObject3*)Time3)->times >= 1)
 		{
 			float t = 1 - ((TimerObject3*)Time3)->times;
@@ -763,6 +805,7 @@ void Scene::UITick(const GameTimer & gt)
 			Time2->TexStride = 0;
 			Time1->TexStride += 1;
 		}
+		*/
 	}
 }
 
@@ -832,7 +875,10 @@ void Scene::Render(const GameTimer& gt)
 				Player->Camera.UpdateConstantBufferOrtho(commandlist);
 				Shaders->SetBillboardShader(commandlist);
 				if (GetGameState() == GS_START)
+				{
 					CharacterSelect->Render(commandlist, gt);
+
+				}
 				BackGround->Render(commandlist, gt);
 				Player->Camera.UpdateConstantBuffer(commandlist);
 			}
@@ -1131,6 +1177,61 @@ Player_Data * Scene::Get_MonsterServerData(const unsigned int & id)
 	return nullptr;
 }
 
+void Scene::SET_STAGET_TIMER_BY_SERVER_DATA(const STC_StageTimer & timer)
+{
+	Player->m_async_client->m_myClient_StageTime = timer.stage_time;
+}
+
+void Scene::SET_SELECTED_CHARACTER_LOADSCENE_BY_SERVER_DATA(const unsigned short& id, const STC_ShowSelectCharacter & data)
+{
+	int find_cnt = 0;
+	if (Player->m_async_client->m_lobbyData.empty())
+	{
+		Player->m_async_client->m_lobbyData.push_back({ id, data.sel_id });
+	}
+	else
+	{
+		for (auto& lobby : Player->m_async_client->m_lobbyData)
+		{
+			if (lobby.my_id == id)
+			{
+				lobby.textureID = data.sel_id;
+				++find_cnt;
+			}
+
+			//cout << "ID: " << lobby.my_id << " , " << "TextureID: " << lobby.textureID << "\n";
+		}
+	}
+
+	if (find_cnt == 0)
+	{
+		Player->m_async_client->m_lobbyData.push_back({ id, data.sel_id });
+	}
+
+}
+
+void Scene::SET_DRAW_STATE_BY_DEATH_BY_SERVER_DATA(const unsigned short& id, const STC_DrawState & data)
+{
+	for (auto& GameObject : DynamicObject)
+	{
+		if (GameObject->isNPC) continue;
+
+		if (id == GameObject->m_player_data.id)
+		{
+			GameObject->DrawObj = data.drawobj;
+			GameObject->currAnimTime = 0.f;
+			GameObject->n_Animation = Ani_State::Idle;
+
+			dynamic_cast<CCubeManObject*>(GameObject)->Hpbar->DrawObj = true;
+			dynamic_cast<CCubeManObject*>(GameObject)->HPFrame->DrawObj = true;
+
+			cout << "ID: " << static_cast<int>(id) << "DrawObject: " << GameObject->DrawObj << "\n";
+			break;
+		}
+
+	}
+}
+
 void Scene::SET_PLAYER_BY_SEVER_DATA(const unsigned short & id, const Player_Data & playerdata, const unsigned char & packet_type)
 {
 	for (auto& GameObject : DynamicObject)
@@ -1201,6 +1302,7 @@ void Scene::SET_PLAYER_BY_SEVER_DATA(const unsigned short & id, const Player_Dat
 					GameObject->m_player_data.id = playerdata.id;
 					GameObject->m_player_data.pos = playerdata.pos;
 					GameObject->m_player_data.status = playerdata.status;
+					GameObject->m_player_data.alive = playerdata.alive;
 
 					GameObject->CenterPos = { playerdata.pos.x , playerdata.pos.y , playerdata.pos.z , playerdata.pos.w };
 					GameObject->pp->SetPosition(&GameObject->CenterPos);
@@ -1231,11 +1333,21 @@ void Scene::SET_PLAYER_BY_SEVER_DATA(const unsigned short & id, const Player_Dat
 						dynamic_cast<CCubeManObject*>(GameObject)->s->ObjData.Scale = 3.0f;
 						dynamic_cast<CCubeManObject*>(GameObject)->Hpbar->YPos = 16;
 						dynamic_cast<CCubeManObject*>(GameObject)->HPFrame->YPos = 16;
-						GameObject->gamedata.MAXHP = 700;
-						GameObject->gamedata.Speed = 75;
-						GameObject->gamedata.HP = GameObject->gamedata.HP + 600;
+						
+						//GameObject->gamedata.MAXHP = 700;
+						//GameObject->gamedata.Speed = 75;
+						//GameObject->gamedata.HP = GameObject->gamedata.HP + 600;
 
 					}
+
+					//캐릭터가 죽었을 때 단 한번만 실행이되어야한다
+					if (playerdata.alive == false && playerdata.respawn_cnt == 1)
+					{
+						GameObject->currAnimTime = 0.f;
+						GameObject->m_player_data.ani = playerdata.ani;
+						GameObject->n_Animation = static_cast<int>(playerdata.ani);
+					}
+					
 
 				}
 				break;
@@ -1268,6 +1380,11 @@ void Scene::SET_PLAYER_BY_SEVER_DATA(const unsigned short & id, const Player_Dat
 
 				}
 				break;
+
+				case PACKET_PROTOCOL_TYPE::DRAW_STATE_BY_DEAD:
+				{
+					
+				}
 
 			default:
 				break;
@@ -1842,14 +1959,9 @@ void Scene::SET_PLAYER_SKILL(const STC_HammerSkillInfo & hammer_bullet)
 void Scene::SET_LOGIN_BY_SERVER_DATA(const STC_LoginData & playerdata)
 {
 	//이게 실행됐다는 것은 해당 방의 인원이 모두 레디를 눌러서 플레이를 한다는 것
+	Player->m_async_client->m_mySkipLogin = true;
 
-	for (auto& GameObject : DynamicObject)
-	{
-		if (GameObject->isNPC) continue;
-
-		GameObject->m_player_data.id = playerdata.my_id;
-		GameObject->TexOff = playerdata.texture_id;
-	}
+	Player->m_async_client->m_clientsID.push_back({ playerdata.my_id, playerdata.texture_id });
 
 	SetGameState(GS_LOAD);
 

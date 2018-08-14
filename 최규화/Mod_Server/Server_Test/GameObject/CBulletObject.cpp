@@ -242,8 +242,18 @@ void CBulletObject::Collision(vector<CPlayerObject*>* clients, double deltime)
 {
 	for (auto iter = clients->begin(); iter != clients->end(); ++iter)
 	{
-		//클라이언트 아이디 == 불렛의 주인아이디 -> 충돌x
+		//----------------------------------------------------충돌 스킵------------//
+
+		//1. 해당 불렛을 쏜 주인이 내 자신인 경우
 		if ((*iter)->GetID() == m_masterID) continue;
+
+		//2. 해당 불렛을 쏜 주인이 죽었을 경우 
+		if (!g_clients[this->m_masterID]->GetAlive()) continue;
+
+		//3. 상대가 죽어있을 경우
+		if (!(*iter)->GetAlive()) continue;
+
+		//----------------------------------------------------충돌 스킵------------//
 
 		if ((*iter)->GetPhysicsPoint() != nullptr)
 		{
@@ -304,9 +314,18 @@ void CBulletObject::Collision(vector<CNpcObject*>* npcs, double deltime)
 		//불렛(플레이어 불렛, npc 불렛)과 그들의 주인(npc)와 충돌x
 		if ((*iter)->GetPhysicsPoint() != nullptr)
 		{
-			//해당 불렛이 임프가 쏜 불렛인 경우 스킵
-			if (!(*iter)->GetAlive()) continue;
+			//----------------------------------------------------충돌 스킵------------//
+
+			//1. 불렛과 충돌했는데 임프가 죽은경우 스킵
+			if ((*iter)->GetAlive() == false) continue;
+
+			//2. 불렛과 충돌했는데, 불렛을 쏜 상대가 죽은경우
+			if (!g_clients[this->m_masterID]->GetAlive()) continue;
+
+			//3. 해당 불렛이 임프가 쏜 불렛인 경우 스킵
 			if (this->GetObjectType() == protocol_NpcStoneBullet) continue;
+
+			//----------------------------------------------------충돌 스킵------------//
 
 			bool test = pp->CollisionTest(*(*iter)->GetPhysicsPoint(), m_Lookvector, m_Rightvector, m_Upvector,
 				(*iter)->GetLookVector(), (*iter)->GetRightVector(), (*iter)->GetUpVector());

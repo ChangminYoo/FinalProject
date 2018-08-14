@@ -29,6 +29,8 @@
 #define SKILL_WAVESHOCK_OP_TIME 0.0125
 #define SKILL_WAVESHOCK_COOLTIME 20.0
 
+#define Player_RespawnTime 5.0
+#define RegularPacketLoadSceneExchangeTime (0.01f)
 #define RegularPacketExchangeTime  (1.0 / 20.0) // 1초에 20번 패킷을 교환(morpg 형식)
 
 
@@ -40,6 +42,9 @@ using Packet = unsigned char;
 
 enum PACKET_PROTOCOL_TYPE
 {
+	DRAW_STATE_BY_DEAD,
+	STAGE_TIMER,
+	LOAD_SCENE_SELECT_CHARACTER,
 	SCENE_STATE_CHANGE,
 	// 캐릭터 정보 초기화
 	INIT_CLIENT,
@@ -197,6 +202,10 @@ struct RigidbodyData
 	unsigned char  type;
 };
 
+
+//------------------------패킷용 움직이는 오브젝트데이터----------------------------//
+
+
 struct MoveObjectData_NoCreate
 {
 	Position	   pos4f;
@@ -285,12 +294,25 @@ struct CTS_HammerSkillInfo
 	unsigned char				weapon_num;				//1
 };
 
+
+//-------------------클라이언트 로그인 관련데이터-----------------------------//
+
+struct STC_ShowSelectCharacter
+{
+	unsigned short             my_id;
+	unsigned char              sel_id;
+};
+
+struct STC_DrawState
+{
+	unsigned short			   my_id;
+	char                       drawobj;
+};
+
 struct STC_LoginData
 {
 	unsigned short				my_id;
 	unsigned char               texture_id;
-	char                        isReady;
-	char                        skip_login;
 };
 
 struct CTS_LoginData
@@ -301,6 +323,8 @@ struct CTS_LoginData
 	//wchar_t				    name[MAX_BUFFER_SIZE / 4]{ L"Guest" };
 
 };
+
+//---------------------클라이언트 씬 변경에 관련된데이터------------------------//
 
 struct STC_ChangeScene
 {
@@ -325,8 +349,15 @@ struct STC_SkillData
 	char		   my_id;		//스킬 넘버
 	char		   alive;
 
-
 };
+
+//--------------------------스테이지 타이머관련 데이터------------------------------//
+
+struct STC_StageTimer
+{
+	double stage_time;
+};
+
 
 //-------------------------------캐릭터 - NPC 데이터-------------------------------//
 
@@ -356,11 +387,13 @@ struct Player_Data
 	char			godmode{ false };			//1
 	char			airbone{ false };			//1
 												//Player_LoginDB  LoginData;
-	char			killcount;
-	char			deathcount;
-	unsigned short  score;
-	unsigned char   rank;
-	char			topRank;
+	char			alive{ true };				//1
+	unsigned short  score;						//2
+	char			killcount;					//1
+	char			deathcount;					//1
+	unsigned char   rank;						//1
+	char			topRank;					//1
+	unsigned char   respawn_cnt;			    //1
 };
 // 18 + 16 + 2 + 1 + 1 + 1 + 1 + 16 = 58  pragma pack 할시
 
@@ -383,6 +416,15 @@ struct Npc_Data
 
 
 #pragma pack (push, 1)		//push 시작부터 1바이트씩 데이터를 잘라 캐시에 저장한다(캐시라인 문제 때문에) - pop에서 멈춘다
+
+typedef struct Server_To_Client_StageTimer_Info
+{
+	unsigned char pack_size = sizeof(STC_StageTimer) + sizeof(unsigned char) + sizeof(unsigned char);
+	unsigned char pack_type = PACKET_PROTOCOL_TYPE::STAGE_TIMER;
+	STC_StageTimer data;
+
+}STC_STAGE_TIMER;
+
 
 //캐릭터 상태 초기화 및 업데이트에 사용한다
 typedef struct Server_To_Client_Player_Info
@@ -668,5 +710,21 @@ typedef struct Client_To_Server_SceneState_Info
 	CTS_ChangeScene state;
 
 }CTS_CHANGE_SCENE;
+
+typedef struct Server_To_Client_ShowSelectChar_Info
+{
+	unsigned char pack_size = sizeof(STC_ShowSelectCharacter) + sizeof(unsigned char) + sizeof(unsigned char);
+	unsigned char pack_type = PACKET_PROTOCOL_TYPE::LOAD_SCENE_SELECT_CHARACTER;
+	STC_ShowSelectCharacter show_char_number;
+
+}STC_CHAR_NUMBER_LOAD_SCENE;
+
+typedef struct Server_To_Client_RespawnDraw
+{
+	unsigned char pack_size = sizeof(STC_DrawState) + sizeof(unsigned char) + sizeof(unsigned char);
+	unsigned char pack_type = PACKET_PROTOCOL_TYPE::DRAW_STATE_BY_DEAD;
+	STC_DrawState stc_draw_state;
+
+}STC_RESPAWN_DRAW;
 
 #pragma pack (pop)
