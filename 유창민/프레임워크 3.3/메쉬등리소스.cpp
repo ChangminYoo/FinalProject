@@ -197,7 +197,14 @@ bool TimerObject1::CreateMesh = false;
 unordered_map<string, unique_ptr<CTexture>> TimerObject1::Textures;//텍스처들을 저장함
 CMesh TimerObject1::Mesh;//나중에 메쉬는 static으로 둬야함
 ComPtr<ID3D12DescriptorHeap> TimerObject1::SrvDescriptorHeap;//텍스처 용 힙
+
 //--------------------------------------------------------------------------------------
+bool PointObject1::CreateMesh = false;
+unordered_map<string, unique_ptr<CTexture>> PointObject1::Textures;//텍스처들을 저장함
+CMesh PointObject1::Mesh;//나중에 메쉬는 static으로 둬야함
+ComPtr<ID3D12DescriptorHeap> PointObject1::SrvDescriptorHeap;//텍스처 용 힙
+ //--------------------------------------------------------------------------------------
+
 bool TimerObject2::CreateMesh = false;
 unordered_map<string, unique_ptr<CTexture>> TimerObject2::Textures;//텍스처들을 저장함
 CMesh  TimerObject2::Mesh;//나중에 메쉬는 static으로 둬야함

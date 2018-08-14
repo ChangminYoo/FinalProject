@@ -348,6 +348,22 @@ LRESULT FrameWork::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				scene->Time3->CenterPos.y = 0.93f*mClientHeight / 2;
 
 
+				scene->MyPoint1->ObjData.Scale = mClientWidth / 30;
+				scene->MyPoint1->ObjData.CustomData1.y = mClientHeight / 10;
+				scene->MyPoint1->CenterPos.x = -(mClientWidth / 2)*0.0625 -(mClientWidth / 2)*0.625;
+				scene->MyPoint1->CenterPos.y = -0.9f*mClientHeight / 2;
+
+				scene->MyPoint2->ObjData.Scale = mClientWidth / 30;
+				scene->MyPoint2->ObjData.CustomData1.y = mClientHeight / 10;
+				scene->MyPoint2->CenterPos.x =  -(mClientWidth / 2)*0.625;
+				scene->MyPoint2->CenterPos.y = -0.9f*mClientHeight / 2;
+
+				scene->MyPoint3->ObjData.Scale = mClientWidth / 30;
+				scene->MyPoint3->ObjData.CustomData1.y = mClientHeight / 10;
+				scene->MyPoint3->CenterPos.x = (mClientWidth / 2)*0.0625 -(mClientWidth / 2)*0.625;
+				scene->MyPoint3->CenterPos.y = -0.9f*mClientHeight / 2;
+
+
 		//}
 		//else if (scene != NULL && scene->GetGameState() == (GS_START || GS_LOAD))
 		//{

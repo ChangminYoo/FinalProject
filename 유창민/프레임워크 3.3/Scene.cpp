@@ -44,6 +44,13 @@ Scene::~Scene()
 	if (CharacterSelect != NULL)
 		delete CharacterSelect;
 
+	if (MyPoint1 != NULL)
+		delete MyPoint1;
+	if (MyPoint2 != NULL)
+		delete MyPoint2;
+	if (MyPoint3 != NULL)
+		delete MyPoint3;
+
 	if (Time1 != NULL)
 		delete Time1;
 	if (Time2 != NULL)
@@ -768,6 +775,18 @@ void Scene::CreateUI()
 		Time1 = new TimerObject1(device, commandlist, NULL, NULL, XMFLOAT4(-35, 0.93f*mHeight / 2, 0, 0));
 		Time2 = new TimerObject2(device, commandlist, NULL, NULL, XMFLOAT4(10,  0.93f*mHeight / 2, 0, 0));
 		Time3 = new TimerObject3(device, commandlist, NULL, NULL, XMFLOAT4(55,  0.93f*mHeight / 2, 0, 0));
+
+		MyPoint1 = new PointObject1(device, commandlist, NULL, NULL, XMFLOAT4(-25-(mWidth/2)*0.625,-0.9f*mHeight / 2, 0, 0));
+		MyPoint1->ObjData.Scale= mWidth / 30;
+		MyPoint1->ObjData.CustomData1.y = mHeight / 10;
+		MyPoint2 = new PointObject1(device, commandlist, NULL, NULL, XMFLOAT4(-(mWidth / 2)*0.625, -0.9f*mHeight / 2, 0, 0));
+		MyPoint2->ObjData.Scale = mWidth / 30;
+		MyPoint2->ObjData.CustomData1.y = mHeight / 10;
+
+		MyPoint3 = new PointObject1(device, commandlist, NULL, NULL, XMFLOAT4(25-(mWidth / 2)*0.625, -0.9f*mHeight / 2, 0, 0));
+		MyPoint3->ObjData.Scale = mWidth / 30;
+		MyPoint3->ObjData.CustomData1.y = mHeight / 10;
+
 	}
 
 }
@@ -810,7 +829,16 @@ void Scene::UITick(const GameTimer & gt)
 		{
 			Time2->TexStride = 0;
 			Time1->TexStride += 1;
+
+
 		}
+
+
+		MyPoint2->TexStride = (Player->pointrank.Point%100)/10;
+		MyPoint1->TexStride = (Player->pointrank.Point / 100);
+
+
+
 	}
 
 }
@@ -868,9 +896,13 @@ void Scene::Render(const GameTimer& gt)
 				for (int i = 0; i < 4; i++)
 					SkillFrameUI[i]->Render(commandlist, gt);
 
-				Time1->Render(commandlist, gt);
+				/*Time1->Render(commandlist, gt);
 				Time2->Render(commandlist, gt);
-				Time3->Render(commandlist, gt);
+				Time3->Render(commandlist, gt);*/
+
+				MyPoint1->Render(commandlist, gt);
+				MyPoint2->Render(commandlist, gt);
+				MyPoint3->Render(commandlist, gt);
 
 				//´Ù½Ã ¿ø»óÅÂ·Î ¹Ù²ãÁÜ. ÀÌ°É ¾ÈÇÏ¸é ÇÇÅ·ÀÌ ¾û¸ÁÀÌµÊ. 
 				Player->Camera.UpdateConstantBuffer(commandlist);

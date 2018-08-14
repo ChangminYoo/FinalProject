@@ -83,6 +83,12 @@ public:
 	CGameObject* Time2 = NULL;
 	CGameObject* Time3 = NULL;
 
+	//자기점수
+	CGameObject* MyPoint1 = NULL;
+	CGameObject* MyPoint2 = NULL;
+	CGameObject* MyPoint3 = NULL;
+
+
 private:
 	//여기다 물체 배치에 대한 상수들 넣는다.
 	float BigWall_X1 = 300 * sinf(0.4f * MMPE_PI);
