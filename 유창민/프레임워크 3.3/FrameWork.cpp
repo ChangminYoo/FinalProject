@@ -347,10 +347,24 @@ LRESULT FrameWork::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				scene->Time3->CenterPos.x = mClientWidth / 8 - mClientWidth / 8 * 0.5f;
 				scene->Time3->CenterPos.y = 0.93f*mClientHeight / 2;
 
+				scene->MyPoint1->ObjData.Scale = mClientWidth / 30;
+				scene->MyPoint1->ObjData.CustomData1.y = mClientHeight / 10;
+				scene->MyPoint1->CenterPos.x = -(mClientWidth / 2)*0.0625 - (mClientWidth / 2)*0.625;
+				scene->MyPoint1->CenterPos.y = -0.9f*mClientHeight / 2;
 
-		//}
-		//else if (scene != NULL && scene->GetGameState() == (GS_START || GS_LOAD))
-		//{
+				scene->MyPoint2->ObjData.Scale = mClientWidth / 30;
+				scene->MyPoint2->ObjData.CustomData1.y = mClientHeight / 10;
+				scene->MyPoint2->CenterPos.x = -(mClientWidth / 2)*0.625;
+				scene->MyPoint2->CenterPos.y = -0.9f*mClientHeight / 2;
+
+				scene->MyPoint3->ObjData.Scale = mClientWidth / 30;
+				scene->MyPoint3->ObjData.CustomData1.y = mClientHeight / 10;
+				scene->MyPoint3->CenterPos.x = (mClientWidth / 2)*0.0625 - (mClientWidth / 2)*0.625;
+				scene->MyPoint3->CenterPos.y = -0.9f*mClientHeight / 2;
+
+
+
+		
 			if (scene->BackGround != NULL)
 			{
 				scene->BackGround->ObjData.Scale = mClientWidth;
@@ -420,6 +434,11 @@ LRESULT FrameWork::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 				}
 
+			}
+			if (scene->Title != NULL)
+			{
+				scene->Title->ObjData.Scale = mClientWidth;
+				scene->Title->ObjData.CustomData1.y= mClientHeight;
 			}
 		}
 		if (Device)
@@ -510,7 +529,7 @@ LRESULT FrameWork::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	case WM_LBUTTONDOWN:
 	case WM_MBUTTONDOWN:
 	case WM_RBUTTONDOWN:
-		if(scene->GetGameState()==GS_PLAY)
+		if(scene != NULL && scene->GetGameState()==GS_PLAY)
 			OnMouseDown(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
 		return 0;
 	case WM_LBUTTONUP:
@@ -520,7 +539,7 @@ LRESULT FrameWork::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		OnMouseUp(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
 		return 0;
 	case WM_MOUSEMOVE:
-		if (scene->GetGameState() == GS_PLAY)
+		if (scene != NULL && scene->GetGameState() == GS_PLAY)
 			OnMouseMove(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
 		return 0;
 	case WM_KEYUP:
