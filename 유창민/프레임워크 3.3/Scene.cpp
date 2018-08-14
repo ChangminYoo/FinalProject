@@ -43,7 +43,8 @@ Scene::~Scene()
 		delete BackGround;
 	if (CharacterSelect != NULL)
 		delete CharacterSelect;
-
+	if (Title != NULL)
+		delete Title;
 	if (Time1 != NULL)
 		delete Time1;
 	if (Time2 != NULL)
@@ -125,7 +126,16 @@ Scene::~Scene()
 
 void Scene::SceneState()
 {
-	if (GAMESTATE == GS_START)//시작시 생성자에서 UI등 기본적인것은 거기서 로드함.
+	if (GAMESTATE == GS_TITLE)
+	{
+		if (Title->TexStride >= 4.0f)
+		{
+			SetGameState(GS_START);
+		}
+	
+	}
+
+	else if (GAMESTATE == GS_START)//시작시 생성자에서 UI등 기본적인것은 거기서 로드함.
 	{
 		if (GetAsyncKeyState(VK_SPACE) & 0x8000 && GetFocus())
 		{
@@ -709,9 +719,7 @@ void Scene::CreateGameObject()
 	for (int i = 0; i < 4; i++)
 	{
 		SkillUI[i]->TexOff = Player->skilldata.Skills[i];
-
 		((CoolBarObject*)SkillCoolBar[i])->MaxCoolTime = Player->skilldata.SkillsMaxCoolTime[Player->skilldata.Skills[i]];
-		//Player->skilldata.SkillsCoolTime[i] = Player->skilldata.SkillsMaxCoolTime[Player->skilldata.Skills[i]];
 	}
 
 
@@ -729,6 +737,7 @@ void Scene::CreateUI()
 
 	SelectBar = new SelectBarObject(device, commandlist, NULL, NULL, XMFLOAT4(0 * 100 - 150, 0.9f*-mHeight / 2, 0, 0));
 
+	Title = new TitleObject(device, commandlist, NULL, NULL, XMFLOAT4(0, 0, 0, 0));
 	
 	for (int i = 0; i < 4; i++)
 	{
@@ -841,7 +850,7 @@ void Scene::Render(const GameTimer& gt)
 			Player->Camera.UpdateConstantBuffer(commandlist);
 			light->UpdateConstantBuffer(commandlist);
 			
-			
+
 			if (GetGameState() == GS_PLAY)
 			{
 				//쉐이더가 보유한 그려야할 오브젝트 목록을 그린다.
@@ -875,17 +884,24 @@ void Scene::Render(const GameTimer& gt)
 				//다시 원상태로 바꿔줌. 이걸 안하면 피킹이 엉망이됨. 
 				Player->Camera.UpdateConstantBuffer(commandlist);
 			}
-			else if (GetGameState() == GS_START || GetGameState()==GS_LOAD)
+			else if (GetGameState() == GS_TITLE || GetGameState() == GS_START || GetGameState()==GS_LOAD)
 			{
 				Player->Camera.UpdateConstantBufferOrtho(commandlist);
 				Shaders->SetBillboardShader(commandlist);
 
-				if(GetGameState() == GS_START)
+				if (GetGameState() == GS_START|| GetGameState() == GS_LOAD)
+				{
+					if(GetGameState() == GS_START)
 					CharacterSelect->Render(commandlist, gt);
+					
+					BackGround->Render(commandlist, gt);
+				}
+				if (GetGameState() == GS_TITLE)
+					Title->Render(commandlist, gt);
 
-				BackGround->Render(commandlist, gt);
 				Player->Camera.UpdateConstantBuffer(commandlist);
 			}
+
 	}
 }
 

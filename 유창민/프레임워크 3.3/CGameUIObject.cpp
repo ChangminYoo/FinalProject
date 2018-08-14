@@ -903,3 +903,101 @@ void TimerObject3::Render(ID3D12GraphicsCommandList * commandlist, const GameTim
 	commandlist->DrawIndexedInstanced(Mesh.nindex, 1, Mesh.nioffset, Mesh.nOffset, 0);
 
 }
+
+TitleObject::TitleObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist, list<CGameObject*>* Plist, list<CGameObject*>* shadow, XMFLOAT4 cp) : CGameObject(m_Device, commandlist, Plist, shadow, cp)
+{
+	ObjData.isAnimation = 0;
+	ObjData.Scale = 800.0f;
+	ObjData.CustomData1.y = 600.0f;
+	ObjData.SpecularParamater = 0.5f;//스페큘러를 낮게준다.
+	ObjData.CustomData1.x = 5;
+	MinDepth = true;
+
+	//게임관련 데이터들
+	gamedata.GodMode = true;
+	staticobject = true;
+
+	if (CreateMesh == false)
+	{
+		Mesh.Index = NULL;
+		Mesh.SubResource = NULL;
+		LoadTexture(m_Device, commandlist, this, Textures, SrvDescriptorHeap, "TitleTex", L"textures/ui/title.dds", false);
+		TextureName = "TitleTex";
+		SetMesh(m_Device, commandlist);
+		CreateMesh = true;
+
+	}
+}
+
+void TitleObject::SetMesh(ID3D12Device * m_Device, ID3D12GraphicsCommandList * commandlist)
+{
+	UINT numOfitem = 1;
+
+
+	Mesh.SubResource = new CVertex;
+	Mesh.nVertex = numOfitem;
+	Mesh.nStride = sizeof(CVertex);
+	Mesh.nOffset = 0;
+
+
+	Mesh.Index = new UINT;
+	Mesh.nindex = numOfitem;
+	Mesh.nioffset = 0;
+	Mesh.nisize = sizeof(UINT);
+
+
+	//여기서 좌표를 일괄적으로 설정 할 수 있다
+	for (int i = 0; i < numOfitem; ++i)
+	{
+
+		Mesh.SubResource[i].V = XMFLOAT3(0, 0, 0);
+
+		Mesh.Index[i] = i;
+	}
+
+	Mesh.CreateVertexBuffer(m_Device, commandlist);
+	Mesh.CreateIndexBuffer(m_Device, commandlist);
+}
+
+void TitleObject::Render(ID3D12GraphicsCommandList * commandlist, const GameTimer & gt)
+{
+	times += gt.DeltaTime();
+	if (times >= 0.5f)
+	{
+		float t = 0.5f - times;
+		TexStride += 1;
+		times = t;
+	}
+
+	ObjData.TexClamp = XMFLOAT4(0.0f + (0.2f*TexStride), 0.2f + (0.2f*TexStride), 0, 0);
+	
+
+	//텍스처가 사이즈가 0 이상이면 연결
+	if (Textures.size()>0)
+		SetTexture(commandlist, SrvDescriptorHeap, Textures["TitleTex"].get()->Resource.Get());
+	//월드변환 업데이트 및 연결
+	UpdateConstBuffer(commandlist, false);
+
+	//애니메이션이 있으면 애니메이션또한 연결
+
+	//메쉬를 렌더해야하는데 포인트리스트로 설정해야하므로 그냥 이렇게 함.
+	D3D12_VERTEX_BUFFER_VIEW vbv;
+
+	vbv.BufferLocation = Mesh.VertexBuffer->GetGPUVirtualAddress();
+	vbv.StrideInBytes = Mesh.nStride;
+	vbv.SizeInBytes = Mesh.nStride *  Mesh.nVertex;
+
+	commandlist->IASetVertexBuffers(0, 1, &vbv);
+
+	D3D12_INDEX_BUFFER_VIEW ibv;
+	ibv.BufferLocation = Mesh.IndexBuffer->GetGPUVirtualAddress();
+	ibv.Format = DXGI_FORMAT_R16_UINT;
+	ibv.SizeInBytes = Mesh.nisize *  Mesh.nindex;
+
+	commandlist->IASetIndexBuffer(&ibv);
+	commandlist->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
+
+
+	commandlist->DrawIndexedInstanced(Mesh.nindex, 1, Mesh.nioffset, Mesh.nOffset, 0);
+
+}

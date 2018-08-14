@@ -421,6 +421,11 @@ LRESULT FrameWork::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				}
 
 			}
+			if (scene->Title != NULL)
+			{
+				scene->Title->ObjData.Scale = mClientWidth;
+				scene->Title->ObjData.CustomData1.y= mClientHeight;
+			}
 		}
 		if (Device)
 		{
@@ -510,7 +515,7 @@ LRESULT FrameWork::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	case WM_LBUTTONDOWN:
 	case WM_MBUTTONDOWN:
 	case WM_RBUTTONDOWN:
-		if(scene->GetGameState()==GS_PLAY)
+		if(scene != NULL && scene->GetGameState()==GS_PLAY)
 			OnMouseDown(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
 		return 0;
 	case WM_LBUTTONUP:
@@ -520,7 +525,7 @@ LRESULT FrameWork::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		OnMouseUp(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
 		return 0;
 	case WM_MOUSEMOVE:
-		if (scene->GetGameState() == GS_PLAY)
+		if (scene != NULL && scene->GetGameState() == GS_PLAY)
 			OnMouseMove(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
 		return 0;
 	case WM_KEYUP:
