@@ -259,7 +259,21 @@ void Scene::SceneState()
 		if (FirstLoad == true)
 		{
 			CreateGameObject();
-
+			/*
+			for (auto& GameObject : DynamicObject)
+			{
+				if (GameObject->isNPC) continue;
+				for (const auto& client : Player->m_async_client->m_clientsID)
+				{
+					if (client.my_id == GameObject->m_player_data.id)
+					{
+						GameObject->TexOff = client.textureID;
+						break;
+					}					
+				}			
+			}
+			*/
+			
 			auto local_count = 0;
 			for (auto& GameObject : DynamicObject)
 			{
@@ -273,6 +287,7 @@ void Scene::SceneState()
 					break;
 			}
 			
+
 			//서버 추가
 			STC_CHANGE_SCENE stc_change_scene;
 			stc_change_scene.state.my_currScene = GS_LOAD;
@@ -564,9 +579,6 @@ void Scene::CreateGameObject()
 	StaticObject.push_back(new ColumnObject(device, commandlist, &BbObject, &Shadows, 0, XMFLOAT4(0, 0, -110, 0)));
 	StaticObject.push_back(new ColumnObject(device, commandlist, &BbObject, &Shadows, 0, XMFLOAT4(0, 0, 110, 0)));					  //82
 
-	StaticObject.push_back(new BreakCartObject(device, commandlist, &BbObject, &Shadows, 0, XMFLOAT4(-60, 0, -100, 0)));		      //83
-
-
 	//BigWall
 	StaticObject.push_back(new BigWallObject(device, commandlist, &BbObject, &Shadows, -BigWall_Rad1, XMFLOAT4(-BigWall_X1, 0, BigWall_Z1, 0)));//좌상							  //100
 	StaticObject.push_back(new BigWallObject(device, commandlist, &BbObject, &Shadows, BigWall_Rad1, XMFLOAT4(BigWall_X1, 0, BigWall_Z1, 0)));//우상
@@ -671,10 +683,10 @@ void Scene::CreateGameObject()
 		Player->PlayerObject->TexOff = CharacterSelect->ObjData.CustomData1.z - 1;
 		Player->PlayerObject->NTexOff = Player->PlayerObject->TexOff + 10;
 
-		//Player->skilldata.Skills[0] = 0;
-		//Player->skilldata.Skills[1] = 5;
-		//Player->skilldata.Skills[2] = 4;
-		//Player->skilldata.Skills[3] = 3;
+		Player->skilldata.Skills[0] = 0;
+		Player->skilldata.Skills[1] = 5;
+		Player->skilldata.Skills[2] = 4;
+		Player->skilldata.Skills[3] = 3;
 
 	}
 	else if (CharacterSelect->ObjData.CustomData1.z == 2)
@@ -684,10 +696,10 @@ void Scene::CreateGameObject()
 		Player->PlayerObject->TexOff = CharacterSelect->ObjData.CustomData1.z - 1;
 		Player->PlayerObject->NTexOff = Player->PlayerObject->TexOff + 10;
 
-		//Player->skilldata.Skills[0] = 1;
-		//Player->skilldata.Skills[1] = 4;
-		//Player->skilldata.Skills[2] = 5;
-		//Player->skilldata.Skills[3] = 6;
+		Player->skilldata.Skills[0] = 1;
+		Player->skilldata.Skills[1] = 4;
+		Player->skilldata.Skills[2] = 5;
+		Player->skilldata.Skills[3] = 6;
 	}
 	else if (CharacterSelect->ObjData.CustomData1.z == 3)
 	{
@@ -696,10 +708,10 @@ void Scene::CreateGameObject()
 		Player->PlayerObject->TexOff = CharacterSelect->ObjData.CustomData1.z - 1;
 		Player->PlayerObject->NTexOff = Player->PlayerObject->TexOff + 10;
 
-		//Player->skilldata.Skills[0] = 0;
-		//Player->skilldata.Skills[1] = 1;
-		//Player->skilldata.Skills[2] = 5;
-		//Player->skilldata.Skills[3] = 3;
+		Player->skilldata.Skills[0] = 0;
+		Player->skilldata.Skills[1] = 1;
+		Player->skilldata.Skills[2] = 5;
+		Player->skilldata.Skills[3] = 3;
 
 	}
 	else if (CharacterSelect->ObjData.CustomData1.z == 4)
@@ -709,10 +721,10 @@ void Scene::CreateGameObject()
 		Player->PlayerObject->TexOff = CharacterSelect->ObjData.CustomData1.z - 1;
 		Player->PlayerObject->NTexOff = Player->PlayerObject->TexOff + 10;
 
-		//Player->skilldata.Skills[0] = 0;
-		//Player->skilldata.Skills[1] = 4;
-		//Player->skilldata.Skills[2] = 3;
-		//Player->skilldata.Skills[3] = 6;
+		Player->skilldata.Skills[0] = 0;
+		Player->skilldata.Skills[1] = 4;
+		Player->skilldata.Skills[2] = 3;
+		Player->skilldata.Skills[3] = 6;
 	}
 	else if (CharacterSelect->ObjData.CustomData1.z == 5)
 	{
@@ -722,10 +734,10 @@ void Scene::CreateGameObject()
 		Player->PlayerObject->TexOff = CharacterSelect->ObjData.CustomData1.z - 1;
 		Player->PlayerObject->NTexOff = Player->PlayerObject->TexOff + 10;
 
-		//Player->skilldata.Skills[0] = 1;
-		//Player->skilldata.Skills[1] = 4;
-		//Player->skilldata.Skills[2] = 5;
-		//Player->skilldata.Skills[3] = 6;
+		Player->skilldata.Skills[0] = 1;
+		Player->skilldata.Skills[1] = 4;
+		Player->skilldata.Skills[2] = 5;
+		Player->skilldata.Skills[3] = 6;
 	}
 	else if (CharacterSelect->ObjData.CustomData1.z == 6)
 	{
@@ -736,10 +748,10 @@ void Scene::CreateGameObject()
 		Player->PlayerObject->TexOff = CharacterSelect->ObjData.CustomData1.z - 1;
 		Player->PlayerObject->NTexOff = Player->PlayerObject->TexOff + 10;
 
-		//Player->skilldata.Skills[0] = 0;
-		//Player->skilldata.Skills[1] = 4;
-		//Player->skilldata.Skills[2] = 5;
-		//Player->skilldata.Skills[3] = 6;
+		Player->skilldata.Skills[0] = 0;
+		Player->skilldata.Skills[1] = 4;
+		Player->skilldata.Skills[2] = 5;
+		Player->skilldata.Skills[3] = 6;
 	}
 	else if (CharacterSelect->ObjData.CustomData1.z == 7)
 	{
@@ -749,10 +761,10 @@ void Scene::CreateGameObject()
 		Player->PlayerObject->TexOff = CharacterSelect->ObjData.CustomData1.z - 1;
 		Player->PlayerObject->NTexOff = Player->PlayerObject->TexOff + 10;
 
-		//Player->skilldata.Skills[0] = 0;
-		//Player->skilldata.Skills[1] = 5;
-		//Player->skilldata.Skills[2] = 3;
-		//Player->skilldata.Skills[3] = 6;
+		Player->skilldata.Skills[0] = 0;
+		Player->skilldata.Skills[1] = 5;
+		Player->skilldata.Skills[2] = 3;
+		Player->skilldata.Skills[3] = 6;
 
 	}
 	else if (CharacterSelect->ObjData.CustomData1.z == 8)
@@ -762,10 +774,10 @@ void Scene::CreateGameObject()
 		Player->PlayerObject->TexOff = CharacterSelect->ObjData.CustomData1.z - 1;
 		Player->PlayerObject->NTexOff = Player->PlayerObject->TexOff + 10;
 
-		//Player->skilldata.Skills[0] = 0;
-		//Player->skilldata.Skills[1] = 1;
-		//Player->skilldata.Skills[2] = 4;
-		//Player->skilldata.Skills[3] = 3;
+		Player->skilldata.Skills[0] = 0;
+		Player->skilldata.Skills[1] = 1;
+		Player->skilldata.Skills[2] = 4;
+		Player->skilldata.Skills[3] = 3;
 	}
 	else if (CharacterSelect->ObjData.CustomData1.z == 9)
 	{
@@ -774,10 +786,10 @@ void Scene::CreateGameObject()
 		Player->PlayerObject->TexOff = CharacterSelect->ObjData.CustomData1.z - 1;
 		Player->PlayerObject->NTexOff = Player->PlayerObject->TexOff + 10;
 
-		//Player->skilldata.Skills[0] = 1;
-		//Player->skilldata.Skills[1] = 5;
-		//Player->skilldata.Skills[2] = 3;
-		//Player->skilldata.Skills[3] = 6;
+		Player->skilldata.Skills[0] = 1;
+		Player->skilldata.Skills[1] = 5;
+		Player->skilldata.Skills[2] = 3;
+		Player->skilldata.Skills[3] = 6;
 	}
 	else if (CharacterSelect->ObjData.CustomData1.z == 10)
 	{
@@ -786,17 +798,17 @@ void Scene::CreateGameObject()
 		Player->PlayerObject->TexOff = CharacterSelect->ObjData.CustomData1.z - 1;
 		Player->PlayerObject->NTexOff = Player->PlayerObject->TexOff + 10;
 
-		//Player->skilldata.Skills[0] = 0;
-		//Player->skilldata.Skills[1] = 1;
-		//Player->skilldata.Skills[2] = 5;
-		//Player->skilldata.Skills[3] = 6;
+		Player->skilldata.Skills[0] = 0;
+		Player->skilldata.Skills[1] = 1;
+		Player->skilldata.Skills[2] = 5;
+		Player->skilldata.Skills[3] = 6;
 	}
 
-	//for (int i = 0; i < 4; i++)
-	//{
-	//	SkillUI[i]->TexOff = Player->skilldata.Skills[i];
-	//	((CoolBarObject*)SkillCoolBar[i])->MaxCoolTime = Player->skilldata.SkillsMaxCoolTime[Player->skilldata.Skills[i]];
-	//}
+	for (int i = 0; i < 4; i++)
+	{
+		SkillUI[i]->TexOff = Player->skilldata.Skills[i];
+		((CoolBarObject*)SkillCoolBar[i])->MaxCoolTime = Player->skilldata.SkillsMaxCoolTime[Player->skilldata.Skills[i]];
+	}
 }
 
 void Scene::CreateUI()
@@ -917,8 +929,8 @@ void Scene::UITick(const GameTimer & gt)
 
 
 		//포인트 증가 
-		//MyPoint2->TexStride = (Player->pointrank.Point % 100) / 10;
-		//MyPoint1->TexStride = (Player->pointrank.Point / 100);
+		MyPoint2->TexStride = (Player->PlayerObject->pointrank.Point % 100) / 10;
+		MyPoint1->TexStride = (Player->PlayerObject->pointrank.Point / 100);
 	}
 }
 
@@ -980,6 +992,9 @@ void Scene::Render(const GameTimer& gt)
 				Time2->Render(commandlist, gt);
 				Time3->Render(commandlist, gt);
 			
+				MyPoint1->Render(commandlist, gt);
+				MyPoint2->Render(commandlist, gt);
+				MyPoint3->Render(commandlist, gt);
 				//다시 원상태로 바꿔줌. 이걸 안하면 피킹이 엉망이됨. 
 				Player->Camera.UpdateConstantBuffer(commandlist);
 			}
@@ -1303,6 +1318,8 @@ void Scene::SET_STAGET_TIMER_BY_SERVER_DATA(const STC_StageTimer & timer)
 void Scene::SET_SELECTED_CHARACTER_LOADSCENE_BY_SERVER_DATA(const unsigned short& id, const STC_ShowSelectCharacter & data)
 {
 	int find_cnt = 0;
+	Player->m_lobbySceneMyID = id;
+
 	if (Player->m_async_client->m_lobbyData.empty())
 	{
 		Player->m_async_client->m_lobbyData.push_back({ id, data.sel_id });
@@ -1326,6 +1343,8 @@ void Scene::SET_SELECTED_CHARACTER_LOADSCENE_BY_SERVER_DATA(const unsigned short
 		Player->m_async_client->m_lobbyData.push_back({ id, data.sel_id });
 	}
 
+	cout << "\n";
+	cout << "MyID: " << static_cast<int>(Player->m_lobbySceneMyID) << "\n";
 }
 
 void Scene::SET_DRAW_STATE_BY_DEATH_BY_SERVER_DATA(const unsigned short& id, const STC_DrawState & data)
@@ -1342,6 +1361,22 @@ void Scene::SET_DRAW_STATE_BY_DEATH_BY_SERVER_DATA(const unsigned short& id, con
 
 			dynamic_cast<CCubeManObject*>(GameObject)->Hpbar->DrawObj = true;
 			dynamic_cast<CCubeManObject*>(GameObject)->HPFrame->DrawObj = true;
+
+			if (!data.isTopRanker)
+			{
+				GameObject->pointrank.TopMode = false;
+				GameObject->ObjData.Scale = 3;
+
+				XMFLOAT3 rx(3, 0, 0);
+				XMFLOAT3 ry(0, 10, 0);
+				XMFLOAT3 rz(0, 0, 3);
+				GameObject->rco.SetPlane(rx, ry, rz);
+
+				dynamic_cast<CCubeManObject*>(GameObject)->s->ObjData.Scale = 2.0f;
+				dynamic_cast<CCubeManObject*>(GameObject)->Hpbar->YPos = 10;
+				dynamic_cast<CCubeManObject*>(GameObject)->HPFrame->YPos = 10;
+
+			}
 
 			cout << "ID: " << static_cast<int>(id) << "DrawObject: " << GameObject->DrawObj << "\n";
 			break;
@@ -1437,7 +1472,7 @@ void Scene::SET_PLAYER_BY_SEVER_DATA(const unsigned short & id, const Player_Dat
 					GameObject->pointrank.KillCount = playerdata.killcount;
 					GameObject->pointrank.Point = playerdata.score;
 					GameObject->pointrank.Rank = playerdata.rank;
-					
+
 					if (playerdata.topRank)
 					{
 						GameObject->pointrank.TopMode = true;
@@ -1446,12 +1481,11 @@ void Scene::SET_PLAYER_BY_SEVER_DATA(const unsigned short & id, const Player_Dat
 						XMFLOAT3 ry(0, 13, 0);
 						XMFLOAT3 rz(0, 0, 4);
 						GameObject->rco.SetPlane(rx, ry, rz);
-						GameObject->pp->SetHalfBox(4, 13, 4);//충돌 박스의 x,y,z 크기
 
 						dynamic_cast<CCubeManObject*>(GameObject)->s->ObjData.Scale = 3.0f;
 						dynamic_cast<CCubeManObject*>(GameObject)->Hpbar->YPos = 16;
 						dynamic_cast<CCubeManObject*>(GameObject)->HPFrame->YPos = 16;
-						
+
 						//GameObject->gamedata.MAXHP = 700;
 						//GameObject->gamedata.Speed = 75;
 						//GameObject->gamedata.HP = GameObject->gamedata.HP + 600;
@@ -1466,7 +1500,6 @@ void Scene::SET_PLAYER_BY_SEVER_DATA(const unsigned short & id, const Player_Dat
 						GameObject->n_Animation = static_cast<int>(playerdata.ani);
 					}
 					
-
 				}
 				break;
 
@@ -1498,11 +1531,6 @@ void Scene::SET_PLAYER_BY_SEVER_DATA(const unsigned short & id, const Player_Dat
 
 				}
 				break;
-
-				case PACKET_PROTOCOL_TYPE::DRAW_STATE_BY_DEAD:
-				{
-					
-				}
 
 			default:
 				break;

@@ -704,21 +704,6 @@ void BulletCube::SetMaterial(ID3D12Device * m_Device, ID3D12GraphicsCommandList 
 
 void BulletCube::Tick(const GameTimer & gt)
 {
-	//적분기. 적분기란? 매 틱마다 힘! 에의해서 변화 되는 가속도/속도/위치를 갱신한다.
-	//이때 pp의 position과 CenterPos를 일치시켜야하므로 CenterPos의 포인터를 인자로 넘겨야 한다.
-
-	//pp->integrate(gt.DeltaTime());
-
-	/*
-	Orient = QuaternionMultiply(Orient, QuaternionRotation(Lookvector, MMPE_PI * gt.DeltaTime()));
-
-	//투사체는 생명 주기가 있어야 한다.
-	LifeTime -= gt.DeltaTime();
-
-	if (LifeTime <= 0)
-		DelObj = true;
-
-	*/
 
 }
 

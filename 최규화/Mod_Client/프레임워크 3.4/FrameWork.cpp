@@ -560,6 +560,8 @@ void FrameWork::OnMouseDown(WPARAM btnState, int x, int y)
 		scene->Player->skilldata.isSkillOn[scene->Player->skilldata.SellectBulletIndex] &&
 		scene->Player->m_async_client->m_start_attack == false)
 	{
+		
+		if (!scene->Player->PlayerObject->m_player_data.alive) return;
 
 		if (scene->Player->skilldata.SellectBulletIndex == 0)
 			scene->Sound->PlaySoundEffect(CSound::SoundType::SKILL1);

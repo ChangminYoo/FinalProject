@@ -9,6 +9,7 @@
 
 #define MONSTER_IMP_SCORE 100
 #define NORMAL_PLAYER_SCORE 10
+#define TOP_RANKER_SCORE 30
 
 #define DISCONNECTED 0
 #define CONNECTED 1
@@ -307,6 +308,7 @@ struct STC_DrawState
 {
 	unsigned short			   my_id;
 	char                       drawobj;
+	char					   isTopRanker;
 };
 
 struct STC_LoginData

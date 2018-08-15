@@ -388,6 +388,7 @@ void AsyncClient::SendPacketRegular(CGameObject& gobj, const GameTimer& gt)
 	//obj->Rightvector;
 }
 
+//캐릭터 선택 로비 씬에서 SPACE키를 누르고 주기적으로 실행됨
 void AsyncClient::SendPacketRegular(const GameTimer & gt)
 {
 	//클라이언트에서 매 프레임마다 정기적으로 보내줘야할 데이터 패킷
@@ -413,6 +414,8 @@ void AsyncClient::SendPacketRegular(const GameTimer & gt)
 
 }
 
+
+//캐릭터 선택 로비 씬에서 SPACE키를 누르기전 주기적으로 실행됨
 void AsyncClient::SendPacketLoadScenePacketRegular(const GameTimer & gt)
 {
 	if (m_mySkipLogin)
@@ -426,6 +429,7 @@ void AsyncClient::SendPacketLoadScenePacketRegular(const GameTimer & gt)
 
 		STC_CHAR_NUMBER_LOAD_SCENE cts_number;
 		cts_number.show_char_number.sel_id = m_myTextureID;
+		
 
 		SendPacket(reinterpret_cast<Packet*>(&cts_number));
 	}
