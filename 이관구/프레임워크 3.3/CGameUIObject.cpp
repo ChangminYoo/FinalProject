@@ -6,6 +6,7 @@ AimObject::AimObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList * comman
 	ObjData.Scale = 20.0f;
 	ObjData.SpecularParamater = 0.5f;//스페큘러를 낮게준다.
 	MinDepth = true;
+	ObjData.CustomData1.x = 7;
 
 	//게임관련 데이터들
 	gamedata.GodMode = true;
@@ -94,7 +95,7 @@ CoolBarObject::CoolBarObject(ID3D12Device * m_Device, ID3D12GraphicsCommandList 
 	ObjData.isAnimation = 0;
 	ObjData.Scale = 80.0f;
 	ObjData.SpecularParamater = 0.5f;//스페큘러를 낮게준다.
-	ObjData.CustomData1.x = 1;
+	ObjData.CustomData1.x = 8;
 	MinDepth = true;
 	Master = master;
 	ObjData.CustomData1.y = 0;

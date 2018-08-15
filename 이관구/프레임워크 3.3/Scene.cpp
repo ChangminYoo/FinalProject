@@ -196,6 +196,7 @@ void Scene::SceneState()
 			ResetTime = false;
 			SetGameState(GS_PLAY);
 			Sound->PlaySoundBG();
+
 		}
 		else
 		{
