@@ -34,62 +34,6 @@ CBulletObject::CBulletObject(const unsigned short & master_id, const unsigned sh
 
 	m_after_collision = AFTER_COLLISION_EFFECT::EMPTY;		//기본은 충돌 후 파티클 생성x
 
-
-	/*
-	if (m_type == protocol_DiceBullet)
-	{
-		XMFLOAT3 l{ 0,0,1 };
-		XMVECTOR ol = XMLoadFloat3(&l);
-		XMVECTOR nl = XMLoadFloat3(&g_clients[m_masterID]->GetLookVector());
-
-		auto axis = XMVector3Cross(ol, nl);
-		//방향축을 완성.
-		axis = XMVector3Normalize(axis);
-		XMFLOAT3 Axis;
-		XMStoreFloat3(&Axis, axis);
-		//이제 회전각도를 구해야한다. 내적을 통해 회전각도를 구한다.
-
-		auto temp = XMVector3Dot(ol, nl);
-
-		float d;//기존 룩벡터와 새로운 룩벡터를 내적한 결과.
-		XMStoreFloat(&d, temp);
-		if (fabsf(d) <= 1)//반드시 이 결과는 -1~1 사이여야한다. 그래야 각도가 구해진다.
-			d = acos(d);//각도 완성. 라디안임
-
-		auto ori = QuaternionRotation(Axis, d);
-		auto wmatrix = XMMatrixIdentity();
-		auto quater = XMLoadFloat4(&ori);
-		wmatrix *= XMMatrixRotationQuaternion(quater);
-
-		auto orr = XMVectorSet(1, 0, 0, 0);
-		orr = XMVector4Transform(orr, wmatrix);//가짜 라이트 벡터
-		orr = XMVector3Normalize(orr);
-		auto RealRight = XMVector3Cross(axis, nl);//진짜 라이트벡터
-		RealRight = XMVector3Normalize(RealRight);
-
-		//진짜 라이트 벡터와 가짜 라이트 벡터를 내적함.
-		temp = XMVector3Dot(RealRight, orr);
-
-		XMStoreFloat(&d, temp);
-		if (fabsf(d) <= 1)//반드시 이 결과는 -1~1 사이여야한다. 그래야 각도가 구해진다.
-			d = acos(d);//각도 완성. 라디안임
-		auto ori2 = XMQuaternionRotationAxis(nl, d);//진짜 룩벡터를 회전축으로 삼고 진짜라이트와 가짜라이트의 사잇각만큼회전
-
-		auto tempori = XMLoadFloat4(&ori);
-		tempori = XMQuaternionMultiply(tempori, ori2);
-		XMStoreFloat4(&ori, tempori);//최종 회전 방향
-		
-		XMFLOAT4 Orient{ 0,0,0,1 };
-		Orient = QuaternionMultiply(Orient, ori);
-		XMFLOAT3 axis2{ 0,1,0 };
-		auto q2 = QuaternionRotation(axis2, m_degree);
-		Orient = QuaternionMultiply(Orient, q2);
-		
-		m_rot4f = { Orient.x, Orient.y, Orient.z, Orient.w };
-
-	}
-	*/
-
 	UpdateLookvector();			//degree를 이용해 변경된 회전값을 클라이언트로부터 건네받았음. 이를 이용해 lookvector, rightvector, upvector 업데이트
 	UpdateUpvector();
 
@@ -110,7 +54,7 @@ CBulletObject::CBulletObject(const unsigned short & master_id, const unsigned sh
 		m_ability.speed = 150;
 		pp->SetHalfBox(1, 1, 1);
 		pp->SetMass(0.35f);
-		m_ability.attack = 1000;
+		m_ability.attack = 10;
 	}
 	else if (BULLET_TYPE::protocol_HeavyBullet == static_cast<int>(type)) 
 	{
@@ -283,7 +227,7 @@ void CBulletObject::Collision(vector<CPlayerObject*>* clients, double deltime)
 
 					if (g_clients[this->GetBulletMasterID()]->GetAlive())
 					{
-						if ((*iter)->GetIsTopRanker())
+						if ((*iter)->GetID() == CPlayerObject::m_topRankerID)
 							g_clients[this->GetBulletMasterID()]->SetPlayerScore(TOP_RANKER_SCORE);
 						else
 							g_clients[this->GetBulletMasterID()]->SetPlayerScore(NORMAL_PLAYER_SCORE);
@@ -324,10 +268,10 @@ void CBulletObject::Collision(vector<CNpcObject*>* npcs, double deltime)
 			if ((*iter)->GetAlive() == false) continue;
 
 			//2. 불렛과 충돌했는데, 불렛을 쏜 상대가 죽은경우
-			if (!g_clients[this->m_masterID]->GetAlive()) continue;
+			if (!g_clients[m_masterID]->GetAlive()) continue;
 
 			//3. 해당 불렛이 임프가 쏜 불렛인 경우 스킵
-			if (this->GetObjectType() == protocol_NpcStoneBullet) continue;
+			if (GetObjectType() == protocol_NpcStoneBullet) continue;
 
 			//----------------------------------------------------충돌 스킵------------//
 
@@ -346,6 +290,8 @@ void CBulletObject::Collision(vector<CNpcObject*>* npcs, double deltime)
 				if ((*iter)->GetMyBasicPacketData().monster_type == IMP)
 					(*iter)->fsm->aidata.LastPosition = this->GetCenterPos4f();
 				
+				m_alive = false;
+				m_bulldata.alive = false;
 
 				//플레이어가 쏜 불렛에 맞고 임프(IMP)몬스터의 체력이 0이하가 되어 죽었음
 				//해당 불렛의 주인ID를 가진 플레이어가 살아있다면 점수를 올린다
@@ -369,8 +315,6 @@ void CBulletObject::Collision(vector<CNpcObject*>* npcs, double deltime)
 				pp->ResolveVelocity(*(*iter)->GetPhysicsPoint(), cn, deltime);
 				(*iter)->GetPhysicsPoint()->SetBounce(false);
 
-				m_alive = false;
-				m_bulldata.alive = false;
 			}
 		}
 	}
@@ -430,12 +374,12 @@ STC_HammerSkillInfo CHammerBulletObject::GetChangedHammerBulletState() const
 	return STC_HammerSkillInfo(m_stc_hammerInfo);
 }
 
-CHammerBulletObject::CHammerBulletObject(const unsigned short & master_id, const unsigned short & myid, const Position & pos, const Rotation & rot, int numOfHammer, const XMFLOAT4 & opp)
+CHammerBulletObject::CHammerBulletObject(const unsigned short & master_id, const unsigned short & myid, const Position & pos, const Rotation & rot, int numOfHammer, const XMFLOAT4 & opp, bool isHead)
 {
 	m_masterID = master_id;
 	m_id = myid;
 
-	m_headBullet = true;
+	m_headBullet = isHead;
 
 	m_type = BULLET_TYPE::protocol_HammerBullet;
 	m_alive = true;
@@ -574,12 +518,18 @@ void CHammerBulletObject::Collision(vector<CPlayerObject*>* clients, double delt
 				// 불렛을 맞은 상대가 죽었을 경우, 그 상대가 플레이어일 경우 점수를 올린다
 				if ((*iter)->GetMyCurrHP() <= 0)
 				{
+					(*iter)->SetMyCharacterDeathCount();
+					(*iter)->CalculatePlayerScoreForRanking();
+
 					if (g_clients[this->GetBulletMasterID()]->GetAlive())
 					{
-						if ((*iter)->GetIsTopRanker()) 
+						if ((*iter)->GetID() == CPlayerObject::m_topRankerID) 
 							g_clients[this->GetBulletMasterID()]->SetPlayerScore(TOP_RANKER_SCORE);
 						else
 							g_clients[this->GetBulletMasterID()]->SetPlayerScore(NORMAL_PLAYER_SCORE);
+
+						g_clients[this->GetBulletMasterID()]->SetMyCharacterKillCount();
+						g_clients[this->GetBulletMasterID()]->CalculatePlayerScoreForRanking();
 					}
 				}
 
@@ -591,7 +541,8 @@ void CHammerBulletObject::Collision(vector<CPlayerObject*>* clients, double delt
 				{
 					auto nPos4f = Float4Add(XMFLOAT4(m_pos4f.x, m_pos4f.y, m_pos4f.z, m_pos4f.w), XMFLOAT4(15, 0, 15, 0));
 
-					g_bullets.push_back(move(new CHammerBulletObject(m_masterID, ++m_id, { nPos4f.x, nPos4f.y, nPos4f.z, nPos4f.w }, { 0,0,0,1 }, m_numOfHammer - 1, XMFLOAT4(0, 0, 35, 0))));
+					auto local_id = m_id;
+					g_bullets.push_back(move(new CHammerBulletObject(m_masterID, ++local_id, { nPos4f.x, nPos4f.y, nPos4f.z, nPos4f.w }, { 0,0,0,1 }, m_numOfHammer - 1, XMFLOAT4(0, 0, 35, 0), false)));
 
 					m_numOfHammer = 0;
 				}
@@ -636,28 +587,28 @@ void CHammerBulletObject::Collision(vector<CNpcObject*>* npcs, double deltime)
 					}
 				}
 
+				m_alive = false;
+				m_bulldata.alive = false;
+
 				//해머는 다이나믹오브젝트랑 충돌시 재생성된다.
 				if (m_numOfHammer > 0)
 				{
 					auto nPos4f = Float4Add(XMFLOAT4(m_pos4f.x, m_pos4f.y, m_pos4f.z, m_pos4f.w), XMFLOAT4(15, 0, 15, 0));
+					auto local_id = m_id;
+					g_bullets.push_back(move(new CHammerBulletObject(m_masterID, ++local_id, { nPos4f.x, nPos4f.y, nPos4f.z, nPos4f.w }, { 0,0,0,1 }, m_numOfHammer - 1, XMFLOAT4(0, 0, 35, 0), false)));
 
-					CBulletObject * bullet = new CHammerBulletObject(m_masterID, ++m_id, { nPos4f.x, nPos4f.y, nPos4f.z, nPos4f.w }, { 0,0,0,1 }, m_numOfHammer - 1, XMFLOAT4(0, 0, 35, 0));
-					
+					m_numOfHammer = 0;
+					/*
 					if (dynamic_cast<CHammerBulletObject*>(bullet))
 					{
 						dynamic_cast<CHammerBulletObject*>(bullet)->m_headBullet = false;
 						dynamic_cast<CHammerBulletObject*>(bullet)->m_stc_hammerInfo.headBullet = false;
 					}
 					else { cout << "In CHammerBulletObject::Collision Error: Hammer Bullet dynamic_cast Error\n"; }
+					*/
 
-					cout << "Hammer ID: " << bullet->GetID() << " , " << "is HeadBullet ?? " << dynamic_cast<CHammerBulletObject*>(bullet)->m_headBullet << "\n";
 
-					g_bullets.emplace_back(bullet);
-					m_numOfHammer = 0;
 				}
-
-				m_alive = false;
-				m_bulldata.alive = false;
 			}
 		}
 	}

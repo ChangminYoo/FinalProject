@@ -448,7 +448,7 @@ void CPlayerObject::ProcessPacket(Packet * packet)
 			ready_flag = true;
 		
 
-		if (g_clients.size() >= 2 && ready_flag) // 2명 이상 레디를 눌렀을 시 게임 스타트
+		if (g_clients.size() >= 1 && ready_flag) // 2명 이상 레디를 눌렀을 시 게임 스타트
 		{
 			STC_PLAYER_LOGIN stc_player_login;
 	
@@ -515,6 +515,8 @@ void CPlayerObject::ProcessPacket(Packet * packet)
 			//2. 타이머 스레드 시작
 			g_timer_queue.CheckPrevTime();
 			g_timer_queue.AddEvent(0, 0, REGULAR_PACKET_EXCHANGE, true, 0);
+
+			g_start_oneGame = true;
 		}
 
 		/*
@@ -655,8 +657,8 @@ void CPlayerObject::ProcessPacket(Packet * packet)
 
 		auto test_data = reinterpret_cast<STC_Test*>(packet);
 
-		cout << "ID: " << test_data->player_data.id << "ElaspedTime: " << test_data->time.t_time << "------"
-			"PrevTime: " << test_data->time.p_time << endl;
+		//cout << "ID: " << test_data->player_data.id << "ElaspedTime: " << test_data->time.t_time << "------"
+		//	"PrevTime: " << test_data->time.p_time << endl;
 	}
 	break;
 
@@ -691,7 +693,7 @@ void CPlayerObject::ProcessPacket(Packet * packet)
 			if (client->GetIsAI() == true || client->GetConnectState() == false) continue;
 
 			client->SendPacket(reinterpret_cast<Packet*>(&stc_cani));
-			cout << "Client Number " << client->m_id << "Animation : " << static_cast<int>(ani->ani_state) << "\n";
+			//cout << "Client Number " << client->m_id << "Animation : " << static_cast<int>(ani->ani_state) << "\n";
 		} 
 	}
 	break;
@@ -874,7 +876,7 @@ void CPlayerObject::ProcessPacket(Packet * packet)
 
 		XMFLOAT4 inOpp = { data->skill_data.opp_pos4f.x, data->skill_data.opp_pos4f.y, data->skill_data.opp_pos4f.z, data->skill_data.opp_pos4f.w };
 		g_bullobj = new CHammerBulletObject(data->skill_data.master_id, data->skill_data.my_id, data->skill_data.pos4f,
-									        data->skill_data.rot4f, data->skill_data.weapon_num, inOpp);
+									        data->skill_data.rot4f, data->skill_data.weapon_num, inOpp, true);
 
 		g_bullets.emplace_back(g_bullobj);
 	}

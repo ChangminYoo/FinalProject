@@ -23,6 +23,7 @@ CNpcObject					*g_npcobj;
 queue<char>					g_pdir_queue;
 
 bool                        g_start_physics;
+bool					    g_start_oneGame;
 
 int main()
 {
@@ -31,6 +32,7 @@ int main()
 		_wsetlocale(LC_ALL, L"korean");
 
 		g_start_physics = false;
+		g_start_oneGame = false;
 
 		CAccpetPlayer server;
 	}

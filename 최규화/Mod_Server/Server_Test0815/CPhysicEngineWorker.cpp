@@ -87,7 +87,7 @@ void CPhysicEngineWorker::Update()
 		
 		for (auto& bullet : g_bullets)
 		{
-			if (!bullet->GetAlive()) continue;
+			//if (!bullet->GetAlive()) continue;
 			if (!g_clients[bullet->GetBulletMasterID()]->GetAlive()) continue;
 
 			bullet->Tick(m_deltime);

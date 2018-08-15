@@ -95,8 +95,6 @@ void CTimerWorker::ProcessPacket(event_type * et)
 			if (!g_clients[et->master_id]->GetWaveshockState())
 				g_clients[et->master_id]->SetWaveshockState(true);
 
-			//m_prevtime = high_resolution_clock::now();
-
 			if (g_clients[et->master_id]->GetWaveshockCurrtime() < SKILL_WAVESHOCK_OP_TIME)
 			{
 				AddEvent(et->id, SKILL_WAVESHOCK_OP_TIME, SKILL_WAVESHOCK, true, et->master_id);
@@ -108,19 +106,6 @@ void CTimerWorker::ProcessPacket(event_type * et)
 				g_clients[et->master_id]->SetWaveshockState(false);
 				g_clients[et->master_id]->SetWaveshockCurrtime(0.0);
 				
-				/*
-				STC_SKILL_WAVESHOCK stc_skill_waveshock;
-				stc_skill_waveshock.skill_data.alive = false;
-				stc_skill_waveshock.skill_data.master_id = et->master_id;
-				stc_skill_waveshock.skill_data.my_id = CHAR_SKILL::WAVE_SHOCK;
-
-				for (auto client : g_clients)
-				{
-					if (client->GetIsAI() == true || client->GetConnectState() == false) continue;
-					
-					client->SendPacket(reinterpret_cast<Packet*>(&stc_skill_waveshock));
-				}
-				*/
 			}
 		}
 		break;
@@ -165,9 +150,9 @@ void CTimerWorker::ProcessPacket(event_type * et)
 			//cout << "Respawn ID: " << static_cast<int>(my_id) << "\n";
 			for (auto& client : g_clients)
 			{ 
-				cout << "ID: " << client->GetID() << "  //  " << "Score: " << client->GetPlayerScore() << "Kill / Death: " << client->GetMyCharacterKillCount() << " , " << client->GetMyCharacterDeathCount() << "\n";
-				cout << "ID: " << client->GetID() << "RankScore: " << client->GetMyScoreForRanking() << "\n";
-				cout << "ID: " << client->GetID() << "IsTopRanker: " << static_cast<bool>(client->GetIsTopRanker()) << " , " << "Current Top Ranker ID: " << CPlayerObject::m_topRankerID << "\n";
+				//cout << "ID: " << client->GetID() << "  //  " << "Score: " << client->GetPlayerScore() << "Kill / Death: " << client->GetMyCharacterKillCount() << " , " << client->GetMyCharacterDeathCount() << "\n";
+				//cout << "ID: " << client->GetID() << "RankScore: " << client->GetMyScoreForRanking() << "\n";
+				//cout << "ID: " << client->GetID() << "IsTopRanker: " << static_cast<bool>(client->GetIsTopRanker()) << " , " << "Current Top Ranker ID: " << CPlayerObject::m_topRankerID << "\n";
 
 				if (!client->GetConnectState()) continue;
 				client->SendPacket(reinterpret_cast<Packet*>(&stc_draw_state));
@@ -209,30 +194,7 @@ void CTimerWorker::ProcessPacket(event_type * et)
 						client->SendPacket(reinterpret_cast<Packet*>(&stc_move_object_no_create));
 					}
 				//}
-
-				/*if (mvobj->GetIsCreateFirst())
-				{
-					STC_MoveObject stc_move_object;
-					stc_move_object.mvobj_data = move(mvobj->GetMoveObjectData());
-
-					for (const auto& client : g_clients)
-					{
-						if (client->GetIsAI()) continue;
-						//if (!client->GetConnectState()) continue;
-
-						client->SendPacket(reinterpret_cast<Packet*>(&stc_move_object));
-
-						if (mvobj->GetIsCreateFirst())
-						{
-							mvobj->SetIsCreateFirst(false);
-							mvobj->UpdateCreateFirstPacketData(false);
-						}
-					}
-				}
-				else
-				{
-				}
-				*/							
+										
 			}
 
 			//1. RigidbodyObject
@@ -360,41 +322,6 @@ void CTimerWorker::ProcessPacket(event_type * et)
 					my_client->m_pdata.respawn_cnt = 0;
 
 			}
-
-
-			//2. All Clients (Player)  // 캐릭터 상태 및 스테이지 타이머 패킷을 주기적으로 보냄
-		/*	STC_CharCurrState stc_char_state;
-			for(const auto& myclient : g_clients)
-			{
-				//클라이언트가 접속이 끊겼으면 정보를 보내지 않는다(MOVE_OBJECT, CLIENT)
-				if (!myclient->GetConnectState()) continue;
-				
-				//---------------------------------------------------------------Move Object--------------------//
-
-				if (!myclient->GetFirstMoveObjects())
-				{
-					for (const auto& mvobj : g_moveobjs)
-					{
-						STC_MoveObject stc_move_object;
-						stc_move_object.mvobj_data = move(mvobj->GetMoveObjectData());
-						myclient->SendPacket(reinterpret_cast<Packet*>(&stc_move_object));
-					}
-				}
-				myclient->SetFirstMoveObjects(true);
-
-				//---------------------------------------------------------------Move Object--------------------//
-
-				//------------------------------------------------------All Client Data to My Client----------//
-				for (const auto& otherclient : g_clients)
-				{
-					stc_char_state.player_data = move(otherclient->m_pdata);
-					myclient->SendPacket(reinterpret_cast<Packet*>(&stc_char_state));
-				}
-
-				//------------------------------------------------------My Client data to Other Client----------//
-			}
-			*/
-
 
 			//3. All NPCs (Non-Player)
 			STC_NpcMonsterCurrState stc_mnpcs_state;

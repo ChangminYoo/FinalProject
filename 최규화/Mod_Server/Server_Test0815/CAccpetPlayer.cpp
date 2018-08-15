@@ -73,6 +73,18 @@ void CAccpetPlayer::AcceptEvent()
 	{
 		if (!error)
 		{
+			if (g_start_oneGame)
+			{
+				cout << "게임이 시작되어 해당 방에 다시 접속할 수 없습니다\n";
+	
+				// shutdown_both - 주고 받는 쪽 모두를 중단
+				m_socket.shutdown(m_socket.shutdown_both);
+
+				m_socket.close();
+
+				return;
+			}
+
 			cout << "클라이언트 [ " << m_playerIndex << " ] 접속완료. ";
 			cout << "IP = " << m_socket.remote_endpoint().address().to_string() << " /// ";
 			cout << "PORT = " << m_socket.remote_endpoint().port() << endl;

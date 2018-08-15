@@ -83,7 +83,7 @@ extern queue<char>					g_pdir_queue;
 extern boost::asio::io_service g_io_service;
 
 extern bool                         g_start_physics;
-
+extern bool                         g_start_oneGame;
 //vector<int, int>				      g_RoomData;
 //int								  g_currRoomCnt;
 //extern bool						  g_start_timer;

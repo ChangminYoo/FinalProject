@@ -80,7 +80,7 @@ public:
 
 public:
 	CHammerBulletObject(const unsigned short& master_id, const unsigned short& myid,
-		const Position& pos, const Rotation& rot, int numOfHammer, const XMFLOAT4& opp);
+		const Position& pos, const Rotation& rot, int numOfHammer, const XMFLOAT4& opp, bool isHead);
 	
 	virtual void UpdateDataForPacket() override;
 
