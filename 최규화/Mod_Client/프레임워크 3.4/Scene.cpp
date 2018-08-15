@@ -1343,8 +1343,8 @@ void Scene::SET_SELECTED_CHARACTER_LOADSCENE_BY_SERVER_DATA(const unsigned short
 		Player->m_async_client->m_lobbyData.push_back({ id, data.sel_id });
 	}
 
-	cout << "\n";
-	cout << "MyID: " << static_cast<int>(Player->m_lobbySceneMyID) << "\n";
+	//cout << "\n";
+	//cout << "MyID: " << static_cast<int>(Player->m_lobbySceneMyID) << "\n";
 }
 
 void Scene::SET_DRAW_STATE_BY_DEATH_BY_SERVER_DATA(const unsigned short& id, const STC_DrawState & data)
@@ -2042,6 +2042,8 @@ void Scene::SET_PLAYER_SKILL(const STC_HammerSkillInfo & hammer_bullet)
 		{
 			for (const auto& client : DynamicObject)
 			{
+				if (client->isNPC) continue;
+
 				if (client->m_player_data.id == hmdata.master_id)
 				{
 					XMFLOAT4 ori = XMFLOAT4(hmdata.rot4f.x, hmdata.rot4f.y, hmdata.rot4f.z, hmdata.rot4f.w);
@@ -2050,6 +2052,8 @@ void Scene::SET_PLAYER_SKILL(const STC_HammerSkillInfo & hammer_bullet)
 
 					CGameObject *hammer = new HammerBullet(device, commandlist, client->ParticleList, NULL, NULL, 0, client, ori, NULL, CenterPos, opp);
 					BulletObject.push_back(hammer);
+
+					cout << "¿õ11\n";
 				}
 			}
 		}
@@ -2066,6 +2070,8 @@ void Scene::SET_PLAYER_SKILL(const STC_HammerSkillInfo & hammer_bullet)
 
 			CGameObject *hammer = new HammerBullet(device, commandlist, Player->PlayerObject->ParticleList, NULL, NULL, 0, Player->PlayerObject, ori, NULL, CenterPos, opp);
 			BulletObject.push_back(hammer);
+
+			cout << "¿õ22\n";
 		}
 	}
 	
