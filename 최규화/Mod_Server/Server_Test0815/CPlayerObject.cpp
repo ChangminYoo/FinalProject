@@ -47,68 +47,6 @@ void CPlayerObject::CheckMyClient()
 
 }
 
-/*
-void CPlayerObject::Init_MonsterInfo()
-{
-	m_state = IDLE;
-
-	//-------------------------- 기본 데이터설정
-
-	m_ani = Ani_State::Idle;
-	m_connect = true;
-	m_dir = 0;
-	m_airbone = false;
-	m_ai = true;
-	m_rot4f = { 0.f, 0.f, 0.f, 1.f };
-	m_godmode = false;
-	m_fixed = false;
-	m_alive = true;
-	m_type = OBJECT_TYPE::NPC_MONSTER_IMP;
-
-	m_ability.attack = 1000;
-	m_ability.orignHP = 5000;
-	m_ability.curHP = 5000;
-	m_ability.speed = 40;
-	m_ability.exp = 0;
-	m_ability.level = 1;
-	
-	//---------------------------- Orient를 이용한 Lookvector // Rightvector // Upvector 설정
-	m_OffLookvector = XMFLOAT3(0, 0, -1);
-	m_OffRightvector = XMFLOAT3(-1, 0, 0);
-
-	xmf4_rot = { m_rot4f.x, m_rot4f.y, m_rot4f.z, m_rot4f.z };
-	auto q = XMLoadFloat4(&xmf4_rot);
-	XMFLOAT3 axis{ 0,1,0 };
-	auto q2 = QuaternionRotation(axis, MMPE_PI);
-	xmf4_rot = QuaternionMultiply(xmf4_rot, q2);
-	m_rot4f = { xmf4_rot.x, xmf4_rot.y, xmf4_rot.z, xmf4_rot.w };
-
-	UpdateLookvector();
-	UpdateUpvector();
-
-	//------------------------------ 물리효과 기본 데이터 설정
-	pp = new PhysicsPoint();
-
-	xmf4_pos = { m_pos4f.x, m_pos4f.y, m_pos4f.z, m_pos4f.w };
-	pp->SetPosition(&xmf4_pos);
-	pp->SetHalfBox(10, 20, 10);
-	pp->SetDamping(0.25);
-	pp->SetBounce(false);
-	pp->SetMass(500);
-
-
-	//------------------------------ 물리효과 적용
-	GravitySystem(0);
-
-	pp->integrate(0);
-	m_pos4f = { xmf4_pos.x, xmf4_pos.y, xmf4_pos.z, xmf4_pos.w };
-
-	AfterGravitySystem(0);
-
-	//------------------------------
-}
-*/
-
 void CPlayerObject::Init_PlayerInfo()
 {
 	m_state = IDLE;
@@ -142,15 +80,15 @@ void CPlayerObject::Init_PlayerInfo()
 	m_ability.speed = 100;
 
 	if (m_id == 0)
-		m_pos4f = { -100.f, -1000.f, 0.f, 0.f };
+		m_pos4f = { -290.f, -1000.f, 310.f, 0.f };
 	else if (m_id == 1)
-		m_pos4f = { 0.f, -1000.f, 0.f, 0.f };
+		m_pos4f = { 290.f, -1000.f, 310.f, 0.f };
 	else if (m_id == 2)
-		m_pos4f = { 100.f, -1000.f, 0.f, 0.f };
+		m_pos4f = { 0.f, -1000.f, 420.f, 0.f };
 	else if (m_id == 3)
-		m_pos4f = { 300.f, -1000.f, 0.f, 0.f };
+		m_pos4f = { 400.f, -1000.f, -100.f, 0.f };
 	else if (m_id == 4)
-		m_pos4f = { 500.f, -1000.f, 0.f, 0.f };
+		m_pos4f = { -400.f, -1000.f, -120.f, 0.f };
 
 	//if (m_id == 0)
 	//	m_player_score = 100;

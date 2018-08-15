@@ -637,7 +637,7 @@ void CPlayer::CreateBullet(ID3D12Device* Device, ID3D12GraphicsCommandList* cl,X
 
 		m_async_client->SendPacket(reinterpret_cast<Packet*>(&cts_attack));
 
-		cout << "SavePoint: " << Goal.x << "," << Goal.y << "," << Goal.z << "\n";
+		//cout << "SavePoint: " << Goal.x << "," << Goal.y << "," << Goal.z << "\n";
 		//
 
 		break;

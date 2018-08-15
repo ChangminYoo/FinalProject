@@ -1378,7 +1378,7 @@ void Scene::SET_DRAW_STATE_BY_DEATH_BY_SERVER_DATA(const unsigned short& id, con
 
 			}
 
-			cout << "ID: " << static_cast<int>(id) << "DrawObject: " << GameObject->DrawObj << "\n";
+			//cout << "ID: " << static_cast<int>(id) << "DrawObject: " << GameObject->DrawObj << "\n";
 			break;
 		}
 
@@ -1638,7 +1638,7 @@ void Scene::SET_NPC_ATTACK_BY_SERVER_DATA(const unsigned short & id, const NPC_B
 				BulletObject.emplace_back(new StoneBullet(master_npc->device, master_npc->commandlist, master_npc->ParticleList,
 										 NULL, master_npc, XMFLOAT4(0, 0, 0, 1), NULL, master_npc->CenterPos, xmf4_pos));
 
-				cout << "StoneBullet ID: " << bulldata.my_id << "Create First \n";
+				//cout << "StoneBullet ID: " << bulldata.my_id << "Create First \n";
 
 			}
 
@@ -1860,7 +1860,7 @@ void Scene::SET_BULLET_BY_SERVER_DATA(STC_BulletObject_Info & bulldata, const un
 
 					lbul->m_particle_type = bulldata.after_coll;
 
-					cout << "Bullet Type: " << static_cast<int>(bulldata.type) << "\n";
+					//cout << "Bullet Type: " << static_cast<int>(bulldata.type) << "\n";
 					
 					//불렛과 대상 충돌 후 파티클 작업
 					//lbul->Collision(bulldata.after_coll, bulldata.damage, XMFLOAT4(bulldata.pos4f.x, bulldata.pos4f.y, bulldata.pos4f.z, bulldata.pos4f.w), XMFLOAT4(bulldata.pos4f.x, bulldata.pos4f.y, bulldata.pos4f.z, bulldata.pos4f.w));
@@ -1969,7 +1969,7 @@ void Scene::SET_PLAYER_SKILL(const unsigned int & id, const STC_SkillData & play
 				// 실드를 따로 생성해서 Centerpos를 패킷으로 받은 아이디를 가진 플레이어값으로 지정한다 
 				case CHAR_SKILL::SHIELD:
 				{
-					cout << "Using Skill Master ID: " << id << "\t" << "m_player_data ID: " << static_cast<int>(GameObject->m_player_data.id) << "\n";
+					//cout << "Using Skill Master ID: " << id << "\t" << "m_player_data ID: " << static_cast<int>(GameObject->m_player_data.id) << "\n";
 					if (playerdata.alive)
 					{
 						NoCollObject.push_back(new ShieldArmor(device, commandlist, &BbObject, &Shadows, GameObject, GameObject->CenterPos));
@@ -2053,7 +2053,7 @@ void Scene::SET_PLAYER_SKILL(const STC_HammerSkillInfo & hammer_bullet)
 					CGameObject *hammer = new HammerBullet(device, commandlist, client->ParticleList, NULL, NULL, 0, client, ori, NULL, CenterPos, opp);
 					BulletObject.push_back(hammer);
 
-					cout << "웅11\n";
+					//cout << "MyClient HammerBulet\n";
 				}
 			}
 		}
@@ -2071,7 +2071,7 @@ void Scene::SET_PLAYER_SKILL(const STC_HammerSkillInfo & hammer_bullet)
 			CGameObject *hammer = new HammerBullet(device, commandlist, Player->PlayerObject->ParticleList, NULL, NULL, 0, Player->PlayerObject, ori, NULL, CenterPos, opp);
 			BulletObject.push_back(hammer);
 
-			cout << "웅22\n";
+			//cout << "MyClient to OtherClient HammerBulet\n";
 		}
 	}
 	
