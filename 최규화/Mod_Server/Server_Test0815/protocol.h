@@ -32,7 +32,7 @@
 
 #define Player_RespawnTime 5.0
 #define RegularPacketLoadSceneExchangeTime (0.01f)
-#define RegularPacketExchangeTime  (1.0 / 20.0) // 1초에 20번 패킷을 교환(morpg 형식)
+#define RegularPacketExchangeTime  (1.0 / 60.0) // 1초에 20번 패킷을 교환(morpg 형식)
 
 
 //추가

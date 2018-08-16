@@ -451,8 +451,11 @@ void Scene::CreateGameObject()
 	SkyObject = new SphereObject(device, commandlist,  &BbObject, &Shadows, XMFLOAT4(0, 0, 0, 0));
 	LandObject.push_back(new GridObject(device, commandlist, &BbObject, &Shadows,1, XMFLOAT4(0, -0.5f, 0, 0))); //1Ãþ
 
-	DynamicObject.push_back(new CCubeManObject(device, commandlist,&BbObject, &Shadows, XMFLOAT4(0, 0, -240, 0)));
-	DynamicObject.push_back(new CCubeManObject(device, commandlist,&BbObject, &Shadows, XMFLOAT4(100, 0, 110, 0)));
+	DynamicObject.push_back(new CCubeManObject(device, commandlist,&BbObject, &Shadows, XMFLOAT4(-2000, 0,  0, 0)));
+	DynamicObject.push_back(new CCubeManObject(device, commandlist,&BbObject, &Shadows, XMFLOAT4(-2100, 0, 0 , 0)));
+	DynamicObject.push_back(new CCubeManObject(device, commandlist, &BbObject, &Shadows, XMFLOAT4(-2200, 0, 0, 0)));
+	DynamicObject.push_back(new CCubeManObject(device, commandlist, &BbObject, &Shadows, XMFLOAT4(-2300, 0, 0, 0)));
+	DynamicObject.push_back(new CCubeManObject(device, commandlist, &BbObject, &Shadows, XMFLOAT4(-2400, 0, 0, 0)));
 
 	CGameObject* imp = new ImpObject(device, commandlist, &BbObject, &Shadows, XMFLOAT4(0, 600, 0, 0));
 	((ImpObject*)imp)->fsm = new FSM(imp, &DynamicObject, &StaticObject, &BulletObject);
@@ -1516,6 +1519,7 @@ void Scene::SET_PLAYER_BY_SEVER_DATA(const unsigned short & id, const Player_Dat
 
 					GameObject->Orient = { playerdata.rot.x , playerdata.rot.y, playerdata.rot.z, playerdata.rot.w };
 
+					GameObject->UpdateLookVector();
 				}
 				break;
 

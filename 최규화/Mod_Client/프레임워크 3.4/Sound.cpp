@@ -5,7 +5,7 @@ CSound::CSound(void)
 	FMOD::System_Create(&system);
 	system->init(32, FMOD_INIT_NORMAL, nullptr);
 	
-	system->createSound("sound/title2.ogg", FMOD_LOOP_NORMAL, 0, &titleSound);
+	system->createSound("sound/title2.ogg", FMOD_DEFAULT, 0, &titleSound);
 	system->createSound("sound/hit1.ogg", FMOD_DEFAULT, 0,   &hitSound1);
 	
 	//스킬 사운드

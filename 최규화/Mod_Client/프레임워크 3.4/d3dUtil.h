@@ -10,7 +10,7 @@
 #endif
 #define WIN32_LEAN_AND_MEAN
 
-#pragma comment(linker,"/entry:WinMainCRTStartup /subsystem:console")
+//#pragma comment(linker,"/entry:WinMainCRTStartup /subsystem:console")
 
 #include <boost/asio.hpp>
 
