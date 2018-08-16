@@ -228,7 +228,7 @@ void Scene::SceneState()
 		}
 
 		Player->m_async_client->m_myTextureID = CharacterSelect->ObjData.CustomData1.z - 1;
-	
+		CharacterSelect->TexStride = Player->m_lobbySceneMyID;
 		//Player->m_async_client->m_lobbyData는 구조체 vector
 		//Player->m_async_client->m_lobbyData에 id 랑 texture_id(	CharacterSelect->ObjData.CustomData1.z (0 ~ 9) 값이 들어있음)
 		
