@@ -9,6 +9,7 @@
 using Microsoft::WRL::ComPtr;
 
 #define LIGHT_MAX 10
+#define GS_TITLE 0 
 #define GS_START 1//시작상태
 #define GS_LOAD 2//로딩상태
 #define GS_PLAY 3//플레이 상태
@@ -39,7 +40,7 @@ public:
 
 	//게임오브젝트, 카메라,세이더오브젝트,라이트,샘플러 포함해야댐	
 	int nShader;//세이더 갯수
-	int GAMESTATE = GS_START;//게임상태.
+	int GAMESTATE = GS_TITLE;//게임상태.
 	bool FirstLoad = false;//첫 로딩인가?
 
 	HWND hWnd;
@@ -86,11 +87,21 @@ public:
 
 	CGameObject* AimUI = NULL;
 	CGameObject* BackGround = NULL;
+
 	CGameObject* CharacterSelect = NULL;
+
 	CGameObject* SkillUI[4] = {NULL};
 	CGameObject* SkillFrameUI[4] = { NULL };
 	CGameObject* SkillCoolBar[4] = { NULL };
 	CGameObject* SelectBar = NULL; //스킬선택
+	CGameObject* Time1 = NULL;
+	CGameObject* Time2 = NULL;
+	CGameObject* Time3 = NULL;
+	CGameObject* Title = NULL;
+
+	CGameObject* MyPoint1 = NULL;
+	CGameObject* MyPoint2 = NULL;
+	CGameObject* MyPoint3 = NULL;
 
 	CGameObject* EmptyObject = nullptr;
 
@@ -101,6 +112,10 @@ public:
 	Player_Data * Get_PlayerServerData(const unsigned int& id);
 	Player_Data* Get_MonsterServerData(const unsigned int& id);
 	int my_ClientID{ 0 };
+	
+	void SET_STAGET_TIMER_BY_SERVER_DATA(const STC_StageTimer& timer);
+	void SET_SELECTED_CHARACTER_LOADSCENE_BY_SERVER_DATA(const unsigned short& id, const STC_ShowSelectCharacter& data);
+	void SET_DRAW_STATE_BY_DEATH_BY_SERVER_DATA(const unsigned short& id, const STC_DrawState& data);
 
 	void SET_PLAYER_BY_SEVER_DATA(const unsigned short& id, const Player_Data& playerdata, const unsigned char& packet_type);
 
@@ -126,6 +141,7 @@ public:
 
 	void SET_PLAYER_SKILL(const STC_HammerSkillInfo& hammer_bullet);
 
+	void SET_LOGIN_BY_SERVER_DATA(const STC_LoginData& playerdata);
 
 	//서버에서 받은 PlayerData를 이용하면 이 함수는 없어도됨
 	//PlayerData를 기반으로 Player의 값이 달라질것이므로

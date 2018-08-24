@@ -10,7 +10,9 @@ struct VertexIn
 struct VertexOut
 {
 	float4 Pos : POSITION;
+	float4 PosW : POSITIONWORLD;
 	float4 Normal : NORMAL;
+	float Fog : FOG;
 };
 
 struct PSOUT
@@ -26,7 +28,8 @@ struct GeoOut
 	float3 PosW : POSITION;
 	float3 Normal : NORMAL;
 	float2 Tex : TEXTURE;
-
+	bool Clipping : CLIPPING;
+	float Fog : FOG;
 };
 
 
@@ -38,6 +41,7 @@ VertexOut VS(VertexIn vin)
 	VertexOut vout;
 
 	vout.Pos = mul(float4(vin.Pos, 1), gWorld);
+	vout.PosW = vout.Pos;
 	vout.Normal = vin.Normal;
 	//반드시 월드변환 이후에 해야함. 
 	if (CustomData1.x == 2)//총알 파티클
@@ -85,6 +89,15 @@ VertexOut VS(VertexIn vin)
 	vout.Pos = mul(vout.Pos, gView);
 
 
+	float foglength = 300;
+	float fogdensity = 0.32f;
+
+	float fdist = distance(vout.PosW, float4(gEyePos, 1));
+	fdist = fdist / foglength * 4;
+	float fexp = exp(-(fdist*fogdensity)*(fdist*fogdensity));
+	vout.Fog = fexp;
+
+
 	return vout;
 
 }
@@ -92,7 +105,7 @@ VertexOut VS(VertexIn vin)
 [maxvertexcount(4)]
 void GS(point VertexOut gin[1], inout TriangleStream<GeoOut> triStream)
 {
-
+	bool Clip =false;
 	float halfWidth;
 	float halfHeight;
 
@@ -102,7 +115,7 @@ void GS(point VertexOut gin[1], inout TriangleStream<GeoOut> triStream)
 		v[i] = gin[0].Pos;
 
 	//CustomData1.x : 파티클의 정체성
-	if (CustomData1.x == 0)//데미지 나, 에임등 고정된 크기를 갖는 경우.
+	if (CustomData1.x == 0)//데미지 등 고정된 크기를 갖는 경우.
 	{
 		halfWidth = 0.5f * Scale;
 		halfHeight = 0.5f * Scale;
@@ -139,6 +152,13 @@ void GS(point VertexOut gin[1], inout TriangleStream<GeoOut> triStream)
 	}
 	else if (CustomData1.x == 2)//총알 파티클
 	{
+		//파티클과 카메라 사이 길이가 150보다 크면 쿼드형이 아니라 정점형으로 처리.
+		float4 distV = gin[0].Pos - float4(gEyePos, 1);
+		float dist = dot(distV, distV);
+		dist = sqrt(dist);
+		if (dist > 150)
+			Clip = true;
+
 		halfWidth = 0.5f * Scale;
 		halfHeight = 0.5f * Scale;
 
@@ -209,6 +229,41 @@ void GS(point VertexOut gin[1], inout TriangleStream<GeoOut> triStream)
 		v[3].x += halfWidth;
 		v[3].y += +halfHeight;
 	}
+	else if (CustomData1.x == 7)
+	{
+		halfWidth = 0.5f * Scale;
+		halfHeight = 0.5f * Scale;
+
+		v[0].x += -halfWidth;
+		v[0].y += -halfHeight;
+
+		v[1].x += -halfWidth;
+		v[1].y += halfHeight;
+
+		v[2].x += halfWidth;
+		v[2].y += -halfHeight;
+
+		v[3].x += halfWidth;
+		v[3].y += halfHeight;
+	}
+	else if (CustomData1.x == 8)//스킬쿨바
+	{
+		halfWidth = 0.5f * Scale;
+		halfHeight = 0.1f * Scale * 0.7;
+		v[0].x += -halfWidth;
+		v[0].y += -halfHeight;
+
+		v[1].x += -halfWidth;
+		v[1].y += halfHeight;
+
+		v[2].x += halfWidth - 2 * halfWidth*(1 - CustomData1.y);
+		v[2].y += -halfHeight;
+
+		v[3].x += halfWidth - 2 * halfWidth *(1 - CustomData1.y);
+		v[3].y += halfHeight;
+
+
+	}
 	else if (CustomData1.x == 10)//총알이 부딪힐때
 	{
 		halfWidth = 0.5f *  Scale*sin(PTime * 3 + gin[0].Normal.w / 100) + 0.5f;
@@ -263,12 +318,22 @@ void GS(point VertexOut gin[1], inout TriangleStream<GeoOut> triStream)
 	for (int i = 0; i < 4; ++i)
 	{
 		gout.PosH = mul(v[i], gProj);
-		gout.PosW = v[i].xyz;
+		gout.PosW = gin[0].PosW.xyz;
 		gout.Normal = float3(0, 1, 0);
 		gout.Tex = tex[i];
+		gout.Fog = gin[0].Fog;
 		gout.PrevNormal = gin[0].Normal;
+		if(Clip==false)
+			gout.Clipping = false;
+		else
+		{
+			if (i == 0)
+				gout.Clipping = false;
+			else
+				gout.Clipping = true;
+		}
 		triStream.Append(gout);
-
+		
 	}
 }
 
@@ -302,6 +367,13 @@ PSOUT PS(GeoOut pin)
 	}
 	pout.Color = textureColor;
 
+	float fogc = pin.Fog;
+
+	float4 colorfog = float4(0.8, 0.8, 0.8, 1);
+
+	if (CustomData1.x != 7 && CustomData1.x != 8 && CustomData1.x != 3 && CustomData1.x != 5)	
+		pout.Color = lerp(colorfog, pout.Color, fogc);
+
 
 	return pout;
 
@@ -321,6 +393,8 @@ float4 PS2(GeoOut pin) : SV_TARGET
 	//알파테스트 실행
 	clip(textureColor.a - 0.1f);
 
+	if(pin.Clipping)
+		discard;
 	
 	//pout.Depth = 1.0f;
 	if (CustomData1.x == 2)
@@ -338,6 +412,13 @@ float4 PS2(GeoOut pin) : SV_TARGET
 		textureColor.z = cos(PTime * 5 * pin.PrevNormal.w / 650) + 0.25;
 	
 	}
+	
+	float fogc = pin.Fog;
+
+	float4 colorfog = float4(0.8, 0.8, 0.8, 1);
+
+	if (CustomData1.x != 7 && CustomData1.x!=8 && CustomData1.x!=3&&CustomData1.x!=5)
+	textureColor = lerp(colorfog, textureColor, fogc);
 
 	return  textureColor;
 

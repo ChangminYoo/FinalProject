@@ -32,6 +32,12 @@ struct RegularCheckInfo
 	AnimationCheck AniCheck;
 };
 
+struct RecvLoginData
+{
+	int my_id;
+	int textureID;
+};
+
 class AsyncClient
 {
 private:
@@ -49,13 +55,24 @@ private:
 	Scene* m_myScene;
 
 	float m_totalTime{ 0.f };
-
+	float m_loadSceneTotalTime{ 0.f };
+	float m_loginTotalTime{ 0.f };
 	char m_move_prevdir{ 0 };
 
 public:
 	AsyncClient() : m_socket(g_io_service) {};
 	~AsyncClient();
 
+	bool m_myClientReady{ false };
+	bool m_mySkipLogin{ false };
+	bool m_selCharacterComplete{ false };
+	int	 m_myTextureID;
+
+	double m_myClient_StageTime{ 0.0 };
+
+	vector<RecvLoginData> m_lobbyData;
+	vector<RecvLoginData> m_clientsID;
+	
 	void Init(CGameObject* obj, Scene* scene);
 
 	void Connect(boost::asio::ip::tcp::endpoint& endpoint);
@@ -66,6 +83,8 @@ public:
 	void ProcessPacket(Packet* packet, CGameObject& obj, Scene& scene);
 
 	void SendPacketRegular(CGameObject& gobj , const GameTimer& gt);
+	void SendPacketRegular(const GameTimer& gt);
+	void SendPacketLoadScenePacketRegular(const GameTimer& gt);
 
 	//얘를 databuf -> recvbuf로 바꾸니 제대로 값이 서버에서 전달됨
 	//recv 함수에서 임시버퍼에 서버에서 받은 데이터를 차례로 담는과정없이 

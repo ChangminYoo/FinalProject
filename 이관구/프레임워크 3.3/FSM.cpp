@@ -291,7 +291,7 @@ state * state_trace::Execute(float DeltaTime, CGameObject * master, AIdata & ada
 	if (fabs(d) <=adata.FireLength && adata.Target == NULL)
 		adata.LastPosition = master->OrgPos;//고유 초창기 위치로 ㄱㄱ
 
-	if (fabs(FloatLength(v2)) >= 75)//중앙에서 어느정도 멀어지면 
+	if (fabs(FloatLength(v2)) >= 65)//중앙에서 어느정도 멀어지면 
 	{
 		adata.LastPosition = master->OrgPos;//고유 초창기 위치로 ㄱㄱ
 	//	adata.Target = NULL;

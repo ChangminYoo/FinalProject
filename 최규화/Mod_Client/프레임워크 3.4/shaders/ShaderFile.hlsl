@@ -26,6 +26,8 @@ struct VertexOut
 	float2 Tex : TEXTURE;
 	float2 dummy2 : Dummy2;//대소문자 관계없으므로 Dummy하면 에러난다
 	float3 Tangent : TANGENT;
+	float Fog : FOG;
+	
 };
 
 
@@ -94,6 +96,15 @@ VertexOut VS(VertexIn vin)
 	vout.PosH = mul(vout.PosH, gViewProj);
 
 	vout.Tex = vin.Tex;
+
+	float foglength = 400;
+	float fogdensity = 0.231f;
+
+	float fdist = distance(vout.PosW, float4(gEyePos, 1));
+	fdist = fdist / foglength * 4;
+	float fexp = exp(-(fdist*fogdensity)*(fdist*fogdensity));
+	vout.Fog = fexp;
+
 
 	return vout;
 }
@@ -209,7 +220,14 @@ float4 PS(VertexOut pin) : SV_Target
 
 	finalcolor = (textureColor * diffuseLight) + litColor * textureColor * lightIntensity + gAmbientLight *textureColor +specularLight*textureColor;
 	finalcolor.w = BlendValue;
+
+	float fogc = pin.Fog;
 	
+	float4 colorfog = float4(0.85, 0.85 , 0.85, 1);
+
+	finalcolor = lerp(colorfog, finalcolor, fogc);
+	
+
 	if (nLights > 0)
 	{
 		
@@ -282,6 +300,12 @@ float4 PS2(VertexOut pin) : SV_Target
 	litColor = saturate(litColor+ Emissive + specular); //마지막으로 스패큘러 더한다.
 	litColor.w = BlendValue;
 	
+	float fogc = pin.Fog;
+
+	float4 colorfog = float4(0.85, 0.85, 0.85, 1);
+
+	litColor = lerp(colorfog, litColor, fogc);
+
 	//litColor.a = textureColor.a;
 	
 	if (nLights > 0)
@@ -290,4 +314,128 @@ float4 PS2(VertexOut pin) : SV_Target
 	return float4(0, 0, 0, 1);
 	
 	
+}
+
+
+float4 SPS(VertexOut pin) : SV_Target
+{
+	float4 textureColor; //텍스쳐 색상
+float3 lightDir;     //빛벡터
+float lightIntensity;
+float3 reflection;   //반사광
+float4 specular = float4(0,0,0,1);
+float4 litColor = float4(1,1,1,1);
+float3 viewDirection;
+float4 finalcolor;
+
+//텍스쳐의 기본 색상 - 샘플러를 사용하여 값 추출
+if (CustomData1.w >= 100 && CustomData1.w <= 500)
+textureColor = gDiffuseMap.Sample(gsamAnisotropicWrap, frac(pin.Tex*CustomData1.w*pow(pin.Tex.x, 3))) * gDiffuse;
+else
+textureColor = gDiffuseMap.Sample(gsamAnisotropicWrap, pin.Tex) * gDiffuse;
+//알파 테스트
+//clip(textureColor.a - 0.1f);
+//
+
+//CustomData1의 w가 1234 이면 노멀매핑을 쓰는것.
+if (CustomData1.w == 1234)
+{
+	//노멀매핑할때 텍스처를 절반으로 나눠야함. 0~0.5까지는 일반텍스처고 0.5~1.0 까진 노멀맵
+	//float2 ptex = pin.Tex;
+	//ptex.x = clamp(ptex.x / 2, 0, 0.5f);
+	//float2 ntex = ptex;
+	//ntex.x = clamp(ntex.x + 0.5f, 0.5f, 1.0f);
+	float3 Normaltexture = gNormalMap.Sample(gsamAnisotropicWrap, pin.Tex);
+	float3 tangent = normalize(pin.Tangent - dot(pin.Tangent, pin.Normal)*pin.Normal);
+	float3 binormal = cross(pin.Normal, tangent);
+
+	float3x3 tbn = float3x3(tangent, binormal, pin.Normal);
+
+	float3 newNormal = (Normaltexture * 2) - 1;//노멀은 -1~1범위를 가져야 하니까 이런처리를 한다.
+
+	pin.Normal = mul(newNormal, tbn);
+
+
+}
+
+float3 NormalVector = pin.Normal;
+
+float4 diffuseLight = float4(0, 0, 0, 0);
+float4 specularLight = float4(0, 0, 0, 0);
+
+//카메라 방향 계산
+viewDirection = gEyePos - pin.PosW.xyz;
+viewDirection = normalize(viewDirection);
+//빛의 방향 계산.
+lightDir = -(gLights[0].Direction);
+lightDir = normalize(lightDir);
+//기본적인 빛 색상
+litColor = gLights[0].DiffuseColor;
+//기본적인 빛의 세기
+lightIntensity = max(dot(NormalVector, lightDir),0);
+if (SpecularParamater >= 0)
+lightIntensity = ceil(lightIntensity * 5) / 5;
+//기본적인 빛 계산
+diffuseLight += CalcDiffuseLight(pin.Normal, lightDir, litColor, lightIntensity);
+specularLight += CalcSpecularLight(pin.Normal, lightDir,viewDirection, litColor, lightIntensity);
+
+diffuseLight += CalcDiffuseLight(pin.Normal, -lightDir + float3(0, lightDir.y * 2, 0), litColor, lightIntensity / 2);
+
+if (SpecularParamater >= 0)
+{
+	//i가 0일때는 그냥 전역광원(태양 같은걸로 처리) 하고 나머지는 점광원으로 할예정..
+	for (int i = 1; i < nLights; ++i)
+	{
+
+		float3 PointLightDirection = -pin.PosW.xyz + gLights[i].Position;
+
+		float DistanceSq = lengthSquared(PointLightDirection);
+
+		float radius = 1000;
+
+
+		if (DistanceSq < abs(radius * radius))
+		{
+			float Distance = sqrt(DistanceSq);
+
+			//노멀화
+			PointLightDirection /= Distance;
+
+			float du = Distance / (1 - DistanceSq / (radius * radius - 1));
+
+			float denom = du / abs(radius) + 1;
+
+
+			float attenuation = 1 / (denom * denom);
+
+			float pointintensity = max(dot(NormalVector, -normalize(gLights[i].Direction)), 0);
+			pointintensity = smoothstep(0.25, 0.7, pointintensity) + 0.15f;
+
+			diffuseLight += CalcDiffuseLight(pin.Normal, PointLightDirection, gLights[i].DiffuseColor, pointintensity) * attenuation;
+
+			specularLight += CalcSpecularLight(pin.Normal, PointLightDirection, viewDirection, gLights[i].DiffuseColor, pointintensity) * attenuation;
+		}
+
+
+
+
+
+
+	}
+
+}
+
+finalcolor = (textureColor * diffuseLight) + litColor * textureColor * lightIntensity + gAmbientLight * textureColor + specularLight * textureColor;
+finalcolor.w = BlendValue;
+
+
+if (nLights > 0)
+{
+
+	return finalcolor;//float4(pin.Normal,1);
+
+}
+else
+return float4(0, 0, 0, 1);
+
 }

@@ -234,6 +234,13 @@ void MainFrameWork::FrameAdvance(const GameTimer& gt)
 	Update(gt);
 	scene->SceneState();
 
+	if (scene->Player != nullptr)
+	{
+		scene->Player->m_async_client->SendPacketLoadScenePacketRegular(gt);
+		scene->Player->m_async_client->SendPacketRegular(gt);
+	}
+		
+
 	if (scene->Player->PlayerObject != nullptr)
 		scene->Player->m_async_client->SendPacketRegular(*scene->Player->PlayerObject, gt);
 

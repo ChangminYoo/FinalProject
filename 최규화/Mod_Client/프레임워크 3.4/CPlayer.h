@@ -78,6 +78,7 @@ public:
 	bool		  m_right_flag{ false }, m_left_flag{ false }, m_up_flag{ false }, m_down_flag{ false };
 	bool		  m_jump_flag{ false };
 
+	unsigned int m_lobbySceneMyID;
 	AsyncClient * m_async_client;
 };
 

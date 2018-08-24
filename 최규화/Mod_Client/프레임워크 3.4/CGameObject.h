@@ -135,12 +135,13 @@ public:
 
 	//기타 공용 데이터들
 	bool DelObj = false;//이게 참이면 실제로 제거된다.
+	bool DrawObj = true;
 	bool Blending = false;
 	bool PrevCool = false;
 	bool isShieldOn = false;
 	bool isHit1 = false;
 
-	float TexStride = 0.f;
+	int TexStride = 0;
 
 	//벽들에 굳이 마우스를 움직일때마다 체크할 필요는 없으므로 추가함. 또 벽은 또 벽대로 뭔가 처리할게 있을것같음.
 	Obj_State obs = Dynamic;

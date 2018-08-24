@@ -248,6 +248,7 @@ void Shader::CreateShader(ID3D12Device * Device, ID3D12RootSignature * GraphicsR
 
 	//그림자용
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC shadowPsoDesc = d3dPipelineStateDesc;
+	shadowPsoDesc.PS = CreatePixelShader(L"shaders/ShaderFile.hlsl", "SPS", "ps_5_0");
 	shadowPsoDesc.BlendState = CreateBlendState(true);
 	shadowPsoDesc.DepthStencilState = ShadowDepthStencilState();
 	Device->CreateGraphicsPipelineState(&shadowPsoDesc, IID_PPV_ARGS(&ShadowPSO));
