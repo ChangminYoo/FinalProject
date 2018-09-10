@@ -554,6 +554,8 @@ CharacterSelectObject::CharacterSelectObject(ID3D12Device * m_Device, ID3D12Grap
 	gamedata.GodMode = true;
 	staticobject = true;
 
+	TexStride = 5.0f;
+
 	if (CreateMesh == false)
 	{
 		Mesh.Index = NULL;
@@ -605,7 +607,7 @@ void CharacterSelectObject::Render(ID3D12GraphicsCommandList * commandlist, cons
 {
 	//TexStart = 서버랑 연동
 
-	ObjData.TexClamp = XMFLOAT4(0.0f + (0.2f*TexStride), 0.2f + (0.2f*TexStride), 0, 0);
+	ObjData.TexClamp = XMFLOAT4(0.0f + (0.16666f*TexStride), 0.16666f + (0.16666f*TexStride), 0, 0);
 
 	//텍스처가 사이즈가 0 이상이면 연결
 	if (Textures.size()>0)
