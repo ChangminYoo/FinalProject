@@ -56,9 +56,12 @@ protected:
 
 	bool				m_createfirst;
 
+	
 public:
 	CMonoObject();
 	virtual ~CMonoObject();
+
+	mutex				m_mtx;
 
 	static map<int, BasicInfo> g_objectData;
 

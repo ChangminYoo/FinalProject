@@ -15,9 +15,10 @@
 #include <chrono>
 #include "protocol.h"
 
+//const char SERVERIP[] = "192.168.41.29";
+
 const char SERVERIP[] = "127.0.0.1";
 //const char SERVERIP[] = "192.168.22.106";
-//const char SERVERIP[] = "127.0.0.1";
 const unsigned short PORT = 31400;
 
 //----------------------------¸Ê 2Ãþ ¿ÀºêÁ§Æ® ¼ö----------------------------//

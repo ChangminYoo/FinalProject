@@ -1481,7 +1481,7 @@ void Scene::SET_PLAYER_BY_SEVER_DATA(const unsigned short & id, const Player_Dat
 						GameObject->m_player_data.ani = playerdata.ani;
 						GameObject->n_Animation = static_cast<int>(playerdata.ani);
 					}
-					
+
 				}
 				break;
 
@@ -1507,11 +1507,20 @@ void Scene::SET_PLAYER_BY_SEVER_DATA(const unsigned short & id, const Player_Dat
 				{
 					//GameObject->ObjData.isAnimation = true;
 
+					//cout << "Before Animation : " << static_cast<int>(GameObject->n_Animation) << " , " << "Before Animation AnimTime: " << GameObject->currAnimTime << "\n";
+
 					GameObject->currAnimTime = 0.f;
 
 					GameObject->m_player_data.ani = playerdata.ani;
 
 					GameObject->n_Animation = static_cast<int>(playerdata.ani);
+
+					//cout << "After Animation : " << static_cast<int>(GameObject->n_Animation) << "\n\n";
+
+					//cout << "After Animation : " << static_cast<int>(GameObject->n_Animation) << " , " << "After Animation AnimTime: " << GameObject->currAnimTime << "\n";
+
+					//cout << "Start Attack ? : " << static_cast<int>(Player->m_async_client->m_start_attack) << " ,  " << "End Attack? " << static_cast<int>(Player->PlayerObject->m_end_attack) << "\n";
+ 
 
 				}
 				break;
@@ -1806,6 +1815,9 @@ void Scene::SET_BULLET_BY_SERVER_DATA(STC_BulletObject_Info & bulldata, const un
 	//클라에서 먼저 불렛이 죽고 서버에서 죽었다는 정보를 주게되면 아래 분기문이 실행됨 -> 버그
 	//내 자신은 이걸 실행할 필요가없음
 
+	if (BulletObject.size() > 1 && BulletObject.size() <= 2)
+		cout << BulletObject.front()->m_bullet_data.my_id << " ,  " << static_cast<int>(BulletObject.front()->m_bullet_data.alive) << " \n";
+
 	//이동 전 첫번째 불렛이다 - 이 때만 Create로 불렛 생성
 	//보간한걸로 하려면 if(first_bullet)이 부분은 없애야함
 	if (first_bullet)
@@ -1824,7 +1836,8 @@ void Scene::SET_BULLET_BY_SERVER_DATA(STC_BulletObject_Info & bulldata, const un
 
 	for (auto lbul : BulletObject)
 	{
-		if (bulldata.master_id == lbul->m_bullet_data.master_id && bulldata.my_id == lbul->m_bullet_data.my_id)
+		if (bulldata.master_id == lbul->m_bullet_data.master_id && bulldata.my_id == lbul->m_bullet_data.my_id 
+			&& lbul->m_bullet_type != BULLET_TYPE::protocol_HammerBullet)
 		{
 			//불렛이 소멸됨 -> 삭제
 			if (!bulldata.alive)
@@ -1839,7 +1852,7 @@ void Scene::SET_BULLET_BY_SERVER_DATA(STC_BulletObject_Info & bulldata, const un
 
 				lbul->m_particle_type = bulldata.after_coll;
 
-				cout << "Bullet ID: " << static_cast<int>(bulldata.my_id) << "Is Alive: " << static_cast<int>(bulldata.alive) << "\n";
+				//cout << "Bullet ID: " << static_cast<int>(bulldata.my_id) << "Is Alive: " << static_cast<int>(bulldata.alive) << "\n";
 
 				//cout << "Bullet Type: " << static_cast<int>(bulldata.type) << "\n";
 

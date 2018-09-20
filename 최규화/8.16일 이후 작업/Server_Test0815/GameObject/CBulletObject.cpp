@@ -546,7 +546,10 @@ void CHammerBulletObject::Collision(vector<CPlayerObject*>* clients, double delt
 				{
 					auto nPos4f = Float4Add(XMFLOAT4(m_pos4f.x, m_pos4f.y, m_pos4f.z, m_pos4f.w), XMFLOAT4(15, 0, 15, 0));
 
+					m_mtx.lock();
 					auto local_id = m_id;
+					m_mtx.unlock();
+
 					g_bullets.push_back(move(new CHammerBulletObject(m_masterID, ++local_id, { nPos4f.x, nPos4f.y, nPos4f.z, nPos4f.w }, { 0,0,0,1 }, m_numOfHammer - 1, XMFLOAT4(0, 0, 35, 0), false)));
 
 					//cout << "BulletID: " << g_bullets.back()->GetID() << "Alive: " << static_cast<int>(g_bullets.back()->GetAlive()) << "\n";
@@ -602,7 +605,11 @@ void CHammerBulletObject::Collision(vector<CNpcObject*>* npcs, double deltime)
 				if (m_numOfHammer > 0)
 				{
 					auto nPos4f = Float4Add(XMFLOAT4(m_pos4f.x, m_pos4f.y, m_pos4f.z, m_pos4f.w), XMFLOAT4(15, 0, 15, 0));
+					
+					m_mtx.lock();
 					auto local_id = m_id;
+					m_mtx.unlock();
+
 					g_bullets.push_back(move(new CHammerBulletObject(m_masterID, ++local_id, { nPos4f.x, nPos4f.y, nPos4f.z, nPos4f.w }, { 0,0,0,1 }, m_numOfHammer - 1, XMFLOAT4(0, 0, 35, 0), false)));
 
 					m_numOfHammer = 0;

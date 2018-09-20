@@ -65,19 +65,13 @@ void CPhysicEngineWorker::Update()
 		for (auto& rigid : g_rigidobjs)
 		{
 			rigid->GravitySystem(m_deltime);
-			//cout << "PosX: " << rigid->GetCenterPos4f().x << "PosY: " << rigid->GetCenterPos4f().y << "PosZ: " << rigid->GetCenterPos4f().z << "PosW: " << rigid->GetCenterPos4f().w << "\n";
-
 			rigid->Tick(m_deltime);
-			//cout << "PosX: " << rigid->GetCenterPos4f().x << "PosY: " << rigid->GetCenterPos4f().y << "PosZ: " << rigid->GetCenterPos4f().z << "PosW: " << rigid->GetCenterPos4f().w << "\n";
-			
 			rigid->AfterGravitySystem(m_deltime);
-			//cout << "PosX: " << rigid->GetCenterPos4f().x << "PosY: " << rigid->GetCenterPos4f().y << "PosZ: " << rigid->GetCenterPos4f().z << "PosW: " << rigid->GetCenterPos4f().w << "\n";
 
 			rigid->UpdateLookvector();
 			rigid->UpdateUpvector();
 
 			rigid->UpdateDataForPacket();
-			//cout << "PosX: " << rigid->GetCenterPos4f().x << "PosY: " << rigid->GetCenterPos4f().y << "PosZ: " << rigid->GetCenterPos4f().z << "PosW: " << rigid->GetCenterPos4f().w << "\n";
 		}
 		
 		for (auto& bullet : g_bullets)
@@ -151,7 +145,7 @@ void CPhysicEngineWorker::Update()
 							client->SendPacket(reinterpret_cast<Packet*>(&stc_attack));
 						}
 
-						cout << "Bullet ID:(light,heavy) " << (*iter)->GetID() << "Is Alive: " << (*iter)->GetAlive() << "\n";
+						//cout << "Bullet ID:(light,heavy) " << (*iter)->GetID() << "Is Alive: " << (*iter)->GetAlive() << "\n";
 					}
 
 					

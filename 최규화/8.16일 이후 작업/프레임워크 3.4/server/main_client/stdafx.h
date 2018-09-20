@@ -16,6 +16,7 @@
 #include "protocol.h"
 #include <iostream>
 
+//const char SERVERIP[] = "192.168.41.29";
 const char SERVERIP[] = "127.0.0.1";
 //const char SERVERIP[] = "192.168.22.106";
 

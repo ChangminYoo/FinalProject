@@ -572,7 +572,7 @@ void CCubeManObject::EndAnimation(int nAni)
 
 
 		//여기가 문제
-		cout << "Client ID: " << m_player_data.id << "Attack Animation End \n";
+		//cout << "Client ID: " << m_player_data.id << "Attack Animation End \n";
 
 	}
 
@@ -583,7 +583,7 @@ void CCubeManObject::EndAnimation(int nAni)
 		Hpbar->DrawObj = false;
 		HPFrame->DrawObj = false;
 
-		nAni = Ani_State::Idle;
+		SetAnimation(static_cast<int>(Ani_State::Idle));
 	}
 }
 
@@ -3388,7 +3388,9 @@ void DiceObject::Tick(const GameTimer & gt)
 		else if (TexStart == 4)
 			Dicedata = 3;
 
-		Master->SetAnimation(2);
+		//시발, 이거 빼야돼는데, 시발, 이거때문에 몇시간이야, 시발
+		//Master->SetAnimation(2);
+
 		//기존 룩벡터와 새로운 룩벡터를 외적해서 방향축을 구한다.
 
 		auto v = Float3Add(V, XMFloat4to3(Master->CenterPos), false);

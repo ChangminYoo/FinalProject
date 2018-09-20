@@ -262,9 +262,14 @@ void AsyncClient::SendPacketRegular(CGameObject& gobj, const GameTimer& gt)
 		cts_cani.id = gobj.m_player_data.id;
 		cts_cani.ani_state = Ani_State::Idle;
 
-		SendPacket(reinterpret_cast<Packet*>(&cts_cani));
+		gobj.n_Animation = static_cast<int>(Ani_State::Idle);
+		gobj.m_player_data.ani = Ani_State::Idle;
+		gobj.currAnimTime = 0.f;
+
 		gobj.m_end_attack = false;
 		m_start_attack = false;
+
+		SendPacket(reinterpret_cast<Packet*>(&cts_cani));
 
 	}
 	
