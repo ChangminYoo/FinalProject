@@ -1815,8 +1815,8 @@ void Scene::SET_BULLET_BY_SERVER_DATA(STC_BulletObject_Info & bulldata, const un
 	//클라에서 먼저 불렛이 죽고 서버에서 죽었다는 정보를 주게되면 아래 분기문이 실행됨 -> 버그
 	//내 자신은 이걸 실행할 필요가없음
 
-	if (BulletObject.size() > 1 && BulletObject.size() <= 2)
-		cout << BulletObject.front()->m_bullet_data.my_id << " ,  " << static_cast<int>(BulletObject.front()->m_bullet_data.alive) << " \n";
+	//if (BulletObject.size() > 1 && BulletObject.size() <= 2)
+		//cout << BulletObject.front()->m_bullet_data.my_id << " ,  " << static_cast<int>(BulletObject.front()->m_bullet_data.alive) << " \n";
 
 	//이동 전 첫번째 불렛이다 - 이 때만 Create로 불렛 생성
 	//보간한걸로 하려면 if(first_bullet)이 부분은 없애야함

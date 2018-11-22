@@ -17,9 +17,10 @@
 
 //const char SERVERIP[] = "192.168.41.29";
 
-const char SERVERIP[] = "127.0.0.1";
+//const char SERVERIP[] = "192.168.206.124";
 //const char SERVERIP[] = "192.168.22.106";
 const unsigned short PORT = 31400;
+const char SERVERIP[] = "127.0.0.1";
 
 //----------------------------¸Ê 2Ãþ ¿ÀºêÁ§Æ® ¼ö----------------------------//
 #define MAX_SECOND_FLOOR_NUM 1

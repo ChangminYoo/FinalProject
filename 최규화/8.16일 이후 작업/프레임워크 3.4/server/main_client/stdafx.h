@@ -17,10 +17,10 @@
 #include <iostream>
 
 //const char SERVERIP[] = "192.168.41.29";
-const char SERVERIP[] = "127.0.0.1";
+//const char SERVERIP[] = "192.168.206.124";
 //const char SERVERIP[] = "192.168.22.106";
 
-//const char SERVERIP[] = "127.0.0.1";
+const char SERVERIP[] = "127.0.0.1";
 const unsigned short PORT = 31400;
 
 using namespace std;
